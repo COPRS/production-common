@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 
 final class PollingRun {
@@ -57,14 +58,55 @@ final class PollingRun {
 		);
 	}
 
+	static PollingRun newInstanceWithoutProductFamily(final Set<InboxEntry> persistedContent, final List<InboxEntry> pickupContent) {
+		// omitting product family comparison S1PRO-2395
+		// determine the entries that have been deleted from inbox to remove them from persistence
+		final Set<InboxEntry> finishedElements = new HashSet<>(subtractWithoutProductFamily(persistedContent, pickupContent));
+
+		// detect all elements that are considered "new" on the inbox
+		final List<InboxEntry> newElements = subtractWithoutProductFamily(pickupContent, persistedContent);
+		Collections.sort(newElements, COMP);
+
+		return new PollingRun(
+				persistedContent,
+				new HashSet<>(pickupContent),
+				finishedElements,
+				newElements
+				);
+	}
+
+	private static List<InboxEntry> subtractWithoutProductFamily(final Collection<InboxEntry> minuend, final Collection<InboxEntry> subtrahend) {
+		// omitting product family comparison S1PRO-2395
+		final List<InboxEntry> result = new ArrayList<>(CollectionUtil.nullToEmpty(minuend).size());
+
+		for (final InboxEntry inboxEntry : CollectionUtil.nullToEmpty(minuend)) {
+			if (!containsWithoutProductFamily(subtrahend, inboxEntry)) {
+				result.add(inboxEntry);
+			}
+		}
+
+		return result;
+	}
+	
+	private static boolean containsWithoutProductFamily(final Collection<InboxEntry> collection, final InboxEntry inboxEntry) {
+		// omitting product family comparison S1PRO-2395
+		for (final InboxEntry elem : CollectionUtil.nullToEmpty(collection)) {
+			if (inboxEntry.equalsWithoutProductFamily(elem)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public Set<InboxEntry> finishedElements() {
-		return finishedElements;
-	}		
-	
-	public List<InboxEntry> newElements() {				
-		return newElements;
-	}	
-	
+		return this.finishedElements;
+	}
+
+	public List<InboxEntry> newElements() {
+		return this.newElements;
+	}
+
 	final void dumpTo(final Set<InboxEntry> handledElements, final Logger log) {
 		final StringBuilder logMessage = new StringBuilder();
 		

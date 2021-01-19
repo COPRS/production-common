@@ -77,7 +77,7 @@ public final class Inbox {
 						inboxAdapter.read(InboxFilter.ALLOW_ALL)
 				);
 			} else {
-				pollingRun = PollingRun.newInstance(
+				pollingRun = PollingRun.newInstanceWithoutProductFamily( // omitting product family comparison S1PRO-2395
 						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
 						inboxAdapter.read(InboxFilter.ALLOW_ALL)
 				);
