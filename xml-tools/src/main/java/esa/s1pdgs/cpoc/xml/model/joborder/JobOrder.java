@@ -61,23 +61,25 @@ public class JobOrder {
 	public JobOrder(final JobOrder obj, final ApplicationLevel applicationLevel) {
 		this();
 		//this.conf = applicationLevel == ApplicationLevel.L0 ? new L0JobOrderConf(obj.getConf()) : new L1JobOrderConf(obj.getConf());
-		if (applicationLevel == ApplicationLevel.L0) {
-			this.conf = new L0JobOrderConf(obj.getConf());
-		} else if (applicationLevel == ApplicationLevel.L2) {
-			this.conf = new L2JobOrderConf(obj.getConf());
-		} else if(applicationLevel == ApplicationLevel.SPP_OBS) {
-			this.conf = new SppObsJobOrderConf(obj.getConf());
-		} else {
-			this.conf = new L1JobOrderConf(obj.getConf());
+		
+		switch(applicationLevel) {
+			case L0: conf = new L0JobOrderConf(obj.getConf()); break;
+			case L2: conf = new L2JobOrderConf(obj.getConf()); break;
+			case SPP_MBU: conf = new SppMbuJobOrderConf(obj.getConf()); break;
+			case SPP_OBS: conf = new SppObsJobOrderConf(obj.getConf()); break;
+			default: conf = new L1JobOrderConf(obj.getConf());
 		}
+		
 		this.procs.addAll(obj.getProcs().stream()
 				.filter(item -> item != null)
 				.map(item -> {
-					if(applicationLevel == ApplicationLevel.SPP_OBS) {
-						return new SppObsJobOrderProc(item);
+					final AbstractJobOrderProc jobOrder;
+					switch (applicationLevel) {
+						case SPP_MBU: jobOrder = new SppMbuJobOrderProc(item); break;
+						case SPP_OBS: jobOrder = new SppObsJobOrderProc(item); break;
+						default: jobOrder = new StandardJobOrderProc(item, applicationLevel);
 					}
-
-					return new StandardJobOrderProc(item, applicationLevel);
+					return jobOrder;
 				})
 				.collect(Collectors.toList()));
 		this.nbProcs = this.procs.size();
