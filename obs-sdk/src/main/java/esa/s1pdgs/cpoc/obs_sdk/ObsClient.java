@@ -121,6 +121,15 @@ public interface ObsClient {
      * or an attempt is being made to query the size of a directory
      */
     String getChecksum(final ObsObject object) throws ObsException;
+    
+    /**
+     * Returns the date of the checksum for the obs file of the given representation.
+     * 
+     * @param object representation of the file in obs or its md5sum file
+     * @return the date for the obs file of the given representation
+     * @throws ObsException on error
+     */
+    Instant getChecksumDate(final ObsObject object) throws ObsException;
 
     /**
      * Sets an expiration time for an {@link ObsObject} to mark an object for automatic deletion after given expiration time

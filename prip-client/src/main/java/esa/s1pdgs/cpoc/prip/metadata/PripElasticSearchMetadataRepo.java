@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
@@ -286,6 +287,12 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			Checksum checksum = new Checksum();
 			checksum.setAlgorithm((String) c.get(Checksum.FIELD_NAMES.ALGORITHM.fieldName()));
 			checksum.setValue((String) c.get(Checksum.FIELD_NAMES.VALUE.fieldName()));
+
+			final String dateStr = (String) c.get(Checksum.FIELD_NAMES.DATE.fieldName());
+			if (StringUtil.isNotBlank(dateStr)) {
+				checksum.setDate(DateUtils.parse(dateStr));
+			}
+			
 			checksumList.add(checksum);
 		}
 		pm.setChecksums(checksumList);

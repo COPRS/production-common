@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -59,20 +60,26 @@ public class TestMappingUtil {
 
 	@Test
 	public void TestMapToChecksum() {
+		final LocalDateTime checksumDate = LocalDateTime.of(2021, Month.JANUARY, 01, 14, 44, 59);
+		
 		ComplexValue cv1 = new ComplexValue();
 		cv1.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, "MD5"));
 		cv1.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, "d41d8cd98f00b204e9800998ecf8427e"));
+		cv1.getValue().add(new Property(null, "ChecksumDate", ValueType.PRIMITIVE, MappingUtil.convertLocalDateTimeToTimestamp(checksumDate)));
 		ComplexValue cv2 = new ComplexValue();
 		cv2.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, "SHA256"));
 		cv2.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"));
+		cv2.getValue().add(new Property(null, "ChecksumDate", ValueType.PRIMITIVE, MappingUtil.convertLocalDateTimeToTimestamp(checksumDate)));
 		List<ComplexValue> expectedResult = Arrays.asList(cv1, cv2);
 
 		Checksum c1 = new Checksum();
 		c1.setAlgorithm("MD5");
 		c1.setValue("d41d8cd98f00b204e9800998ecf8427e");
+		c1.setDate(checksumDate);
 		Checksum c2 = new Checksum();
 		c2.setAlgorithm("SHA256");
 		c2.setValue("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+		c2.setDate(checksumDate);
 		List<Checksum> checksums = Arrays.asList(c1, c2);
 		List<ComplexValue> actualResult = MappingUtil.mapToChecksumList(checksums);
 		
@@ -81,6 +88,7 @@ public class TestMappingUtil {
 
 	@Test
 	public void TestPripMetadataToEntity() {		
+		final LocalDateTime checksumDate = LocalDateTime.of(2021, Month.JANUARY, 01, 20, 15, 01);
 		URI uri = MappingUtil.createId("http://example.org", "Products", UUID.fromString("00000000-0000-0000-0000-000000000001"));
 		ComplexValue contentDate = new ComplexValue();
 		contentDate.getValue().add(new Property(null, "Start", ValueType.PRIMITIVE, new Timestamp(111111111111L)));
@@ -103,9 +111,11 @@ public class TestMappingUtil {
 		ComplexValue cv1 = new ComplexValue();
 		cv1.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, "MD5"));
 		cv1.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, "d41d8cd98f00b204e9800998ecf8427e"));
+		cv1.getValue().add(new Property(null, "ChecksumDate", ValueType.PRIMITIVE, MappingUtil.convertLocalDateTimeToTimestamp(checksumDate)));
 		ComplexValue cv2 = new ComplexValue();
 		cv2.getValue().add(new Property(null, "Algorithm", ValueType.PRIMITIVE, "SHA256"));
 		cv2.getValue().add(new Property(null, "Value", ValueType.PRIMITIVE, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"));
+		cv2.getValue().add(new Property(null, "ChecksumDate", ValueType.PRIMITIVE, MappingUtil.convertLocalDateTimeToTimestamp(checksumDate)));
 		Entity expectedEntity = new Entity()
 				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, UUID.fromString("00000000-0000-0000-0000-000000000001")))
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "Name"))
@@ -161,12 +171,15 @@ public class TestMappingUtil {
 				new PripGeoCoordinate(0.0, 1.0), new PripGeoCoordinate(2.0, 3.0),
 				new PripGeoCoordinate(4.0, 5.0), new PripGeoCoordinate(0.0, 1.0)));
 		inputPripMetadata.setFootprint(inputPolygon);
+		
 		Checksum checksum1 = new Checksum();
 		checksum1.setAlgorithm("MD5");
 		checksum1.setValue("d41d8cd98f00b204e9800998ecf8427e");
+		checksum1.setDate(checksumDate);
 		Checksum checksum2 = new Checksum();
 		checksum2.setAlgorithm("SHA256");
 		checksum2.setValue("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+		checksum2.setDate(checksumDate);
 		inputPripMetadata.setChecksums(Arrays.asList(checksum1, checksum2));
 		Entity actualEntity = MappingUtil.pripMetadataToEntity(inputPripMetadata, "http://example.org");
 		
