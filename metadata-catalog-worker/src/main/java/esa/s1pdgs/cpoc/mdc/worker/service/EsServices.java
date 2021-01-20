@@ -483,7 +483,7 @@ public class EsServices {
 	}
 
 	public SearchMetadata latestValidity(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+										 final ProductFamily productFamily, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -765,7 +765,7 @@ public class EsServices {
 
 					r.add(local);
 				}
-				return checkIfFullyCoverage(r, beginDate, endDate, 0);
+				return checkIfFullyCoverage(r, beginDate);
 			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
@@ -774,8 +774,7 @@ public class EsServices {
 		return null;
 	}
 
-	private List<SearchMetadata> checkIfFullyCoverage(final List<SearchMetadata> products, final String beginDateStr,
-			final String endDateStr, final int gapThresholdMillis) {
+	private List<SearchMetadata> checkIfFullyCoverage(final List<SearchMetadata> products, final String beginDateStr) {
 		final LocalDateTime beginDate = DateUtils.parse(beginDateStr);
 		final LocalDateTime endDate = DateUtils.parse(beginDateStr);
 
@@ -792,12 +791,12 @@ public class EsServices {
 			 */
 			final long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
 			final long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
-			if ((startTime <= refTime + gapThresholdMillis) && (stopTime > refTime)) {
+			if ((startTime <= refTime) && (stopTime > refTime)) {
 				refTime = stopTime;
 			}
 		}
 
-		if ((refTime + gapThresholdMillis) >= (endDate.toEpochSecond(ZoneOffset.UTC) + gapThresholdMillis)) {
+		if ((refTime) >= (endDate.toEpochSecond(ZoneOffset.UTC))) {
 			// No gaps, full coverage, return all results
 			return products;
 		}
@@ -806,8 +805,8 @@ public class EsServices {
 		return Collections.emptyList();
 	}
 
-	public SearchMetadata latestStopValidity(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+	public SearchMetadata latestStopValidity(final String productType,
+											 final ProductFamily productFamily, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -909,6 +908,10 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 
+		if(r == null) {
+			return null;
+		}
+
 		final SearchMetadata local = new SearchMetadata();
 		local.setProductName(r.get("productName").toString());
 		local.setProductType(r.get("productType").toString());
@@ -941,7 +944,7 @@ public class EsServices {
 	 * @return latest product with intersecting validity time
 	 */
 	public SearchMetadata lastValIntersect(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+										   final ProductFamily productFamily, final String satelliteId) throws Exception {
 
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
@@ -999,7 +1002,7 @@ public class EsServices {
 	 *                   search itself throws an error
 	 */
 	public SearchMetadata latestValCoverClosest(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+												final ProductFamily productFamily, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -1795,11 +1798,7 @@ public class EsServices {
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (isNotEmpty(searchResponse)) {
-				return true; 
-			} else {	
-				return false;
-			}
+			return isNotEmpty(searchResponse);
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for EW SLC mask intersection", e);
 		}
@@ -1865,11 +1864,7 @@ public class EsServices {
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (isNotEmpty(searchResponse)) {
-				return true; 
-			} else {	
-				return false;
-			}
+			return isNotEmpty(searchResponse);
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for ocean mask intersection", e);
 		}
@@ -1984,7 +1979,7 @@ public class EsServices {
 		return false;
 	}
 	
-	private final String getIndexForFilename(final ProductFamily family, final String productName) {	
+	private String getIndexForFilename(final ProductFamily family, final String productName) {
 		if (ProductFamily.AUXILIARY_FILE == family) {	
 			// FIXME: idea here is to use the same config as for metadata extraction in order to 
 			// detect the correct product type.

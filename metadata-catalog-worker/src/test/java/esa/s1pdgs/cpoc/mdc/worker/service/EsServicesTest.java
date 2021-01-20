@@ -525,7 +525,7 @@ public class EsServicesTest{
         this.mockSearchRequest(response);
         
         try {
-            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "satelliteId");
             assertEquals("Search metadata are not equals", expectedResult, result);
         } catch (final Exception e) {
             fail("Exception occurred: " + e.getMessage());
@@ -535,7 +535,7 @@ public class EsServicesTest{
     @Test(expected = Exception.class)
     public void lastValIntersectIOExceptionTest() throws Exception {
         this.mockSearchRequestThrowIOException();
-        esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+        esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "satelliteId");
     }
     
     @Test
@@ -556,7 +556,7 @@ public class EsServicesTest{
         this.mockSearchRequest(response);
         
         try {
-            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "satelliteId");
             assertEquals("Search metadata are not equals", null, result);
         } catch (final Exception e) {
             fail("Exception occurred: " + e.getMessage());
