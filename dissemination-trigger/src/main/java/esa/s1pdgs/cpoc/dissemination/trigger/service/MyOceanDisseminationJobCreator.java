@@ -13,8 +13,6 @@ public class MyOceanDisseminationJobCreator implements DisseminationJobCreator {
 	
 	private static final Logger LOGGER = LogManager.getLogger(MyOceanDisseminationJobCreator.class);
 	
-	public static final String TYPE = DisseminationTriggerType.MYOCEAN.name().toLowerCase();
-	
 	private static final String MANIFEST_SAFE_FILE = "manifest.safe";
 	
 	private final MetadataClient metadataClient;

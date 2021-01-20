@@ -65,8 +65,16 @@ public class ProductionEventListener implements MqiListener<ProductionEvent> {
 	public void initService() {
 		if (pollingIntervalMs > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, ProductCategory.LEVEL_PRODUCTS, this,
-					messageFilter, pollingIntervalMs, pollingInitialDelayMs, appStatus));
+
+			ProductCategory productCategory = ProductCategory.LEVEL_PRODUCTS;
+
+			if (DisseminationTriggerType.MYOCEAN.name().equalsIgnoreCase(disseminationTriggerType)) {
+				productCategory = ProductCategory.LEVEL_PRODUCTS;
+			} else if (DisseminationTriggerType.MBU.name().equalsIgnoreCase(disseminationTriggerType)) {
+				productCategory = ProductCategory.SPP_MBU_PRODUCTS;
+			}
+			service.execute(new MqiConsumer<ProductionEvent>(mqiClient, productCategory, this, messageFilter,
+					pollingIntervalMs, pollingInitialDelayMs, appStatus));
 		}
 	}
 
@@ -93,8 +101,10 @@ public class ProductionEventListener implements MqiListener<ProductionEvent> {
 
 					DisseminationJobCreator jobCreator;
 
-					if (MyOceanDisseminationJobCreator.TYPE.equalsIgnoreCase(disseminationTriggerType)) {
+					if (DisseminationTriggerType.MYOCEAN.name().equalsIgnoreCase(disseminationTriggerType)) {
 						jobCreator = new MyOceanDisseminationJobCreator(metadataClient);
+					} else if (DisseminationTriggerType.MBU.name().equalsIgnoreCase(disseminationTriggerType)) {
+						jobCreator = new DefaultDisseminationJobCreator();
 					} else {
 						jobCreator = new DefaultDisseminationJobCreator();
 					}
