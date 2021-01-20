@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -436,10 +437,15 @@ public class EsServices {
 
 		final SearchRequest beforeRequest = newQueryFor(productType, productFamily, satelliteId, instrumentConfId,
 				processMode, QueryBuilders.rangeQuery("validityStartTime").lt(centreTime),
-				new FieldSortBuilder("validityStartTime").order(SortOrder.DESC), "NONE");
+				"NONE",
+				new FieldSortBuilder("validityStartTime").order(SortOrder.DESC),
+				new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 		final SearchRequest afterRequest = newQueryFor(productType, productFamily, satelliteId, instrumentConfId,
 				processMode, QueryBuilders.rangeQuery("validityStartTime").gte(centreTime),
-				new FieldSortBuilder("validityStartTime").order(SortOrder.ASC), "NONE");
+				"NONE",
+				new FieldSortBuilder("validityStartTime").order(SortOrder.ASC),
+				new FieldSortBuilder("creationTime").order(SortOrder.DESC));
+
 		try {
 			final SearchResponse beforeResponse = elasticsearchDAO.search(beforeRequest);
 			final SearchResponse afterResponse = elasticsearchDAO.search(afterRequest);
@@ -550,8 +556,9 @@ public class EsServices {
 	}
 
 	private SearchRequest newQueryFor(final String productType, final ProductFamily productFamily,
-			final String satelliteId, final int instrumentConfId, final String processMode,
-			final RangeQueryBuilder rangeQueryBuilder, final FieldSortBuilder sortOrder, final String polarisation) {
+									  final String satelliteId, final int instrumentConfId, final String processMode,
+									  final RangeQueryBuilder rangeQueryBuilder, final String polarisation,
+									  final FieldSortBuilder... sortOrder) {
 		final ProductCategory category = ProductCategory.of(productFamily);
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(rangeQueryBuilder);
@@ -587,7 +594,10 @@ public class EsServices {
 			index = productFamily.name().toLowerCase();
 		}
 		sourceBuilder.size(1);
-		sourceBuilder.sort(sortOrder);
+
+		if(sortOrder != null) {
+			Arrays.stream(sortOrder).forEach(sourceBuilder::sort);
+		}
 
 		final SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.source(sourceBuilder);
@@ -612,10 +622,15 @@ public class EsServices {
 
 		final SearchRequest beforeRequest = newQueryFor(productType, productFamily, satelliteId, instrumentConfId,
 				processMode, QueryBuilders.rangeQuery("validityStopTime").lt(centreTime),
-				new FieldSortBuilder("validityStopTime").order(SortOrder.DESC), polarisation);
+				polarisation,
+				new FieldSortBuilder("validityStopTime").order(SortOrder.DESC),
+				new FieldSortBuilder("creationTime").order(SortOrder.DESC));
 		final SearchRequest afterRequest = newQueryFor(productType, productFamily, satelliteId, instrumentConfId,
 				processMode, QueryBuilders.rangeQuery("validityStopTime").gte(centreTime),
-				new FieldSortBuilder("validityStopTime").order(SortOrder.ASC), polarisation);
+				polarisation,
+				new FieldSortBuilder("validityStopTime").order(SortOrder.ASC),
+				new FieldSortBuilder("creationTime").order(SortOrder.DESC));
+
 		try {
 			final SearchResponse beforeResponse = elasticsearchDAO.search(beforeRequest);
 			final SearchResponse afterResponse = elasticsearchDAO.search(afterRequest);
