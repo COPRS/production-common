@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
 public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SppObsPropertiesAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SppObsTypeAdapter.class);
 
     private static final DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
     private final MetadataClient metadataClient;
