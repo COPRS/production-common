@@ -81,60 +81,6 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
 
 	@Override
 	public final void customJobOrder(final AppDataJob job, final JobOrder jobOrder) {
-		final LevelSliceProduct product = LevelSliceProduct.of(job);
-		
-		// Rewrite job order sensing time
-		final String jobOrderStart = DateUtils.convertToAnotherFormat(product.getSegmentStartDate(),
-				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
-		final String jobOrderStop = DateUtils.convertToAnotherFormat(product.getSegmentStopDate(),
-				AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER);
-		
-		jobOrder.getConf().setSensingTime(new JobOrderSensingTime(jobOrderStart, jobOrderStop));
-
-		updateProcParam(
-				jobOrder, 
-				"Mission_Id",
-				product.getMissionId() + product.getSatelliteId());
-		updateProcParam(
-				jobOrder, 
-				"Slice_Number", 
-				String.valueOf(product.getNumberSlice()));
-		updateProcParam(
-				jobOrder, 
-				"Total_Number_Of_Slices",
-				String.valueOf(product.getTotalNbOfSlice()));
-		updateProcParam(
-				jobOrder, 
-				"Slice_Overlap",
-				String.valueOf(sliceOverlap.get(product.getAcquisition())));
-		updateProcParam(
-				jobOrder, 
-				"Slice_Length",
-				String.valueOf(sliceLength.get(product.getAcquisition())));
-		updateProcParam(
-				jobOrder, 
-				"Slicing_Flag", 
-				"TRUE"
-		);
-		
-		// S1PRO-2194: evaluate mapped timeliness value. Keep default, if there is no
-		// corresponding mapping configured;
-		final String inputTimeliness = product.getTimeliness(); // is an empty string if not defined
-		
-		final String timelinessInJoborder = timelinessMapping.get(inputTimeliness);
-		if (timelinessInJoborder != null) {
-			LOGGER.debug("Adding 'Timeliness_Category' value '{}' to joborder of job {} (input was: {})", 
-					timelinessInJoborder, job.getId(), inputTimeliness);
-			updateProcParamIfDefined(
-					jobOrder, 
-					"Timeliness_Category", 
-					timelinessInJoborder
-			);
-		}
-		else {
-			LOGGER.trace("Omitting provision of timeliness value {} (no mapping defined in {})",  
-					inputTimeliness, timelinessMapping);
-		}
 	}
 
 	@Override
