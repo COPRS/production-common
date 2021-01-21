@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -21,6 +22,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceProduct;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -50,53 +52,19 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
 
     @Override
     public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) {
-    	final LevelSliceProduct product = LevelSliceProduct.of(job);
-		
-		// Retrieve instrument configuration id and slice number
-		try {
-			final L0SliceMetadata file = metadataClient.getL0Slice(product.getProductName());
-			product.setInsConfId(file.getInstrumentConfigurationId());
-			product.setNumberSlice(file.getNumberSlice());
-			product.setDataTakeId(file.getDatatakeId());
-			product.addSlice(file);
-			
-		} catch (final MetadataQueryException e) {
-			LOGGER.debug("L0 slice for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), 
-					Exceptions.messageOf(e));
-		}
-		// Retrieve Total_Number_Of_Slices
-		try {
-			final L0AcnMetadata acn = metadataClient.getFirstACN(
-					product.getProductName(),
-					product.getProcessMode()
-			);
-			product.setTotalNbOfSlice(acn.getNumberOfSlices());
-			product.setSegmentStartDate(acn.getValidityStart());
-			product.setSegmentStopDate(acn.getValidityStop());
-			product.addAcn(acn);
-		} catch (final MetadataQueryException e) {
-			LOGGER.debug("L0 acn for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), 
-					Exceptions.messageOf(e));
-		}
-		return product;
+    	return L2Product.of(job);
     }
 
     @Override
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
-		final LevelSliceProduct product = LevelSliceProduct.of(job);
-		
-		// there needs to be a slice
-		if (product.getSlices().isEmpty()) {
-			throw new IpfPrepWorkerInputsMissingException(
-					Collections.singletonMap(
-							product.getProductName(), 
-							"No Slice: " + 	product.getProductName()
-					)
-			);
+    	final L2Product product = L2Product.of(job);
+    	try {
+			final SearchMetadata metadata = metadataClient.queryByFamilyAndProductName(ProductFamily.L2_SLICE.name(), product.getProductName());
+		} catch (final MetadataQueryException e) {
+			LOGGER.debug("L2 product for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), Exceptions.messageOf(e));
+			throw new IpfPrepWorkerInputsMissingException(Collections.emptyMap());
 		}
-		
-		// if it's there, job creation can proceed
-		LOGGER.info("Found slice {}", product.getSlices());
+    	LOGGER.info("Found WV_OCN__2S {}", product.getProductName());
 	}
 
 	@Override
