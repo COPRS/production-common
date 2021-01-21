@@ -187,10 +187,7 @@ public class IpfPreparationWorkerConfiguration {
 				);
 			case SPP_MBU:
 				return new SppMbuTypeAdapter(
-						metadataClient, 
-						settings.getTypeOverlap(), 
-						settings.getTypeSliceLength(),
-						settings.getJoborderTimelinessCategoryMapping()
+						metadataClient
 				);
 			case SPP_OBS:
 				return new SppObsTypeAdapter(metadataClient, SppObsPropertiesAdapter.of(sppObsProperties));
