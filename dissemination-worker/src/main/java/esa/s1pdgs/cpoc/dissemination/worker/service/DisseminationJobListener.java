@@ -94,7 +94,7 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 					.getOrDefault(outboxConfig.getProtocol(), OutboxClient.Factory.NOT_DEFINED_ERROR)
 					.newClient(this.obsClient, outboxConfig, pathEvaluator);
 
-			LOG.info("using {} for outbox '{}'", outboxClient, outboxName);
+			LOG.info("using {} for outbox '{}' with configuration: {}", outboxClient, outboxName, outboxConfig);
 			this.clientsToOutboxes.put(outboxName, outboxClient);
 		}
 

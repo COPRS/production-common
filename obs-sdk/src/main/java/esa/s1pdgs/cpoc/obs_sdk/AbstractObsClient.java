@@ -7,11 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -32,6 +34,7 @@ import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Streams;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
@@ -430,6 +433,32 @@ public abstract class AbstractObsClient implements ObsClient {
 
 			return result.get().getMd5Hash();
 		} catch (SdkClientException | IOException e) {
+			throw new ObsException(object.getFamily(), object.getKey(), e);
+		}
+	}
+
+	@Override
+	public Instant getChecksumDate(final ObsObject object) throws ObsException {
+		final String md5FileKey;
+		if (StringUtil.isBlank(Objects.requireNonNull(object).getKey())) {
+			throw new IllegalArgumentException("obs key must not be null / empty / blank");
+		} else if (object.getKey().endsWith(Md5.MD5SUM_SUFFIX)) {
+			md5FileKey = object.getKey();
+		} else {
+			md5FileKey = Md5.md5KeyFor(object);
+		}
+
+		try {
+			final ObsObject md5File = new ObsObject(object.getFamily(), md5FileKey);
+			final ObsObjectMetadata md5FileMetadata = this.getMetadata(md5File);
+			if (null == md5FileMetadata || null == md5FileMetadata.getLastModified()) {
+				throw new ObsException(AbstractCodedException.ErrorCode.INTERNAL_ERROR, object.getFamily(),
+						object.getKey(),
+						"checksum date of md5sum file '" + md5File.getKey() + "' could not be obtained");
+			}
+			return md5FileMetadata.getLastModified();
+
+		} catch (final SdkClientException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);
 		}
 	}

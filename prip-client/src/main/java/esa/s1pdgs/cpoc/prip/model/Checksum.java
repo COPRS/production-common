@@ -1,13 +1,17 @@
 package esa.s1pdgs.cpoc.prip.model;
 
+import java.time.LocalDateTime;
+
 import org.json.JSONObject;
+
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class Checksum {
 
 	public static final String DEFAULT_ALGORITHM = "MD5";
 
 	public enum FIELD_NAMES {
-		ALGORITHM("algorithm"), VALUE("value");
+		ALGORITHM("algorithm"), VALUE("value"), DATE("checksum_date");
 
 		private String fieldName;
 
@@ -22,6 +26,7 @@ public class Checksum {
 
 	private String algorithm;
 	private String value;
+	private LocalDateTime date;
 
 	public String getAlgorithm() {
 		return algorithm;
@@ -38,12 +43,21 @@ public class Checksum {
 	public void setValue(String value) {
 		this.value = value;
 	}
+	
+	public LocalDateTime getDate() {
+		return this.date;
+	}
+
+	public void setDate(LocalDateTime date) {
+		this.date = date;
+	}
 
 	@Override
 	public String toString() {
 		JSONObject json = new JSONObject();
 		json.put(FIELD_NAMES.ALGORITHM.fieldName, algorithm);
 		json.put(FIELD_NAMES.VALUE.fieldName, value);
+		json.put(FIELD_NAMES.DATE.fieldName, (date != null) ? DateUtils.formatToOdataDateTimeFormat(date) : JSONObject.NULL);
 		return json.toString();
 	}
 
@@ -53,6 +67,7 @@ public class Checksum {
 		int result = 1;
 		result = prime * result + ((algorithm == null) ? 0 : algorithm.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		result = prime * result + ((date == null) ? 0 : date.hashCode());
 		return result;
 	}
 
@@ -64,15 +79,33 @@ public class Checksum {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Checksum other = (Checksum) obj;
+		final Checksum other = (Checksum) obj;
+		
 		if (algorithm == null) {
-			if (other.algorithm != null)
+			if (other.algorithm != null) {
 				return false;
-		} else if (!algorithm.equals(other.algorithm))
+			}
+		} else if (!algorithm.equals(other.algorithm)) {
 			return false;
+		}
+		
 		if (value == null) {
-			return other.value == null;
-		} else return value.equals(other.value);
+			if (other.value != null) {
+				return false;
+			}
+		} else if (!value.equals(other.value)) {
+			return false;
+		}
+		
+		if (date == null) {
+			if (other.date != null) {
+				return false;
+			}
+		} else if (!date.equals(other.date)) {
+			return false;
+		}
+		
+		return true;
 	}
 
 }

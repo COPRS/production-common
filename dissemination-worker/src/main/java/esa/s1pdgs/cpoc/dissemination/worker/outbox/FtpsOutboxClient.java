@@ -11,6 +11,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.commons.net.ftp.FTPSClient;
 
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.dissemination.worker.config.DisseminationWorkerProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.dissemination.worker.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -42,7 +43,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 		final FTPSClient ftpsClient = new FTPSClient("TLS", true);
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply don't configure a keystore
-		if (this.config.getKeystoreFile() != null) {
+		if (StringUtil.isNotBlank(this.config.getKeystoreFile())) {
 			final KeyStore keyStore = newKeyStore(Utils.getInputStream(this.config.getKeystoreFile()),
 					this.config.getKeystorePass());
 
@@ -55,7 +56,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 			ftpsClient.setWantClientAuth(true);
 		}
 
-		if (this.config.getTruststoreFile() != null) {
+		if (StringUtil.isNotBlank(this.config.getTruststoreFile())) {
 			final KeyStore trustStore = newKeyStore(Utils.getInputStream(this.config.getTruststoreFile()),
 					this.config.getTruststorePass());
 

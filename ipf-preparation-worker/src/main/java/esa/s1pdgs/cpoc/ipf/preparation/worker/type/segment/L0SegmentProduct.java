@@ -32,11 +32,11 @@ public class L0SegmentProduct extends AbstractProduct {
 		super(product);
 	}
 
-	public static final L0SegmentProduct of(final AppDataJob job) {
+	public static L0SegmentProduct of(final AppDataJob job) {
 		return of(job.getProduct());
 	}
 	
-	public static final L0SegmentProduct of(final AppDataJobProduct product) {
+	public static L0SegmentProduct of(final AppDataJobProduct product) {
 		return new L0SegmentProduct(
 				new AppDataJobProductAdapter(product)
 		);
@@ -96,19 +96,31 @@ public class L0SegmentProduct extends AbstractProduct {
 				metadata.getValidityStop(),
 				toMetadataMap(metadata)
 		);
-		
-		/*
-		 * s1pro-2175:
-		 * For RFC products, the start time can differ for the same datatake, so do not mix them together in the same job!
-		 */
-		if (!res.contains(segment) && product.getStartTime().equals(segment.getStartDate())) {				
-			// Take only latest segment			
-			final List<AppDataJobFile> updated = merge(res, segment, metadata.getPolarisation());			
-			product.setProductsFor(metadata.getPolarisation(), updated);	
+
+		if(isRfc()) {
+			/*
+			 * s1pro-2175:
+			 * For RFC products, the start time can differ for the same datatake, so do not mix them together in the same job!
+			 */
+			if (!res.contains(segment) && product.getStartTime().equals(segment.getStartDate())) {
+				mergeSegmentInto(metadata, res, segment);
+			}
+
+		} else {
+			if (!res.contains(segment)) {
+				mergeSegmentInto(metadata, res, segment);
+			}
 		}
-	}	
-	
-	private final List<AppDataJobFile> merge(
+		
+	}
+
+	private void mergeSegmentInto(LevelSegmentMetadata metadata, List<AppDataJobFile> res, AppDataJobFile segment) {
+		// Take only latest segment
+		final List<AppDataJobFile> updated = merge(res, segment, metadata.getPolarisation());
+		product.setProductsFor(metadata.getPolarisation(), updated);
+	}
+
+	private List<AppDataJobFile> merge(
 			final List<AppDataJobFile> existingFiles, 
 			final AppDataJobFile newElement,
 			final String polarisation
@@ -180,7 +192,7 @@ public class L0SegmentProduct extends AbstractProduct {
 		return overridingInputs;
 	}
 
-	private final Map<String,String> toMetadataMap(final LevelSegmentMetadata metadata) {
+	private Map<String,String> toMetadataMap(final LevelSegmentMetadata metadata) {
 		final Map<String,String> result = new LinkedHashMap<>();
 		result.put(DATATAKE_ID, String.valueOf(metadata.getDatatakeId()));
 		result.put(CONSOLIDATION, String.valueOf(metadata.getConsolidation()));
@@ -189,7 +201,7 @@ public class L0SegmentProduct extends AbstractProduct {
 		return result;
 	}
 	
-	private final LevelSegmentMetadata toMetadataObject(final AppDataJobFile file, final String polarisation) {
+	private LevelSegmentMetadata toMetadataObject(final AppDataJobFile file, final String polarisation) {
 		final LevelSegmentMetadata meta = new LevelSegmentMetadata();
 		meta.setDatatakeId(file.getMetadata().get(DATATAKE_ID));
 		meta.setConsolidation(file.getMetadata().get(CONSOLIDATION));

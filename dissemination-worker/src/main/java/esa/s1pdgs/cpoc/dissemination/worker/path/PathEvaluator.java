@@ -15,7 +15,11 @@ public interface PathEvaluator {
 
 		@Override
 		public String outputFilename(ObsObject mainFile, ObsObject sourceFile) {
-			return Paths.get(sourceFile.getKey()).getFileName().toString();
+			Path path = Paths.get(sourceFile.getKey()).getFileName();
+			if (null == path) {
+				throw new RuntimeException(String.format("Cannot create output filename due to corrupt obs object: %s", sourceFile));
+			}
+			return path.toString();
 		}
 	};
 

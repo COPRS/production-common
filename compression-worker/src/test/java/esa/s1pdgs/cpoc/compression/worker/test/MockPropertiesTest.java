@@ -3,9 +3,6 @@ package esa.s1pdgs.cpoc.compression.worker.test;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -44,32 +41,6 @@ public class MockPropertiesTest {
      */
     @Mock
     protected StatusService mqiStatusService;
-
-    /**
-     * Mock the default development properties (all step activation at true)
-     */
-    protected void mockDefaultDevProperties() {
-        this.mockDevProperties(true, true, true, true);
-    }
-
-    /**
-     * Mock the development properties
-     * 
-     * @param download
-     * @param execution
-     * @param upload
-     * @param erasing
-     */
-    protected void mockDevProperties(final boolean download,
-            final boolean execution, final boolean upload,
-            final boolean erasing) {
-        Map<String, Boolean> activations = new HashMap<>();
-        activations.put("download", Boolean.valueOf(download));
-        activations.put("execution", Boolean.valueOf(execution));
-        activations.put("upload", Boolean.valueOf(upload));
-        activations.put("erasing", Boolean.valueOf(erasing));
-//        doReturn(activations).when(devProperties).getStepsActivation();
-    }
 
     /**
      * Default mock of application properties

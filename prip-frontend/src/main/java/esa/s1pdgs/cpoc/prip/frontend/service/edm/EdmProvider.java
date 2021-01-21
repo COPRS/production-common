@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.prip.frontend.service.edm;
 
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Algorithm;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksum;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ChecksumDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
@@ -215,6 +216,8 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 					.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()));
 			properties.add(new CsdlProperty().setName(Value.name())
 					.setType(EdmPrimitiveTypeKind.String.getFullQualifiedName()));
+			properties.add(new CsdlProperty().setName(ChecksumDate.name())
+					.setType(DATE_TIME_OFFSET_TYPE_FQN));
 			entityType.setProperties(properties);
 			return entityType;
 		}

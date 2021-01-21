@@ -101,6 +101,11 @@ public class FakeObsClient implements ObsClient {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public Instant getChecksumDate(ObsObject object) throws ObsException {
+		return null;
+	}
 
 	@Override
 	public void setExpirationTime(ObsObject object, Instant expirationTime) throws ObsServiceException {

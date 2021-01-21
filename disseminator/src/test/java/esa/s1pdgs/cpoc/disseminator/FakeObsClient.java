@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -71,6 +72,11 @@ public abstract class FakeObsClient implements ObsClient {
 
 	@Override
 	public String getChecksum(final ObsObject object) {
+		return null;
+	}
+	
+	@Override
+	public Instant getChecksumDate(ObsObject object) throws ObsException {
 		return null;
 	}
 
