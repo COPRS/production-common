@@ -35,6 +35,14 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
 
     @Override
     public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) {
+    	final L2Product product = L2Product.of(job);
+    	try {
+			final SearchMetadata metadata = metadataClient.queryByFamilyAndProductName(ProductFamily.L2_SLICE.name(), product.getProductName());
+			product.setStartTime(metadata.getValidityStart());
+			product.setStopTime(metadata.getValidityStop());
+		} catch (final MetadataQueryException e) {
+			LOGGER.debug("L2 product for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), Exceptions.messageOf(e));
+		}
     	return L2Product.of(job);
     }
 
@@ -42,10 +50,10 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
     	final L2Product product = L2Product.of(job);
     	try {
-			final SearchMetadata metadata = metadataClient.queryByFamilyAndProductName(ProductFamily.L2_SLICE.name(), product.getProductName());
+			metadataClient.queryByFamilyAndProductName(ProductFamily.L2_SLICE.name(), product.getProductName()); // just to validate that metadata exists
 		} catch (final MetadataQueryException e) {
 			LOGGER.debug("L2 product for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), Exceptions.messageOf(e));
-			throw new IpfPrepWorkerInputsMissingException(Collections.emptyMap());
+			throw new IpfPrepWorkerInputsMissingException(Collections.singletonMap(product.getProductName(), "No WV_OCN__2S: " + product.getProductName()));
 		}
     	LOGGER.info("Found WV_OCN__2S {}", product.getProductName());
 	}
