@@ -51,14 +51,20 @@ public class Checksum {
 	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
+	
+	public JSONObject toJson() {
+		final JSONObject json = new JSONObject();
+		json.put(FIELD_NAMES.ALGORITHM.fieldName, algorithm);
+		json.put(FIELD_NAMES.VALUE.fieldName, value);
+		if (null != date) {
+			json.put(FIELD_NAMES.DATE.fieldName, DateUtils.formatToOdataDateTimeFormat(date));
+		}
+		return json;
+	}
 
 	@Override
 	public String toString() {
-		JSONObject json = new JSONObject();
-		json.put(FIELD_NAMES.ALGORITHM.fieldName, algorithm);
-		json.put(FIELD_NAMES.VALUE.fieldName, value);
-		json.put(FIELD_NAMES.DATE.fieldName, (date != null) ? DateUtils.formatToOdataDateTimeFormat(date) : JSONObject.NULL);
-		return json.toString();
+		return toJson().toString();
 	}
 
 	@Override
