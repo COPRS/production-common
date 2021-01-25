@@ -15,8 +15,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.annotation.PostConstruct;
 
@@ -152,16 +152,20 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			
 						checkThreadInterrupted();
 						LOGGER.info("Compressing/Uncompressing inputs for {}", job);
-						procCompletionSrv.submit(procExecutor);
-						waitForPoolProcessesEnding(procCompletionSrv);
+						final Future<?> fut = procCompletionSrv.submit(procExecutor);
+						waitForPoolProcessesEnding(
+								"Compressing/Uncompressing inputs for " + job,
+								fut,
+								procCompletionSrv, 
+								properties.getTmProcAllTasksS() * 1000L);
 			
 						checkThreadInterrupted();
 						LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
-						List<GenericPublicationMessageDto<CompressionEvent>> compressionEventDtos = fileUploader.processOutput(report);
+						final List<GenericPublicationMessageDto<CompressionEvent>> compressionEventDtos = fileUploader.processOutput(report);
 						
 						// ugly workaround for impossible casting issue:
-						List<GenericPublicationMessageDto<? extends AbstractMessage>> result = new ArrayList<>();
-						for (GenericPublicationMessageDto<CompressionEvent> compressionEventDto : compressionEventDtos) {
+						final List<GenericPublicationMessageDto<? extends AbstractMessage>> result = new ArrayList<>();
+						for (final GenericPublicationMessageDto<CompressionEvent> compressionEventDto : compressionEventDtos) {
 							result.add(compressionEventDto);
 						}
 						return new MqiPublishingJob<CompressionEvent>(result);
@@ -223,18 +227,40 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	 * @throws InterruptedException
 	 * @throws AbstractCodedException
 	 */
-	private final void waitForPoolProcessesEnding(final ExecutorCompletionService<?> procCompletionSrv)
-			throws InterruptedException, AbstractCodedException {
-		checkThreadInterrupted();
+	/**
+	 * Wait for the processes execution completion
+	 */
+	// TODO FIXME this needs to be cleaned up to have a self contained cancellation process
+	protected void waitForPoolProcessesEnding(
+			final String message,
+			final Future<?> submittedFuture,
+			final ExecutorCompletionService<Void> procCompletionSrv,
+			final long timeoutMilliSeconds
+	) throws InterruptedException, AbstractCodedException {
 		try {
-			procCompletionSrv.take().get(properties.getTmProcAllTasksS(), TimeUnit.SECONDS);
+			checkThreadInterrupted();
+			final Future<?> future = procCompletionSrv.poll(timeoutMilliSeconds, TimeUnit.MILLISECONDS);
+			// timeout scenario
+			if (future == null) {
+				submittedFuture.cancel(true);
+				throw new InterruptedException();
+			}	
+			if (future.isCancelled()) {
+				LOGGER.debug("{}: cancelled", message);
+				throw new InterruptedException();
+			}		
+			future.get();
+			LOGGER.debug("{}: successfully executed", message);
 		} catch (final ExecutionException e) {
 			if (e.getCause() instanceof AbstractCodedException) {
 				throw (AbstractCodedException) e.getCause();
 			} else {
 				throw new InternalErrorException(e.getMessage(), e);
 			}
-		} catch (final TimeoutException e) {
+		}
+		// timeout scenario: 
+		catch (final InterruptedException e) {
+			LOGGER.debug("{}: Timeout after {} seconds", message, properties.getTmProcAllTasksS());
 			throw new InternalErrorException(e.getMessage(), e);
 		}
 	}
