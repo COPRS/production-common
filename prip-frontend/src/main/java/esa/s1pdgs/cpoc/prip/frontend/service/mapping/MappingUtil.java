@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.prip.frontend.service.mapping;
 
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Algorithm;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksum;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ChecksumDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
@@ -168,6 +169,7 @@ public class MappingUtil {
 				ComplexValue complexValue = new ComplexValue();
 				complexValue.getValue().add(new Property(null, Algorithm.name(), ValueType.PRIMITIVE, checksum.getAlgorithm()));
 				complexValue.getValue().add(new Property(null, Value.name(), ValueType.PRIMITIVE, checksum.getValue()));
+				complexValue.getValue().add(new Property(null, ChecksumDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(checksum.getDate())));
 				listOfComplexValues.add(complexValue);
 			}
 		}

@@ -2,7 +2,9 @@ package esa.s1pdgs.cpoc.prip.worker.service;
 
 import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.removeZipSuffix;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -230,15 +232,21 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 
 	private List<Checksum> getChecksums(final ProductFamily family, final String key) {
 		final Checksum checksum = new Checksum();
-		checksum.setAlgorithm("");
+		checksum.setAlgorithm(Checksum.DEFAULT_ALGORITHM);
 		checksum.setValue("");
 		try {
-			final String value = obsClient.getChecksum(new ObsObject(family, key));
-			checksum.setAlgorithm(Checksum.DEFAULT_ALGORITHM);
+			final ObsObject obsObject = new ObsObject(family, key);
+			final String value = obsClient.getChecksum(obsObject);
 			checksum.setValue(value);
+			
+			final Instant checksumDate = obsClient.getChecksumDate(obsObject);
+			if (null == checksumDate ) {
+				LOGGER.warn(String.format("could not determine checksum date for %s", key));
+			} else {
+				checksum.setDate(LocalDateTime.ofInstant(checksumDate, ZoneOffset.UTC));
+			}
 		} catch (final ObsException e) {
 			LOGGER.warn(String.format("could not determine checksum of %s", key), e);
-
 		}
 		return Arrays.asList(checksum);
 	}

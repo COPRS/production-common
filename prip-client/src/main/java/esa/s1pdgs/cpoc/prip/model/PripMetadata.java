@@ -9,9 +9,11 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class PripMetadata {
@@ -248,6 +250,10 @@ public class PripMetadata {
 				} else {
 					json.put(field.fieldName(), (JSONObject)null);
 				}
+			} else if (FIELD_NAMES.CHECKSUM.fieldName.equals(field.fieldName)) {
+				final JSONArray checksumArray = new JSONArray();
+				CollectionUtil.nullToEmpty(this.checksums).forEach(checksum -> checksumArray.put(checksum.toJson()));
+				json.put(field.fieldName(), checksumArray);
 			} else {
 				json.put(field.fieldName(), field.toJsonAccessor().apply(this));
 			}

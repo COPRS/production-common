@@ -71,6 +71,27 @@ public class InboxEntry {
 				&& Objects.equals(this.productFamily, other.productFamily)
 				&& Objects.equals(this.inboxType, other.inboxType);
 	}
+	
+	public boolean equalsWithoutProductFamily(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		// WARNING: Don't take 'id' into account when implementing equals/hashCode
+		// because it's always 0 when created from Inbox
+		final InboxEntry other = (InboxEntry) obj;
+		return Objects.equals(this.name, other.name) && Objects.equals(this.pickupURL, other.pickupURL)
+				&& Objects.equals(this.relativePath, other.relativePath)
+				&& Objects.equals(this.stationName, other.stationName)
+				&& Objects.equals(this.processingPod, other.processingPod)
+				// omitting product family comparison S1PRO-2395
+				&& Objects.equals(this.inboxType, other.inboxType);
+	}
 
 	@Override
 	public int hashCode() {

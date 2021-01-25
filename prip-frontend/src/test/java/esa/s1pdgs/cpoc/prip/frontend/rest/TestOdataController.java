@@ -262,10 +262,12 @@ public class TestOdataController {
 		Checksum checksum1 = new Checksum();
 		checksum1.setAlgorithm(Checksum.DEFAULT_ALGORITHM);
 		checksum1.setValue("000000000000000000000");
+		checksum1.setDate(creationDate);
 
 		Checksum checksum2 = new Checksum();
 		checksum2.setAlgorithm("SHA1");
 		checksum2.setValue("111111111111111111111");
+		checksum2.setDate(creationDate);
 
 		List<Checksum> checksums = new ArrayList<>();
 		checksums.add(checksum1);
