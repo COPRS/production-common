@@ -20,4 +20,12 @@ public class L2Product extends AbstractProduct {
 				new AppDataJobProductAdapter(product)
 		);
 	}
+	
+	public void setStartTime(final String startTime) {
+        product.setStartTime(startTime);
+    }
+
+    public void setStopTime(final String stopTime) {
+        product.setStopTime(stopTime);
+    }
 }

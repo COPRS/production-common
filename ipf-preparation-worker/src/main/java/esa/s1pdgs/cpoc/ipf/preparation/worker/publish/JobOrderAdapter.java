@@ -61,7 +61,7 @@ public final class JobOrderAdapter
 			this.xmlConverter = xmlConverter;
 		}
 
-		final JobOrderAdapter newJobOrderFor(final AppDataJob job) {
+		public final JobOrderAdapter newJobOrderFor(final AppDataJob job) {
 			final long inc = job.getId();
 			
 			final String workingDir = "/data/localWD/" + inc + "/";
