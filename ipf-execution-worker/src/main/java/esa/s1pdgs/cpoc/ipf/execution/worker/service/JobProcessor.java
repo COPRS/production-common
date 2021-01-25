@@ -16,8 +16,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -262,16 +262,23 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				obsClient, 
 				job.getWorkDirectory(), 
 				job.getInputs(),
-				this.properties.getSizeBatchDownload(), 
+				properties.getSizeBatchDownload(), 
 				getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				procExecutor, 
-				this.properties.getLevel(),
-				this.properties.getPathJobOrderXslt()
+				properties.getLevel(),
+				properties.getPathJobOrderXslt()
 		);
 
-		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
-				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
-				this.properties.getLevel(), properties);
+		final OutputProcessor outputProcessor = new OutputProcessor(
+				obsClient, 
+				procuderFactory, 
+				message, 
+				outputListFile,
+				properties.getSizeBatchUpload(), 
+				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
+				properties.getLevel(), 
+				properties
+	    );
 		
 		
 		reporting.begin(
@@ -334,7 +341,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         try {
             LOGGER.info("{} Starting process executor",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));
-            procCompletionSrv.submit(procExecutor);
+            final Future<?> submittedFuture = procCompletionSrv.submit(procExecutor);
             poolProcessing = true;
             
             final List<ObsDownloadObject> downloadToBatch;
@@ -348,7 +355,12 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
                 downloadToBatch = Collections.emptyList();
             }
-            this.waitForPoolProcessesEnding(procCompletionSrv);
+            waitForPoolProcessesEnding(
+            		getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job), 
+            		submittedFuture, 
+            		procCompletionSrv,
+            		properties.getTmProcAllTasksS() * 1000L
+            );
             poolProcessing = false;
             
             if (devProperties.getStepsActivation().get("upload")) {
@@ -421,20 +433,38 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 	/**
 	 * Wait for the processes execution completion
-	 * 
 	 */
-	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<Void> procCompletionSrv)
-			throws InterruptedException, AbstractCodedException {
-		checkThreadInterrupted();
+	// TODO FIXME this needs to be cleaned up to have a self contained cancellation process
+	protected void waitForPoolProcessesEnding(
+			final String message,
+			final Future<?> submittedFuture,
+			final ExecutorCompletionService<Void> procCompletionSrv,
+			final long timeoutMilliSeconds
+	) throws InterruptedException, AbstractCodedException {
 		try {
-			procCompletionSrv.take().get(properties.getTmProcAllTasksS(), TimeUnit.SECONDS);
+			checkThreadInterrupted();
+			final Future<?> future = procCompletionSrv.poll(timeoutMilliSeconds, TimeUnit.MILLISECONDS);
+			// timeout scenario
+			if (future == null) {
+				submittedFuture.cancel(true);
+				throw new InterruptedException();
+			}	
+			if (future.isCancelled()) {
+				LOGGER.debug("{}: cancelled", message);
+				throw new InterruptedException();
+			}		
+			future.get();
+			LOGGER.debug("{}: successfully executed", message);
 		} catch (final ExecutionException e) {
 			if (e.getCause() instanceof AbstractCodedException) {
 				throw (AbstractCodedException) e.getCause();
 			} else {
 				throw new InternalErrorException(e.getMessage(), e);
 			}
-		} catch (final TimeoutException e) {
+		}
+		// timeout scenario: 
+		catch (final InterruptedException e) {
+			LOGGER.debug("{}: Timeout after {} seconds", message, properties.getTmProcAllTasksS());
 			throw new InternalErrorException(e.getMessage(), e);
 		}
 	}

@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.service;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -12,9 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.junit.After;
 import org.junit.Before;
@@ -129,7 +132,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         }
         mockWorkingdirProperties(workingDir.toPath());
         processor = new JobProcessor(appStatus, properties, devProperties,
-                obsClient, procuderFactory, mqiService, Collections.EMPTY_LIST, errorAppender, mqiStatusService, 0L, 10L);
+                obsClient, procuderFactory, mqiService, Collections.emptyList(), errorAppender, mqiStatusService, 0L, 10L);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }
@@ -158,11 +161,11 @@ public class JobProcessorTest extends MockPropertiesTest {
         final ExecutorCompletionService<Void> procCompletionSrvTmp =
                 new ExecutorCompletionService<>(
                         Executors.newSingleThreadExecutor());
-        procCompletionSrvTmp.submit(procExecutor);
+        final Future<?> fut = procCompletionSrvTmp.submit(procExecutor);
 
         thrown.expect(IpfExecutionWorkerProcessTimeoutException.class);
         thrown.expectMessage("timeout exception");
-        processor.waitForPoolProcessesEnding(procCompletionSrvTmp);
+        processor.waitForPoolProcessesEnding("test", fut, procCompletionSrvTmp, 1000L);
     }
 
     /**
@@ -179,10 +182,10 @@ public class JobProcessorTest extends MockPropertiesTest {
         final ExecutorCompletionService<Void> procCompletionSrvTmp =
                 new ExecutorCompletionService<>(
                         Executors.newSingleThreadExecutor());
-        procCompletionSrvTmp.submit(procExecutor);
+        final Future<?> fut = procCompletionSrvTmp.submit(procExecutor);
 
         thrown.expect(InternalErrorException.class);
-        processor.waitForPoolProcessesEnding(procCompletionSrvTmp);
+        processor.waitForPoolProcessesEnding("test", fut, procCompletionSrvTmp, 1000L);
     }
 
     @Test
@@ -388,5 +391,45 @@ public class JobProcessorTest extends MockPropertiesTest {
         verify(properties, times(1)).getTmProcAllTasksS();
         verify(properties, times(1)).getTmProcStopS();
 
+    }
+    
+    
+    private final Callable<Void> newSleepCallable(final long msSleep) {
+    	return new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				Thread.sleep(msSleep);
+				System.err.println("Finished");
+				return null;
+			}
+    		
+		};
+    }
+    
+    @Test
+    public void testWaitForPoolProcessesEnding_Success() throws Exception {
+		final ExecutorService exec = Executors.newSingleThreadExecutor();
+    	try {
+    		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(exec);
+    		final Future<?> submittedFuture = procCompletionSrv.submit(newSleepCallable(10L));
+        	processor.waitForPoolProcessesEnding("test", submittedFuture, procCompletionSrv, 1000L);
+    	}
+    	finally {
+    		exec.shutdownNow();
+    	}
+    }
+    
+    @Test(expected=InternalErrorException.class)
+    public void testWaitForPoolProcessesEnding_OnTimeout_ShallThrowException() throws Exception {
+		final ExecutorService exec = Executors.newSingleThreadExecutor();
+    	try {
+    		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(exec);
+    		final Future<?> submittedFuture = procCompletionSrv.submit(newSleepCallable(10000L));
+        	processor.waitForPoolProcessesEnding("test", submittedFuture, procCompletionSrv, 10L);
+        	fail();
+    	}
+    	finally {
+    		exec.shutdownNow();
+    	}
     }
 }
