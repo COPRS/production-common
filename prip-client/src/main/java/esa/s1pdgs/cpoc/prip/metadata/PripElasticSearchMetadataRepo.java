@@ -23,14 +23,19 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.common.geo.GeoShapeType;
+import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
+import org.elasticsearch.common.geo.builders.PolygonBuilder;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.geometry.Geometry;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,6 +52,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm.PripSortOrder;
 import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
@@ -150,6 +156,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 				buildQueryWithTextFilter((PripTextFilter)filter, queryBuilder);
 			}else if (filter instanceof PripBooleanFilter) {
 				buildQueryWithBooleanFilter((PripBooleanFilter)filter, queryBuilder);
+			}else if (filter instanceof PripGeometryFilter) {
+				buildQueryWithGeometryFilter((PripGeometryFilter) filter, queryBuilder);
 			}else {
 				throw new IllegalArgumentException(String.format("filter type not supported: %s", filter.getClass().getSimpleName()));
 			}
@@ -272,6 +280,56 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		return metadata;
 	}
 
+	private static void buildQueryWithGeometryFilter(PripGeometryFilter filter, BoolQueryBuilder queryBuilder) {
+		switch (filter.getFunction()) {
+		case INTERSECTS:
+			try {
+				queryBuilder.must(QueryBuilders.geoIntersectionQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
+			} catch (IOException e) {
+				throw new IllegalArgumentException(
+						String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
+			break;
+		case DISJOINTS:
+			try {
+				queryBuilder.must(QueryBuilders.geoDisjointQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
+			} catch (IOException e) {
+				throw new IllegalArgumentException(
+						String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
+			break;
+		case WITHIN:
+			try {
+				queryBuilder.must(QueryBuilders.geoWithinQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
+			} catch (IOException e) {
+				throw new IllegalArgumentException(
+						String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
+			break;
+		default:
+			throw new IllegalArgumentException(
+					String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+	
+	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
+		if (input instanceof Polygon) {
+			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
+			Polygon polygon = (Polygon) input;
+			for (final Coordinate coord : polygon.getCoordinates()) {
+				final double lon = coord.x;
+				final double lat = coord.y;
+				coordBuilder.coordinate(lon, lat);
+			}
+			return new PolygonBuilder(coordBuilder).buildGeometry();
+		} else {
+			throw new IllegalArgumentException(
+					String.format("not supported geometry: %s", input.getClass().getName()));
+		}
+
+		
+	}
+	
 	private static SortOrder sortOrderFor(String sortOrder) {
 		if (SortOrder.ASC.name().equalsIgnoreCase(sortOrder) || SortOrder.ASC.toString().equalsIgnoreCase(sortOrder)) {
 			return SortOrder.ASC;
