@@ -75,16 +75,15 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 	private static final List<String> SORTABLE_FIELDS;
 	static {
 		SORTABLE_FIELDS = new ArrayList<>();
-		SORTABLE_FIELDS.add(FIELD_NAMES.CREATION_DATE.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.EVICTION_DATE.fieldName());
+		SORTABLE_FIELDS.add(EntityTypeProperties.PublicationDate.name());
+		SORTABLE_FIELDS.add(EntityTypeProperties.EvictionDate.name());
 		SORTABLE_FIELDS.add(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.Start);
 		SORTABLE_FIELDS.add(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.End);
-		SORTABLE_FIELDS.add(FIELD_NAMES.NAME.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.CONTENT_LENGTH.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.PRODUCT_FAMILY.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.PRODUCTION_TYPE.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.CONTENT_TYPE.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.ID.fieldName());
+		SORTABLE_FIELDS.add(EntityTypeProperties.Name.name());
+		SORTABLE_FIELDS.add(EntityTypeProperties.ContentLength.name());
+		SORTABLE_FIELDS.add(EntityTypeProperties.ProductionType.name());
+		SORTABLE_FIELDS.add(EntityTypeProperties.ContentType.name());
+		SORTABLE_FIELDS.add(EntityTypeProperties.Id.name());
 	}
 
 	// --------------------------------------------------------------------------
