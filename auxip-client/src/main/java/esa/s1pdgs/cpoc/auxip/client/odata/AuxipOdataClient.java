@@ -78,8 +78,17 @@ public class AuxipOdataClient implements AuxipClient {
 		this.contentLengthAttrName = Objects.requireNonNull(hostConfig.getContentLengthAttrName(),
 				"content length attribute name must not be null!");
 
-		this.rootServiceUrl = URI.create(
-				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!"));
+		final String baseUri = 
+				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!");
+		
+		// S1PRO-2414: Trailing slash is required here for URI resolve to work properly. However, for ingestion-worker
+		// does not work if the trailing '/' is already configured, so we need the logic here
+		if (!baseUri.endsWith("/")) {
+			this.rootServiceUrl = URI.create(baseUri + "/");
+		}
+		else {
+			this.rootServiceUrl = URI.create(baseUri);
+		}
 
 		this.disabled = !"basic".equalsIgnoreCase(hostConfig.getAuthType())
 				&& !"oauth2".equalsIgnoreCase(hostConfig.getAuthType());
