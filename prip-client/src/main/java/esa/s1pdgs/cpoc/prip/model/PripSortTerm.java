@@ -39,11 +39,6 @@ public class PripSortTerm {
 
 	// --------------------------------------------------------------------------
 
-	public PripSortTerm(String sortFieldName, String sortOrder) {
-		this.sortFieldName = FIELD_NAMES.fromString(sortFieldName);
-		this.sortOrder = PripSortOrder.fromString(sortOrder);
-	}
-
 	public PripSortTerm(FIELD_NAMES sortFieldName, PripSortOrder sortOrder) {
 		this.sortFieldName = sortFieldName;
 		this.sortOrder = sortOrder;

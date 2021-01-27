@@ -3,8 +3,10 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -72,18 +74,18 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 	private ServiceMetadata serviceMetadata;
 	private final PripMetadataRepository pripMetadataRepository;
 
-	private static final List<String> SORTABLE_FIELDS;
+	private static final Map<String, PripMetadata.FIELD_NAMES> SORTABLE_FIELDS;
 	static {
-		SORTABLE_FIELDS = new ArrayList<>();
-		SORTABLE_FIELDS.add(EntityTypeProperties.PublicationDate.name());
-		SORTABLE_FIELDS.add(EntityTypeProperties.EvictionDate.name());
-		SORTABLE_FIELDS.add(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.Start);
-		SORTABLE_FIELDS.add(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.End);
-		SORTABLE_FIELDS.add(EntityTypeProperties.Name.name());
-		SORTABLE_FIELDS.add(EntityTypeProperties.ContentLength.name());
-		SORTABLE_FIELDS.add(EntityTypeProperties.ProductionType.name());
-		SORTABLE_FIELDS.add(EntityTypeProperties.ContentType.name());
-		SORTABLE_FIELDS.add(EntityTypeProperties.Id.name());
+		SORTABLE_FIELDS = new HashMap<>();
+		SORTABLE_FIELDS.put(EntityTypeProperties.PublicationDate.name(), PripMetadata.FIELD_NAMES.CREATION_DATE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.EvictionDate.name(), PripMetadata.FIELD_NAMES.EVICTION_DATE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.Start.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_START);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.End.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_END);
+		SORTABLE_FIELDS.put(EntityTypeProperties.Name.name(), PripMetadata.FIELD_NAMES.NAME);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentLength.name(), PripMetadata.FIELD_NAMES.CONTENT_LENGTH);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ProductionType.name(), PripMetadata.FIELD_NAMES.PRODUCTION_TYPE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentType.name(), PripMetadata.FIELD_NAMES.CONTENT_TYPE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.Id.name(), PripMetadata.FIELD_NAMES.ID);
 	}
 
 	// --------------------------------------------------------------------------
@@ -214,12 +216,12 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 							if (StringUtil.isNotBlank(edmProperty.getName())) {
 								final String fieldName = edmProperty.getName();
 
-								if (SORTABLE_FIELDS.contains(fieldName)) {
-									sortFieldName = FIELD_NAMES.fromString(fieldName);
+								if (SORTABLE_FIELDS.containsKey(fieldName)) {
+									sortFieldName = SORTABLE_FIELDS.get(fieldName);
 								} else {
 									throw new ODataApplicationException(
 											"Invalid value for $orderby: field name '" + fieldName
-											+ "' is not supported! Supported field names: " + SORTABLE_FIELDS,
+											+ "' is not supported! Supported field names: " + SORTABLE_FIELDS.keySet(),
 											HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 								}
 							}
