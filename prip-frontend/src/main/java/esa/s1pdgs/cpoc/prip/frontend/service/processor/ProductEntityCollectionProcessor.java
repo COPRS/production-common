@@ -232,6 +232,8 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 						sortTerms.add(new PripSortTerm(sortFieldName, sortOrder));
 					}
 				}
+
+				LOGGER.debug("using sort terms: " + sortTerms);
 			}
 
 			List<PripMetadata> queryResult;
