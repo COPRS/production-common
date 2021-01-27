@@ -464,8 +464,10 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		}
 		// timeout scenario: 
 		catch (final InterruptedException e) {
-			LOGGER.debug("{}: Timeout after {} seconds", message, properties.getTmProcAllTasksS());
-			throw new InternalErrorException(e.getMessage(), e);
+			final String errMess = String.format("%s: Timeout after %s seconds",  message, properties.getTmProcAllTasksS());
+			
+			LOGGER.debug(errMess);
+			throw new InternalErrorException(errMess, e);
 		}
 	}
 
