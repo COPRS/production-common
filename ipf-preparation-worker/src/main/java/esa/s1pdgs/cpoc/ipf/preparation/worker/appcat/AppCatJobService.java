@@ -89,11 +89,11 @@ public class AppCatJobService {
 		);	
 	}
 	
-	public final Optional<AppDataJob> findJobForDatatakeId(
+	public final Optional<List<AppDataJob>> findJobsForDatatakeId(
 			final String dataTakeId,
 			final String productType
 	) throws AbstractCodedException {
-		return first(
+		return returnOrEmpty(
 				appCatClient.findByProductDataTakeId(productType, dataTakeId), 
 				String.format("dataTakeId %s", dataTakeId)
 		);	
