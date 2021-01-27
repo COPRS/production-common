@@ -34,6 +34,7 @@ import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceComplexProperty;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
@@ -224,6 +225,22 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 											+ "' is not supported! Supported field names: " + SORTABLE_FIELDS.keySet(),
 											HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 								}
+							}
+						} else if (uriResource instanceof UriResourceComplexProperty) {
+							final UriResourceComplexProperty complexProperty = (UriResourceComplexProperty) uriResource;
+							final String complexTypeAttrName = complexProperty.getSegmentValue();
+							final UriResource subElement = resourcePath.getUriResourceParts().get(1);
+							final String subElementAttrName = subElement.getSegmentValue();
+							final String complexTypePath = complexTypeAttrName + "/" + subElementAttrName;
+
+							if (SORTABLE_FIELDS.containsKey(complexTypePath)) {
+								sortFieldName = SORTABLE_FIELDS.get(complexTypePath);
+							} else {
+								throw new ODataApplicationException(
+										"Invalid value for $orderby: field name '" + complexTypePath
+												+ "' is not supported! Supported field names: "
+												+ SORTABLE_FIELDS.keySet(),
+										HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 							}
 						}
 					}
