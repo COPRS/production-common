@@ -81,14 +81,7 @@ public class AuxipOdataClient implements AuxipClient {
 		final String baseUri = 
 				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!");
 		
-		// S1PRO-2414: Trailing slash is required here for URI resolve to work properly. However, for ingestion-worker
-		// does not work if the trailing '/' is already configured, so we need the logic here
-		if (!baseUri.endsWith("/")) {
-			this.rootServiceUrl = URI.create(baseUri + "/");
-		}
-		else {
-			this.rootServiceUrl = URI.create(baseUri);
-		}
+		rootServiceUrl = toNormalizedUri(baseUri);
 
 		this.disabled = !"basic".equalsIgnoreCase(hostConfig.getAuthType())
 				&& !"oauth2".equalsIgnoreCase(hostConfig.getAuthType());
@@ -103,6 +96,15 @@ public class AuxipOdataClient implements AuxipClient {
 
 		this.downloadClient = downloadClient;
 		this.context = context;
+	}
+	
+	// S1PRO-2414: Trailing slash is required here for URI resolve to work properly. However, for ingestion-worker
+	// does not work if the trailing '/' is already configured, so we need the logic here
+	static final URI toNormalizedUri(final String configuredUri) {
+		if (!configuredUri.endsWith("/")) {
+			return URI.create(configuredUri + "/");
+		}
+		return URI.create(configuredUri);
 	}
 
 	// --------------------------------------------------------------------------
@@ -137,6 +139,8 @@ public class AuxipOdataClient implements AuxipClient {
 
 		return result;
 	}
+	
+	
 
 	@Override
 	public InputStream read(@NonNull final UUID productMetadataId) {
@@ -145,7 +149,6 @@ public class AuxipOdataClient implements AuxipClient {
 			return new NullInputStream(0);
 		}
 
-		// FIXME trailing slash is mandatory for this to work
 		final URI productDownloadUrl = this.rootServiceUrl
 				.resolve("Products(" + productMetadataId.toString() + ")/$value");
 
