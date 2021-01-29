@@ -24,7 +24,8 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 		}			
 	}
 	
-	private static final int DEFAULT_PORT = 990;
+	private static final int DEFAULT_PORT_EXPLICIT = 23;
+	private static final int DEFAULT_PORT_IMPLICIT = 990;
 
 	public FtpsOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater pathEvaluator) {
 		super(obsClient, config, pathEvaluator);
@@ -61,7 +62,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 		    ftpsClient.setTrustManager(trustManagers[0]);
 		}
 		
-		final int port = (config.getPort() > 0) ? config.getPort(): DEFAULT_PORT;
+		final int port = config.getPort() > 0 ? config.getPort() : (config.isImplicitSsl() ? DEFAULT_PORT_IMPLICIT : DEFAULT_PORT_EXPLICIT);
 		ftpsClient.connect(config.getHostname(), port);
 	    assertPositiveCompletion(ftpsClient);
 	    
