@@ -477,6 +477,6 @@ public class S3ObsClientIT {
         assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 
         final String md5 = uut.getChecksum(new ObsObject(auxiliaryFiles, testFileName1));
-        assertThat(md5, is(equalTo("98f6bcd4621d373cade4e832627b4f6")));
+        assertThat(md5, is(equalTo("098f6bcd4621d373cade4e832627b4f6")));
     }
 }
