@@ -131,7 +131,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		}	
 		else {
 			// FTPS client creation			
-			final FTPSClient ftpsClient = new FTPSClient(config.getSslProtocol(), !config.isExplictFtps());
+			final FTPSClient ftpsClient = new FTPSClient(config.getSslProtocol(), !config.isExplicitFtps());
 			ftpsClient.setDefaultTimeout(config.getConnectTimeoutSec() * 1000);
 			ftpsClient.setConnectTimeout(config.getConnectTimeoutSec() * 1000);
 			ftpsClient.setDataTimeout(config.getConnectTimeoutSec() * 1000);

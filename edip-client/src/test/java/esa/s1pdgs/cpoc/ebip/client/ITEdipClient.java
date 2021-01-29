@@ -201,7 +201,7 @@ public class ITEdipClient {
 		result.setPass(PASS);
 		result.setUser(USER);	
 		result.setConnectTimeoutSec(100);
-		result.setExplictFtps(false);
+		result.setExplicitFtps(false);
 		result.setTrustSelfSignedCertificate(true);
 		return result;
 	}
