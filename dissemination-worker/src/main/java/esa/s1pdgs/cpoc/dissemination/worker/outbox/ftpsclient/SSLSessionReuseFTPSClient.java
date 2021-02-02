@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.dissemination.worker.outbox;
+package esa.s1pdgs.cpoc.dissemination.worker.outbox.ftpsclient;
 
 import java.io.IOException;
 import java.lang.reflect.Field;

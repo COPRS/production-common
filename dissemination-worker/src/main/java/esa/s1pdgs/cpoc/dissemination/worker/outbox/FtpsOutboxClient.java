@@ -13,6 +13,7 @@ import org.apache.commons.net.ftp.FTPSClient;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.dissemination.worker.config.DisseminationWorkerProperties.OutboxConfiguration;
+import esa.s1pdgs.cpoc.dissemination.worker.outbox.ftpsclient.SSLSessionReuseFTPSClient;
 import esa.s1pdgs.cpoc.dissemination.worker.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;

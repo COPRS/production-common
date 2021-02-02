@@ -12,6 +12,7 @@ import org.apache.commons.net.ftp.FTPSClient;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
+import esa.s1pdgs.cpoc.disseminator.outbox.ftpsclient.SSLSessionReuseFTPSClient;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -35,7 +36,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 
 	@Override
 	public String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
-		final FTPSClient ftpsClient = new FTPSClient("TLS", config.isImplicitSsl());
+		final FTPSClient ftpsClient = new SSLSessionReuseFTPSClient("TLS", config.isImplicitSsl());
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply don't configure a keystore
 		if (StringUtil.isNotBlank(config.getKeystoreFile())) {
