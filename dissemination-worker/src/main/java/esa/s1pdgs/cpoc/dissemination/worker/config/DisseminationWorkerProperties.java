@@ -153,7 +153,7 @@ public class DisseminationWorkerProperties {
 		private String keystorePass = "changeit";
 
 		// per default, use java keystore and password
-		private String truststoreFile = System.getProperty("java.home") + "/lib/security/cacerts";
+		private String truststoreFile = null;
 		private String truststorePass = "changeit";
 
 		private int bufferSize = 8 * 1014 * 1024;
