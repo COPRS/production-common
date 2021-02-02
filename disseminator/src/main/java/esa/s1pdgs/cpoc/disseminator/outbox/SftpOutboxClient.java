@@ -12,7 +12,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
 		@Override
-		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {		
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator eval) {		
 			return new SftpOutboxClient(obsClient, config, eval);
 		}			
 	}
@@ -29,7 +29,7 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	
 	private static final int DEFAULT_PORT = 22;
 	
-	SftpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+	SftpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator eval) {
 		super(obsClient, config, eval);
 	}
 

@@ -19,8 +19,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.IsipPathEvaluater;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.IsipPathEvaluator;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -53,7 +53,7 @@ public class TestLocalOutboxClient {
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
 		
-		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config, PathEvaluater.NULL);
+		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config, PathEvaluator.NULL);
 		outbox.transfer(new ObsObject(ProductFamily.BLANK, "foo.bar"), ReportingFactory.NULL);
 		
 		final File expected = new File(testDir, "foo.bar");
@@ -77,7 +77,7 @@ public class TestLocalOutboxClient {
 		final OutboxConfiguration config = new OutboxConfiguration();
 		config.setPath(testDir.getPath());
 		
-		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config, new IsipPathEvaluater());
+		final LocalOutboxClient outbox = new LocalOutboxClient(fakeObsClient, config, new IsipPathEvaluator());
 		outbox.transfer(new ObsObject(ProductFamily.BLANK, "S1A_AUX_CAL_V20171017T080000_G20180622T082918.SAFE"), ReportingFactory.NULL);
 		
 		final File expected = new File(testDir, "S1A_AUX_CAL_V20171017T080000_G20180622T082918.ISIP/S1A_AUX_CAL_V20171017T080000_G20180622T082918.SAFE");

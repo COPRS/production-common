@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.disseminator.outbox.FtpsOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.LocalOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.SftpOutboxClient;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.disseminator.report.OverpassCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.disseminator.service.DisseminationException;
 import esa.s1pdgs.cpoc.disseminator.service.DisseminationService;
@@ -93,7 +93,7 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
     	for (final Map.Entry<String, OutboxConfiguration> entry : properties.getOutboxes().entrySet()) {	
     		final String target = entry.getKey();
     		final OutboxConfiguration config = entry.getValue();    	
-    		final PathEvaluater eval = PathEvaluater.newInstance(config);
+    		final PathEvaluator eval = PathEvaluator.newInstance(config);
 
     		final OutboxClient outboxClient = FACTORIES.getOrDefault(config.getProtocol(), OutboxClient.Factory.NOT_DEFINED_ERROR)
     				.newClient(obsClient, config, eval);    		

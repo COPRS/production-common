@@ -13,7 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.util.Strings;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -21,12 +21,12 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public final class LocalOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
-		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator eval) {
 			return new LocalOutboxClient(obsClient, config, eval);
 		}
 	}
 	
-	public LocalOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+	public LocalOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator eval) {
 		super(obsClient, config, eval);
 	}
 
