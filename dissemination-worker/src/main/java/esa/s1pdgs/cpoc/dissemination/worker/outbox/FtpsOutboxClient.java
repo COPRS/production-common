@@ -37,7 +37,7 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 	@Override
 	public String transfer(final ObsObject mainFile, final List<ObsObject> obsObjects,
 		final ReportingFactory reportingFactory) throws Exception {
-		final FTPSClient ftpsClient = new FTPSClient("TLS", true);
+		final FTPSClient ftpsClient = new FTPSClient("TLS", config.isImplicitSsl());
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply don't configure a keystore
 		if (StringUtil.isNotBlank(config.getKeystoreFile())) {
