@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
@@ -269,6 +270,40 @@ public class OutputProcessor {
 					else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
+						
+						// FIXME / TODO Please clean up!
+						// S1PRO-2420 Dirty workaround to filter partial RFC products
+						final String acquisitionModeStr = productName.substring(4, 6);
+					    if ("RF".equals(acquisitionModeStr)) {
+							final Reporting reporting = reportingFactory.newReporting("GhostHandling");	
+
+							reporting.begin(
+									ReportingUtils.newFilenameReportingInputFor(family, productName),
+									new ReportingMessage("Checking if %s is a ghost candidate", productName)
+							);
+							
+							final File manifest = new File(file,"manifest.safe");
+							if (manifest.exists() && 
+									(FileUtils.readFile(file).contains("<productConsolidation>PARTIAL</productConsolidation>") ||
+									 FileUtils.readFile(file).contains("<productSensingConsolidation>PARTIAL</productSensingConsolidation>"))
+							   ) {				
+								LOGGER.info("Product {} is a ghost candidate", productName);
+								reporting.end(
+										new GhostHandlingSegmentReportingOutput(true),
+										new ReportingMessage("%s (%s) is a ghost candidate", productName, family)
+								);
+								continue;		
+								// fall through
+							}
+							
+							LOGGER.info("Product {} is not a ghost candidate and processMode is {}", productName,inputMessage.getBody().getProductProcessMode());							
+							reporting.end(
+									new GhostHandlingSegmentReportingOutput(false),
+									new ReportingMessage("%s (%s) is not a ghost candidate", productName, family)
+							);							
+					    }
+					    // end of S1PRO-2420 
+						
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
