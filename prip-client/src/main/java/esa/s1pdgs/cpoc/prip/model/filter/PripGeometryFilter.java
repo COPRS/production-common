@@ -7,7 +7,7 @@ import org.locationtech.jts.geom.Geometry;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 /**
- * Text filter for querying the persistence repository.
+ * Geometry filter for querying the persistence repository.
  */
 public class PripGeometryFilter extends PripQueryFilter {
 

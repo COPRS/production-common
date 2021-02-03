@@ -172,8 +172,20 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			}
 		}
 
-		if (null == uriInfo.getCountOption() || !uriInfo.getCountOption().getValue()) {
+		if (null != uriInfo.getCountOption() && uriInfo.getCountOption().getValue()) {
 
+			// Count Request
+
+			int count = 0;
+			if (queryFilters.isEmpty()) {
+				count = this.pripMetadataRepository.countAll();
+			} else {
+				count = this.pripMetadataRepository.countWithFilters(queryFilters);
+			}
+
+			entityCollection.setCount(count);
+		}
+			
 			// List of Entities Request
 
 			Optional<Integer> top = Optional.empty();
@@ -274,31 +286,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
 			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
 
-		} else {
-
-			// Count Request
-
-			int count = 0;
-			if (queryFilters.isEmpty()) {
-				count = this.pripMetadataRepository.countAll();
-			} else {
-				count = this.pripMetadataRepository.countWithFilters(queryFilters);
-			}
-
-			entityCollection.setCount(count);
-
-			// serialize
-			final InputStream serializedContent = this.serializeEntityCollection(entityCollection,
-					responseEdmEntityType, request.getRawBaseUri(), startEdmEntitySet.getName(), contextUrl,
-					responseFormat, uriInfo, expandOptions);
-
-			response.setContent(serializedContent);
-			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-
-			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
-
-		}
+		
 	}
 
 	// --------------------------------------------------------------------------
