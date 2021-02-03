@@ -5,7 +5,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -55,6 +58,7 @@ import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:obs-aws-s3.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})
