@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
@@ -128,7 +129,7 @@ public class OutputProcessor {
 	private final String uploadPrefix;
 
 	public static enum AcquisitionMode {
-		EW, IW, SM, WV
+		EW, IW, SM, WV, RF
 	}
 
 	/**
@@ -242,7 +243,7 @@ public class OutputProcessor {
 								new ReportingMessage("Checking if %s is a ghost candidate", productName)
 						);
 						
-						final boolean ghostCandidate = isGhostCandidate(productName);
+						final boolean ghostCandidate = isGhostCandidate(file);
 
 						LOGGER.info("Output {} is recognized as belonging to the family {}", productName, family);
 						
@@ -269,36 +270,7 @@ public class OutputProcessor {
 					}
 					else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
-								matchOutput.getFamily());
-						
-						// FIXME / TODO Please clean up!
-						// S1PRO-2420 Dirty workaround to filter partial RFC products
-						final String acquisitionModeStr = productName.substring(4, 6);
-					    if ("RF".equals(acquisitionModeStr)) {
-							final Reporting reporting = reportingFactory.newReporting("GhostHandling");	
-
-							reporting.begin(
-									ReportingUtils.newFilenameReportingInputFor(family, productName),
-									new ReportingMessage("Checking if %s is a ghost candidate", productName)
-							);		
-							if (isPartial(file)) {				
-								LOGGER.info("Product {} is a ghost candidate", productName);
-								reporting.end(
-										new GhostHandlingSegmentReportingOutput(true),
-										new ReportingMessage("%s (%s) is a ghost candidate", productName, family)
-								);
-								continue;		
-								// fall through
-							}
-							
-							LOGGER.info("Product {} is not a ghost candidate and processMode is {}", productName,inputMessage.getBody().getProductProcessMode());							
-							reporting.end(
-									new GhostHandlingSegmentReportingOutput(false),
-									new ReportingMessage("%s (%s) is not a ghost candidate", productName, family)
-							);							
-					    }
-					    // end of S1PRO-2420 
-						
+								matchOutput.getFamily());						
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
@@ -364,10 +336,15 @@ public class OutputProcessor {
 		return productSize;
 	}
 
-	static boolean isPartial(final File file) throws InternalErrorException {		
+	static boolean isPartial(final File file) {		
 		final File manifest = new File(file,"manifest.safe");
-		return manifest.exists() && FileUtils.readFile(manifest)
-				.contains("<productConsolidation>PARTIAL</productConsolidation>");
+		try {
+			return manifest.exists() && FileUtils.readFile(manifest)
+					.contains("<productConsolidation>PARTIAL</productConsolidation>");
+		} catch (final InternalErrorException e) {
+			LOGGER.error(Exceptions.messageOf(e), e);
+			return false;
+		}
 	}
 	
 	
@@ -381,7 +358,8 @@ public class OutputProcessor {
 	 *         product. If an error occurs during the extraction, the product will
 	 *         be identified as non-ghost
 	 */
-	boolean isGhostCandidate(final String productName) {
+	boolean isGhostCandidate(final File file) {
+		final String productName = file.getName();
 		LOGGER.info("Performing ghost candidate check for product '{}'", productName);
 
 		// Something completely unexpected was provided as product Name
@@ -435,6 +413,18 @@ public class OutputProcessor {
 
 		LOGGER.info("Information used for ghost candidate detection: duration {}, acquisitionMode {}",
 				duration.getSeconds(), acquisitionMode);
+		
+		// S1PRO-2420: PARTIAL products of RF products shall be treated as ghosts
+		if (acquisitionMode == AcquisitionMode.RF) {	
+			if (isPartial(file)){
+				LOGGER.info("Partial RF {} marked as ghost", productName);
+				return true;
+			}
+			else {
+				LOGGER.info("RF {} is not ghost", productName);
+				return false;
+			}
+		}
 
 		// if the configured length is smaller than the duration, its a candidate
 		final long ghostLength = ghostLength(acquisitionMode);
