@@ -711,6 +711,20 @@ public class OutputProcessorTest {
 				Mockito.any());
 
 	}
+	
+	@Test
+	public final void testIsPartial() throws Exception {
+		final File testManifest = new File(
+				getClass().getClassLoader()
+					.getResource("S1A_RF_RAW__0SVH_20200120T110827_20200120T110827_030883_038B52_18C1.SAFE/manifest.safe")
+					.toURI()
+		);
+		assertEquals(true, testManifest.exists());
+		
+		assertEquals(true, OutputProcessor.isPartial(testManifest.getParentFile()));		
+	}
+	
+	
 
     private Method getMethodForPublishAccodingUpload()
             throws NoSuchMethodException, SecurityException {

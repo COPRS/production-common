@@ -280,13 +280,8 @@ public class OutputProcessor {
 							reporting.begin(
 									ReportingUtils.newFilenameReportingInputFor(family, productName),
 									new ReportingMessage("Checking if %s is a ghost candidate", productName)
-							);
-							
-							final File manifest = new File(file,"manifest.safe");
-							if (manifest.exists() && 
-									(FileUtils.readFile(file).contains("<productConsolidation>PARTIAL</productConsolidation>") ||
-									 FileUtils.readFile(file).contains("<productSensingConsolidation>PARTIAL</productSensingConsolidation>"))
-							   ) {				
+							);		
+							if (isPartial(file)) {				
 								LOGGER.info("Product {} is a ghost candidate", productName);
 								reporting.end(
 										new GhostHandlingSegmentReportingOutput(true),
@@ -367,6 +362,12 @@ public class OutputProcessor {
 
 		}
 		return productSize;
+	}
+
+	static boolean isPartial(final File file) throws InternalErrorException {		
+		final File manifest = new File(file,"manifest.safe");
+		return manifest.exists() && FileUtils.readFile(manifest)
+				.contains("<productConsolidation>PARTIAL</productConsolidation>");
 	}
 	
 	
