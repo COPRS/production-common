@@ -1,5 +1,5 @@
 image: docker:latest
-pull_policy: "if-not-present"
+pull_policy: if-not-present
 
 services:
   - name: docker:18.06-dind
