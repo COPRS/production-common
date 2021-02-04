@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.disseminator.outbox;
 import java.io.InputStream;
 import java.nio.file.Path;
 
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,8 +39,8 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 		final JSch client = new JSch();
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
 		
-		if (config.getKeyFile() != null) {
-			client.addIdentity(config.getKeyFile());
+		if (StringUtil.isNotEmpty(config.getKeyFile())) {
+			client.addIdentity("/app/ssh/" + config.getKeyFile());
 		}
 	    final Session session = client.getSession(config.getUsername(), config.getHostname(), port);
 	    if (config.getPassword() != null) {
