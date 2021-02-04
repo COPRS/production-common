@@ -26,7 +26,7 @@ public class DisseminationProperties {
 		private String path = null;
 		private String username = null;
 		private String password = null;
-		private String keyFile = null;
+		private String keyData = null;
 		private String hostname = "localhost";
 		private int port = -1; // --> not defined
 		
@@ -79,13 +79,13 @@ public class DisseminationProperties {
 		public void setPassword(String password) {
 			this.password = password;
 		}
-		
-		public String getKeyFile() {
-			return keyFile;
+
+		public String getKeyData() {
+			return keyData;
 		}
-		
-		public void setKeyFile(String keyFile) {
-			this.keyFile = keyFile;
+
+		public void setKeyData(String keyData) {
+			this.keyData = keyData;
 		}
 
 		public String getHostname() {
@@ -187,7 +187,7 @@ public class DisseminationProperties {
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
-					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port + 
+					+ ", password=<NOT_SHOWN>, keyData=<NOT_SHOWN>, hostname=" + hostname + ", port=" + port +
 					", pathEvaluator=" + pathEvaluator + ", bufferSize=" + bufferSize+ ", ftpPasv=" + ftpPasv
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
 					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl 

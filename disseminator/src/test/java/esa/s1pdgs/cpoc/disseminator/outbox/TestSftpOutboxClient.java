@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 
+import com.jcraft.jsch.JSch;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.server.PasswordAuthenticator;
@@ -121,7 +122,7 @@ public class TestSftpOutboxClient {
 		
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluater.NULL);
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
@@ -152,7 +153,7 @@ public class TestSftpOutboxClient {
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		dir.mkdirs();
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluater.NULL);
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");

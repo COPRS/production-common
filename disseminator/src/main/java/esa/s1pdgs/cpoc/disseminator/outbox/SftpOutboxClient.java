@@ -1,47 +1,59 @@
 package esa.s1pdgs.cpoc.disseminator.outbox;
 
-import java.io.InputStream;
-import java.nio.file.Path;
-
+import com.jcraft.jsch.*;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
-
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
 import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
 
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
 		@Override
-		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {		
-			return new SftpOutboxClient(obsClient, config, eval);
-		}			
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+			final JSch client = new JSch();
+
+			if (StringUtil.isNotEmpty(config.getKeyData())) {
+				try {
+					Path private_key = Files.createTempFile("", "private_key");
+					FileUtils.writeFile(private_key.toFile(), new String(Base64.getDecoder().decode(config.getKeyData())));
+					client.addIdentity(private_key.toString());
+				} catch (IOException | InternalErrorException | JSchException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			return new SftpOutboxClient(obsClient, client, config, eval);
+		}
 	}
 	
 	private static final Logger LOG = LogManager.getLogger(SftpOutboxClient.class);
 	
 	private static final int DEFAULT_PORT = 22;
-	
-	SftpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+
+	private final JSch client;
+
+	SftpOutboxClient(final ObsClient obsClient, final JSch sshClient, final OutboxConfiguration config, final PathEvaluater eval) {
 		super(obsClient, config, eval);
+		this.client = sshClient;
 	}
 
 	@Override
 	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {	
-		final JSch client = new JSch();
+	
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
 		
-		if (StringUtil.isNotEmpty(config.getKeyFile())) {
-			client.addIdentity("/app/ssh/" + config.getKeyFile());
-		}
 	    final Session session = client.getSession(config.getUsername(), config.getHostname(), port);
 	    if (config.getPassword() != null) {
 	    	session.setPassword(config.getPassword());
