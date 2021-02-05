@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 
-public class IsipPathEvaluater implements PathEvaluater {
+public class IsipPathEvaluator implements PathEvaluator {
 	@Override
 	public final Path outputPath(String basePath, ObsObject obsObject) {
 		return Paths.get(basePath, obsObject.getKey().replace(".SAFE", ".ISIP"));

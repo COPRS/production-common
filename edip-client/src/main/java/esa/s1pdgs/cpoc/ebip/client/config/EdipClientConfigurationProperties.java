@@ -20,7 +20,7 @@ public class EdipClientConfigurationProperties {
 		private int connectTimeoutSec = 60;
 		private boolean pasv;
 		private String sslProtocol = "TLS";
-		private boolean explictFtps = true;
+		private boolean explicitFtps = true;
 		private String keyManagerKeyStore =  "";
 		private String keyManagerKeyStorePassword = "changeit"; // default JKS password
 		private String trustManagerKeyStore =  "";
@@ -81,12 +81,12 @@ public class EdipClientConfigurationProperties {
 			this.sslProtocol = sslProtocol;
 		}
 
-		public boolean isExplictFtps() {
-			return explictFtps;
+		public boolean isExplicitFtps() {
+			return explicitFtps;
 		}
 
-		public void setExplictFtps(final boolean explictFtps) {
-			this.explictFtps = explictFtps;
+		public void setExplicitFtps(final boolean explicitFtps) {
+			this.explicitFtps = explicitFtps;
 		}
 
 		public String getKeyManagerKeyStore() {

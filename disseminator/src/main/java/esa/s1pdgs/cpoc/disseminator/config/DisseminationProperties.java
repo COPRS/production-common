@@ -40,7 +40,7 @@ public class DisseminationProperties {
 		
 		private int bufferSize = 8 * 1014 * 1024;
 		
-		private boolean implicitSsl = true;
+		private boolean implicitSsl = false;
 		
 		private boolean ftpPasv = false;
 		

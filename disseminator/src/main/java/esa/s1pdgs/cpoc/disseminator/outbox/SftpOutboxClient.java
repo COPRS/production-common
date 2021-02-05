@@ -5,7 +5,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -21,7 +21,7 @@ import java.util.Base64;
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
 		@Override
-		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator eval) {
 			final JSch client = new JSch();
 
 			if (StringUtil.isNotEmpty(config.getKeyData())) {
@@ -44,16 +44,16 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 
 	private final JSch client;
 
-	SftpOutboxClient(final ObsClient obsClient, final JSch sshClient, final OutboxConfiguration config, final PathEvaluater eval) {
+	SftpOutboxClient(final ObsClient obsClient, final JSch sshClient, final OutboxConfiguration config, final PathEvaluator eval) {
 		super(obsClient, config, eval);
 		this.client = sshClient;
 	}
 
 	@Override
 	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {	
-	
+
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
-		
+
 	    final Session session = client.getSession(config.getUsername(), config.getHostname(), port);
 	    if (config.getPassword() != null) {
 	    	session.setPassword(config.getPassword());
