@@ -60,7 +60,12 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	        	logger.debug("Using active");
 		        ftpClient.enterLocalActiveMode();
 	        }
-	        assertPositiveCompletion(ftpClient);        
+
+			// we connect to s1pro-mock-dissemination-svc (k8s service for mock pod),
+			// but initiation of data transfer may come from s1pro-mock-dissemination-ftps (docker image inside pod)
+			ftpClient.setRemoteVerificationEnabled(false);
+
+			assertPositiveCompletion(ftpClient);
 	        
 			final Path path = evaluatePathFor(obsObject);	
 			final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
