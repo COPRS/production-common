@@ -95,7 +95,10 @@ public class FtpOutboxClient extends AbstractOutboxClient {
     				logger.info("Uploading {} to {}", entry, dest);
     				ftpClient.storeFile(dest.toString(), in);
     				assertPositiveCompletion(ftpClient);	    				
-    			}
+    			} catch (IOException e) {
+    				logger.error("could not transfer {}", obsObject.getKey(), e);
+    				throw e;
+				}
     		}
 			return retVal;
     	}
