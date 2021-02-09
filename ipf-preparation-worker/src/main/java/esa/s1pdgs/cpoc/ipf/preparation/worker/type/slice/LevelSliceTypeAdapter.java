@@ -145,11 +145,13 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 				jobOrder, 
 				"Slice_Length",
 				String.valueOf(sliceLength.get(product.getAcquisition())));
-		updateProcParam(
-				jobOrder, 
-				"Slicing_Flag", 
-				"TRUE"
-		);
+		
+		// S1PRO-2459: check if providing default values is sufficient
+//		updateProcParam(
+//				jobOrder, 
+//				"Slicing_Flag", 
+//				"TRUE"
+//		);
 		
 		// S1PRO-2194: evaluate mapped timeliness value. Keep default, if there is no
 		// corresponding mapping configured;
