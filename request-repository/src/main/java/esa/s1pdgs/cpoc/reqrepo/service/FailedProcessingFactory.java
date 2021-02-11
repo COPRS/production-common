@@ -27,7 +27,6 @@ final class FailedProcessingFactory
 	private String topic;
 	private Object dto;		
 	private String predecessorTopic = null;
-	private Object predecessorDto = null;
 	private String failedPod;
 	private Date failureDate;
 	private String failureMessage;
@@ -114,7 +113,7 @@ final class FailedProcessingFactory
 				lastAssignmentDate,
 				failureDate,
 				failureMessage,
-				predecessorDto,
+				predecessorMessage,
 				predecessorTopic
 		);
 	}	
