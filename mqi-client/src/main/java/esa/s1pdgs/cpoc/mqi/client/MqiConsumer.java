@@ -140,6 +140,12 @@ public final class MqiConsumer<E extends AbstractMessage> implements Runnable {
 			} catch (final AbstractCodedException ace) {
 				LOG.warn("Error Code: {}, Message: {}", ace.getCode().getCode(), ace.getLogMessage());
 				appStatus.setError("NEXT_MESSAGE");
+			} catch (final Throwable e) {
+				// S1PRO-2431: Exceptions and Errors like OutOfMemoryError not handled shall lead to a restart by Kubernetes
+				LOG.error("Unexpected Error: {},  Terminating this service now! ", e.getMessage());
+				e.printStackTrace();
+				appStatus.setShallBeStopped(true);
+				appStatus.forceStopping();
 			}
 			try {
 				appStatus.sleep(pollingIntervalMillis);
