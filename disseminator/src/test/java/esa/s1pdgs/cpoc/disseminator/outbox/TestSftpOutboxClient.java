@@ -84,12 +84,14 @@ public class TestSftpOutboxClient {
 		sshd.setFileSystemFactory(new VirtualFileSystemFactory(rootDir.getPath()));
 						
 		sshd.start();
+		System.out.println(rootDir);
 	}
 	
 	@AfterClass
 	public static void tearDownClass() throws Exception {
 		sshd.stop();
-		FileUtils.delete(rootDir.getPath());
+		
+		//FileUtils.delete(rootDir.getPath());
 	}
 	
 	@Before
@@ -123,7 +125,7 @@ public class TestSftpOutboxClient {
 		
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, 755);
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, "755");
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
@@ -154,7 +156,7 @@ public class TestSftpOutboxClient {
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		dir.mkdirs();
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, 755);
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, "755");
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");

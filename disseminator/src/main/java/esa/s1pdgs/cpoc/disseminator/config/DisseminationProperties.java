@@ -30,7 +30,7 @@ public class DisseminationProperties {
 		private String hostname = "localhost";
 		private int port = -1; // --> not defined
 		
-		private int permissions = 755;
+		private String permissions = "755";
 		
 		private String keystoreFile = null;
 		private String keystorePass = "changeit";
@@ -185,11 +185,11 @@ public class DisseminationProperties {
 		public void setChmodScriptPath(final String chmodScriptPath) {
 			this.chmodScriptPath = chmodScriptPath;
 		}
-		public int getPermissions() {
+		public String getPermissions() {
 			return permissions;
 		}
 
-		public void setPermissions(final int permissions) {
+		public void setPermissions(final String permissions) {
 			this.permissions = permissions;
 		}
 

@@ -49,14 +49,14 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 
 	private final JSch client;
 	
-	private final int permissions;
+	private final String permissions;
 
 	SftpOutboxClient(
 			final ObsClient obsClient, 
 			final JSch sshClient, 
 			final OutboxConfiguration config, 
 			final PathEvaluator eval,
-			final int permissions
+			final String permissions
 	) {
 		super(obsClient, config, eval);
 		this.client = sshClient;
@@ -102,14 +102,14 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 						} catch (final SftpException e) {
 							// thrown, if directory does not exist
 							LOG.info("Creating directory {}", currentPath);
-							channel.mkdir(currentPath);
-							channel.chmod(permissions,  dest.toString());
+							channel.mkdir(currentPath);						
 						}
 	    			}		    			
 	    			try (final InputStream in = stream(obsObject.getFamily(), entry)) {
 	    				LOG.info("Uploading {} to {}", entry, dest);
 	    				channel.put(in, dest.toString());
-	    				channel.chmod(permissions,  dest.toString());
+	    				LOG.info("Chmod {} file {}", permissions, currentPath);
+	    				channel.chmod(Integer.parseInt(permissions, 8),  dest.toString());
 	    			}
 	    		}
 				return retVal;
