@@ -84,14 +84,12 @@ public class TestSftpOutboxClient {
 		sshd.setFileSystemFactory(new VirtualFileSystemFactory(rootDir.getPath()));
 						
 		sshd.start();
-		System.out.println(rootDir);
 	}
 	
 	@AfterClass
 	public static void tearDownClass() throws Exception {
-		sshd.stop();
-		
-		//FileUtils.delete(rootDir.getPath());
+		sshd.stop();		
+		FileUtils.delete(rootDir.getPath());
 	}
 	
 	@Before

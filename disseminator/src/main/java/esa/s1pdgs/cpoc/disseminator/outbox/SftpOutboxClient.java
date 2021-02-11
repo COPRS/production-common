@@ -102,14 +102,16 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 						} catch (final SftpException e) {
 							// thrown, if directory does not exist
 							LOG.info("Creating directory {}", currentPath);
-							channel.mkdir(currentPath);						
+							channel.mkdir(currentPath);	
+			    			LOG.info("Chmod {} dir {}", permissions, currentPath.toString());
+							channel.chmod(Integer.parseInt(permissions, 8), currentPath.toString());
 						}
 	    			}		    			
 	    			try (final InputStream in = stream(obsObject.getFamily(), entry)) {
 	    				LOG.info("Uploading {} to {}", entry, dest);
 	    				channel.put(in, dest.toString());
-	    				LOG.info("Chmod {} file {}", permissions, currentPath);
-	    				channel.chmod(Integer.parseInt(permissions, 8),  dest.toString());
+	        			LOG.info("Chmod {} file {}", permissions, dest.toString());
+	    				channel.chmod(Integer.parseInt(permissions, 8), dest.toString());
 	    			}
 	    		}
 				return retVal;
