@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 
-import com.jcraft.jsch.JSch;
 import org.apache.sshd.SshServer;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.server.PasswordAuthenticator;
@@ -24,6 +23,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.jcraft.jsch.JSch;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
@@ -110,7 +111,7 @@ public class TestSftpOutboxClient {
 			}
 
 			@Override
-			public InputStream getAsStream(ProductFamily family, String key) {
+			public InputStream getAsStream(final ProductFamily family, final String key) {
 				return new ByteArrayInputStream("expected file content".getBytes());
 			}
 		};
@@ -122,7 +123,7 @@ public class TestSftpOutboxClient {
 		
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL);
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, 755);
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
@@ -139,7 +140,7 @@ public class TestSftpOutboxClient {
 			}
 
 			@Override
-			public InputStream getAsStream(ProductFamily family, String key) {
+			public InputStream getAsStream(final ProductFamily family, final String key) {
 				return new ByteArrayInputStream("expected file content".getBytes());
 			}
 		};
@@ -153,7 +154,7 @@ public class TestSftpOutboxClient {
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		dir.mkdirs();
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL);
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, 755);
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");

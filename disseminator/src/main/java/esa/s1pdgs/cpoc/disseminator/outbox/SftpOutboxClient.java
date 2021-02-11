@@ -1,6 +1,20 @@
 package esa.s1pdgs.cpoc.disseminator.outbox;
 
-import com.jcraft.jsch.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
+
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
@@ -9,14 +23,6 @@ import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
 
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
@@ -26,15 +32,14 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 
 			if (StringUtil.isNotEmpty(config.getKeyData())) {
 				try {
-					Path private_key = Files.createTempFile("", "private_key");
+					final Path private_key = Files.createTempFile("", "private_key");
 					FileUtils.writeFile(private_key.toFile(), new String(Base64.getDecoder().decode(config.getKeyData())));
 					client.addIdentity(private_key.toString());
 				} catch (IOException | InternalErrorException | JSchException e) {
 					throw new RuntimeException(e);
 				}
 			}
-
-			return new SftpOutboxClient(obsClient, client, config, eval);
+			return new SftpOutboxClient(obsClient, client, config, eval, config.getPermissions());
 		}
 	}
 	
@@ -43,10 +48,19 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 	private static final int DEFAULT_PORT = 22;
 
 	private final JSch client;
+	
+	private final int permissions;
 
-	SftpOutboxClient(final ObsClient obsClient, final JSch sshClient, final OutboxConfiguration config, final PathEvaluator eval) {
+	SftpOutboxClient(
+			final ObsClient obsClient, 
+			final JSch sshClient, 
+			final OutboxConfiguration config, 
+			final PathEvaluator eval,
+			final int permissions
+	) {
 		super(obsClient, config, eval);
 		this.client = sshClient;
+		this.permissions = permissions;
 	}
 
 	@Override
@@ -89,11 +103,13 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 							// thrown, if directory does not exist
 							LOG.info("Creating directory {}", currentPath);
 							channel.mkdir(currentPath);
+							channel.chmod(permissions,  dest.toString());
 						}
 	    			}		    			
 	    			try (final InputStream in = stream(obsObject.getFamily(), entry)) {
 	    				LOG.info("Uploading {} to {}", entry, dest);
-	    				channel.put(in, dest.toString());	    				
+	    				channel.put(in, dest.toString());
+	    				channel.chmod(permissions,  dest.toString());
 	    			}
 	    		}
 				return retVal;
