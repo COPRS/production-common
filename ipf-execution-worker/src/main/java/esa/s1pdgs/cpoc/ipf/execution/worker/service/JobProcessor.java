@@ -269,18 +269,23 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				properties.getPathJobOrderXslt()
 		);
 
+//		this.authorizedOutputs = inputMessage.getBody().getOutputs();
+//		this.workDirectory = inputMessage.getBody().getWorkDirectory();
+//		this.debugMode = inputMessage.getDto().isDebug();
+		
 		final OutputProcessor outputProcessor = new OutputProcessor(
 				obsClient, 
 				procuderFactory, 
-				message, 
+				message.getBody().getWorkDirectory(),
 				outputListFile,
+				message, 
+				message.getBody().getOutputs(),
 				properties.getSizeBatchUpload(), 
 				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
 				properties.getLevel(), 
-				properties
-	    );
-		
-		
+				properties,
+				message.getDto().isDebug()
+	    );		
 		reporting.begin(
 				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
 				new ReportingMessage("Start job processing")
@@ -367,7 +372,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-                productionEvents.addAll(outputProcessor.processOutput(reporting, reporting.getUid()));
+                productionEvents.addAll(outputProcessor.processOutput(reporting, reporting.getUid(), job));
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));

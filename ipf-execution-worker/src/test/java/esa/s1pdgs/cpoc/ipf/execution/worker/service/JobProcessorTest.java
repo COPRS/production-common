@@ -25,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -224,7 +225,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Step 2
         doReturn(Collections.emptyList()).when(inputDownloader).processInputs(reporting);
         // Step 4
-        doReturn(Collections.emptyList()).when(outputProcessor).processOutput(reporting, UUID.randomUUID());
+        doReturn(Collections.emptyList()).when(outputProcessor).processOutput(reporting, UUID.randomUUID(), new IpfExecutionJob());
         // Step 5
         final File folder1 =
                 new File(inputMessage.getBody().getWorkDirectory() + "folder1");
@@ -259,8 +260,6 @@ public class JobProcessorTest extends MockPropertiesTest {
     public void testCall() throws Exception {
         mockAllStep(false);
         
-        
-
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
                 procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
@@ -269,7 +268,11 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 2
         verify(inputDownloader, times(1)).processInputs(reporting);
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput(reporting, reporting.getUid());
+        verify(outputProcessor, times(1)).processOutput(
+        		Mockito.eq(reporting), 
+        		Mockito.eq(reporting.getUid()),
+        		Mockito.any()
+        );
        
         // Check step 5
         assertFalse(workingDir.exists());
@@ -297,7 +300,11 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 2
         verify(inputDownloader, times(0)).processInputs(reporting);
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput(reporting, reporting.getUid());
+        verify(outputProcessor, times(1)).processOutput(
+        		Mockito.eq(reporting), 
+        		Mockito.eq(reporting.getUid()),
+        		Mockito.any()
+        );
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
@@ -324,7 +331,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 2
         verify(inputDownloader, times(1)).processInputs(reporting);
         // Check step 4
-        verify(outputProcessor, times(0)).processOutput(reporting, UUID.randomUUID());
+        verify(outputProcessor, times(0)).processOutput(reporting, UUID.randomUUID(), new IpfExecutionJob());
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
@@ -352,7 +359,11 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 2
         verify(inputDownloader, times(1)).processInputs(reporting);
         // Check step 4
-        verify(outputProcessor, times(1)).processOutput(reporting, reporting.getUid());
+        verify(outputProcessor, times(1)).processOutput(
+        		Mockito.eq(reporting), 
+        		Mockito.eq(reporting.getUid()),
+        		Mockito.any()
+        );
         // Check step 5
         assertTrue(workingDir.exists());
         // Check step 6
@@ -383,7 +394,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check status set to error
         verify(appStatus, times(1)).setError("PROCESSING");
         // Check step 4
-        verify(outputProcessor, never()).processOutput(reporting, UUID.randomUUID());
+        verify(outputProcessor, never()).processOutput(reporting, UUID.randomUUID(), new IpfExecutionJob());
         // Check step 5
         assertFalse(workingDir.exists());
         // Check step 6
