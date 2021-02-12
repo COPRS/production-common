@@ -27,19 +27,33 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
 		@Override
-		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator eval) {
+		public OutboxClient newClient(
+				final ObsClient obsClient, 
+				final OutboxConfiguration config, 
+				final PathEvaluator eval
+		) {
 			final JSch client = new JSch();
 
 			if (StringUtil.isNotEmpty(config.getKeyData())) {
 				try {
 					final Path private_key = Files.createTempFile("", "private_key");
-					FileUtils.writeFile(private_key.toFile(), new String(Base64.getDecoder().decode(config.getKeyData())));
+					FileUtils.writeFile(
+							private_key.toFile(), 
+							new String(Base64.getDecoder().decode(config.getKeyData()))
+					);
 					client.addIdentity(private_key.toString());
 				} catch (IOException | InternalErrorException | JSchException e) {
 					throw new RuntimeException(e);
 				}
 			}
-			return new SftpOutboxClient(obsClient, client, config, eval, config.getPermissions());
+			return new SftpOutboxClient(
+					obsClient, 
+					client, 
+					config, 
+					eval, 
+					config.getFilePermissions(), 
+					config.getDirectoryPermissions()
+			);
 		}
 	}
 	
@@ -49,22 +63,27 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 
 	private final JSch client;
 	
-	private final String permissions;
+	private final String filePermissions;
+	
+	private final String directoryPermissions;
 
 	SftpOutboxClient(
 			final ObsClient obsClient, 
 			final JSch sshClient, 
 			final OutboxConfiguration config, 
 			final PathEvaluator eval,
-			final String permissions
+			final String filePermissions,
+			final String directoryPermissions
 	) {
 		super(obsClient, config, eval);
 		this.client = sshClient;
-		this.permissions = permissions;
+		this.filePermissions = filePermissions;
+		this.directoryPermissions = directoryPermissions;
 	}
 
 	@Override
-	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {	
+	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) 
+			throws Exception {	
 
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
 
@@ -103,15 +122,15 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 							// thrown, if directory does not exist
 							LOG.info("Creating directory {}", currentPath);
 							channel.mkdir(currentPath);	
-			    			LOG.info("Chmod {} dir {}", permissions, currentPath.toString());
-							channel.chmod(Integer.parseInt(permissions, 8), currentPath.toString());
+			    			LOG.info("Chmod {} dir {}", directoryPermissions, currentPath.toString());
+							channel.chmod(Integer.parseInt(directoryPermissions, 8), currentPath.toString());
 						}
 	    			}		    			
 	    			try (final InputStream in = stream(obsObject.getFamily(), entry)) {
 	    				LOG.info("Uploading {} to {}", entry, dest);
 	    				channel.put(in, dest.toString());
-	        			LOG.info("Chmod {} file {}", permissions, dest.toString());
-	    				channel.chmod(Integer.parseInt(permissions, 8), dest.toString());
+	        			LOG.info("Chmod {} file {}", filePermissions, dest.toString());
+	    				channel.chmod(Integer.parseInt(filePermissions, 8), dest.toString());
 	    			}
 	    		}
 				return retVal;

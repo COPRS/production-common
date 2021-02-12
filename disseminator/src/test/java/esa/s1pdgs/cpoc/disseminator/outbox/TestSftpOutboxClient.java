@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collections;
 import java.util.List;
 
@@ -123,13 +125,19 @@ public class TestSftpOutboxClient {
 		
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, "755");
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, "664", "775");
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertTrue(expectedFile.exists());
 		assertEquals("expected file content", FileUtils.readFile(expectedFile));
+
+		// File 664
+		assertPermissions(expectedFile.toPath(), "rw-rw-r--");
+		// Directory 775
+		assertPermissions(expectedFile.getParentFile().toPath(), "rwxrwxr-x");
 	}
+
 	
 	@Test
 	public final void testUpload_OnExistingDirectory_ShallTransferFile() throws Exception {
@@ -154,12 +162,23 @@ public class TestSftpOutboxClient {
 		final File dir = new File(rootDir, testDir.toPath().toString());
 		dir.mkdirs();
 		
-		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, "755");
+		final SftpOutboxClient uut = new SftpOutboxClient(fakeObsClient, new JSch(), config, PathEvaluator.NULL, "664", "775");
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");
 		assertTrue(expectedFile.exists());
 		assertEquals("expected file content", FileUtils.readFile(expectedFile));
+		
+		// File 664
+		assertPermissions(expectedFile.toPath(), "rw-rw-r--");
+		// Directory 775
+		assertPermissions(expectedFile.getParentFile().toPath(), "rwxrwxr-x");
 	}
-
+	
+	private final void assertPermissions(final Path path, final String perms) throws IOException {
+		assertEquals(
+				PosixFilePermissions.fromString(perms), 
+				Files.getPosixFilePermissions(path)
+		);
+	}
 }

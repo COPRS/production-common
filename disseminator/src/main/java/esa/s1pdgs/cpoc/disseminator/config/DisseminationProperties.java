@@ -30,7 +30,8 @@ public class DisseminationProperties {
 		private String hostname = "localhost";
 		private int port = -1; // --> not defined
 		
-		private String permissions = "755";
+		private String filePermissions = "664";
+		private String directoryPermissions = "775";
 		
 		private String keystoreFile = null;
 		private String keystorePass = "changeit";
@@ -185,19 +186,28 @@ public class DisseminationProperties {
 		public void setChmodScriptPath(final String chmodScriptPath) {
 			this.chmodScriptPath = chmodScriptPath;
 		}
-		public String getPermissions() {
-			return permissions;
+		
+		public String getFilePermissions() {
+			return filePermissions;
 		}
 
-		public void setPermissions(final String permissions) {
-			this.permissions = permissions;
+		public void setFilePermissions(final String filePermissions) {
+			this.filePermissions = filePermissions;
+		}
+
+		public String getDirectoryPermissions() {
+			return directoryPermissions;
+		}
+
+		public void setDirectoryPermissions(final String directoryPermissions) {
+			this.directoryPermissions = directoryPermissions;
 		}
 
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
 					+ ", password=<NOT_SHOWN>, keyData=<NOT_SHOWN>, hostname=" + hostname + ", port=" + port +
-					", permissions=" + permissions + ", pathEvaluator=" + pathEvaluator + ", bufferSize=" 
+					", directoryPermissions=" + directoryPermissions +	", filePermissions=" + filePermissions + ", pathEvaluator=" + pathEvaluator + ", bufferSize=" 
 					+ bufferSize+ ", ftpPasv=" + ftpPasv
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
 					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl 
