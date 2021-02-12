@@ -24,6 +24,7 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
 
 public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 
@@ -47,12 +48,23 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
 		} catch (final MetadataQueryException e) {
 			LOGGER.debug("L2 product for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), Exceptions.messageOf(e));
 		}
-    	
+
     	List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(tasktableAdapter);
     	AppDataJobTaskInputs originalInput = appDataJobTaskInputs.get(0);
     	AppDataJobInput first = originalInput.getInputs().get(0);
-    	AppDataJobFile file = new AppDataJobFile(product.getProductName(), product.getProductName(), product.getStartTime(), product.getStopTime());
-    	AppDataJobInput mbuInput = new AppDataJobInput(first.getTaskTableInputReference(), first.getFileType(), first.getFileNameType(), first.isMandatory(), Collections.singletonList(file));
+    	AppDataJobFile file = new AppDataJobFile(
+    			product.getProductName(),
+    			product.getProductName(),
+    			product.getStartTime(),
+    			product.getStopTime()
+    	);
+    	AppDataJobInput mbuInput = new AppDataJobInput(
+    			first.getTaskTableInputReference(),
+    			product.getProductType(),
+    			TaskTableFileNameType.PHYSICAL.toString(),
+    			first.isMandatory(),
+    			Collections.singletonList(file)
+    	);
   		originalInput.setInputs(Collections.singletonList(mbuInput));
     	product.overridingInputs(appDataJobTaskInputs);
     	return product;
