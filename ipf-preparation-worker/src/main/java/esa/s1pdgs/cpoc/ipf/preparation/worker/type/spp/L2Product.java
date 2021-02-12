@@ -1,11 +1,17 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 
 public class L2Product extends AbstractProduct {
+	
+	private final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
 	
 	public L2Product(final AppDataJobProductAdapter product) {
 		super(product);
@@ -28,4 +34,13 @@ public class L2Product extends AbstractProduct {
     public void setStopTime(final String stopTime) {
         product.setStopTime(stopTime);
     }
+
+    public final void overridingInputs(final List<AppDataJobTaskInputs> overridingInputs) {
+    	this.overridingInputs.addAll(overridingInputs);
+    }
+    
+    @Override
+	public List<AppDataJobTaskInputs> overridingInputs() {
+		return overridingInputs;
+	}
 }

@@ -7,11 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -34,7 +38,7 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
 	}
 
     @Override
-    public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) {
+    public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdapter) {
     	final L2Product product = L2Product.of(job);
     	try {
 			final SearchMetadata metadata = metadataClient.queryByFamilyAndProductName(ProductFamily.L2_SLICE.name(), product.getProductName());
@@ -43,7 +47,15 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
 		} catch (final MetadataQueryException e) {
 			LOGGER.debug("L2 product for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), Exceptions.messageOf(e));
 		}
-    	return L2Product.of(job);
+    	
+    	List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(tasktableAdapter);
+    	AppDataJobTaskInputs originalInput = appDataJobTaskInputs.get(0);
+    	AppDataJobInput first = originalInput.getInputs().get(0);
+    	AppDataJobFile file = new AppDataJobFile(product.getProductName(), product.getProductName(), product.getStartTime(), product.getStopTime());
+    	AppDataJobInput mbuInput = new AppDataJobInput(first.getTaskTableInputReference(), first.getFileType(), first.getFileNameType(), first.isMandatory(), Collections.singletonList(file));
+  		originalInput.setInputs(Collections.singletonList(mbuInput));
+    	product.overridingInputs(appDataJobTaskInputs);
+    	return product;
     }
 
     @Override
