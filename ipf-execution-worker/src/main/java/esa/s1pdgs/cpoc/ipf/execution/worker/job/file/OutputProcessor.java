@@ -725,7 +725,7 @@ public class OutputProcessor {
 		return hostname + "_" + 
 				job.getKeyObjectStorage() + "_" + 
 				uuid.toString() + "_" + 
-				job.getRetryCounter() + "/";
+				job.getRetryCounter();
 	}
 
 	private long size(final File file) throws InternalErrorException {
