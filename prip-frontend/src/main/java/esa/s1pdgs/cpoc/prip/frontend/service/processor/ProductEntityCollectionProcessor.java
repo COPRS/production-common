@@ -83,11 +83,10 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 		SORTABLE_FIELDS.put(EntityTypeProperties.ContentDate.name() + "/" + EntityTypeProperties.Start.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_START);
 		SORTABLE_FIELDS.put(EntityTypeProperties.ContentDate.name() + "/" + EntityTypeProperties.End.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_END);
 		SORTABLE_FIELDS.put(EntityTypeProperties.ContentLength.name(), PripMetadata.FIELD_NAMES.CONTENT_LENGTH);
-		// sorting on fields of type text is not (out of the box) supported in elasticsearch
-		//SORTABLE_FIELDS.put(EntityTypeProperties.Name.name(), PripMetadata.FIELD_NAMES.NAME);
-		//SORTABLE_FIELDS.put(EntityTypeProperties.ProductionType.name(), PripMetadata.FIELD_NAMES.PRODUCTION_TYPE);
-		//SORTABLE_FIELDS.put(EntityTypeProperties.ContentType.name(), PripMetadata.FIELD_NAMES.CONTENT_TYPE);
-		//SORTABLE_FIELDS.put(EntityTypeProperties.Id.name(), PripMetadata.FIELD_NAMES.ID);
+		SORTABLE_FIELDS.put(EntityTypeProperties.Name.name(), PripMetadata.FIELD_NAMES.NAME);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ProductionType.name(), PripMetadata.FIELD_NAMES.PRODUCTION_TYPE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentType.name(), PripMetadata.FIELD_NAMES.CONTENT_TYPE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.Id.name(), PripMetadata.FIELD_NAMES.ID);
 	}
 
 	// --------------------------------------------------------------------------

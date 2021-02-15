@@ -13,6 +13,7 @@ public class TestPollingRun {
 
 	@SuppressWarnings("deprecation")
 	private static final Date LAST_MODIFIED_1 = new Date(2021, 2, 1, 10, 22, 22);
+	private static final Date LAST_MODIFIED_2 = new Date(2021, 2, 2, 11, 33, 33);
 	private static final String FILE_PATH_1 = "S1B/DCS_04_S1B_20210208090050025513_dat/ch_1/DCS_04_S1B_20210208090050025513_ch1_DSDB_00020.raw";
 	private static final String PICKUP_URL_1 = "https://esa-copernicus.ksat.no/SVL/SENTINEL1/NOMINAL";
 	private static final String PROCESSING_POD_1 = "s1pro-ingestion-xbip-cgs02-trigger-0";
@@ -245,10 +246,30 @@ public class TestPollingRun {
 				"expected finished elements return 1 inbox entry!");
 	}
 
+	@Test
+	public void test_inboxEntryComparison_withProductFamily_differentModificationDate_expectAllEmpty() {
+
+		final InboxEntry inboxEntry = createInboxEntry(LAST_MODIFIED_1);
+		final InboxEntry inboxEntry2 = createInboxEntry(LAST_MODIFIED_2);
+
+		final PollingRun pollingRunExpectAllEmpty = PollingRun.newInstance(
+				Collections.singleton(inboxEntry), Collections.singletonList(inboxEntry2));
+
+		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty.finishedElements()),
+				"expected finished elements to be empty!");
+		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty.newElements()),
+				"expected new elements to be empty!");
+	}
+
 	// --------------------------------------------------------------------------
 
 	private static InboxEntry createInboxEntry() {
 		return new InboxEntry(FILE_PATH_1, FILE_PATH_1, PICKUP_URL_1, LAST_MODIFIED_1, SIZE_1, PROCESSING_POD_1,
+				INBOX_TYPE_1, PRODUCT_FAMILY_1, STATION_NAME_1);
+	}
+
+	private static InboxEntry createInboxEntry(final Date lastModified) {
+		return new InboxEntry(FILE_PATH_1, FILE_PATH_1, PICKUP_URL_1, lastModified, SIZE_1, PROCESSING_POD_1,
 				INBOX_TYPE_1, PRODUCT_FAMILY_1, STATION_NAME_1);
 	}
 
