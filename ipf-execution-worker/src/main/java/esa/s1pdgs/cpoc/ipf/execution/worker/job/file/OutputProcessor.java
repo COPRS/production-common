@@ -329,6 +329,7 @@ public class OutputProcessor {
 				case L1_ACN:
 				case L2_SLICE:
 				case L2_ACN:
+				case SPP_MBU: //just trying
 				case SPP_OBS: //just trying
 				case S3_AUX:
 				case S3_CAL:
