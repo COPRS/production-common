@@ -23,7 +23,6 @@ import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
-import org.elasticsearch.client.core.GetSourceRequest;
 import org.elasticsearch.common.geo.GeoShapeType;
 import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
 import org.elasticsearch.common.geo.builders.PolygonBuilder;
@@ -64,7 +63,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	private static final Logger LOGGER = LogManager.getLogger(PripElasticSearchMetadataRepo.class);
 	private static final String ES_INDEX = "prip";
-	private final int maxSearchHits;
+	private int maxSearchHits;
 
 	private final RestHighLevelClient restHighLevelClient;
 
@@ -239,6 +238,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		List<PripMetadata> result = new ArrayList<>();
 		if (skip.orElse(0) <= 0 || skip.orElse(0) + top.orElse(0) <= this.maxSearchHits) {
 			// Paging through less than maxSearchHits -> default behaviour
+			LOGGER.info("Handling query with skip={} and top={} (max-search-hits={}) -> Use elastic classical pagination", skip.orElse(0), top.orElse(0), this.maxSearchHits);
 			result.addAll(convert(this.query(queryBuilder, top, skip, sortTerms)));
 		} else {
 			// Paging through more than maxSearchHits ->
@@ -255,6 +255,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 				offset = offset - offsetList.size();
 				pageSize = offset > maxSearchHits ? maxSearchHits : offset;
 			}
+
+			LOGGER.info("Handling query with skip={} and top={} (max-search-hits={}) -> Use elastic search_after", skip.orElse(0), top.orElse(0), this.maxSearchHits);
 			offsetList = this.queryOffset(queryBuilder, top, Optional.of(pageSize), sortTerms, true,
 					offsetSearchHit.getSortValues());
 			result.addAll(convert(offsetList));
