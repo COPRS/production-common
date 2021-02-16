@@ -20,7 +20,7 @@ public class TestOutputProcessor {
 		
 		final String expected = "s1pro-l0-asp-ipf-execution-worker-0_"
 				+ "S1A_IW_RAW__0SDV_20200120T184423_20200120T184455_030888_038B80_3138.SAFE_"
-				+ "493460d9-7f1b-434e-9d90-776be731bbf6_0/";
+				+ "493460d9-7f1b-434e-9d90-776be731bbf6_0";
 		final String actual = uut.debugOutputPrefix("s1pro-l0-asp-ipf-execution-worker-0", id, job);
 		assertEquals(expected, actual);
 		System.out.println(actual);
