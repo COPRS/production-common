@@ -1,10 +1,14 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp;
 
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -95,7 +99,7 @@ public class SppMbuTypeAdapterTest {
 	}
 	
 	@Test
-	public void mbuProduction() throws MetadataQueryException, IOException, JAXBException {
+	public void mbuProduction() throws MetadataQueryException, IOException, JAXBException, URISyntaxException {
 		
 		Instant insertionTime = Instant.now();
 		String metadataInsertionTime = toMetadataDateFormat(insertionTime);
@@ -136,9 +140,10 @@ public class SppMbuTypeAdapterTest {
 		
 		JobOrderAdapter jobOrderAdapter = jobOrderFactory.newJobOrderFor(appDataJob);
 		
-		System.out.println(jobOrderAdapter.toXml());
+		final String expectedJobOrder = new String(Files.readAllBytes(new File(
+				"./src/test/resources/jobOrder_SPP_MBU_expected.xml").toPath()), StandardCharsets.UTF_8);
 		
-		
+		assertEquals(expectedJobOrder, jobOrderAdapter.toXml());
 	}
 	
 	private String toMetadataDateFormat(Instant date) {
