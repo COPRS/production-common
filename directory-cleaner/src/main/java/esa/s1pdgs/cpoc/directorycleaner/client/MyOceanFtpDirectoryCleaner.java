@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.directorycleaner.client;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -29,6 +30,7 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 
 	protected final Logger logger = LoggerFactory.getLogger(MyOceanFtpDirectoryCleaner.class);
 
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	private static final int DEFAULT_PORT = 21;
 
 	protected final FtpClientConfig config;
@@ -180,20 +182,43 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 			}
 
 			if (this.exceedsRetentionTime(timestamp)) {
+				DATE_FORMAT.setTimeZone(timestamp.getTimeZone());
+				this.logger.debug("Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
+						file.getName(), DATE_FORMAT.format(timestamp), this.retentionTimeInDays, this.config);
+				final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MyOceanCleanerFileRemoval");
+				reporting.begin(new ReportingMessage(
+						"Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
+						file.getName(), DATE_FORMAT.format(timestamp), this.retentionTimeInDays, this.config));
+
 				final String fileName = file.getName();
 				if (null == fileName) {
-					this.logger.warn("couldn't obtain filename of file to delete in directory " + directoryPath + ": " + this.config);
+					this.logger.warn("Couldn't obtain filename of file to delete in directory " + directoryPath + ": " + this.config);
+					reporting.error(new ReportingMessage("Couldn't obtain filename of file to delete in directory %s: %s", directoryPath, this.config));
 					continue;
 				}
 				final Path filePath = Paths.get(directoryPath, fileName);
 				if (null == filePath) {
-					this.logger.warn("couldn't assemble path for file to delete " + fileName + ": " + this.config);
+					this.logger.warn("Couldn't assemble path for file to delete " + fileName + ": " + this.config);
+					reporting.error(new ReportingMessage("Couldn't assemble path for file %s in directory %s for deletion:", fileName, directoryPath, this.config));
 					continue;
 				}
 
-				this.logger.debug("removing file %s from: %s", filePath, this.config);
-				// TODO @MSc: TRACE report for file deletion
-				ftpClient.deleteFile(filePath.toString());
+				boolean successfullyDeleted = false;
+				try {
+					successfullyDeleted = ftpClient.deleteFile(filePath.toString());
+				} catch (final IOException e) {
+					this.logger.warn("Error on deleting file %s on %s: %s", filePath, this.config, StringUtil.stackTraceToString(e));
+					reporting.error(new ReportingMessage("Error on deleting file %s on %s: %s", filePath, this.config, StringUtil.stackTraceToString(e)));
+					continue;
+				}
+
+				if (successfullyDeleted) {
+					this.logger.info("File %s successfully deleted on: %s", filePath, this.config);
+					reporting.end(new ReportingMessage("File %s successfully deleted on: %s", filePath, this.config));
+				} else {
+					this.logger.warn("File %s couldn't be deleted on: %s", filePath, this.config);
+					reporting.error(new ReportingMessage("File %s couldn't be deleted on: %s", filePath, this.config));
+				}
 			}
 		}
 	}
