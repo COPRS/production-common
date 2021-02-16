@@ -361,6 +361,6 @@
 		<module>xml-tools</module>
 		<module>dissemination-trigger</module>
     	<module>dissemination-worker</module>
-    	<module>outbox-cleaner</module>
+    	<module>directory-cleaner</module>
 	</modules>
 </project>

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.outbox.cleaner.client;
+package esa.s1pdgs.cpoc.directorycleaner.client;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.utils.ArrayUtil;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
-import esa.s1pdgs.cpoc.outbox.cleaner.DirectoryCleaner;
-import esa.s1pdgs.cpoc.outbox.cleaner.config.FtpClientConfig;
-import esa.s1pdgs.cpoc.outbox.cleaner.util.LogPrintWriter;
+import esa.s1pdgs.cpoc.directorycleaner.DirectoryCleaner;
+import esa.s1pdgs.cpoc.directorycleaner.config.FtpClientConfig;
+import esa.s1pdgs.cpoc.directorycleaner.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;

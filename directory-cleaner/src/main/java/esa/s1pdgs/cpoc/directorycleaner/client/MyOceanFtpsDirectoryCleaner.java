@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.outbox.cleaner.client;
+package esa.s1pdgs.cpoc.directorycleaner.client;
 
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -12,9 +12,9 @@ import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPSClient;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
-import esa.s1pdgs.cpoc.outbox.cleaner.config.FtpClientConfig;
-import esa.s1pdgs.cpoc.outbox.cleaner.util.LogPrintWriter;
-import esa.s1pdgs.cpoc.outbox.cleaner.util.Utils;
+import esa.s1pdgs.cpoc.directorycleaner.config.FtpClientConfig;
+import esa.s1pdgs.cpoc.directorycleaner.util.LogPrintWriter;
+import esa.s1pdgs.cpoc.directorycleaner.util.Utils;
 
 public class MyOceanFtpsDirectoryCleaner extends MyOceanFtpDirectoryCleaner {
 

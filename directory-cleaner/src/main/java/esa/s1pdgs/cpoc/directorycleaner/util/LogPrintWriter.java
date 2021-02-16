@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.outbox.cleaner.util;
+package esa.s1pdgs.cpoc.directorycleaner.util;
 
 import java.io.IOException;
 import java.io.PrintWriter;

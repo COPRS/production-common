@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.outbox.cleaner.config;
+package esa.s1pdgs.cpoc.directorycleaner.config;
 
 public class FtpClientConfig {
 	public enum Protocol {

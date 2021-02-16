@@ -1,9 +1,9 @@
-package esa.s1pdgs.cpoc.outbox.cleaner;
+package esa.s1pdgs.cpoc.directorycleaner;
 
-import esa.s1pdgs.cpoc.outbox.cleaner.client.MyOceanFtpDirectoryCleaner;
-import esa.s1pdgs.cpoc.outbox.cleaner.client.MyOceanFtpsDirectoryCleaner;
-import esa.s1pdgs.cpoc.outbox.cleaner.config.FtpClientConfig;
-import esa.s1pdgs.cpoc.outbox.cleaner.config.FtpClientConfig.Protocol;
+import esa.s1pdgs.cpoc.directorycleaner.client.MyOceanFtpDirectoryCleaner;
+import esa.s1pdgs.cpoc.directorycleaner.client.MyOceanFtpsDirectoryCleaner;
+import esa.s1pdgs.cpoc.directorycleaner.config.FtpClientConfig;
+import esa.s1pdgs.cpoc.directorycleaner.config.FtpClientConfig.Protocol;
 
 public class DirectoryCleanerFactory {
 

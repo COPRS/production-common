@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.outbox.cleaner.client;
+package esa.s1pdgs.cpoc.directorycleaner.client;
 
 import java.io.IOException;
 import java.lang.reflect.Field;

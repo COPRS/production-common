@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.outbox.cleaner;
+package esa.s1pdgs.cpoc.directorycleaner;
 
 public class Application {
 

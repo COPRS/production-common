@@ -7,18 +7,18 @@
 	  <artifactId>s1pro-core</artifactId>
 	  <version>2.30.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>s1pro-core-outbox-cleaner</artifactId>
+	<artifactId>s1pro-core-directory-cleaner</artifactId>
 	<packaging>jar</packaging>
 	
 	<description>S1PDGS Cloud POC - Runnable Jar that cleans the configured MyOcean target pod from old files and directories and issues TRACE report messages</description>
 
 	<properties>
 		<!--docker.image.prefix>springio</docker.image.prefix-->
-		<project.build.finalName>s1pdgs-outbox-cleaner</project.build.finalName>
-		<project.artifactId>s1pdgs-outbox-cleaner</project.artifactId>
-		<instance.name>outbox-cleaner</instance.name>
-		<log.dir>/var/log/outboxcleaner</log.dir>
-		<start-class>esa.s1pdgs.cpoc.outbox.cleaner.Application</start-class>
+		<project.build.finalName>s1pdgs-directory-cleaner</project.build.finalName>
+		<project.artifactId>s1pdgs-directory-cleaner</project.artifactId>
+		<instance.name>directory-cleaner</instance.name>
+		<log.dir>/var/log/dir-cleaner</log.dir>
+		<start-class>esa.s1pdgs.cpoc.directorycleaner.Application</start-class>
 	</properties>
 
 	<dependencies>
