@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration debug="false" scan="true" scanPeriod="30 seconds">
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSS} | %-5level | %-30.30logger{30} | %-20thread | %msg%n%ex{full}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE-LogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${log.dir}/${instance.name}.log</file>
+		<append>true</append>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSS} | %-5level | %-30.30logger{30} | %-20thread | %msg%n%ex{full}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${log.dir}/${instance.name}.log-%d{yyyyMMdd}</FileNamePattern>
+		</rollingPolicy>
+	</appender>
+
+	<!--appender name="SysLogAppender" class="ch.qos.logback.classic.net.SyslogAppender"> 
+		<SyslogHost>localhost</SyslogHost> <Facility>local0</Facility> <SuffixPattern>${project.compName} 
+		%m%n</SuffixPattern> </appender -->
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<target>System.out</target>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<root level="DEBUG">
+		<!-- appender-ref ref="FILE-LogAppender" /-->
+		<!-- <appender-ref ref="STDOUT" /-->
+		<appender-ref ref="console" />
+		<!-- appender-ref ref="SysLogAppender" /-->
+	</root>
+
+	<logger name="esa.s1pdgs.cpoc.myocean.cleaner" level="DEBUG" />
+	<logger name="com.werum.sentinel.prip.backend.datadetection" level="DEBUG" />
+
+	<logger name="org.springframework" level="WARN" />
+	<logger name="org.apache.http" level="INFO" />
+
+</configuration>
