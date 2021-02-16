@@ -133,16 +133,16 @@ public class EsServices {
 		}
 	}
 
-	public void createMetadataWithRetries(final JSONObject product, final String productName, final int numRetries,
+	public String createMetadataWithRetries(final JSONObject product, final String productName, final int numRetries,
 			final long retrySleep) throws InterruptedException {
-		Retries.performWithRetries(() -> {
+		return Retries.performWithRetries(() -> {
 			if (!isMetadataExist(product)) {
 				LOGGER.debug("Creating metadata in ES for product {}", productName);
-				createMetadata(product);
+				return createMetadata(product);
 			} else {
 				LOGGER.debug("ES already contains metadata for product {}", productName);
 			}
-			return null;
+			return "";
 		}, "Create metadata " + product, numRetries, retrySleep);
 	}
 
@@ -151,7 +151,10 @@ public class EsServices {
 	 * index named [productType] with id [productName]
 	 * 
 	 */
-	void createMetadata(final JSONObject product) throws Exception {
+	String createMetadata(final JSONObject product) throws Exception {
+		
+		String warningMessage = "";
+		
 		try {
 			final String productType;
 			final ProductFamily family = ProductFamily.valueOf(product.getString("productFamily"));
@@ -184,15 +187,15 @@ public class EsServices {
 				final String result = e.getMessage();
 				boolean fixed = false;
 				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
-					LOGGER.warn(
-							"Parsing error occurred for sliceCoordinates, dropping them as workaround for #S1PRO-783");
+					warningMessage = "Parsing error occurred for sliceCoordinates, dropping them as workaround for #S1PRO-783";
+					LOGGER.warn(warningMessage);
 					product.remove("sliceCoordinates");
 					fixed = true;
 				}
 
 				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
-					LOGGER.warn(
-							"Parsing error occurred for segmentCoordinates, dropping them as workaround for #S1PRO-783");
+					warningMessage = "Parsing error occurred for segmentCoordinates, dropping them as workaround for #S1PRO-783";
+					LOGGER.warn(warningMessage);
 					product.remove("segmentCoordinates");
 					fixed = true;
 				}
@@ -219,6 +222,7 @@ public class EsServices {
 		} catch (JSONException | IOException e) {
 			throw new Exception(e);
 		}
+		return warningMessage;
 	}
 
 	public void createMaskFootprintData(final MaskType maskType, final JSONObject product, final String id) throws Exception {

@@ -102,6 +102,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 				new ReportingMessage("Starting metadata extraction"));
 		return new MqiMessageEventHandler.Builder<CatalogEvent>(ProductCategory.CATALOG_EVENT)
 				.onSuccess(res -> reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction")))
+				.onWarning(res -> reporting.warning(reportingOutput(res), new ReportingMessage("End metadata extraction")))
 				.onError(e -> reporting
 						.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e))))
 				.publishMessageProducer(() -> handleMessage(message, reporting)).newResult();
@@ -113,6 +114,20 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		errorAppender.send(
 				new FailedProcessingDto(processConfiguration.getHostname(), new Date(), error.getMessage(), message));
 	}
+	
+	@Override
+	public void onWarning(final GenericMessageDto<CatalogJob> message, final String warningMessage) {
+		LOG.warn(warningMessage);
+				
+		final FailedProcessingDto failedProcessing = new FailedProcessingDto(
+        		processConfiguration.getHostname(),
+        		new Date(), 
+        		String.format("Warning on handling CatalogJob message %s: %s", message.getId(), warningMessage), 
+        		message
+        );
+        errorAppender.send(failedProcessing);
+	}
+	
 
 	private String determineOutputKeyDependentOnProductFamilyAndTimeliness(final CatalogEvent event) {
 
@@ -165,9 +180,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 		}
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
-
-		esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertion().getMaxRetries(),
-				properties.getProductInsertion().getTempoRetryMs());
+		
+		String warningMessage = 
+				esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertion().getMaxRetries(),
+						properties.getProductInsertion().getTempoRetryMs());
 
 		final CatalogEvent event = toCatalogEvent(message.getBody(), metadata);
 		event.setUid(reporting.getUid());
@@ -175,7 +191,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 				message.getId(), event.getProductFamily(), event);
 		messageDto.setInputKey(message.getInputKey());
 		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));
-		return new MqiPublishingJob<CatalogEvent>(Collections.singletonList(messageDto));
+		return new MqiPublishingJob<CatalogEvent>(Collections.singletonList(messageDto), warningMessage);
 	}
 
 	private final ReportingOutput reportingOutput(final List<GenericPublicationMessageDto<CatalogEvent>> pubs) {
