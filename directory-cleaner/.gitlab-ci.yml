@@ -5,7 +5,7 @@ image: registry.tools.s1pdgs.eu/anonymous/docker:latest
 variables:
   MODULE_DIRECTORY_CLEANER: s1pro-core-directory-cleaner
 
-outbox-cleaner-build:
+directory-cleaner-build:
   stage: module
   script:
     - cd directory-cleaner
