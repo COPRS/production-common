@@ -53,3 +53,4 @@ include:
   - local: data-lifecycle-worker/.gitlab-ci.yml
   - local: dissemination-trigger/.gitlab-ci.yml
   - local: dissemination-worker/.gitlab-ci.yml
+  - local: directory-cleaner/.gitlab-ci.yml
