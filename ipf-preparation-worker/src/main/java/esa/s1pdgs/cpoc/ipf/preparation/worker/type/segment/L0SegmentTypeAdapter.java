@@ -44,7 +44,6 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableTask;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
-import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
 public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {	
 	private final MetadataClient metadataClient;
@@ -62,7 +61,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat,
 			final CatalogEventAdapter catEvent, final AppDataJob job) throws AbstractCodedException {
 
-		Optional<List<AppDataJob>> jobForDataTakeId = appCat.findJobsForDatatakeId(catEvent.datatakeId(), catEvent.productType());
+		final Optional<List<AppDataJob>> jobForDataTakeId = appCat.findJobsForDatatakeId(catEvent.datatakeId(), catEvent.productType());
 
 		if(!jobForDataTakeId.isPresent() || jobForDataTakeId.get().isEmpty()) {
 			return Optional.empty();
@@ -77,9 +76,9 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 
 	// S1PRO-2175 also check start time to create different jobs for RFC segments with different
 	// start times but same data take id
-	private Optional<AppDataJob> withSameStartTime(CatalogEventAdapter catEvent, List<AppDataJob> jobsForDatatakeId) {
+	private Optional<AppDataJob> withSameStartTime(final CatalogEventAdapter catEvent, final List<AppDataJob> jobsForDatatakeId) {
 		
-		for(AppDataJob job: jobsForDatatakeId) {
+		for(final AppDataJob job: jobsForDatatakeId) {
 			if(job.getStartTime().equals(catEvent.validityStartTime())) {
 				return  Optional.of(job);
 			}
@@ -103,8 +102,8 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 
 		// S1PRO-2175 overriding inputs have to be added to the product here as this is the object which will
 		// actually update the job later
-		Map<String, List<LevelSegmentMetadata>> segmentsForPolaristions = product.segmentsForPolaristions();
-		List<LevelSegmentMetadata> inputSegmentData = new ArrayList<>();
+		final Map<String, List<LevelSegmentMetadata>> segmentsForPolaristions = product.segmentsForPolaristions();
+		final List<LevelSegmentMetadata> inputSegmentData = new ArrayList<>();
 		segmentsForPolaristions.forEach((key, value) -> inputSegmentData.addAll(value));
 		product.overridingInputs(
 				createOverridingInputs(
@@ -182,12 +181,12 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		// AuxQuery however expects a full ist of inputs (those with results and those without results yet)
 		// It would perhaps be better to have e.g. a field "preselectedInputs" at the job
 		// and leave additionalInputs empty, as it is used by AuxQuery only
-		List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(taskTableAdapter);
+		final List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(taskTableAdapter);
 
-		for(AppDataJobTaskInputs taskInputs : appDataJobTaskInputs) {
-			List<AppDataJobInput> mergedInputs = new ArrayList<>();
+		for(final AppDataJobTaskInputs taskInputs : appDataJobTaskInputs) {
+			final List<AppDataJobInput> mergedInputs = new ArrayList<>();
 
-			for(AppDataJobInput input : taskInputs.getInputs()) {
+			for(final AppDataJobInput input : taskInputs.getInputs()) {
 
 				final Optional<QueryUtils.TaskAndInput> optionalTask = QueryUtils.getTaskForReference(
 						input.getTaskTableInputReference(),
@@ -259,7 +258,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 				.collect(Collectors.toList());
 	}
 
-	private List<AppDataJobFile> toAppDataJobFiles(List<LevelSegmentMetadata> segmentsA, List<LevelSegmentMetadata> segmentsB) {
+	private List<AppDataJobFile> toAppDataJobFiles(final List<LevelSegmentMetadata> segmentsA, final List<LevelSegmentMetadata> segmentsB) {
 		final List<AppDataJobFile> files = new ArrayList<>();
 		for (final LevelSegmentMetadata segment : segmentsA) {
 			files.add(new AppDataJobFile(
@@ -280,7 +279,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		return files;
 	}
 
-	private void handleNonRfSegments(final AppDataJob job, final L0SegmentProduct product, TaskTableAdapter taskTableAdapter)
+	private void handleNonRfSegments(final AppDataJob job, final L0SegmentProduct product, final TaskTableAdapter taskTableAdapter)
 			throws IpfPrepWorkerInputsMissingException {
 		// Retrieve the segments
 		final Map<String, String> missingMetadata = new HashMap<>();
