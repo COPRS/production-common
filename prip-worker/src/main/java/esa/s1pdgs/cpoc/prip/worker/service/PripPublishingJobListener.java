@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -66,6 +68,9 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class PripPublishingJobListener implements MqiListener<PripPublishingJob> {
 
 	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
+	
+	private static final String PATTERN_STR = "^S1[AB]_OPER_AUX_QCSTDB_.*$";
+	private static final Pattern PATTERN_NO_MDC = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
 
 	private final GenericMqiClient mqiClient;
 	private final List<MessageFilter> messageFilter;
@@ -159,11 +164,6 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException, InterruptedException {
 		final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
 
-		final SearchMetadata searchMetadata = queryMetadata(
-				publishingJob.getProductFamily(),
-				publishingJob.getKeyObjectStorage()
-		);
-
 		PripMetadata pripMetadata = new PripMetadata();		
 		pripMetadata.setId(UUID.randomUUID());
 		pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
@@ -177,34 +177,53 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		pripMetadata
 				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 		
-		// ValidityStart: mandatory field, only optional when plan and report
-		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStart())) {
-			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
-		}
+		if(mdcQuery(publishingJob.getKeyObjectStorage())) {
 		
-		// ValidityStop: mandatory field, only optional when plan and report
-		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStop())) {
-			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
-		}
-				
-		Map<String, Object> pripAttributes = mdcToPripMapper.map(publishingJob.getKeyObjectStorage(),
-				searchMetadata.getProductType(), searchMetadata.getAdditionalProperties());		
-		pripMetadata.setAttributes(pripAttributes);
-		
-		final List<PripGeoCoordinate> coordinates = new ArrayList<>();
-		if (null != searchMetadata.getFootprint()) {
-			for (final List<Double> p : searchMetadata.getFootprint()) {
-				coordinates.add(new PripGeoCoordinate(p.get(0), p.get(1)));
+			final SearchMetadata searchMetadata = queryMetadata(
+					publishingJob.getProductFamily(),
+					publishingJob.getKeyObjectStorage()
+			);
+			
+			// ValidityStart: mandatory field, only optional when plan and report
+			if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStart())) {
+				pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
 			}
+			
+			// ValidityStop: mandatory field, only optional when plan and report
+			if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStop())) {
+				pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+			}
+					
+			Map<String, Object> pripAttributes = mdcToPripMapper.map(publishingJob.getKeyObjectStorage(),
+					searchMetadata.getProductType(), searchMetadata.getAdditionalProperties());		
+			pripMetadata.setAttributes(pripAttributes);
+			
+			final List<PripGeoCoordinate> coordinates = new ArrayList<>();
+			if (null != searchMetadata.getFootprint()) {
+				for (final List<Double> p : searchMetadata.getFootprint()) {
+					coordinates.add(new PripGeoCoordinate(p.get(0), p.get(1)));
+				}
+			}
+			if (!coordinates.isEmpty()) {
+				pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
+			}	
+			
 		}
-		if (!coordinates.isEmpty()) {
-			pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
-		}	
 		pripMetadataRepo.save(pripMetadata);
 
 		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
 	}
 	
+	private boolean mdcQuery(String key) {
+		final Matcher m = PATTERN_NO_MDC.matcher(key);
+
+		if (m.matches()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	private SearchMetadata queryMetadata(final ProductFamily productFamily, final String keyObjectStorage) throws MetadataQueryException, InterruptedException {
 		return Retries.performWithRetries(() -> {
 				return metadataClient.queryByFamilyAndProductName(
