@@ -79,7 +79,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
         	);
         	final AppDataJobInput input = new AppDataJobInput(
         			first.getTaskTableInputReference(),
-        			auxResorb.getProductType(),
+        			"AUX_RES",
         			TaskTableFileNameType.PHYSICAL.toString(),
         			first.isMandatory(),
         			Collections.singletonList(file)
