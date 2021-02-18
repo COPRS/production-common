@@ -86,6 +86,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
         	);
       		originalInput.setInputs(Collections.singletonList(input));
       		auxResorb.overridingInputs(appDataJobTaskInputs);
+      		LOGGER.debug("Added AUXRESORB {}", originalInput);
         } catch (final MetadataQueryException e) {
             LOGGER.error("Error on query execution, retrying next time", e);
         }
