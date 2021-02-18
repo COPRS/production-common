@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ingestion.worker.service;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.SardineRuntimeException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -58,15 +60,10 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	private final InboxAdapterManager inboxAdapterManager;
 
 	@Autowired
-	public IngestionWorkerService(
-			final GenericMqiClient mqiClient, 
-			final List<MessageFilter> messageFilter,
-			final ErrorRepoAppender errorRepoAppender,
-			final IngestionWorkerServiceConfigurationProperties properties, 
-			final ProductService productService,
-			final AppStatus appStatus,
-			final InboxAdapterManager inboxAdapterManager
-	) {
+	public IngestionWorkerService(final GenericMqiClient mqiClient, final List<MessageFilter> messageFilter,
+			final ErrorRepoAppender errorRepoAppender, final IngestionWorkerServiceConfigurationProperties properties,
+			final ProductService productService, final AppStatus appStatus,
+			final InboxAdapterManager inboxAdapterManager) {
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
 		this.errorRepoAppender = errorRepoAppender;
@@ -75,108 +72,80 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		this.appStatus = appStatus;
 		this.inboxAdapterManager = inboxAdapterManager;
 	}
-	
+
 	@PostConstruct
 	public void initService() {
 		if (properties.getPollingIntervalMs() > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<IngestionJob>(
-					mqiClient,
-					ProductCategory.INGESTION, 
-					this,
-					messageFilter,
-					properties.getPollingIntervalMs(),
-					0L,
-					appStatus
-			));
+			service.execute(new MqiConsumer<IngestionJob>(mqiClient, ProductCategory.INGESTION, this, messageFilter,
+					properties.getPollingIntervalMs(), 0L, appStatus));
 		}
 	}
 
 	@Override
 	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IngestionJob> message) throws Exception {
 		final IngestionJob ingestion = message.getBody();
-		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(ingestion.getUid())				
+
+		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(ingestion.getUid())
 				.newReporting("IngestionWorker");
-		
-		LOG.debug("received Ingestion: {}", ingestion.getProductName());		
-		final URI productUri = IngestionJobs.toUri(ingestion);		
+
+		LOG.debug("received Ingestion: {}", ingestion.getProductName());
+		final URI productUri = IngestionJobs.toUri(ingestion);
 		final InboxAdapter inboxAdapter = inboxAdapterManager.getInboxAdapterFor(productUri);
-	
-		return new MqiMessageEventHandler.Builder<IngestionEvent>(ProductCategory.INGESTION_EVENT)
-				.onSuccess(res -> {
-					inboxAdapter.delete(productUri);
-					reporting.end(
-							IngestionWorkerReportingOutput.newInstance(ingestion, new Date()),
-							new ReportingMessage(
-									ingestion.getProductSizeByte(),
-									"End processing of %s", ingestion.getKeyObjectStorage()
-							)
-					);
-				})
-				.onError(e -> reporting.error(new ReportingMessage(
-						"Error processing of %s: %s", 
-						ingestion.getKeyObjectStorage(),  
-						LogUtils.toString(e)
-				)))
-				.publishMessageProducer(() -> {					
+
+		return new MqiMessageEventHandler.Builder<IngestionEvent>(ProductCategory.INGESTION_EVENT).onSuccess(res -> {
+			inboxAdapter.delete(productUri);
+			reporting.end(IngestionWorkerReportingOutput.newInstance(ingestion, new Date()), new ReportingMessage(
+					ingestion.getProductSizeByte(), "End processing of %s", ingestion.getKeyObjectStorage()));
+		}).onError(e -> reporting.error(new ReportingMessage("Error processing of %s: %s",
+				ingestion.getKeyObjectStorage(), LogUtils.toString(e)))).publishMessageProducer(() -> {
 					reporting.begin(
-							new InboxReportingInput(ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getPickupBaseURL()), 
-							new ReportingMessage("Start processing of %s", ingestion.getProductName())
-					);	
-					final List<Product<IngestionEvent>> result = identifyAndUpload(message, inboxAdapter, ingestion, reporting);
-					return publish(result, message, reporting.getUid());					
-				})
-				.newResult();
+							new InboxReportingInput(ingestion.getProductName(), ingestion.getRelativePath(),
+									ingestion.getPickupBaseURL()),
+							new ReportingMessage("Start processing of %s", ingestion.getProductName()));
+					final List<Product<IngestionEvent>> result = identifyAndUpload(message, inboxAdapter, ingestion,
+							reporting);
+					return publish(result, message, reporting.getUid());
+				}).newResult();
 	}
-	
+
 	@Override
 	public final void onTerminalError(final GenericMessageDto<IngestionJob> message, final Exception error) {
 		LOG.error(error);
-		errorRepoAppender.send(new FailedProcessingDto(
-				properties.getHostname(), 
-				new Date(),
-				String.format("Error on handling IngestionJob message %s: %s", message.getId(), LogUtils.toString(error)), 
-				message
-		));
+		errorRepoAppender.send(new FailedProcessingDto(properties.getHostname(), new Date(), String.format(
+				"Error on handling IngestionJob message %s: %s", message.getId(), LogUtils.toString(error)), message));
 	}
 
-	final List<Product<IngestionEvent>> identifyAndUpload(
-			final GenericMessageDto<IngestionJob> message, 
-			final InboxAdapter inboxAdapter,
-			final IngestionJob ingestion,
-			final ReportingFactory reportingFactory
-	) throws Exception {
+	final List<Product<IngestionEvent>> identifyAndUpload(final GenericMessageDto<IngestionJob> message,
+			final InboxAdapter inboxAdapter, final IngestionJob ingestion, final ReportingFactory reportingFactory)
+			throws Exception {
 		try {
 			return productService.ingest(ingestion.getProductFamily(), inboxAdapter, ingestion, reportingFactory);
-		} 
-		catch (final Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e);
-			throw e;
+			// Only throw if it is NOT an Internal Server Error (500)
+			if (e instanceof SardineRuntimeException) { 
+				return Collections.emptyList();
+			} else {
+				throw e;
+			}
 		}
 	}
 
-	final MqiPublishingJob<IngestionEvent> publish(
-			final List<Product<IngestionEvent>> products, 
-			final GenericMessageDto<IngestionJob> message,
-			final UUID reportingId
-	) throws AbstractCodedException {				
-		final List<GenericPublicationMessageDto<? extends AbstractMessage>> results = new ArrayList<>();		
+	final MqiPublishingJob<IngestionEvent> publish(final List<Product<IngestionEvent>> products,
+			final GenericMessageDto<IngestionJob> message, final UUID reportingId) throws AbstractCodedException {
+		final List<GenericPublicationMessageDto<? extends AbstractMessage>> results = new ArrayList<>();
 		for (final Product<IngestionEvent> product : products) {
 			final IngestionEvent event = product.getDto();
 			event.setUid(reportingId);
-			
+
 			final GenericPublicationMessageDto<IngestionEvent> result = new GenericPublicationMessageDto<>(
-					message.getId(), 
-					product.getFamily(), 
-					event
-			);
+					message.getId(), product.getFamily(), event);
 			result.setInputKey(message.getInputKey());
 			result.setOutputKey(product.getFamily().toString());
 			LOG.info("publishing : {}", result);
 			results.add(result);
 		}
 		return new MqiPublishingJob<IngestionEvent>(results);
-	}	
+	}
 }
