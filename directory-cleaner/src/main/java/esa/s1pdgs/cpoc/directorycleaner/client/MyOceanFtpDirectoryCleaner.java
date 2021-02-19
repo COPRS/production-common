@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.common.utils.ArrayUtil;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.directorycleaner.DirectoryCleaner;
-import esa.s1pdgs.cpoc.directorycleaner.config.FtpClientConfig;
+import esa.s1pdgs.cpoc.directorycleaner.config.DirectoryCleanerProperties;
 import esa.s1pdgs.cpoc.directorycleaner.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -33,14 +33,12 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	private static final int DEFAULT_PORT = 21;
 
-	protected final FtpClientConfig config;
-	protected final int retentionTimeInDays;
+	protected final DirectoryCleanerProperties config;
 
 	// --------------------------------------------------------------------------
 
-	public MyOceanFtpDirectoryCleaner(final FtpClientConfig config, final int retentionTimeinDays) {
+	public MyOceanFtpDirectoryCleaner(final DirectoryCleanerProperties config) {
 		this.config = config;
-		this.retentionTimeInDays = retentionTimeinDays;
 	}
 
 	// --------------------------------------------------------------------------
@@ -117,7 +115,7 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 		assertPositiveCompletion(ftpClient);
 
 		// login
-		if (!ftpClient.login(this.config.getUsername(), this.config.getPassw())) {
+		if (!ftpClient.login(this.config.getUsername(), this.config.getPassword())) {
 			throw new RuntimeException(
 					"Could not authenticate user '" + this.config.getUsername() + "' with:" + this.config);
 		}
@@ -131,7 +129,7 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 		final LocalDateTime fileTimestamp = LocalDateTime.ofInstant(timestamp.toInstant(), zoneId);
 		final LocalDateTime now = LocalDateTime.now(zoneId);
 
-		return fileTimestamp.isBefore(now.minusDays(this.retentionTimeInDays));
+		return fileTimestamp.isBefore(now.minusDays(this.config.getRetentionTimeInDays()));
 	}
 
 	protected void clean(final FTPClient ftpClient) throws IOException {
@@ -184,11 +182,11 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 			if (this.exceedsRetentionTime(timestamp)) {
 				DATE_FORMAT.setTimeZone(timestamp.getTimeZone());
 				this.logger.debug("Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
-						file.getName(), DATE_FORMAT.format(timestamp), this.retentionTimeInDays, this.config);
+						file.getName(), DATE_FORMAT.format(timestamp), this.config.getRetentionTimeInDays(), this.config);
 				final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MyOceanCleanerFileRemoval");
 				reporting.begin(new ReportingMessage(
 						"Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
-						file.getName(), DATE_FORMAT.format(timestamp), this.retentionTimeInDays, this.config));
+						file.getName(), DATE_FORMAT.format(timestamp), this.config.getRetentionTimeInDays(), this.config));
 
 				final String fileName = file.getName();
 				if (null == fileName) {

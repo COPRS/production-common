@@ -1,6 +1,16 @@
 package esa.s1pdgs.cpoc.directorycleaner.config;
 
-public class FtpClientConfig {
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
+
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = "directory-cleaner")
+public class DirectoryCleanerProperties {
+
 	public enum Protocol {
 		FTP, FTPS;
 
@@ -22,7 +32,7 @@ public class FtpClientConfig {
 	private boolean implicitSsl = true;
 	private boolean ftpPassiveMode = false;
 	private String username = null;
-	private String passw = null;
+	private String password = null;
 	private String path = null;
 
 	private String keyFile = null;
@@ -33,13 +43,16 @@ public class FtpClientConfig {
 	private String truststoreFile = System.getProperty("java.home") + "/lib/security/cacerts";
 	private String truststorePass = "changeit";
 
+	private int retentionTimeInDays = 7;
+
 	// --------------------------------------------------------------------------
 
 	@Override
 	public String toString() {
-		return "FtpConfig [protocol=" + this.protocol + ", path=" + this.path + ", username=" + this.username
-				+ ", passw=<NOT_SHOWN>, keyFile=" + this.keyFile + ", hostname=" + this.hostname + ", port=" + this.port
-				+ ", ftpPassiveMode=" + this.ftpPassiveMode + ", keystoreFile=" + this.keystoreFile
+		return "FtpConfig [protocol=" + this.protocol + ", path=" + this.path + ", retentionTimeInDays="
+				+ this.retentionTimeInDays + ", username=" + this.username + ", passw=<NOT_SHOWN>, keyFile="
+				+ this.keyFile + ", hostname=" + this.hostname + ", port=" + this.port + ", ftpPassiveMode="
+				+ this.ftpPassiveMode + ", keystoreFile=" + this.keystoreFile
 				+ ", keystorePass=<NOT_SHOWN>, truststoreFile=" + this.truststoreFile
 				+ ", truststorePass=<NOT_SHOWN>, implicitSsl=" + this.implicitSsl + "]";
 	}
@@ -70,12 +83,12 @@ public class FtpClientConfig {
 		this.username = username;
 	}
 
-	public String getPassw() {
-		return this.passw;
+	public String getPassword() {
+		return this.password;
 	}
 
-	public void setPassw(String passw) {
-		this.passw = passw;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public String getKeyFile() {
@@ -146,7 +159,32 @@ public class FtpClientConfig {
 		return this.ftpPassiveMode;
 	}
 
-	public void setFtpPassiveMode(boolean ftpPassiveMode) {
-		this.ftpPassiveMode = ftpPassiveMode;
+	public void setFtpPasv(String ftpPasv) {
+		this.ftpPassiveMode = parseBooleanOrDefault(ftpPasv, false);
 	}
+
+	public int getRetentionTimeInDays() {
+		return this.retentionTimeInDays;
+	}
+
+	public void setRetentionTimeInDays(int retentionTimeInDays) {
+		this.retentionTimeInDays = retentionTimeInDays;
+	}
+
+	// --------------------------------------------------------------------------
+
+	private static boolean parseBooleanOrDefault(String booleanStr, boolean defaultValue) {
+		if (StringUtil.isNotBlank(booleanStr)) {
+			if ("true".equalsIgnoreCase(booleanStr) || "yes".equalsIgnoreCase(booleanStr)
+					|| "on".equalsIgnoreCase(booleanStr) || "1".equals(booleanStr)) {
+				return true;
+			} else if ("false".equalsIgnoreCase(booleanStr) || "no".equalsIgnoreCase(booleanStr)
+					|| "off".equalsIgnoreCase(booleanStr) || "0".equals(booleanStr)) {
+				return false;
+			}
+		}
+
+		return defaultValue;
+	}
+
 }

@@ -12,7 +12,7 @@ import org.apache.commons.net.PrintCommandListener;
 import org.apache.commons.net.ftp.FTPSClient;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
-import esa.s1pdgs.cpoc.directorycleaner.config.FtpClientConfig;
+import esa.s1pdgs.cpoc.directorycleaner.config.DirectoryCleanerProperties;
 import esa.s1pdgs.cpoc.directorycleaner.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.directorycleaner.util.Utils;
 
@@ -23,8 +23,8 @@ public class MyOceanFtpsDirectoryCleaner extends MyOceanFtpDirectoryCleaner {
 
 	// --------------------------------------------------------------------------
 
-	public MyOceanFtpsDirectoryCleaner(final FtpClientConfig config, final int retentionTimeinDays) {
-		super(config, retentionTimeinDays);
+	public MyOceanFtpsDirectoryCleaner(final DirectoryCleanerProperties config) {
+		super(config);
 	}
 
 	// --------------------------------------------------------------------------
@@ -73,7 +73,7 @@ public class MyOceanFtpsDirectoryCleaner extends MyOceanFtpDirectoryCleaner {
 		assertPositiveCompletion(ftpsClient);
 
 		// login
-		if (!ftpsClient.login(this.config.getUsername(), this.config.getPassw())) {
+		if (!ftpsClient.login(this.config.getUsername(), this.config.getPassword())) {
 			throw new RuntimeException(
 					"Could not authenticate user '" + this.config.getUsername() + "' with:" + this.config);
 		}
