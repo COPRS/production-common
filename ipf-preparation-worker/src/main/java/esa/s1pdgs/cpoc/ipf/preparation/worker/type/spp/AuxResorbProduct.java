@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -8,12 +9,13 @@ import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 
 public class AuxResorbProduct extends AbstractProduct {
+	private final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
 
-    public AuxResorbProduct(AppDataJobProductAdapter product) {
+    public AuxResorbProduct(final AppDataJobProductAdapter product) {
         super(product);
     }
 
-    public static AuxResorbProduct of(AppDataJob job) {
+    public static AuxResorbProduct of(final AppDataJob job) {
         return new AuxResorbProduct(new AppDataJobProductAdapter(job.getProduct()));
     }
 
@@ -25,16 +27,20 @@ public class AuxResorbProduct extends AbstractProduct {
         product.setStopTime(stopTime);
     }
 
-    public void setSelectedOrbitFirstAzimuthTimeUtc(String value) {
+    public void setSelectedOrbitFirstAzimuthTimeUtc(final String value) {
         product.setStringValue("selectedOrbitFirstAzimuthTimeUtc", value);
     }
 
     public String getSelectedOrbitFirstAzimuthTimeUtc() {
         return product.getStringValue("selectedOrbitFirstAzimuthTimeUtc");
     }
-
-    @Override
-    public List<AppDataJobTaskInputs> overridingInputs() {
-        return null; //to add this product as input
+    
+    public final void overridingInputs(final List<AppDataJobTaskInputs> inputs) {
+    	overridingInputs.addAll(inputs);
     }
+    
+    @Override
+	public List<AppDataJobTaskInputs> overridingInputs() {
+		return overridingInputs;
+	}
 }
