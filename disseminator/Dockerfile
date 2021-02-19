@@ -16,4 +16,6 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY --from=build /app/disseminator/target/s1pro-core-disseminator-*.jar s1pdgs-disseminator.jar
 COPY /config/start.sh start.sh
 
+RUN ulimit 8192
+
 ENTRYPOINT "/app/start.sh"
