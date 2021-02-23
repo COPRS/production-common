@@ -9,11 +9,14 @@ import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterEntry;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -43,14 +46,30 @@ public class ObsAdapter {
 			);
 		}
 	}
-	
-	private final List<StreamObsUploadObject> toUploadObjects(final ProductFamily family, final List<InboxAdapterEntry> entries) {
+
+	public final long sizeOf(final ProductFamily family, final String obsKey) {
+		try {
+			final ObsObject obsObject = new ObsObject(family, obsKey);
+			if(!obsClient.exists(obsObject)) {
+				return -1;
+			}
+
+			return obsClient.size(obsObject);
+		} catch (ObsException | SdkClientException e) {
+			throw new RuntimeException(
+					String.format("Error during check for existing obs object with key %s: %s",
+							obsKey,
+							LogUtils.toString(e)));
+		}
+	}
+
+	private List<StreamObsUploadObject> toUploadObjects(final ProductFamily family, final List<InboxAdapterEntry> entries) {
 		return entries.stream()
 			.map(e -> new StreamObsUploadObject(family, e.key(), inputStreamOf(e), e.size()))
 			.collect(Collectors.toList());
 	}
 	
-	private final InputStream inputStreamOf(final InboxAdapterEntry entry) {
+	private InputStream inputStreamOf(final InboxAdapterEntry entry) {
 		// S1PRO-2117: Make the buffer explicit here and avoid having too many concurrent open connection
 		// for product download
 		if (copyInputStreamToBuffer) {

@@ -31,9 +31,7 @@ public class ProductServiceImpl implements ProductService {
 			final ReportingFactory reportingFactory
 	) throws Exception {		
 		final URI uri = IngestionJobs.toUri(ingestion);
-
 		final ObsAdapter obsAdapter = newObsAdapterFor(reportingFactory);
-
 		final String obsKey = obsKeyFor(ingestion);
 
 		final IngestionEvent dto = new IngestionEvent(
@@ -45,13 +43,30 @@ public class ProductServiceImpl implements ProductService {
 				ingestion.getMode(),
 				ingestion.getTimeliness()
 		);
-		final Product<IngestionEvent> prod = new Product<>(family, uri, dto);
+
+		checkExistingInObs(obsAdapter, ingestion);
+		upload(obsAdapter, ingestion, family, inboxAdapter, uri, obsKey);
+
+		return Collections.singletonList(new Product<>(family, uri, dto));
+	}
+
+	private void upload(ObsAdapter obsAdapter, IngestionJob ingestion, ProductFamily family, InboxAdapter inboxAdapter, URI uri, String obsKey) throws Exception {
 		obsAdapter.upload(
-				family, 
+				family,
 				inboxAdapter.read(uri, ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getProductSizeByte()),
 				obsKey
 		);
-		return Collections.singletonList(prod);
+	}
+
+	private void checkExistingInObs(final ObsAdapter obsAdapter, final IngestionJob ingestion) {
+		final String obsKey = obsKeyFor(ingestion);
+
+		long size = obsAdapter.sizeOf(ingestion.getProductFamily(), obsKey);
+
+		if (size == ingestion.getProductSizeByte()) {
+			throw new RuntimeException(
+					String.format("File %s is already in obs and hase same size, aborting ingestion", obsKey));
+		}
 	}
 
 	private String obsKeyFor(final IngestionJob ingestion) {
