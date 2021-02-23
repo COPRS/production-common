@@ -66,6 +66,7 @@ public class TestMyOceanFtpDirectoryCleaner {
 		userFactory.setPasswordEncryptor(new ClearTextPasswordEncryptor());
 
 		final File userPropsFile = Files.createTempFile("user", ".properties").toFile();
+		userPropsFile.deleteOnExit();
 		userDir = new File(rootDir, "user");
 		final BaseUser user = new BaseUser();
 		user.setName(USER);
