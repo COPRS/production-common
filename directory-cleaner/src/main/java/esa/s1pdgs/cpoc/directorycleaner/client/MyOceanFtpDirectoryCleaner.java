@@ -152,8 +152,6 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 	protected void cleanRecursively(final FTPClient ftpClient, final String startPath, final String currentDirectory) throws IOException {
 		// move down the directory structure (depth-first)
 		final FTPFile[] subdirectories = ftpClient.listDirectories(currentDirectory);
-		System.out.println("sub directories of " + currentDirectory + ":\n");
-		this.printLines(subdirectories);
 		for (final FTPFile subDir : ArrayUtil.nullToEmpty(subdirectories)) {
 			final String subDirName = subDir.getName();
 			assertNotNull(subDirName, "error obtaining name of sub directory from: " + this.config);
@@ -167,12 +165,6 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 		this.deleteOldFilesFromDirectory(ftpClient, currentDirectory);
 		if (!startPath.equals(currentDirectory)) {
 			this.deleteOldAndEmptyDirectory(ftpClient, currentDirectory);
-		}
-	}
-
-	private void printLines(final Object[] lines) {
-		for (final Object obj : ArrayUtil.nullToEmpty(lines)) {
-			System.out.println(" - " + (null != obj ? obj.toString() : "null"));
 		}
 	}
 
@@ -248,12 +240,13 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 		}
 
 		if (this.exceedsRetentionTime(timestamp) //
-				&& ArrayUtil.isEmpty(ftpClient.listDirectories())
-				&& ArrayUtil.isEmpty(ftpClient.listFiles())) {
+				&& ArrayUtil.isEmpty(ftpClient.listDirectories(directoryPath))
+				&& ArrayUtil.isEmpty(ftpClient.listFiles(directoryPath))) {
 			try {
 				Thread.sleep(1111); // just for safety ...
 			} catch (final InterruptedException e) {}
-			if (ArrayUtil.isEmpty(ftpClient.listDirectories()) && ArrayUtil.isEmpty(ftpClient.listFiles())) {
+			if (ArrayUtil.isEmpty(ftpClient.listDirectories(directoryPath))
+					&& ArrayUtil.isEmpty(ftpClient.listFiles(directoryPath))) {
 				this.logger.debug("removing directory %s from: %s", directoryPath, this.config);
 				ftpClient.removeDirectory(directoryPath);
 			}

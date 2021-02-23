@@ -37,6 +37,10 @@ public class TestMyOceanFtpDirectoryCleaner {
 	private static File userDir;
 	private static FtpServer ftpServer;
 
+	private File day20Dir;
+	private File day21Dir;
+	private File day22Dir;
+
 	private File day20File;
 	private File day21File;
 	private File day22File;
@@ -113,21 +117,21 @@ public class TestMyOceanFtpDirectoryCleaner {
 		final File yearDir = new File(userDir, "2021");
 		final File monthDir = new File(yearDir, "02");
 
-		final File day20Dir = new File(monthDir, "20");
-		day20Dir.mkdirs();
-		this.day20File = new File(day20Dir, "file0");
+		this.day20Dir = new File(monthDir, "20");
+		this.day20Dir.mkdirs();
+		this.day20File = new File(this.day20Dir, "file0");
 		System.out.println(" -> create " + this.day20File);
 		FileUtils.writeFile(this.day20File, "file0");
 
-		final File day21Dir = new File(monthDir, "21");
-		day21Dir.mkdirs();
-		this.day21File = new File(day21Dir, "file1");
+		this.day21Dir = new File(monthDir, "21");
+		this.day21Dir.mkdirs();
+		this.day21File = new File(this.day21Dir, "file1");
 		System.out.println(" -> create " + this.day21File);
 		FileUtils.writeFile(this.day21File, "file1");
 
-		final File day22Dir = new File(monthDir, "22");
-		day22Dir.mkdirs();
-		this.day22File = new File(day22Dir, "file2");
+		this.day22Dir = new File(monthDir, "22");
+		this.day22Dir.mkdirs();
+		this.day22File = new File(this.day22Dir, "file2");
 		System.out.println(" -> create " + this.day22File);
 		FileUtils.writeFile(this.day22File, "file2");
 	}
@@ -158,6 +162,10 @@ public class TestMyOceanFtpDirectoryCleaner {
 		boolean exceedsRetentionTime = cleaner.exceedsRetentionTime(timestamp);
 		assertTrue("expected " + DATE_FORMAT.format(timestamp.getTime()) + " to _not_ exceed retention time of "
 				+ config.getRetentionTimeInDays() + " days", !exceedsRetentionTime);
+
+		// looks like LocalDateTime.now() in MyOceanFtpDirectoryCleaner.exceedsRetentionTime() is sometimes the same if called in short succession
+		// to make sure this does not happen in this test we just wait some time, in real world execution this doesn't matter
+		Thread.sleep(500);
 
 		config.setRetentionTimeInDays(0);
 		System.out.println("using config: " + config);
@@ -191,7 +199,7 @@ public class TestMyOceanFtpDirectoryCleaner {
 	}
 
 	@Test
-	public final void testOutboxCleaner_deleteAllFiles() throws Exception {
+	public final void testOutboxCleaner_deleteAllFilesAndDirectories() throws Exception {
 		this.checkFilesExist();
 
 		final DirectoryCleanerProperties config = new DirectoryCleanerProperties();
@@ -209,6 +217,7 @@ public class TestMyOceanFtpDirectoryCleaner {
 		cleaner.cleanDirectories();
 
 		this.checkFilesDontExist();
+		this.checkDirectoriesDontExist();
 	}
 
 	// --------------------------------------------------------------------------
@@ -229,6 +238,15 @@ public class TestMyOceanFtpDirectoryCleaner {
 				null != this.day21File && !this.day21File.exists());
 		assertTrue("file " + ((null != this.day22File) ? this.day22File : "") + " must not exist",
 				null != this.day22File && !this.day22File.exists());
+	}
+
+	private final void checkDirectoriesDontExist() {
+		assertTrue("directory " + ((null != this.day20Dir) ? this.day20Dir : "") + " must not exist",
+				null != this.day20Dir && !this.day20Dir.exists());
+		assertTrue("directory " + ((null != this.day21Dir) ? this.day21Dir : "") + " must not exist",
+				null != this.day21Dir && !this.day21Dir.exists());
+		assertTrue("directory " + ((null != this.day22Dir) ? this.day22Dir : "") + " must not exist",
+				null != this.day22Dir && !this.day22Dir.exists());
 	}
 
 }
