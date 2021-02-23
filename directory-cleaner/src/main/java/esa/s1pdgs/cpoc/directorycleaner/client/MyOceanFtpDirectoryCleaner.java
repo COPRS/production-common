@@ -146,10 +146,10 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 			startPath = "/";
 		}
 
-		this.cleanRecursively(ftpClient, startPath);
+		this.cleanRecursively(ftpClient, startPath, startPath);
 	}
 
-	protected void cleanRecursively(final FTPClient ftpClient, final String currentDirectory) throws IOException {
+	protected void cleanRecursively(final FTPClient ftpClient, final String startPath, final String currentDirectory) throws IOException {
 		// move down the directory structure (depth-first)
 		final FTPFile[] subdirectories = ftpClient.listDirectories(currentDirectory);
 		for (final FTPFile subDir : ArrayUtil.nullToEmpty(subdirectories)) {
@@ -159,12 +159,13 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 			assertNotNull(subDirPath, "error assembling path for sub directory " + subDirName + " for: " + this.config);
 
 			// dig deeper
-			this.cleanRecursively(ftpClient, subDirPath.toString());
+			this.cleanRecursively(ftpClient, startPath, subDirPath.toString());
 		}
 
-		// delete old files and old empty directories
 		this.deleteOldFilesFromDirectory(ftpClient, currentDirectory);
-		this.deleteOldAndEmptyDirectory(ftpClient, currentDirectory);
+		if (!startPath.equals(currentDirectory)) {
+			this.deleteOldAndEmptyDirectory(ftpClient, currentDirectory);
+		}
 	}
 
 	protected void deleteOldFilesFromDirectory(final FTPClient ftpClient, final String directoryPath) throws IOException {
