@@ -190,6 +190,34 @@ public class TestMyOceanFtpDirectoryCleaner {
 		this.checkFilesExist();
 	}
 
+	@Test
+	public final void testOutboxCleaner_deleteAllFiles() throws Exception {
+		this.checkFilesExist();
+
+		final DirectoryCleanerProperties config = new DirectoryCleanerProperties();
+		config.setProtocol(Protocol.FTP);
+		config.setHostname("localhost");
+		config.setPort(PORT);
+		config.setUsername(USER);
+		config.setPassword(PASS);
+		config.setPath(TestMyOceanFtpDirectoryCleaner.rootDir.getPath());
+		config.setImplicitSsl(false);
+		config.setFtpPasv("false");
+		config.setRetentionTimeInDays(0);
+		System.out.println("using config: " + config);
+
+		//		System.out.println("CHECK");
+		//		Thread.sleep(30000);
+
+		final MyOceanFtpDirectoryCleaner cleaner = new MyOceanFtpDirectoryCleaner(config);
+		cleaner.cleanDirectories();
+
+		this.checkFilesDontExist();
+
+		//Thread.sleep(30000);
+		//System.out.println("END");
+	}
+
 	// --------------------------------------------------------------------------
 
 	private final void checkFilesExist() {
