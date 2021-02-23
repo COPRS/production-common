@@ -191,11 +191,11 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 			if (this.exceedsRetentionTime(timestamp)) {
 				DATE_FORMAT.setTimeZone(timestamp.getTimeZone());
 				this.logger.debug("Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
-						file.getName(), DATE_FORMAT.format(timestamp), this.config.getRetentionTimeInDays(), this.config);
+						file.getName(), DATE_FORMAT.format(timestamp.getTime()), this.config.getRetentionTimeInDays(), this.config);
 				final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MyOceanCleanerFileRemoval");
 				reporting.begin(new ReportingMessage(
 						"Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
-						file.getName(), DATE_FORMAT.format(timestamp), this.config.getRetentionTimeInDays(), this.config));
+						file.getName(), DATE_FORMAT.format(timestamp.getTime()), this.config.getRetentionTimeInDays(), this.config));
 
 				final String fileName = file.getName();
 				if (null == fileName) {

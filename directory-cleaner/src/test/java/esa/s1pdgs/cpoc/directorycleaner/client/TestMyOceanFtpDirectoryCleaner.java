@@ -110,7 +110,7 @@ public class TestMyOceanFtpDirectoryCleaner {
 	public final void setUp() throws IOException, InternalErrorException {
 		System.out.println("setup (test level) ...");
 
-		final File yearDir = new File(rootDir, "2021");
+		final File yearDir = new File(userDir, "2021");
 		final File monthDir = new File(yearDir, "02");
 
 		final File day20Dir = new File(monthDir, "20");
@@ -135,8 +135,8 @@ public class TestMyOceanFtpDirectoryCleaner {
 	@After
 	public final void tearDown() {
 		System.out.println("tear down (test level) ...");
-		for (final String path : ArrayUtil.nullToEmpty(rootDir.list())) {
-			final File file = new File(rootDir, path);
+		for (final String path : ArrayUtil.nullToEmpty(userDir.list())) {
+			final File file = new File(userDir, path);
 
 			if (!userDir.equals(file)) {
 				System.out.println(" -> delete " + file.getPath());
@@ -178,7 +178,7 @@ public class TestMyOceanFtpDirectoryCleaner {
 		config.setPort(PORT);
 		config.setUsername(USER);
 		config.setPassword(PASS);
-		config.setPath(TestMyOceanFtpDirectoryCleaner.rootDir.getPath());
+		config.setPath(userDir.getPath());
 		config.setImplicitSsl(false);
 		config.setFtpPasv("false");
 		config.setRetentionTimeInDays(7);
@@ -200,22 +200,15 @@ public class TestMyOceanFtpDirectoryCleaner {
 		config.setPort(PORT);
 		config.setUsername(USER);
 		config.setPassword(PASS);
-		config.setPath(TestMyOceanFtpDirectoryCleaner.rootDir.getPath());
 		config.setImplicitSsl(false);
 		config.setFtpPasv("false");
 		config.setRetentionTimeInDays(0);
 		System.out.println("using config: " + config);
 
-		//		System.out.println("CHECK");
-		//		Thread.sleep(30000);
-
 		final MyOceanFtpDirectoryCleaner cleaner = new MyOceanFtpDirectoryCleaner(config);
 		cleaner.cleanDirectories();
 
 		this.checkFilesDontExist();
-
-		//Thread.sleep(30000);
-		//System.out.println("END");
 	}
 
 	// --------------------------------------------------------------------------
