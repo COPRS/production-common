@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.ArrayUtil;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.directorycleaner.config.DirectoryCleanerProperties;
 import esa.s1pdgs.cpoc.directorycleaner.config.DirectoryCleanerProperties.Protocol;
@@ -44,6 +45,8 @@ public class TestMyOceanFtpDirectoryCleaner {
 
 	@BeforeClass
 	public static void setupClass() throws Exception {
+		System.out.println("setup (class level) ...");
+
 		rootDir = Files.createTempDirectory("test_ftp_server_").toFile();
 		rootDir.deleteOnExit();
 
@@ -69,6 +72,7 @@ public class TestMyOceanFtpDirectoryCleaner {
 		user.setPassword(PASS);
 		user.setHomeDirectory(userDir.getPath());
 		user.setEnabled(true);
+		System.out.println(" -> create user directory: " + userDir.getPath());
 		userDir.mkdirs();
 
 		final String prefix = "ftpserver.user." + user.getName();
@@ -80,23 +84,30 @@ public class TestMyOceanFtpDirectoryCleaner {
 
 		final String configString = String.format(template, user.getHomeDirectory(), user.getPassword());
 
+		System.out.println(" -> write content to file " + userPropsFile.getPath() + ": " + configString);
 		FileUtils.writeFile(userPropsFile, configString);
 		userFactory.setFile(userPropsFile);
 		ftpServerFactory.setUserManager(userFactory.createUserManager());
 
 		ftpServer = ftpServerFactory.createServer();
+		System.out.println(" -> start ftp server ...");
 		ftpServer.start();
 	}
 
 	@AfterClass
 	public static void tearDownClass() {
+		System.out.println("tear down (class level) ...");
+
+		System.out.println(" -> stop ftp server ...");
 		ftpServer.stop();
+
+		System.out.println(" -> delete root dir " + rootDir.getPath() + " ...");
 		FileUtils.delete(rootDir.getPath());
 	}
 
 	@Before
 	public final void setUp() throws IOException, InternalErrorException {
-		System.out.println("creating myocean directory structure ...");
+		System.out.println("setup (test level) ...");
 
 		final File yearDir = new File(rootDir, "2021");
 		final File monthDir = new File(yearDir, "02");
@@ -104,25 +115,33 @@ public class TestMyOceanFtpDirectoryCleaner {
 		final File day20Dir = new File(monthDir, "20");
 		day20Dir.mkdirs();
 		this.day20File = new File(day20Dir, "file0");
+		System.out.println(" -> create " + this.day20File);
 		FileUtils.writeFile(this.day20File, "file0");
-		System.out.println(" -> " + this.day20File);
 
 		final File day21Dir = new File(monthDir, "21");
 		day21Dir.mkdirs();
 		this.day21File = new File(day21Dir, "file1");
+		System.out.println(" -> create " + this.day21File);
 		FileUtils.writeFile(this.day21File, "file1");
-		System.out.println(" -> " + this.day21File);
 
 		final File day22Dir = new File(monthDir, "22");
 		day22Dir.mkdirs();
 		this.day22File = new File(day22Dir, "file2");
+		System.out.println(" -> create " + this.day22File);
 		FileUtils.writeFile(this.day22File, "file2");
-		System.out.println(" -> " + this.day22File);
 	}
 
 	@After
 	public final void tearDown() {
-		//
+		System.out.println("tear down (test level) ...");
+		for (final String path : ArrayUtil.nullToEmpty(rootDir.list())) {
+			final File file = new File(rootDir, path);
+
+			if (!userDir.equals(file)) {
+				System.out.println(" -> delete " + file.getPath());
+				FileUtils.delete(file.getPath());
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------
