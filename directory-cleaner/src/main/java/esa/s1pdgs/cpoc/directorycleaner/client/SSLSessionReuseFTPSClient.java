@@ -44,7 +44,7 @@ public class SSLSessionReuseFTPSClient extends FTPSClient {
                     throw new IOException(e);
                 }
             } else {
-                throw new IOException("Invalid SSL Session");
+                //throw new IOException("Invalid SSL Session");
             }
         }
     }

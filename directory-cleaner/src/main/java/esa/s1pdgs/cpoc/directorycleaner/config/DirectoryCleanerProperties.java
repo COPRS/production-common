@@ -29,7 +29,7 @@ public class DirectoryCleanerProperties {
 	private String hostname = null;
 	private Protocol protocol = Protocol.FTP;
 	private int port = -1; // --> not defined
-	private boolean implicitSsl = true;
+	private boolean implicitSsl = false;
 	private boolean ftpPassiveMode = false;
 	private String username = null;
 	private String password = null;
