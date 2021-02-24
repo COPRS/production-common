@@ -5,6 +5,9 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
@@ -14,6 +17,8 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class ProductServiceImpl implements ProductService {
+
+	private static final Logger LOG = LoggerFactory.getLogger(ProductServiceImpl.class);
 
 	private final ObsClient obsClient;
 	private final boolean bufferInput;
@@ -61,11 +66,16 @@ public class ProductServiceImpl implements ProductService {
 	private void checkExistingInObs(final ObsAdapter obsAdapter, final IngestionJob ingestion) {
 		final String obsKey = obsKeyFor(ingestion);
 
+		//returns -1 if it is not in OBS
 		long size = obsAdapter.sizeOf(ingestion.getProductFamily(), obsKey);
 
 		if (size == ingestion.getProductSizeByte()) {
 			throw new RuntimeException(
 					String.format("File %s is already in obs and hase same size, aborting ingestion", obsKey));
+		}
+
+		if(size > 0) {
+			LOG.info("file {} has new size {}, will overwrite existing one with size {}", obsKey, ingestion.getProductSizeByte(), size);
 		}
 	}
 

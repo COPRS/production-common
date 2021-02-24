@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.SardineRuntimeException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
@@ -77,13 +76,13 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	public void initService() {
 		if (properties.getPollingIntervalMs() > 0) {
 			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<IngestionJob>(mqiClient, ProductCategory.INGESTION, this, messageFilter,
+			service.execute(new MqiConsumer<>(mqiClient, ProductCategory.INGESTION, this, messageFilter,
 					properties.getPollingIntervalMs(), 0L, appStatus));
 		}
 	}
 
 	@Override
-	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IngestionJob> message) throws Exception {
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IngestionJob> message) {
 		final IngestionJob ingestion = message.getBody();
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(ingestion.getUid())
@@ -133,7 +132,7 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	}
 
 	final MqiPublishingJob<IngestionEvent> publish(final List<Product<IngestionEvent>> products,
-			final GenericMessageDto<IngestionJob> message, final UUID reportingId) throws AbstractCodedException {
+			final GenericMessageDto<IngestionJob> message, final UUID reportingId) {
 		final List<GenericPublicationMessageDto<? extends AbstractMessage>> results = new ArrayList<>();
 		for (final Product<IngestionEvent> product : products) {
 			final IngestionEvent event = product.getDto();
@@ -146,6 +145,6 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			LOG.info("publishing : {}", result);
 			results.add(result);
 		}
-		return new MqiPublishingJob<IngestionEvent>(results);
+		return new MqiPublishingJob<>(results);
 	}
 }
