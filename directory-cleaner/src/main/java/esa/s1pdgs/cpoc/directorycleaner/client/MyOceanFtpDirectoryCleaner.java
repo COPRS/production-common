@@ -146,26 +146,25 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 			startPath = "/";
 		}
 
-		this.cleanRecursively(ftpClient, startPath, startPath);
+		this.cleanRecursively(ftpClient, startPath, null);
 	}
 
-	protected void cleanRecursively(final FTPClient ftpClient, final String startPath, final String currentDirectory) throws IOException {
+	protected void cleanRecursively(final FTPClient ftpClient, final String currentDirectoryPath, final FTPFile currentDirectory)
+			throws IOException {
 		// move down the directory structure (depth-first)
-		final FTPFile[] subdirectories = ftpClient.listDirectories(currentDirectory);
+		final FTPFile[] subdirectories = ftpClient.listDirectories(currentDirectoryPath);
 		for (final FTPFile subDir : ArrayUtil.nullToEmpty(subdirectories)) {
 			final String subDirName = subDir.getName();
 			assertNotNull(subDirName, "error obtaining name of sub directory from: " + this.config);
-			final Path subDirPath = Paths.get(currentDirectory, subDirName);
+			final Path subDirPath = Paths.get(currentDirectoryPath, subDirName);
 			assertNotNull(subDirPath, "error assembling path for sub directory " + subDirName + " for: " + this.config);
 
 			// dig deeper
-			this.cleanRecursively(ftpClient, startPath, subDirPath.toString());
+			this.cleanRecursively(ftpClient, subDirPath.toString(), subDir);
 		}
 
-		this.deleteOldFilesFromDirectory(ftpClient, currentDirectory);
-		if (!startPath.equals(currentDirectory)) {
-			this.deleteOldAndEmptyDirectory(ftpClient, currentDirectory);
-		}
+		this.deleteOldFilesFromDirectory(ftpClient, currentDirectoryPath);
+		this.deleteOldAndEmptyDirectory(ftpClient, currentDirectoryPath, currentDirectory);
 	}
 
 	protected void deleteOldFilesFromDirectory(final FTPClient ftpClient, final String directoryPath) throws IOException {
@@ -222,16 +221,13 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 		}
 	}
 
-	protected void deleteOldAndEmptyDirectory(final FTPClient ftpClient, final String directoryPath) throws IOException {
-		final FTPFile directory = ftpClient.mlistFile(directoryPath);
-
-		if (null == directory) {
-			this.logger.warn("omitting directory removal check because wasn't able to obtain directory '"
-					+ directoryPath + "' from: " + this.config);
+	protected void deleteOldAndEmptyDirectory(final FTPClient ftpClient, final String directoryPath, final FTPFile currentDirectory)
+			throws IOException {
+		if (null == currentDirectory) {
 			return;
 		}
 
-		final Calendar timestamp = directory.getTimestamp();
+		final Calendar timestamp = currentDirectory.getTimestamp();
 		if (null == timestamp) {
 			this.logger.info(String.format(
 					"omitting directory removal check because wasn't able to obtain timestamp from directory %s: %s",
