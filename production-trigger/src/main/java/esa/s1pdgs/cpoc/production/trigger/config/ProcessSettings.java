@@ -46,6 +46,8 @@ public class ProcessSettings {
     
 	private String seaCoverageCheckPattern = "$a"; // per default, don't match anything
 	
+	private String l0EwSlcCheckPattern = "$a";
+	
     private String blacklistPattern;
     
     private long fixedDelayMs;
@@ -84,6 +86,14 @@ public class ProcessSettings {
 
 	public void setSeaCoverageCheckPattern(final String seaCoverageCheckPattern) {
 		this.seaCoverageCheckPattern = seaCoverageCheckPattern;
+	}
+	
+	public String getL0EwSlcCheckPattern() {
+		return l0EwSlcCheckPattern;
+	}
+
+	public void setL0EwSlcCheckPattern(String l0EwSlcCheckPattern) {
+		this.l0EwSlcCheckPattern = l0EwSlcCheckPattern;
 	}
 
     public String getBlacklistPattern() {
@@ -125,4 +135,5 @@ public class ProcessSettings {
 	public void setProductType(final String productType) {
 		this.productType = productType;
 	}
+
 }

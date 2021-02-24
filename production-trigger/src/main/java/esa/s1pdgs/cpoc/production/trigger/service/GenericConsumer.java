@@ -36,6 +36,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.production.trigger.config.ProcessSettings;
 import esa.s1pdgs.cpoc.production.trigger.report.DispatchReportInput;
+import esa.s1pdgs.cpoc.production.trigger.report.L0EWSliceMaskCheckReportingOutput;
 import esa.s1pdgs.cpoc.production.trigger.report.SeaCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.production.trigger.taskTableMapping.TasktableMapper;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -51,7 +52,8 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
     private final List<MessageFilter> messageFilter;
     private final AppStatus appStatus;    
     private final ErrorRepoAppender errorRepoAppender;    
-    private final Pattern seaCoverageCheckPattern;    
+    private final Pattern seaCoverageCheckPattern;
+    private final Pattern l0EwSlcCheckPattern;
     private final MetadataClient metadataClient;
     private final TasktableMapper taskTableMapper;
     
@@ -70,6 +72,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         this.appStatus = appStatus;
         this.errorRepoAppender = errorRepoAppender;
 		this.seaCoverageCheckPattern = Pattern.compile(processSettings.getSeaCoverageCheckPattern());
+		this.l0EwSlcCheckPattern = Pattern.compile(processSettings.getL0EwSlcCheckPattern());
 		this.metadataClient = metadataClient;
 		this.taskTableMapper = taskTableMapper;
     }
@@ -257,7 +260,12 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         final String productName = event.getProductName();
         final ProductFamily family = event.getProductFamily();
 		
-        // S1PRO-483: check for matching products if they are over sea. If not, simply skip the
+        return seaCoverageCheck(reporting, productName, family); //&& l0EwSliceMaskCheck(reporting, productName, family);
+	}
+
+	private boolean seaCoverageCheck(final ReportingFactory reporting, final String productName,
+			final ProductFamily family) throws Exception {
+		// S1PRO-483: check for matching products if they are over sea. If not, simply skip the
         // production
 		final Reporting seaReport = reporting.newReporting("SeaCoverageCheck");
         try {
@@ -286,5 +294,37 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 			throw e;			
 		}        
         return true;
-	}    
+	}
+	
+	private boolean l0EwSliceMaskCheck(final ReportingFactory reporting, final String productName,
+			final ProductFamily family) throws Exception {
+		// S1PRO-2320: check if EW_SLC products matches a specific mask. If not, simply skip the production
+		final Reporting ewSlcReport = reporting.newReporting("L0EWSliceMaskCheck");
+        try {
+			if (l0EwSlcCheckPattern.matcher(productName).matches()) {   
+				ewSlcReport.begin(
+						ReportingUtils.newFilenameReportingInputFor(family, productName),
+						new ReportingMessage("Checking if L0 EW slice %s is intersecting mask", productName)
+				);	
+				if (!metadataClient.isIntersectingEwSlcMask(family, productName)) {
+					ewSlcReport.end(
+							new L0EWSliceMaskCheckReportingOutput(false), 
+							new ReportingMessage("L0 EW slice %s is not intersecting mask", productName)
+					);
+					LOGGER.warn("Skipping job generation for product {} because it is not intersecting mask", productName);
+			        return false;
+			    }
+				else {
+					ewSlcReport.end(
+							new L0EWSliceMaskCheckReportingOutput(true), 
+							new ReportingMessage("L0 EW slice %s is intersecting mask", productName)
+					);
+				}
+			}
+		} catch (final Exception e) {
+			ewSlcReport.error(new ReportingMessage("L0 EW slice check failed: %s", LogUtils.toString(e)));
+			throw e;			
+		}        
+        return true;
+	}  
 }
