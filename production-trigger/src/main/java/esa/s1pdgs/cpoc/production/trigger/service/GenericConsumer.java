@@ -260,7 +260,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         final String productName = event.getProductName();
         final ProductFamily family = event.getProductFamily();
 		
-        return seaCoverageCheck(reporting, productName, family); //&& l0EwSliceMaskCheck(reporting, productName, family);
+        return seaCoverageCheck(reporting, productName, family) && l0EwSliceMaskCheck(reporting, productName, family);
 	}
 
 	private boolean seaCoverageCheck(final ReportingFactory reporting, final String productName,
