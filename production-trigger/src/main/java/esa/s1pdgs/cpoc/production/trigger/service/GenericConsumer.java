@@ -176,6 +176,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
     ) throws Exception {
         final CatalogEvent event = mqiMessage.getBody();
         final String productName = event.getProductName();
+        final ProductFamily family = event.getProductFamily();
         
 		LOGGER.debug("Handling consumption of product {}", productName);
 
@@ -184,14 +185,16 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
         		new ReportingMessage("Received CatalogEvent for %s", productName)
         );  
         
-        if (isAllowed(event, reporting)) {                   
+        if (isAllowed(productName, family, reporting)) {                   
             final List<String> taskTableNames = taskTableMapper.tasktableFor(event);
             final List<GenericPublicationMessageDto<? extends AbstractMessage>> messageDtos = new ArrayList<>(taskTableNames.size());
             
             for (final String taskTableName: taskTableNames)
             {
-            	LOGGER.debug("Tasktable for {} is {}", productName, taskTableName);
-            	messageDtos.add(dispatch(mqiMessage,reporting, taskTableName));
+            	if (l0EwSliceMaskCheck(reporting, productName, family, taskTableName)) {
+            		LOGGER.debug("Tasktable for {} is {}", productName, taskTableName);
+            		messageDtos.add(dispatch(mqiMessage,reporting, taskTableName));
+            	}
             }               
             LOGGER.info("Dispatching product {}", productName);
             return new MqiPublishingJob<IpfPreparationJob>(messageDtos);          
@@ -256,11 +259,8 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		return messageDto;
 	}	
 
-	private final boolean isAllowed(final CatalogEvent event, final ReportingFactory reporting) throws Exception {
-        final String productName = event.getProductName();
-        final ProductFamily family = event.getProductFamily();
-		
-        return seaCoverageCheck(reporting, productName, family) && l0EwSliceMaskCheck(reporting, productName, family);
+	private final boolean isAllowed(final String productName, final ProductFamily family, final ReportingFactory reporting) throws Exception {
+        return seaCoverageCheck(reporting, productName, family);
 	}
 
 	private boolean seaCoverageCheck(final ReportingFactory reporting, final String productName,
@@ -297,11 +297,11 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 	}
 	
 	private boolean l0EwSliceMaskCheck(final ReportingFactory reporting, final String productName,
-			final ProductFamily family) throws Exception {
+			final ProductFamily family, final String taskTableName) throws Exception {
 		// S1PRO-2320: check if EW_SLC products matches a specific mask. If not, simply skip the production
 		final Reporting ewSlcReport = reporting.newReporting("L0EWSliceMaskCheck");
         try {
-			if (l0EwSlcCheckPattern.matcher(productName).matches()) {   
+			if (l0EwSlcCheckPattern.matcher(productName).matches() && taskTableName.contains("EW_RAW__0_SLC")) { 
 				ewSlcReport.begin(
 						ReportingUtils.newFilenameReportingInputFor(family, productName),
 						new ReportingMessage("Checking if L0 EW slice %s is intersecting mask", productName)
