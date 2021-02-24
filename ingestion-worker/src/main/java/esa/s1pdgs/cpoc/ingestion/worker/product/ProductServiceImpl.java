@@ -71,11 +71,11 @@ public class ProductServiceImpl implements ProductService {
 
 		if (size == ingestion.getProductSizeByte()) {
 			throw new RuntimeException(
-					String.format("File %s is already in obs and hase same size, aborting ingestion", obsKey));
+					String.format("File %s is already in obs and has the same size, aborting ingestion", obsKey));
 		}
 
 		if(size > 0) {
-			LOG.info("file {} has new size {}, will overwrite existing one with size {}", obsKey, ingestion.getProductSizeByte(), size);
+			LOG.info("File {} has new size {}, will overwrite existing one with size {}", obsKey, ingestion.getProductSizeByte(), size);
 		}
 	}
 
