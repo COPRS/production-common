@@ -169,7 +169,7 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 	}
 
 	protected void deleteOldFilesFromDirectory(final FTPClient ftpClient, final String directoryPath) throws IOException {
-		final FTPFile[] files = ftpClient.listFiles(directoryPath);
+		final FTPFile[] files = ftpClient.listFiles(directoryPath, FTPFile::isFile);
 
 		for (final FTPFile file : ArrayUtil.nullToEmpty(files)) {
 			final Calendar timestamp = file.getTimestamp();
