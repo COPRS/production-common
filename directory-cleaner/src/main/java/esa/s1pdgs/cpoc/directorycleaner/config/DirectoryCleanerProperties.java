@@ -52,8 +52,8 @@ public class DirectoryCleanerProperties {
 		return "FtpConfig [protocol=" + this.protocol + ", path=" + this.path + ", retentionTimeInDays="
 				+ this.retentionTimeInDays + ", username=" + this.username + ", passw=<NOT_SHOWN>, keyFile="
 				+ this.keyFile + ", hostname=" + this.hostname + ", port=" + this.port + ", ftpPassiveMode="
-				+ this.ftpPassiveMode + ", keystoreFile=" + this.keystoreFile
-				+ ", keystorePass=<NOT_SHOWN>, truststoreFile=" + this.truststoreFile
+				+ this.ftpPassiveMode + ", keystoreFile=" + (null != this.keystoreFile ? "<NOT_SHOWN>" : null)
+				+ ", keystorePass=<NOT_SHOWN>, truststoreFile=" + (null != this.truststoreFile ? "<NOT_SHOWN>" : null)
 				+ ", truststorePass=<NOT_SHOWN>, implicitSsl=" + this.implicitSsl + "]";
 	}
 
