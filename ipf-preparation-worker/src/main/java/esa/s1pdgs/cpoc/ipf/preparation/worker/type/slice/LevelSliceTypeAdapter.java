@@ -1,48 +1,74 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobPreselectedInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableInputAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
+import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
 public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
+	private static final List<String> AUX_ORB_TYPES = Arrays.asList(
+			"AUX_POE",
+			"AUX_RES",
+			"MPL_ORBPRE"
+	);
+	
 	private final MetadataClient metadataClient;
 	private final Map<String, Float> sliceOverlap;
 	private final Map<String, Float> sliceLength;
 	private final Map<String,String> timelinessMapping;
+	private final Function<TaskTable, InputTimeoutChecker> timeoutCheckerF;
 	
 	public LevelSliceTypeAdapter(
 			final MetadataClient metadataClient,
 			final Map<String, Float> sliceOverlap,
 			final Map<String, Float> sliceLength,
-			final Map<String,String> timelinessMapping
+			final Map<String,String> timelinessMapping,
+			final Function<TaskTable, InputTimeoutChecker> timeoutChecker
 	) {
 		this.metadataClient = metadataClient;
 		this.sliceOverlap = sliceOverlap;
 		this.sliceLength = sliceLength;
 		this.timelinessMapping = timelinessMapping;
+		this.timeoutCheckerF = timeoutChecker;
 	}
 
 	@Override
-	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {	
+	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter) 
+			throws IpfPrepWorkerInputsMissingException {
+		
 		final LevelSliceProduct product = LevelSliceProduct.of(job);
 		
 		// Retrieve instrument configuration id and slice number
@@ -70,10 +96,84 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 		} catch (final MetadataQueryException e) {
 			LOGGER.debug("L0 acn for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), 
 					Exceptions.messageOf(e));
+			
+			// S1PRO-2476: omit querying for AUX_RES & Co. ...
+			return product;
+		}
+		
+		// S1PRO-2476: For AUX_RESORB, POE or PREORB, start-/stop times from ACN shall be used
+		// i.e. the "normal" LatestValCover query will not work. So we are adding these files here and not in AuxQuery
+		final Optional<TaskTableInputAdapter> opt = taskTableAdapter.firstInputContainingOneOf(AUX_ORB_TYPES);
+		
+		if (opt.isPresent()) {
+			
+			final TaskTableInputAdapter ttInput = opt.get();
+			
+			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(job.getProduct());
+			
+			for (final TaskTableInputAlternative alternative : ttInput.getInput().getAlternatives()) {		
+				final SearchMetadataQuery query = taskTableAdapter.metadataSearchQueryFor(alternative);
+								
+				try {
+					final List<SearchMetadata> queryResults = Retries.performWithRetries(
+							() -> metadataClient.search(
+									query,
+									sanitizeDateString(product.getSegmentStartDate()),
+									sanitizeDateString(product.getSegmentStopDate()),
+									productAdapter.getSatelliteId(),
+									productAdapter.getInsConfId(),
+									productAdapter.getProcessMode(),
+									"NONE" // AUX_RES doesn't have a polarisation (i hope)
+							), 
+							"Query " + query, 
+							3, 
+							5000L
+					);
+					
+					final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(
+							taskTableAdapter.taskTable()
+					);					
+					if (!queryResults.isEmpty()) {						
+						final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
+						preselected.setTaskTableInputReference(ttInput.getReference());
+						preselected.setFileType(alternative.getFileType());		
+						preselected.setFileNameType(alternative.getFileNameType().toString());
+						
+						final List<AppDataJobFile> files = new ArrayList<>();
+						for (final SearchMetadata meta : queryResults) {														
+							files.add(new AppDataJobFile(
+									meta.getProductName(), 
+									meta.getKeyObjectStorage(), 
+									meta.getValidityStart(), 
+									meta.getValidityStop(), 
+									meta.getAdditionalProperties()
+							));
+						}
+						preselected.setFiles(files);			
+						product.preselectedInputs(Collections.singletonList(preselected));					
+					}
+					else if (!timeoutChecker.isTimeoutExpiredFor(job, ttInput.getInput())) {
+						throw new IpfPrepWorkerInputsMissingException(
+								Collections.singletonMap(
+										ttInput.getReference() + " is missing", 
+										ttInput.getInput().toLogMessage()
+								)
+						);
+					}
+				} catch (final InterruptedException e) {
+					LOGGER.error(e);
+					throw new IpfPrepWorkerInputsMissingException(Collections.emptyMap());
+				}
+			}			
 		}
 		return product;
 	}
 	
+	private String sanitizeDateString(final String metadataFormat) {
+		return DateUtils.convertToAnotherFormat(metadataFormat, AppDataJobProduct.TIME_FORMATTER,
+				AbstractMetadata.METADATA_DATE_FORMATTER);
+	}
+
 	@Override
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {
 		final LevelSliceProduct product = LevelSliceProduct.of(job);
@@ -97,6 +197,12 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 					)
 			);
 		}
+		
+		// S1PRO-2476: make sure AuxPre/res/poe is there or timeout is reached
+		if (product.preselectedInputs().isEmpty()) {
+			
+		}
+		
 		// if both are there, job creation can proceed
 		LOGGER.info("Found slice {} and ACN {}", product.getSlices(), product.getAcns());
 	}

@@ -4,7 +4,6 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,7 +165,8 @@ public class IpfPreparationWorkerConfiguration {
 						metadataClient, 
 						settings.getTypeOverlap(), 
 						settings.getTypeSliceLength(),
-						settings.getJoborderTimelinessCategoryMapping()
+						settings.getJoborderTimelinessCategoryMapping(),
+						timeoutCheckerFor()
 				);			
 			case S3_L0: case S3_L1: case S3_L2:
 				return new S3TypeAdapter(

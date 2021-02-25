@@ -10,10 +10,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
@@ -21,6 +24,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.converter.TaskTableToJobOrderConverter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils.TaskAndInput;
 import esa.s1pdgs.cpoc.metadata.client.SearchMetadataQuery;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -109,6 +113,29 @@ public class TaskTableAdapter {
 		return QueryUtils.inputsMappedTo(Collections::singletonMap, this).stream()
 				.flatMap(map -> map.entrySet().stream())
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+	
+	public final Optional<TaskTableInputAdapter> firstInputContainingOneOf(final List<String> types) {			
+		for (final AppDataJobTaskInputs taskInputs : QueryUtils.buildInitialInputs(this)) {
+			for (final AppDataJobInput input : taskInputs.getInputs()) {				
+				
+				final Optional<TaskAndInput> optionalTask = QueryUtils
+						.getTaskForReference(input.getTaskTableInputReference(), this);
+				
+				if (!optionalTask.isPresent()) {
+					continue;
+				}
+				final TaskAndInput ti = optionalTask.get();
+				final TaskTableInput ttInput = ti.getInput();
+							
+				for (final TaskTableInputAlternative alternative : ttInput.getAlternatives()) {
+					if (types.contains(alternative.getFileType())) {
+						return Optional.of(new TaskTableInputAdapter(input.getTaskTableInputReference(), ttInput));
+					}
+				}	
+			}
+		}
+		return Optional.empty();
 	}
 	
 	public final JobOrder newJobOrder(final ProcessSettings settings, final ProductMode mode) {
