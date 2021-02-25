@@ -143,7 +143,8 @@ public class AppCatJobService {
 					if (queried != null) {
 						final AppDataJobProduct prod = queried.toProduct();
 						job.setProduct(prod);						
-						job.setAdditionalInputs(queried.overridingInputs());					
+						job.setAdditionalInputs(queried.overridingInputs());
+						job.setPreselectedInputs(queried.preselectedInputs());
 						
 						// dirty workaround for segment and session scenario
 						final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
