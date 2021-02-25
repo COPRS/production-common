@@ -27,7 +27,7 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 	    private final String file;
 	    private final Function<AppDataJobProduct, String> keyFunction;
 	    
-	    private final Map<Pattern, String> routingMap = new LinkedHashMap<>();
+	    private final Map<Pattern, List<String>> routingMap = new LinkedHashMap<>();
 
 		public Factory(
 				final XmlConverter xmlConverter, 
@@ -50,7 +50,9 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
             	final Pattern key = routeKeyPatternOf(route);
             	final String ttName = targetTasktableOf(route);
             	LOGGER.debug("-> adding tasktable route for {} -> {}", key, ttName);
-            	routingMap.put(key, ttName);
+            	final List<String> value = routingMap.getOrDefault(key, new ArrayList<>());
+            	value.add(ttName);
+            	routingMap.put(key, value);
             }
             return new RoutingBasedTasktableMapper(keyFunction, routingMap);
 		}
@@ -84,11 +86,11 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 	private static final Logger LOGGER = LogManager.getLogger(RoutingBasedTasktableMapper.class);
 	
 	private final Function<AppDataJobProduct, String> keyFunction;
-    private final Map<Pattern, String> routingMap;
+    private final Map<Pattern, List<String>> routingMap;
 
 	public RoutingBasedTasktableMapper(
 			final Function<AppDataJobProduct, String> keyFunction,
-			final Map<Pattern, String> routingMap		
+			final Map<Pattern, List<String>> routingMap		
 	) {
 		this.keyFunction = keyFunction;
 		this.routingMap = routingMap;
@@ -101,10 +103,10 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
         LOGGER.debug("Searching tasktable for {}", key);
         final List<String> taskTableHolder = new ArrayList<>();
         
-        for (final Map.Entry<Pattern, String> entry : routingMap.entrySet()) {
+        for (final Map.Entry<Pattern, List<String>> entry : routingMap.entrySet()) {
 			if (entry.getKey().matcher(key).matches()) {	
 				LOGGER.info("Got tasktable {} for {}", entry.getValue(), key);   
-				taskTableHolder.add(entry.getValue());
+				taskTableHolder.addAll(entry.getValue());
 			}
 		}        
         
