@@ -71,6 +71,12 @@ public class AppDataJob {
      */
     private List<AppDataJobTaskInputs> additionalInputs;
 
+	/**
+	 * Inputs preselected by  main input search, which
+	 * should not be queries by AuxQuery any more
+	 */
+	private List<AppDataJobPreselectedInput> preselectedInputs;
+
     /**
      * Generations of the job
      */
@@ -271,7 +277,15 @@ public class AppDataJob {
         this.additionalInputs = additionalInputs;
     }
 
-    /**
+	public List<AppDataJobPreselectedInput> getPreselectedInputs() {
+		return preselectedInputs;
+	}
+
+	public void setPreselectedInputs(List<AppDataJobPreselectedInput> preselectedInputs) {
+		this.preselectedInputs = preselectedInputs;
+	}
+
+	/**
      * @return the generations
      */
     public AppDataJobGeneration getGeneration() {
