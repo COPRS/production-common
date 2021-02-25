@@ -7,6 +7,8 @@ import java.util.Objects;
 public class AppDataJobPreselectedInput {
 
     private String taskTableInputReference;
+    private String fileType;
+    private String fileNameType;
     private List<AppDataJobFile> files;
 
     public AppDataJobPreselectedInput() {
@@ -14,8 +16,10 @@ public class AppDataJobPreselectedInput {
         files = Collections.emptyList();
     }
 
-    public AppDataJobPreselectedInput(String taskTableInputReference, List<AppDataJobFile> files) {
+    public AppDataJobPreselectedInput(final String taskTableInputReference,final String fileType,final String fileNameType,final List<AppDataJobFile> files) {
         this.taskTableInputReference = taskTableInputReference;
+        this.fileType = fileType;
+        this.fileNameType = fileNameType;
         this.files = files;
     }
 
@@ -35,16 +39,35 @@ public class AppDataJobPreselectedInput {
         this.files = files;
     }
 
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getFileNameType() {
+        return fileNameType;
+    }
+
+    public void setFileNameType(String fileNameType) {
+        this.fileNameType = fileNameType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AppDataJobPreselectedInput that = (AppDataJobPreselectedInput) o;
-        return Objects.equals(taskTableInputReference, that.taskTableInputReference) && Objects.equals(files, that.files);
+        return Objects.equals(taskTableInputReference, that.taskTableInputReference)
+                && Objects.equals(fileType, that.fileType)
+                && Objects.equals(fileNameType, that.fileNameType)
+                && Objects.equals(files, that.files);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskTableInputReference, files);
+        return Objects.hash(taskTableInputReference, fileType, fileNameType, files);
     }
 }
