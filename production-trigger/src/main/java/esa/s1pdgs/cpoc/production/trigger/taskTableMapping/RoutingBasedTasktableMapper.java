@@ -48,10 +48,10 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 
             for (final LevelProductsRoute route : routing.getRoutes()) {
             	final Pattern key = routeKeyPatternOf(route);
-            	final String ttName = targetTasktableOf(route);
+            	final List<String> ttName = route.getRouteTo().getTaskTables();
             	LOGGER.debug("-> adding tasktable route for {} -> {}", key, ttName);
             	final List<String> value = routingMap.getOrDefault(key, new ArrayList<>());
-            	value.add(ttName);
+            	value.addAll(ttName);
             	routingMap.put(key, value);
             }
             return new RoutingBasedTasktableMapper(keyFunction, routingMap);
@@ -63,12 +63,6 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 		
 		private final String routeKeyOf(final LevelProductsRoute route) {
 			return route.getRouteFrom().getAcquisition() + "_" + route.getRouteFrom().getSatelliteId();
-		}
-		
-		private final String targetTasktableOf(final LevelProductsRoute route) {
-			final List<String> res = route.getRouteTo().getTaskTables();
-			Assert.isTrue(res.size() == 1, "One tasktable expected");
-			return res.get(0);
 		}
 		
 		private final LevelProductsRouting parse() {
