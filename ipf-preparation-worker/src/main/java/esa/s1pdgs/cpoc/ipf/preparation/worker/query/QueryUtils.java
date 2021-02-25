@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -12,9 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobPreselectedInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
@@ -33,6 +38,8 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
  *
  */
 public class QueryUtils {
+
+	private static final Logger LOG = LoggerFactory.getLogger(QueryUtils.class);
 
 	/**
 	 * Creates a list of alternatives for the given list of inputs
@@ -62,9 +69,8 @@ public class QueryUtils {
 	 * Creates a list of AppDataJobTaskInputs used in AppDataJobs. The list is based
 	 * on the specific tasktable accessible through the TaskTableAdapter.
 	 * 
-	 * @param mode      ProductMode, used to filter not used inputs of the TaskTable
 	 * @param ttAdapter Adapter to access the contents of the TaskTable
-	 * @return
+	 * @return list of all inputs generated from the task table
 	 */
 	public static List<AppDataJobTaskInputs> buildInitialInputs(final TaskTableAdapter ttAdapter) {
 		return taskTableTasksAndInputsMappedTo(
@@ -75,6 +81,41 @@ public class QueryUtils {
 	}
 
 	/**
+	 *
+	 * @param originalInputs originalInputs inputs with empty results yet
+	 * @param preselectedInputs preselected inputs coming from main input search
+	 * @return complete of inputs (with and without preselected result)
+	 */
+	public static List<AppDataJobTaskInputs> includingPreselected(final List<AppDataJobTaskInputs> originalInputs, final List<AppDataJobPreselectedInput> preselectedInputs) {
+		if(preselectedInputs == null) {
+			return originalInputs;
+		}
+
+		final Map<String, AppDataJobPreselectedInput> mappedByTaskInputReference
+				= preselectedInputs.stream().collect(toMap(AppDataJobPreselectedInput::getTaskTableInputReference, input -> input));
+
+		return originalInputs.stream().map(taskInputs -> maybeReplace(taskInputs, mappedByTaskInputReference)).collect(toList());
+	}
+
+	private static AppDataJobTaskInputs maybeReplace(final AppDataJobTaskInputs original, final Map<String, AppDataJobPreselectedInput> preselectedInputs) {
+		List<AppDataJobInput> inputsIncludingPreselectedInputs = original.getInputs().stream().map(input -> maybeReplace(input, preselectedInputs)).collect(toList());
+
+		return new AppDataJobTaskInputs(original.getTaskName(), original.getTaskVersion(), inputsIncludingPreselectedInputs);
+	}
+
+	private static AppDataJobInput maybeReplace(final AppDataJobInput input, final Map<String, AppDataJobPreselectedInput> preselectedInputs) {
+		if (preselectedInputs.containsKey(input.getTaskTableInputReference())) {
+
+			final String preseletedFiles = preselectedInputs.get(input.getTaskTableInputReference()).getFiles().stream().map(AppDataJobFile::getFilename).collect(joining(", "));
+			LOG.debug("replacing input {} {} with preselected results {}", input.getTaskTableInputReference(), input.getFileType(), preseletedFiles);
+
+			return new AppDataJobInput(input.getTaskTableInputReference(), input.getFileType(), input.getFileNameType(), input.isMandatory(), preselectedInputs.get(input.getTaskTableInputReference()).getFiles());
+		}
+
+		return input;
+	}
+
+	/**
 	 * Creates a list of type T of length number of inputs in tasktable. The
 	 * inputMapFunction is used to create the entries of the list
 	 * 
@@ -82,8 +123,6 @@ public class QueryUtils {
 	 *                         the list used as first parameter in taskMapFunction
 	 * @param inputMapFunction creates entries for list
 	 * @param taskTableAdapter adapter to access contents of tasktable
-	 * @param mode             specifies acceptable mode of tasktable inputs
-	 *                         {@link #modeOfInputOrReference}
 	 * @return list (length = number of inputs in tasks of tasktable) with entries
 	 *         based on inputMapFunction
 	 */
@@ -183,8 +222,6 @@ public class QueryUtils {
 	 * @param inputMapFunction creates entries for list used as first parameter of
 	 *                         taskMapFunction (size = number of inputs for task in
 	 *                         tasktable)
-	 * @param mode             specifies acceptable mode of tasktable inputs
-	 *                         {@link #modeOfInputOrReference}
 	 * @param ttAdapter        adapter to access contents of tasktable
 	 * @return list (length = number of tasks in tasktable) with entries based on
 	 *         taskMapFunction
