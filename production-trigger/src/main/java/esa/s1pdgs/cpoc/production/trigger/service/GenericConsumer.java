@@ -301,7 +301,7 @@ public class GenericConsumer implements MqiListener<CatalogEvent> {
 		// S1PRO-2320: check if EW_SLC products matches a specific mask. If not, simply skip the production
 		final Reporting ewSlcReport = reporting.newReporting("L0EWSliceMaskCheck");
         try {
-			if (l0EwSlcCheckPattern.matcher(productName).matches() && taskTableName.contains("EW_RAW__0_SLC")) { 
+			if (l0EwSlcCheckPattern.matcher(productName).matches() && taskTableName.contains(processSettings.getL0EwSlcTaskTableName())) { 
 				ewSlcReport.begin(
 						ReportingUtils.newFilenameReportingInputFor(family, productName),
 						new ReportingMessage("Checking if L0 EW slice %s is intersecting mask", productName)
