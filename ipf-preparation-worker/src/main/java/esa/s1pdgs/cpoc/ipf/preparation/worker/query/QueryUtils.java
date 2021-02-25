@@ -106,17 +106,24 @@ public class QueryUtils {
 	private static AppDataJobInput maybeReplace(final AppDataJobInput input, final Map<String, AppDataJobPreselectedInput> preselectedInputs) {
 		if (preselectedInputs.containsKey(input.getTaskTableInputReference())) {
 
-			final String preseletedFiles = preselectedInputs.get(input.getTaskTableInputReference()).getFiles().stream().map(AppDataJobFile::getFilename).collect(joining(", "));
-			LOG.debug("replacing input {} {} with preselected results {}", input.getTaskTableInputReference(), input.getFileType(), preseletedFiles);
+			final AppDataJobPreselectedInput preselectedInput = preselectedInputs.get(input.getTaskTableInputReference());
+			final String preselectedFiles = preselectedInput.getFiles().stream().map(AppDataJobFile::getFilename).collect(joining(", "));
 
-			return new AppDataJobInput(input.getTaskTableInputReference(), input.getFileType(), input.getFileNameType(), input.isMandatory(), preselectedInputs.get(input.getTaskTableInputReference()).getFiles());
+			LOG.debug("replacing input {} {} with preselected results {}", input.getTaskTableInputReference(), input.getFileType(), preselectedFiles);
+
+			return new AppDataJobInput(
+					input.getTaskTableInputReference(),
+					preselectedInput.getFileType(),
+					preselectedInput.getFileNameType(),
+					input.isMandatory(),
+					preselectedInput.getFiles());
 		}
 
 		return input;
 	}
 
 	/**
-	 * Creates a list of type T of length number of inputs in tasktable. The
+	 * Creates a list of type T of length number of inputs in taskTable. The
 	 * inputMapFunction is used to create the entries of the list
 	 * 
 	 * @param <T>              result type of inputMapFunction, type of entries for
