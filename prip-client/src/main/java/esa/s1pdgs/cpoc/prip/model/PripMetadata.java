@@ -123,7 +123,7 @@ public class PripMetadata {
 	
 	private ProductionType productionType;
 	
-	private GeoShapePolygon footprint;
+	private PripGeoShape footprint;
 	
 	private Map<String, Object> attributes;
 
@@ -222,11 +222,11 @@ public class PripMetadata {
 		this.productionType = productionType;
 	}
 	
-	public GeoShapePolygon getFootprint() {
+	public PripGeoShape getFootprint() {
 		return footprint;
 	}
 
-	public void setFootprint(GeoShapePolygon footprint) {
+	public void setFootprint(PripGeoShape footprint) {
 		this.footprint = footprint;
 	}
 	
@@ -245,7 +245,7 @@ public class PripMetadata {
 			// FIXME: Find a generic solution to support both String and JSON sub elements
 			if (field.fieldName.equals(FIELD_NAMES.FOOTPRINT.fieldName)) {
 				if (null != getFootprint()) {
-					GeoShapePolygon footprint = (GeoShapePolygon)field.toJsonAccessor().apply(this);
+					PripGeoShape footprint = (PripGeoShape)field.toJsonAccessor().apply(this);
 					json.put(field.fieldName(), footprint.toJson());
 				} else {
 					json.put(field.fieldName(), (JSONObject)null);

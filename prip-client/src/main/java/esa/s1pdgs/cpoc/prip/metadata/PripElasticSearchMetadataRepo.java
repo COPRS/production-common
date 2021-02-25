@@ -46,6 +46,7 @@ import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
@@ -469,7 +470,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 		pm.setChecksums(checksumList);
 
-		pm.setFootprint(this.mapToGeoShapePolygon(sourceAsMap));
+		pm.setFootprint(this.mapToPripGeoShape(sourceAsMap));
 
 		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
 				.collect(Collectors.toMap(Entry::getKey, s -> {
@@ -493,34 +494,48 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		return pm;
 	}
 
-	private GeoShapePolygon mapToGeoShapePolygon(Map<String, Object> sourceAsMap) {
+	@SuppressWarnings("unchecked")
+	private PripGeoShape mapToPripGeoShape(Map<String, Object> sourceAsMap) {
 		final Map<String, Object> footprintJson = (Map<String, Object>) sourceAsMap
 				.get(PripMetadata.FIELD_NAMES.FOOTPRINT.fieldName());
 
 		if (null != footprintJson && !footprintJson.isEmpty()) {
 			final String footprintGeoshapeType = (String) footprintJson.get(PripGeoShape.FIELD_NAMES.TYPE.fieldName());
-			if (!GeoShapeType.POLYGON.wktName().equals(footprintGeoshapeType)) {
+			
+			if (GeoShapeType.POLYGON.wktName().equalsIgnoreCase(footprintGeoshapeType)) {
+				final List<Object> footprintCoordinatesOuterArray = (List<Object>) footprintJson
+						.get(PripGeoShape.FIELD_NAMES.COORDINATES.fieldName());
+				final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray.get(0);
+
+				final List<PripGeoCoordinate> pripGeoCoordinates = new ArrayList<>();
+				for (final Object coordPair : Objects.requireNonNull(footprintCoordinatesInnerArray)) {
+					final List<Number> coords = (List<Number>) coordPair;
+					final double lon = coords.get(0).doubleValue();
+					final double lat = coords.get(1).doubleValue();
+					pripGeoCoordinates.add(new PripGeoCoordinate(lon, lat));
+				}
+				return new GeoShapePolygon(pripGeoCoordinates);
+			} else if (GeoShapeType.LINESTRING.wktName().equalsIgnoreCase(footprintGeoshapeType)) {
+				final List<Object> footprintCoordinatesOuterArray = (List<Object>) footprintJson
+						.get(PripGeoShape.FIELD_NAMES.COORDINATES.fieldName());
+				final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray.get(0);
+
+				final List<PripGeoCoordinate> pripGeoCoordinates = new ArrayList<>();
+				for (final Object coordPair : Objects.requireNonNull(footprintCoordinatesInnerArray)) {
+					final List<Number> coords = (List<Number>) coordPair;
+					final double lon = coords.get(0).doubleValue();
+					final double lat = coords.get(1).doubleValue();
+					pripGeoCoordinates.add(new PripGeoCoordinate(lon, lat));
+				}
+				return new GeoShapeLineString(pripGeoCoordinates);
+			} else {
 				throw new IllegalArgumentException(
 						"PRIP metadata attribute value of " + PripMetadata.FIELD_NAMES.FOOTPRINT.fieldName() + "."
 								+ PripGeoShape.FIELD_NAMES.TYPE.fieldName() + " must be '"
-								+ GeoShapeType.POLYGON.wktName() + "' but is '" + footprintGeoshapeType + "'!");
+								+ GeoShapeType.POLYGON.wktName() + "' or '" + 
+										GeoShapeType.LINESTRING.wktName() + "' but is '" + footprintGeoshapeType + "'!");
 			}
-
-			final List<Object> footprintCoordinatesOuterArray = (List<Object>) footprintJson
-					.get(PripGeoShape.FIELD_NAMES.COORDINATES.fieldName());
-			final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray.get(0);
-
-			final List<PripGeoCoordinate> pripGeoCoordinates = new ArrayList<>();
-			for (final Object coordPair : Objects.requireNonNull(footprintCoordinatesInnerArray)) {
-				final List<Number> coords = (List<Number>) coordPair;
-				final double lon = coords.get(0).doubleValue();
-				final double lat = coords.get(1).doubleValue();
-				pripGeoCoordinates.add(new PripGeoCoordinate(lon, lat));
-			}
-
-			return new GeoShapePolygon(pripGeoCoordinates);
 		}
-
 		return null;
 	}
 
@@ -551,7 +566,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		countRequest.source(searchSourceBuilder);
 
 		try {
-			count = new Long(this.restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount())
+			count = Long.valueOf(this.restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount())
 					.intValue();
 			LOGGER.info("counting PRIP metadata successful, number of hits {}", count);
 		} catch (final IOException e) {
