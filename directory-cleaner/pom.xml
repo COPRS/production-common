@@ -17,7 +17,6 @@
 		<project.build.finalName>s1pdgs-directory-cleaner</project.build.finalName>
 		<project.artifactId>s1pdgs-directory-cleaner</project.artifactId>
 		<instance.name>directory-cleaner</instance.name>
-		<log.dir>/var/log/dir-cleaner</log.dir>
 		<start-class>esa.s1pdgs.cpoc.directorycleaner.Application</start-class>
 	</properties>
 
