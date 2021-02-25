@@ -52,6 +52,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
@@ -83,6 +84,9 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private final ApplicationProperties props;
 	private final ErrorRepoAppender errorAppender;
 	private final MdcToPripMapper mdcToPripMapper;
+	
+	@Value("${prip-worker.metadata-mapping.footprint-is-linestring:}")
+	private String footprintIsLineStringCondition;
 	
 	@Autowired
 	public PripPublishingJobListener(
@@ -205,9 +209,13 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				}
 			}
 			if (!coordinates.isEmpty()) {
-				pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
-			}	
-			
+				// Differentiate polygon and linestring!
+				if (pripMetadata.getName().matches(footprintIsLineStringCondition)) {
+					pripMetadata.setFootprint(new GeoShapeLineString(coordinates));
+				} else {
+					pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
+				}
+			}		
 		}
 		pripMetadataRepo.save(pripMetadata);
 
