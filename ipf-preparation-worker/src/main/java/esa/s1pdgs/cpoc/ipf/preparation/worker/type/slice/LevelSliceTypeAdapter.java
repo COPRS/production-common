@@ -133,7 +133,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 					final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(
 							taskTableAdapter.taskTable()
 					);					
-					if (!queryResults.isEmpty()) {						
+					if ((!queryResults.isEmpty()) && product.preselectedInputs().isEmpty()) {						
 						final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
 						preselected.setTaskTableInputReference(ttInput.getReference());
 						preselected.setFileType(alternative.getFileType());		
