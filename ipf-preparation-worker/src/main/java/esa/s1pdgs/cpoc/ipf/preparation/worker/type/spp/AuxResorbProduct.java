@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobPreselectedInput;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 
 public class AuxResorbProduct extends AbstractProduct {
-	private final List<AppDataJobPreselectedInput> preselectedInputs = new ArrayList<>();
+	private final List<AppDataJobTaskInputs> overridingInputs = new ArrayList<>();
 
     public AuxResorbProduct(final AppDataJobProductAdapter product) {
         super(product);
@@ -35,12 +35,12 @@ public class AuxResorbProduct extends AbstractProduct {
         return product.getStringValue("selectedOrbitFirstAzimuthTimeUtc");
     }
     
-    public final void preselectedInputs(final List<AppDataJobPreselectedInput> inputs) {
-    	preselectedInputs.addAll(inputs);
+    public final void overridingInputs(final List<AppDataJobTaskInputs> inputs) {
+    	overridingInputs.addAll(inputs);
     }
     
     @Override
-	public List<AppDataJobPreselectedInput> preselectedInputs() {
-		return preselectedInputs;
+	public List<AppDataJobTaskInputs> overridingInputs() {
+		return overridingInputs;
 	}
 }

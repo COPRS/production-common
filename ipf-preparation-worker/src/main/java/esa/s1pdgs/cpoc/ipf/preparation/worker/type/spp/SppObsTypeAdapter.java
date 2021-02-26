@@ -12,7 +12,6 @@ import org.springframework.util.StringUtils;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobPreselectedInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
@@ -72,18 +71,21 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
         	final List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(tasktableAdapter);
         	final AppDataJobTaskInputs originalInput = appDataJobTaskInputs.get(0);
         	final AppDataJobInput first = originalInput.getInputs().get(0);
-        	
-        	final AppDataJobPreselectedInput preselectedInput = new AppDataJobPreselectedInput();
-        	preselectedInput.setFileType("AUX_RES");
-        	preselectedInput.setFileNameType(TaskTableFileNameType.PHYSICAL.toString());
-        	preselectedInput.setTaskTableInputReference(first.getTaskTableInputReference());      	
-        	preselectedInput.setFiles(Collections.singletonList(new AppDataJobFile(
+        	final AppDataJobFile file = new AppDataJobFile(
         			auxResorb.getProductName(),
         			auxResorb.getProductName(),
         			auxResorb.getStartTime(),
         			auxResorb.getStopTime()
-        	)));
-        	auxResorb.preselectedInputs(Collections.singletonList(preselectedInput));
+        	);
+        	final AppDataJobInput input = new AppDataJobInput(
+        			first.getTaskTableInputReference(),
+        			"AUX_RES",
+        			TaskTableFileNameType.PHYSICAL.toString(),
+        			first.isMandatory(),
+        			Collections.singletonList(file)
+        	);
+      		originalInput.setInputs(Collections.singletonList(input));
+      		auxResorb.overridingInputs(appDataJobTaskInputs);
       		LOGGER.debug("Added AUXRESORB {}", originalInput);
         } catch (final MetadataQueryException e) {
             LOGGER.error("Error on query execution, retrying next time", e);
