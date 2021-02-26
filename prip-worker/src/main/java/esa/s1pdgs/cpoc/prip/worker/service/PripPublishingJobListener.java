@@ -204,6 +204,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			
 			final List<PripGeoCoordinate> coordinates = new ArrayList<>();
 			if (null != searchMetadata.getFootprint()) {
+				LOGGER.debug("Footprint given with {} coordinates", searchMetadata.getFootprint().size());
 				for (final List<Double> p : searchMetadata.getFootprint()) {
 					coordinates.add(new PripGeoCoordinate(p.get(0), p.get(1)));
 				}
@@ -211,6 +212,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			if (!coordinates.isEmpty()) {
 				// Differentiate polygon and linestring!
 				if (pripMetadata.getName().matches(footprintIsLineStringCondition)) {
+					LOGGER.debug("Footprint should be of type 'linestring'");
 					pripMetadata.setFootprint(new GeoShapeLineString(coordinates));
 				} else {
 					pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
