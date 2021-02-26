@@ -1451,7 +1451,7 @@ public class EsServices {
 		if (null != coordinates && coordinates.containsKey("coordinates") && coordinates.containsKey("type")) {
 			final String type = (String) coordinates.get("type");
 			final List<Object> firstArray = (List<Object>) coordinates.get("coordinates");
-			if (null != firstArray && "polygon".equalsIgnoreCase(type)) {
+			if (null != firstArray && ("polygon".equalsIgnoreCase(type) || "linestring".equalsIgnoreCase(type))) {
 				final List<Object> secondArray = (List<Object>) firstArray.get(0);
 				for (final Object arr : secondArray) {
 					final List<Double> p = new ArrayList<>();
