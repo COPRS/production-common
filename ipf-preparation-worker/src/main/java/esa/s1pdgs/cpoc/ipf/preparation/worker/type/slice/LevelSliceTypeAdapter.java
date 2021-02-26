@@ -105,7 +105,10 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 		// i.e. the "normal" LatestValCover query will not work. So we are adding these files here and not in AuxQuery
 		final Optional<TaskTableInputAdapter> opt = taskTableAdapter.firstInputContainingOneOf(AUX_ORB_TYPES);
 		
-		if (opt.isPresent()) {
+		if (opt.isPresent()) {			
+			LOGGER.debug("Performing 'special' query on products {} to use different start/stop times "
+					+ "(segStart:{}, segStop:{})", AUX_ORB_TYPES, product.getSegmentStartDate(), 
+					product.getSegmentStopDate());
 			
 			final TaskTableInputAdapter ttInput = opt.get();
 			
@@ -115,50 +118,60 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 				final SearchMetadataQuery query = taskTableAdapter.metadataSearchQueryFor(alternative);
 								
 				try {
-					final List<SearchMetadata> queryResults = Retries.performWithRetries(
-							() -> metadataClient.search(
-									query,
-									sanitizeDateString(product.getSegmentStartDate()),
-									sanitizeDateString(product.getSegmentStopDate()),
-									productAdapter.getSatelliteId(),
-									productAdapter.getInsConfId(),
-									productAdapter.getProcessMode(),
-									"NONE" // AUX_RES doesn't have a polarisation (i hope)
-							), 
-							"Query " + query, 
-							3, 
-							5000L
-					);
-					
-					final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(
-							taskTableAdapter.taskTable()
-					);					
-					if ((!queryResults.isEmpty()) && product.preselectedInputs().isEmpty()) {						
-						final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
-						preselected.setTaskTableInputReference(ttInput.getReference());
-						preselected.setFileType(alternative.getFileType());		
-						preselected.setFileNameType(alternative.getFileNameType().toString());
+					if (product.preselectedInputs().isEmpty()) {
+						LOGGER.debug("Checking for {} using  (start:{}, stop:{})", alternative.getFileType(), 
+								product.getSegmentStartDate(), product.getSegmentStopDate());
 						
-						final List<AppDataJobFile> files = new ArrayList<>();
-						for (final SearchMetadata meta : queryResults) {														
-							files.add(new AppDataJobFile(
-									meta.getProductName(), 
-									meta.getKeyObjectStorage(), 
-									meta.getValidityStart(), 
-									meta.getValidityStop(), 
-									meta.getAdditionalProperties()
-							));
-						}
-						preselected.setFiles(files);			
-						product.preselectedInputs(Collections.singletonList(preselected));					
-					}
-					else if (!timeoutChecker.isTimeoutExpiredFor(job, ttInput.getInput())) {
-						throw new IpfPrepWorkerInputsMissingException(
-								Collections.singletonMap(
-										ttInput.getReference() + " is missing", 
-										ttInput.getInput().toLogMessage()
-								)
+						final List<SearchMetadata> queryResults = Retries.performWithRetries(
+								() -> metadataClient.search(
+										query,
+										sanitizeDateString(product.getSegmentStartDate()),
+										sanitizeDateString(product.getSegmentStopDate()),
+										productAdapter.getSatelliteId(),
+										productAdapter.getInsConfId(),
+										productAdapter.getProcessMode(),
+										"NONE" // AUX_RES doesn't have a polarisation (i hope)
+								), 
+								"Query " + query, 
+								3, // TODO /FIXME make configurable
+								5000L // TODO /FIXME make configurable
 						);
+						final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(
+								taskTableAdapter.taskTable()
+						);							
+						if (!queryResults.isEmpty()) {									
+							final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
+							preselected.setTaskTableInputReference(ttInput.getReference());
+							preselected.setFileType(alternative.getFileType());		
+							preselected.setFileNameType(alternative.getFileNameType().toString());
+							
+							final List<AppDataJobFile> files = new ArrayList<>();
+							for (final SearchMetadata meta : queryResults) {														
+								files.add(new AppDataJobFile(
+										meta.getProductName(), 
+										meta.getKeyObjectStorage(), 
+										meta.getValidityStart(), 
+										meta.getValidityStop(), 
+										meta.getAdditionalProperties()
+								));
+							}
+							preselected.setFiles(files);	
+							LOGGER.debug("Adding preselected inputs: {}", preselected);
+							product.preselectedInputs(Collections.singletonList(preselected));	
+							break; // don't query any further
+						}
+						// make the timeout check here becaues here we still got the TaskTableInput
+						else if (!timeoutChecker.isTimeoutExpiredFor(job, ttInput.getInput())) {
+							throw new IpfPrepWorkerInputsMissingException(
+									Collections.singletonMap(
+											ttInput.getReference() + " is missing", 
+											ttInput.getInput().toLogMessage()
+									)
+							);
+						}
+					}
+					else {
+						LOGGER.debug("Got already following preselected inputs: {}", product.preselectedInputs());
 					}
 				} catch (final InterruptedException e) {
 					LOGGER.error(e);
@@ -197,12 +210,6 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 					)
 			);
 		}
-		
-		// S1PRO-2476: make sure AuxPre/res/poe is there or timeout is reached
-		if (product.preselectedInputs().isEmpty()) {
-			
-		}
-		
 		// if both are there, job creation can proceed
 		LOGGER.info("Found slice {} and ACN {}", product.getSlices(), product.getAcns());
 	}
