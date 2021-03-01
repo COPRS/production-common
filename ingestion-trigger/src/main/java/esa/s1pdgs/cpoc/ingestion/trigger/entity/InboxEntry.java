@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.ingestion.trigger.entity;
 
 import static java.lang.String.format;
 
+import java.time.LocalDateTime;
+
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -22,7 +24,8 @@ public class InboxEntry {
 	private String name;
 	private String relativePath;
 	private String pickupURL;
-	private Date lastModified;
+	private Date lastModified; // ... timestamp of file on pickup
+	private LocalDateTime knownSince;
 	private long size;
 	private String stationName;
 	private String processingPod;
@@ -61,8 +64,11 @@ public class InboxEntry {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		// WARNING: Don't take 'id' into account when implementing equals/hashCode
-		// because it's always 0 when created from Inbox
+		// WARNING: Don't take these attributes into account for equals/hashCode,
+		// because they're not known on inbox side or may rightfully change
+		// * id (only known in persistence)
+		// * knownSince (only known in persistence)
+		// * lastModified (may change in inbox, but don't matters in our context)
 		final InboxEntry other = (InboxEntry) obj;
 		return Objects.equals(this.name, other.name) && Objects.equals(this.pickupURL, other.pickupURL)
 				&& Objects.equals(this.relativePath, other.relativePath)
@@ -71,7 +77,7 @@ public class InboxEntry {
 				&& Objects.equals(this.productFamily, other.productFamily)
 				&& Objects.equals(this.inboxType, other.inboxType);
 	}
-	
+
 	public boolean equalsWithoutProductFamily(final Object obj) {
 		if (this == obj) {
 			return true;
@@ -82,8 +88,11 @@ public class InboxEntry {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		// WARNING: Don't take 'id' into account when implementing equals/hashCode
-		// because it's always 0 when created from Inbox
+		// WARNING: Don't take these attributes into account for equals/hashCode,
+		// because they're not known on inbox side or may rightfully change
+		// * id (only known in persistence)
+		// * knownSince (only known in persistence)
+		// * lastModified (may change in inbox, but don't matters in our context)
 		final InboxEntry other = (InboxEntry) obj;
 		return Objects.equals(this.name, other.name) && Objects.equals(this.pickupURL, other.pickupURL)
 				&& Objects.equals(this.relativePath, other.relativePath)
@@ -102,9 +111,9 @@ public class InboxEntry {
 	@Override
 	public String toString() {
 		return format(
-				"InboxEntry [name=%s, relativePath=%s, pickupURL=%s, productFamily=%s, lastModified=%s, size=%s, stationName=%s, processingPod=%s, inboxType=%s]",
-				this.name, this.relativePath, this.pickupURL, this.productFamily, this.lastModified, this.size,
-				this.stationName, this.processingPod, this.inboxType);
+				"InboxEntry [name=%s, relativePath=%s, pickupURL=%s, productFamily=%s, lastModified=%s, knownSince=%s, size=%s, stationName=%s, processingPod=%s, inboxType=%s]",
+				this.name, this.relativePath, this.pickupURL, this.productFamily, this.lastModified, this.knownSince,
+				this.size, this.stationName, this.processingPod, this.inboxType);
 	}
 
 	// --------------------------------------------------------------------------
@@ -175,6 +184,14 @@ public class InboxEntry {
 
 	public void setProductFamily(String productFamily) {
 		this.productFamily = productFamily;
+	}
+
+	public LocalDateTime getKnownSince() {
+		return this.knownSince;
+	}
+
+	public void setKnownSince(LocalDateTime knownSince) {
+		this.knownSince = knownSince;
 	}
 
 }

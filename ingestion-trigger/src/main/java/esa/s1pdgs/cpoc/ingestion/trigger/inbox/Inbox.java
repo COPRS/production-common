@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.ingestion.trigger.auxip.AuxipInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
@@ -39,6 +38,7 @@ public final class Inbox {
 	private final String mode;
 	private final String timeliness;
 	private final ProductNameEvaluator nameEvaluator;
+	private final int stationRetentionTime;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
@@ -48,6 +48,7 @@ public final class Inbox {
 			final String topic,
 			final ProductFamily family,
 			final String stationName,
+			final int stationRetentionTime,
 			final String mode,
 			final String timeliness,
 			final ProductNameEvaluator nameEvaluator
@@ -59,6 +60,7 @@ public final class Inbox {
 		this.topic = topic;
 		this.family = family;
 		this.stationName = stationName;
+		this.stationRetentionTime = stationRetentionTime;
 		this.mode = mode;
 		this.timeliness = timeliness;
 		this.nameEvaluator = nameEvaluator;
@@ -74,17 +76,18 @@ public final class Inbox {
 			if(inboxAdapter instanceof SupportsProductFamily) {
 				pollingRun = PollingRun.newInstance(
 						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, family),
-						inboxAdapter.read(InboxFilter.ALLOW_ALL)
+						inboxAdapter.read(InboxFilter.ALLOW_ALL), stationRetentionTime
 				);
 			} else {
 				pollingRun = PollingRun.newInstanceWithoutProductFamily( // omitting product family comparison S1PRO-2395
 						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
-						inboxAdapter.read(InboxFilter.ALLOW_ALL)
+						inboxAdapter.read(InboxFilter.ALLOW_ALL), stationRetentionTime
 				);
 			}
 
 			// when a product has been removed from the inbox directory, it shall be removed
 			// from the persistence so it will not be ignored if it occurs again on the inbox
+			// S1PRO-2470: additional condition for removal from persistence is the stationRetentionTime
 			ingestionTriggerServiceTransactional.removeFinished(pollingRun.finishedElements());
 			
 			final Set<InboxEntry> handledElements = new HashSet<>();

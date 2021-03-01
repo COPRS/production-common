@@ -76,6 +76,7 @@ public class InboxFactory {
 				config.getTopic(),
 				config.getFamily(),
 				config.getStationName(),
+				config.getStationRetentionTime(),
 				config.getMode(),
 				config.getTimeliness(),
 				newProductNameEvaluatorFor(config)				

@@ -21,6 +21,8 @@ public class InboxConfiguration {
 	private Date ignoreFilesBeforeDate = ConfigDateConverter.DEFAULT_START_DATE;
 	
 	private ProductFamily family = ProductFamily.BLANK;
+	
+	private int stationRetentionTime = 0; // how many days to keep persisted data about inbox files at a minimum
 
 	public String getType() {
 		return type;
@@ -117,6 +119,14 @@ public class InboxConfiguration {
 	public void setIgnoreFilesBeforeDate(final Date ignoreFilesBeforeDate) {
 		this.ignoreFilesBeforeDate = ignoreFilesBeforeDate;
 	}
+	
+	public int getStationRetentionTime() {
+		return stationRetentionTime;
+	}
+
+	public void setStationRetentionTime(int stationRetentionTime) {
+		this.stationRetentionTime = stationRetentionTime;
+	}
 
 	@Override
 	public String toString() {
@@ -124,6 +134,6 @@ public class InboxConfiguration {
 				+ ignoreRegex + ", topic=" + topic + ", stationName=" + stationName + ", mode=" + mode + ", timeliness="
 				+ timeliness + ", sessionNamePattern=" + sessionNamePattern + ", sessionNameGroupIndex="
 				+ sessionNameGroupIndex + ", ignoreFilesBeforeDate=" + ignoreFilesBeforeDate + ", family=" + family
-				+ "]";
+				+ ", stationRetentionTime=" + stationRetentionTime + "]";
 	}
 }

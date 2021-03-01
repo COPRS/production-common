@@ -74,6 +74,7 @@ public class TestInbox {
                 "topic",
                 productFamily,
                 "WILE",
+                0,
                 "NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator()
@@ -108,6 +109,7 @@ public class TestInbox {
                 "topic",
                 productFamily,
 				"WILE",
+				0,
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator()
@@ -146,6 +148,7 @@ public class TestInbox {
                 "topic",
                 productFamily,
 				"WILE",
+				0,
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator()
@@ -173,6 +176,7 @@ public class TestInbox {
                 "topic",
                 productFamily,
 				"WILE",
+				0,
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator()

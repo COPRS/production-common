@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +52,9 @@ public class IngestionTriggerServiceTransactional {
 	}
 
 	public InboxEntry add(final InboxEntry entry) {
+		if (null != entry && null == entry.getKnownSince()) {
+			entry.setKnownSince(LocalDateTime.now(ZoneOffset.UTC));
+		}
 		LOG.debug("persisting inbox entry: " + entry);
 		return this.repository.save(entry);
 	}
