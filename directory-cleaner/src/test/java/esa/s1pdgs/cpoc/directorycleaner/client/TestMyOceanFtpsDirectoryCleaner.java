@@ -36,7 +36,7 @@ import esa.s1pdgs.cpoc.directorycleaner.util.Utils;
 
 public class TestMyOceanFtpsDirectoryCleaner {
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
 	private static final String USER = "user";
 	private static final String PASS = "pass";
@@ -200,7 +200,7 @@ public class TestMyOceanFtpsDirectoryCleaner {
 		MyOceanFtpsDirectoryCleaner cleaner = new MyOceanFtpsDirectoryCleaner(config);
 		final Calendar timestamp = Calendar.getInstance();
 		boolean exceedsRetentionTime = cleaner.exceedsRetentionTime(timestamp);
-		assertTrue("expected " + DATE_FORMAT.format(timestamp.getTime()) + " to _not_ exceed retention time of "
+		assertTrue("expected " + this.dateFormat.format(timestamp.getTime()) + " to _not_ exceed retention time of "
 				+ config.getRetentionTimeInDays() + " days", !exceedsRetentionTime);
 
 		// looks like LocalDateTime.now() in MyOceanFtpDirectoryCleaner.exceedsRetentionTime() is sometimes the same if called in short succession
@@ -212,7 +212,7 @@ public class TestMyOceanFtpsDirectoryCleaner {
 
 		cleaner = new MyOceanFtpsDirectoryCleaner(config);
 		exceedsRetentionTime = cleaner.exceedsRetentionTime(timestamp);
-		assertTrue("expected " + DATE_FORMAT.format(timestamp.getTime()) + " to exceed retention time of "
+		assertTrue("expected " + this.dateFormat.format(timestamp.getTime()) + " to exceed retention time of "
 				+ config.getRetentionTimeInDays() + " days", exceedsRetentionTime);
 	}
 

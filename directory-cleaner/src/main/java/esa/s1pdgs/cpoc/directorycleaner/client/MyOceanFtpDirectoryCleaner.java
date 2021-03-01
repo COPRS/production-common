@@ -30,9 +30,9 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 
 	protected final Logger logger = LoggerFactory.getLogger(MyOceanFtpDirectoryCleaner.class);
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	private static final int DEFAULT_PORT = 21;
 
+	protected final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	protected final DirectoryCleanerProperties config;
 
 	// --------------------------------------------------------------------------
@@ -180,13 +180,15 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 			}
 
 			if (this.exceedsRetentionTime(timestamp)) {
-				DATE_FORMAT.setTimeZone(timestamp.getTimeZone());
+				this.dateFormat.setTimeZone(timestamp.getTimeZone());
 				this.logger.debug("Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
-						file.getName(), DATE_FORMAT.format(timestamp.getTime()), this.config.getRetentionTimeInDays(), this.config);
+						file.getName(), this.dateFormat.format(timestamp.getTime()), this.config.getRetentionTimeInDays(),
+						this.config);
 				final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MyOceanCleanerFileRemoval");
 				reporting.begin(new ReportingMessage(
 						"Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
-						file.getName(), DATE_FORMAT.format(timestamp.getTime()), this.config.getRetentionTimeInDays(), this.config));
+						file.getName(), this.dateFormat.format(timestamp.getTime()), this.config.getRetentionTimeInDays(),
+						this.config));
 
 				final String fileName = file.getName();
 				if (null == fileName) {
