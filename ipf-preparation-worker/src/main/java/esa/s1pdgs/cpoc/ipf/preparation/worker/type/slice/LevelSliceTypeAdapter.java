@@ -171,6 +171,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 							);
 						}
 						else {
+							LOGGER.debug("Timeout on {}", ttInput.getInput());
 						}
 					}
 					else {
