@@ -27,6 +27,7 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 
 	@Override
 	public final boolean isTimeoutExpiredFor(final AppDataJob job, final TaskTableInput input) {
+		LOG.debug("==0 checking for timeouts: {}", configs);
 		try {
 			for (final InputWaitingConfig config : configs) {
 				LOG.debug("==1 found inputWaitingConfig: {}", config);
