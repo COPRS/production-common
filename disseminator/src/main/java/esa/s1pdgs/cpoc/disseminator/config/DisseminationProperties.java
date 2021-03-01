@@ -30,8 +30,8 @@ public class DisseminationProperties {
 		private String hostname = "localhost";
 		private int port = -1; // --> not defined
 		
-		private String filePermissions = "664";
-		private String directoryPermissions = "775";
+		private String filePermissions = null;
+		private String directoryPermissions = null;
 		
 		private String keystoreFile = null;
 		private String keystorePass = "changeit";
