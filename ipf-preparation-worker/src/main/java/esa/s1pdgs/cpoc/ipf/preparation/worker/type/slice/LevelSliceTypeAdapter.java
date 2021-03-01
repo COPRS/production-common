@@ -162,12 +162,15 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 						}
 						// make the timeout check here becaues here we still got the TaskTableInput
 						else if (!timeoutChecker.isTimeoutExpiredFor(job, ttInput.getInput())) {
+							LOGGER.debug("Waiting for timeout on {}", ttInput.getInput());
 							throw new IpfPrepWorkerInputsMissingException(
 									Collections.singletonMap(
 											ttInput.getReference() + " is missing", 
 											ttInput.getInput().toLogMessage()
 									)
 							);
+						}
+						else {
 						}
 					}
 					else {
