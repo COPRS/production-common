@@ -27,10 +27,9 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 
 	@Override
 	public final boolean isTimeoutExpiredFor(final AppDataJob job, final TaskTableInput input) {
-		LOG.debug("==0 checking for timeouts: {}", configs);
+		LOG.debug("checking for timeouts using: {}", configs);
 		try {
 			for (final InputWaitingConfig config : configs) {
-				LOG.debug("==1 found inputWaitingConfig: {}", config);
 				if (isMatchingConfiguredInputIdRegex(config, input) && 
 					isMatchingConfiguredTimeliness(config, job)) {
 
@@ -43,12 +42,9 @@ public final class InputTimeoutCheckerImpl implements InputTimeoutChecker {
 					// sensing relative timeout (for waiting for missing inputs)
 					final LocalDateTime sensingStart = DateUtils.parse(job.getStartTime());
 					final LocalDateTime sensingRelativeTimeoutMoment = sensingStart.plusSeconds(config.getWaitingFromDownlinkInSeconds());
-					LOG.debug("==2 Creation time {} > {} ?", jobCreationRelativeMinimalWaitingTimeMoment, now);
-					LOG.debug("==3 Sensing time {} is compared to {}", sensingRelativeTimeoutMoment, now);
-										
-					final boolean foo = !(now.isBefore(jobCreationRelativeMinimalWaitingTimeMoment) || now.isBefore(sensingRelativeTimeoutMoment));
-					LOG.debug("==4 Is timed out? {}", String.valueOf(foo));					
-					return foo;
+					
+					return !(now.isBefore(jobCreationRelativeMinimalWaitingTimeMoment) || 
+							now.isBefore(sensingRelativeTimeoutMoment));
 				}
 			}
 
