@@ -42,7 +42,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	private static final List<String> AUX_ORB_TYPES = Arrays.asList(
 			"AUX_POE",
 			"AUX_RES",
-			"MPL_ORBPRE"
+			"AUX_PRE"
 	);
 	
 	private final MetadataClient metadataClient;
