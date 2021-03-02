@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -52,7 +53,8 @@ public class IngestionTriggerServiceTransactional {
 	}
 
 	public InboxEntry add(final InboxEntry entry) {
-		if (null != entry && null == entry.getKnownSince()) {
+		Objects.requireNonNull(entry, "InboxEntry must not be null");
+		if (null == entry.getKnownSince()) {
 			entry.setKnownSince(LocalDateTime.now(ZoneOffset.UTC));
 		}
 		LOG.debug("persisting inbox entry: " + entry);
