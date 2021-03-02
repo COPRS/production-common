@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
 import org.junit.Test;
@@ -15,6 +16,7 @@ public class TestPollingRun {
 
 	@SuppressWarnings("deprecation")
 	private static final Date LAST_MODIFIED_1 = new Date(2021, 2, 1, 10, 22, 22);
+	@SuppressWarnings("deprecation")
 	private static final Date LAST_MODIFIED_2 = new Date(2021, 2, 2, 11, 33, 33);
 	private static final LocalDateTime KNOWN_SINCE_1 = LocalDateTime.now(ZoneId.of("UTC"));
 	private static final String FILE_PATH_1 = "S1B/DCS_04_S1B_20210208090050025513_dat/ch_1/DCS_04_S1B_20210208090050025513_ch1_DSDB_00020.raw";
@@ -23,7 +25,7 @@ public class TestPollingRun {
 	private static final String INBOX_TYPE_1 = "xbip";
 	private static final String PRODUCT_FAMILY_1 = "EDRS_SESSION";
 	private static final String STATION_NAME_1 = "SGS_";
-	private static final int STATION_RETENTION_TIME_1 = 0;
+	private static final int STATION_RETENTION_TIME_DEFAULT = 0;
 	private static final long SIZE_1 = 667788;
 
 	// --------------------------------------------------------------------------
@@ -35,7 +37,7 @@ public class TestPollingRun {
 		// does not lead to re-ingestion
 
 		final PollingRun pollingRunExpectAllEmpty = PollingRun.newInstanceWithoutProductFamily(
-				Collections.emptySet(), Collections.emptyList(), STATION_RETENTION_TIME_1);
+				Collections.emptySet(), Collections.emptyList(), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty.finishedElements()),
 				"expected finished elements to be empty!");
@@ -47,7 +49,7 @@ public class TestPollingRun {
 
 		final PollingRun pollingRunExpectAllEmpty2 = PollingRun.newInstanceWithoutProductFamily(
 				Collections.singleton(inboxEntryWithoutProductFamily), Collections.singletonList(inboxEntry),
-				STATION_RETENTION_TIME_1);
+				STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty2.finishedElements()),
 				"expected finished elements to be empty!");
@@ -56,7 +58,7 @@ public class TestPollingRun {
 
 		final PollingRun pollingRunExpectAllEmpty3 = PollingRun.newInstanceWithoutProductFamily(
 				Collections.singleton(inboxEntry), Collections.singletonList(inboxEntryWithoutProductFamily),
-				STATION_RETENTION_TIME_1);
+				STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty3.finishedElements()),
 				"expected finished elements to be empty!");
@@ -65,7 +67,7 @@ public class TestPollingRun {
 
 		final PollingRun pollingRunExpectAllEmpty4 = PollingRun.newInstanceWithoutProductFamily(
 				Collections.singleton(inboxEntryWithoutProductFamily),
-				Collections.singletonList(inboxEntryWithoutProductFamily), STATION_RETENTION_TIME_1);
+				Collections.singletonList(inboxEntryWithoutProductFamily), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty4.finishedElements()),
 				"expected finished elements to be empty!");
@@ -82,7 +84,7 @@ public class TestPollingRun {
 		final InboxEntry inboxEntryWithoutProductFamily = createInboxEntryWithoutProductFamily();
 
 		final PollingRun pollingRunExpectNew = PollingRun.newInstanceWithoutProductFamily(Collections.emptySet(),
-				Collections.singletonList(inboxEntryWithoutProductFamily), STATION_RETENTION_TIME_1);
+				Collections.singletonList(inboxEntryWithoutProductFamily), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectNew.finishedElements()),
 				"expected finished elements to be empty!");
@@ -94,7 +96,7 @@ public class TestPollingRun {
 		final InboxEntry inboxEntry = createInboxEntry();
 
 		final PollingRun pollingRunExpectNew2 = PollingRun.newInstanceWithoutProductFamily(Collections.emptySet(),
-				Collections.singletonList(inboxEntry), STATION_RETENTION_TIME_1);
+				Collections.singletonList(inboxEntry), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectNew2.finishedElements()),
 				"expected finished elements to be empty!");
@@ -114,7 +116,7 @@ public class TestPollingRun {
 
 		final PollingRun pollingRunExpectFinished = PollingRun.newInstanceWithoutProductFamily(
 				Collections.singleton(inboxEntryWithoutProductFamily), Collections.emptyList(),
-				STATION_RETENTION_TIME_1);
+				STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.newElements()),
 				"expected new elements to be empty!");
@@ -126,7 +128,7 @@ public class TestPollingRun {
 		final InboxEntry inboxEntry = createInboxEntry();
 
 		final PollingRun pollingRunExpectFinished2 = PollingRun.newInstanceWithoutProductFamily(
-				Collections.singleton(inboxEntry), Collections.emptyList(), STATION_RETENTION_TIME_1);
+				Collections.singleton(inboxEntry), Collections.emptyList(), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished2.newElements()),
 				"expected new elements to be empty!");
@@ -137,12 +139,56 @@ public class TestPollingRun {
 	}
 
 	@Test
+	public void test_stationRetentionTime_withoutProductFamily_expectFinished() {
+		// creating a polling run with method newInstanceWithoutProductFamily will compare inbox entries
+		// from persistence and pickup ignoring the product family so that legacy data from persistence
+		// does not lead to re-ingestion
+
+		final int stationRetentionTimeInDays = 7;
+		final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
+		final InboxEntry inboxEntryExpectFinished = createInboxEntryWithoutProductFamily();
+		inboxEntryExpectFinished.setKnownSince(now.minusDays(stationRetentionTimeInDays).minusSeconds(1));
+
+		final PollingRun pollingRunExpectFinished = PollingRun.newInstanceWithoutProductFamily(
+				Collections.singleton(inboxEntryExpectFinished), Collections.emptyList(), stationRetentionTimeInDays);
+
+		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.newElements()),
+				"expected new elements to be empty!");
+		assertTrue(CollectionUtil.isNotEmpty(pollingRunExpectFinished.finishedElements())
+				&& pollingRunExpectFinished.finishedElements().size() == 1
+				&& inboxEntryExpectFinished.equals(pollingRunExpectFinished.finishedElements().iterator().next()),
+				"expected finished elements return 1 inbox entry!");
+	}
+
+	@Test
+	public void test_stationRetentionTime_withoutProductFamily_expectNotFinished() {
+		// creating a polling run with method newInstanceWithoutProductFamily will compare inbox entries
+		// from persistence and pickup ignoring the product family so that legacy data from persistence
+		// does not lead to re-ingestion
+
+		final int stationRetentionTimeInDays = 7;
+		final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
+		final InboxEntry inboxEntryExpectNotFinished = createInboxEntryWithoutProductFamily();
+		inboxEntryExpectNotFinished.setKnownSince(now.minusDays(stationRetentionTimeInDays).plusSeconds(1));
+
+		final PollingRun pollingRunExpectFinished = PollingRun.newInstanceWithoutProductFamily(
+				Collections.singleton(inboxEntryExpectNotFinished), Collections.emptyList(), stationRetentionTimeInDays);
+
+		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.newElements()),
+				"expected new elements to be empty!");
+		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.finishedElements()),
+				"expected finished elements to be empty!");
+	}
+
+	@Test
 	public void test_inboxEntryComparison_withProductFamily_expectAllEmpty() {
 		// creating a polling run with method newInstance will take product family into account
 		// when comparing inbox entries from persistence with inbox entries from pickup
 
 		final PollingRun pollingRunExpectAllEmpty = PollingRun.newInstance(Collections.emptySet(),
-				Collections.emptyList(), STATION_RETENTION_TIME_1);
+				Collections.emptyList(), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty.finishedElements()),
 				"expected finished elements to be empty!");
@@ -152,7 +198,7 @@ public class TestPollingRun {
 		final InboxEntry inboxEntry = createInboxEntry();
 
 		final PollingRun pollingRunExpectAllEmpty2 = PollingRun.newInstance(
-				Collections.singleton(inboxEntry), Collections.singletonList(inboxEntry), STATION_RETENTION_TIME_1);
+				Collections.singleton(inboxEntry), Collections.singletonList(inboxEntry), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty2.finishedElements()),
 				"expected finished elements to be empty!");
@@ -168,7 +214,7 @@ public class TestPollingRun {
 		final InboxEntry inboxEntry = createInboxEntry();
 
 		final PollingRun pollingRunExpectNew = PollingRun.newInstance(Collections.emptySet(),
-				Collections.singletonList(inboxEntry), STATION_RETENTION_TIME_1);
+				Collections.singletonList(inboxEntry), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectNew.finishedElements()),
 				"expected finished elements to be empty!");
@@ -180,7 +226,7 @@ public class TestPollingRun {
 		final InboxEntry inboxEntryWithoutProductFamily = createInboxEntryWithoutProductFamily();
 
 		final PollingRun pollingRunExpectNew2 = PollingRun.newInstance(Collections.emptySet(),
-				Collections.singletonList(inboxEntryWithoutProductFamily), STATION_RETENTION_TIME_1);
+				Collections.singletonList(inboxEntryWithoutProductFamily), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectNew2.finishedElements()),
 				"expected finished elements to be empty!");
@@ -199,7 +245,7 @@ public class TestPollingRun {
 		final InboxEntry inboxEntry = createInboxEntry();
 
 		final PollingRun pollingRunExpectFinished = PollingRun.newInstance(
-				Collections.singleton(inboxEntry), Collections.emptyList(), STATION_RETENTION_TIME_1);
+				Collections.singleton(inboxEntry), Collections.emptyList(), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.newElements()),
 				"expected new elements to be empty!");
@@ -212,7 +258,7 @@ public class TestPollingRun {
 
 		final PollingRun pollingRunExpectFinished2 = PollingRun.newInstance(
 				Collections.singleton(inboxEntryWithoutProductFamily), Collections.emptyList(),
-				STATION_RETENTION_TIME_1);
+				STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished2.newElements()),
 				"expected new elements to be empty!");
@@ -232,7 +278,7 @@ public class TestPollingRun {
 
 		final PollingRun pollingRunExpectFinishedAndNew = PollingRun.newInstance(
 				Collections.singleton(inboxEntry), Collections.singletonList(inboxEntryWithoutProductFamily),
-				STATION_RETENTION_TIME_1);
+				STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isNotEmpty(pollingRunExpectFinishedAndNew.newElements())
 				&& pollingRunExpectFinishedAndNew.newElements().size() == 1
@@ -245,7 +291,7 @@ public class TestPollingRun {
 
 		final PollingRun pollingRunExpectFinishedAndNew2 = PollingRun.newInstance(
 				Collections.singleton(inboxEntryWithoutProductFamily), Collections.singletonList(inboxEntry),
-				STATION_RETENTION_TIME_1);
+				STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isNotEmpty(pollingRunExpectFinishedAndNew2.newElements())
 				&& pollingRunExpectFinishedAndNew2.newElements().size() == 1
@@ -264,12 +310,48 @@ public class TestPollingRun {
 		final InboxEntry inboxEntry2 = createInboxEntry(LAST_MODIFIED_2);
 
 		final PollingRun pollingRunExpectAllEmpty = PollingRun.newInstance(
-				Collections.singleton(inboxEntry), Collections.singletonList(inboxEntry2), STATION_RETENTION_TIME_1);
+				Collections.singleton(inboxEntry), Collections.singletonList(inboxEntry2), STATION_RETENTION_TIME_DEFAULT);
 
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty.finishedElements()),
 				"expected finished elements to be empty!");
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectAllEmpty.newElements()),
 				"expected new elements to be empty!");
+	}
+
+	@Test
+	public void test_stationRetentionTime_withProductFamily_expectFinished() {
+		final int stationRetentionTimeInDays = 7;
+		final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
+		final InboxEntry inboxEntryExpectFinished = createInboxEntryWithoutProductFamily();
+		inboxEntryExpectFinished.setKnownSince(now.minusDays(stationRetentionTimeInDays).minusSeconds(1));
+
+		final PollingRun pollingRunExpectFinished = PollingRun.newInstance(
+				Collections.singleton(inboxEntryExpectFinished), Collections.emptyList(), stationRetentionTimeInDays);
+
+		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.newElements()),
+				"expected new elements to be empty!");
+		assertTrue(CollectionUtil.isNotEmpty(pollingRunExpectFinished.finishedElements())
+				&& pollingRunExpectFinished.finishedElements().size() == 1
+				&& inboxEntryExpectFinished.equals(pollingRunExpectFinished.finishedElements().iterator().next()),
+				"expected finished elements return 1 inbox entry!");
+	}
+
+	@Test
+	public void test_stationRetentionTime_withProductFamily_expectNotFinished() {
+		final int stationRetentionTimeInDays = 7;
+		final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
+		final InboxEntry inboxEntryExpectNotFinished = createInboxEntryWithoutProductFamily();
+		inboxEntryExpectNotFinished.setKnownSince(now.minusDays(stationRetentionTimeInDays).plusSeconds(1));
+
+		final PollingRun pollingRunExpectFinished = PollingRun.newInstance(
+				Collections.singleton(inboxEntryExpectNotFinished), Collections.emptyList(), stationRetentionTimeInDays);
+
+		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.newElements()),
+				"expected new elements to be empty!");
+		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.finishedElements()),
+				"expected finished elements to be empty!");
 	}
 
 	// --------------------------------------------------------------------------
