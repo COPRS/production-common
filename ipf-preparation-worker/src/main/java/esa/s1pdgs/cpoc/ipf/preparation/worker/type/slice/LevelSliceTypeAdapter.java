@@ -42,7 +42,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	private static final List<String> AUX_ORB_TYPES = Arrays.asList(
 			"AUX_POE",
 			"AUX_RES",
-			"MPL_ORBPRE"
+			"AUX_PRE"
 	);
 	
 	private final MetadataClient metadataClient;
@@ -162,12 +162,16 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 						}
 						// make the timeout check here becaues here we still got the TaskTableInput
 						else if (!timeoutChecker.isTimeoutExpiredFor(job, ttInput.getInput())) {
+							LOGGER.debug("Waiting for timeout on {}", ttInput.getInput());
 							throw new IpfPrepWorkerInputsMissingException(
 									Collections.singletonMap(
 											ttInput.getReference() + " is missing", 
 											ttInput.getInput().toLogMessage()
 									)
 							);
+						}
+						else {
+							LOGGER.debug("Timeout on {}", ttInput.getInput());
 						}
 					}
 					else {

@@ -327,7 +327,7 @@ public class IpfPreparationWorkerConfiguration {
 	private InputTimeoutChecker inputWaitTimeoutFor(final TaskTable taskTable) {
 		final List<InputWaitingConfig> configsForTaskTable = new ArrayList<>();
 		for (final InputWaitingConfig config : settings.getInputWaiting()) {
-			if (taskTable.getProcessorName().equals(config.getProcessorNameRegexp()) &&
+			if (taskTable.getProcessorName().matches(config.getProcessorNameRegexp()) &&
 				taskTable.getVersion().matches(config.getProcessorVersionRegexp())) 
 			{			
 				configsForTaskTable.add(config);
