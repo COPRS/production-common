@@ -50,7 +50,8 @@ final class PollingRun {
 				.minusDays(0 <= stationRetentionTime ? stationRetentionTime : 0);
 		// I. make sure to keep entries persisted for at least [stationRetentionTime] days
 		final Set<InboxEntry> finishedElements = CollectionUtil.nullToEmpty(persistedContent).stream()
-				.filter(entry -> threshold.isAfter(entry.getKnownSince())).collect(Collectors.toSet());
+				.filter(entry -> null == entry.getKnownSince() || threshold.isAfter(entry.getKnownSince()))
+				.collect(Collectors.toSet());
 		// II. then, if they aren't on the pickup anymore, consider them finished (= delete them)
 		finishedElements.removeAll(pickupContent);
 
@@ -71,7 +72,8 @@ final class PollingRun {
 				.minusDays(0 <= stationRetentionTime ? stationRetentionTime : 0);
 		// I. make sure to keep entries persisted for at least [stationRetentionTime] days
 		final Set<InboxEntry> oldElements = CollectionUtil.nullToEmpty(persistedContent).stream()
-				.filter(entry -> threshold.isAfter(entry.getKnownSince())).collect(Collectors.toSet());
+				.filter(entry -> null == entry.getKnownSince() || threshold.isAfter(entry.getKnownSince()))
+				.collect(Collectors.toSet());
 		// II. then, if they aren't on the pickup anymore, consider them finished (= delete them)
 		final Set<InboxEntry> finishedElements = new HashSet<>(
 				subtractWithoutProductFamily(oldElements, pickupContent));
