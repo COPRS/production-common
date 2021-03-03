@@ -212,7 +212,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			if (!coordinates.isEmpty()) {
 				// Differentiate polygon and linestring!
 				if (pripMetadata.getName().matches(footprintIsLineStringCondition)) {
-					LOGGER.debug("Assumption that footprint is of type 'linestring'");
+					LOGGER.debug("Product name matching `{}` -> Assuming that footprint is of type 'linestring'", footprintIsLineStringCondition);
 					pripMetadata.setFootprint(new GeoShapeLineString(coordinates));
 				} else if (coordinates.size() >= 4) {
 					pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
