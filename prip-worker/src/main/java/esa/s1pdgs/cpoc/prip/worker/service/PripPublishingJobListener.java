@@ -212,10 +212,12 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			if (!coordinates.isEmpty()) {
 				// Differentiate polygon and linestring!
 				if (pripMetadata.getName().matches(footprintIsLineStringCondition)) {
-					LOGGER.debug("Footprint should be of type 'linestring'");
+					LOGGER.debug("Assumption that footprint is of type 'linestring'");
 					pripMetadata.setFootprint(new GeoShapeLineString(coordinates));
-				} else {
+				} else if (coordinates.size() >= 4) {
 					pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
+				} else {
+					LOGGER.warn("No valid footprint of type 'polygon' (must be >= 4 points) -> Footprint ignored!");
 				}
 			}		
 		}
