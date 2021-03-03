@@ -518,10 +518,9 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			} else if (GeoShapeType.LINESTRING.wktName().equalsIgnoreCase(footprintGeoshapeType)) {
 				final List<Object> footprintCoordinatesOuterArray = (List<Object>) footprintJson
 						.get(PripGeoShape.FIELD_NAMES.COORDINATES.fieldName());
-				final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray.get(0);
 
 				final List<PripGeoCoordinate> pripGeoCoordinates = new ArrayList<>();
-				for (final Object coordPair : Objects.requireNonNull(footprintCoordinatesInnerArray)) {
+				for (final Object coordPair : Objects.requireNonNull(footprintCoordinatesOuterArray)) {
 					final List<Number> coords = (List<Number>) coordPair;
 					final double lon = coords.get(0).doubleValue();
 					final double lat = coords.get(1).doubleValue();
