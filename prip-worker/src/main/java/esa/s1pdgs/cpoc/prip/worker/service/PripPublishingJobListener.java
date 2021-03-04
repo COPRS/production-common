@@ -79,14 +79,12 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private final MetadataClient metadataClient;
 	private final long pollingIntervalMs;
 	private final long pollingInitialDelayMs;
+	private final String footprintIsLineStringCondition;
 	private final PripMetadataRepository pripMetadataRepo;
 	private final AppStatus appStatus;
 	private final ApplicationProperties props;
 	private final ErrorRepoAppender errorAppender;
 	private final MdcToPripMapper mdcToPripMapper;
-	
-	@Value("${prip-worker.metadata-mapping.footprint-is-linestring-regexp:}")
-	private String footprintIsLineStringCondition;
 	
 	@Autowired
 	public PripPublishingJobListener(
@@ -97,6 +95,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			final PripMetadataRepository pripMetadataRepo,
 			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
+			@Value("${prip-worker.metadata-mapping.footprint-is-linestring-regexp:}") final String footprintIsLineStringCondition,
 			final AppStatus appStatus,
 			final ApplicationProperties props,
 			final ErrorRepoAppender errorAppender
@@ -108,6 +107,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		this.pripMetadataRepo = pripMetadataRepo;
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
+		this.footprintIsLineStringCondition = footprintIsLineStringCondition;
 		this.appStatus = appStatus;
 		this.props = props;
 		this.errorAppender = errorAppender;
@@ -212,9 +212,9 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			if (!coordinates.isEmpty()) {
 				// Differentiate polygon and linestring!
 				boolean isLineString = pripMetadata.getName().matches(footprintIsLineStringCondition);
-				LOGGER.debug("Product name matching `{}`: {}", footprintIsLineStringCondition, isLineString);
+				LOGGER.debug("Product '{}' matching '{}': {}", pripMetadata.getName(), footprintIsLineStringCondition, isLineString);
 				if (isLineString) {
-					LOGGER.debug("-> Assuming that footprint is of type 'linestring'");
+					LOGGER.debug("Assuming that footprint is of type 'linestring'");
 					pripMetadata.setFootprint(new GeoShapeLineString(coordinates));
 				} else if (coordinates.size() >= 4) {
 					pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
