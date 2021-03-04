@@ -85,7 +85,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private final ErrorRepoAppender errorAppender;
 	private final MdcToPripMapper mdcToPripMapper;
 	
-	@Value("${prip-worker.metadata-mapping.footprint-is-linestring:}")
+	@Value("${prip-worker.metadata-mapping.footprint-is-linestring-regexp:}")
 	private String footprintIsLineStringCondition;
 	
 	@Autowired
