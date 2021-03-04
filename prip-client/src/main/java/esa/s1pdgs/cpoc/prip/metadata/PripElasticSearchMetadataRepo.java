@@ -401,6 +401,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
+		//TODO Also support LineString...
 		if (input instanceof Polygon) {
 			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
 			final Polygon polygon = (Polygon) input;
