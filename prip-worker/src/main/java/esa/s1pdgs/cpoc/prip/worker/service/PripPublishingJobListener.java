@@ -214,7 +214,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				boolean isLineString = pripMetadata.getName().matches(footprintIsLineStringCondition);
 				LOGGER.debug("Product '{}' matching '{}': {}", pripMetadata.getName(), footprintIsLineStringCondition, isLineString);
 				if (isLineString) {
-					LOGGER.debug("Assuming that footprint is of type 'linestring'");
+					LOGGER.debug("Assuming that footprint with {} points is of type 'linestring'", coordinates.size());
 					pripMetadata.setFootprint(new GeoShapeLineString(coordinates));
 				} else if (coordinates.size() >= 4) {
 					pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
