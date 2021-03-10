@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 import java.time.LocalDateTime;
 
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 
 public interface DataLifecycleService {
 
@@ -10,8 +11,9 @@ public interface DataLifecycleService {
 	 * Triggers the deletion of all products from obs which have an eviction date in the past.
 	 *
 	 * @param operatorName the name of the initiating operator
+	 * @throws DataLifecycleMetadataRepositoryException on persistence error
 	 */
-	void evict(String operatorName);
+	void evict(String operatorName) throws DataLifecycleMetadataRepositoryException;
 
 	/**
 	 * Triggers the deletion of the product with the given product name from obs if it has an eviction date in the past or when {@code forceCompressed} and/or {@code forceUncompressed} are {@code true}.
@@ -20,8 +22,10 @@ public interface DataLifecycleService {
 	 * @param forceCompressed   {@code true} to force eviction ignoring the eviction date for the product in compressed storage, {@code false} to evict only when eviction date is in the past
 	 * @param forceUncompressed {@code true} to force eviction ignoring the eviction date for the product in uncompressed storage, {@code false} to evict only when eviction date is in the past
 	 * @param operatorName      the name of the initiating operator
+	 * @throws DataLifecycleMetadataRepositoryException on persistence error
 	 */
-	void evict(String productname, boolean forceCompressed, boolean forceUncompressed, String operatorName);
+	void evict(String productname, boolean forceCompressed, boolean forceUncompressed, String operatorName)
+			throws DataLifecycleMetadataRepositoryException;
 
 	/**
 	 * Updates the retention behaviour of the product with the given product name by setting the given eviction dates. If the eviction date is {@code null} the product will be freezed by setting the
@@ -32,8 +36,10 @@ public interface DataLifecycleService {
 	 * @param evictionTimeInUncompressedStorage UTC timestamp to set as new eviction date for the given product in compressed storage, {@code null} for freeze
 	 * @param operatorName                      the name of the initiating operator
 	 * @return the data lifecycle metadata for the updated product
+	 * @throws DataLifecycleMetadataRepositoryException on persistence error
 	 */
 	DataLifecycleMetadata updateRetention(String productname, LocalDateTime evictionTimeInCompressedStorage,
-			LocalDateTime evictionTimeInUncompressedStorage, String operatorName);
+			LocalDateTime evictionTimeInUncompressedStorage, String operatorName)
+					throws DataLifecycleMetadataRepositoryException;
 
 }
