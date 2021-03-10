@@ -24,26 +24,16 @@ public interface DataLifecycleService {
 	void evict(String productname, boolean forceCompressed, boolean forceUncompressed, String operatorName);
 
 	/**
-	 * Updates the retention behaviour of the product with the given product name by setting the given eviction dates.
+	 * Updates the retention behaviour of the product with the given product name by setting the given eviction dates. If the eviction date is {@code null} the product will be freezed by setting the
+	 * eviction date far in the future. If the product is not available a data request will be triggered to bring the product back.
 	 *
 	 * @param productname                       the name of the product to update retention, not {@code null}
-	 * @param evictionTimeInCompressedStorage   UTC timestamp to set as new eviction date for the given product in compressed storage, if {@code null} will keep current eviction date
-	 * @param evictionTimeInUncompressedStorage UTC timestamp to set as new eviction date for the given product in compressed storage, if {@code null} will keep current eviction date
+	 * @param evictionTimeInCompressedStorage   UTC timestamp to set as new eviction date for the given product in compressed storage, {@code null} for freeze
+	 * @param evictionTimeInUncompressedStorage UTC timestamp to set as new eviction date for the given product in compressed storage, {@code null} for freeze
 	 * @param operatorName                      the name of the initiating operator
 	 * @return the data lifecycle metadata for the updated product
 	 */
 	DataLifecycleMetadata updateRetention(String productname, LocalDateTime evictionTimeInCompressedStorage,
 			LocalDateTime evictionTimeInUncompressedStorage, String operatorName);
-
-	/**
-	 * Ensures the product with the given product name is available for the next {@code hoursToReserve} hours. When necessary the products eviction date is updated. If the product is not available a data
-	 * request will be triggered to bring it back.
-	 *
-	 * @param productname    the name of the product to reserve, not {@code null}
-	 * @param hoursToReserve the hours to reserve the product (from now)
-	 * @param operatorName   the name of the initiating operator
-	 * @return the data lifecycle metadata for the product, or {@code null} when product not available (a data request will be triggered to bring the product back)
-	 */
-	DataLifecycleMetadata reserve(String productname, int hoursToReserve, String operatorName);
 
 }

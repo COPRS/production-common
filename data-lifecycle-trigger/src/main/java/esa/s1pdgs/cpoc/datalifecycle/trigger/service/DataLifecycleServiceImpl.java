@@ -30,10 +30,4 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		return null;
 	}
 
-	@Override
-	public DataLifecycleMetadata reserve(String productname, int hoursToReserve, String operatorName) {
-		// TODO @MSc: impl
-		return null;
-	}
-
 }
