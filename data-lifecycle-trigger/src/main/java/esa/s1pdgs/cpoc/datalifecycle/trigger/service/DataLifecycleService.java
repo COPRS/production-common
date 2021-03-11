@@ -23,9 +23,10 @@ public interface DataLifecycleService {
 	 * @param forceUncompressed {@code true} to force eviction ignoring the eviction date for the product in uncompressed storage, {@code false} to evict only when eviction date is in the past
 	 * @param operatorName      the name of the initiating operator
 	 * @throws DataLifecycleMetadataRepositoryException on persistence error
+	 * @throws DataLifecycleMetadataNotFoundException   when no data lifecycle metadata is found for the given product name
 	 */
 	void evict(String productname, boolean forceCompressed, boolean forceUncompressed, String operatorName)
-			throws DataLifecycleMetadataRepositoryException;
+			throws DataLifecycleMetadataRepositoryException, DataLifecycleMetadataNotFoundException;
 
 	/**
 	 * Updates the retention behaviour of the product with the given product name by setting the given eviction dates. If the eviction date is {@code null} the product will be freezed by setting the
