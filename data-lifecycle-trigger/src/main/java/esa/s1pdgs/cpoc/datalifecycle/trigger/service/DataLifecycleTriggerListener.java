@@ -166,10 +166,12 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			metadata.setEvictionDateInCompressedStorage(evictionDateTime);
 			metadata.setPathInCompressedStorage(obsKey);
 			metadata.setPersistentInCompressedStorage(this.isPersistentInCompressedStorage(obsKey));
+			metadata.setProductFamilyInCompressedStorage(inputEvent.getProductFamily());
 		} else {
 			metadata.setEvictionDateInUncompressedStorage(evictionDateTime);
 			metadata.setPathInUncompressedStorage(obsKey);
 			metadata.setPersistentInUncompressedStorage(this.isPersistentInUncompressedStorage(obsKey));
+			metadata.setProductFamilyInUncompressedStorage(inputEvent.getProductFamily());
 		}
 		
 		metadata.setAvailableInLta(this.isAvailableInLta(obsKey));

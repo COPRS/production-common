@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 /**
@@ -17,6 +18,8 @@ public class DataLifecycleMetadata {
 
 	public static enum FIELD_NAME {
 		PRODUCT_NAME("ProductName", DataLifecycleMetadata::getProductName), //
+		PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE("ProductFamilyInUncompressedStorage", DataLifecycleMetadata::getProductFamilyInUncompressedStorageAsString), //
+		PRODUCT_FAMILY_IN_COMPRESSED_STORAGE("ProductFamilyInCompressedStorage", DataLifecycleMetadata::getProductFamilyInCompressedStorageAsString), //
 		PATH_IN_UNCOMPRESSED_STORAGE("PathInUncompressedStorage", DataLifecycleMetadata::getPathInUncompressedStorage), //
 		PATH_IN_COMPRESSED_STORAGE("PathInCompressedStorage", DataLifecycleMetadata::getPathInCompressedStorage), //
 		EVICTION_DATE_IN_UNCOMPRESSED_STORAGE("EvictionDateInUncompressedStorage",
@@ -52,6 +55,12 @@ public class DataLifecycleMetadata {
 			if (PRODUCT_NAME.fieldName.equals(fieldName)) {
 				return PRODUCT_NAME;
 			}
+			if (PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE.fieldName.equals(fieldName)) {
+				return PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE;
+			}
+			if (PRODUCT_FAMILY_IN_COMPRESSED_STORAGE.fieldName.equals(fieldName)) {
+				return PRODUCT_FAMILY_IN_COMPRESSED_STORAGE;
+			}
 			if (PATH_IN_UNCOMPRESSED_STORAGE.fieldName.equals(fieldName)) {
 				return PATH_IN_UNCOMPRESSED_STORAGE;
 			}
@@ -85,6 +94,10 @@ public class DataLifecycleMetadata {
 
 	private String productName;
 
+	private ProductFamily productFamilyInUncompressedStorage;
+
+	private ProductFamily productFamilyInCompressedStorage;
+
 	private String pathInUncompressedStorage;
 	
 	private String pathInCompressedStorage;
@@ -110,10 +123,9 @@ public class DataLifecycleMetadata {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.productName, this.pathInUncompressedStorage, this.pathInCompressedStorage,
-				this.evictionDateInUncompressedStorage, this.evictionDateInCompressedStorage,
-				this.persistentInUncompressedStorage, this.persistentInCompressedStorage, this.availableInLta,
-				this.lastModified);
+		return Objects.hash(this.productName, this.productFamilyInUncompressedStorage, this.productFamilyInCompressedStorage, this.pathInUncompressedStorage,
+				this.pathInCompressedStorage, this.evictionDateInUncompressedStorage, this.evictionDateInCompressedStorage,
+				this.persistentInUncompressedStorage, this.persistentInCompressedStorage, this.availableInLta, this.lastModified);
 	}
 	
 	@Override
@@ -130,6 +142,8 @@ public class DataLifecycleMetadata {
 
 		final DataLifecycleMetadata other = (DataLifecycleMetadata) obj;
 		return Objects.equals(this.productName, other.productName)
+				&& Objects.equals(this.productFamilyInUncompressedStorage, other.productFamilyInUncompressedStorage)
+				&& Objects.equals(this.productFamilyInCompressedStorage, other.productFamilyInCompressedStorage)
 				&& Objects.equals(this.pathInUncompressedStorage, other.pathInUncompressedStorage)
 				&& Objects.equals(this.pathInCompressedStorage, other.pathInCompressedStorage)
 				&& Objects.equals(this.evictionDateInUncompressedStorage, other.evictionDateInUncompressedStorage)
@@ -166,6 +180,30 @@ public class DataLifecycleMetadata {
 
 	public void setProductName(String productName) {
 		this.productName = productName;
+	}
+
+	public ProductFamily getProductFamilyInUncompressedStorage() {
+		return this.productFamilyInUncompressedStorage;
+	}
+
+	public String getProductFamilyInUncompressedStorageAsString() {
+		return (null != this.productFamilyInUncompressedStorage) ? this.productFamilyInUncompressedStorage.name() : null;
+	}
+
+	public void setProductFamilyInUncompressedStorage(ProductFamily productFamilyInUncompressedStorage) {
+		this.productFamilyInUncompressedStorage = productFamilyInUncompressedStorage;
+	}
+
+	public ProductFamily getProductFamilyInCompressedStorage() {
+		return this.productFamilyInCompressedStorage;
+	}
+
+	public String getProductFamilyInCompressedStorageAsString() {
+		return (null != this.productFamilyInCompressedStorage) ? this.productFamilyInCompressedStorage.name() : null;
+	}
+
+	public void setProductFamilyInCompressedStorage(ProductFamily productFamilyInCompressedStorage) {
+		this.productFamilyInCompressedStorage = productFamilyInCompressedStorage;
 	}
 
 	public String getPathInUncompressedStorage() {
