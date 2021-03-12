@@ -22,7 +22,7 @@ public class DisseminationWorkerProperties {
 	private int maxRetries = 3;
 	private long tempoRetryMs = 1000;
 
-	private int obsMaxRetries = 100;
+	private int obsMaxRetries = 200;
 	private long obsTempoRetryMs = 10000;
 
 	private long pollingIntervalMs = 1000;

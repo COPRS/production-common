@@ -212,7 +212,7 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 	private List<ObsObject> assertExist(final List<DisseminationSource> files) throws InterruptedException {
 		return Retries.performWithRetries(() -> {
 			return this.assertExistInObs(files);
-		}, "assert files exist in OBS: " + files, this.config.getObsMaxRetries(), this.config.getObsTempoRetryMs());
+		}, "assert files exists in OBS: " + files, this.config.getObsMaxRetries(), this.config.getObsTempoRetryMs());
 	}
 
 	private List<ObsObject> assertExistInObs(final List<DisseminationSource> files)

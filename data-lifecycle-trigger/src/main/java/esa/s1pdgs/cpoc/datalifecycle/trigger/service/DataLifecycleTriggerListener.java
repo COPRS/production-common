@@ -166,10 +166,12 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			metadata.setEvictionDateInCompressedStorage(evictionDateTime);
 			metadata.setPathInCompressedStorage(obsKey);
 			metadata.setPersistentInCompressedStorage(this.isPersistentInCompressedStorage(obsKey));
+			metadata.setProductFamilyInCompressedStorage(inputEvent.getProductFamily());
 		} else {
 			metadata.setEvictionDateInUncompressedStorage(evictionDateTime);
 			metadata.setPathInUncompressedStorage(obsKey);
 			metadata.setPersistentInUncompressedStorage(this.isPersistentInUncompressedStorage(obsKey));
+			metadata.setProductFamilyInUncompressedStorage(inputEvent.getProductFamily());
 		}
 		
 		metadata.setAvailableInLta(this.isAvailableInLta(obsKey));
@@ -180,27 +182,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			LOG.error("error saving data lifecycle metadata for " + inputEvent.getProductFamily().name() + ": "
 					+ fileName + ": " + LogUtils.toString(e), e);
 		}
-	}
-
-	final EvictionManagementJob toEvictionManagementJob(
-			final E inputEvent, 
-			final List<RetentionPolicy> retentionPolicies,
-			final UUID reportingUid
-	) {
-		final EvictionManagementJob evictionManagementJob = new EvictionManagementJob();
-
-		final Date evictionDate = calculateEvictionDate(
-				retentionPolicies, 
-				inputEvent.getCreationDate(),
-				inputEvent.getProductFamily(), 
-				this.getFileName(inputEvent.getKeyObjectStorage())
-		);
-		evictionManagementJob.setProductFamily(inputEvent.getProductFamily());
-		evictionManagementJob.setKeyObjectStorage(inputEvent.getKeyObjectStorage());
-		evictionManagementJob.setEvictionDate(evictionDate);
-		evictionManagementJob.setUid(reportingUid);
-		evictionManagementJob.setUnlimited((evictionDate == null));
-		return evictionManagementJob;
 	}
 
 	final Date calculateEvictionDate(

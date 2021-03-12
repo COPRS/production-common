@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +14,6 @@ import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigur
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
-import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 
 public class DataLifecycleTriggerListenerTest {
@@ -80,82 +77,4 @@ public class DataLifecycleTriggerListenerTest {
 		Assert.assertEquals(Instant.parse("2000-01-05T00:00:00.00z"), evictionDate.toInstant());
 	}
 	
-	@Test
-	public void toEvictionManagementJob_EDRS_SESSSION() {
-		
-		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
-		final String obsKey = "L20191204153633245000201/DCS_02_L20191204153633245000201_ch2_DSDB_00027.raw";
-		final ProductFamily productFamily = ProductFamily.EDRS_SESSION;
-		
-		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
-		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
-		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
-		Assert.assertEquals(Date.from(Instant.parse("2000-01-05T00:00:00.00z")), evictionManagementJob.getEvictionDate());
-		Assert.assertEquals(false, evictionManagementJob.isUnlimited());
-		Assert.assertEquals(obsKey, evictionManagementJob.getKeyObjectStorage());
-	}
-	
-	@Test
-	public void toEvictionManagementJob_AUX_PP1() {
-		
-		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
-		final String obsKey = "S1A_AUX_PP1";
-		final ProductFamily productFamily = ProductFamily.AUXILIARY_FILE;
-		
-		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
-		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
-		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
-		Assert.assertEquals(null, evictionManagementJob.getEvictionDate());
-		Assert.assertEquals(true, evictionManagementJob.isUnlimited());
-		Assert.assertEquals(obsKey, evictionManagementJob.getKeyObjectStorage());
-	}
-	
-	@Test
-	public void toEvictionManagementJob_L2_ACN_ZIP() {
-		
-		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
-		final String obsKey = "S1B_S1_OCN__2SS.zip";
-		final ProductFamily productFamily = ProductFamily.L2_ACN_ZIP;
-		
-		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
-		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
-		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
-		Assert.assertEquals(Date.from(Instant.parse("2000-01-08T00:00:00.00z")), evictionManagementJob.getEvictionDate());
-		Assert.assertEquals(false, evictionManagementJob.isUnlimited());
-		Assert.assertEquals(obsKey, evictionManagementJob.getKeyObjectStorage());
-		
-	}
-	
-	@Test
-	public void toEvictionManagementJob_NOT_CONFIGURED() {
-		
-		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
-		final String obsKey = "S1A_S1_RAW__0SD";
-		final ProductFamily productFamily = ProductFamily.L0_SLICE;
-		
-		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
-		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
-		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
-		Assert.assertEquals(null, evictionManagementJob.getEvictionDate());
-		Assert.assertEquals(true, evictionManagementJob.isUnlimited());
-		Assert.assertEquals(obsKey, evictionManagementJob.getKeyObjectStorage());
-		
-	}
-
-	private IngestionEvent toInputEvent(final Date creationDate, final String obsKey, final ProductFamily productFamily) {
-		final IngestionEvent inputEvent = new IngestionEvent();
-		inputEvent.setCreationDate(creationDate);
-		inputEvent.setKeyObjectStorage(obsKey);
-		inputEvent.setProductFamily(productFamily);
-		return inputEvent;
-	}
-
 }

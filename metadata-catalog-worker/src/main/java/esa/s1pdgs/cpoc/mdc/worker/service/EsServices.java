@@ -1463,7 +1463,7 @@ public class EsServices {
 						p.add(lat);
 						footprint.add(p);
 					}
-				} else if  ("linestring".equalsIgnoreCase(type)) {
+				} else if ("linestring".equalsIgnoreCase(type)) {
 					for (final Object arr : firstArray) {
 						final List<Double> p = new ArrayList<>();
 						final List<Number> coords = (List<Number>) arr;

@@ -30,6 +30,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.EsClientConfiguration;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
@@ -200,7 +201,17 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName());
 		metadata.setEvictionDateInCompressedStorage(
 				(null != evictionDateInCompressedStorage) ? DateUtils.parse(evictionDateInCompressedStorage) : null);
-		
+
+		final String productFamilyInUncompressedStorage = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE.fieldName());
+		metadata.setProductFamilyInUncompressedStorage(
+				(null != productFamilyInUncompressedStorage) ? ProductFamily.fromValue(productFamilyInUncompressedStorage) : null);
+
+		final String productFamilyInCompressedStorage = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_COMPRESSED_STORAGE.fieldName());
+		metadata.setProductFamilyInCompressedStorage(
+				(null != productFamilyInCompressedStorage) ? ProductFamily.fromValue(productFamilyInCompressedStorage) : null);
+
 		final String lastModified = (String) sourceAsMap
 				.get(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName());
 		metadata.setLastModified((null != lastModified) ? DateUtils.parse(lastModified) : null);

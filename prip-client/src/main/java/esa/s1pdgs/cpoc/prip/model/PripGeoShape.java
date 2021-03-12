@@ -49,10 +49,10 @@ public class PripGeoShape {
 	public String toString() {
 		return toJson().toString();
 	}
-	
+
 	public JSONObject toJson() {
 		final JSONObject json = new JSONObject();
-		
+
 		List<List<List<Double>>> coordExportOuterList = new ArrayList<>();
 		List<List<Double>> coordExportInnerList = new ArrayList<>();
 		coordExportOuterList.add(coordExportInnerList);
@@ -62,10 +62,14 @@ public class PripGeoShape {
 			p.add(coords.getLatitude());
 			coordExportInnerList.add(p);
 		}
-		
+
 		json.put(FIELD_NAMES.TYPE.fieldName, this.type.shapeName());
-		json.put(FIELD_NAMES.COORDINATES.fieldName, coordExportOuterList);
-		
+
+		if (GeoShapeType.LINESTRING.equals(this.type)) {
+			json.put(FIELD_NAMES.COORDINATES.fieldName, coordExportInnerList);
+		} else if (GeoShapeType.POLYGON.equals(this.type)) {
+			json.put(FIELD_NAMES.COORDINATES.fieldName, coordExportOuterList);
+		}
 		return json;
 	}
 
@@ -130,7 +134,7 @@ public class PripGeoShape {
 	public void setCoordinates(List<PripGeoCoordinate> coordinates) {
 		this.coordinates = coordinates;
 	}
-	
+
 	public int getSRID() {
 		return 4326; // EPSG-Code for WGS84 (Elasticsearch uses WGS-84 coordinates only)
 	}
