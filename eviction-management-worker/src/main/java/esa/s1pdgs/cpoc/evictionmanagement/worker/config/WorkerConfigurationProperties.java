@@ -11,7 +11,7 @@ public class WorkerConfigurationProperties {
 	
 	private long pollingIntervalMs = 1000;
 	private long pollingInitialDelayMs = 5000;
-	
+	private String hostname;
 	
 	public long getPollingIntervalMs() {
 		return pollingIntervalMs;
@@ -24,6 +24,12 @@ public class WorkerConfigurationProperties {
 	}
 	public void setPollingInitialDelayMs(long pollingInitialDelayMs) {
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
+	}
+	public String getHostname() {
+		return hostname;
+	}
+	public void setHostname(final String hostname) {
+		this.hostname = hostname;
 	}
 
 }

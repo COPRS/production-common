@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.evictionmanagement.worker.service;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.evictionmanagement.worker.config.WorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
@@ -40,6 +43,7 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 	private final GenericMqiClient mqiClient;
 	private final List<MessageFilter> messageFilter;
 	private final ObsClient obsClient;
+	private final ErrorRepoAppender errorAppender;
 	private final WorkerConfigurationProperties workerConfig;
 	
 	@Autowired
@@ -48,12 +52,14 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 			final GenericMqiClient mqiClient,
 			final List<MessageFilter> messageFilter,
 			final ObsClient obsClient,
+			final ErrorRepoAppender errorAppender,
 			final WorkerConfigurationProperties workerConfig) {
 		
 		this.appStatus = appStatus;
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
 		this.obsClient = obsClient;
+		this.errorAppender = errorAppender;
 		this.workerConfig = workerConfig;
 	}
 	
@@ -69,7 +75,7 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 	@Override
 	public MqiMessageEventHandler onMessage(final GenericMessageDto<EvictionManagementJob> inputMessage) {
 		
-		LOG.debug("starting eviction, got message: {}", inputMessage);
+		LOG.debug("Starting eviction, got message: {}", inputMessage);
 		final EvictionManagementJob evictionJob = inputMessage.getBody();
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
@@ -85,9 +91,15 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 				.onSuccess(res -> reporting.end(
 						new ReportingMessage("Eviction of %s was successful", evictionJob.getKeyObjectStorage())
 				))
-				.onError(e  -> reporting.error(new ReportingMessage(
-						"Error evicting %s: %s", evictionJob.getKeyObjectStorage(), LogUtils.toString(e)
-				)))
+				.onError(e  -> {
+					final String errorMessage = String.format("Error evicting %s: %s", evictionJob.getKeyObjectStorage(), LogUtils.toString(e));
+					reporting.error(new ReportingMessage(errorMessage));
+					LOG.error(errorMessage);
+					errorAppender.send(
+							new FailedProcessingDto(workerConfig.getHostname(), new Date(), errorMessage, inputMessage)
+							);
+					}
+				)
 				.publishMessageProducer(() -> {
 					evict(evictionJob);
 					return createOutputMessage(inputMessage.getId(), evictionJob);
