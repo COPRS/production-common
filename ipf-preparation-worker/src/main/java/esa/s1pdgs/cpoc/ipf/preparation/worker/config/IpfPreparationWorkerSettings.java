@@ -116,8 +116,39 @@ public class IpfPreparationWorkerSettings {
 					+ ", waitingFromIngestionInSeconds=" + waitingFromIngestionInSeconds + "]";
 		}
 	}
+	
+	public static class LatenessConfig {
+		private long lateAfterMilliseconds;
+		private String inputTopic;
+		private String lateTopic;
+		public long getLateAfterMilliseconds() {
+			return lateAfterMilliseconds;
+		}
+		public void setLateAfterMilliseconds(final long lateAfterMilliseconds) {
+			this.lateAfterMilliseconds = lateAfterMilliseconds;
+		}
+		public String getInputTopic() {
+			return inputTopic;
+		}
+		public void setInputTopic(final String inputTopic) {
+			this.inputTopic = inputTopic;
+		}
+		public String getLateTopic() {
+			return lateTopic;
+		}
+		public void setLateTopic(final String lateTopic) {
+			this.lateTopic = lateTopic;
+		}
+		@Override
+		public String toString() {
+			return "LatenessConfig [lateAfterMilliseconds=" + lateAfterMilliseconds + ", inputTopic=" + inputTopic
+					+ ", lateTopic=" + lateTopic + "]";
+		}
+	}
 
 	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
+	
+	private List<LatenessConfig> latenessConfig = new ArrayList<>();
 
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
 	
@@ -126,7 +157,15 @@ public class IpfPreparationWorkerSettings {
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
 	}
+	
+	public List<LatenessConfig> getLatenessConfig() {
+		return latenessConfig;
+	}
 
+	public void setLatenessConfig(final List<LatenessConfig> latenessConfig) {
+		this.latenessConfig = latenessConfig;
+	}
+	
 	public void setProductCategories(final Map<ProductCategory, CategoryConfig> productCategories) {
 		this.productCategories = productCategories;
 	}

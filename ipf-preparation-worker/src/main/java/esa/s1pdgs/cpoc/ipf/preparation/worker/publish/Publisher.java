@@ -4,6 +4,8 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +20,9 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.config.IpfPreparationWorkerSettings.LatenessConfig;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
@@ -172,9 +176,34 @@ public class Publisher {
 	private void publishJob(final AppDataJob job, final IpfExecutionJob execJob) throws AbstractCodedException {
 		LOGGER.info("Publishing job {} (product {})", job.getId(), job.getProductName());
 		final GenericPublicationMessageDto<IpfExecutionJob> messageToPublish = new GenericPublicationMessageDto<>(
-				job.getPrepJobMessage().getId(), execJob.getProductFamily(), execJob);
-		messageToPublish.setInputKey(job.getPrepJobMessage().getInputKey());
+				job.getPrepJobMessage().getId(), 
+				execJob.getProductFamily(), 
+				execJob
+		);
+		
+		messageToPublish.setInputKey(inputKeyOf(job));		
 		messageToPublish.setOutputKey(execJob.getProductFamily().name());
+		
 		mqiClient.publish(messageToPublish, ProductCategory.LEVEL_JOBS);
+	}
+	
+	private final String inputKeyOf(final AppDataJob job) {
+		// S1PRO-2521: check if job is 'late' and needs to be put into the corresponding 
+		// kafka topic
+		final String inputKey = job.getPrepJobMessage().getInputKey();
+		
+		for (final LatenessConfig config : prepperSettings.getLatenessConfig()) {
+			if (config.getInputTopic().equals(inputKey)) {
+				LOGGER.debug("Found {} for job {}", config, job.getId());
+				final LocalDateTime endTime = DateUtils.parse(job.getStopTime());
+				
+				// is request late?
+				if (LocalDateTime.now().isAfter(endTime.plus(config.getLateAfterMilliseconds(), ChronoUnit.MILLIS))) {
+					LOGGER.info("job {} is late and will be handled with a low priority");
+					return config.getLateTopic();
+				}
+			}
+		}		
+		return inputKey;
 	}
 }
