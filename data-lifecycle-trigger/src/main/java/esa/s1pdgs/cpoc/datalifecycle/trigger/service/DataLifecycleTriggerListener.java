@@ -184,27 +184,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		}
 	}
 
-	final EvictionManagementJob toEvictionManagementJob(
-			final E inputEvent, 
-			final List<RetentionPolicy> retentionPolicies,
-			final UUID reportingUid
-	) {
-		final EvictionManagementJob evictionManagementJob = new EvictionManagementJob();
-
-		final Date evictionDate = calculateEvictionDate(
-				retentionPolicies, 
-				inputEvent.getCreationDate(),
-				inputEvent.getProductFamily(), 
-				this.getFileName(inputEvent.getKeyObjectStorage())
-		);
-		evictionManagementJob.setProductFamily(inputEvent.getProductFamily());
-		evictionManagementJob.setKeyObjectStorage(inputEvent.getKeyObjectStorage());
-		evictionManagementJob.setEvictionDate(evictionDate);
-		evictionManagementJob.setUid(reportingUid);
-		evictionManagementJob.setUnlimited((evictionDate == null));
-		return evictionManagementJob;
-	}
-
 	final Date calculateEvictionDate(
 			final List<RetentionPolicy> retentionPolicies, 
 			final Date creationDate, 
