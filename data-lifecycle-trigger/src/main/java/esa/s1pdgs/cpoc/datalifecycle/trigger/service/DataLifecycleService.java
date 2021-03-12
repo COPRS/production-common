@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
@@ -42,5 +43,13 @@ public interface DataLifecycleService {
 	DataLifecycleMetadata updateRetention(String productname, LocalDateTime evictionTimeInCompressedStorage,
 			LocalDateTime evictionTimeInUncompressedStorage, String operatorName)
 					throws DataLifecycleMetadataRepositoryException;
+
+	List<DataLifecycleMetadata> getProducts(String namePattern, boolean persistentInUncompressedStorage, LocalDateTime minimalEvictionTimeInUncompressedStorage,
+			LocalDateTime maximalEvictionTimeInUncompressedStorage, boolean persistentIncompressedStorage, LocalDateTime minimalEvictionTimeInCompressedStorage,
+			LocalDateTime maximalEvictionTimeInCompressedStorage, boolean availableInLta, Integer pageSize, Integer pageNumber);
+
+	List<DataLifecycleMetadata> getProducts(List<String> productnames);
+
+	DataLifecycleMetadata getProduct(String productname);
 
 }
