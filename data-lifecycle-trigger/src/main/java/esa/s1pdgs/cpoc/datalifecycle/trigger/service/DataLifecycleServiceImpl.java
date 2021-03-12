@@ -120,7 +120,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 			evictionJobUncompressed.setKeyObjectStorage(pathInUncompressedStorage);
 			// TODO @MSc: evictionJobUncompressed.setProductFamily(productFamily);
-			evictionJobUncompressed.setOperatorName(operatorName);
+			// TODO @MSc: evictionJobUncompressed.setOperatorName(operatorName);
 
 			evictionJobs.add(evictionJobUncompressed);
 			LOG.debug("will evict product from uncompressed storage: " + dataLifecycleMetadata);
@@ -138,7 +138,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 			evictionJobCompressed.setKeyObjectStorage(pathInCompressedStorage);
 			// TODO @MSc: evictionJobCompressed.setProductFamily(productFamily);
-			evictionJobCompressed.setOperatorName(operatorName);
+			// TODO @MSc: evictionJobCompressed.setOperatorName(operatorName);
 
 			evictionJobs.add(evictionJobCompressed);
 			LOG.debug("will evict product from compressed storage: " + dataLifecycleMetadata);
