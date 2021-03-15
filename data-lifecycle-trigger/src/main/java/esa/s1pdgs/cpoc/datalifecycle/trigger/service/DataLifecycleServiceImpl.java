@@ -11,55 +11,60 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
+import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
+import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 @Service
 public class DataLifecycleServiceImpl implements DataLifecycleService {
 	private static final Logger LOG = LogManager.getLogger(DataLifecycleServiceImpl.class);
 
 	private final DataLifecycleMetadataRepository lifecycleMetadataRepo;
+	private final MqiClient mqiClient;
 
 	// --------------------------------------------------------------------------
 
 	@Autowired
-	public DataLifecycleServiceImpl(final DataLifecycleMetadataRepository lifecycleMetadataRepo) {
+	public DataLifecycleServiceImpl(final DataLifecycleMetadataRepository lifecycleMetadataRepo, final MqiClient mqiClient) {
 		this.lifecycleMetadataRepo = lifecycleMetadataRepo;
+		this.mqiClient = mqiClient;
 	}
 
 	// --------------------------------------------------------------------------
 
 	@Override
-	public void evict(String operatorName) throws DataLifecycleMetadataRepositoryException {
+	public void evict(String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
 		LOG.debug("starting general eviction request ...");
 		// TODO @MSc: impl
 	}
 
 	@Override
 	public void evict(String productname, boolean forceCompressed, boolean forceUncompressed, String operatorName)
-			throws DataLifecycleMetadataRepositoryException, DataLifecycleMetadataNotFoundException {
+			throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleMetadataNotFoundException {
 		LOG.debug("starting eviction request for '" + productname + "' (forceCompressed=" + forceCompressed + ", forceUncompressed=" + forceUncompressed + ")");
 
-		final DataLifecycleMetadata lifecycleMetadata;
 		try {
-			lifecycleMetadata = this.getAndCheckExists(productname);
+			final DataLifecycleMetadata lifecycleMetadata = this.getAndCheckExists(productname);
+			this.evict(lifecycleMetadata, forceCompressed, forceUncompressed, operatorName);
 		} catch (final DataLifecycleMetadataNotFoundException e) {
 			LOG.info("cannot evict product: " + e.getMessage());
 			throw e;
-		} catch (final DataLifecycleMetadataRepositoryException e) {
+		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
 			LOG.error("error on evicting product: " + e.getMessage());
 			throw e;
 		}
-
-		this.evict(lifecycleMetadata, forceCompressed, forceUncompressed, operatorName);
 	}
 
 	@Override
 	public DataLifecycleMetadata updateRetention(String productname, LocalDateTime evictionTimeInCompressedStorage,
-			LocalDateTime evictionTimeInUncompressedStorage, String operatorName) throws DataLifecycleMetadataRepositoryException {
+			LocalDateTime evictionTimeInUncompressedStorage, String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
 		// TODO @MSc: impl
 		return null;
 	}
@@ -105,8 +110,8 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		}
 	}
 
-	private DataLifecycleMetadata evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,
-			String operatorName) {
+	private void evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,
+			String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
 		final List<EvictionManagementJob> evictionJobs = new ArrayList<>();
 		final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
@@ -116,11 +121,17 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		if (StringUtil.isNotBlank(pathInUncompressedStorage)
 				&& (forceUncompressed || (null != evictionDateInUncompressedStorage && now.isAfter(evictionDateInUncompressedStorage)))) {
+			final ProductFamily productFamilyInUncompressedStorage = dataLifecycleMetadata.getProductFamilyInUncompressedStorage();
+			if (null == productFamilyInUncompressedStorage || ProductFamily.BLANK == productFamilyInUncompressedStorage) {
+				throw new DataLifecycleTriggerInternalServerErrorException(
+						"error evicting product, no valid product family found for uncompressed storage for: " + dataLifecycleMetadata);
+			}
+
 			final EvictionManagementJob evictionJobUncompressed = new EvictionManagementJob();
 
 			evictionJobUncompressed.setKeyObjectStorage(pathInUncompressedStorage);
-			// TODO @MSc: evictionJobUncompressed.setProductFamily(productFamily);
-			// TODO @MSc: evictionJobUncompressed.setOperatorName(operatorName);
+			evictionJobUncompressed.setProductFamily(productFamilyInUncompressedStorage);
+			evictionJobUncompressed.setOperatorName(operatorName);
 
 			evictionJobs.add(evictionJobUncompressed);
 			LOG.debug("will evict product from uncompressed storage: " + dataLifecycleMetadata);
@@ -134,11 +145,17 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		if (StringUtil.isNotBlank(pathInCompressedStorage)
 				&& (forceUncompressed || (null != evictionDateInCompressedStorage && now.isAfter(evictionDateInCompressedStorage)))) {
+			final ProductFamily productFamilyInCompressedStorage = dataLifecycleMetadata.getProductFamilyInCompressedStorage();
+			if (null == productFamilyInCompressedStorage || ProductFamily.BLANK == productFamilyInCompressedStorage) {
+				throw new DataLifecycleTriggerInternalServerErrorException(
+						"error evicting product, no valid product family found for compressed storage for: " + dataLifecycleMetadata);
+			}
+
 			final EvictionManagementJob evictionJobCompressed = new EvictionManagementJob();
 
 			evictionJobCompressed.setKeyObjectStorage(pathInCompressedStorage);
-			// TODO @MSc: evictionJobCompressed.setProductFamily(productFamily);
-			// TODO @MSc: evictionJobCompressed.setOperatorName(operatorName);
+			evictionJobCompressed.setProductFamily(productFamilyInCompressedStorage);
+			evictionJobCompressed.setOperatorName(operatorName);
 
 			evictionJobs.add(evictionJobCompressed);
 			LOG.debug("will evict product from compressed storage: " + dataLifecycleMetadata);
@@ -146,9 +163,21 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			LOG.debug("cannot evict product from compressed storage: " + dataLifecycleMetadata);
 		}
 
-		// TODO @MSc: EvictionManagementJob(s) abschicken über mqiclient (dazu brauch man product family)
+		// publish jobs
+		for (final EvictionManagementJob job : evictionJobs) {
+			try {
+				this.publishEvictionJob(job);
+			} catch (final AbstractCodedException e) {
+				throw new DataLifecycleTriggerInternalServerErrorException("error publishing eviction management job: " + job, e);
+			}
+		}
+	}
 
-		return null;
+	private void publishEvictionJob(final EvictionManagementJob job) throws AbstractCodedException {
+		final GenericPublicationMessageDto<EvictionManagementJob> message = new GenericPublicationMessageDto<>(job.getProductFamily(), job);
+		final ProductCategory productCategory = ProductCategory.of(job.getProductFamily());
+
+		this.mqiClient.publish(message, productCategory);
 	}
 
 }
