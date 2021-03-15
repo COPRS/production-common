@@ -356,6 +356,7 @@
 		<module>data-lifecycle-trigger</module>
 		<module>data-request-worker</module>
 		<module>eviction-management-worker</module>
+		<module>data-lifecycle-rest</module>
 		<module>validation</module>
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
