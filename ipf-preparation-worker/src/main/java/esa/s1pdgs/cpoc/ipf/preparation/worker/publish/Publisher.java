@@ -196,10 +196,12 @@ public class Publisher {
 			if (config.getInputTopic().equals(inputKey)) {
 				LOGGER.debug("Found {} for job {}", config, job.getId());
 				final LocalDateTime endTime = DateUtils.parse(job.getStopTime());
+				final LocalDateTime timeoutAt = endTime.plus(config.getLateAfterMilliseconds(), ChronoUnit.MILLIS);
 				
 				// is request late?
-				if (LocalDateTime.now().isAfter(endTime.plus(config.getLateAfterMilliseconds(), ChronoUnit.MILLIS))) {
-					LOGGER.info("job {} is late and will be handled with a low priority");
+				if (LocalDateTime.now().isAfter(timeoutAt)) {
+					LOGGER.info("job {} is late at {} and will be handled with a low priority", 
+							job.getId(), DateUtils.formatToMetadataDateTimeFormat(timeoutAt));
 					return config.getLateTopic();
 				}
 			}
