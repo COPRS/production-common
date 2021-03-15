@@ -62,7 +62,7 @@ public class DataLifecycleTriggerRestControllerTest {
 		return dataLifecycleMetadataToReturn;
 	}
 	
-//	@Test
+	@Test
 	public void test_getProduct_200() throws Exception {
 		doReturn(Collections.singletonList(newDataLifecycleMetadata()))
 			.when(service)

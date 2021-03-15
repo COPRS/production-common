@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleMetadataNotFoundException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleService;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleTriggerInternalServerErrorException;
 
 public class DataLifecycleServiceDelegator {
 
@@ -68,7 +69,7 @@ public class DataLifecycleServiceDelegator {
 	 * @throws DataLifecycleMetadataRepositoryException 
 	 * @see DataLifecycleTriggerRestController#deleteProducts(String, String)
 	 */
-	public void deleteProducts(String operatorName) throws DataLifecycleMetadataRepositoryException {
+	public void deleteProducts(String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
 		this.dataLifecycleService.evict(operatorName);
 	}
 
@@ -88,12 +89,12 @@ public class DataLifecycleServiceDelegator {
 
 	/**
 	 * @throws DataLifecycleMetadataNotFoundException
-	 * @throws DataLifecycleMetadataRepositoryException 
+	 * @throws DataLifecycleTriggerInternalServerErrorException 
 	 * @see DataLifecycleTriggerRestController#deleteProduct(String, String,
 	 *      boolean, boolean, String)
 	 */
 	public void deleteProduct(String productname, boolean forceCompressed, boolean forceUncompressed,
-			String operatorName) throws DataLifecycleMetadataNotFoundException, DataLifecycleMetadataRepositoryException {
+			String operatorName) throws DataLifecycleMetadataNotFoundException, DataLifecycleTriggerInternalServerErrorException {
 		this.dataLifecycleService.evict(productname, forceCompressed, forceUncompressed, operatorName);
 	}
 
@@ -102,7 +103,7 @@ public class DataLifecycleServiceDelegator {
 	 * @see DataLifecycleTriggerRestController#patchProduct(String, String, ProductPatchDto)
 	 */
 	public Product patchProduct(String productname, String operatorName, String evictionTimeInUncompressedStorage,
-			String evictionTimeInCompressedStorage) throws DataLifecycleMetadataRepositoryException {
+			String evictionTimeInCompressedStorage) throws DataLifecycleTriggerInternalServerErrorException {
 		return convertToProduct(
 				this.dataLifecycleService.updateRetention(productname, convertDateTime(evictionTimeInCompressedStorage),
 						convertDateTime(evictionTimeInUncompressedStorage), operatorName));

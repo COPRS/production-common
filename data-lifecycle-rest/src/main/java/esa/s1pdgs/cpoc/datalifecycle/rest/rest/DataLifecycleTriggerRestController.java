@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.datalifecycle.rest.rest.model.ProductPostDto;
 import esa.s1pdgs.cpoc.datalifecycle.rest.service.DataLifecycleServiceDelegator;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleMetadataNotFoundException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleTriggerInternalServerErrorException;
 
 @RestController
 @RequestMapping("api/v1")
@@ -124,7 +125,7 @@ public class DataLifecycleTriggerRestController {
 
 		try {
 			dataLifecycleServiceDelegator.deleteProducts(operatorName);
-		} catch (DataLifecycleMetadataRepositoryException e) {
+		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -176,7 +177,7 @@ public class DataLifecycleTriggerRestController {
 			dataLifecycleServiceDelegator.deleteProduct(productname, forceCompressed, forceUncompressed, operatorName);
 		} catch (DataLifecycleMetadataNotFoundException e) {
 			assertProductFound(null, productname);
-		} catch (DataLifecycleMetadataRepositoryException e) {
+		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			LOGGER.error("internal server error: " + productname, e);
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -207,7 +208,7 @@ public class DataLifecycleTriggerRestController {
 			result = dataLifecycleServiceDelegator.patchProduct(productname, productPatch.getOperatorName(),
 					productPatch.getEvictionTimeInUncompressedStorage(),
 					productPatch.getEvictionTimeInCompressedStorage());
-		} catch (DataLifecycleMetadataRepositoryException e) {
+		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
