@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: s1pro-core-data-lifecycle-rest
+  main:
+     allow-bean-definition-overriding: true
+   
+logging:
+  config: classpath:log4j2-test.yml
+
+# REST controller
+server:
+  port: 8080      
+
+# OpenAPI validator
+openapi:
+  disable-validation: true
+  path-exclusion-regex: ^\/(app\/status|error)$
+  spec-file: src/test/resources/s1pro-api_openapi.yaml
+
