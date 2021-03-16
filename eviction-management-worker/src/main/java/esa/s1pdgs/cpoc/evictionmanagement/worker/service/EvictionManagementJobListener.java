@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -130,8 +131,7 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 	}
 
 	private void evict(EvictionManagementJob evictionJob) throws Exception {
-		// TODO Auto-generated method stub
-
+		obsClient.delete(new ObsObject(evictionJob.getProductFamily(), evictionJob.getKeyObjectStorage()));
 	}
 
 }
