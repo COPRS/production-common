@@ -299,7 +299,7 @@ public class TaskTableAdapter {
 		);
 	}
 	
-	private String convertDateToJobOrderFormat(final String metadataFormat) {
+	public static String convertDateToJobOrderFormat(final String metadataFormat) {
 		return DateUtils.convertToAnotherFormat(
 				metadataFormat,
 				AbstractMetadata.METADATA_DATE_FORMATTER,

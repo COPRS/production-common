@@ -1,15 +1,12 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
 import java.sql.Date;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -32,7 +29,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
-import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AspProperties;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
@@ -41,6 +37,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableFactory;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
 
 @RunWith(SpringRunner.class)
@@ -177,19 +174,22 @@ public class L0SegmentTypeAdapterTest {
 	public void testNonRFProductionWithOlderAndNewerFullSegments()
 			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
 
-		Instant insertionTime = Instant.now();
+		final LocalDateTime insertionTime = LocalDateTime.now();
 
-		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
-		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
+		final String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
+		final String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
 
 		metadata_IW_VV_02F9CE_FULL_1.setInsertionTime(metadataInsertionTime1);
 		metadata_IW_VV_02F9CE_FULL_2.setInsertionTime(metadataInsertionTime2);
 		metadata_IW_VH_02F9CE_FULL_1.setInsertionTime(metadataInsertionTime1);
 		metadata_IW_VH_02F9CE_FULL_2.setInsertionTime(metadataInsertionTime2);
 
-		AppDataJob appDataJob1 = new AppDataJob(123L);
-		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
-		AppDataJobProduct product1 = new AppDataJobProduct();
+		final AppDataJob appDataJob1 = new AppDataJob(123L);
+				
+		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)
+				.atZone(ZoneId.of("UTC")).toInstant()));
+
+		final AppDataJobProduct product1 = new AppDataJobProduct();
 		product1.getMetadata().put("startTime", "2021-01-04T09:17:09.187813Z");
 		product1.getMetadata().put("productName",
 				"S1B_IW_RAW__0SVV_20210104T091709_20210104T091833_025002_02F9CE_17E4.SAFE");
@@ -197,7 +197,8 @@ public class L0SegmentTypeAdapterTest {
 		product1.getMetadata().put("dataTakeId", "02F9CE");
 		appDataJob1.setProduct(product1);
 
-		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_FULL_1, metadata_IW_VV_02F9CE_FULL_2)).when(metadataClient)
+		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_FULL_1, metadata_IW_VV_02F9CE_FULL_2))
+			.when(metadataClient)
 				.getLevelSegments("02F9CE");
 
 		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
@@ -215,7 +216,7 @@ public class L0SegmentTypeAdapterTest {
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 			fail("Missing inputs, exception shall be thrown!");
-		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+		} catch (final IpfPrepWorkerInputsMissingException missingEx) {
 			// Expected
 		}
 
@@ -240,7 +241,7 @@ public class L0SegmentTypeAdapterTest {
 
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
-		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+		} catch (final IpfPrepWorkerInputsMissingException missingEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
 	}
@@ -257,19 +258,20 @@ public class L0SegmentTypeAdapterTest {
 	public void testNonRFProductionWithOlderAndNewerPartialSegments()
 			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
 
-		Instant insertionTime = Instant.now();
+		final LocalDateTime insertionTime = LocalDateTime.now();
 
-		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
-		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
+		final String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
+		final String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
 
 		metadata_IW_VV_02F9CE_PART_1.setInsertionTime(metadataInsertionTime1);
 		metadata_IW_VV_02F9CE_PART_2.setInsertionTime(metadataInsertionTime2);
 		metadata_IW_VH_02F9CE_PART_1.setInsertionTime(metadataInsertionTime1);
 		metadata_IW_VH_02F9CE_PART_2.setInsertionTime(metadataInsertionTime2);
 
-		AppDataJob appDataJob1 = new AppDataJob(123L);
-		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
-		AppDataJobProduct product1 = new AppDataJobProduct();
+		final AppDataJob appDataJob1 = new AppDataJob(123L);				
+		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)
+				.atZone(ZoneId.of("UTC")).toInstant()));
+		final AppDataJobProduct product1 = new AppDataJobProduct();
 		product1.getMetadata().put("startTime", "2021-01-04T09:17:09.187813Z");
 		product1.getMetadata().put("productName",
 				"S1B_IW_RAW__0SVV_20210104T091709_20210104T091825_025002_02F9CE_12AB.SAFE");
@@ -280,11 +282,11 @@ public class L0SegmentTypeAdapterTest {
 		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_PART_1, metadata_IW_VV_02F9CE_PART_2, metadata_IW_VH_02F9CE_PART_1,
 				metadata_IW_VH_02F9CE_PART_2)).when(metadataClient).getLevelSegments("02F9CE");
 
-		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		final Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
 		appDataJob1.setProduct(product.toProduct());
 		appDataJob1.setAdditionalInputs(product.overridingInputs());
 
-		Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
+		final Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -299,7 +301,7 @@ public class L0SegmentTypeAdapterTest {
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 			fail("Missing inputs, exception shall be thrown!");
-		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+		} catch (final IpfPrepWorkerInputsMissingException missingEx) {
 			// Expected
 		}
 
@@ -318,19 +320,20 @@ public class L0SegmentTypeAdapterTest {
 	public void testNonRFProductionWithOlderAndNewerFullAndPartialSegments()
 			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
 
-		Instant insertionTime = Instant.now();
+		final LocalDateTime insertionTime = LocalDateTime.now();
 
-		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
-		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
+		final String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
+		final String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
 
 		metadata_IW_VV_02F9CE_FULL_1.setInsertionTime(metadataInsertionTime2);
 		metadata_IW_VV_02F9CE_FULL_2.setInsertionTime(metadataInsertionTime1);
 		metadata_IW_VH_02F9CE_FULL_1.setInsertionTime(metadataInsertionTime2);
 		metadata_IW_VH_02F9CE_PART_1.setInsertionTime(metadataInsertionTime1);
 
-		AppDataJob appDataJob1 = new AppDataJob(123L);
-		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
-		AppDataJobProduct product1 = new AppDataJobProduct();
+		final AppDataJob appDataJob1 = new AppDataJob(123L);		
+		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)
+				.atZone(ZoneId.of("UTC")).toInstant()));
+		final AppDataJobProduct product1 = new AppDataJobProduct();
 		product1.getMetadata().put("startTime", "2021-01-04T09:17:09.187813Z");
 		product1.getMetadata().put("productName",
 				"S1B_IW_RAW__0SVV_20210104T091709_20210104T091833_025002_02F9CE_4F09.SAFE");
@@ -338,8 +341,9 @@ public class L0SegmentTypeAdapterTest {
 		product1.getMetadata().put("dataTakeId", "02F9CE");
 		appDataJob1.setProduct(product1);
 
-		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_FULL_2, metadata_IW_VH_02F9CE_PART_1)).when(metadataClient)
-				.getLevelSegments("02F9CE");
+		doReturn(Arrays.asList(metadata_IW_VV_02F9CE_FULL_2, metadata_IW_VH_02F9CE_PART_1))
+			.when(metadataClient)
+			.getLevelSegments("02F9CE");
 
 		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
 		appDataJob1.setProduct(product.toProduct());
@@ -360,7 +364,7 @@ public class L0SegmentTypeAdapterTest {
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 			fail("Missing inputs, exception shall be thrown!");
-		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+		} catch (final IpfPrepWorkerInputsMissingException missingEx) {
 			// Expected
 		}
 
@@ -387,7 +391,7 @@ public class L0SegmentTypeAdapterTest {
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 			assertEquals(2, appDataJob1.getAdditionalInputs().size());
-		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+		} catch (final IpfPrepWorkerInputsMissingException missingEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
 	}
@@ -404,19 +408,20 @@ public class L0SegmentTypeAdapterTest {
 	public void testRFProductionWithOlderAndNewerFullSegments()
 			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
 
-		Instant insertionTime = Instant.now();
+		final LocalDateTime insertionTime = LocalDateTime.now();
 
-		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
-		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
+		final String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
+		final String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
 
 		metadata_RF_VV_043734_FULL_1.setInsertionTime(metadataInsertionTime1);
 		metadata_RF_VV_043734_FULL_2.setInsertionTime(metadataInsertionTime2);
 		metadata_RF_VH_043734_FULL_1.setInsertionTime(metadataInsertionTime1);
 		metadata_RF_VH_043734_FULL_2.setInsertionTime(metadataInsertionTime2);
 
-		AppDataJob appDataJob1 = new AppDataJob(123L);
-		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
-		AppDataJobProduct product1 = new AppDataJobProduct();
+		final AppDataJob appDataJob1 = new AppDataJob(123L);
+		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)
+				.atZone(ZoneId.of("UTC")).toInstant()));
+		final AppDataJobProduct product1 = new AppDataJobProduct();
 		product1.getMetadata().put("startTime", "2021-01-04T07:19:10.000000Z");
 		product1.getMetadata().put("productName",
 				"S1A_RF_RAW__0SVV_20210104T071910_20210104T071912_035985_043734_C9E3.SAFE");
@@ -442,7 +447,7 @@ public class L0SegmentTypeAdapterTest {
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 			fail("Missing inputs, exception shall be thrown!");
-		} catch (DiscardedException discardedEx) {
+		} catch (final DiscardedException discardedEx) {
 			// Expected
 		}
 
@@ -469,9 +474,9 @@ public class L0SegmentTypeAdapterTest {
 
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
-		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+		} catch (final IpfPrepWorkerInputsMissingException missingEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
-		} catch (DiscardedException discardedEx) {
+		} catch (final DiscardedException discardedEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
 	}
@@ -488,11 +493,11 @@ public class L0SegmentTypeAdapterTest {
 	public void testRFProductionWithOlderAndNewerPartialSegments()
 			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
 
-		Instant insertionTime = Instant.now();
+		final LocalDateTime insertionTime = LocalDateTime.now();
 
-		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
-		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
-		String metadataInsertionTime3 = toMetadataDateFormat(insertionTime.plusSeconds(180));
+		final String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
+		final String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
+		final String metadataInsertionTime3 = toMetadataDateFormat(insertionTime.plusSeconds(180));
 
 		metadata_RF_VV_043734_PART_1.setInsertionTime(metadataInsertionTime1);
 		metadata_RF_VV_043734_PART_2.setInsertionTime(metadataInsertionTime2);
@@ -500,9 +505,10 @@ public class L0SegmentTypeAdapterTest {
 		metadata_RF_VH_043734_PART_1.setInsertionTime(metadataInsertionTime1);
 		metadata_RF_VH_043734_PART_2.setInsertionTime(metadataInsertionTime2);
 
-		AppDataJob appDataJob1 = new AppDataJob(123L);
-		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
-		AppDataJobProduct product1 = new AppDataJobProduct();
+		final AppDataJob appDataJob1 = new AppDataJob(123L);
+		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)
+				.atZone(ZoneId.of("UTC")).toInstant()));
+		final AppDataJobProduct product1 = new AppDataJobProduct();
 		product1.getMetadata().put("startTime", "2021-01-04T07:19:10.000000Z");
 		product1.getMetadata().put("productName",
 				"S1A_RF_RAW__0SVV_20210104T071910_20210104T071911_035985_043734_A9E3.SAFE");
@@ -528,7 +534,7 @@ public class L0SegmentTypeAdapterTest {
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 			fail("Missing inputs, exception shall be thrown!");
-		} catch (DiscardedException discardedEx) {
+		} catch (final DiscardedException discardedEx) {
 			// Expected
 		}
 
@@ -551,7 +557,7 @@ public class L0SegmentTypeAdapterTest {
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
 			fail("Missing inputs, exception shall be thrown!");
-		} catch (DiscardedException discardedEx) {
+		} catch (final DiscardedException discardedEx) {
 			// Expected
 		}
 
@@ -577,9 +583,9 @@ public class L0SegmentTypeAdapterTest {
 
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
-		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+		} catch (final IpfPrepWorkerInputsMissingException missingEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
-		} catch (DiscardedException discardedEx) {
+		} catch (final DiscardedException discardedEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
 
@@ -598,11 +604,11 @@ public class L0SegmentTypeAdapterTest {
 	public void testRFProductionWithOlderAndNewerFullAndPartialSegments()
 			throws MetadataQueryException, IpfPrepWorkerInputsMissingException {
 
-		Instant insertionTime = Instant.now();
+		final LocalDateTime insertionTime = LocalDateTime.now();
 
-		String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
-		String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
-		String metadataInsertionTime3 = toMetadataDateFormat(insertionTime.plusSeconds(180));
+		final String metadataInsertionTime1 = toMetadataDateFormat(insertionTime);
+		final String metadataInsertionTime2 = toMetadataDateFormat(insertionTime.plusSeconds(130));
+		final String metadataInsertionTime3 = toMetadataDateFormat(insertionTime.plusSeconds(180));
 
 		metadata_RF_VV_043734_PART_3.setInsertionTime(metadataInsertionTime1);
 		metadata_RF_VV_043734_FULL_1.setInsertionTime(metadataInsertionTime2);
@@ -610,9 +616,12 @@ public class L0SegmentTypeAdapterTest {
 		metadata_RF_VH_043734_FULL_1.setInsertionTime(metadataInsertionTime1);
 		metadata_RF_VH_043734_PART_2.setInsertionTime(metadataInsertionTime2);
 
-		AppDataJob appDataJob1 = new AppDataJob(123L);
-		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)));
-		AppDataJobProduct product1 = new AppDataJobProduct();
+		final AppDataJob appDataJob1 = new AppDataJob(123L);
+		
+		appDataJob1.setCreationDate(Date.from(insertionTime.plusSeconds(3)
+				.atZone(ZoneId.of("UTC")).toInstant()));
+		
+		final AppDataJobProduct product1 = new AppDataJobProduct();
 		product1.getMetadata().put("startTime", "2021-01-04T07:19:20.000000Z");
 		product1.getMetadata().put("productName",
 				"S1A_RF_RAW__0SVV_20210104T071920_20210104T071921_035985_043734_75C7.SAFE");
@@ -624,11 +633,13 @@ public class L0SegmentTypeAdapterTest {
 				metadata_RF_VH_043734_FULL_1, metadata_RF_VH_043734_PART_2)).when(metadataClient)
 						.getLevelSegments("043734");
 
-		Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
+		final Product product = uut.mainInputSearch(appDataJob1, taskTableAdapter);
 		appDataJob1.setProduct(product.toProduct());
 		appDataJob1.setAdditionalInputs(product.overridingInputs());
+		
+		System.out.println(product);
 
-		Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
+		final Map<String, List<AppDataJobFile>> inputs = appDataJob1.getProduct().getInputs();
 
 		assertEquals(2, inputs.size());
 		assertNotNull(inputs.get("VV"));
@@ -642,19 +653,27 @@ public class L0SegmentTypeAdapterTest {
 
 		try {
 			uut.validateInputSearch(appDataJob1, taskTableAdapter);
-		} catch (IpfPrepWorkerInputsMissingException missingEx) {
+		} catch (final IpfPrepWorkerInputsMissingException missingEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
-		} catch (DiscardedException discardedEx) {
+		} catch (final DiscardedException discardedEx) {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
 
 	}
 
-	private String toMetadataDateFormat(Instant date) {
-		return DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.ofInstant(date, ZoneId.of("UTC")));
+	private String toMetadataDateFormat(final LocalDateTime date) {
+		return AbstractMetadata.METADATA_DATE_FORMATTER.format(date);
+//		
+//		return DateUtils.convertToAnotherFormat(
+//				metadataFormat,
+//				AbstractMetadata.METADATA_DATE_FORMATTER,
+//				JobOrderTimeInterval.DATE_FORMATTER
+//		);
+//		
+//		return DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.ofInstant(date, ZoneId.of("UTC")));
 	}
 
-	private AspProperties createAspProperties(boolean disableTimeout) {
+	private AspProperties createAspProperties(final boolean disableTimeout) {
 		final AspProperties aspProperties = new AspProperties();
 
 		aspProperties.setDisableTimeout(disableTimeout);

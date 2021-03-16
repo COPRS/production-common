@@ -49,16 +49,16 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
 			LOGGER.debug("L2 product for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), Exceptions.messageOf(e));
 		}
 
-    	List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(tasktableAdapter);
-    	AppDataJobTaskInputs originalInput = appDataJobTaskInputs.get(0);
-    	AppDataJobInput first = originalInput.getInputs().get(0);
-    	AppDataJobFile file = new AppDataJobFile(
+    	final List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(tasktableAdapter);
+    	final AppDataJobTaskInputs originalInput = appDataJobTaskInputs.get(0);
+    	final AppDataJobInput first = originalInput.getInputs().get(0);
+    	final AppDataJobFile file = new AppDataJobFile(
     			product.getProductName(),
     			product.getProductName(),
-    			product.getStartTime(),
-    			product.getStopTime()
+    			TaskTableAdapter.convertDateToJobOrderFormat(product.getStartTime()),
+    			TaskTableAdapter.convertDateToJobOrderFormat(product.getStopTime())
     	);
-    	AppDataJobInput mbuInput = new AppDataJobInput(
+    	final AppDataJobInput mbuInput = new AppDataJobInput(
     			first.getTaskTableInputReference(),
     			product.getProductType(),
     			TaskTableFileNameType.PHYSICAL.toString(),

@@ -134,7 +134,11 @@ public final class JobOrderAdapter
 
 		private List<JobOrderTimeInterval> toIntervals(final List<AppDataJobFile> files) {
 			return files.stream().map(
-					f -> new JobOrderTimeInterval(f.getStartDate(), f.getEndDate(), f.getFilename())).collect(toList());
+					f -> new JobOrderTimeInterval(
+							f.getStartDate(), 
+							f.getEndDate(), 
+							f.getFilename())
+					).collect(toList());
 		}
 
 		private List<JobOrderInputFile> toFileNames(final List<AppDataJobFile> files) {

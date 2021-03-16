@@ -150,8 +150,8 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 								files.add(new AppDataJobFile(
 										meta.getProductName(), 
 										meta.getKeyObjectStorage(), 
-										meta.getValidityStart(), 
-										meta.getValidityStop(), 
+										TaskTableAdapter.convertDateToJobOrderFormat(meta.getValidityStart()),
+										TaskTableAdapter.convertDateToJobOrderFormat(meta.getValidityStop()),
 										meta.getAdditionalProperties()
 								));
 							}
