@@ -9,3 +9,13 @@ logging:
 
 status:
   block-system-exit: true
+
+  # REST controller
+server:
+  port: 8080      
+
+# OpenAPI validator
+openapi:
+  disable-validation: true
+  path-exclusion-regex: ^\/(app\/status|error)$
+  spec-file: src/test/resources/s1pro-api_openapi.yaml

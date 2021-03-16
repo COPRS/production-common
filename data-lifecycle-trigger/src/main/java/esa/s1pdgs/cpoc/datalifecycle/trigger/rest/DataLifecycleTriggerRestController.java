@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.datalifecycle.rest.rest;
+package esa.s1pdgs.cpoc.datalifecycle.trigger.rest;
 
 import java.util.List;
 
@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.datalifecycle.rest.rest.model.Product;
-import esa.s1pdgs.cpoc.datalifecycle.rest.rest.model.ProductPatchDto;
-import esa.s1pdgs.cpoc.datalifecycle.rest.rest.model.ProductPostDto;
-import esa.s1pdgs.cpoc.datalifecycle.rest.service.DataLifecycleServiceDelegator;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.Product;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.ProductPatchDto;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.ProductPostDto;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleMetadataNotFoundException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleTriggerInternalServerErrorException;
 

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.datalifecycle.rest.rest;
+package esa.s1pdgs.cpoc.datalifecycle.trigger.rest;
 
 import org.springframework.http.HttpStatus;
 
