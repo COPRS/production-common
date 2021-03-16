@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,25 +44,66 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 	@Override
 	public void evict(String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
-		LOG.debug("starting general eviction request ...");
-		// TODO @MSc: impl
+		LOG.debug("starting general eviction request on behalf of " + (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
+
+		final List<DataLifecycleMetadata> productsToDelete;
+		try {
+			productsToDelete = this.lifecycleMetadataRepo.findByEvictionDateBefore(LocalDateTime.now(ZoneId.of("UTC")));
+			LOG.info("found " + productsToDelete.size() + " products to evict on behalt of "
+					+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
+		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
+			LOG.error("error searching for products to evict on behalf of "
+					+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]: " + e.getMessage()));
+			throw e;
+		}
+
+		final List<DataLifecycleTriggerInternalServerErrorException> errors = new ArrayList<>();
+		int evictionJobsSend = 0;
+		for (final DataLifecycleMetadata metadata : productsToDelete) {
+			try {
+				evictionJobsSend += this.evict(metadata, false, false, operatorName);
+			} catch (final DataLifecycleTriggerInternalServerErrorException e) {
+				LOG.error("error on evicting product (operator: " + operatorName + "), will skip this one: " + e.getMessage());
+				errors.add(e);
+			}
+		}
+
+		if (!errors.isEmpty()) {
+			if (errors.size() == 1) {
+				throw new DataLifecycleTriggerInternalServerErrorException("an error ocurred on general eviction request from "
+						+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]") + ", " + evictionJobsSend
+						+ " EvictionManagementJobs where sent though: " + Exceptions.toString(errors.get(0)));
+			} else {
+				throw new DataLifecycleTriggerInternalServerErrorException(errors.size() + " errors ocurred on general eviction request from "
+						+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]") + ", " + evictionJobsSend
+						+ " EvictionManagementJobs where sent though.");
+			}
+		}
+
+		LOG.info(evictionJobsSend + " EvictionManagementJobs where sent on behalf of "
+				+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
 	}
 
 	@Override
 	public void evict(String productname, boolean forceCompressed, boolean forceUncompressed, String operatorName)
 			throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleMetadataNotFoundException {
-		LOG.debug("starting eviction request for '" + productname + "' (forceCompressed=" + forceCompressed + ", forceUncompressed=" + forceUncompressed + ")");
+		LOG.debug("starting eviction request for '" + productname + "' (forceCompressed=" + forceCompressed + ", forceUncompressed=" + forceUncompressed
+				+ ", operatorName=" + operatorName + ")");
 
+		final int evictionJobsSend;
 		try {
 			final DataLifecycleMetadata lifecycleMetadata = this.getAndCheckExists(productname);
-			this.evict(lifecycleMetadata, forceCompressed, forceUncompressed, operatorName);
+			evictionJobsSend = this.evict(lifecycleMetadata, forceCompressed, forceUncompressed, operatorName);
 		} catch (final DataLifecycleMetadataNotFoundException e) {
-			LOG.info("cannot evict product: " + e.getMessage());
+			LOG.info("cannot evict product (operator: " + operatorName + "): " + e.getMessage());
 			throw e;
 		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
-			LOG.error("error on evicting product: " + e.getMessage());
+			LOG.error("error on evicting product (operator: " + operatorName + "): " + e.getMessage());
 			throw e;
 		}
+
+		LOG.info(evictionJobsSend + " EvictionManagementJobs where sent on behalf of "
+				+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
 	}
 
 	@Override
@@ -112,8 +154,9 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		}
 	}
 
-	private void evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,
+	private int evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,
 			String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
+		int evictionJobsSend = 0;
 		final List<EvictionManagementJob> evictionJobs = new ArrayList<>();
 		final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
@@ -168,7 +211,10 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		// publish jobs
 		for (final EvictionManagementJob job : evictionJobs) {
 			this.publish(job);
+			evictionJobsSend++;
 		}
+
+		return evictionJobsSend;
 	}
 
 	private void publish(final EvictionManagementJob job) throws DataLifecycleTriggerInternalServerErrorException {

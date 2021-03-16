@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +31,10 @@ public class DataLifecycleTriggerListenerTest {
 		public Optional<DataLifecycleMetadata> findByProductName(String name)
 				throws DataLifecycleMetadataRepositoryException {
 			return Optional.empty();
+		}
+		@Override
+		public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp) {
+			return Collections.emptyList();
 		}
 	};
 	
