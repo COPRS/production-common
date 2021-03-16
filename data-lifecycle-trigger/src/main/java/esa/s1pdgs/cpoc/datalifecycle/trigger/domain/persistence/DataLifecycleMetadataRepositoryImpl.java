@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +31,7 @@ import org.springframework.stereotype.Repository;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.EsClientConfiguration;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
 
@@ -117,6 +117,17 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		return Optional.of(result.get(0));
 	}
 
+	@Override
+	public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp) throws DataLifecycleMetadataRepositoryException {
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+
+		queryBuilder.should(QueryBuilders.rangeQuery(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName()).lt(timestamp));
+		// OR
+		queryBuilder.should(QueryBuilders.rangeQuery(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName()).lt(timestamp));
+
+		return this.query(queryBuilder, null, null, DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName(), SortOrder.ASC);
+	}
+
 	// --------------------------------------------------------------------------
 	
 	private List<DataLifecycleMetadata> query(BoolQueryBuilder queryBuilder, Integer top, Integer skip,
@@ -138,11 +149,13 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		}
 
 		// sorting
-		if (null != sortFieldName && !sortFieldName.isEmpty()) {
+		if (StringUtil.isNotBlank(sortFieldName)) {
 			if (null == sortOrder) {
 				sortOrder = SortOrder.ASC;
 			}
 			sourceBuilder.sort(sortFieldName, sortOrder);
+		} else { // default sorting
+			sourceBuilder.sort(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName(), SortOrder.DESC);
 		}
 
 		final SearchRequest searchRequest = new SearchRequest(this.elasticsearchIndex);
