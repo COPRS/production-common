@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.datarequest.worker.service;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -117,7 +118,7 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 						LOG.info("File is missing in ZIP bucket: {}, requesting order", dataRequestJob.getKeyObjectStorage());
 						dataRequestType = DataRequestType.ORDER;
 					}
-					return createOutputMessage(inputMessage.getId(), dataRequestJob, dataRequestType);
+					return createOutputMessage(inputMessage.getId(), dataRequestJob, reporting.getUid(), dataRequestType);
 				})
 				.newResult();
 	}
@@ -134,12 +135,13 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 	}
 	
 	private MqiPublishingJob<DataRequestEvent> createOutputMessage(final long inputMessageId,
-			final DataRequestJob dataRequestJob, final DataRequestType dataRequestType) {
+			final DataRequestJob dataRequestJob, final UUID reportingUid, final DataRequestType dataRequestType) {
 		
 		final DataRequestEvent dataRequestEvent = new DataRequestEvent();
 		dataRequestEvent.setProductFamily(dataRequestJob.getProductFamily());
 		dataRequestEvent.setKeyObjectStorage(dataRequestJob.getKeyObjectStorage());
 		dataRequestEvent.setDataRequestType(dataRequestType);
+		dataRequestEvent.setUid(reportingUid);
 		final GenericPublicationMessageDto<DataRequestEvent> outputMessage = new GenericPublicationMessageDto<DataRequestEvent>(
 				inputMessageId, dataRequestJob.getProductFamily(), dataRequestEvent);
 		return new MqiPublishingJob<DataRequestEvent>(Collections.singletonList(outputMessage));

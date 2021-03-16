@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.evictionmanagement.worker.service;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -103,7 +104,7 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 				)
 				.publishMessageProducer(() -> {
 					evict(evictionJob);
-					return createOutputMessage(inputMessage.getId(), evictionJob);
+					return createOutputMessage(inputMessage.getId(), evictionJob, reporting.getUid());
 				})
 				.newResult();
 	}
@@ -120,11 +121,12 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 	}
 
 	private MqiPublishingJob<EvictionEvent> createOutputMessage(final long inputMessageId,
-			final EvictionManagementJob evictionJob) {
+			final EvictionManagementJob evictionJob, final UUID reportingUid) {
 		final EvictionEvent evictionEvent = new EvictionEvent();
 		evictionEvent.setProductFamily(evictionJob.getProductFamily());
 		evictionEvent.setKeyObjectStorage(evictionJob.getKeyObjectStorage());
 		evictionEvent.setOperatorName(evictionJob.getOperatorName());
+		evictionEvent.setUid(reportingUid);
 		final GenericPublicationMessageDto<EvictionEvent> outputMessage = new GenericPublicationMessageDto<EvictionEvent>(
 				inputMessageId, evictionJob.getProductFamily(), evictionEvent);
 		return new MqiPublishingJob<EvictionEvent>(Collections.singletonList(outputMessage));
