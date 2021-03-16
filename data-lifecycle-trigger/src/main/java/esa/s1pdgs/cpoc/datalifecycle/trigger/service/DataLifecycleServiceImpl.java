@@ -11,30 +11,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
-import esa.s1pdgs.cpoc.mqi.client.MqiClient;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 
 @Service
 public class DataLifecycleServiceImpl implements DataLifecycleService {
 	private static final Logger LOG = LogManager.getLogger(DataLifecycleServiceImpl.class);
 
 	private final DataLifecycleMetadataRepository lifecycleMetadataRepo;
-	private final MqiClient mqiClient;
+	private final MessageProducer<EvictionManagementJob> messageProducer;
+	private final String evictionTopic;
 
 	// --------------------------------------------------------------------------
 
 	@Autowired
-	public DataLifecycleServiceImpl(final DataLifecycleMetadataRepository lifecycleMetadataRepo, final MqiClient mqiClient) {
+	public DataLifecycleServiceImpl(final DataLifecycleTriggerConfigurationProperties configurationProperties,
+			final DataLifecycleMetadataRepository lifecycleMetadataRepo, final MessageProducer<EvictionManagementJob> messageProducer) {
 		this.lifecycleMetadataRepo = lifecycleMetadataRepo;
-		this.mqiClient = mqiClient;
+		this.messageProducer = messageProducer;
+		this.evictionTopic = configurationProperties.getEvictionTopic();
 	}
 
 	// --------------------------------------------------------------------------
@@ -165,19 +167,18 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		// publish jobs
 		for (final EvictionManagementJob job : evictionJobs) {
-			try {
-				this.publishEvictionJob(job);
-			} catch (final AbstractCodedException e) {
-				throw new DataLifecycleTriggerInternalServerErrorException("error publishing eviction management job: " + job, e);
-			}
+			this.publish(job);
 		}
 	}
 
-	private void publishEvictionJob(final EvictionManagementJob job) throws AbstractCodedException {
-		final GenericPublicationMessageDto<EvictionManagementJob> message = new GenericPublicationMessageDto<>(job.getProductFamily(), job);
-		final ProductCategory productCategory = ProductCategory.of(job.getProductFamily());
-
-		this.mqiClient.publish(message, productCategory);
+	private void publish(final EvictionManagementJob job) throws DataLifecycleTriggerInternalServerErrorException {
+		try {
+			this.messageProducer.send(this.evictionTopic, job);
+		} catch (final Exception e) {
+			throw new DataLifecycleTriggerInternalServerErrorException(
+					String.format("Error on publishing EvictionManagementJob for %s to %s: %s", job.getKeyObjectStorage(), this.evictionTopic,
+							Exceptions.messageOf(e)), e);
+		}
 	}
 
 }

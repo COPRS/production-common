@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.datalifecycle.rest.rest;
+package esa.s1pdgs.cpoc.datalifecycle.trigger.rest;
 
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,10 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,9 +26,7 @@ import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleService;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(DataLifecycleTriggerRestController.class)
-//@ActiveProfiles("test")
-//@SpringBootTest
-@DirtiesContext
+@ActiveProfiles("test")
 public class DataLifecycleTriggerRestControllerTest {
 
 	private static final String API_KEY = DataLifecycleTriggerRestController.API_KEY;

@@ -89,6 +89,8 @@ public class DataLifecycleTriggerConfigurationProperties {
 	private String patternPersistentInCompressedStorage;
 	private String patternAvailableInLta;
 	
+	private String evictionTopic;
+	
 	// --------------------------------------------------------------------------
 	
 	@Override
@@ -136,6 +138,14 @@ public class DataLifecycleTriggerConfigurationProperties {
 
 	public void setPatternAvailableInLta(String patternAvailableInLta) {
 		this.patternAvailableInLta = patternAvailableInLta;
+	}
+
+	public String getEvictionTopic() {
+		return this.evictionTopic;
+	}
+
+	public void setEvictionTopic(String evictionTopic) {
+		this.evictionTopic = evictionTopic;
 	}
 	
 }

@@ -34,6 +34,7 @@ import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.GetBucketLifecycleConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -652,6 +653,33 @@ public class S3ObsServices {
 			}
 		}
 	}
+	
+	public void deleteFile(DeleteObjectRequest deleteObjectRequest) throws S3ObsServiceException, S3SdkClientException {
+
+		for (int retryCount = 1;; retryCount++) {
+			try {
+				log(format("Performing %s", deleteObjectRequest));
+				s3client.deleteObject(deleteObjectRequest);
+				break;
+			} catch (final com.amazonaws.SdkClientException sce) {
+				if (retryCount <= numRetries) {
+					LOGGER.warn(format("Delete object from bucket %s failed: Attempt : %d / %d",
+							deleteObjectRequest.getBucketName(), retryCount, numRetries));
+					try {
+						Thread.sleep(retryDelay);
+					} catch (final InterruptedException e) {
+						throw new S3SdkClientException(deleteObjectRequest.getBucketName(),
+								deleteObjectRequest.getKey(), format("Delte of object fails: %s", sce.getMessage()),
+								sce);
+					}
+				} else {
+					throw new S3SdkClientException(deleteObjectRequest.getBucketName(), deleteObjectRequest.getKey(),
+							format("Delete of object fails: %s", sce.getMessage()), sce);
+				}
+			}
+		}
+	}
+
 
 	public long size(final String bucketName, final String prefix) throws S3SdkClientException {
 		log(format("Get size of object %s from bucket %s", prefix, bucketName));
@@ -689,5 +717,4 @@ public class S3ObsServices {
 			throw new S3SdkClientException(bucketName, key, "Could not create temporary download URL");
 		}
 	}
-
 }

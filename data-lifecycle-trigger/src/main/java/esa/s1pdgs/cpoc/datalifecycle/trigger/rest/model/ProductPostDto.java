@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.datalifecycle.rest.rest.model;
+package esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model;
 
 import java.util.List;
 

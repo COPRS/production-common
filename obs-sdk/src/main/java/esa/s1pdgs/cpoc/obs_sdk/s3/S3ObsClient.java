@@ -30,6 +30,7 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -241,6 +242,18 @@ public class S3ObsClient extends AbstractObsClient {
 		}
 	}
 	
+	@Override
+	public void delete(ObsObject object) throws ObsException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(object);
+		
+		try {
+			s3Services.deleteFile(new DeleteObjectRequest(getBucketFor(object.getFamily()), object.getKey()));
+			s3Services.deleteFile(new DeleteObjectRequest(getBucketFor(object.getFamily()), object.getKey() + Md5.MD5SUM_SUFFIX));
+		} catch (S3SdkClientException | ObsServiceException e) {
+			throw new ObsException(object.getFamily(), object.getKey(), e);
+		}
+	}
+	
 	public void createBucket(final ProductFamily family) throws ObsServiceException, S3SdkClientException {
 		s3Services.createBucket(getBucketFor(family));
 	}
@@ -370,4 +383,5 @@ public class S3ObsClient extends AbstractObsClient {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);			
 		}
 	}
+	
 }
