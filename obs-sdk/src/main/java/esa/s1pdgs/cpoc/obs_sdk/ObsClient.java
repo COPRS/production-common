@@ -78,6 +78,8 @@ public interface ObsClient {
     void uploadStreams(final List<StreamObsUploadObject> objects, final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException;
 
     void move(final ObsObject from, final ProductFamily to) throws ObsException, ObsServiceException;
+    
+    void delete(final ObsObject object) throws ObsException, ObsServiceException; 
 
     Map<String,ObsObject> listInterval(final ProductFamily family, Date intervalStart, Date intervalEnd) throws SdkClientException;
 

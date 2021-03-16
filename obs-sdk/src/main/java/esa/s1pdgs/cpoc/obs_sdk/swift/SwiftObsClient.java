@@ -319,4 +319,9 @@ public class SwiftObsClient extends AbstractObsClient {
 		}		
      	return url;
 	}
+
+	@Override
+	public void delete(ObsObject object) throws ObsException, ObsServiceException {
+		throw new UnsupportedOperationException("delete not yet implemented for swift");
+	}
 }

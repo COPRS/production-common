@@ -15,6 +15,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObjectMetadata;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -103,4 +104,9 @@ public abstract class FakeObsClient implements ObsClient {
 	public List<String> list(ProductFamily family, String keyPrefix) {
 		return null;
 	}
+	
+	@Override
+	public void delete(ObsObject object) throws ObsException, ObsServiceException {
+	}	
+
 }
