@@ -31,8 +31,8 @@
                </List_of_File_Names>
                <List_of_Time_Intervals count="1">
                   <Time_Interval>
-                     <Start>2020-01-20T16:47:03.429756Z</Start>
-                     <Stop>2020-01-20T17:12:45.024909Z</Stop>
+                     <Start>20200120_164703429756</Start>
+                     <Stop>20200120_171245024909</Stop>
                      <File_Name>/data/localWD/123/S1B_WV_OCN__2SSV_20200120T164703_20200120T171244_019903_025A64_140C.SAFE</File_Name>
                   </Time_Interval>
                </List_of_Time_Intervals>

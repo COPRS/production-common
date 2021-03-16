@@ -74,8 +74,8 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
         	final AppDataJobFile file = new AppDataJobFile(
         			auxResorb.getProductName(),
         			auxResorb.getProductName(),
-        			auxResorb.getStartTime(),
-        			auxResorb.getStopTime()
+        			TaskTableAdapter.convertDateToJobOrderFormat(auxResorb.getStartTime()),
+        			TaskTableAdapter.convertDateToJobOrderFormat(auxResorb.getStopTime())
         	);
         	final AppDataJobInput input = new AppDataJobInput(
         			first.getTaskTableInputReference(),
