@@ -123,6 +123,7 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 		final EvictionEvent evictionEvent = new EvictionEvent();
 		evictionEvent.setProductFamily(evictionJob.getProductFamily());
 		evictionEvent.setKeyObjectStorage(evictionJob.getKeyObjectStorage());
+		evictionEvent.setOperatorName(evictionJob.getOperatorName());
 		final GenericPublicationMessageDto<EvictionEvent> outputMessage = new GenericPublicationMessageDto<EvictionEvent>(
 				inputMessageId, evictionJob.getProductFamily(), evictionEvent);
 		return new MqiPublishingJob<EvictionEvent>(Collections.singletonList(outputMessage));
