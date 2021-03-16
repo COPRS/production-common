@@ -245,10 +245,16 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public void delete(ObsObject object) throws ObsException, ObsServiceException {
 		ValidArgumentAssertion.assertValidArgument(object);
-		
+		String bucket = getBucketFor(object.getFamily());
+		String keyPrefix = object.getKey();
 		try {
-			s3Services.deleteFile(new DeleteObjectRequest(getBucketFor(object.getFamily()), object.getKey()));
-			s3Services.deleteFile(new DeleteObjectRequest(getBucketFor(object.getFamily()), object.getKey() + Md5.MD5SUM_SUFFIX));
+			LOGGER.info("Deleting all files in bucket {} with prefix {}", bucket, keyPrefix);
+			final List<String> result = s3Services.getAll(bucket, keyPrefix).stream().map(S3ObjectSummary::getKey)
+					.collect(Collectors.toList());
+			for (String key : result) {
+				LOGGER.debug("Deleting file {} in bucket {}", key, bucket);
+				s3Services.deleteFile(new DeleteObjectRequest(bucket, key));
+			}
 		} catch (S3SdkClientException | ObsServiceException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);
 		}
