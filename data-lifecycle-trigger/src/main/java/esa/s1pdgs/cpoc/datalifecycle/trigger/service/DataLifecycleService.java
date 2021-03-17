@@ -38,10 +38,11 @@ public interface DataLifecycleService {
 	 * @param operatorName                      the name of the initiating operator
 	 * @return the data lifecycle metadata for the updated product
 	 * @throws DataLifecycleTriggerInternalServerErrorException on internal server error
+	 * @throws DataLifecycleMetadataNotFoundException           when no data lifecycle metadata is found for the given product name
 	 */
 	DataLifecycleMetadata updateRetention(String productname, LocalDateTime evictionTimeInCompressedStorage,
 			LocalDateTime evictionTimeInUncompressedStorage, String operatorName)
-			throws DataLifecycleTriggerInternalServerErrorException;
+					throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleMetadataNotFoundException;
 
 	List<DataLifecycleMetadata> getProducts(String namePattern, boolean persistentInUncompressedStorage, LocalDateTime minimalEvictionTimeInUncompressedStorage,
 			LocalDateTime maximalEvictionTimeInUncompressedStorage, boolean persistentIncompressedStorage, LocalDateTime minimalEvictionTimeInCompressedStorage,

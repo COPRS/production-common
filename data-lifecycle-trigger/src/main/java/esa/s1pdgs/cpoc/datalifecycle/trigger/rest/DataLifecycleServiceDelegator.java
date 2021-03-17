@@ -100,11 +100,12 @@ public class DataLifecycleServiceDelegator {
 	}
 
 	/**
+	 * @throws DataLifecycleMetadataNotFoundException 
 	 * @throws DataLifecycleMetadataRepositoryException 
 	 * @see DataLifecycleTriggerRestController#patchProduct(String, String, ProductPatchDto)
 	 */
 	public Product patchProduct(String productname, String operatorName, String evictionTimeInUncompressedStorage,
-			String evictionTimeInCompressedStorage) throws DataLifecycleTriggerInternalServerErrorException {
+			String evictionTimeInCompressedStorage) throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleMetadataNotFoundException {
 		return convertToProduct(
 				this.dataLifecycleService.updateRetention(productname, convertDateTime(evictionTimeInCompressedStorage),
 						convertDateTime(evictionTimeInUncompressedStorage), operatorName));

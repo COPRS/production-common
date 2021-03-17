@@ -13,6 +13,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties;
@@ -92,7 +93,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		final int evictionJobsSend;
 		try {
-			final DataLifecycleMetadata lifecycleMetadata = this.getAndCheckExists(productname);
+			final DataLifecycleMetadata lifecycleMetadata = this.getAndCheckPathExists(productname);
 			evictionJobsSend = this.evict(lifecycleMetadata, forceCompressed, forceUncompressed, operatorName);
 		} catch (final DataLifecycleMetadataNotFoundException e) {
 			LOG.info("cannot evict product (operator: " + operatorName + "): " + e.getMessage());
@@ -102,15 +103,34 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			throw e;
 		}
 
-		LOG.info(evictionJobsSend + " EvictionManagementJobs where sent on behalf of "
+		LOG.info(evictionJobsSend + " EvictionManagementJobs where sent for '" + productname + "' on behalf of "
 				+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
 	}
 
 	@Override
 	public DataLifecycleMetadata updateRetention(String productname, LocalDateTime evictionTimeInCompressedStorage,
-			LocalDateTime evictionTimeInUncompressedStorage, String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
-		// TODO @MSc: impl
-		return null;
+			LocalDateTime evictionTimeInUncompressedStorage, String operatorName)
+					throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleMetadataNotFoundException {
+		LOG.debug("starting retention update request for '" + productname + "' (evictionTimeInCompressedStorage="
+				+ (null != evictionTimeInCompressedStorage ? DateUtils.formatToMetadataDateTimeFormat(evictionTimeInCompressedStorage) : "FREEZE")
+				+ ", evictionTimeInUncompressedStorage="
+				+ (null != evictionTimeInUncompressedStorage ? DateUtils.formatToMetadataDateTimeFormat(evictionTimeInUncompressedStorage) : "FREEZE")
+				+ ", operatorName=" + operatorName + ")");
+
+		final DataLifecycleMetadata updatedMetadata;
+		try {
+			final DataLifecycleMetadata metadataToUpdate = this.getAndCheckPathExists(productname);
+			updatedMetadata = this.updateRetention(metadataToUpdate, evictionTimeInCompressedStorage, evictionTimeInUncompressedStorage);
+		} catch (final DataLifecycleMetadataNotFoundException e) {
+			LOG.info("cannot update retention of product (operator: " + operatorName + "): " + e.getMessage());
+			throw e;
+		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
+			LOG.error("error on updating retention of product (operator: " + operatorName + "): " + e.getMessage());
+			throw e;
+		}
+
+		LOG.info("updated retention on behalf of " + operatorName + ": " + updatedMetadata);
+		return updatedMetadata;
 	}
 
 	@Override
@@ -136,7 +156,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 	// --------------------------------------------------------------------------
 
-	private DataLifecycleMetadata getAndCheckExists(final String productname)
+	private DataLifecycleMetadata getAndCheckPathExists(final String productname)
 			throws DataLifecycleMetadataNotFoundException, DataLifecycleMetadataRepositoryException {
 		final Optional<DataLifecycleMetadata> oLifecycleMetadata = this.lifecycleMetadataRepo.findByProductName(productname);
 
@@ -154,6 +174,29 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		}
 	}
 
+	private DataLifecycleMetadata updateRetention(@NonNull DataLifecycleMetadata dataLifecycleMetadata, LocalDateTime evictionTimeInCompressedStorage,
+			LocalDateTime evictionTimeInUncompressedStorage)
+					throws DataLifecycleMetadataRepositoryException, DataLifecycleMetadataNotFoundException {
+		// uncompressed
+		if (null != evictionTimeInUncompressedStorage) {
+			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(evictionTimeInUncompressedStorage);
+		} else { // freeze
+			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(LocalDateTime.MAX);
+		}
+
+		// compressed
+		if (null != evictionTimeInCompressedStorage) {
+			dataLifecycleMetadata.setEvictionDateInCompressedStorage(evictionTimeInCompressedStorage);
+		} else { // freeze
+			dataLifecycleMetadata.setEvictionDateInCompressedStorage(LocalDateTime.MAX);
+		}
+
+		this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
+		return this.lifecycleMetadataRepo.findByProductName(dataLifecycleMetadata.getProductName())
+				.orElseThrow(() -> new DataLifecycleMetadataNotFoundException(
+						"error reading metadata for product '" + dataLifecycleMetadata.getProductName() + "' after retention update"));
+	}
+
 	private int evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,
 			String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
 		int evictionJobsSend = 0;
@@ -169,7 +212,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			final ProductFamily productFamilyInUncompressedStorage = dataLifecycleMetadata.getProductFamilyInUncompressedStorage();
 			if (null == productFamilyInUncompressedStorage || ProductFamily.BLANK == productFamilyInUncompressedStorage) {
 				throw new DataLifecycleTriggerInternalServerErrorException(
-						"error evicting product, no valid product family found for uncompressed storage for: " + dataLifecycleMetadata);
+						"error trigger eviction of product, no valid product family found for uncompressed storage for: " + dataLifecycleMetadata);
 			}
 
 			final EvictionManagementJob evictionJobUncompressed = new EvictionManagementJob();
@@ -179,9 +222,9 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			evictionJobUncompressed.setOperatorName(operatorName);
 
 			evictionJobs.add(evictionJobUncompressed);
-			LOG.debug("will evict product from uncompressed storage: " + dataLifecycleMetadata);
+			LOG.debug("will trigger eviction of product from uncompressed storage on behalf of " + operatorName + ": " + dataLifecycleMetadata);
 		} else {
-			LOG.debug("cannot evict product from uncompressed storage: " + dataLifecycleMetadata);
+			LOG.debug("cannot trigger eviction of product from uncompressed storage on behalf of " + operatorName + ": " + dataLifecycleMetadata);
 		}
 
 		// compressed
@@ -193,7 +236,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			final ProductFamily productFamilyInCompressedStorage = dataLifecycleMetadata.getProductFamilyInCompressedStorage();
 			if (null == productFamilyInCompressedStorage || ProductFamily.BLANK == productFamilyInCompressedStorage) {
 				throw new DataLifecycleTriggerInternalServerErrorException(
-						"error evicting product, no valid product family found for compressed storage for: " + dataLifecycleMetadata);
+						"error trigger evictiion of product, no valid product family found for compressed storage for: " + dataLifecycleMetadata);
 			}
 
 			final EvictionManagementJob evictionJobCompressed = new EvictionManagementJob();
@@ -203,9 +246,9 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			evictionJobCompressed.setOperatorName(operatorName);
 
 			evictionJobs.add(evictionJobCompressed);
-			LOG.debug("will evict product from compressed storage: " + dataLifecycleMetadata);
+			LOG.debug("will trigger eviction of product from compressed storage on behalf of " + operatorName + ": " + dataLifecycleMetadata);
 		} else {
-			LOG.debug("cannot evict product from compressed storage: " + dataLifecycleMetadata);
+			LOG.debug("cannot trigger eviction from product from compressed storage on behalf of " + operatorName + ": " + dataLifecycleMetadata);
 		}
 
 		// publish jobs
