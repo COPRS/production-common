@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +20,7 @@ import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.message.MessageProducer;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 
 @Service
@@ -28,17 +28,24 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	private static final Logger LOG = LogManager.getLogger(DataLifecycleServiceImpl.class);
 
 	private final DataLifecycleMetadataRepository lifecycleMetadataRepo;
-	private final MessageProducer<EvictionManagementJob> messageProducer;
+	private final MessageProducer<EvictionManagementJob> evictionJobMessageProducer;
 	private final String evictionTopic;
+	private final MessageProducer<DataRequestJob> dataRequestJobMessageProducer;
+	private final String dataRequestTopic;
+	private final long dataRequestCooldown;
 
 	// --------------------------------------------------------------------------
 
 	@Autowired
 	public DataLifecycleServiceImpl(final DataLifecycleTriggerConfigurationProperties configurationProperties,
-			final DataLifecycleMetadataRepository lifecycleMetadataRepo, final MessageProducer<EvictionManagementJob> messageProducer) {
+			final DataLifecycleMetadataRepository lifecycleMetadataRepo, final MessageProducer<EvictionManagementJob> evictionJobMessageProducer,
+			final MessageProducer<DataRequestJob> dataRequestJobMessageProducer) {
 		this.lifecycleMetadataRepo = lifecycleMetadataRepo;
-		this.messageProducer = messageProducer;
+		this.evictionJobMessageProducer = evictionJobMessageProducer;
 		this.evictionTopic = configurationProperties.getEvictionTopic();
+		this.dataRequestJobMessageProducer = dataRequestJobMessageProducer;
+		this.dataRequestTopic = configurationProperties.getDataRequestTopic();
+		this.dataRequestCooldown = configurationProperties.getDataRequestCooldownInSec();
 	}
 
 	// --------------------------------------------------------------------------
@@ -119,7 +126,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		final DataLifecycleMetadata updatedMetadata;
 		try {
-			final DataLifecycleMetadata metadataToUpdate = this.getAndCheckPathExists(productname);
+			final DataLifecycleMetadata metadataToUpdate = this.getOrRequest(productname);
 			updatedMetadata = this.updateRetention(metadataToUpdate, evictionTimeInCompressedStorage, evictionTimeInUncompressedStorage);
 		} catch (final DataLifecycleMetadataNotFoundException e) {
 			LOG.info("cannot update retention of product (operator: " + operatorName + "): " + e.getMessage());
@@ -174,6 +181,50 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		}
 	}
 
+	private DataLifecycleMetadata getOrRequest(final String productname)
+			throws DataLifecycleMetadataNotFoundException, DataLifecycleTriggerInternalServerErrorException {
+		final Optional<DataLifecycleMetadata> oLifecycleMetadata = this.lifecycleMetadataRepo.findByProductName(productname);
+
+		if (oLifecycleMetadata.isPresent()) {
+			final DataLifecycleMetadata dataLifecycleMetadata = oLifecycleMetadata.get();
+
+			if (StringUtil.isNotBlank(dataLifecycleMetadata.getPathInUncompressedStorage())) {
+				return dataLifecycleMetadata;
+			} else {
+				this.sendDataRequest(dataLifecycleMetadata);
+				throw new DataLifecycleMetadataNotFoundException(
+						"data lifecycle metadata contains no path in uncompressed storage for product '" + productname
+								+ "', data request sent, try again later");
+			}
+		} else {
+			throw new DataLifecycleMetadataNotFoundException("no data lifecycle metadata found for product '" + productname + "', unable to send data request");
+		}
+	}
+
+	public boolean sendDataRequest(final DataLifecycleMetadata dataLifecycleMetadata) throws DataLifecycleTriggerInternalServerErrorException {
+		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+
+		if (null == dataLifecycleMetadata.getLastDataRequest()
+				|| now.minusSeconds(this.dataRequestCooldown).isAfter(dataLifecycleMetadata.getLastDataRequest())) {
+			final ProductFamily productFamily = dataLifecycleMetadata.getProductFamilyInUncompressedStorage();
+			if (null == productFamily) {
+				throw new DataLifecycleTriggerInternalServerErrorException(
+						"cannot send data request for '" + dataLifecycleMetadata.getProductName() + "' as product family in uncompressed storage is unknown.");
+			}
+
+			final DataRequestJob dataRequestJob = new DataRequestJob();
+			dataRequestJob.setKeyObjectStorage(dataLifecycleMetadata.getProductName());
+			dataRequestJob.setProductFamily(productFamily);
+
+			this.publish(dataRequestJob);
+			dataLifecycleMetadata.setLastDataRequest(now);
+			this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
+			return true;
+		}
+
+		return false;
+	}
+
 	private DataLifecycleMetadata updateRetention(@NonNull DataLifecycleMetadata dataLifecycleMetadata, LocalDateTime evictionTimeInCompressedStorage,
 			LocalDateTime evictionTimeInUncompressedStorage)
 					throws DataLifecycleMetadataRepositoryException, DataLifecycleMetadataNotFoundException {
@@ -201,7 +252,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
 		int evictionJobsSend = 0;
 		final List<EvictionManagementJob> evictionJobs = new ArrayList<>();
-		final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
 		// uncompressed
 		final String pathInUncompressedStorage = dataLifecycleMetadata.getPathInUncompressedStorage();
@@ -262,11 +313,20 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 	private void publish(final EvictionManagementJob job) throws DataLifecycleTriggerInternalServerErrorException {
 		try {
-			this.messageProducer.send(this.evictionTopic, job);
+			this.evictionJobMessageProducer.send(this.evictionTopic, job);
 		} catch (final Exception e) {
 			throw new DataLifecycleTriggerInternalServerErrorException(
 					String.format("Error on publishing EvictionManagementJob for %s to %s: %s", job.getKeyObjectStorage(), this.evictionTopic,
 							Exceptions.messageOf(e)), e);
+		}
+	}
+
+	private void publish(final DataRequestJob job) throws DataLifecycleTriggerInternalServerErrorException {
+		try {
+			this.dataRequestJobMessageProducer.send(this.dataRequestTopic, job);
+		} catch (final Exception e) {
+			throw new DataLifecycleTriggerInternalServerErrorException(String.format("Error on publishing DataRequestJob for %s to %s: %s",
+					job.getKeyObjectStorage(), this.dataRequestTopic, Exceptions.messageOf(e)), e);
 		}
 	}
 

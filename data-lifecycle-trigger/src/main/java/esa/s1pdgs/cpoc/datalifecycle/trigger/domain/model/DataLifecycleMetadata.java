@@ -30,8 +30,9 @@ public class DataLifecycleMetadata {
 				DataLifecycleMetadata::getPersistentInUncompressedStorage), //
 		PERSISTENT_IN_COMPRESSED_STORAGE("PersistentInCompressedStorage",
 				DataLifecycleMetadata::getPersistentInCompressedStorage), //
-		AVAILABLE_IN_LTA("AvailableInLta", DataLifecycleMetadata::getAvailableInLta),
-		LAST_MODIFIED("LastModified", DataLifecycleMetadata::getLastModifiedAsString); //
+		AVAILABLE_IN_LTA("AvailableInLta", DataLifecycleMetadata::getAvailableInLta), //
+		LAST_MODIFIED("LastModified", DataLifecycleMetadata::getLastModifiedAsString), //
+		LAST_DATA_REQUEST("LastDataRequest", DataLifecycleMetadata::getLastDataRequestAsString); //
 
 		private final String fieldName;
 		private final Function<DataLifecycleMetadata, Object> toJsonAccessor;
@@ -85,6 +86,9 @@ public class DataLifecycleMetadata {
 			if (LAST_MODIFIED.fieldName.equals(fieldName)) {
 				return LAST_MODIFIED;
 			}
+			if (LAST_DATA_REQUEST.fieldName.equals(fieldName)) {
+				return LAST_DATA_REQUEST;
+			}
 			
 			throw new IllegalArgumentException(String.format("field name not supported: %s", fieldName));
 		}
@@ -114,6 +118,8 @@ public class DataLifecycleMetadata {
 	
 	private LocalDateTime lastModified;
 	
+	private LocalDateTime lastDataRequest;
+	
 	// --------------------------------------------------------------------------
 
 	public DataLifecycleMetadata() {
@@ -125,7 +131,7 @@ public class DataLifecycleMetadata {
 	public int hashCode() {
 		return Objects.hash(this.productName, this.productFamilyInUncompressedStorage, this.productFamilyInCompressedStorage, this.pathInUncompressedStorage,
 				this.pathInCompressedStorage, this.evictionDateInUncompressedStorage, this.evictionDateInCompressedStorage,
-				this.persistentInUncompressedStorage, this.persistentInCompressedStorage, this.availableInLta, this.lastModified);
+				this.persistentInUncompressedStorage, this.persistentInCompressedStorage, this.availableInLta, this.lastModified, this.getLastDataRequest());
 	}
 	
 	@Override
@@ -151,7 +157,8 @@ public class DataLifecycleMetadata {
 				&& Objects.equals(this.persistentInUncompressedStorage, other.persistentInUncompressedStorage)
 				&& Objects.equals(this.persistentInCompressedStorage, other.persistentInCompressedStorage)
 				&& Objects.equals(this.availableInLta, other.availableInLta)
-				&& Objects.equals(this.lastModified, other.lastModified);
+				&& Objects.equals(this.lastModified, other.lastModified)
+				&& Objects.equals(this.getLastDataRequest(), other.getLastDataRequest());
 	}
 	
 	@Override
@@ -286,6 +293,20 @@ public class DataLifecycleMetadata {
 
 	public void setLastModified(LocalDateTime lastModified) {
 		this.lastModified = lastModified;
+	}
+
+	public LocalDateTime getLastDataRequest() {
+		return this.lastDataRequest;
+	}
+	
+	public String getLastDataRequestAsString() {
+		return (null != this.lastDataRequest)
+				? DateUtils.formatToMetadataDateTimeFormat(this.lastDataRequest)
+				: null;
+	}
+
+	public void setLastDataRequest(LocalDateTime lastDataRequest) {
+		this.lastDataRequest = lastDataRequest;
 	}
 	
 }

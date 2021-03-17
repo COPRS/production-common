@@ -229,6 +229,10 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 				.get(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName());
 		metadata.setLastModified((null != lastModified) ? DateUtils.parse(lastModified) : null);
 		
+		final String lastDataRequest = (String) sourceAsMap
+				.get(DataLifecycleMetadata.FIELD_NAME.LAST_DATA_REQUEST.fieldName());
+		metadata.setLastDataRequest((null != lastDataRequest) ? DateUtils.parse(lastDataRequest) : null);
+		
 		LOG.debug("mapped product data lifecycle metadata from search result: " + metadata);
 		return metadata;
 	}

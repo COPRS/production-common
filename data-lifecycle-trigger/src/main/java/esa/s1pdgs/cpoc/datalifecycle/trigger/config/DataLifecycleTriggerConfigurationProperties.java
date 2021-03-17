@@ -90,6 +90,9 @@ public class DataLifecycleTriggerConfigurationProperties {
 	private String patternAvailableInLta;
 	
 	private String evictionTopic;
+	private String dataRequestTopic;
+	
+	private long dataRequestCooldownInSec = 1200;
 	
 	// --------------------------------------------------------------------------
 	
@@ -146,6 +149,22 @@ public class DataLifecycleTriggerConfigurationProperties {
 
 	public void setEvictionTopic(String evictionTopic) {
 		this.evictionTopic = evictionTopic;
+	}
+
+	public String getDataRequestTopic() {
+		return this.dataRequestTopic;
+	}
+
+	public void setDataRequestTopic(String dataRequestTopic) {
+		this.dataRequestTopic = dataRequestTopic;
+	}
+
+	public long getDataRequestCooldownInSec() {
+		return this.dataRequestCooldownInSec;
+	}
+
+	public void setDataRequestCooldownInSec(long dataRequestCooldownInSec) {
+		this.dataRequestCooldownInSec = dataRequestCooldownInSec;
 	}
 	
 }
