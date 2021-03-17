@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @ControllerAdvice
 public class DataLifecycleTriggerRestExceptionHandler {	
+	
 	@ExceptionHandler(DataLifecycleTriggerRestControllerException.class)
 	@ResponseBody
 	ResponseEntity<?> handleControllerException(final HttpServletRequest _request, final Throwable _e) {

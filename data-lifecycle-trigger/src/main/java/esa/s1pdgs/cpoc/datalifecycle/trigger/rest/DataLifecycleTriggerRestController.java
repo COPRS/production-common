@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.Product;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.ProductPatchDto;
@@ -69,10 +70,10 @@ public class DataLifecycleTriggerRestController {
 
 		assertValidApiKey(apiKey);
 
-		assertValidDateTimeString("minimalEvictionTimeInUncompressedStorage", minimalEvictionTimeInUncompressedStorage);
-		assertValidDateTimeString("maximalEvictionTimeInUncompressedStorage", maximalEvictionTimeInUncompressedStorage);
-		assertValidDateTimeString("minimalEvictionTimeInCompressedStorage", minimalEvictionTimeInCompressedStorage);
-		assertValidDateTimeString("maximalEvictionTimeInCompressedStorage", maximalEvictionTimeInCompressedStorage);
+		assertValidDateTimeString("minimalEvictionTimeInUncompressedStorage", minimalEvictionTimeInUncompressedStorage, true);
+		assertValidDateTimeString("maximalEvictionTimeInUncompressedStorage", maximalEvictionTimeInUncompressedStorage, true);
+		assertValidDateTimeString("minimalEvictionTimeInCompressedStorage", minimalEvictionTimeInCompressedStorage, true);
+		assertValidDateTimeString("maximalEvictionTimeInCompressedStorage", maximalEvictionTimeInCompressedStorage, true);
 
 		try {
 			return dataLifecycleServiceDelegator.getProducts(namePattern, persistentInUncompressedStorage,
@@ -199,8 +200,8 @@ public class DataLifecycleTriggerRestController {
 		LOGGER.info("patch product with productname {}", productname);
 		assertValidApiKey(apiKey);
 
-		assertValidDateTimeString("evictionTimeInUncompressedStorage", productPatch.getEvictionTimeInUncompressedStorage());
-		assertValidDateTimeString("evictionTimeInCompressedStorage", productPatch.getEvictionTimeInCompressedStorage());
+		assertValidDateTimeString("evictionTimeInUncompressedStorage", productPatch.getEvictionTimeInUncompressedStorage(), true);
+		assertValidDateTimeString("evictionTimeInCompressedStorage", productPatch.getEvictionTimeInCompressedStorage(), true);
 
 		Product result = null;
 		try {
@@ -227,8 +228,13 @@ public class DataLifecycleTriggerRestController {
 		}
 	}
 
-	private static final void assertValidDateTimeString(final String attributeName, final String dateTimeAsString)
+	private static final void assertValidDateTimeString(final String attributeName, final String dateTimeAsString, boolean optional)
 			throws DataLifecycleTriggerRestControllerException {
+		
+		if (optional && (StringUtil.isEmpty(dateTimeAsString) || "null".equalsIgnoreCase(dateTimeAsString))) {
+			return;
+		}
+		
 		try {
 			DataLifecycleServiceDelegator.convertDateTime(dateTimeAsString);
 		} catch (NumberFormatException e) {
