@@ -658,7 +658,6 @@ public class S3ObsServices {
 
 		for (int retryCount = 1;; retryCount++) {
 			try {
-				log(format("Performing %s", deleteObjectRequest));
 				s3client.deleteObject(deleteObjectRequest);
 				break;
 			} catch (final com.amazonaws.SdkClientException sce) {
