@@ -126,7 +126,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		final DataLifecycleMetadata updatedMetadata;
 		try {
-			final DataLifecycleMetadata metadataToUpdate = this.getOrRequest(productname);
+			final DataLifecycleMetadata metadataToUpdate = this.getOrRequest(productname, operatorName);
 			updatedMetadata = this.updateRetention(metadataToUpdate, evictionTimeInCompressedStorage, evictionTimeInUncompressedStorage);
 		} catch (final DataLifecycleMetadataNotFoundException e) {
 			LOG.info("cannot update retention of product (operator: " + operatorName + "): " + e.getMessage());
@@ -181,7 +181,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		}
 	}
 
-	private DataLifecycleMetadata getOrRequest(final String productname)
+	private DataLifecycleMetadata getOrRequest(final String productname, final String operatorName)
 			throws DataLifecycleMetadataNotFoundException, DataLifecycleTriggerInternalServerErrorException {
 		final Optional<DataLifecycleMetadata> oLifecycleMetadata = this.lifecycleMetadataRepo.findByProductName(productname);
 
@@ -191,7 +191,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			if (StringUtil.isNotBlank(dataLifecycleMetadata.getPathInUncompressedStorage())) {
 				return dataLifecycleMetadata;
 			} else {
-				this.sendDataRequest(dataLifecycleMetadata);
+				this.sendDataRequest(dataLifecycleMetadata, operatorName);
 				throw new DataLifecycleMetadataNotFoundException(
 						"data lifecycle metadata contains no path in uncompressed storage for product '" + productname
 								+ "', data request sent, try again later");
@@ -201,7 +201,8 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		}
 	}
 
-	public boolean sendDataRequest(final DataLifecycleMetadata dataLifecycleMetadata) throws DataLifecycleTriggerInternalServerErrorException {
+	public boolean sendDataRequest(final DataLifecycleMetadata dataLifecycleMetadata, final String operatorName)
+			throws DataLifecycleTriggerInternalServerErrorException {
 		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
 		if (null == dataLifecycleMetadata.getLastDataRequest()
@@ -215,6 +216,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			final DataRequestJob dataRequestJob = new DataRequestJob();
 			dataRequestJob.setKeyObjectStorage(dataLifecycleMetadata.getProductName());
 			dataRequestJob.setProductFamily(productFamily);
+			dataRequestJob.setOperatorName(operatorName);
 
 			this.publish(dataRequestJob);
 			dataLifecycleMetadata.setLastDataRequest(now);
