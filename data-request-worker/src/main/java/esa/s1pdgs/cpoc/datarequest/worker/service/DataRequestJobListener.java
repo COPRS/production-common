@@ -89,7 +89,7 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 				new ReportingMessage("Starting data request of %s", dataRequestJob.getKeyObjectStorage())
 		);
 		
-		return new MqiMessageEventHandler.Builder<DataRequestEvent>(ProductCategory.EVICTION_EVENTS)
+		return new MqiMessageEventHandler.Builder<DataRequestEvent>(ProductCategory.DATA_REQUEST_EVENT)
 				.onSuccess(res -> {
 					DataRequestType type = res.get(0).getDto().getDataRequestType();
 					reporting.end(

@@ -89,7 +89,7 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 				new ReportingMessage("Starting eviction of %s", evictionJob.getKeyObjectStorage())
 		);
 		
-		return new MqiMessageEventHandler.Builder<EvictionEvent>(ProductCategory.EVICTION_EVENTS)
+		return new MqiMessageEventHandler.Builder<EvictionEvent>(ProductCategory.EVICTION_EVENT)
 				.onSuccess(res -> reporting.end(
 						new ReportingMessage("Eviction of %s was successful", evictionJob.getKeyObjectStorage())
 				))
