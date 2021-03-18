@@ -27,6 +27,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -115,6 +116,15 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		}
 		
 		return Optional.of(result.get(0));
+	}
+
+	@Override
+	public List<DataLifecycleMetadata> findByProductNames(@NonNull List<String> productNames) throws DataLifecycleMetadataRepositoryException {
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		productNames
+				.forEach(name -> queryBuilder.should(QueryBuilders.termQuery(DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME.fieldName() + ".keyword", name)));
+
+		return this.query(queryBuilder, null, null, null, null);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
@@ -12,6 +13,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
@@ -150,9 +152,17 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	}
 
 	@Override
-	public List<DataLifecycleMetadata> getProducts(List<String> productnames) {
-		// TODO @MSc: impl
-		return null;
+	public List<DataLifecycleMetadata> getProducts(List<String> productnames) throws DataLifecycleMetadataRepositoryException {
+		LOG.debug("incoming query for data lifecycle metadata of products: " + productnames);
+
+		if (CollectionUtil.isEmpty(productnames)) {
+			return Collections.emptyList();
+		}
+
+		final List<DataLifecycleMetadata> metadata = this.lifecycleMetadataRepo.findByProductNames(productnames);
+
+		LOG.debug("answering data lifecycle metadata query for " + metadata.size() + " products with " + metadata.size() + " results");
+		return metadata;
 	}
 
 	@Override
