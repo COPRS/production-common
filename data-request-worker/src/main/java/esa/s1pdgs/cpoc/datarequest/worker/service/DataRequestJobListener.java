@@ -141,6 +141,7 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 		dataRequestEvent.setProductFamily(dataRequestJob.getProductFamily());
 		dataRequestEvent.setKeyObjectStorage(dataRequestJob.getKeyObjectStorage());
 		dataRequestEvent.setDataRequestType(dataRequestType);
+		dataRequestEvent.setOperatorName(dataRequestJob.getOperatorName());
 		dataRequestEvent.setUid(reportingUid);
 		final GenericPublicationMessageDto<DataRequestEvent> outputMessage = new GenericPublicationMessageDto<DataRequestEvent>(
 				inputMessageId, dataRequestJob.getProductFamily(), dataRequestEvent);

@@ -1,6 +1,9 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.Arrays;
 import java.util.Objects;
+
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class DataRequestJob extends AbstractMessage {
 
@@ -10,6 +13,7 @@ public class DataRequestJob extends AbstractMessage {
 
 	public DataRequestJob() {
 		super();
+		this.setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
 	// --------------------------------------------------------------------------
@@ -38,7 +42,7 @@ public class DataRequestJob extends AbstractMessage {
 
 	@Override
 	public String toString() {
-		return String.format("EvictionManagementJob [productFamily=%s, keyObjectStorage=%s, creationDate=%s, operatorName=%s]", this.productFamily,
+		return String.format("DataRequestJob [productFamily=%s, keyObjectStorage=%s, creationDate=%s, operatorName=%s]", this.productFamily,
 				this.keyObjectStorage, this.creationDate, this.operatorName);
 	}
 

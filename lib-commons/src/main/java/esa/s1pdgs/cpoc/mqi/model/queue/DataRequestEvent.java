@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 public class DataRequestEvent extends AbstractMessage {
 	
 	private DataRequestType dataRequestType;
+	private String operatorName;
 	
 	public DataRequestEvent() {
 		super();
@@ -21,11 +22,19 @@ public class DataRequestEvent extends AbstractMessage {
 	public void setDataRequestType(DataRequestType dataRequestType) {
 		this.dataRequestType = dataRequestType;
 	}
+	
+	public String getOperatorName() {
+		return operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedActions, demandType, debug, retryCounter, dataRequestType);
+				allowedActions, demandType, debug, retryCounter, dataRequestType, operatorName);
 	}
 
 	@Override
@@ -44,12 +53,13 @@ public class DataRequestEvent extends AbstractMessage {
 		        && demandType == other.demandType
 		        && debug == other.debug
 		        && retryCounter == other.retryCounter
-				&& dataRequestType == other.dataRequestType;
+				&& dataRequestType == other.dataRequestType
+				&& Objects.equals(operatorName, other.operatorName);
 	}
 
 	@Override
 	public String toString() {
-		return "DataRequestEvent [dataRequestType=" + dataRequestType + ", productFamily=" + productFamily
+		return "DataRequestEvent [operatorName=" + operatorName + ", dataRequestType=" + dataRequestType + ", productFamily=" + productFamily
 				+ ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid + ", creationDate=" + creationDate
 				+ ", hostname=" + hostname + ", allowedActions=" + allowedActions + ", demandType=" + demandType
 				+ ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
