@@ -151,6 +151,10 @@ public class DataLifecycleTriggerRestController {
 			result = dataLifecycleServiceDelegator.getProduct(productname);
 		} catch (DataLifecycleMetadataNotFoundException e) {
 			assertProductFound(result, productname);
+		} catch (DataLifecycleTriggerInternalServerErrorException e) {
+			LOGGER.error("internal server error: " + productname, e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
 		return result;

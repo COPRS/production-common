@@ -76,9 +76,10 @@ public class DataLifecycleServiceDelegator {
 
 	/**
 	 * @throws DataLifecycleMetadataNotFoundException
+	 * @throws DataLifecycleTriggerInternalServerErrorException 
 	 * @see DataLifecycleTriggerRestController#getProduct(String, String)
 	 */
-	public Product getProduct(String productname) throws DataLifecycleMetadataNotFoundException {
+	public Product getProduct(String productname) throws DataLifecycleMetadataNotFoundException, DataLifecycleTriggerInternalServerErrorException {
 		DataLifecycleMetadata result = this.dataLifecycleService.getProduct(productname);
 
 		Product mappedResult = null;

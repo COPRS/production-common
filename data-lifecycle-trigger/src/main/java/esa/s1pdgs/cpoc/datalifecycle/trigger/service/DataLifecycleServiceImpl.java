@@ -156,28 +156,44 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	}
 
 	@Override
-	public DataLifecycleMetadata getProduct(String productname) {
-		// TODO @MSc: impl
-		return null;
+	public DataLifecycleMetadata getProduct(String productname)
+			throws DataLifecycleMetadataNotFoundException, DataLifecycleTriggerInternalServerErrorException {
+		LOG.debug("incoming query for data lifecycle metadata of product '" + productname + "'");
+
+		final DataLifecycleMetadata lifecycleMetadata;
+
+		try {
+			lifecycleMetadata = this.get(productname);
+		} catch (DataLifecycleMetadataRepositoryException | DataLifecycleMetadataNotFoundException e) {
+			LOG.info("error reading data lifecycle metadata: " + e.getMessage());
+			throw e;
+		}
+
+		LOG.debug("answering data lifecycle metadata query for product '" + productname + "' with: " + lifecycleMetadata);
+		return lifecycleMetadata;
 	}
 
 	// --------------------------------------------------------------------------
 
-	private DataLifecycleMetadata getAndCheckPathExists(final String productname)
-			throws DataLifecycleMetadataNotFoundException, DataLifecycleMetadataRepositoryException {
+	private DataLifecycleMetadata get(final String productname) throws DataLifecycleMetadataNotFoundException, DataLifecycleMetadataRepositoryException {
 		final Optional<DataLifecycleMetadata> oLifecycleMetadata = this.lifecycleMetadataRepo.findByProductName(productname);
 
 		if (oLifecycleMetadata.isPresent()) {
-			final DataLifecycleMetadata dataLifecycleMetadata = oLifecycleMetadata.get();
-
-			if (StringUtil.isNotBlank(dataLifecycleMetadata.getPathInUncompressedStorage())
-					|| StringUtil.isNotBlank(dataLifecycleMetadata.getPathInCompressedStorage())) {
-				return dataLifecycleMetadata;
-			} else {
-				throw new DataLifecycleMetadataNotFoundException("data lifecycle metadata contains no storage paths for product: " + productname);
-			}
+			return oLifecycleMetadata.get();
 		} else {
 			throw new DataLifecycleMetadataNotFoundException("no data lifecycle metadata found for product: " + productname);
+		}
+	}
+
+	private DataLifecycleMetadata getAndCheckPathExists(final String productname)
+			throws DataLifecycleMetadataNotFoundException, DataLifecycleMetadataRepositoryException {
+		final DataLifecycleMetadata dataLifecycleMetadata = this.get(productname);
+
+		if (StringUtil.isNotBlank(dataLifecycleMetadata.getPathInUncompressedStorage())
+				|| StringUtil.isNotBlank(dataLifecycleMetadata.getPathInCompressedStorage())) {
+			return dataLifecycleMetadata;
+		} else {
+			throw new DataLifecycleMetadataNotFoundException("data lifecycle metadata contains no storage paths for product: " + productname);
 		}
 	}
 
@@ -194,7 +210,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 				this.sendDataRequest(dataLifecycleMetadata, operatorName);
 				throw new DataLifecycleMetadataNotFoundException(
 						"data lifecycle metadata contains no path in uncompressed storage for product '" + productname
-								+ "', data request sent, try again later");
+						+ "', data request sent, try again later");
 			}
 		} else {
 			throw new DataLifecycleMetadataNotFoundException("no data lifecycle metadata found for product '" + productname + "', unable to send data request");

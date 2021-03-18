@@ -50,6 +50,6 @@ public interface DataLifecycleService {
 
 	List<DataLifecycleMetadata> getProducts(List<String> productnames);
 
-	DataLifecycleMetadata getProduct(String productname);
+	DataLifecycleMetadata getProduct(String productname) throws DataLifecycleMetadataNotFoundException, DataLifecycleTriggerInternalServerErrorException;
 
 }
