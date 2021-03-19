@@ -103,7 +103,7 @@ public class DataLifecycleTriggerRestController {
 
 		try {
 			return dataLifecycleServiceDelegator.getProducts(productPost.getProductnames());
-		} catch (DataLifecycleMetadataRepositoryException e) {
+		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

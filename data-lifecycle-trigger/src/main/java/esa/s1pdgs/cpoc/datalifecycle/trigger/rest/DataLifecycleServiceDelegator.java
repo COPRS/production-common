@@ -54,7 +54,7 @@ public class DataLifecycleServiceDelegator {
 	/**
 	 * @see DataLifecycleTriggerRestController#postProducts(String, ProductPostDto)
 	 */
-	public List<Product> getProducts(List<String> productnames) throws DataLifecycleMetadataRepositoryException {
+	public List<Product> getProducts(List<String> productnames) throws DataLifecycleTriggerInternalServerErrorException {
 		List<DataLifecycleMetadata> result = this.dataLifecycleService.getProducts(productnames);
 		List<Product> mappedResult = new ArrayList<>();
 		if (result != null) {

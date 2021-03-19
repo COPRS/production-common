@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +60,8 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		final List<DataLifecycleMetadata> productsToDelete;
 		try {
-			productsToDelete = this.lifecycleMetadataRepo.findByEvictionDateBefore(LocalDateTime.now(ZoneId.of("UTC")));
-			LOG.info("found " + productsToDelete.size() + " products to evict on behalt of "
+			productsToDelete = CollectionUtil.nullToEmptyList(this.lifecycleMetadataRepo.findByEvictionDateBefore(LocalDateTime.now(ZoneId.of("UTC"))));
+			LOG.debug("found " + productsToDelete.size() + " products to evict on behalt of "
 					+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
 		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
 			LOG.error("error searching for products to evict on behalf of "
@@ -102,7 +104,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		final int evictionJobsSend;
 		try {
-			final DataLifecycleMetadata lifecycleMetadata = this.getAndCheckPathExists(productname);
+			final DataLifecycleMetadata lifecycleMetadata = this.getOrThrow(productname);
 			evictionJobsSend = this.evict(lifecycleMetadata, forceCompressed, forceUncompressed, operatorName);
 		} catch (final DataLifecycleMetadataNotFoundException e) {
 			LOG.info("cannot evict product (operator: " + operatorName + "): " + e.getMessage());
@@ -128,7 +130,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 
 		final DataLifecycleMetadata updatedMetadata;
 		try {
-			final DataLifecycleMetadata metadataToUpdate = this.getOrRequest(productname, operatorName);
+			final DataLifecycleMetadata metadataToUpdate = this.getAndRequest(productname, operatorName);
 			updatedMetadata = this.updateRetention(metadataToUpdate, evictionTimeInCompressedStorage, evictionTimeInUncompressedStorage);
 		} catch (final DataLifecycleMetadataNotFoundException e) {
 			LOG.info("cannot update retention of product (operator: " + operatorName + "): " + e.getMessage());
@@ -152,16 +154,16 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	}
 
 	@Override
-	public List<DataLifecycleMetadata> getProducts(List<String> productnames) throws DataLifecycleMetadataRepositoryException {
+	public List<DataLifecycleMetadata> getProducts(List<String> productnames) throws DataLifecycleTriggerInternalServerErrorException {
 		LOG.debug("incoming query for data lifecycle metadata of products: " + productnames);
 
 		if (CollectionUtil.isEmpty(productnames)) {
 			return Collections.emptyList();
 		}
 
-		final List<DataLifecycleMetadata> metadata = this.lifecycleMetadataRepo.findByProductNames(productnames);
+		final List<DataLifecycleMetadata> metadata = this.getAndRequest(productnames, "[NOT SPECIFIED]");
 
-		LOG.debug("answering data lifecycle metadata query for " + metadata.size() + " products with " + metadata.size() + " results");
+		LOG.info("answering data lifecycle metadata query for " + metadata.size() + " products with " + metadata.size() + " results");
 		return metadata;
 	}
 
@@ -171,21 +173,25 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		LOG.debug("incoming query for data lifecycle metadata of product '" + productname + "'");
 
 		final DataLifecycleMetadata lifecycleMetadata;
-
 		try {
-			lifecycleMetadata = this.get(productname);
-		} catch (DataLifecycleMetadataRepositoryException | DataLifecycleMetadataNotFoundException e) {
+			lifecycleMetadata = this.getAndRequest(productname, "[NOT SPECIFIED]");
+		} catch (DataLifecycleTriggerInternalServerErrorException | DataLifecycleMetadataNotFoundException e) {
 			LOG.info("error reading data lifecycle metadata: " + e.getMessage());
 			throw e;
 		}
 
-		LOG.debug("answering data lifecycle metadata query for product '" + productname + "' with: " + lifecycleMetadata);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("answering data lifecycle metadata query for product '" + productname + "' with: " + lifecycleMetadata);
+		} else {
+			LOG.info("answering data lifecycle metadata query for product: " + productname);
+		}
+
 		return lifecycleMetadata;
 	}
 
 	// --------------------------------------------------------------------------
 
-	private DataLifecycleMetadata get(final String productname) throws DataLifecycleMetadataNotFoundException, DataLifecycleMetadataRepositoryException {
+	private DataLifecycleMetadata getOrThrow(final String productname) throws DataLifecycleMetadataNotFoundException, DataLifecycleMetadataRepositoryException {
 		final Optional<DataLifecycleMetadata> oLifecycleMetadata = this.lifecycleMetadataRepo.findByProductName(productname);
 
 		if (oLifecycleMetadata.isPresent()) {
@@ -195,62 +201,50 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		}
 	}
 
-	private DataLifecycleMetadata getAndCheckPathExists(final String productname)
-			throws DataLifecycleMetadataNotFoundException, DataLifecycleMetadataRepositoryException {
-		final DataLifecycleMetadata dataLifecycleMetadata = this.get(productname);
-
-		if (StringUtil.isNotBlank(dataLifecycleMetadata.getPathInUncompressedStorage())
-				|| StringUtil.isNotBlank(dataLifecycleMetadata.getPathInCompressedStorage())) {
-			return dataLifecycleMetadata;
-		} else {
-			throw new DataLifecycleMetadataNotFoundException("data lifecycle metadata contains no storage paths for product: " + productname);
-		}
-	}
-
-	private DataLifecycleMetadata getOrRequest(final String productname, final String operatorName)
+	/**
+	 * @return the metadata if existing and in case of no path in uncomressed storage sends a data request
+	 * @throws DataLifecycleMetadataNotFoundException           if the metadata does not exist
+	 * @throws DataLifecycleTriggerInternalServerErrorException if something goes wrong with persistence or kafka
+	 */
+	private DataLifecycleMetadata getAndRequest(final String productname, final String operatorName)
 			throws DataLifecycleMetadataNotFoundException, DataLifecycleTriggerInternalServerErrorException {
-		final Optional<DataLifecycleMetadata> oLifecycleMetadata = this.lifecycleMetadataRepo.findByProductName(productname);
+		final DataLifecycleMetadata dataLifecycleMetadata = this.getOrThrow(productname);
 
-		if (oLifecycleMetadata.isPresent()) {
-			final DataLifecycleMetadata dataLifecycleMetadata = oLifecycleMetadata.get();
-
-			if (StringUtil.isNotBlank(dataLifecycleMetadata.getPathInUncompressedStorage())) {
-				return dataLifecycleMetadata;
-			} else {
-				this.sendDataRequest(dataLifecycleMetadata, operatorName);
-				throw new DataLifecycleMetadataNotFoundException(
-						"data lifecycle metadata contains no path in uncompressed storage for product '" + productname
-						+ "', data request sent, try again later");
-			}
-		} else {
-			throw new DataLifecycleMetadataNotFoundException("no data lifecycle metadata found for product '" + productname + "', unable to send data request");
+		// send data requests if not in uncompressed storage
+		if (StringUtil.isBlank(dataLifecycleMetadata.getPathInUncompressedStorage())) {
+			this.sendDataRequest(dataLifecycleMetadata, operatorName);
 		}
+
+		return dataLifecycleMetadata;
 	}
 
-	public boolean sendDataRequest(final DataLifecycleMetadata dataLifecycleMetadata, final String operatorName)
+	/**
+	 * @return the metadata for the given product names and in case of no path in uncomressed storage sending a data requests
+	 * @throws DataLifecycleTriggerInternalServerErrorException if something goes wrong with persistence or data request
+	 */
+	private List<DataLifecycleMetadata> getAndRequest(final List<String> productNames, final String operatorName)
 			throws DataLifecycleTriggerInternalServerErrorException {
-		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+		final List<DataLifecycleMetadata> metadata = CollectionUtil.nullToEmptyList(this.lifecycleMetadataRepo.findByProductNames(productNames));
 
-		if (null == dataLifecycleMetadata.getLastDataRequest()
-				|| now.minusSeconds(this.dataRequestCooldown).isAfter(dataLifecycleMetadata.getLastDataRequest())) {
-			final ProductFamily productFamily = dataLifecycleMetadata.getProductFamilyInUncompressedStorage();
-			if (null == productFamily) {
-				throw new DataLifecycleTriggerInternalServerErrorException(
-						"cannot send data request for '" + dataLifecycleMetadata.getProductName() + "' as product family in uncompressed storage is unknown.");
+		// send data requests if not in uncompressed storage
+		final List<DataLifecycleMetadata> notAvailableUncompressed = metadata.stream().filter(m -> StringUtil.isBlank(m.getPathInUncompressedStorage()))
+				.collect(Collectors.toList());
+		long requestsSent = 0;
+		for (final DataLifecycleMetadata requestMe : notAvailableUncompressed) {
+			try {
+				if (this.sendDataRequest(requestMe, "[NOT SPECIFIED]")) {
+					requestsSent++;
+				}
+			} catch (final DataLifecycleTriggerInternalServerErrorException e) {
+				LOG.error("error sending data request for product '" + requestMe.getProductName() + "' on behalf of '" + operatorName + "': "
+						+ Exceptions.toString(e));
+				continue; // best effort approach
 			}
-
-			final DataRequestJob dataRequestJob = new DataRequestJob();
-			dataRequestJob.setKeyObjectStorage(dataLifecycleMetadata.getProductName());
-			dataRequestJob.setProductFamily(productFamily);
-			dataRequestJob.setOperatorName(operatorName);
-
-			this.publish(dataRequestJob);
-			dataLifecycleMetadata.setLastDataRequest(now);
-			this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
-			return true;
 		}
 
-		return false;
+		LOG.debug("products queried: " + productNames.size() + " / lifecycle metadata found: " + metadata.size() + " / not available uncompressed: "
+				+ notAvailableUncompressed.size() + " / data requests sent: " + requestsSent);
+		return metadata;
 	}
 
 	private DataLifecycleMetadata updateRetention(@NonNull DataLifecycleMetadata dataLifecycleMetadata, LocalDateTime evictionTimeInCompressedStorage,
@@ -337,6 +331,37 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		}
 
 		return evictionJobsSend;
+	}
+
+	public boolean sendDataRequest(final DataLifecycleMetadata dataLifecycleMetadata, final String operatorName)
+			throws DataLifecycleTriggerInternalServerErrorException {
+		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+
+		if (null == dataLifecycleMetadata.getLastDataRequest()
+				|| now.minusSeconds(this.dataRequestCooldown).isAfter(dataLifecycleMetadata.getLastDataRequest())) {
+			final ProductFamily productFamily = dataLifecycleMetadata.getProductFamilyInUncompressedStorage();
+			if (null == productFamily) {
+				throw new DataLifecycleTriggerInternalServerErrorException(
+						"cannot send data request for '" + dataLifecycleMetadata.getProductName() + "' as product family in uncompressed storage is unknown.");
+			}
+
+			final DataRequestJob dataRequestJob = new DataRequestJob();
+			dataRequestJob.setKeyObjectStorage(dataLifecycleMetadata.getProductName());
+			dataRequestJob.setProductFamily(productFamily);
+			dataRequestJob.setOperatorName(operatorName);
+
+			LOG.debug("sending data request: " + dataRequestJob);
+			this.publish(dataRequestJob);
+			dataLifecycleMetadata.setLastDataRequest(now);
+			this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
+			return true;
+		} else {
+			final String cooldownEnd = DateUtils
+					.formatToMetadataDateTimeFormat(dataLifecycleMetadata.getLastDataRequest().plusSeconds(this.dataRequestCooldown));
+			LOG.debug(
+					"ommitting sending a data request for '" + dataLifecycleMetadata.getProductName() + "', because of active cooldown, ending " + cooldownEnd);
+			return false;
+		}
 	}
 
 	private void publish(final EvictionManagementJob job) throws DataLifecycleTriggerInternalServerErrorException {

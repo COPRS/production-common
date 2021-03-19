@@ -24,6 +24,10 @@ public class CollectionUtil {
 		return (coll != null) ? coll : new ArrayList<>(0);
 	}
 
+	public static <T> List<T> nullToEmptyList(Collection<T> coll) {
+		return (coll != null) ? new ArrayList<>(coll) : new ArrayList<>(0);
+	}
+
 	public static int size(Collection<?> coll) {
 		return (coll != null) ? coll.size() : 0;
 	}
