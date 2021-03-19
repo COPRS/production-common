@@ -1,13 +1,21 @@
 
 package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence;
 
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
@@ -20,8 +28,10 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -31,10 +41,16 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.EsClientConfiguration;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleSortTerm;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleBooleanFilter;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleQueryFilter;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleRangeValueFilter;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleTextFilter;
 
 /**
  * Data lifecycle metadata repository implementation.
@@ -86,13 +102,13 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 					final StringBuilder errBuilder = new StringBuilder(
 							"data lifecycle metadata could not be saved successfully for product: "
 									+ metadata.getProductName());
-					for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
+					for (final ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
 						errBuilder.append("\nsaving error: " + failure.reason());
 					}
 					throw new DataLifecycleMetadataRepositoryException(errBuilder.toString());
 				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new DataLifecycleMetadataRepositoryException("error saving product data lifecycle metadata ("
 					+ metadata.getProductName() + "): " + e.getMessage(), e);
 		}
@@ -101,11 +117,10 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	@Override
 	public Optional<DataLifecycleMetadata> findByProductName(String name) throws DataLifecycleMetadataRepositoryException {
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		queryBuilder.must(
-				QueryBuilders.termQuery(DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME.fieldName() + ".keyword", name));
-		
-		final List<DataLifecycleMetadata> result = this.query(queryBuilder, null, null, null, null);
-		
+		queryBuilder.must(QueryBuilders.termQuery(PRODUCT_NAME.fieldName() + ".keyword", name));
+
+		final List<DataLifecycleMetadata> result = this.queryWithOffset(queryBuilder, Optional.empty(), Optional.empty(), null);
+
 		if (result.isEmpty()) {
 			return Optional.empty();
 		}
@@ -121,128 +136,275 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	@Override
 	public List<DataLifecycleMetadata> findByProductNames(@NonNull List<String> productNames) throws DataLifecycleMetadataRepositoryException {
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		productNames
-				.forEach(name -> queryBuilder.should(QueryBuilders.termQuery(DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME.fieldName() + ".keyword", name)));
+		productNames.forEach(name -> queryBuilder.should(QueryBuilders.termQuery(PRODUCT_NAME.fieldName() + ".keyword", name)));
 
-		return this.query(queryBuilder, null, null, null, null);
+		return this.queryWithOffset(queryBuilder, Optional.empty(), Optional.empty(), null);
 	}
 
 	@Override
 	public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp) throws DataLifecycleMetadataRepositoryException {
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		final DataLifecycleSortTerm sortTerm = new DataLifecycleSortTerm(LAST_MODIFIED, DataLifecycleSortOrder.ASCENDING);
 
-		queryBuilder.should(QueryBuilders.rangeQuery(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName()).lt(timestamp));
+		queryBuilder.should(QueryBuilders.rangeQuery(EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName()).lt(timestamp));
 		// OR
-		queryBuilder.should(QueryBuilders.rangeQuery(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName()).lt(timestamp));
+		queryBuilder.should(QueryBuilders.rangeQuery(EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName()).lt(timestamp));
 
-		return this.query(queryBuilder, null, null, DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName(), SortOrder.ASC);
+		return this.queryWithOffset(queryBuilder, Optional.empty(), Optional.empty(), Collections.singletonList(sortTerm));
+	}
+
+	@Override
+	public List<DataLifecycleMetadata> findWithFilters(List<DataLifecycleQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip,
+			List<DataLifecycleSortTerm> sortTerms) {
+		LOG.info("finding data lifecycle metadata with filters {}", filters);
+
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildQueryWithFilters(filters, queryBuilder);
+
+		return this.queryWithOffset(queryBuilder, top, skip, sortTerms);
 	}
 
 	// --------------------------------------------------------------------------
-	
-	private List<DataLifecycleMetadata> query(BoolQueryBuilder queryBuilder, Integer top, Integer skip,
-			String sortFieldName, SortOrder sortOrder) throws DataLifecycleMetadataRepositoryException {
+
+	private List<DataLifecycleMetadata> queryWithOffset(final BoolQueryBuilder queryBuilder, final Optional<Integer> top, final Optional<Integer> skip,
+			final List<DataLifecycleSortTerm> sortTerms) {
+
+		final List<DataLifecycleMetadata> result = new ArrayList<>();
+		if (skip.orElse(0) <= 0 || skip.orElse(0) + top.orElse(0) <= this.searchResultLimit) {
+			// Paging through less than searchResultLimit -> default behaviour
+			LOG.info("Handling query with skip={} and top={} (max-search-hits={}) -> Use elastic classical pagination", skip.orElse(0), top.orElse(0),
+					this.searchResultLimit);
+			result.addAll(mapToMetadata(this.query(queryBuilder, top, skip, sortTerms)));
+		} else {
+			// Paging through more than searchResultLimit ->
+			// 1. iterate to offset (first page by using default mechanism, each further page by using search_after)
+			// 2. search_after(offset)
+			Integer offset = skip.orElse(0);
+			Integer pageSize = offset > this.searchResultLimit ? this.searchResultLimit : offset;
+			List<SearchHit> offsetList = this.queryOffset(queryBuilder, Optional.of(pageSize), Optional.of(0), sortTerms, false, null);
+			SearchHit offsetSearchHit = offsetList.get(offsetList.size() - 1);
+
+			while (offset > this.searchResultLimit) {
+				offsetList = this.queryOffset(queryBuilder, top, Optional.of(pageSize), sortTerms, true, offsetSearchHit.getSortValues());
+				offsetSearchHit = offsetList.get(offsetList.size() - 1);
+				offset = offset - offsetList.size();
+				pageSize = offset > this.searchResultLimit ? this.searchResultLimit : offset;
+			}
+
+			LOG.info("Handling query with skip={} and top={} (max-search-hits={}) -> Use elastic search_after", skip.orElse(0), top.orElse(0),
+					this.searchResultLimit);
+			offsetList = this.queryOffset(queryBuilder, top, Optional.of(pageSize), sortTerms, true, offsetSearchHit.getSortValues());
+			result.addAll(mapToMetadata(offsetList));
+		}
+
+		return result;
+	}
+
+	private List<SearchHit> query(final BoolQueryBuilder queryBuilder, final Optional<Integer> top, final Optional<Integer> skip,
+			final List<DataLifecycleSortTerm> sortTerms) {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
 		if (null != queryBuilder) {
 			sourceBuilder.query(queryBuilder);
 		}
 
-		// paging
-		if (null != skip && 0 <= skip) {
-			sourceBuilder.from(skip);
-		}
-		if (null != top && 0 <= top && top <= this.searchResultLimit) {
-			sourceBuilder.size(top);
-		} else {
-			sourceBuilder.size(this.searchResultLimit);
+		configurePaging(top, skip, this.searchResultLimit, sourceBuilder);
+		configureSorting(sortTerms, sourceBuilder);
+
+		return this.search(sourceBuilder);
+	}
+
+	private List<SearchHit> queryOffset(final BoolQueryBuilder queryBuilder, final Optional<Integer> top, final Optional<Integer> skip,
+			final List<DataLifecycleSortTerm> sortTerms, final boolean searchAfter, final Object[] searchAfterOffset) {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+		if (null != queryBuilder) {
+			sourceBuilder.query(queryBuilder);
 		}
 
-		// sorting
-		if (StringUtil.isNotBlank(sortFieldName)) {
-			if (null == sortOrder) {
-				sortOrder = SortOrder.ASC;
-			}
-			sourceBuilder.sort(sortFieldName, sortOrder);
-		} else { // default sorting
-			sourceBuilder.sort(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName(), SortOrder.DESC);
-		}
+		configurePaging(top, searchAfter ? Optional.of(0) : skip, this.searchResultLimit, sourceBuilder);
+		configureSorting(sortTerms, sourceBuilder);
 
+		if (searchAfter) {
+			sourceBuilder.searchAfter(searchAfterOffset);
+		}
+		
+		return this.search(sourceBuilder);
+	}
+
+	private List<SearchHit> search(final SearchSourceBuilder sourceBuilder) {
 		final SearchRequest searchRequest = new SearchRequest(this.elasticsearchIndex);
 		searchRequest.source(sourceBuilder);
 
-		final List<DataLifecycleMetadata> result = new ArrayList<>();
-		LOG.debug("product data lifecycle metadata search request ("
-				+ this.elasticsearchClient.getLowLevelClient().getNodes().get(0).getHost() + "): " + searchRequest);
-
+		LOG.debug("search request: {}", searchRequest);
 		try {
-			final SearchResponse searchResponse = this.elasticsearchClient.search(searchRequest,
-					RequestOptions.DEFAULT);
-			LOG.debug("product data lifecycle metadata search response: " + searchResponse);
+			final SearchResponse searchResponse = this.elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT);
+			LOG.debug("response: {}", searchResponse);
 
-			for (SearchHit hit : searchResponse.getHits().getHits()) {
-				result.add(this.mapToMetadata(hit));
-			}
-		} catch (Exception e) {
-			throw new DataLifecycleMetadataRepositoryException("error searching for product data lifecycle metadata ("
-					+ (null != e.getMessage() ? e.getMessage() : e.getClass().getSimpleName()) + ")", e);
+			return Arrays.asList(searchResponse.getHits().getHits());
+		} catch (final IOException e) {
+			LOG.warn("error while finding PRIP metadata", e);
 		}
 
-		LOG.debug("found " + result.size() + " elements on product data lifecycle metadata search");
-		if (result.size() == this.searchResultLimit) {
-			LOG.warn(
-					"the number of elements found on product data lifecycle metadata search equals the configured limit."
-							+ " it may be the case that more elements exist in elasticsearch but are not returned because of the limit!");
-		}
-
-		return result;
+		return Collections.emptyList();
 	}
 
-	private DataLifecycleMetadata mapToMetadata(SearchHit hit) {
+	// --------------------------------------------------------------------------
+
+	private static void buildQueryWithFilters(final List<? extends DataLifecycleQueryFilter> filters, final BoolQueryBuilder queryBuilder) {
+		for (final DataLifecycleQueryFilter filter : CollectionUtil.nullToEmpty(filters)) {
+			if (filter instanceof DataLifecycleRangeValueFilter) {
+				buildQueryWithRangeValueFilter((DataLifecycleRangeValueFilter<?>) filter, queryBuilder);
+			} else if (filter instanceof DataLifecycleTextFilter) {
+				buildQueryWithTextFilter((DataLifecycleTextFilter) filter, queryBuilder);
+			} else if (filter instanceof DataLifecycleBooleanFilter) {
+				buildQueryWithBooleanFilter((DataLifecycleBooleanFilter) filter, queryBuilder);
+			} else {
+				throw new IllegalArgumentException(String.format("filter type not supported: %s", filter.getClass().getSimpleName()));
+			}
+		}
+	}
+
+	private static void buildQueryWithRangeValueFilter(final DataLifecycleRangeValueFilter<?> filter, final BoolQueryBuilder queryBuilder) {
+		switch (filter.getOperator()) {
+		case LT:
+			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).lt(filter.getValue()));
+			break;
+		case LE:
+			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).lte(filter.getValue()));
+			break;
+		case GT:
+			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).gt(filter.getValue()));
+			break;
+		case GE:
+			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).gte(filter.getValue()));
+			break;
+		case EQ:
+			queryBuilder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()));
+			break;
+		case NE:
+			queryBuilder.mustNot(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()));
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("filter operator not supported: %s", filter.getOperator().name()));
+		}
+	}
+
+	private static void buildQueryWithTextFilter(final DataLifecycleTextFilter filter, final BoolQueryBuilder queryBuilder) {
+		switch (filter.getFunction()) {
+		case STARTS_WITH:
+			queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())));
+			break;
+		case ENDS_WITH:
+			queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s", filter.getText())));
+			break;
+		case CONTAINS:
+			queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())));
+			break;
+		case EQUALS:
+			queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND));
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+
+	private static void buildQueryWithBooleanFilter(final DataLifecycleBooleanFilter filter, final BoolQueryBuilder queryBuilder) {
+		switch (filter.getFunction()) {
+		case EQUALS:
+			queryBuilder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			break;
+		case EQUALS_NOT:
+			queryBuilder.mustNot(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+
+	private static void configurePaging(final Optional<Integer> top, final Optional<Integer> skip, final int searchResultLimit,
+			final SearchSourceBuilder sourceBuilder) {
+		if (skip.isPresent()) {
+			sourceBuilder.from(skip.get());
+		}
+		if (top.isPresent() && 0 <= top.get() && top.get() <= searchResultLimit) {
+			sourceBuilder.size(top.get());
+		} else {
+			sourceBuilder.size(searchResultLimit);
+		}
+	}
+
+	private static void configureSorting(final List<DataLifecycleSortTerm> sortTerms, final SearchSourceBuilder sourceBuilder) {
+		boolean sortedByTieBraker = false;
+		if (CollectionUtil.isNotEmpty(sortTerms)) {
+			for (final DataLifecycleSortTerm sortTerm : sortTerms) {
+				final String sortFieldName = sortTerm.getSortFieldName().fieldName();
+				final DataLifecycleSortOrder sortOrder = sortTerm.getSortOrderOrDefault(DataLifecycleSortOrder.ASCENDING);
+
+				sourceBuilder.sort(sortFieldName, sortOrderFor(sortOrder.abbreviation()));
+
+				if (PRODUCT_NAME.fieldName().equals(sortFieldName)) {
+					sortedByTieBraker = true;
+				}
+			}
+		} else {
+			// when no sorting is specified, sort by last modified descending
+			sourceBuilder.sort(LAST_MODIFIED.fieldName(), SortOrder.DESC);
+		}
+
+		if (!sortedByTieBraker) {
+			sourceBuilder.sort(PRODUCT_NAME.fieldName(), SortOrder.ASC);
+		}
+	}
+
+	private static SortOrder sortOrderFor(final String sortOrder) {
+		if (SortOrder.ASC.name().equalsIgnoreCase(sortOrder) || SortOrder.ASC.toString().equalsIgnoreCase(sortOrder)) {
+			return SortOrder.ASC;
+		}
+		if (SortOrder.DESC.name().equalsIgnoreCase(sortOrder) || SortOrder.DESC.toString().equalsIgnoreCase(sortOrder)) {
+			return SortOrder.DESC;
+		}
+
+		throw new IllegalArgumentException(String.format("sort order not supported: %s", sortOrder));
+	}
+
+	private static List<DataLifecycleMetadata> mapToMetadata(final List<SearchHit> searchHits) {
+		return CollectionUtil.nullToEmpty(searchHits).stream().map(DataLifecycleMetadataRepositoryImpl::mapToMetadata).collect(Collectors.toList());
+	}
+
+	private static DataLifecycleMetadata mapToMetadata(final SearchHit hit) {
 		final Map<String, Object> sourceAsMap = hit.getSourceAsMap();
 		final DataLifecycleMetadata metadata = new DataLifecycleMetadata();
 
-		metadata.setProductName((String) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME.fieldName()));
-		metadata.setPathInUncompressedStorage(
-				(String) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE.fieldName()));
-		metadata.setPathInCompressedStorage(
-				(String) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE.fieldName()));
-		metadata.setPersistentInUncompressedStorage((Boolean) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_UNCOMPRESSED_STORAGE.fieldName()));
-		metadata.setPersistentInCompressedStorage((Boolean) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_COMPRESSED_STORAGE.fieldName()));
-		metadata.setAvailableInLta(
-				(Boolean) sourceAsMap.get(DataLifecycleMetadata.FIELD_NAME.AVAILABLE_IN_LTA.fieldName()));
-		
-		final String evictionDateInUncompressedStorage = (String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName());
+		metadata.setProductName((String) sourceAsMap.get(PRODUCT_NAME.fieldName()));
+		metadata.setPathInUncompressedStorage((String) sourceAsMap.get(PATH_IN_UNCOMPRESSED_STORAGE.fieldName()));
+		metadata.setPathInCompressedStorage((String) sourceAsMap.get(PATH_IN_COMPRESSED_STORAGE.fieldName()));
+		metadata.setPersistentInUncompressedStorage((Boolean) sourceAsMap.get(PERSISTENT_IN_UNCOMPRESSED_STORAGE.fieldName()));
+		metadata.setPersistentInCompressedStorage((Boolean) sourceAsMap.get(PERSISTENT_IN_COMPRESSED_STORAGE.fieldName()));
+		metadata.setAvailableInLta((Boolean) sourceAsMap.get(AVAILABLE_IN_LTA.fieldName()));
+
+		final String evictionDateInUncompressedStorage = (String) sourceAsMap.get(EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName());
 		metadata.setEvictionDateInUncompressedStorage(
-				(null != evictionDateInUncompressedStorage) ? DateUtils.parse(evictionDateInUncompressedStorage)
-						: null);
-		
-		final String evictionDateInCompressedStorage = (String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName());
+				(null != evictionDateInUncompressedStorage) ? DateUtils.parse(evictionDateInUncompressedStorage) : null);
+
+		final String evictionDateInCompressedStorage = (String) sourceAsMap.get(EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName());
 		metadata.setEvictionDateInCompressedStorage(
 				(null != evictionDateInCompressedStorage) ? DateUtils.parse(evictionDateInCompressedStorage) : null);
 
-		final String productFamilyInUncompressedStorage = (String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE.fieldName());
+		final String productFamilyInUncompressedStorage = (String) sourceAsMap.get(PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE.fieldName());
 		metadata.setProductFamilyInUncompressedStorage(
 				(null != productFamilyInUncompressedStorage) ? ProductFamily.fromValue(productFamilyInUncompressedStorage) : null);
 
-		final String productFamilyInCompressedStorage = (String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_COMPRESSED_STORAGE.fieldName());
+		final String productFamilyInCompressedStorage = (String) sourceAsMap.get(PRODUCT_FAMILY_IN_COMPRESSED_STORAGE.fieldName());
 		metadata.setProductFamilyInCompressedStorage(
 				(null != productFamilyInCompressedStorage) ? ProductFamily.fromValue(productFamilyInCompressedStorage) : null);
 
-		final String lastModified = (String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName());
+		final String lastModified = (String) sourceAsMap.get(LAST_MODIFIED.fieldName());
 		metadata.setLastModified((null != lastModified) ? DateUtils.parse(lastModified) : null);
-		
-		final String lastDataRequest = (String) sourceAsMap
-				.get(DataLifecycleMetadata.FIELD_NAME.LAST_DATA_REQUEST.fieldName());
+
+		final String lastDataRequest = (String) sourceAsMap.get(LAST_DATA_REQUEST.fieldName());
 		metadata.setLastDataRequest((null != lastDataRequest) ? DateUtils.parse(lastDataRequest) : null);
-		
+
 		LOG.debug("mapped product data lifecycle metadata from search result: " + metadata);
 		return metadata;
 	}
