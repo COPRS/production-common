@@ -26,16 +26,18 @@ public class DataLifecycleTriggerListenerTest {
 	
 	private DataLifecycleMetadataRepository metadataRepoMock = new DataLifecycleMetadataRepository() {
 		@Override
-		public void save(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
+		public void save(DataLifecycleMetadata metadata)
+				throws DataLifecycleMetadataRepositoryException {
 			// nothing
 		}
 		@Override
-		public Optional<DataLifecycleMetadata> findByProductName(String name)
+		public Optional<DataLifecycleMetadata> findByProductName(String productName)
 				throws DataLifecycleMetadataRepositoryException {
 			return Optional.empty();
 		}
 		@Override
-		public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp) {
+		public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp)
+				throws DataLifecycleMetadataRepositoryException {
 			return Collections.emptyList();
 		}
 		@Override
@@ -44,8 +46,9 @@ public class DataLifecycleTriggerListenerTest {
 			return Collections.emptyList();
 		}
 		@Override
-		public List<DataLifecycleMetadata> findWithFilters(List<DataLifecycleQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip,
-				List<DataLifecycleSortTerm> sortTerms) {
+		public List<DataLifecycleMetadata> findWithFilters(List<DataLifecycleQueryFilter> filters,
+				Optional<Integer> top, Optional<Integer> skip,	List<DataLifecycleSortTerm> sortTerms)
+						throws DataLifecycleMetadataRepositoryException {
 			return Collections.emptyList();
 		}
 	};
