@@ -47,7 +47,9 @@ public class CompressionTriggerService {
 			compressionDirection = CompressionDirection.COMPRESS;
 		}
 
-		return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+		return new CompressionJob(
+				event.getKeyObjectStorage(),
+				event.getProductFamily(),
 				composeCompressedKeyObjectStorage(event.getKeyObjectStorage()),
 				composeCompressedProductFamily(event.getProductFamily()),
 				compressionDirection);
@@ -57,12 +59,16 @@ public class CompressionTriggerService {
 	private static final CompressionJobMapper<IngestionEvent> INGESTION_MAPPER = (event, reportingId) -> {
 
 		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
-			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+			return new CompressionJob(
+					event.getKeyObjectStorage(),
+					event.getProductFamily(),
 					removeZipSuffix(event.getKeyObjectStorage()),
 					removeZipSuffixFromProductFamily(event.getProductFamily()),
 					CompressionDirection.UNCOMPRESS);
 		} else {
-			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+			return new CompressionJob(
+					event.getKeyObjectStorage(),
+					event.getProductFamily(),
 					composeCompressedKeyObjectStorage(event.getKeyObjectStorage()),
 					composeCompressedProductFamily(event.getProductFamily()),
 					CompressionDirection.COMPRESS);
@@ -80,7 +86,9 @@ public class CompressionTriggerService {
 			compressionDirection = CompressionDirection.UNCOMPRESS;
 		}
 		
-		return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+		return new CompressionJob(
+				composeCompressedKeyObjectStorage(event.getKeyObjectStorage()), 
+				composeCompressedProductFamily(event.getProductFamily()),
 				event.getKeyObjectStorage(),
 				event.getProductFamily(),
 				compressionDirection);
