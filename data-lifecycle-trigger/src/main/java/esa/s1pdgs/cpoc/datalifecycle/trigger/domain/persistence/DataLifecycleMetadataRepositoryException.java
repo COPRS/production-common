@@ -1,7 +1,7 @@
 
 package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence;
 
-import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleTriggerInternalServerErrorException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerInternalServerErrorException;
 
 /**
  * Signaling that something went wrong interacting with the persistence.

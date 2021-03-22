@@ -19,8 +19,9 @@ import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMet
 import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.Product;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.ProductPatchDto;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.ProductPostDto;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleMetadataNotFoundException;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleTriggerInternalServerErrorException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleMetadataNotFoundException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerBadRequestException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerInternalServerErrorException;
 
 @RestController
 @RequestMapping("api/v1")
@@ -80,9 +81,12 @@ public class DataLifecycleTriggerRestController {
 					minimalEvictionTimeInUncompressedStorage, maximalEvictionTimeInUncompressedStorage,
 					persistentIncompressedStorage, minimalEvictionTimeInCompressedStorage,
 					maximalEvictionTimeInCompressedStorage, availableInLta, pageSize, pageNumber);
-		} catch (DataLifecycleMetadataRepositoryException e) {
+		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (DataLifecycleTriggerBadRequestException e) {
+			throw new DataLifecycleTriggerRestControllerException(String.format("Bad request"),
+					HttpStatus.BAD_REQUEST);
 		}
 	}
 

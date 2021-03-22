@@ -38,6 +38,9 @@ import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleQu
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleTextFilter;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleMetadataNotFoundException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerBadRequestException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerInternalServerErrorException;
 import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
@@ -163,7 +166,8 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	public List<DataLifecycleMetadata> getProducts(String namePattern, Boolean persistentInUncompressedStorage,
 			LocalDateTime minimalEvictionTimeInUncompressedStorage, LocalDateTime maximalEvictionTimeInUncompressedStorage,
 			Boolean persistentIncompressedStorage, LocalDateTime minimalEvictionTimeInCompressedStorage, LocalDateTime maximalEvictionTimeInCompressedStorage,
-			Boolean availableInLta, Integer pageSize, Integer pageNumber) {
+			Boolean availableInLta, Integer pageSize, Integer pageNumber)
+			throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleTriggerBadRequestException {
 
 		final ArrayList<DataLifecycleQueryFilter> filters = new ArrayList<>();
 
@@ -195,8 +199,21 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			filters.add(new DataLifecycleDateTimeFilter(EVICTION_DATE_IN_COMPRESSED_STORAGE, LE, maximalEvictionTimeInCompressedStorage));
 		}
 
-		// TODO @MSc: impl paging
-		return this.lifecycleMetadataRepo.findWithFilters(filters, Optional.empty(), Optional.empty(), Collections.emptyList());
+		// paging
+		Optional<Integer> oTop = Optional.empty();
+		Optional<Integer> oSkip = Optional.empty();
+
+		if (null != pageSize || null != pageNumber) {
+			if (null != pageSize && pageSize > 0 && null != pageNumber && pageNumber >= 0) {
+				oTop = Optional.of(pageSize);
+				oSkip = Optional.of(pageNumber * pageSize);
+			} else {
+				throw new DataLifecycleTriggerBadRequestException(
+						"error querying for products: for paging both arguments (page size > 0 and page number >= 0) must be provided");
+			}
+		}
+
+		return this.lifecycleMetadataRepo.findWithFilters(filters, oTop, oSkip, Collections.emptyList());
 	}
 
 	@Override

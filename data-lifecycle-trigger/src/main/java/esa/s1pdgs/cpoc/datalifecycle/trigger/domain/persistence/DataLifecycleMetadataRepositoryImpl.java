@@ -155,7 +155,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 
 	@Override
 	public List<DataLifecycleMetadata> findWithFilters(List<DataLifecycleQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip,
-			List<DataLifecycleSortTerm> sortTerms) {
+			List<DataLifecycleSortTerm> sortTerms) throws DataLifecycleMetadataRepositoryException {
 		LOG.info("finding data lifecycle metadata with filters {}", filters);
 
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
@@ -167,7 +167,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	// --------------------------------------------------------------------------
 
 	private List<DataLifecycleMetadata> queryWithOffset(final BoolQueryBuilder queryBuilder, final Optional<Integer> top, final Optional<Integer> skip,
-			final List<DataLifecycleSortTerm> sortTerms) {
+			final List<DataLifecycleSortTerm> sortTerms) throws DataLifecycleMetadataRepositoryException {
 
 		final List<DataLifecycleMetadata> result = new ArrayList<>();
 		if (skip.orElse(0) <= 0 || skip.orElse(0) + top.orElse(0) <= this.searchResultLimit) {
@@ -201,7 +201,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	}
 
 	private List<SearchHit> query(final BoolQueryBuilder queryBuilder, final Optional<Integer> top, final Optional<Integer> skip,
-			final List<DataLifecycleSortTerm> sortTerms) {
+			final List<DataLifecycleSortTerm> sortTerms) throws DataLifecycleMetadataRepositoryException {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
 		if (null != queryBuilder) {
@@ -215,7 +215,8 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	}
 
 	private List<SearchHit> queryOffset(final BoolQueryBuilder queryBuilder, final Optional<Integer> top, final Optional<Integer> skip,
-			final List<DataLifecycleSortTerm> sortTerms, final boolean searchAfter, final Object[] searchAfterOffset) {
+			final List<DataLifecycleSortTerm> sortTerms, final boolean searchAfter, final Object[] searchAfterOffset)
+					throws DataLifecycleMetadataRepositoryException {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
 		if (null != queryBuilder) {
@@ -326,12 +327,21 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	}
 
 	private static void configurePaging(final Optional<Integer> top, final Optional<Integer> skip, final int searchResultLimit,
-			final SearchSourceBuilder sourceBuilder) {
+			final SearchSourceBuilder sourceBuilder) throws DataLifecycleMetadataRepositoryException {
 		if (skip.isPresent()) {
-			sourceBuilder.from(skip.get());
+			if (skip.get() >= 0) {
+				sourceBuilder.from(skip.get());
+			} else {
+				throw new DataLifecycleMetadataRepositoryException("invalid search result offset (skip): value of " + skip.get() + " is not >= 0");
+			}
 		}
-		if (top.isPresent() && 0 <= top.get() && top.get() <= searchResultLimit) {
-			sourceBuilder.size(top.get());
+
+		if (top.isPresent()) {
+			if (0 < top.get() && top.get() <= searchResultLimit) {
+				sourceBuilder.size(top.get());
+			} else {
+				throw new DataLifecycleMetadataRepositoryException("invalid page size: value of " + top.get() + " is not > 0 and <= " + searchResultLimit);
+			}
 		} else {
 			sourceBuilder.size(searchResultLimit);
 		}

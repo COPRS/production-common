@@ -1,5 +1,5 @@
 
-package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
+package esa.s1pdgs.cpoc.datalifecycle.trigger.service.error;
 
 /**
  * Signaling that a requested product was not found in the data lifecycle metadata persistence.

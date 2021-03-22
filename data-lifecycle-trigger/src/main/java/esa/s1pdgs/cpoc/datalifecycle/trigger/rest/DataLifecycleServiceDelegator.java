@@ -11,9 +11,10 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.rest.model.Product;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleMetadataNotFoundException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleService;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.service.DataLifecycleTriggerInternalServerErrorException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleMetadataNotFoundException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerBadRequestException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerInternalServerErrorException;
 
 @Component
 public class DataLifecycleServiceDelegator {
@@ -35,7 +36,7 @@ public class DataLifecycleServiceDelegator {
 			String minimalEvictionTimeInUncompressedStorage, String maximalEvictionTimeInUncompressedStorage,
 			Boolean persistentIncompressedStorage, String minimalEvictionTimeInCompressedStorage,
 			String maximalEvictionTimeInCompressedStorage, Boolean availableInLta, Integer pageSize,
-			Integer pageNumber) throws DataLifecycleMetadataRepositoryException {
+			Integer pageNumber) throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleTriggerBadRequestException {
 		List<DataLifecycleMetadata> result = this.dataLifecycleService.getProducts(namePattern,
 				persistentInUncompressedStorage, convertDateTime(minimalEvictionTimeInUncompressedStorage),
 				convertDateTime(maximalEvictionTimeInUncompressedStorage), persistentIncompressedStorage,

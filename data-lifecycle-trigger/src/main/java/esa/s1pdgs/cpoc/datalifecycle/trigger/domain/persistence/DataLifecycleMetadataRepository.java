@@ -39,8 +39,9 @@ public interface DataLifecycleMetadataRepository {
 	 * @param skip      for paging
 	 * @param sortTerms order by
 	 * @return the search result
+	 * @throws DataLifecycleMetadataRepositoryException on repository error
 	 */
 	List<DataLifecycleMetadata> findWithFilters(List<DataLifecycleQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip,
-			List<DataLifecycleSortTerm> sortTerms);
+			List<DataLifecycleSortTerm> sortTerms) throws DataLifecycleMetadataRepositoryException;
 
 }
