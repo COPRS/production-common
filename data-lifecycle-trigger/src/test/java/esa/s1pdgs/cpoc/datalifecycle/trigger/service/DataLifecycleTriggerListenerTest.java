@@ -14,6 +14,8 @@ import org.junit.Test;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.RetentionPolicy;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleSortTerm;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleQueryFilter;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
@@ -39,6 +41,11 @@ public class DataLifecycleTriggerListenerTest {
 		@Override
 		public List<DataLifecycleMetadata> findByProductNames(List<String> productNames)
 				throws DataLifecycleMetadataRepositoryException {
+			return Collections.emptyList();
+		}
+		@Override
+		public List<DataLifecycleMetadata> findWithFilters(List<DataLifecycleQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip,
+				List<DataLifecycleSortTerm> sortTerms) {
 			return Collections.emptyList();
 		}
 	};
