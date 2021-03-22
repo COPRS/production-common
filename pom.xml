@@ -354,6 +354,7 @@
  		<module>prip-frontend</module>
 		<module>prip-client</module>
 		<module>data-lifecycle-trigger</module>
+		<module>data-lifecycle-client</module>
 		<module>data-request-worker</module>
 		<module>eviction-management-worker</module>
 		<module>validation</module>

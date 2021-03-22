@@ -1,9 +1,9 @@
-package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter;
+package esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter;
 
 import java.time.LocalDateTime;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 
 /**
  * Date time filter for querying the persistence repository.

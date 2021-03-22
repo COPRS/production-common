@@ -1,5 +1,5 @@
 
-package esa.s1pdgs.cpoc.datalifecycle.trigger.service.error;
+package esa.s1pdgs.cpoc.datalifecycle.client.error;
 
 /**
  * Signaling that something went wrong in the data lifecycle trigger.

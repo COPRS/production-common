@@ -1,10 +1,10 @@
 
-package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence;
+package esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence;
 
-import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE;
-import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE;
-import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME;
-import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.*;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -43,14 +43,14 @@ import org.springframework.stereotype.Repository;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.config.EsClientConfiguration;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleSortTerm;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleBooleanFilter;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleQueryFilter;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleRangeValueFilter;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleTextFilter;
+import esa.s1pdgs.cpoc.datalifecycle.client.config.EsClientConfiguration;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleBooleanFilter;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQueryFilter;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleRangeValueFilter;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleTextFilter;
 
 /**
  * Data lifecycle metadata repository implementation.

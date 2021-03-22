@@ -1,5 +1,5 @@
 
-package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence;
+package esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,9 +7,9 @@ import java.util.Optional;
 
 import org.springframework.lang.NonNull;
 
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleSortTerm;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleQueryFilter;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQueryFilter;
 
 /**
  * Data lifecycle metadata repository interface.

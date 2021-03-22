@@ -1,8 +1,8 @@
-package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter;
+package esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter;
 
 import java.util.Objects;
 
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 
 /**
  * Text filter for querying the persistence repository.

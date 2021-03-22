@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter;
+package esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter;
 
 import java.util.Objects;
 
