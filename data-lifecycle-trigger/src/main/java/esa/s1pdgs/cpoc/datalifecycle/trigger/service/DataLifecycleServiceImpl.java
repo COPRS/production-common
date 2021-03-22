@@ -1,5 +1,16 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.AVAILABLE_IN_LTA;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleBooleanFilter.Function.EQUALS;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleRangeValueFilter.Operator.GE;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleRangeValueFilter.Operator.LE;
+import static esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleTextFilter.Function.MATCHES_REGEX;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -21,6 +32,10 @@ import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleBooleanFilter;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleDateTimeFilter;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleQueryFilter;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.filter.DataLifecycleTextFilter;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.message.MessageProducer;
@@ -145,12 +160,43 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	}
 
 	@Override
-	public List<DataLifecycleMetadata> getProducts(String namePattern, boolean persistentInUncompressedStorage,
+	public List<DataLifecycleMetadata> getProducts(String namePattern, Boolean persistentInUncompressedStorage,
 			LocalDateTime minimalEvictionTimeInUncompressedStorage, LocalDateTime maximalEvictionTimeInUncompressedStorage,
-			boolean persistentIncompressedStorage, LocalDateTime minimalEvictionTimeInCompressedStorage, LocalDateTime maximalEvictionTimeInCompressedStorage,
-			boolean availableInLta, Integer pageSize, Integer pageNumber) {
-		// TODO @MSc: impl
-		return null;
+			Boolean persistentIncompressedStorage, LocalDateTime minimalEvictionTimeInCompressedStorage, LocalDateTime maximalEvictionTimeInCompressedStorage,
+			Boolean availableInLta, Integer pageSize, Integer pageNumber) {
+
+		final ArrayList<DataLifecycleQueryFilter> filters = new ArrayList<>();
+
+		if (StringUtil.isNotBlank(namePattern)) {
+			filters.add(new DataLifecycleTextFilter(PRODUCT_NAME, MATCHES_REGEX, namePattern));
+		}
+
+		if (null != persistentInUncompressedStorage) {
+			filters.add(new DataLifecycleBooleanFilter(PERSISTENT_IN_UNCOMPRESSED_STORAGE, EQUALS, persistentInUncompressedStorage));
+		}
+		if (null != persistentIncompressedStorage) {
+			filters.add(new DataLifecycleBooleanFilter(PERSISTENT_IN_COMPRESSED_STORAGE, EQUALS, persistentIncompressedStorage));
+		}
+		if (null != availableInLta) {
+			filters.add(new DataLifecycleBooleanFilter(AVAILABLE_IN_LTA, EQUALS, availableInLta));
+		}
+
+		if (null != minimalEvictionTimeInUncompressedStorage) {
+			filters.add(new DataLifecycleDateTimeFilter(EVICTION_DATE_IN_UNCOMPRESSED_STORAGE, GE, minimalEvictionTimeInUncompressedStorage));
+		}
+		if (null != maximalEvictionTimeInUncompressedStorage) {
+			filters.add(new DataLifecycleDateTimeFilter(EVICTION_DATE_IN_UNCOMPRESSED_STORAGE, LE, maximalEvictionTimeInUncompressedStorage));
+		}
+
+		if (null != minimalEvictionTimeInCompressedStorage) {
+			filters.add(new DataLifecycleDateTimeFilter(EVICTION_DATE_IN_COMPRESSED_STORAGE, GE, minimalEvictionTimeInCompressedStorage));
+		}
+		if (null != maximalEvictionTimeInCompressedStorage) {
+			filters.add(new DataLifecycleDateTimeFilter(EVICTION_DATE_IN_COMPRESSED_STORAGE, LE, maximalEvictionTimeInCompressedStorage));
+		}
+
+		// TODO @MSc: impl paging
+		return this.lifecycleMetadataRepo.findWithFilters(filters, Optional.empty(), Optional.empty(), Collections.emptyList());
 	}
 
 	@Override

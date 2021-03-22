@@ -31,10 +31,10 @@ public class DataLifecycleServiceDelegator {
 	 * @see DataLifecycleTriggerRestController#getProducts(String, String, boolean,
 	 *      String, String, boolean, String, String, boolean, Integer, Integer)
 	 */
-	public List<Product> getProducts(String namePattern, boolean persistentInUncompressedStorage,
+	public List<Product> getProducts(String namePattern, Boolean persistentInUncompressedStorage,
 			String minimalEvictionTimeInUncompressedStorage, String maximalEvictionTimeInUncompressedStorage,
-			boolean persistentIncompressedStorage, String minimalEvictionTimeInCompressedStorage,
-			String maximalEvictionTimeInCompressedStorage, boolean availableInLta, Integer pageSize,
+			Boolean persistentIncompressedStorage, String minimalEvictionTimeInCompressedStorage,
+			String maximalEvictionTimeInCompressedStorage, Boolean availableInLta, Integer pageSize,
 			Integer pageNumber) throws DataLifecycleMetadataRepositoryException {
 		List<DataLifecycleMetadata> result = this.dataLifecycleService.getProducts(namePattern,
 				persistentInUncompressedStorage, convertDateTime(minimalEvictionTimeInUncompressedStorage),

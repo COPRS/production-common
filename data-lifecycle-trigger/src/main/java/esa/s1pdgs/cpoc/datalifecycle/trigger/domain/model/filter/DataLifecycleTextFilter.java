@@ -13,7 +13,8 @@ public class DataLifecycleTextFilter extends DataLifecycleQueryFilter {
 		STARTS_WITH("startswith"), //
 		ENDS_WITH("endswith"), //
 		CONTAINS("contains"), //
-		EQUALS("eq");
+		EQUALS("eq"), //
+		MATCHES_REGEX("regex");
 
 		private String functionName;
 
@@ -39,6 +40,13 @@ public class DataLifecycleTextFilter extends DataLifecycleQueryFilter {
 
 	public DataLifecycleTextFilter(DataLifecycleMetadata.FIELD_NAME fieldName) {
 		this(fieldName.fieldName());
+	}
+
+	public DataLifecycleTextFilter(DataLifecycleMetadata.FIELD_NAME fieldName, Function function, String text) {
+		this(fieldName);
+
+		this.function = Objects.requireNonNull(function);
+		this.text = Objects.requireNonNull(text);
 	}
 
 	public DataLifecycleTextFilter(String fieldName, Function function, String text) {

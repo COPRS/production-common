@@ -39,6 +39,13 @@ public class DataLifecycleBooleanFilter extends DataLifecycleQueryFilter {
 		super(fieldName.fieldName());
 	}
 
+	public DataLifecycleBooleanFilter(DataLifecycleMetadata.FIELD_NAME fieldName, Function function, Boolean value) {
+		this(fieldName);
+
+		this.function = Objects.requireNonNull(function);
+		this.value = (Objects.requireNonNull(value));
+	}
+
 	public DataLifecycleBooleanFilter(String fieldName, Function function, Boolean value) {
 		this(fieldName);
 

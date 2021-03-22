@@ -292,6 +292,9 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 
 	private static void buildQueryWithTextFilter(final DataLifecycleTextFilter filter, final BoolQueryBuilder queryBuilder) {
 		switch (filter.getFunction()) {
+		case MATCHES_REGEX:
+			queryBuilder.must(QueryBuilders.regexpQuery(filter.getFieldName(), filter.getText()));
+			break;
 		case STARTS_WITH:
 			queryBuilder.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())));
 			break;

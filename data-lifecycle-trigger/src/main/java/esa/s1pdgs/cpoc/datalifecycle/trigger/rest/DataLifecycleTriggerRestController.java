@@ -57,13 +57,13 @@ public class DataLifecycleTriggerRestController {
 	@RequestMapping(method = RequestMethod.GET, path = "/products")
 	public List<Product> getProducts(@RequestHeader(name = "ApiKey", required = true) final String apiKey,
 			@RequestParam(value = "namePattern", required = false) final String namePattern,
-			@RequestParam(value = "persistentInUncompressedStorage", required = false) final boolean persistentInUncompressedStorage,
+			@RequestParam(value = "persistentInUncompressedStorage", required = false) final Boolean persistentInUncompressedStorage,
 			@RequestParam(value = "minimalEvictionTimeInUncompressedStorage", required = false) final String minimalEvictionTimeInUncompressedStorage,
 			@RequestParam(value = "maximalEvictionTimeInUncompressedStorage", required = false) final String maximalEvictionTimeInUncompressedStorage,
-			@RequestParam(value = "persistentIncompressedStorage", required = false) final boolean persistentIncompressedStorage,
+			@RequestParam(value = "persistentIncompressedStorage", required = false) final Boolean persistentIncompressedStorage,
 			@RequestParam(value = "minimalEvictionTimeInCompressedStorage", required = false) final String minimalEvictionTimeInCompressedStorage,
 			@RequestParam(value = "maximalEvictionTimeInCompressedStorage", required = false) final String maximalEvictionTimeInCompressedStorage,
-			@RequestParam(value = "availableInLta", required = false) final boolean availableInLta,
+			@RequestParam(value = "availableInLta", required = false) final Boolean availableInLta,
 			@RequestParam(value = "pageSize", required = false) final Integer pageSize,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "0") final Integer pageNumber) {
 		LOGGER.info("get products");

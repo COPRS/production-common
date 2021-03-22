@@ -44,9 +44,9 @@ public interface DataLifecycleService {
 			LocalDateTime evictionTimeInUncompressedStorage, String operatorName)
 					throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleMetadataNotFoundException;
 
-	List<DataLifecycleMetadata> getProducts(String namePattern, boolean persistentInUncompressedStorage, LocalDateTime minimalEvictionTimeInUncompressedStorage,
-			LocalDateTime maximalEvictionTimeInUncompressedStorage, boolean persistentIncompressedStorage, LocalDateTime minimalEvictionTimeInCompressedStorage,
-			LocalDateTime maximalEvictionTimeInCompressedStorage, boolean availableInLta, Integer pageSize, Integer pageNumber);
+	List<DataLifecycleMetadata> getProducts(String namePattern, Boolean persistentInUncompressedStorage, LocalDateTime minimalEvictionTimeInUncompressedStorage,
+			LocalDateTime maximalEvictionTimeInUncompressedStorage, Boolean persistentIncompressedStorage, LocalDateTime minimalEvictionTimeInCompressedStorage,
+			LocalDateTime maximalEvictionTimeInCompressedStorage, Boolean availableInLta, Integer pageSize, Integer pageNumber);
 
 	List<DataLifecycleMetadata> getProducts(List<String> productnames) throws DataLifecycleTriggerInternalServerErrorException;
 

@@ -18,6 +18,10 @@ public class DataLifecycleDateTimeFilter extends DataLifecycleRangeValueFilter<L
 		this(fieldName.fieldName());
 	}
 
+	public DataLifecycleDateTimeFilter(DataLifecycleMetadata.FIELD_NAME fieldName, Operator operator, LocalDateTime value) {
+		super(fieldName.fieldName(), operator, value);
+	}
+
 	public DataLifecycleDateTimeFilter(String fieldName, Operator operator, LocalDateTime value) {
 		super(fieldName,operator, value);
 	}
