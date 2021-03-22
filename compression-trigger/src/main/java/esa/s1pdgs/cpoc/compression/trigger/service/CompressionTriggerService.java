@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestType;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
@@ -79,8 +80,11 @@ public class CompressionTriggerService {
 	private static final CompressionJobMapper<DataRequestEvent> DATA_REQUEST_MAPPER = (event, reportingId) -> {
 		
 		CompressionDirection compressionDirection;
+		
+		
 
-		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
+		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY) ||
+				event.getDataRequestType() != DataRequestType.UNCOMPRESS) {
 			compressionDirection = CompressionDirection.UNDEFINED;
 		} else {
 			compressionDirection = CompressionDirection.UNCOMPRESS;
