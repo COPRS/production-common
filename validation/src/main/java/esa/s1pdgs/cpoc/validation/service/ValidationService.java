@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,6 +21,8 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleTextFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -41,27 +45,27 @@ public class ValidationService {
 	private final MetadataClient metadataClient;
 
 	private final ObsClient obsClient;
-	
+
 	private final DataLifecycleMetadataRepository lifecycleMetadataRepo;
 
 	@Autowired
 	private ApplicationProperties properties;
-	
+
 	@Autowired
 	private AppStatus appStatus;
-	
-	private int nbRunningConsistencyChecks = 0; 
+
+	private int nbRunningConsistencyChecks = 0;
 	private Object nbRunningConsistencyChecksLock = new Object();
-    		
+
 	private static class Discrepancy {
 		public String obsKey;
 		public String reason;
-		
+
 		public Discrepancy(final String obsKey, final String reason) {
 			this.obsKey = obsKey;
 			this.reason = reason;
 		}
-		
+
 		@Override
 		public String toString() {
 			final StringBuilder sb = new StringBuilder();
@@ -78,71 +82,75 @@ public class ValidationService {
 	}
 
 	public void checkConsistencyForInterval() {
-		synchronized(nbRunningConsistencyChecksLock) {
+		synchronized (nbRunningConsistencyChecksLock) {
 			if (++nbRunningConsistencyChecks == 1) {
 				appStatus.setProcessing(esa.s1pdgs.cpoc.appstatus.Status.PROCESSING_MSG_ID_UNDEFINED);
 			}
 		}
 		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ValidationService");
 		reporting.begin(new ReportingMessage("Starting validation"));
-		try {		
+		try {
 			int totalDiscrepancies = 0;
 			final Set<ProductFamily> families = properties.getFamilies().keySet();
 			LOGGER.info("Validating {} product families", families.size());
 			for (final ProductFamily family : families) {
-				final FamilyIntervalConf conf = properties.getFamilies().get(family);			
+				final FamilyIntervalConf conf = properties.getFamilies().get(family);
 				final LocalDateTime startInterval = LocalDateTime.now().minusSeconds(conf.getLifeTime());
-				final LocalDateTime endInterval = LocalDateTime.now().minusSeconds(conf.getInitialDelay());			
-				final int familyDiscrepancies = validateProductFamily(reporting, family, startInterval, endInterval);				
+				final LocalDateTime endInterval = LocalDateTime.now().minusSeconds(conf.getInitialDelay());
+				final int familyDiscrepancies = validateProductFamily(reporting, family, startInterval, endInterval);
 				totalDiscrepancies += familyDiscrepancies;
 			}
 			LOGGER.info("Found {} discrepancies for all families", totalDiscrepancies);
-			
+
 			reporting.end(new ReportingMessage("End validation"));
 		} catch (final Exception e) {
-			reporting.error(new ReportingMessage("Error occured while performing validation: {}", LogUtils.toString(e)));
+			reporting
+					.error(new ReportingMessage("Error occured while performing validation: {}", LogUtils.toString(e)));
 		}
-		
-		synchronized(nbRunningConsistencyChecksLock) {
+
+		synchronized (nbRunningConsistencyChecksLock) {
 			if (--nbRunningConsistencyChecks == 0) {
 				appStatus.setWaiting();
 			}
 		}
 	}
 
-	int validateProductFamily(final ReportingFactory reportingFactory, final ProductFamily family, final LocalDateTime startInterval,
-			final LocalDateTime endInterval) throws Exception {		
+	int validateProductFamily(final ReportingFactory reportingFactory, final ProductFamily family,
+			final LocalDateTime startInterval, final LocalDateTime endInterval) throws Exception {
 		final Reporting reporting = reportingFactory.newReporting("ValidateMDC");
-		reporting.begin(new ReportingMessage("Starting validation from {} to {} for family {}", startInterval, endInterval, family));		
+		reporting.begin(new ReportingMessage("Starting validation from {} to {} for family {}", startInterval,
+				endInterval, family));
 		try {
 			/*
-			 * Step 1: Fetch a snapshot from MDC and OBS to ensure that no data is changed or added meanwhile giving false positives.
+			 * Step 1: Fetch a snapshot from MDC and OBS to ensure that no data is changed
+			 * or added meanwhile giving false positives.
 			 */
 			List<SearchMetadata> metadataResults = null;
 			final String queryFamily = getQueryFamily(family);
 			LOGGER.info("Performing metadata query for family '{}'", queryFamily);
-			metadataResults = metadataClient.query(ProductFamily.valueOf(queryFamily), startInterval, endInterval);							
-			LOGGER.info("Metadata query for family '{}' returned {} hits", queryFamily, metadataResults.size());				
-			
+			metadataResults = metadataClient.query(ProductFamily.valueOf(queryFamily), startInterval, endInterval);
+			LOGGER.info("Metadata query for family '{}' returned {} hits", queryFamily, metadataResults.size());
+
 			Map<String, ObsObject> obsResults = null;
 			final Date startDate = Date.from(startInterval.atZone(ZoneId.of("UTC")).toInstant());
 			final Date endDate = Date.from(endInterval.atZone(ZoneId.of("UTC")).toInstant());
 			obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate);
 			LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
-			
+
 			/*
-			 * Step 2: We are doing a query on the metadata of the family and getting all entries form the
-			 * catalog that is available. Then we instruct the obs client to validate if these entries are valid.
+			 * Step 2: We are doing a query on the metadata of the family and getting all
+			 * entries form the catalog that is available. Then we instruct the obs client
+			 * to validate if these entries are valid.
 			 */
 			final List<Discrepancy> discrepancies = new ArrayList<>();
 			for (final SearchMetadata smd : metadataResults) {
 				// If its a zipped family, we need to extend the filename
-				String key = smd.getKeyObjectStorage();					
+				String key = smd.getKeyObjectStorage();
 				if (family.name().endsWith("_ZIP")) {
 					key += ".zip";
-				} 
+				}
 				final Reporting obsReporting = reporting.newReporting("ValidateObs");
-				try {	
+				try {
 					obsReporting.begin(new ReportingMessage("Validating %s", key));
 					obsClient.validate(new ObsObject(family, key));
 					obsReporting.end(new ReportingMessage("%s is valid", key));
@@ -153,42 +161,44 @@ public class ValidationService {
 					discrepancies.add(new Discrepancy(smd.getKeyObjectStorage(), ex.getMessage()));
 				}
 			}
-			
+
 			/*
-			 * Step 3: After we know that the catalog data is valid within the OBS, we check if there are additional
-			 * products stored within that are not expects.
+			 * Step 3: After we know that the catalog data is valid within the OBS, we check
+			 * if there are additional products stored within that are not expects.
 			 */
 			final Set<String> realKeys = extractRealKeysForMDC(obsResults.values(), family);
 			for (final SearchMetadata smd : metadataResults) {
 				realKeys.remove(smd.getKeyObjectStorage());
 			}
-			
+
 			LOGGER.info("Found {} keys that are in OBS, but not in MetadataCatalog", realKeys.size());
-			for (final String key: realKeys) {
-				final Discrepancy discrepancy = new Discrepancy(key,"Exists in OBS, but not in MDC");
+			for (final String key : realKeys) {
+				final Discrepancy discrepancy = new Discrepancy(key, "Exists in OBS, but not in MDC");
 				discrepancies.add(discrepancy);
 			}
-			
+
 			/*
-			 * Step 4: Check that everything that is in OBS is also in the Data Lifecycle index
+			 * Step 4: Check that everything that is in OBS is also in the Data Lifecycle
+			 * index
 			 */
 			checkDataLifecycleIndex(obsResults.values(), family, discrepancies);
-			
+
 			/*
 			 * Step 5: Presenting the results of the discrepancies check
 			 */
 			if (discrepancies.isEmpty()) {
-				reporting.end(new ReportingMessage("No discrepancies found in MetadataCatalog"));
+				reporting.end(new ReportingMessage("No discrepancies found"));
 			} else {
 				reporting.error(new ReportingMessage("Discrepancies found for following products: {}",
 						buildProductList(discrepancies)));
 			}
-	
+
 			LOGGER.info("Found {} discrepancies for family '{}'", discrepancies.size(), family);
-			return discrepancies.size();			
+			return discrepancies.size();
 		} catch (final MetadataQueryException e) {
-			reporting.error(new ReportingMessage("Error occured while performing metadata catalog query task [code {}] {}",
-					e.getCode().getCode(), e.getLogMessage()));
+			reporting.error(
+					new ReportingMessage("Error occured while performing metadata catalog query task [code {}] {}",
+							e.getCode().getCode(), e.getLogMessage()));
 			throw e;
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage(LogUtils.toString(e)));
@@ -196,67 +206,69 @@ public class ValidationService {
 		}
 
 	}
-	
+
 	private void checkDataLifecycleIndex(Collection<ObsObject> obsObjects, ProductFamily family,
 			List<Discrepancy> discrepancies) throws DataLifecycleMetadataRepositoryException {
-		
-		if(family == ProductFamily.EDRS_SESSION) {
+
+		LOGGER.info("Check that everything that is in OBS is also in the Data Lifecycle index");
+
+		if (family == ProductFamily.EDRS_SESSION) {
 			// skip EDRS_SESSION
 			return;
 		}
-		
-		for(String key: extractRealKeysForDataLifecycle(obsObjects, family)) {
-			if(!lifecycleMetadataRepo.findByProductName(key).isPresent())
-			{
-				final Discrepancy discrepancy = new Discrepancy(key, "Exists in OBS, but not in Data Lifecycle Index");
+
+		for (ObsObject o : obsObjects) {
+			if (isNotPresentInDataLifecycleIndex(o.getKey())) {
+				LOGGER.trace("Exists in OBS, but not in Data Lifecycle Index: {}", o.getKey());
+				final Discrepancy discrepancy = new Discrepancy(o.getKey(),
+						"Exists in OBS, but not in Data Lifecycle Index");
 				discrepancies.add(discrepancy);
 			}
 		}
 	}
 
+	private boolean isNotPresentInDataLifecycleIndex(String key) throws DataLifecycleMetadataRepositoryException {
+
+		DataLifecycleMetadata.FIELD_NAME field = null;
+
+		if (key.endsWith(".zip")) {
+			field = DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE;
+		} else {
+			field = DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE;
+		}
+
+		List<DataLifecycleMetadata> result = lifecycleMetadataRepo.findWithFilters(
+				Collections.singletonList(
+						new DataLifecycleTextFilter(field, DataLifecycleTextFilter.Function.EQUALS, key)),
+				Optional.empty(), Optional.empty(), Collections.emptyList());
+		return result.isEmpty();
+	}
+
 	Set<String> extractRealKeysForMDC(final Collection<ObsObject> obsResults, final ProductFamily family) {
 		final Set<String> realProducts = new HashSet<>();
-		for (final ObsObject obsResult: obsResults) {			
+		for (final ObsObject obsResult : obsResults) {
 			final String key = obsResult.getKey();
 			final int index = key.indexOf("/");
 			String realKey = null;
-			
+
 			if (family == ProductFamily.EDRS_SESSION) {
 				realKey = key;
 				/*
-				 *  EDRS_Sessions are just queried on raw and not containg DSIB.
-				 *  So we are removing them from the check
+				 * EDRS_Sessions are just queried on raw and not containg DSIB. So we are
+				 * removing them from the check
 				 */
 				if (realKey.endsWith("DSIB.xml")) {
-					LOGGER.debug("Ignoring DSIB file: {}",realKey);
+					LOGGER.debug("Ignoring DSIB file: {}", realKey);
 					continue;
 				}
 			} else if (index != -1) {
 				realKey = key.substring(0, index);
 			} else {
-				realKey = key;							
+				realKey = key;
 			}
 			if (key.endsWith(".zip")) {
 				// Special case zipped products. The MDC key does not contain the zip!
-				realKey = realKey.substring(0,key.lastIndexOf(".zip"));
-			}	
-			LOGGER.trace("key is {}", realKey);
-			realProducts.add(realKey);
-		}
-		return realProducts;
-	}
-	
-	Set<String> extractRealKeysForDataLifecycle(final Collection<ObsObject> obsResults, final ProductFamily family) {
-		final Set<String> realProducts = new HashSet<>();
-		for (final ObsObject obsResult: obsResults) {			
-			final String key = obsResult.getKey();
-			final int index = key.indexOf("/");
-			String realKey = null;
-			
-			if (index != -1) {
-				realKey = key.substring(0, index);
-			} else {
-				realKey = key;							
+				realKey = realKey.substring(0, key.lastIndexOf(".zip"));
 			}
 			LOGGER.trace("key is {}", realKey);
 			realProducts.add(realKey);
