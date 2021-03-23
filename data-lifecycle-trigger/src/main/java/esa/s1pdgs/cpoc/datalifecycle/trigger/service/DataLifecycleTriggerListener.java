@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
@@ -28,7 +27,6 @@ import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -94,32 +92,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 				.publishMessageProducer(() -> {
 					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				}).newResult();
-		// the data lifecycle trigger was reactivated in course of S1PRO-1869, but not so the worker.
-		// therefore, we prevent the trigger from firing any messages for now
-		// to reactivate the previous bevhaviour in the trigger, remove the return block above and uncomment the return block below
-		
-//		return new MqiMessageEventHandler.Builder<EvictionManagementJob>(ProductCategory.EVICTION_MANAGEMENT_JOBS)
-//				.onSuccess(res -> reporting.end(new ReportingMessage("End handling event for %s", inputEvent.getKeyObjectStorage())))
-//				.onError(e -> reporting.error(new ReportingMessage(
-//						"Error on handling event for %s: %s", 
-//						inputEvent.getKeyObjectStorage(),
-//						LogUtils.toString(e)
-//				)))
-//				.publishMessageProducer(() ->{
-//					final EvictionManagementJob evictionManagementJob = toEvictionManagementJob(
-//							inputEvent, 
-//							retentionPolicies,
-//							reporting.getUid()
-//					);
-//
-//					final GenericPublicationMessageDto<EvictionManagementJob> outputMessage = new GenericPublicationMessageDto<EvictionManagementJob>(
-//							inputMessage.getId(), 
-//							inputEvent.getProductFamily(), 
-//							evictionManagementJob
-//					);
-//					return new MqiPublishingJob<EvictionManagementJob>(Collections.singletonList(outputMessage));
-//				})
-//				.newResult();
 	}
 	
 	@Override
