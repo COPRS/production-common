@@ -28,7 +28,8 @@ public class DataLifecycleTriggerService {
 			ProductCategory.INGESTION_EVENT,
 			ProductCategory.PRODUCTION_EVENT,
 			ProductCategory.COMPRESSED_PRODUCTS,
-			ProductCategory.LTA_DOWNLOAD_EVENT
+			ProductCategory.LTA_DOWNLOAD_EVENT,
+			ProductCategory.EVICTION_EVENT
 	);
 	
 	private final DataLifecycleTriggerConfigurationProperties configurationProperties;

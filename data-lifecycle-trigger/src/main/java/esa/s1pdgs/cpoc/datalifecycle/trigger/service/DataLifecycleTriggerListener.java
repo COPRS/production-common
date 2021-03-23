@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigur
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
+import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -27,6 +28,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -79,16 +81,23 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(inputEvent.getProductFamily(), inputEvent.getKeyObjectStorage()),
 				new ReportingMessage("Handling event for %s", inputEvent.getKeyObjectStorage()));
-		
-		this.updateMetadata(inputMessage);
-		
-		//
-		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.EVICTION_MANAGEMENT_JOBS)
+
+		try {
+			if (inputEvent instanceof EvictionEvent) {
+				this.updateEvictedMetadata((EvictionEvent) inputEvent);
+			} else {
+				this.updateMetadata(inputMessage);
+			}
+		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
+			reporting.error(
+					new ReportingMessage("Error handling %s for %s: %s", inputEvent.getClass().getSimpleName(), inputEvent.getKeyObjectStorage(),
+							LogUtils.toString(e)));
+		}
+
+		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.of(inputEvent.getProductFamily()))
 				.onSuccess(res -> reporting.end(new ReportingMessage("End handling event for %s", inputEvent.getKeyObjectStorage())))
-				.onError(e -> reporting.error(new ReportingMessage(
-						"Error on handling event for %s: %s",
-						inputEvent.getKeyObjectStorage(),
-						LogUtils.toString(e))))
+				.onError(e -> reporting.error(new ReportingMessage("Error handling %s for %s: %s", inputEvent.getClass().getSimpleName(),
+						inputEvent.getKeyObjectStorage(), LogUtils.toString(e))))
 				.publishMessageProducer(() -> {
 					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				}).newResult();
@@ -108,7 +117,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	// --------------------------------------------------------------------------
 	
 	/* Creating and updating data lifecycle metadata */
-	private void updateMetadata(final GenericMessageDto<E> inputMessage) {
+	private void updateMetadata(final GenericMessageDto<E> inputMessage) throws DataLifecycleMetadataRepositoryException {
 		final E inputEvent = inputMessage.getBody();
 		final String obsKey = inputEvent.getKeyObjectStorage();
 		
@@ -121,7 +130,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			oExistingMetadata = this.metadataRepo.findByProductName(productName);
 		} catch (DataLifecycleMetadataRepositoryException e) {
 			LOG.error("error searching data lifecycle metadata by product name: " + LogUtils.toString(e), e);
-			return;
+			throw e;
 		}
 		
 		final Date evictionDate = this.calculateEvictionDate(this.retentionPolicies, inputEvent.getCreationDate(),
@@ -139,11 +148,17 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			metadata.setPathInCompressedStorage(obsKey);
 			metadata.setPersistentInCompressedStorage(this.isPersistentInCompressedStorage(obsKey));
 			metadata.setProductFamilyInCompressedStorage(inputEvent.getProductFamily());
+
+			LOG.debug(String.format("%s lifecycle metadata with information for compressed storage: %s",
+					(oExistingMetadata.isPresent() ? "updating" : "creating"), metadata));
 		} else {
 			metadata.setEvictionDateInUncompressedStorage(evictionDateTime);
 			metadata.setPathInUncompressedStorage(obsKey);
 			metadata.setPersistentInUncompressedStorage(this.isPersistentInUncompressedStorage(obsKey));
 			metadata.setProductFamilyInUncompressedStorage(inputEvent.getProductFamily());
+
+			LOG.debug(String.format("%s lifecycle metadata with information for uncompressed storage: %s",
+					(oExistingMetadata.isPresent() ? "updating" : "creating"), metadata));
 		}
 		
 		metadata.setAvailableInLta(this.isAvailableInLta(obsKey));
@@ -153,6 +168,46 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		} catch (DataLifecycleMetadataRepositoryException e) {
 			LOG.error("error saving data lifecycle metadata for " + inputEvent.getProductFamily().name() + ": "
 					+ fileName + ": " + LogUtils.toString(e), e);
+			throw e;
+		}
+	}
+
+	/* Removing storage path from data lifecycle metadata after eviction of product */
+	private void updateEvictedMetadata(final EvictionEvent inputEvent) throws DataLifecycleTriggerInternalServerErrorException {
+		final String obsKey = inputEvent.getKeyObjectStorage();
+		final String productName = this.getProductName(obsKey);
+		final boolean isCompressedStorage = inputEvent.getProductFamily().isCompressed();
+
+		final Optional<DataLifecycleMetadata> oExistingMetadata;
+		try {
+			oExistingMetadata = this.metadataRepo.findByProductName(productName);
+		} catch (final DataLifecycleMetadataRepositoryException e) {
+			LOG.error("error updating lifecycle metadata due to eviction of " + productName + ": " + LogUtils.toString(e), e);
+			throw e;
+		}
+
+		if (!oExistingMetadata.isPresent()) {
+			LOG.error("error updating lifecycle metadata due to eviction of " + productName + ": no lifecycle metadata found");
+			throw new DataLifecycleTriggerInternalServerErrorException(
+					"error updating lifecycle metadata due to eviction of " + productName + ": no lifecycle metadata found");
+		}
+
+		final DataLifecycleMetadata metadata = oExistingMetadata.get();
+
+		// erase storage path as it is no longer valid
+		if (isCompressedStorage) {
+			metadata.setPathInCompressedStorage(null);
+			LOG.debug("erasing path in compressed storage from lifecycle metadata due to eviction of: " + productName);
+		} else {
+			metadata.setPathInUncompressedStorage(null);
+			LOG.debug("erasing path in uncompressed storage from lifecycle metadata due to eviction of: " + productName);
+		}
+
+		try {
+			this.metadataRepo.save(metadata);
+		} catch (final DataLifecycleMetadataRepositoryException e) {
+			LOG.error("error updating lifecycle metadata due to eviction of " + productName + ": " + LogUtils.toString(e), e);
+			throw e;
 		}
 	}
 
