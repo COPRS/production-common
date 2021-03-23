@@ -3,7 +3,7 @@ spring:
     name: s1pdgs-validation-app
     
 logging:
-  config: classpath:log4j2.yml
+  config: classpath:log4j2-test.yml
 
 # REST controller
 server:
@@ -12,7 +12,22 @@ server:
 metadata:
   host: ${catalog_rest_host:metadata-catalog-svc:8080}             # 
   rest-api_nb-retry: 3                                             #  
-  rest-api_tempo-retry-ms: 1000                                    # 
+  rest-api_tempo-retry-ms: 1000
+  
+# Elastic Search
+elasticsearch:
+  # Host of Elasticsearch cluster
+  host: localhost      
+  # Port of Elasticsearch cluster                                  
+  port: 9200                                           
+  # The maximum number of search results returned from Elasticsearch
+  search-result-limit: 1000             
+  # Timeout in milliseconds of connection to the cluster     
+  connect-timeout-ms: 2000        
+  # Timeout in milliseconds of the socket to the cluster                                
+  socket-timeout-ms: 10000  
+  # Timeout in milliseconds of connection to the cluster                                      
+  max-retry-timeout-ms: 30000                                # 
   
 validation:
   # How many seconds in the past should the interval start

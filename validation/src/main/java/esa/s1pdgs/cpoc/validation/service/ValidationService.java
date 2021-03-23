@@ -19,6 +19,8 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -39,6 +41,8 @@ public class ValidationService {
 	private final MetadataClient metadataClient;
 
 	private final ObsClient obsClient;
+	
+	private final DataLifecycleMetadataRepository lifecycleMetadataRepo;
 
 	@Autowired
 	private ApplicationProperties properties;
@@ -66,9 +70,11 @@ public class ValidationService {
 	}
 
 	@Autowired
-	public ValidationService(final MetadataClient metadataClient, final ObsClient obsClient) {
+	public ValidationService(final MetadataClient metadataClient, final ObsClient obsClient,
+			final DataLifecycleMetadataRepository lifecycleMetadataRepo) {
 		this.metadataClient = metadataClient;
 		this.obsClient = obsClient;
+		this.lifecycleMetadataRepo = lifecycleMetadataRepo;
 	}
 
 	public void checkConsistencyForInterval() {
@@ -152,7 +158,7 @@ public class ValidationService {
 			 * Step 3: After we know that the catalog data is valid within the OBS, we check if there are additional
 			 * products stored within that are not expects.
 			 */
-			final Set<String> realKeys = extractRealKeys(obsResults.values(), family);
+			final Set<String> realKeys = extractRealKeysForMDC(obsResults.values(), family);
 			for (final SearchMetadata smd : metadataResults) {
 				realKeys.remove(smd.getKeyObjectStorage());
 			}
@@ -164,7 +170,12 @@ public class ValidationService {
 			}
 			
 			/*
-			 * Step 4: Presenting the results of the discrepancies check
+			 * Step 4: Check that everything that is in OBS is also in the Data Lifecycle index
+			 */
+			checkDataLifecycleIndex(obsResults.values(), family, discrepancies);
+			
+			/*
+			 * Step 5: Presenting the results of the discrepancies check
 			 */
 			if (discrepancies.isEmpty()) {
 				reporting.end(new ReportingMessage("No discrepancies found in MetadataCatalog"));
@@ -186,7 +197,24 @@ public class ValidationService {
 
 	}
 	
-	Set<String> extractRealKeys(final Collection<ObsObject> obsResults, final ProductFamily family) {
+	private void checkDataLifecycleIndex(Collection<ObsObject> obsObjects, ProductFamily family,
+			List<Discrepancy> discrepancies) throws DataLifecycleMetadataRepositoryException {
+		
+		if(family == ProductFamily.EDRS_SESSION) {
+			// skip EDRS_SESSION
+			return;
+		}
+		
+		for(String key: extractRealKeysForDataLifecycle(obsObjects, family)) {
+			if(!lifecycleMetadataRepo.findByProductName(key).isPresent())
+			{
+				final Discrepancy discrepancy = new Discrepancy(key, "Exists in OBS, but not in Data Lifecycle Index");
+				discrepancies.add(discrepancy);
+			}
+		}
+	}
+
+	Set<String> extractRealKeysForMDC(final Collection<ObsObject> obsResults, final ProductFamily family) {
 		final Set<String> realProducts = new HashSet<>();
 		for (final ObsObject obsResult: obsResults) {			
 			final String key = obsResult.getKey();
@@ -212,6 +240,24 @@ public class ValidationService {
 				// Special case zipped products. The MDC key does not contain the zip!
 				realKey = realKey.substring(0,key.lastIndexOf(".zip"));
 			}	
+			LOGGER.trace("key is {}", realKey);
+			realProducts.add(realKey);
+		}
+		return realProducts;
+	}
+	
+	Set<String> extractRealKeysForDataLifecycle(final Collection<ObsObject> obsResults, final ProductFamily family) {
+		final Set<String> realProducts = new HashSet<>();
+		for (final ObsObject obsResult: obsResults) {			
+			final String key = obsResult.getKey();
+			final int index = key.indexOf("/");
+			String realKey = null;
+			
+			if (index != -1) {
+				realKey = key.substring(0, index);
+			} else {
+				realKey = key;							
+			}
 			LOGGER.trace("key is {}", realKey);
 			realProducts.add(realKey);
 		}

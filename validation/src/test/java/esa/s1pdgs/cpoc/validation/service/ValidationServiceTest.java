@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,8 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -33,6 +36,9 @@ public class ValidationServiceTest {
 
 	@Mock
 	private ObsClient obsClient;
+	
+	@Mock
+	private DataLifecycleMetadataRepository lifecycleMetadataRepo;
 
 	private ValidationService validationService;
 	
@@ -44,7 +50,7 @@ public class ValidationServiceTest {
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		validationService = new ValidationService(metadataClient, obsClient);
+		validationService = new ValidationService(metadataClient, obsClient, lifecycleMetadataRepo);
 	}
 
 	@Test
@@ -109,9 +115,16 @@ public class ValidationServiceTest {
 				Mockito.eq(Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant())));
 		
 		// OBS does have 6 elements, but two are actually the same product
-		assertEquals(5,validationService.extractRealKeys(obsResults.values(),ProductFamily.AUXILIARY_FILE).size());
+		assertEquals(5,validationService.extractRealKeysForMDC(obsResults.values(),ProductFamily.AUXILIARY_FILE).size());
 
-		validationService.validateProductFamily(reporting, ProductFamily.AUXILIARY_FILE, localDateTimeStart,
-				localDateTimeStop);
+		assertEquals(6, validationService.validateProductFamily(reporting, ProductFamily.AUXILIARY_FILE, localDateTimeStart,
+				localDateTimeStop));
+		
+		doReturn(Optional.of(new DataLifecycleMetadata())).when(lifecycleMetadataRepo).findByProductName("S1B_OPER_AUX_OBMEMC_PDMC_20140212T000000.xml");
+		doReturn(Optional.of(new DataLifecycleMetadata())).when(lifecycleMetadataRepo).findByProductName("S1B_WV_RAW__0NSV_20181001T145340_20181001T151214_012960_017F00_584F.SAFE.zip");
+		doReturn(Optional.of(new DataLifecycleMetadata())).when(lifecycleMetadataRepo).findByProductName("S1B_WV_RAW__0NSV_20181001T134430_20181001T135939_012959_017EF8_789A.SAFE");
+		
+		assertEquals(3, validationService.validateProductFamily(reporting, ProductFamily.AUXILIARY_FILE, localDateTimeStart,
+				localDateTimeStop));
 	}
 }
