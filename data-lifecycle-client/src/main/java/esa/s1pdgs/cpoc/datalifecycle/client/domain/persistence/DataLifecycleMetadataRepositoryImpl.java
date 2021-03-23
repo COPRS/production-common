@@ -366,7 +366,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		}
 
 		if (!sortedByTieBraker) {
-			sourceBuilder.sort(PRODUCT_NAME.fieldName(), SortOrder.ASC);
+			sourceBuilder.sort(PRODUCT_NAME.fieldName() + ".keyword", SortOrder.ASC);
 		}
 	}
 
