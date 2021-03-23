@@ -167,7 +167,19 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			LocalDateTime minimalEvictionTimeInUncompressedStorage, LocalDateTime maximalEvictionTimeInUncompressedStorage,
 			Boolean persistentIncompressedStorage, LocalDateTime minimalEvictionTimeInCompressedStorage, LocalDateTime maximalEvictionTimeInCompressedStorage,
 			Boolean availableInLta, Integer pageSize, Integer pageNumber)
-			throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleTriggerBadRequestException {
+					throws DataLifecycleTriggerInternalServerErrorException, DataLifecycleTriggerBadRequestException {
+		LOG.debug(String.format("incoming query for data lifecycle metadata of products with attributes:"
+				+ " namePattern=%s, persistentInUncompressedStorage=%b, minimalEvictionTimeInUncompressedStorage=%s, maximalEvictionTimeInUncompressedStorage=%s,"
+				+ " persistentIncompressedStorage=%b, minimalEvictionTimeInCompressedStorage=%s, maximalEvictionTimeInCompressedStorage=%s,"
+				+ " availableInLta=%b, pageSize=%d, pageNumber=%d", namePattern, persistentInUncompressedStorage,
+				(null != minimalEvictionTimeInUncompressedStorage ? DateUtils.formatToMetadataDateTimeFormat(minimalEvictionTimeInUncompressedStorage)
+						: "null"),
+				(null != maximalEvictionTimeInUncompressedStorage ? DateUtils.formatToMetadataDateTimeFormat(maximalEvictionTimeInUncompressedStorage)
+						: "null"),
+				persistentIncompressedStorage,
+				(null != minimalEvictionTimeInCompressedStorage ? DateUtils.formatToMetadataDateTimeFormat(minimalEvictionTimeInCompressedStorage) : "null"),
+				(null != maximalEvictionTimeInCompressedStorage ? DateUtils.formatToMetadataDateTimeFormat(maximalEvictionTimeInCompressedStorage) : "null"),
+				availableInLta, pageSize, pageNumber));
 
 		final ArrayList<DataLifecycleQueryFilter> filters = new ArrayList<>();
 
