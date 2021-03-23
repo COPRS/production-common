@@ -17,35 +17,48 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 public class DataLifecycleMetadata {
 
 	public static enum FIELD_NAME {
-		PRODUCT_NAME("ProductName", DataLifecycleMetadata::getProductName), //
-		PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE("ProductFamilyInUncompressedStorage", DataLifecycleMetadata::getProductFamilyInUncompressedStorageAsString), //
-		PRODUCT_FAMILY_IN_COMPRESSED_STORAGE("ProductFamilyInCompressedStorage", DataLifecycleMetadata::getProductFamilyInCompressedStorageAsString), //
-		PATH_IN_UNCOMPRESSED_STORAGE("PathInUncompressedStorage", DataLifecycleMetadata::getPathInUncompressedStorage), //
-		PATH_IN_COMPRESSED_STORAGE("PathInCompressedStorage", DataLifecycleMetadata::getPathInCompressedStorage), //
-		EVICTION_DATE_IN_UNCOMPRESSED_STORAGE("EvictionDateInUncompressedStorage",
+		PRODUCT_NAME("ProductName", FIELD_TYPE.TEXT, DataLifecycleMetadata::getProductName), //
+		PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE("ProductFamilyInUncompressedStorage", FIELD_TYPE.TEXT,
+				DataLifecycleMetadata::getProductFamilyInUncompressedStorageAsString), //
+		PRODUCT_FAMILY_IN_COMPRESSED_STORAGE("ProductFamilyInCompressedStorage", FIELD_TYPE.TEXT,
+				DataLifecycleMetadata::getProductFamilyInCompressedStorageAsString), //
+		PATH_IN_UNCOMPRESSED_STORAGE("PathInUncompressedStorage", FIELD_TYPE.TEXT, //
+				DataLifecycleMetadata::getPathInUncompressedStorage),
+		PATH_IN_COMPRESSED_STORAGE("PathInCompressedStorage", FIELD_TYPE.TEXT, //
+				DataLifecycleMetadata::getPathInCompressedStorage),
+		EVICTION_DATE_IN_UNCOMPRESSED_STORAGE("EvictionDateInUncompressedStorage", FIELD_TYPE.DATE,
 				DataLifecycleMetadata::getEvictionDateInUncompressedStorageAsString), //
-		EVICTION_DATE_IN_COMPRESSED_STORAGE("EvictionDateInCompressedStorage",
+		EVICTION_DATE_IN_COMPRESSED_STORAGE("EvictionDateInCompressedStorage", FIELD_TYPE.DATE,
 				DataLifecycleMetadata::getEvictionDateInCompressedStorageAsString), //
-		PERSISTENT_IN_UNCOMPRESSED_STORAGE("PersistentInUncompressedStorage",
+		PERSISTENT_IN_UNCOMPRESSED_STORAGE("PersistentInUncompressedStorage", FIELD_TYPE.BOOLEAN,
 				DataLifecycleMetadata::getPersistentInUncompressedStorage), //
-		PERSISTENT_IN_COMPRESSED_STORAGE("PersistentInCompressedStorage",
+		PERSISTENT_IN_COMPRESSED_STORAGE("PersistentInCompressedStorage", FIELD_TYPE.BOOLEAN,
 				DataLifecycleMetadata::getPersistentInCompressedStorage), //
-		AVAILABLE_IN_LTA("AvailableInLta", DataLifecycleMetadata::getAvailableInLta), //
-		LAST_MODIFIED("LastModified", DataLifecycleMetadata::getLastModifiedAsString), //
-		LAST_DATA_REQUEST("LastDataRequest", DataLifecycleMetadata::getLastDataRequestAsString); //
+		AVAILABLE_IN_LTA("AvailableInLta", FIELD_TYPE.BOOLEAN, //
+				DataLifecycleMetadata::getAvailableInLta),
+		LAST_MODIFIED("LastModified", FIELD_TYPE.DATE, //
+				DataLifecycleMetadata::getLastModifiedAsString),
+		LAST_DATA_REQUEST("LastDataRequest", FIELD_TYPE.DATE, //
+				DataLifecycleMetadata::getLastDataRequestAsString);
 
 		private final String fieldName;
+		private final FIELD_TYPE fieldType;
 		private final Function<DataLifecycleMetadata, Object> toJsonAccessor;
 
-		private FIELD_NAME(String fieldName, Function<DataLifecycleMetadata, Object> toJsonAccessor) {
+		private FIELD_NAME(String fieldName, FIELD_TYPE fieldType, Function<DataLifecycleMetadata, Object> toJsonAccessor) {
 			this.fieldName = fieldName;
+			this.fieldType = fieldType;
 			this.toJsonAccessor = toJsonAccessor;
 		}
 
 		public String fieldName() {
 			return this.fieldName;
 		}
-		
+
+		public FIELD_TYPE fieldType() {
+			return this.fieldType;
+		}
+
 		public Function<DataLifecycleMetadata, Object> toJsonAccessor() {
 			return this.toJsonAccessor;
 		}
@@ -92,6 +105,10 @@ public class DataLifecycleMetadata {
 			
 			throw new IllegalArgumentException(String.format("field name not supported: %s", fieldName));
 		}
+	}
+
+	public static enum FIELD_TYPE {
+		TEXT, DATE, NUMBER, BOOLEAN;
 	}
 
 	// --------------------------------------------------------------------------

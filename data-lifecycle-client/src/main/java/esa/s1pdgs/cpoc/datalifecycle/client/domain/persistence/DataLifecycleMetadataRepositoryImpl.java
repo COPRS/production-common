@@ -45,6 +45,7 @@ import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.datalifecycle.client.config.EsClientConfiguration;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleBooleanFilter;
@@ -351,12 +352,12 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		boolean sortedByTieBraker = false;
 		if (CollectionUtil.isNotEmpty(sortTerms)) {
 			for (final DataLifecycleSortTerm sortTerm : sortTerms) {
-				final String sortFieldName = sortTerm.getSortFieldName().fieldName();
+				final FIELD_NAME sortField = sortTerm.getSortFieldName();
 				final DataLifecycleSortOrder sortOrder = sortTerm.getSortOrderOrDefault(DataLifecycleSortOrder.ASCENDING);
 
-				sourceBuilder.sort(sortFieldName, sortOrderFor(sortOrder.abbreviation()));
+				sourceBuilder.sort(getSortFieldName(sortField), sortOrderFor(sortOrder.abbreviation()));
 
-				if (PRODUCT_NAME.fieldName().equals(sortFieldName)) {
+				if (PRODUCT_NAME == sortField) {
 					sortedByTieBraker = true;
 				}
 			}
@@ -366,7 +367,15 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		}
 
 		if (!sortedByTieBraker) {
-			sourceBuilder.sort(PRODUCT_NAME.fieldName() + ".keyword", SortOrder.ASC);
+			sourceBuilder.sort(getSortFieldName(PRODUCT_NAME), SortOrder.ASC);
+		}
+	}
+
+	private static String getSortFieldName(final DataLifecycleMetadata.FIELD_NAME sorField) {
+		if (DataLifecycleMetadata.FIELD_TYPE.TEXT == sorField.fieldType()) {
+			return sorField.fieldName() + ".keyword";
+		} else {
+			return sorField.fieldName();
 		}
 	}
 
