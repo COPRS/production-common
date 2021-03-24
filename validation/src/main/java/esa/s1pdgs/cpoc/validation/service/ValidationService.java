@@ -217,10 +217,10 @@ public class ValidationService {
 			return;
 		}
 
-		for (ObsObject o : obsObjects) {
-			if (isNotPresentInDataLifecycleIndex(o.getKey())) {
-				LOGGER.trace("Exists in OBS, but not in Data Lifecycle Index: {}", o.getKey());
-				final Discrepancy discrepancy = new Discrepancy(o.getKey(),
+		for (String key : extractRealKeysForDataLifecycle(obsObjects)) {
+			if (isNotPresentInDataLifecycleIndex(key)) {
+				LOGGER.trace("Exists in OBS, but not in Data Lifecycle Index: {}", key);
+				final Discrepancy discrepancy = new Discrepancy(key,
 						"Exists in OBS, but not in Data Lifecycle Index");
 				discrepancies.add(discrepancy);
 			}
@@ -269,6 +269,24 @@ public class ValidationService {
 			if (key.endsWith(".zip")) {
 				// Special case zipped products. The MDC key does not contain the zip!
 				realKey = realKey.substring(0, key.lastIndexOf(".zip"));
+			}
+			LOGGER.trace("key is {}", realKey);
+			realProducts.add(realKey);
+		}
+		return realProducts;
+	}
+	
+	Set<String> extractRealKeysForDataLifecycle(final Collection<ObsObject> obsResults) {
+		final Set<String> realProducts = new HashSet<>();
+		for (final ObsObject obsResult : obsResults) {
+			final String key = obsResult.getKey();
+			final int index = key.indexOf("/");
+			String realKey = null;
+
+			if (index != -1) {
+				realKey = key.substring(0, index);
+			} else {
+				realKey = key;
 			}
 			LOGGER.trace("key is {}", realKey);
 			realProducts.add(realKey);
