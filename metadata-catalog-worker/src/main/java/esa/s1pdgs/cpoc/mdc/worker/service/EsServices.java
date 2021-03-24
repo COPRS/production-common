@@ -1262,10 +1262,11 @@ public class EsServices {
 		final SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.source(sourceBuilder);
 
+		final List<SearchMetadata> result = new ArrayList<>();
+		
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (this.isNotEmpty(searchResponse)) {
-				final List<SearchMetadata> r = new ArrayList<>();
 				for (final SearchHit hit : searchResponse.getHits().getHits()) {
 					final Map<String, Object> source = hit.getSourceAsMap();
 					final SearchMetadata local = new SearchMetadata();
@@ -1289,16 +1290,13 @@ public class EsServices {
 						}
 					}
 					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
-					r.add(local);
+					result.add(local);
 				}
-
-				return r;
 			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
-
-		return null;
+		return result;
 	}
 	
 	/**
