@@ -420,6 +420,13 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 						"cannot send data request for '" + dataLifecycleMetadata.getProductName() + "' as product family in uncompressed storage is unknown.");
 			}
 
+			// prevent sending data requests for session files, because they are non-recoverable
+			if (ProductFamily.EDRS_SESSION == productFamily) {
+				LOG.debug(String.format("sending no data request for '%s', because session files are non-recoverable",
+						dataLifecycleMetadata.getProductName()));
+				return false;
+			}
+
 			final DataRequestJob dataRequestJob = new DataRequestJob();
 			dataRequestJob.setKeyObjectStorage(dataLifecycleMetadata.getProductName());
 			dataRequestJob.setProductFamily(productFamily);
@@ -431,10 +438,8 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
 			return true;
 		} else {
-			final String cooldownEnd = DateUtils
-					.formatToMetadataDateTimeFormat(dataLifecycleMetadata.getLastDataRequest().plusSeconds(this.dataRequestCooldown));
-			LOG.debug(
-					"ommitting sending a data request for '" + dataLifecycleMetadata.getProductName() + "', because of active cooldown, ending " + cooldownEnd);
+			LOG.debug(String.format("ommitting sending a data request for '%s', because of active cooldown, ending %s",dataLifecycleMetadata.getProductName(),DateUtils
+					.formatToMetadataDateTimeFormat(dataLifecycleMetadata.getLastDataRequest().plusSeconds(this.dataRequestCooldown))));
 			return false;
 		}
 	}
