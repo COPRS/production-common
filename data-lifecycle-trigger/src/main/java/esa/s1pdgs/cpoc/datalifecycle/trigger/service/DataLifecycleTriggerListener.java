@@ -82,23 +82,16 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 				ReportingUtils.newFilenameReportingInputFor(inputEvent.getProductFamily(), inputEvent.getKeyObjectStorage()),
 				new ReportingMessage("Handling event for %s", inputEvent.getKeyObjectStorage()));
 
-		try {
-			if (inputEvent instanceof EvictionEvent) {
-				this.updateEvictedMetadata((EvictionEvent) inputEvent);
-			} else {
-				this.updateMetadata(inputMessage);
-			}
-		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
-			reporting.error(
-					new ReportingMessage("Error handling %s for %s: %s", inputEvent.getClass().getSimpleName(), inputEvent.getKeyObjectStorage(),
-							LogUtils.toString(e)));
-		}
-
 		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.of(inputEvent.getProductFamily()))
 				.onSuccess(res -> reporting.end(new ReportingMessage("End handling event for %s", inputEvent.getKeyObjectStorage())))
 				.onError(e -> reporting.error(new ReportingMessage("Error handling %s for %s: %s", inputEvent.getClass().getSimpleName(),
 						inputEvent.getKeyObjectStorage(), LogUtils.toString(e))))
 				.publishMessageProducer(() -> {
+					if (inputEvent instanceof EvictionEvent) {
+						this.updateEvictedMetadata((EvictionEvent) inputEvent);
+					} else {
+						this.updateMetadata(inputMessage);
+					}
 					return new MqiPublishingJob<NullMessage>(Collections.emptyList());
 				}).newResult();
 	}
