@@ -142,7 +142,7 @@ public class DataLifecycleTriggerRestController {
 	 * @param productname product name of product
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.GET, path = "products/{productname}")
+	@RequestMapping(method = RequestMethod.GET, path = "/products/{productname}")
 	public Product getProduct(@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("productname") final String productname) {
 		LOGGER.info("get product with productname {}", productname);
