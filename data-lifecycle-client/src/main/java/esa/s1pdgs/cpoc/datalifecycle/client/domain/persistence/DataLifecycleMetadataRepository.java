@@ -26,10 +26,14 @@ public interface DataLifecycleMetadataRepository {
 	 * Returns all data lifecycle metadata entries that have at least one eviction date before the given timestamp.
 	 *
 	 * @param timestamp the timestamp
+	 * @param top       for paging
+	 * @param skip      for paging
+	 * @param sortTerms to order by attributes
 	 * @return all data lifecycle metadata entries that have at least one eviction date before the given timestamp.
 	 * @throws DataLifecycleMetadataRepositoryException on repository error
 	 */
-	List<DataLifecycleMetadata> findByEvictionDateBefore(@NonNull LocalDateTime timestamp) throws DataLifecycleMetadataRepositoryException;
+	List<DataLifecycleMetadata> findByEvictionDateBefore(@NonNull LocalDateTime timestamp, Optional<Integer> top, Optional<Integer> skip,
+			List<DataLifecycleSortTerm> sortTerms) throws DataLifecycleMetadataRepositoryException;
 
 	/**
 	 * Querying the repository with filters.
@@ -37,7 +41,7 @@ public interface DataLifecycleMetadataRepository {
 	 * @param filters   to narrow the query
 	 * @param top       for paging
 	 * @param skip      for paging
-	 * @param sortTerms order by
+	 * @param sortTerms to order by attributes
 	 * @return the search result
 	 * @throws DataLifecycleMetadataRepositoryException on repository error
 	 */

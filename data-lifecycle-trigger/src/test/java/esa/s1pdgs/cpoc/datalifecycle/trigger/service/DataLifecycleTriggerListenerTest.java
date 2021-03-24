@@ -36,8 +36,9 @@ public class DataLifecycleTriggerListenerTest {
 			return Optional.empty();
 		}
 		@Override
-		public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp)
-				throws DataLifecycleMetadataRepositoryException {
+		public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp,
+				Optional<Integer> top, Optional<Integer> skip, List<DataLifecycleSortTerm> sortTerms)
+						throws DataLifecycleMetadataRepositoryException {
 			return Collections.emptyList();
 		}
 		@Override

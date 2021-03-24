@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.AVAILABLE_IN_LTA;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_COMPRESSED_STORAGE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_UNCOMPRESSED_STORAGE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME;
@@ -32,6 +33,8 @@ import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleBooleanFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleDateTimeFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQueryFilter;
@@ -76,26 +79,40 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	public void evict(String operatorName) throws DataLifecycleTriggerInternalServerErrorException {
 		LOG.debug("starting general eviction request on behalf of " + (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
 
-		final List<DataLifecycleMetadata> productsToDelete;
+		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+		final DataLifecycleSortTerm sortTerm = new DataLifecycleSortTerm(LAST_MODIFIED, DataLifecycleSortOrder.ASCENDING);
+
+		final int pageSize = 100;
+		int offset = 0;
+		List<DataLifecycleMetadata> productsToDelete;
+		final List<DataLifecycleTriggerInternalServerErrorException> errors = new ArrayList<>();
+		long evictionJobsSend = 0;
+
 		try {
-			productsToDelete = CollectionUtil.nullToEmptyList(this.lifecycleMetadataRepo.findByEvictionDateBefore(LocalDateTime.now(ZoneId.of("UTC"))));
-			LOG.debug("found " + productsToDelete.size() + " products to evict on behalt of "
-					+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
+			do {
+				// get result page
+				productsToDelete = this.lifecycleMetadataRepo.findByEvictionDateBefore(now, Optional.of(pageSize), Optional.of(offset),
+						Collections.singletonList(sortTerm));
+				LOG.debug("found " + productsToDelete.size() + " products (page size: " + pageSize + ") to evict on behalt of "
+						+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
+
+				// process result page
+				for (final DataLifecycleMetadata metadata : productsToDelete) {
+					try {
+						evictionJobsSend += this.evict(metadata, false, false, operatorName);
+					} catch (final DataLifecycleTriggerInternalServerErrorException e) {
+						LOG.error("error on evicting product (operator: " + operatorName + "), will skip this one: " + e.getMessage());
+						errors.add(e);
+						continue;
+					}
+				}
+				// calculate offset for next page
+				offset += pageSize;
+			} while (CollectionUtil.isNotEmpty(productsToDelete));
 		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
 			LOG.error("error searching for products to evict on behalf of "
 					+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]: " + e.getMessage()));
 			throw e;
-		}
-
-		final List<DataLifecycleTriggerInternalServerErrorException> errors = new ArrayList<>();
-		int evictionJobsSend = 0;
-		for (final DataLifecycleMetadata metadata : productsToDelete) {
-			try {
-				evictionJobsSend += this.evict(metadata, false, false, operatorName);
-			} catch (final DataLifecycleTriggerInternalServerErrorException e) {
-				LOG.error("error on evicting product (operator: " + operatorName + "), will skip this one: " + e.getMessage());
-				errors.add(e);
-			}
 		}
 
 		if (!errors.isEmpty()) {

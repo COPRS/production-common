@@ -143,15 +143,15 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	}
 
 	@Override
-	public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp) throws DataLifecycleMetadataRepositoryException {
+	public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp, Optional<Integer> top, Optional<Integer> skip,
+			List<DataLifecycleSortTerm> sortTerms) throws DataLifecycleMetadataRepositoryException {
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		final DataLifecycleSortTerm sortTerm = new DataLifecycleSortTerm(LAST_MODIFIED, DataLifecycleSortOrder.ASCENDING);
 
 		queryBuilder.should(QueryBuilders.rangeQuery(EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName()).lt(timestamp));
 		// OR
 		queryBuilder.should(QueryBuilders.rangeQuery(EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName()).lt(timestamp));
 
-		return this.queryWithOffset(queryBuilder, Optional.empty(), Optional.empty(), Collections.singletonList(sortTerm));
+		return this.queryWithOffset(queryBuilder, top, skip, sortTerms);
 	}
 
 	@Override
