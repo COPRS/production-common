@@ -136,6 +136,11 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 
 	@Override
 	public List<DataLifecycleMetadata> findByProductNames(@NonNull List<String> productNames) throws DataLifecycleMetadataRepositoryException {
+		if (productNames.size() > this.searchResultLimit) {
+			throw new DataLifecycleMetadataRepositoryException(
+					"the products requested (" + productNames.size() + ") exceed the search result limit of " + this.searchResultLimit
+							+ ". no paging is supported for this function yet!");
+		}
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		productNames.forEach(name -> queryBuilder.should(QueryBuilders.termQuery(PRODUCT_NAME.fieldName() + ".keyword", name)));
 

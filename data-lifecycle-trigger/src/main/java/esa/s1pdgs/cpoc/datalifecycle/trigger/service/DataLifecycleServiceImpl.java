@@ -91,8 +91,8 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		try {
 			do {
 				// get result page
-				productsToDelete = this.lifecycleMetadataRepo.findByEvictionDateBefore(now, Optional.of(pageSize), Optional.of(offset),
-						Collections.singletonList(sortTerm));
+				productsToDelete = CollectionUtil.nullToEmptyList(this.lifecycleMetadataRepo.findByEvictionDateBefore(now, Optional.of(pageSize),
+						Optional.of(offset), Collections.singletonList(sortTerm)));
 				LOG.debug("found " + productsToDelete.size() + " products (page size: " + pageSize + ") to evict on behalt of "
 						+ (StringUtil.isNotBlank(operatorName) ? operatorName : "[NOT SPECIFIED]"));
 
@@ -107,6 +107,9 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 					}
 				}
 				// calculate offset for next page
+				if (((long) offset + pageSize) > Integer.MAX_VALUE) {
+					throw new DataLifecycleTriggerInternalServerErrorException("paging offset exceeds limit of " + Integer.MAX_VALUE);
+				}
 				offset += pageSize;
 			} while (CollectionUtil.isNotEmpty(productsToDelete));
 		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
