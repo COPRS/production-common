@@ -255,9 +255,13 @@ public class S3ObsClient extends AbstractObsClient {
 				LOGGER.debug("Deleting file {} in bucket {}", key, bucket);
 				s3Services.deleteFile(new DeleteObjectRequest(bucket, key));
 			}
-			String md5sumfile = keyPrefix +  Md5.MD5SUM_SUFFIX;
-			LOGGER.info("Deleting md5sum file {} in bucket {}", md5sumfile, bucket);
-			s3Services.deleteFile(new DeleteObjectRequest(bucket, md5sumfile));
+			String md5sumfile = keyPrefix + Md5.MD5SUM_SUFFIX;
+			if (s3Services.exist(bucket, md5sumfile)) {
+				LOGGER.info("Deleting md5sum file {} in bucket {}", md5sumfile, bucket);
+				s3Services.deleteFile(new DeleteObjectRequest(bucket, md5sumfile));
+			} else {
+				LOGGER.warn("No md5sum file exist for file {} in bucket {}", md5sumfile, bucket);
+			}
 		} catch (S3SdkClientException | ObsServiceException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);
 		}
