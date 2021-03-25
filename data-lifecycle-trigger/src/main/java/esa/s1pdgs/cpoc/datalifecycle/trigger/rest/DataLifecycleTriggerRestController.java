@@ -158,6 +158,10 @@ public class DataLifecycleTriggerRestController {
 			LOGGER.error("internal server error: " + productname, e);
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
+			LOGGER.error("internal server error: " + productname, e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
 		return result;
