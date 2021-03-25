@@ -361,10 +361,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			dataLifecycleMetadata.setEvictionDateInCompressedStorage(FOREVER);
 		}
 
-		this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
-		return this.lifecycleMetadataRepo.findByProductName(dataLifecycleMetadata.getProductName())
-				.orElseThrow(() -> new DataLifecycleMetadataNotFoundException(
-						"error reading metadata for product '" + dataLifecycleMetadata.getProductName() + "' after retention update"));
+		return this.lifecycleMetadataRepo.saveAndGet(dataLifecycleMetadata);
 	}
 
 	private int evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,

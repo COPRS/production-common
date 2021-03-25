@@ -18,6 +18,8 @@ public interface DataLifecycleMetadataRepository {
 
 	void save(@NonNull DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException;
 
+	DataLifecycleMetadata saveAndGet(@NonNull DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException;
+
 	Optional<DataLifecycleMetadata> findByProductName(@NonNull String productName) throws DataLifecycleMetadataRepositoryException;
 
 	List<DataLifecycleMetadata> findByProductNames(@NonNull List<String> productNames) throws DataLifecycleMetadataRepositoryException;

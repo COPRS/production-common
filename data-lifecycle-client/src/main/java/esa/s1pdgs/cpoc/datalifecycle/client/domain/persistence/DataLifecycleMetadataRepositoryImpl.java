@@ -25,6 +25,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -114,7 +115,49 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 					+ metadata.getProductName() + "): " + e.getMessage(), e);
 		}
 	}
-	
+
+	@Override
+	public DataLifecycleMetadata saveAndGet(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
+		metadata.setLastModified(LocalDateTime.now(ZoneId.of("UTC")));
+
+		final IndexRequest request = new IndexRequest(this.elasticsearchIndex).id(metadata.getProductName())
+				.source(metadata.toJson().toString(), XContentType.JSON);
+		request.setRefreshPolicy(RefreshPolicy.IMMEDIATE); // <-- we need the updated data immediately
+
+		LOG.debug("product data lifecycle metadata save request ("
+				+ this.elasticsearchClient.getLowLevelClient().getNodes().get(0).getHost() + "): " + request);
+
+		try {
+			final IndexResponse response = this.elasticsearchClient.index(request, RequestOptions.DEFAULT);
+
+			if (DocWriteResponse.Result.CREATED == response.getResult()
+					|| DocWriteResponse.Result.UPDATED == response.getResult()) {
+				LOG.debug("successfully saved product data lifecycle metadata " + metadata);
+
+				return this.findByProductName(metadata.getProductName())
+						.orElseThrow(() -> new DataLifecycleMetadataRepositoryException("error reading product data after saving"));
+			} else {
+				final ReplicationResponse.ShardInfo shardInfo = response.getShardInfo();
+				if (shardInfo.getFailed() > 0) {
+					final StringBuilder errBuilder = new StringBuilder(
+							"data lifecycle metadata could not be saved successfully for product: "
+									+ metadata.getProductName());
+					for (final ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
+						errBuilder.append("\nsaving error: " + failure.reason());
+					}
+					throw new DataLifecycleMetadataRepositoryException(errBuilder.toString());
+				}
+
+				throw new DataLifecycleMetadataRepositoryException(
+						"data lifecycle metadata could not be saved successfully (but no error message returned from persistence) for product: "
+								+ metadata.getProductName());
+			}
+		} catch (final IOException e) {
+			throw new DataLifecycleMetadataRepositoryException("error saving product data lifecycle metadata ("
+					+ metadata.getProductName() + "): " + e.getMessage(), e);
+		}
+	}
+
 	@Override
 	public Optional<DataLifecycleMetadata> findByProductName(String name) throws DataLifecycleMetadataRepositoryException {
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
