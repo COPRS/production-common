@@ -86,6 +86,10 @@ public class DataLifecycleTriggerRestController {
 		} catch (DataLifecycleTriggerBadRequestException e) {
 			throw new DataLifecycleTriggerRestControllerException(String.format("Bad request"),
 					HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			LOGGER.error("internal server error", e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -109,6 +113,10 @@ public class DataLifecycleTriggerRestController {
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
+			LOGGER.error("internal server error", e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -131,6 +139,10 @@ public class DataLifecycleTriggerRestController {
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
+			LOGGER.error("internal server error", e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -192,6 +204,10 @@ public class DataLifecycleTriggerRestController {
 			LOGGER.error("internal server error: " + productname, e);
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
+			LOGGER.error("internal server error: " + productname, e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -225,6 +241,10 @@ public class DataLifecycleTriggerRestController {
 		} catch (DataLifecycleMetadataNotFoundException e) {
 			throw new DataLifecycleTriggerRestControllerException(String.format("Not found"),
 					HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			LOGGER.error("internal server error: " + productname, e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		assertProductFound(result, productname);
 		return result;
