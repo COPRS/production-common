@@ -5,26 +5,26 @@ public class Product {
 	private String productname;
 
 	private String pathInUncompressedStorage;
-	private boolean persistentInUncompressedStorage;
+	private Boolean persistentInUncompressedStorage;
 	private String evictionTimeInUncompressedStorage;
 	private String productFamilyInUncompressedStorage;
 
 	private String pathInCompressedStorage;
-	private boolean persistentInCompressedStorage;
+	private Boolean persistentInCompressedStorage;
 	private String evictionTimeInCompressedStorage;
 	private String productFamilyInCompressedStorage;
 
-	private boolean availableInLta;
+	private Boolean availableInLta;
 	private String lastModificationTime;
 
 	public Product() {
 		super();
 	}
 
-	public Product(String productname, String pathInUncompressedStorage, boolean persistentInUncompressedStorage,
+	public Product(String productname, String pathInUncompressedStorage, Boolean persistentInUncompressedStorage,
 			String evictionTimeInUncompressedStorage, String productFamilyInUncompressedStorage,
-			String pathInCompressedStorage, boolean persistentInCompressedStorage,
-			String evictionTimeInCompressedStorage, String productFamilyInCompressedStorage, boolean availableInLta,
+			String pathInCompressedStorage, Boolean persistentInCompressedStorage,
+			String evictionTimeInCompressedStorage, String productFamilyInCompressedStorage, Boolean availableInLta,
 			String lastModificationTime) {
 		super();
 		this.productname = productname;
@@ -56,11 +56,11 @@ public class Product {
 		this.pathInUncompressedStorage = pathInUncompressedStorage;
 	}
 
-	public boolean isPersistentInUncompressedStorage() {
+	public Boolean isPersistentInUncompressedStorage() {
 		return persistentInUncompressedStorage;
 	}
 
-	public void setPersistentInUncompressedStorage(boolean persistentInUncompressedStorage) {
+	public void setPersistentInUncompressedStorage(Boolean persistentInUncompressedStorage) {
 		this.persistentInUncompressedStorage = persistentInUncompressedStorage;
 	}
 
@@ -88,11 +88,11 @@ public class Product {
 		this.pathInCompressedStorage = pathInCompressedStorage;
 	}
 
-	public boolean isPersistentInCompressedStorage() {
+	public Boolean isPersistentInCompressedStorage() {
 		return persistentInCompressedStorage;
 	}
 
-	public void setPersistentInCompressedStorage(boolean persistentInCompressedStorage) {
+	public void setPersistentInCompressedStorage(Boolean persistentInCompressedStorage) {
 		this.persistentInCompressedStorage = persistentInCompressedStorage;
 	}
 
@@ -112,11 +112,11 @@ public class Product {
 		this.productFamilyInCompressedStorage = productFamilyInCompressedStorage;
 	}
 
-	public boolean isAvailableInLta() {
+	public Boolean isAvailableInLta() {
 		return availableInLta;
 	}
 
-	public void setAvailableInLta(boolean availableInLta) {
+	public void setAvailableInLta(Boolean availableInLta) {
 		this.availableInLta = availableInLta;
 	}
 
