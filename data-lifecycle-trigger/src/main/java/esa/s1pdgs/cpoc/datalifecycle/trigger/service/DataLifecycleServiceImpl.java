@@ -457,7 +457,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
 			return true;
 		} else {
-			LOG.debug(String.format("ommitting sending a data request for '%s', because of active cooldown, ending %s",dataLifecycleMetadata.getProductName(),DateUtils
+			LOG.debug(String.format("omit sending a data request for '%s', because of active cooldown, ending %s",dataLifecycleMetadata.getProductName(),DateUtils
 					.formatToMetadataDateTimeFormat(dataLifecycleMetadata.getLastDataRequest().plusSeconds(this.dataRequestCooldown))));
 			return false;
 		}
