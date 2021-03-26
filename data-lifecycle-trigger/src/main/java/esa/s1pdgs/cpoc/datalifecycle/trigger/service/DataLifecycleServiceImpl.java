@@ -399,7 +399,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		final LocalDateTime evictionDateInCompressedStorage = dataLifecycleMetadata.getEvictionDateInCompressedStorage();
 
 		if (StringUtil.isNotBlank(pathInCompressedStorage)
-				&& (forceUncompressed || (null != evictionDateInCompressedStorage && now.isAfter(evictionDateInCompressedStorage)))) {
+				&& (forceCompressed || (null != evictionDateInCompressedStorage && now.isAfter(evictionDateInCompressedStorage)))) {
 			final ProductFamily productFamilyInCompressedStorage = dataLifecycleMetadata.getProductFamilyInCompressedStorage();
 			if (null == productFamilyInCompressedStorage || ProductFamily.BLANK == productFamilyInCompressedStorage) {
 				throw new DataLifecycleTriggerInternalServerErrorException(
