@@ -30,6 +30,10 @@ public class DataLifecycleTriggerListenerTest {
 				throws DataLifecycleMetadataRepositoryException {
 			// nothing
 		}
+		public DataLifecycleMetadata saveAndGet(DataLifecycleMetadata metadata)
+				throws DataLifecycleMetadataRepositoryException {
+			return null;
+		};
 		@Override
 		public Optional<DataLifecycleMetadata> findByProductName(String productName)
 				throws DataLifecycleMetadataRepositoryException {

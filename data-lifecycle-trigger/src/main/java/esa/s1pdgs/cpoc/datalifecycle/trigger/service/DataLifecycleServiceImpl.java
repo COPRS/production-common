@@ -52,6 +52,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 public class DataLifecycleServiceImpl implements DataLifecycleService {
 	private static final Logger LOG = LogManager.getLogger(DataLifecycleServiceImpl.class);
 
+	private static final LocalDateTime FOREVER = LocalDateTime.of(9999, 12, 31, 23, 59, 59);
+
 	private final DataLifecycleMetadataRepository lifecycleMetadataRepo;
 	private final MessageProducer<EvictionManagementJob> evictionJobMessageProducer;
 	private final String evictionTopic;
@@ -349,20 +351,17 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		if (null != evictionTimeInUncompressedStorage) {
 			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(evictionTimeInUncompressedStorage);
 		} else { // freeze
-			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(LocalDateTime.MAX);
+			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(FOREVER);
 		}
 
 		// compressed
 		if (null != evictionTimeInCompressedStorage) {
 			dataLifecycleMetadata.setEvictionDateInCompressedStorage(evictionTimeInCompressedStorage);
 		} else { // freeze
-			dataLifecycleMetadata.setEvictionDateInCompressedStorage(LocalDateTime.MAX);
+			dataLifecycleMetadata.setEvictionDateInCompressedStorage(FOREVER);
 		}
 
-		this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
-		return this.lifecycleMetadataRepo.findByProductName(dataLifecycleMetadata.getProductName())
-				.orElseThrow(() -> new DataLifecycleMetadataNotFoundException(
-						"error reading metadata for product '" + dataLifecycleMetadata.getProductName() + "' after retention update"));
+		return this.lifecycleMetadataRepo.saveAndGet(dataLifecycleMetadata);
 	}
 
 	private int evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,
@@ -458,7 +457,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
 			return true;
 		} else {
-			LOG.debug(String.format("ommitting sending a data request for '%s', because of active cooldown, ending %s",dataLifecycleMetadata.getProductName(),DateUtils
+			LOG.debug(String.format("omit sending a data request for '%s', because of active cooldown, ending %s",dataLifecycleMetadata.getProductName(),DateUtils
 					.formatToMetadataDateTimeFormat(dataLifecycleMetadata.getLastDataRequest().plusSeconds(this.dataRequestCooldown))));
 			return false;
 		}
