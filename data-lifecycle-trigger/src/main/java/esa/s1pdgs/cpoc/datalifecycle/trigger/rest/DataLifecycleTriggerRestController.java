@@ -81,6 +81,7 @@ public class DataLifecycleTriggerRestController {
 					persistentIncompressedStorage, minimalEvictionTimeInCompressedStorage,
 					maximalEvictionTimeInCompressedStorage, availableInLta, pageSize, pageNumber);
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
+			LOGGER.error("internal server error", e);
 			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (DataLifecycleTriggerBadRequestException e) {
@@ -111,11 +112,12 @@ public class DataLifecycleTriggerRestController {
 		try {
 			return dataLifecycleServiceDelegator.getProducts(productPost.getProductnames());
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			LOGGER.error("internal server error", e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			LOGGER.error("internal server error", e);
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -137,11 +139,12 @@ public class DataLifecycleTriggerRestController {
 		try {
 			dataLifecycleServiceDelegator.deleteProducts(operatorName);
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			LOGGER.error("internal server error", e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			LOGGER.error("internal server error", e);
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -168,11 +171,11 @@ public class DataLifecycleTriggerRestController {
 			assertProductFound(result, productname);
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			LOGGER.error("internal server error: " + productname, e);
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			LOGGER.error("internal server error: " + productname, e);
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
@@ -202,11 +205,11 @@ public class DataLifecycleTriggerRestController {
 			assertProductFound(null, productname);
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
 			LOGGER.error("internal server error: " + productname, e);
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (Exception e) {
 			LOGGER.error("internal server error: " + productname, e);
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -236,14 +239,15 @@ public class DataLifecycleTriggerRestController {
 					productPatch.getEvictionTimeInUncompressedStorage(),
 					productPatch.getEvictionTimeInCompressedStorage());
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			LOGGER.error("internal server error: " + productname, e);
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (DataLifecycleMetadataNotFoundException e) {
-			throw new DataLifecycleTriggerRestControllerException(String.format("Not found"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Not found: %s", e.getMessage()),
 					HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
 			LOGGER.error("internal server error: " + productname, e);
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		assertProductFound(result, productname);
