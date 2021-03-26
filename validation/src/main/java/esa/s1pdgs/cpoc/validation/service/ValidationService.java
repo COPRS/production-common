@@ -212,12 +212,7 @@ public class ValidationService {
 
 		LOGGER.info("Check that everything that is in OBS is also in the Data Lifecycle index");
 
-		if (family == ProductFamily.EDRS_SESSION) {
-			// skip EDRS_SESSION
-			return;
-		}
-
-		for (String key : extractRealKeysForDataLifecycle(obsObjects)) {
+		for (String key : extractRealKeysForDataLifecycle(obsObjects, family)) {
 			if (isNotPresentInDataLifecycleIndex(key)) {
 				LOGGER.trace("Exists in OBS, but not in Data Lifecycle Index: {}", key);
 				final Discrepancy discrepancy = new Discrepancy(key,
@@ -276,14 +271,24 @@ public class ValidationService {
 		return realProducts;
 	}
 	
-	Set<String> extractRealKeysForDataLifecycle(final Collection<ObsObject> obsResults) {
+	Set<String> extractRealKeysForDataLifecycle(final Collection<ObsObject> obsResults, final ProductFamily family) {
 		final Set<String> realProducts = new HashSet<>();
 		for (final ObsObject obsResult : obsResults) {
 			final String key = obsResult.getKey();
 			final int index = key.indexOf("/");
 			String realKey = null;
 
-			if (index != -1) {
+			if (family == ProductFamily.EDRS_SESSION) {
+				realKey = key;
+				/*
+				 * EDRS_Sessions are just queried on raw and not containg DSIB. So we are
+				 * removing them from the check
+				 */
+				if (realKey.endsWith("DSIB.xml")) {
+					LOGGER.debug("Ignoring DSIB file: {}", realKey);
+					continue;
+				}
+			} else if (index != -1) {
 				realKey = key.substring(0, index);
 			} else {
 				realKey = key;
