@@ -81,14 +81,14 @@ public class DataLifecycleTriggerRestController {
 					persistentIncompressedStorage, minimalEvictionTimeInCompressedStorage,
 					maximalEvictionTimeInCompressedStorage, availableInLta, pageSize, pageNumber);
 		} catch (DataLifecycleTriggerInternalServerErrorException e) {
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (DataLifecycleTriggerBadRequestException e) {
-			throw new DataLifecycleTriggerRestControllerException(String.format("Bad request"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Bad request: %s", e.getMessage()),
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			LOGGER.error("internal server error", e);
-			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error"),
+			throw new DataLifecycleTriggerRestControllerException(String.format("Internal server error: %s", e.getMessage()),
 						HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
