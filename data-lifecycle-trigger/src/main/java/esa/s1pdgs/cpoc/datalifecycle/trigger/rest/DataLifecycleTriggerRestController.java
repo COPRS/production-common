@@ -266,7 +266,7 @@ public class DataLifecycleTriggerRestController {
 	private static final void assertValidDateTimeString(final String attributeName, final String dateTimeAsString, boolean optional)
 			throws DataLifecycleTriggerRestControllerException {
 		
-		if (optional && (StringUtil.isEmpty(dateTimeAsString) || "null".equalsIgnoreCase(dateTimeAsString))) {
+		if (optional && ((StringUtil.isEmpty(dateTimeAsString) || "null".equalsIgnoreCase(dateTimeAsString)))) {
 			return;
 		}
 		
