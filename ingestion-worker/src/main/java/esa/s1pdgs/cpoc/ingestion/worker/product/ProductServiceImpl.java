@@ -69,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
 		//returns -1 if it is not in OBS
 		long size = obsAdapter.sizeOf(ingestion.getProductFamily(), obsKey);
 
-		if (size == ingestion.getProductSizeByte()) {
+		if (ingestion.getProductSizeByte() >= 0 && size == ingestion.getProductSizeByte()) {
 			throw new RuntimeException(
 					String.format("File %s is already in obs and has the same size, aborting ingestion", obsKey));
 		}
