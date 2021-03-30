@@ -427,7 +427,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		return evictionJobsSend;
 	}
 
-	public boolean sendDataRequest(final DataLifecycleMetadata dataLifecycleMetadata, final String operatorName)
+	private boolean sendDataRequest(final DataLifecycleMetadata dataLifecycleMetadata, final String operatorName)
 			throws DataLifecycleTriggerInternalServerErrorException {
 		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
