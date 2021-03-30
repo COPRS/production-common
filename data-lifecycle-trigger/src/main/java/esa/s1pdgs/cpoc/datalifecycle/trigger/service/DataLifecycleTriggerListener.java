@@ -84,8 +84,8 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 
 		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.of(inputEvent.getProductFamily()))
 				.onSuccess(res -> reporting.end(new ReportingMessage("End handling event for %s", inputEvent.getKeyObjectStorage())))
-				.onError(e -> reporting.error(new ReportingMessage("Error handling %s for %s: %s", inputEvent.getClass().getSimpleName(),
-						inputEvent.getKeyObjectStorage(), LogUtils.toString(e))))
+				.onError(e -> reporting.error(new ReportingMessage("Error handling event for %s: on %s -> %s", inputEvent.getKeyObjectStorage(),
+						inputEvent.getClass().getSimpleName(), LogUtils.toString(e))))
 				.publishMessageProducer(() -> {
 					if (inputEvent instanceof EvictionEvent) {
 						this.updateEvictedMetadata((EvictionEvent) inputEvent);
