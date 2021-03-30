@@ -50,8 +50,8 @@ public class DataLifecycleTriggerRestController {
 	 * @param minimalEvictionTimeInCompressedStorage used to filter by evictionTimeInInCompresedStorage &gt;= minimalEvictionTimeInCompressedStorage
 	 * @param maximalEvictionTimeInCompressedStorage used to filter by evictionTimeInInCompresedStorage &gt;= maximalEvictionTimeInCompressedStorage
 	 * @param availableInLta flag if product can be retrieved from LTA
-	 * @param pageSize number of processings returned per page (default is unlimited)
-	 * @param pageNumber page number, first page is pageNumber=0 (default). Only used in case `pageSize` is provided
+	 * @param pageSize number of lifecycle metadata entries returned per page (default is 1000)
+	 * @param pageNumber page number, first page is pageNumber=0 (default).
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.GET, path = "/products")
@@ -64,7 +64,7 @@ public class DataLifecycleTriggerRestController {
 			@RequestParam(value = "minimalEvictionTimeInCompressedStorage", required = false) final String minimalEvictionTimeInCompressedStorage,
 			@RequestParam(value = "maximalEvictionTimeInCompressedStorage", required = false) final String maximalEvictionTimeInCompressedStorage,
 			@RequestParam(value = "availableInLta", required = false) final Boolean availableInLta,
-			@RequestParam(value = "pageSize", required = false) final Integer pageSize,
+			@RequestParam(value = "pageSize", required = false, defaultValue = "1000") final Integer pageSize,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "0") final Integer pageNumber) {
 		LOGGER.info("get products");
 
