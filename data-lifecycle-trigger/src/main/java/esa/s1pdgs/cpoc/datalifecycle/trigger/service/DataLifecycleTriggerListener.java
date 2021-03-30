@@ -72,6 +72,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 
 	@Override
 	public MqiMessageEventHandler onMessage(final GenericMessageDto<E> inputMessage) throws Exception {
+		LOG.debug("Starting data lifecycle management, got message: {}", inputMessage);
 		final E inputEvent = inputMessage.getBody();
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
