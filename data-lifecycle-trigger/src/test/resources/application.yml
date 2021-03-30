@@ -44,36 +44,48 @@ mqi:
   # Time between retries in milliseconds, default is 1000
   tempo-retry-ms: 2000
   
-## Data Lifecycle Trigger config
-#data-lifecycle-trigger:
-#  # java regex pattern matching OBS keys which should be marked as 'persistent in uncompressed storage' in data lifecycle metadata index
-#  pattern-persistent-in-uncompressed-storage: "a^"
-#  # java regex pattern matching OBS keys which should be marked as 'persistent in compressed storage' in data lifecycle metadata index
-#  pattern-persistent-in-compressed-storage: "a^"
-#  # java regex pattern matching OBS keys which should be marked as 'available in LTA' in data lifecycle metadata index
-#  pattern-available-in-lta: "a^"
-#  product-categories:
-#    ingestion-event:
-#      # (fixed delay) Period in milliseconds between 2 polls of next message
-#      fixed-delay-ms: 500                
-#      # Initial delay in milliseconds before starting consuming message                         
-#      init-delay-poll-ms: 2000                                    
-#    production-event:
-#      # (fixed delay) Period in milliseconds between 2 polls of next message
-#      fixed-delay-ms: 500                  
-#      # Initial delay in milliseconds before starting consuming message                       
-#      init-delay-poll-ms: 2000                                    
-#    compressed-products:
-#      # (fixed delay) Period in milliseconds between 2 polls of next message
-#      fixed-delay-ms: 500
-#      # Initial delay in milliseconds before starting consuming message 
-#      init-delay-poll-ms: 2000
-#    lta-download-event:
-#      # (fixed delay) Period in milliseconds between 2 polls of next message
-#      fixed-delay-ms: 500
-#      # Initial delay in milliseconds before starting consuming message 
-#      init-delay-poll-ms: 2000
-#  # Retention policies (file name pattern and retention time in days) per product family
+# Data Lifecycle Trigger config
+data-lifecycle-trigger:
+  # java regex pattern matching OBS keys which should be marked as 'persistent in uncompressed storage' in data lifecycle metadata index
+  pattern-persistent-in-uncompressed-storage: "a^"
+  # java regex pattern matching OBS keys which should be marked as 'persistent in compressed storage' in data lifecycle metadata index
+  pattern-persistent-in-compressed-storage: "a^"
+  # java regex pattern matching OBS keys which should be marked as 'available in LTA' in data lifecycle metadata index
+  pattern-available-in-lta: "a^"
+  # Kafka topic to send eviction jobs to the eviction management worker
+  eviction-topic: t-pdgs-eviction-management-jobs
+  # Kafka topic to send data request jobs to the data request worker
+  data-request-topic: t-pdgs-data-request-jobs
+  # how long to wait to allow the next data request on the same product, defaults to 1200s
+  data-request-cooldown-in-sec: 1200
+  # Product categories
+  product-categories:
+    ingestion-event:
+      # (fixed delay) Period in milliseconds between 2 polls of next message
+      fixed-delay-ms: 500
+      # Initial delay in milliseconds before starting consuming message                         
+      init-delay-poll-ms: 2000
+    production-event:
+      # (fixed delay) Period in milliseconds between 2 polls of next message
+      fixed-delay-ms: 500
+      # Initial delay in milliseconds before starting consuming message                       
+      init-delay-poll-ms: 2000
+    compressed-products:
+      # (fixed delay) Period in milliseconds between 2 polls of next message
+      fixed-delay-ms: 500
+      # Initial delay in milliseconds before starting consuming message 
+      init-delay-poll-ms: 2000
+    lta-download-event:
+      # (fixed delay) Period in milliseconds between 2 polls of next message
+      fixed-delay-ms: 500
+      # Initial delay in milliseconds before starting consuming message 
+      init-delay-poll-ms: 2000
+    eviction-event:
+      # (fixed delay) Period in milliseconds between 2 polls of next message
+      fixed-delay-ms: 500
+      # Initial delay in milliseconds before starting consuming message 
+      init-delay-poll-ms: 2000
+  # Retention policies (file name pattern and retention time in days) per product family
 #  retention-policies:
 #    - productFamily: ${retention_productfamily_1}
 #      filePattern: ${retention_filepattern_1}
