@@ -14,6 +14,7 @@ import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.filter.PositiveFileSizeFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingInput;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingOutput;
@@ -76,12 +77,12 @@ public final class Inbox {
 			if(inboxAdapter instanceof SupportsProductFamily) {
 				pollingRun = PollingRun.newInstance(
 						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, family),
-						inboxAdapter.read(InboxFilter.ALLOW_ALL), stationRetentionTime
+						inboxAdapter.read(new PositiveFileSizeFilter()), stationRetentionTime
 				);
 			} else {
 				pollingRun = PollingRun.newInstanceWithoutProductFamily( // omitting product family comparison S1PRO-2395
 						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
-						inboxAdapter.read(InboxFilter.ALLOW_ALL), stationRetentionTime
+						inboxAdapter.read(new PositiveFileSizeFilter()), stationRetentionTime
 				);
 			}
 
