@@ -965,7 +965,7 @@ paths:
           type: boolean
       - name: pageSize
         in: query
-        description: Number of processings returned per page (default is unlimited)
+        description: Number of products returned per page (default is 1000)
         required: false
         style: form
         schema:
@@ -2037,7 +2037,9 @@ components:
           description: flag if product is persisted in uncompressed storage
         evictionTimeInUncompressedStorage: 
           type: string
-          description: date when the product is evicted from uncompressed storage
+          description: date when the product is evicted from uncompressed storage. 
+            If this is set to 'null' it means there is no systematic retention policy configured
+            If this is set to a date very far in the future, it means it has been frozen by an operator
           format: date-time
         productFamilyInUncompressedStorage:
           type: string
@@ -2051,6 +2053,8 @@ components:
         evictionTimeInCompressedStorage: 
           type: string
           description: date when the product is evicted from compressed storage
+            If this is set to 'null' it means there is no systematic retention policy configured
+            If this is set to a date very far in the future, it means it has been frozen by an operator
           format: date-time  
         productFamilyInCompressedStorage:
           type: string
