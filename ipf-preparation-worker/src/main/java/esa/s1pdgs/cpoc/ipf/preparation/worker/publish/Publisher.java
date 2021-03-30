@@ -192,20 +192,22 @@ public class Publisher {
 		// kafka topic
 		final String inputKey = job.getPrepJobMessage().getInputKey();
 		
-		for (final LatenessConfig config : prepperSettings.getLatenessConfig()) {
-			if (config.getInputTopic().equals(inputKey)) {
-				LOGGER.debug("Found {} for job {}", config, job.getId());
-				final LocalDateTime endTime = DateUtils.parse(job.getStopTime());
-				final LocalDateTime timeoutAt = endTime.plus(config.getLateAfterMilliseconds(), ChronoUnit.MILLIS);
-				
-				// is request late?
-				if (LocalDateTime.now().isAfter(timeoutAt)) {
-					LOGGER.info("job {} is late at {} and will be handled with a low priority", 
-							job.getId(), DateUtils.formatToMetadataDateTimeFormat(timeoutAt));
-					return config.getLateTopic();
+		if (prepperSettings.isLateTopicActive()) {
+			for (final LatenessConfig config : prepperSettings.getLatenessConfig()) {
+				if (config.getInputTopic().equals(inputKey)) {
+					LOGGER.debug("Found {} for job {}", config, job.getId());
+					final LocalDateTime endTime = DateUtils.parse(job.getStopTime());
+					final LocalDateTime timeoutAt = endTime.plus(config.getLateAfterMilliseconds(), ChronoUnit.MILLIS);
+					
+					// is request late?
+					if (LocalDateTime.now().isAfter(timeoutAt)) {
+						LOGGER.info("job {} is late at {} and will be handled with a low priority", 
+								job.getId(), DateUtils.formatToMetadataDateTimeFormat(timeoutAt));
+						return config.getLateTopic();
+					}
 				}
-			}
-		}		
+			}	
+		}
 		return inputKey;
 	}
 }
