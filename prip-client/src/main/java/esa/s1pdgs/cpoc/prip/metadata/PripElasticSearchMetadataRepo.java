@@ -96,10 +96,12 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 						final String reason = failure.reason();
 						LOGGER.error(reason);
 					}
+					throw new RuntimeException("could not save PRIP metadata");
 				}
 			}
 		} catch (final IOException e) {
 			LOGGER.error("could not save PRIP metadata", e);
+			throw new RuntimeException("could not save PRIP metadata", e);
 		}
 	}
 
