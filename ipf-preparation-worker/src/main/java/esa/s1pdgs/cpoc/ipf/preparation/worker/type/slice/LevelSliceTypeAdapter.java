@@ -114,6 +114,10 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			
 			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(job.getProduct());
 			
+			final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(taskTableAdapter.taskTable());	
+			
+			boolean foundAux = false;
+						
 			for (final TaskTableInputAlternative alternative : ttInput.getInput().getAlternatives()) {		
 				final SearchMetadataQuery query = taskTableAdapter.metadataSearchQueryFor(alternative);
 								
@@ -136,9 +140,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 								3, // TODO /FIXME make configurable
 								5000L // TODO /FIXME make configurable
 						);
-						final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(
-								taskTableAdapter.taskTable()
-						);							
+									
 						if (!queryResults.isEmpty()) {									
 							final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
 							preselected.setTaskTableInputReference(ttInput.getReference());
@@ -158,20 +160,8 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 							preselected.setFiles(files);	
 							LOGGER.debug("Adding preselected inputs: {}", preselected);
 							product.preselectedInputs(Collections.singletonList(preselected));	
+							foundAux = true;
 							break; // don't query any further
-						}
-						// make the timeout check here becaues here we still got the TaskTableInput
-						else if (!timeoutChecker.isTimeoutExpiredFor(job, ttInput.getInput())) {
-							LOGGER.debug("Waiting for timeout on {}", ttInput.getInput());
-							throw new IpfPrepWorkerInputsMissingException(
-									Collections.singletonMap(
-											ttInput.getReference() + " is missing", 
-											ttInput.getInput().toLogMessage()
-									)
-							);
-						}
-						else {
-							LOGGER.debug("Timeout on {}", ttInput.getInput());
 						}
 					}
 					else {
@@ -181,7 +171,18 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 					LOGGER.error(e);
 					throw new IpfPrepWorkerInputsMissingException(Collections.emptyMap());
 				}
-			}			
+			}	
+			// S1PRO-2600: check timeout AFTER querying all alternatives...
+			// make the timeout check here because here we still got the TaskTableInput
+			if (!foundAux && !timeoutChecker.isTimeoutExpiredFor(job, ttInput.getInput())) {
+				LOGGER.debug("Waiting for timeout on {}", ttInput.getInput());
+				throw new IpfPrepWorkerInputsMissingException(
+						Collections.singletonMap(
+								ttInput.getReference() + " is missing", 
+								ttInput.getInput().toLogMessage()
+						)
+				);
+			}
 		}
 		return product;
 	}

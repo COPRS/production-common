@@ -153,6 +153,8 @@ public class IpfPreparationWorkerSettings {
 	private Map<ProductCategory, CategoryConfig> productCategories = new LinkedHashMap<>();
 	
 	private Map<String,String> joborderTimelinessCategoryMapping = new LinkedHashMap<>();
+	
+	private boolean lateTopicActive = false;
 
 	public Map<ProductCategory, CategoryConfig> getProductCategories() {
 		return productCategories;
@@ -597,4 +599,13 @@ public class IpfPreparationWorkerSettings {
 				+ productMode + "\", productCategories: \"" + productCategories + "\", inputWaiting: \"" + inputWaiting
 				+ "\", joborderTimelinessCategoryMapping="+joborderTimelinessCategoryMapping+"}";
 	}
+
+	public boolean isLateTopicActive() {
+		return lateTopicActive;
+	}
+
+	public void setLateTopicActive(final boolean lateTopicActive) {
+		this.lateTopicActive = lateTopicActive;
+	}
 }
+
