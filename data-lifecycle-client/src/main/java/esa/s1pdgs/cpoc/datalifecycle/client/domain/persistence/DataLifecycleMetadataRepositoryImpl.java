@@ -468,6 +468,14 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		final String productFamilyInCompressedStorage = (String) sourceAsMap.get(PRODUCT_FAMILY_IN_COMPRESSED_STORAGE.fieldName());
 		metadata.setProductFamilyInCompressedStorage(
 				(null != productFamilyInCompressedStorage) ? ProductFamily.fromValue(productFamilyInCompressedStorage) : null);
+		
+		final String lastInsertionInUncompressedStorage = (String) sourceAsMap.get(LAST_INSERTION_IN_UNCOMPRESSED_STORAGE.fieldName());
+		metadata.setLastInsertionInUncompressedStorage(
+				(null != lastInsertionInUncompressedStorage) ? DateUtils.parse(lastInsertionInUncompressedStorage) : null);
+		
+		final String lastInsertionInCompressedStorage = (String) sourceAsMap.get(LAST_INSERTION_IN_COMPRESSED_STORAGE.fieldName());
+		metadata.setLastInsertionInCompressedStorage(
+				(null != lastInsertionInCompressedStorage) ? DateUtils.parse(lastInsertionInCompressedStorage) : null);
 
 		final String lastModified = (String) sourceAsMap.get(LAST_MODIFIED.fieldName());
 		metadata.setLastModified((null != lastModified) ? DateUtils.parse(lastModified) : null);

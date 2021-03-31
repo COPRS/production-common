@@ -30,6 +30,10 @@ public class DataLifecycleMetadata {
 				DataLifecycleMetadata::getEvictionDateInUncompressedStorageAsString), //
 		EVICTION_DATE_IN_COMPRESSED_STORAGE("EvictionDateInCompressedStorage", FIELD_TYPE.DATE,
 				DataLifecycleMetadata::getEvictionDateInCompressedStorageAsString), //
+		LAST_INSERTION_IN_UNCOMPRESSED_STORAGE("LastInsertionInUncompressedStorage", FIELD_TYPE.DATE, //
+				DataLifecycleMetadata::getLastInsertionInUncompressedStorageAsString),
+		LAST_INSERTION_IN_COMPRESSED_STORAGE("LastInsertionInCompressedStorage", FIELD_TYPE.DATE, //
+				DataLifecycleMetadata::getLastInsertionInCompressedStorageAsString),
 		PERSISTENT_IN_UNCOMPRESSED_STORAGE("PersistentInUncompressedStorage", FIELD_TYPE.BOOLEAN,
 				DataLifecycleMetadata::getPersistentInUncompressedStorage), //
 		PERSISTENT_IN_COMPRESSED_STORAGE("PersistentInCompressedStorage", FIELD_TYPE.BOOLEAN,
@@ -87,6 +91,12 @@ public class DataLifecycleMetadata {
 			if (EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName.equals(fieldName)) {
 				return EVICTION_DATE_IN_COMPRESSED_STORAGE;
 			}
+			if (LAST_INSERTION_IN_UNCOMPRESSED_STORAGE.fieldName.equals(fieldName)) {
+				return LAST_INSERTION_IN_UNCOMPRESSED_STORAGE;
+			}
+			if (LAST_INSERTION_IN_COMPRESSED_STORAGE.fieldName.equals(fieldName)) {
+				return LAST_INSERTION_IN_COMPRESSED_STORAGE;
+			}
 			if (PERSISTENT_IN_UNCOMPRESSED_STORAGE.fieldName.equals(fieldName)) {
 				return PERSISTENT_IN_UNCOMPRESSED_STORAGE;
 			}
@@ -130,7 +140,11 @@ public class DataLifecycleMetadata {
 	private Boolean persistentInUncompressedStorage;
 	
 	private Boolean persistentInCompressedStorage;
-	
+
+	private LocalDateTime lastInsertionInUncompressedStorage; // the time when the path was inserted in the data lifecycle index (not in OBS)
+
+	private LocalDateTime lastInsertionInCompressedStorage; // the time when the path was inserted in the data lifecycle index (not in OBS)
+
 	private Boolean availableInLta;
 	
 	private LocalDateTime lastModified;
@@ -148,7 +162,8 @@ public class DataLifecycleMetadata {
 	public int hashCode() {
 		return Objects.hash(this.productName, this.productFamilyInUncompressedStorage, this.productFamilyInCompressedStorage, this.pathInUncompressedStorage,
 				this.pathInCompressedStorage, this.evictionDateInUncompressedStorage, this.evictionDateInCompressedStorage,
-				this.persistentInUncompressedStorage, this.persistentInCompressedStorage, this.availableInLta, this.lastModified, this.getLastDataRequest());
+				this.lastInsertionInUncompressedStorage, this.lastInsertionInCompressedStorage, this.persistentInUncompressedStorage,
+				this.persistentInCompressedStorage, this.availableInLta, this.lastModified, this.lastDataRequest);
 	}
 	
 	@Override
@@ -171,6 +186,8 @@ public class DataLifecycleMetadata {
 				&& Objects.equals(this.pathInCompressedStorage, other.pathInCompressedStorage)
 				&& Objects.equals(this.evictionDateInUncompressedStorage, other.evictionDateInUncompressedStorage)
 				&& Objects.equals(this.evictionDateInCompressedStorage, other.evictionDateInCompressedStorage)
+				&& Objects.equals(this.lastInsertionInUncompressedStorage, other.lastInsertionInUncompressedStorage)
+				&& Objects.equals(this.lastInsertionInCompressedStorage, other.lastInsertionInCompressedStorage)
 				&& Objects.equals(this.persistentInUncompressedStorage, other.persistentInUncompressedStorage)
 				&& Objects.equals(this.persistentInCompressedStorage, other.persistentInCompressedStorage)
 				&& Objects.equals(this.availableInLta, other.availableInLta)
@@ -325,5 +342,29 @@ public class DataLifecycleMetadata {
 	public void setLastDataRequest(LocalDateTime lastDataRequest) {
 		this.lastDataRequest = lastDataRequest;
 	}
-	
+
+	public LocalDateTime getLastInsertionInUncompressedStorage() {
+		return this.lastInsertionInUncompressedStorage;
+	}
+
+	public String getLastInsertionInUncompressedStorageAsString() {
+		return (null != this.lastInsertionInUncompressedStorage) ? DateUtils.formatToMetadataDateTimeFormat(this.lastInsertionInUncompressedStorage) : null;
+	}
+
+	public void setLastInsertionInUncompressedStorage(LocalDateTime lastInsertionInUncompressedStorage) {
+		this.lastInsertionInUncompressedStorage = lastInsertionInUncompressedStorage;
+	}
+
+	public LocalDateTime getLastInsertionInCompressedStorage() {
+		return this.lastInsertionInCompressedStorage;
+	}
+
+	public String getLastInsertionInCompressedStorageAsString() {
+		return (null != this.lastInsertionInCompressedStorage) ? DateUtils.formatToMetadataDateTimeFormat(this.lastInsertionInCompressedStorage) : null;
+	}
+
+	public void setLastInsertionInCompressedStorage(LocalDateTime lastInsertionInCompressedStorage) {
+		this.lastInsertionInCompressedStorage = lastInsertionInCompressedStorage;
+	}
+
 }

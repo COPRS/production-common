@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +38,13 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class DataLifecycleTriggerListener<E extends AbstractMessage> implements MqiListener<E> {
 	private static final Logger LOG = LogManager.getLogger(DataLifecycleTriggerListener.class);
+
+	private static final List<Class<? extends AbstractMessage>> UPDATE_INSERTIONTIME_ON = Arrays.asList(
+			ProductCategory.INGESTION_EVENT.getDtoClass(), //
+			ProductCategory.COMPRESSED_PRODUCTS.getDtoClass(), //
+			ProductCategory.PRODUCTION_EVENT.getDtoClass(), //
+			ProductCategory.LTA_DOWNLOAD_EVENT.getDtoClass() //
+	);
 
 	private final ErrorRepoAppender errorRepoAppender;
 	private final ProcessConfiguration processConfig;
@@ -143,6 +151,10 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			metadata.setPersistentInCompressedStorage(this.isPersistentInCompressedStorage(obsKey));
 			metadata.setProductFamilyInCompressedStorage(inputEvent.getProductFamily());
 
+			if (needsInsertionTimeUpdate(inputEvent)) {
+				metadata.setLastInsertionInCompressedStorage(LocalDateTime.now(ZoneId.of("UTC")));
+			}
+
 			LOG.debug(String.format("%s lifecycle metadata with information for compressed storage: %s",
 					(oExistingMetadata.isPresent() ? "updating" : "creating"), metadata));
 		} else {
@@ -150,6 +162,10 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			metadata.setPathInUncompressedStorage(obsKey);
 			metadata.setPersistentInUncompressedStorage(this.isPersistentInUncompressedStorage(obsKey));
 			metadata.setProductFamilyInUncompressedStorage(inputEvent.getProductFamily());
+
+			if (needsInsertionTimeUpdate(inputEvent)) {
+				metadata.setLastInsertionInUncompressedStorage(LocalDateTime.now(ZoneId.of("UTC")));
+			}
 
 			LOG.debug(String.format("%s lifecycle metadata with information for uncompressed storage: %s",
 					(oExistingMetadata.isPresent() ? "updating" : "creating"), metadata));
@@ -253,5 +269,17 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		return (null != this.persistentInCompressedStoragePattern) && (null != obsKey)
 				&& this.persistentInCompressedStoragePattern.matcher(obsKey).matches();
 	}
-	
+
+	private static <E extends AbstractMessage> boolean needsInsertionTimeUpdate(final E event) {
+		final Class<? extends AbstractMessage> eventClass = event.getClass();
+
+		for (final Class<? extends AbstractMessage> updateClazz : UPDATE_INSERTIONTIME_ON) {
+			if (updateClazz.isInstance(eventClass)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 }
