@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 @Configuration
 @ConfigurationProperties("data-lifecycle-trigger")
@@ -84,6 +85,8 @@ public class DataLifecycleTriggerConfigurationProperties {
 	
 	private List<RetentionPolicy> retentionPolicies = new ArrayList<>();
 	
+	private Map<ProductFamily, Integer> shorteningEvictionTimeAfterCompression = new LinkedHashMap<>();
+	
 	// regular expressions in Java format
 	private String patternPersistentInUncompressedStorage;
 	private String patternPersistentInCompressedStorage;
@@ -98,7 +101,8 @@ public class DataLifecycleTriggerConfigurationProperties {
 	
 	@Override
 	public String toString() {
-		return String.format("DataLifecycleTriggerConfigurationProperties [productCategories=%s, retentionPolicies=%s]", productCategories, retentionPolicies);
+		return String.format("DataLifecycleTriggerConfigurationProperties [productCategories=%s, retentionPolicies=%s, shorteningEvictionTimeAfterCompression=%s]",
+				productCategories, retentionPolicies, shorteningEvictionTimeAfterCompression);
 	}
 	
 	// --------------------------------------------------------------------------
@@ -117,6 +121,14 @@ public class DataLifecycleTriggerConfigurationProperties {
 
 	public void setRetentionPolicies(List<RetentionPolicy> retentionPolicies) {
 		this.retentionPolicies = retentionPolicies;
+	}
+	
+	public Map<ProductFamily, Integer> getShorteningEvictionTimeAfterCompression() {
+		return shorteningEvictionTimeAfterCompression;
+	}
+
+	public void setShorteningEvictionTimeAfterCompression(Map<ProductFamily, Integer> shortingEvictionTimeAfterCompression) {
+		this.shorteningEvictionTimeAfterCompression = shortingEvictionTimeAfterCompression;
 	}
 
 	public String getPatternPersistentInUncompressedStorage() {

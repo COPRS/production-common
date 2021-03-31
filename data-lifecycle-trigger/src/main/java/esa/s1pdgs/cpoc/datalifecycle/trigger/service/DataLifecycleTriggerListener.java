@@ -6,7 +6,9 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -16,7 +18,9 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.RetentionPolicy;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
@@ -49,6 +53,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	private final ErrorRepoAppender errorRepoAppender;
 	private final ProcessConfiguration processConfig;
 	private final List<RetentionPolicy> retentionPolicies;
+	private final Map<ProductFamily, Integer> shortingEvictionTimeAfterCompression;
 	private final DataLifecycleMetadataRepository metadataRepo;
 	private final Pattern persistentInUncompressedStoragePattern;
 	private final Pattern persistentInCompressedStoragePattern;
@@ -58,6 +63,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			final ErrorRepoAppender errorRepoAppender,
 			final ProcessConfiguration processConfig, 
 			final List<RetentionPolicy> retentionPolicies,
+			final Map<ProductFamily, Integer> shortingEvictionTimeAfterCompression,
 			final DataLifecycleMetadataRepository metadataRepo,
 			final String patternPersistentInUncompressedStorage,
 			final String patternPersistentInCompressedStorage,
@@ -74,6 +80,27 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 				? Pattern.compile(patternPersistentInCompressedStorage)
 				: null;
 		this.availableInLtaPattern = null != patternAvailableInLta ? Pattern.compile(patternAvailableInLta) : null;
+		this.shortingEvictionTimeAfterCompression = null != shortingEvictionTimeAfterCompression ? shortingEvictionTimeAfterCompression
+				: Collections.emptyMap();
+
+		// validate eviction time shortening configuration
+		final Iterator<Map.Entry<ProductFamily, Integer>> iter = this.shortingEvictionTimeAfterCompression.entrySet().iterator();
+		while (iter.hasNext()) {
+			final Map.Entry<ProductFamily, Integer> entry = iter.next();
+			final ProductFamily productFamily = entry.getKey();
+			final Integer evictTimeOffset = entry.getValue();
+
+			if (null == productFamily || !productFamily.isCompressed()) {
+				LOG.warn(String.format("eviction time shortening configuration for %s is invalid and will be ignored: only compressed product families allowed",
+						productFamily));
+				iter.remove();
+			} else if (null == evictTimeOffset || evictTimeOffset < 0) {
+				LOG.warn(String.format(
+						"eviction time shortening configuration for %s is invalid (offset value: %s) and will be ignored: only values > 0 allowed",
+						productFamily, evictTimeOffset));
+				iter.remove();
+			}
+		}
 	}
 	
 	// --------------------------------------------------------------------------
@@ -125,8 +152,10 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		
 		final String fileName = this.getFileName(obsKey);
 		final String productName = this.getProductName(obsKey);
-		final boolean isCompressedStorage = inputEvent.getProductFamily().isCompressed();
-		
+		final ProductFamily productFamily = inputEvent.getProductFamily();
+		final boolean isCompressedStorage = productFamily.isCompressed();
+		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+
 		final Optional<DataLifecycleMetadata> oExistingMetadata;
 		try {
 			oExistingMetadata = this.metadataRepo.findByProductName(productName);
@@ -134,9 +163,8 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			LOG.error("error searching data lifecycle metadata by product name: " + LogUtils.toString(e), e);
 			throw e;
 		}
-		
-		final Date evictionDate = this.calculateEvictionDate(this.retentionPolicies, inputEvent.getCreationDate(),
-				inputEvent.getProductFamily(), fileName);
+
+		final Date evictionDate = this.calculateEvictionDate(this.retentionPolicies, inputEvent.getCreationDate(), productFamily, fileName);
 		LocalDateTime evictionDateTime = null;
 		if (null != evictionDate) {
 			evictionDateTime = LocalDateTime.ofInstant(evictionDate.toInstant(), ZoneId.of("UTC"));
@@ -149,10 +177,36 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			metadata.setEvictionDateInCompressedStorage(evictionDateTime);
 			metadata.setPathInCompressedStorage(obsKey);
 			metadata.setPersistentInCompressedStorage(this.isPersistentInCompressedStorage(obsKey));
-			metadata.setProductFamilyInCompressedStorage(inputEvent.getProductFamily());
+			metadata.setProductFamilyInCompressedStorage(productFamily);
 
 			if (needsInsertionTimeUpdate(inputEvent)) {
-				metadata.setLastInsertionInCompressedStorage(LocalDateTime.now(ZoneId.of("UTC")));
+				metadata.setLastInsertionInCompressedStorage(now);
+			}
+
+			if (needsEvictionTimeShorteningInUncompressedStorage(inputEvent)) {
+				final Integer evictionTimeOffsetInHours = this.shortingEvictionTimeAfterCompression.get(productFamily);
+				final LocalDateTime shortenedEvictionDate = now.plusHours(evictionTimeOffsetInHours);
+				final LocalDateTime evictionDateInUncompressedStorage = metadata.getEvictionDateInUncompressedStorage();
+
+				if (StringUtil.isBlank(metadata.getPathInUncompressedStorage())) {
+					LOG.debug(String.format("skip shortening eviction date in uncompressed storage after compression: no path in uncompressed storage for %s",
+							productName));
+				} else if (null == evictionDateInUncompressedStorage || evictionDateInUncompressedStorage.plusYears(1000).isBefore(now)) {
+					LOG.debug(String.format(
+							"skip shortening eviction date in uncompressed storage after compression: %s is freezed in uncompressed storage, eviction date %s",
+							productName,
+							(null != evictionDateInUncompressedStorage ? DateUtils.formatToMetadataDateTimeFormat(evictionDateInUncompressedStorage)
+									: "null")));
+				} else if (evictionDateInUncompressedStorage.isBefore(shortenedEvictionDate)) {
+					LOG.debug(String.format(
+							"skip shortening eviction date in uncompressed storage after compression: eviction date of %s in uncompressed storage is already shorter (%s < %s)",
+							productName,
+							(null != evictionDateInUncompressedStorage ? DateUtils.formatToMetadataDateTimeFormat(evictionDateInUncompressedStorage) : "null"),
+							DateUtils.formatToMetadataDateTimeFormat(shortenedEvictionDate)));
+				} else {
+					metadata.setEvictionDateInUncompressedStorage(shortenedEvictionDate);
+					LOG.info("shortening eviction date in uncompressed storage after compression of %s to %s", productName, shortenedEvictionDate);
+				}
 			}
 
 			LOG.debug(String.format("%s lifecycle metadata with information for compressed storage: %s",
@@ -161,10 +215,10 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			metadata.setEvictionDateInUncompressedStorage(evictionDateTime);
 			metadata.setPathInUncompressedStorage(obsKey);
 			metadata.setPersistentInUncompressedStorage(this.isPersistentInUncompressedStorage(obsKey));
-			metadata.setProductFamilyInUncompressedStorage(inputEvent.getProductFamily());
+			metadata.setProductFamilyInUncompressedStorage(productFamily);
 
 			if (needsInsertionTimeUpdate(inputEvent)) {
-				metadata.setLastInsertionInUncompressedStorage(LocalDateTime.now(ZoneId.of("UTC")));
+				metadata.setLastInsertionInUncompressedStorage(now);
 			}
 
 			LOG.debug(String.format("%s lifecycle metadata with information for uncompressed storage: %s",
@@ -176,7 +230,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		try {
 			this.metadataRepo.save(metadata);
 		} catch (DataLifecycleMetadataRepositoryException e) {
-			LOG.error("error saving data lifecycle metadata for " + inputEvent.getProductFamily().name() + ": "
+			LOG.error("error saving data lifecycle metadata for " + productFamily.name() + ": "
 					+ fileName + ": " + LogUtils.toString(e), e);
 			throw e;
 		}
@@ -280,6 +334,11 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		}
 
 		return false;
+	}
+
+	private static <E extends AbstractMessage> boolean needsEvictionTimeShorteningInUncompressedStorage(final E event) {
+		// when compression event + compressed product family
+		return ProductCategory.COMPRESSED_PRODUCTS.getDtoClass().isInstance(event.getClass()) && event.getProductFamily().isCompressed();
 	}
 
 }

@@ -97,7 +97,7 @@ public class DataLifecycleTriggerListenerTest {
 		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
 		final String obsKey = "L20191204153633245000201/DCS_02_L20191204153633245000201_ch2_DSDB_00027.raw";
 		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
+		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, null, this.metadataRepoMock, null, null, null);
 		final Date evictionDate = dtl.calculateEvictionDate(retentionPolicies, creationDate, ProductFamily.EDRS_SESSION,
 				dtl.getFileName(obsKey));
 		Assert.assertEquals(Instant.parse("2000-01-05T00:00:00.00z"), evictionDate.toInstant());
