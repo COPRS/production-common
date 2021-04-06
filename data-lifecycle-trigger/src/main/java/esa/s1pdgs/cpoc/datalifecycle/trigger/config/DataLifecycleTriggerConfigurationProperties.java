@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.RetentionPolicy;
 
 @Configuration
 @ConfigurationProperties("data-lifecycle-trigger")
@@ -39,43 +40,6 @@ public class DataLifecycleTriggerConfigurationProperties {
 		@Override
 		public String toString() {
 			return "CategoryConfig [fixedDelayMs=" + fixedDelayMs + ", initDelayPolMs=" + initDelayPolMs + "]";
-		}
-	}
-	
-	public static class RetentionPolicy {
-
-		private String productFamily;
-		private String filePattern;
-		private int retentionTimeDays = -1;
-
-		public String getProductFamily() {
-			return productFamily;
-		}
-
-		public void setProductFamily(String productFamily) {
-			this.productFamily = productFamily;
-		}
-
-		public String getFilePattern() {
-			return filePattern;
-		}
-
-		public void setFilePattern(String filePattern) {
-			this.filePattern = filePattern;
-		}
-
-		public int getRetentionTimeDays() {
-			return this.retentionTimeDays;
-		}
-
-		public void setRetentionTimeDays(int retentionTimeDays) {
-			this.retentionTimeDays = retentionTimeDays;
-		}
-
-		@Override
-		public String toString() {
-			return String.format("RetentionPolicy [productFamily=%s, filePattern=%s, retentionTimeDays=%s]",
-					productFamily, filePattern, retentionTimeDays);
 		}
 	}
 	

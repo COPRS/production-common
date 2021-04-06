@@ -20,9 +20,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.RetentionPolicy;
 import esa.s1pdgs.cpoc.datalifecycle.client.DataLifecycleClientUtil;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.RetentionPolicy;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
@@ -164,7 +164,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			throw e;
 		}
 
-		final Date evictionDate = this.calculateEvictionDate(this.retentionPolicies, inputEvent.getCreationDate(), productFamily, fileName);
+		final Date evictionDate = DataLifecycleClientUtil.calculateEvictionDate(this.retentionPolicies, inputEvent.getCreationDate(), productFamily, fileName);
 		LocalDateTime evictionDateTime = null;
 		if (null != evictionDate) {
 			evictionDateTime = LocalDateTime.ofInstant(evictionDate.toInstant(), ZoneId.of("UTC"));
@@ -275,28 +275,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		}
 	}
 
-	final Date calculateEvictionDate(
-			final List<RetentionPolicy> retentionPolicies, 
-			final Date creationDate, 
-			final ProductFamily productFamily,
-			final String fileName
-	) {
-		for (final RetentionPolicy r : retentionPolicies) {
-
-			if (r.getProductFamily().equals(productFamily.name()) && Pattern.matches(r.getFilePattern(), fileName)) {
-				if (r.getRetentionTimeDays() > 0) {
-					LOG.info("retention time is {} days for file: {}", r.getRetentionTimeDays(), fileName);
-					return Date.from(creationDate.toInstant().plus(Period.ofDays(r.getRetentionTimeDays())));
-				} else {
-					LOG.info("retention time is unlimited for file: {}", fileName);
-					return null;
-				}
-			}
-		}
-		LOG.warn("no retention time found for file: {}", fileName);
-		return null;
-	}
-	
 	boolean isAvailableInLta(final String obsKey) {
 		return (null != this.availableInLtaPattern) && (null != obsKey)
 				&& this.availableInLtaPattern.matcher(obsKey).matches();
