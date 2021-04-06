@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,6 +21,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.RetentionPolicy;
+import esa.s1pdgs.cpoc.datalifecycle.client.DataLifecycleClientUtil;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
@@ -150,8 +150,8 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		final E inputEvent = inputMessage.getBody();
 		final String obsKey = inputEvent.getKeyObjectStorage();
 		
-		final String fileName = this.getFileName(obsKey);
-		final String productName = this.getProductName(obsKey);
+		final String fileName = DataLifecycleClientUtil.getFileName(obsKey);
+		final String productName = DataLifecycleClientUtil.getProductName(obsKey);
 		final ProductFamily productFamily = inputEvent.getProductFamily();
 		final boolean isCompressedStorage = productFamily.isCompressed();
 		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
@@ -239,7 +239,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	/* Removing storage path from data lifecycle metadata after eviction of product */
 	private void updateEvictedMetadata(final EvictionEvent inputEvent) throws DataLifecycleTriggerInternalServerErrorException {
 		final String obsKey = inputEvent.getKeyObjectStorage();
-		final String productName = this.getProductName(obsKey);
+		final String productName = DataLifecycleClientUtil.getProductName(obsKey);
 		final boolean isCompressedStorage = inputEvent.getProductFamily().isCompressed();
 
 		final Optional<DataLifecycleMetadata> oExistingMetadata;
@@ -295,18 +295,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		}
 		LOG.warn("no retention time found for file: {}", fileName);
 		return null;
-	}
-	
-	String getFileName(final String obsKey) {
-		return FilenameUtils.getName(obsKey);
-	}
-	
-	String getProductName(final String obsKey) {
-		if (FilenameUtils.getExtension(obsKey).equalsIgnoreCase("ZIP")) {
-			return FilenameUtils.getBaseName(obsKey);
-		}else {
-			return FilenameUtils.getName(obsKey);
-		}
 	}
 	
 	boolean isAvailableInLta(final String obsKey) {
