@@ -182,11 +182,11 @@ public class DataLifecycleSyncService {
 			metadata.setProductName(productName);
 
 			Date now = new Date();
-			LocalDateTime insertionDate = LocalDateTime.ofInstant(now.toInstant(), ZoneId.of("UTC"));
+			LocalDateTime insertionDate = LocalDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
 			Date calculatedEvictionDate = DataLifecycleClientUtil
 					.calculateEvictionDate(lifecycleSyncConfig.getRetentionPolicies(), now, family, fileName);
 			LocalDateTime evictionDate = (calculatedEvictionDate != null)
-					? LocalDateTime.ofInstant(calculatedEvictionDate.toInstant(), ZoneId.of("UTC"))
+					? LocalDateTime.ofInstant(calculatedEvictionDate.toInstant(), ZoneId.systemDefault())
 					: null;
 
 			if (family.isCompressed()) {
