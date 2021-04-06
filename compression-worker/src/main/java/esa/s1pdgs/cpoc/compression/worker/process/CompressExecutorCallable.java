@@ -105,6 +105,10 @@ public class CompressExecutorCallable implements Callable<Void> {
 			}
 		}        
 
+        if (r != 0) {
+        	throw new InternalErrorException("Exit code of compression/uncompression script != 0: " + r);
+        }
+        
         return new TaskResult(binaryPath, r);
     }
 	
