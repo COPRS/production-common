@@ -61,6 +61,29 @@ public class ValidationRestController {
 				Date.from(lEnd.atZone(ZoneId.systemDefault()).toInstant()));
 
 	}
+	
+	@Async
+	@RequestMapping(method = RequestMethod.POST, path = "/syncDataLifecycleIndexWithOBS")
+	public void syncDataLifecycleIndexWithOBS (
+			@RequestParam(value = "startDate", required = true) final String startDate,
+			@RequestParam(value = "endDate", required = true) final String endDate) {
+		
+		LOGGER.info("Received sync request for synchronisation of Datalifecycle Index with OBS");		
+
+		assertValidDateTimeString("startDate", startDate, false);
+		assertValidDateTimeString("endDate", endDate, false);
+		
+		LocalDateTime lStart = convertDateTime(startDate);
+		LocalDateTime lEnd = convertDateTime(endDate);
+		
+		if (lStart.isAfter(lEnd)) {
+			throw new ValidationRestControllerException(
+					String.format("startDate %s is after endDate %s", startDate, endDate),
+					HttpStatus.BAD_REQUEST);
+		}
+		//TODO:		syncService.syncDataLifecycleIndexWithOBS()
+
+	}
 
 	private void assertValidDateTimeString(final String attributeName, final String dateTimeAsString,
 			boolean optional) {

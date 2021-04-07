@@ -92,7 +92,6 @@ public class DataLifecycleSyncService {
 
 		} else {
 			final String endSyncMsg = String.format("End of synchronisation with errors, stats: %s", stats);
-			;
 			reporting.error(new ReportingMessage(endSyncMsg));
 			LOG.warn(endSyncMsg);
 		}
