@@ -5,6 +5,13 @@ OUTPUT=$2
 
 echo "Compressing ${INPUT} to ${OUTPUT}"
 7za a -tzip ${OUTPUT} ./${INPUT}
+result=$?
 
-echo "Compression script done."
-exit 0
+if [ ${result} -eq 0 ]
+then
+  echo "Compression script done."
+  exit ${result}
+else
+  echo "Error during compression script excecution." >&2
+  exit ${result}
+fi

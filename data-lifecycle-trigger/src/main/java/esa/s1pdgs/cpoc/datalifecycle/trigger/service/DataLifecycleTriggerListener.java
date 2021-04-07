@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
@@ -183,7 +182,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 				metadata.setLastInsertionInCompressedStorage(now);
 			}
 
-			if (needsEvictionTimeShorteningInUncompressedStorage(inputEvent)) {
+			if (needsEvictionTimeShorteningInUncompressedStorage(inputEvent, this.shortingEvictionTimeAfterCompression)) {
 				final Integer evictionTimeOffsetInHours = this.shortingEvictionTimeAfterCompression.get(productFamily);
 				final LocalDateTime shortenedEvictionDate = now.plusHours(evictionTimeOffsetInHours);
 				final LocalDateTime evictionDateInUncompressedStorage = metadata.getEvictionDateInUncompressedStorage();
@@ -290,11 +289,9 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 				&& this.persistentInCompressedStoragePattern.matcher(obsKey).matches();
 	}
 
-	private static <E extends AbstractMessage> boolean needsInsertionTimeUpdate(final E event) {
-		final Class<? extends AbstractMessage> eventClass = event.getClass();
-
+	static <E extends AbstractMessage> boolean needsInsertionTimeUpdate(final E event) {
 		for (final Class<? extends AbstractMessage> updateClazz : UPDATE_INSERTIONTIME_ON) {
-			if (updateClazz.isInstance(eventClass)) {
+			if (updateClazz.isInstance(event)) {
 				return true;
 			}
 		}
@@ -302,9 +299,11 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		return false;
 	}
 
-	private static <E extends AbstractMessage> boolean needsEvictionTimeShorteningInUncompressedStorage(final E event) {
-		// when compression event + compressed product family
-		return ProductCategory.COMPRESSED_PRODUCTS.getDtoClass().isInstance(event.getClass()) && event.getProductFamily().isCompressed();
+	static <E extends AbstractMessage> boolean needsEvictionTimeShorteningInUncompressedStorage(final E event,
+			final Map<ProductFamily, Integer> shortingEvictionTimeAfterCompression) {
+		// when compression event + shortening configuration available
+		return ProductCategory.COMPRESSED_PRODUCTS.getDtoClass().isInstance(event)
+				&& shortingEvictionTimeAfterCompression.containsKey(event.getProductFamily());
 	}
 
 }

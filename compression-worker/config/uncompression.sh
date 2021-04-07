@@ -4,6 +4,13 @@ INPUT=$1
 
 echo "Uncompressing ${INPUT}"
 7za x ${INPUT}
+result=$?
 
-echo "Uncompression script done."
-exit 0
+if [ ${result} -eq 0 ]
+then
+  echo "Uncompression script done."
+  exit ${result}
+else
+  echo "Error during uncompression script excecution." >&2
+  exit ${result}
+fi
