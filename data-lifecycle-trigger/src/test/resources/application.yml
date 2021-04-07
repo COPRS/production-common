@@ -294,6 +294,11 @@ data-lifecycle-trigger:
 #    - productFamily: ${retention_productfamily_69}
 #      filePattern: ${retention_filepattern_69}
 #      retentionTimeDays: ${retention_time_days_69}
+#  # on compression events of the listed product families the eviction time in uncompressed storage will be shortened
+#  # to the configured amount of hours (now + hours) if the already existing eviction timestamp is not already shorter
+#  shortening-eviction-time-after-compression:
+#    l1_slice_zip: 6
+#    l1_acn_zip: 6
 
 # Application status
 status:

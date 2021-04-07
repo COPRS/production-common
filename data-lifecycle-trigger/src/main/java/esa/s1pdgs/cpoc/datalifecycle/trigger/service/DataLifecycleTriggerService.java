@@ -78,6 +78,7 @@ public class DataLifecycleTriggerService {
 				errorRepoAppender, 
 				processConfig,
 				configurationProperties.getRetentionPolicies(),
+				configurationProperties.getShorteningEvictionTimeAfterCompression(),
 				this.metadataRepo,
 				this.configurationProperties.getPatternPersistentInUncompressedStorage(),
 				this.configurationProperties.getPatternPersistentInCompressedStorage(),
