@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
@@ -122,6 +124,49 @@ public class DataLifecycleTriggerListenerTest {
 		for (final AbstractMessage event : no) {
 			Assert.assertFalse("expected " + event.getClass().getSimpleName() + " to NOT need insertion time update",
 					DataLifecycleTriggerListener.needsInsertionTimeUpdate(event));
+		}
+	}
+
+	@Test
+	public void needsEvictionTimeShorteningInUncompressedStorage() {
+		final AbstractMessage yes[] = { //
+				new CompressionEvent(ProductFamily.L1_SLICE_ZIP, null, null), //
+				new CompressionEvent(ProductFamily.L1_ACN_ZIP, null, null) //
+		};
+
+		final EvictionEvent evictionEvent1 = new EvictionEvent();
+		evictionEvent1.setProductFamily(ProductFamily.L1_SLICE);
+		final EvictionEvent evictionEvent2 = new EvictionEvent();
+		evictionEvent2.setProductFamily(ProductFamily.L1_SLICE_ZIP);
+		final LtaDownloadEvent ltaDownloadEvent1 = new LtaDownloadEvent();
+		ltaDownloadEvent1.setProductFamily(ProductFamily.L1_ACN);
+		final LtaDownloadEvent ltaDownloadEvent2 = new LtaDownloadEvent();
+		ltaDownloadEvent2.setProductFamily(ProductFamily.L1_ACN_ZIP);
+
+		final AbstractMessage no[] = { //
+				new CompressionEvent(ProductFamily.L1_SLICE, null, null), //
+				new CompressionEvent(ProductFamily.L1_ACN, null, null), //
+				new IngestionEvent(ProductFamily.L1_SLICE, null, null, 0, null, null, null), //
+				new IngestionEvent(ProductFamily.L1_SLICE_ZIP, null, null, 0, null, null, null), //
+				new ProductionEvent(null, null, ProductFamily.L1_ACN), //
+				new ProductionEvent(null, null, ProductFamily.L1_ACN_ZIP), //
+				evictionEvent1, evictionEvent2, //
+				ltaDownloadEvent1, ltaDownloadEvent2 //
+				/* and all the others */
+		};
+
+		final Map<ProductFamily, Integer> shortingEvictionTimeAfterCompression = new HashMap<>();
+		shortingEvictionTimeAfterCompression.put(ProductFamily.L1_SLICE_ZIP, 6);
+		shortingEvictionTimeAfterCompression.put(ProductFamily.L1_ACN_ZIP, 6);
+
+		for (final AbstractMessage event : yes) {
+			Assert.assertTrue("expected " + event.getClass().getSimpleName() + "[" + event.getProductFamily() + "] to need eviction time update",
+					DataLifecycleTriggerListener.needsEvictionTimeShorteningInUncompressedStorage(event, shortingEvictionTimeAfterCompression));
+		}
+
+		for (final AbstractMessage event : no) {
+			Assert.assertFalse("expected " + event.getClass().getSimpleName() + "[" + event.getProductFamily() + "] to NOT need eviction time update",
+					DataLifecycleTriggerListener.needsEvictionTimeShorteningInUncompressedStorage(event, shortingEvictionTimeAfterCompression));
 		}
 	}
 

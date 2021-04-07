@@ -182,7 +182,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 				metadata.setLastInsertionInCompressedStorage(now);
 			}
 
-			if (needsEvictionTimeShorteningInUncompressedStorage(inputEvent)) {
+			if (needsEvictionTimeShorteningInUncompressedStorage(inputEvent, this.shortingEvictionTimeAfterCompression)) {
 				final Integer evictionTimeOffsetInHours = this.shortingEvictionTimeAfterCompression.get(productFamily);
 				final LocalDateTime shortenedEvictionDate = now.plusHours(evictionTimeOffsetInHours);
 				final LocalDateTime evictionDateInUncompressedStorage = metadata.getEvictionDateInUncompressedStorage();
@@ -299,9 +299,11 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		return false;
 	}
 
-	private static <E extends AbstractMessage> boolean needsEvictionTimeShorteningInUncompressedStorage(final E event) {
-		// when compression event + compressed product family
-		return ProductCategory.COMPRESSED_PRODUCTS.getDtoClass().isInstance(event.getClass()) && event.getProductFamily().isCompressed();
+	static <E extends AbstractMessage> boolean needsEvictionTimeShorteningInUncompressedStorage(final E event,
+			final Map<ProductFamily, Integer> shortingEvictionTimeAfterCompression) {
+		// when compression event + shortening configuration available
+		return ProductCategory.COMPRESSED_PRODUCTS.getDtoClass().isInstance(event)
+				&& shortingEvictionTimeAfterCompression.containsKey(event.getProductFamily());
 	}
 
 }
