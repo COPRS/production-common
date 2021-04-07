@@ -19,7 +19,12 @@ import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.RetentionPolicy;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQueryFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.LtaDownloadEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class DataLifecycleTriggerListenerTest {
 	
@@ -31,6 +36,7 @@ public class DataLifecycleTriggerListenerTest {
 				throws DataLifecycleMetadataRepositoryException {
 			// nothing
 		}
+		@Override
 		public DataLifecycleMetadata saveAndGet(DataLifecycleMetadata metadata)
 				throws DataLifecycleMetadataRepositoryException {
 			return null;
@@ -102,5 +108,21 @@ public class DataLifecycleTriggerListenerTest {
 				DataLifecycleClientUtil.getFileName(obsKey));
 		Assert.assertEquals(Instant.parse("2000-01-05T00:00:00.00z"), evictionDate.toInstant());
 	}
-	
+
+	@Test
+	public void needsInsertionTimeUpdate() {
+		final AbstractMessage yes[] = { new IngestionEvent(), new CompressionEvent(), new ProductionEvent(), new LtaDownloadEvent() };
+		final AbstractMessage no[] = { new EvictionEvent() /* and all the others */ };
+
+		for (final AbstractMessage event : yes) {
+			Assert.assertTrue("expected " + event.getClass().getSimpleName() + " to need insertion time update",
+					DataLifecycleTriggerListener.needsInsertionTimeUpdate(event));
+		}
+
+		for (final AbstractMessage event : no) {
+			Assert.assertFalse("expected " + event.getClass().getSimpleName() + " to NOT need insertion time update",
+					DataLifecycleTriggerListener.needsInsertionTimeUpdate(event));
+		}
+	}
+
 }
