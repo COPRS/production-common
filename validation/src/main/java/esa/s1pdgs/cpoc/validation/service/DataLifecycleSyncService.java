@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import esa.s1pdgs.cpoc.datalifecycle.client.DataLifecycleClientUtil;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.RetentionPolicy;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleDateTimeFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQueryFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
@@ -77,8 +79,8 @@ public class DataLifecycleSyncService {
 		LOG.info(beginSyncMsg);
 
 		DataLifecycleSyncStats stats = new DataLifecycleSyncStats();
-
-		for (ProductFamily family : appProperties.getFamilies().keySet()) {
+		
+		for (ProductFamily family : determineFamiliesToCheck()) {
 
 			Reporting reportFamily = reporting.newReporting("SyncFamily");
 			final String beginSyncFamilyMsg = String.format("Start synchronising family %s", family);
@@ -113,6 +115,18 @@ public class DataLifecycleSyncService {
 		}
 
 		return stats;
+	}
+
+	Set<ProductFamily> determineFamiliesToCheck() {
+
+		Set<ProductFamily> families = EnumSet.noneOf(ProductFamily.class);
+
+		for (RetentionPolicy r : lifecycleSyncConfig.getRetentionPolicies()) {
+
+			families.add(ProductFamily.valueOf(r.getProductFamily()));
+		}
+
+		return families;
 	}
 
 	void syncFamily(final Date startDate, final Date endDate, ProductFamily family, final Reporting reporting,
