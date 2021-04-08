@@ -65,15 +65,27 @@ public class AspPropertiesAdapterTest {
 	public final void testTimeout_IfTimeoutReached_ShallReturnTrue() {
 		final AspPropertiesAdapter aspPropertiesAdapter = AspPropertiesAdapter.of(this.createAspProperties(false));
 
-		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
-		final String sensingEndTime = now.minusHours(WAITING_TIME_HOURS_NOMINAL_FAST + 1)
-				.format(METADATA_DATE_FORMATTER);
-		final String jobCreationTime = now.minusHours(WAITING_TIME_HOURS_NOMINAL_FAST - 1)
-				.format(METADATA_DATE_FORMATTER);
+		final LocalDateTime sensingEndTime = LocalDateTime.now(ZoneId.of("UTC"));
+		final LocalDateTime jobCreationTime = sensingEndTime.plusHours(1);
+		final LocalDateTime now = sensingEndTime.plusHours(WAITING_TIME_HOURS_NOMINAL_FAST + 1);
 
-		final AppDataJob job = this.newJobWithMetadata(jobCreationTime, sensingEndTime);
+		final AppDataJob job = this.newJobWithMetadata(jobCreationTime.format(METADATA_DATE_FORMATTER), sensingEndTime.format(METADATA_DATE_FORMATTER));
 
-		assertTrue(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime, LocalDateTime.now(ZoneId.of("UTC"))),
+		assertTrue(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime.format(METADATA_DATE_FORMATTER), now),
+				"Expected timeout to be reached!");
+	}
+
+	@Test
+	public final void testTimeout_IfMinimalNotReached_ShallReturnFalse() {
+		final AspPropertiesAdapter aspPropertiesAdapter = AspPropertiesAdapter.of(this.createAspProperties(false));
+
+		final LocalDateTime sensingEndTime = LocalDateTime.now(ZoneId.of("UTC"));
+		final LocalDateTime now = sensingEndTime.plusHours(WAITING_TIME_HOURS_NOMINAL_FAST + 1);
+		final LocalDateTime jobCreationTime = now.minusHours(WAITING_TIME_HOURS_MINIMAL_FAST - 1);
+
+		final AppDataJob job = this.newJobWithMetadata(jobCreationTime.format(METADATA_DATE_FORMATTER), sensingEndTime.format(METADATA_DATE_FORMATTER));
+
+		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime.format(METADATA_DATE_FORMATTER), now),
 				"Expected timeout to be reached!");
 	}
 
@@ -81,19 +93,44 @@ public class AspPropertiesAdapterTest {
 	public final void testTimeout_IfTimeoutNotReached_ShallReturnFalse() {
 		final AspPropertiesAdapter aspPropertiesAdapter = AspPropertiesAdapter.of(this.createAspProperties(false));
 
-		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
-		final String sensingEndTime = now
-				.minusHours(WAITING_TIME_HOURS_NOMINAL_FAST - 1)
-				.format(METADATA_DATE_FORMATTER);
-		final String jobCreationTime = now.minusHours(WAITING_TIME_HOURS_NOMINAL_FAST + 1)
-				.format(METADATA_DATE_FORMATTER);
+		final LocalDateTime sensingEndTime = LocalDateTime.now(ZoneId.of("UTC"));
+		final LocalDateTime now = sensingEndTime.plusHours(WAITING_TIME_HOURS_NOMINAL_FAST - 1);
+		final LocalDateTime jobCreationTime = now.minusHours(WAITING_TIME_HOURS_NOMINAL_FAST + 1);
 
-		final AppDataJob job = this.newJobWithMetadata(jobCreationTime, sensingEndTime);
+		final AppDataJob job = this.newJobWithMetadata(jobCreationTime.format(METADATA_DATE_FORMATTER), sensingEndTime.format(METADATA_DATE_FORMATTER));
 
-		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime, LocalDateTime.now(ZoneId.of("UTC"))),
+		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime.format(METADATA_DATE_FORMATTER), now),
 				"Expected timeout to not be reached!");
 	}
-	
+
+	@Test
+	public final void testTimeout_IfOldProductAndWithinMinimal_ShallReturnFalse() {
+		final AspPropertiesAdapter aspPropertiesAdapter = AspPropertiesAdapter.of(this.createAspProperties(false));
+
+		final LocalDateTime sensingEndTime = LocalDateTime.now(ZoneId.of("UTC")).minusHours(4378);
+		final LocalDateTime jobCreationTime = LocalDateTime.now(ZoneId.of("UTC")).minusHours(WAITING_TIME_HOURS_MINIMAL_FAST - 1);
+		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+
+		final AppDataJob job = this.newJobWithMetadata(jobCreationTime.format(METADATA_DATE_FORMATTER), sensingEndTime.format(METADATA_DATE_FORMATTER));
+
+		assertFalse(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime.format(METADATA_DATE_FORMATTER), now),
+				"Expected timeout to not be reached!");
+	}
+
+	@Test
+	public final void testTimeout_IfOldProductAndAfterMinimal_ShallReturnTrue() {
+		final AspPropertiesAdapter aspPropertiesAdapter = AspPropertiesAdapter.of(this.createAspProperties(false));
+
+		final LocalDateTime sensingEndTime = LocalDateTime.now(ZoneId.of("UTC")).minusHours(4378);
+		final LocalDateTime jobCreationTime = LocalDateTime.now(ZoneId.of("UTC")).minusHours(WAITING_TIME_HOURS_MINIMAL_FAST + 1);
+		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+
+		final AppDataJob job = this.newJobWithMetadata(jobCreationTime.format(METADATA_DATE_FORMATTER), sensingEndTime.format(METADATA_DATE_FORMATTER));
+
+		assertTrue(aspPropertiesAdapter.isTimeoutReached(job, sensingEndTime.format(METADATA_DATE_FORMATTER), now),
+				"Expected timeout to not be reached!");
+	}
+
 	@Test
 	public final void testTimeout() {
 		final AspPropertiesAdapter aspPropertiesAdapter = AspPropertiesAdapter.of(this.createAspProperties());
