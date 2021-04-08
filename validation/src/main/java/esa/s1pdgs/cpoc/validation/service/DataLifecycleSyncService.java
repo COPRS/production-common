@@ -1,10 +1,19 @@
 package esa.s1pdgs.cpoc.validation.service;
 
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleRangeValueFilter.Operator.GE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleRangeValueFilter.Operator.LE;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -15,11 +24,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.datalifecycle.client.DataLifecycleClientUtil;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleDateTimeFilter;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQueryFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
+import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
@@ -228,6 +244,93 @@ public class DataLifecycleSyncService {
 			realProducts.add(realKey);
 		}
 		return realProducts;
+	}
+
+	public DataLifecycleSyncStats syncDataLifecycleIndexWithOBS(LocalDateTime startDate, LocalDateTime endDate)
+			throws DataLifecycleTriggerInternalServerErrorException {
+		if (null == startDate) {
+			startDate = LocalDateTime.of(2000, 1, 1, 0, 0, 0, 0);
+			LOG.info(String.format("no start date provided for data lifecycle metadata synchronization with OBS, using %s",
+					DateUtils.formatToMetadataDateTimeFormat(startDate)));
+		}
+		if (null == endDate) {
+			endDate = LocalDateTime.of(9999, 12, 31, 23, 59, 59, 999999999);
+			LOG.info(String.format("no end date provided for data lifecycle metadata synchronization with OBS, using %s",
+					DateUtils.formatToMetadataDateTimeFormat(endDate)));
+		}
+
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncDataLifecycleIndexFromOBS");
+		final String beginSyncMsg = "Start synchronising";
+		reporting.begin(new ReportingMessage(beginSyncMsg));
+		LOG.info(beginSyncMsg);
+
+		final DataLifecycleSyncStats stats = new DataLifecycleSyncStats();
+
+		final int pageSize = 100;
+		List<DataLifecycleMetadata> productsToSync;
+		final DataLifecycleSortTerm sortTerm = new DataLifecycleSortTerm(LAST_MODIFIED, DataLifecycleSortOrder.ASCENDING);
+
+		// iterate data lifecycle index for uncompressed files
+		final ArrayList<DataLifecycleQueryFilter> filtersForUncompressed = new ArrayList<>();
+		filtersForUncompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_UNCOMPRESSED_STORAGE, GE, startDate));
+		filtersForUncompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_UNCOMPRESSED_STORAGE, LE, endDate));
+
+		int offset = 0;
+		long iterateCounterUncompressed = 0;
+		long removedCounterUncompressed = 0;
+		do {
+			// get result page
+			productsToSync = CollectionUtil.nullToEmptyList(this.lifecycleMetadataRepo.findWithFilters(filtersForUncompressed,
+					Optional.of(pageSize), Optional.of(offset), Collections.singletonList(sortTerm)));
+
+			iterateCounterUncompressed += productsToSync.size();
+			final int page = (offset > 0 ? offset / pageSize : 0);
+			LOG.debug(String.format(
+					"found %s data lifecycle metadata entries for products in uncompressed storage to sync with OBS (page: %d / page size: %d / offset: %d)",
+					productsToSync.size(), page, pageSize, offset));
+
+			final int removedOnPage = 0;
+			for (final DataLifecycleMetadata metadata : productsToSync) {
+				//try
+				// TODO: check obs + delete path if necessary + increment removedOnPage if necessary
+				//catch
+			}
+			removedCounterUncompressed += removedOnPage;
+
+			LOG.debug(String.format("removed path in uncompressed storage from %d of %d on page %d", removedOnPage, pageSize, page));
+
+			// calculate offset for next page
+			if (((long) offset + pageSize) > Integer.MAX_VALUE) {
+				throw new DataLifecycleTriggerInternalServerErrorException("paging offset exceeds limit of " + Integer.MAX_VALUE);
+			}
+			offset += pageSize;
+		} while (CollectionUtil.isNotEmpty(productsToSync));
+
+		LOG.info(String.format(
+				"removed paths in uncompressed storage from %d data lifecycle metadata entries of a total of %d with insertion times between %s and %s",
+				removedCounterUncompressed, iterateCounterUncompressed, DateUtils.formatToMetadataDateTimeFormat(startDate),
+				DateUtils.formatToMetadataDateTimeFormat(endDate)));
+
+		// iterate data lifecycle index for compressed files
+		final ArrayList<DataLifecycleQueryFilter> filtersForCompressed = new ArrayList<>();
+		filtersForCompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_COMPRESSED_STORAGE, GE, startDate));
+		filtersForCompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_COMPRESSED_STORAGE, LE, endDate));
+
+		// TODO @MSc: impl iterate lifecycle index for compressed files (with paging) and search files in OBS, when not found, delete path from lifecycle index
+		// (analog oben mit uncompressed)
+
+		if (stats.getErrors() == 0) {
+			final String endSyncMsg = String.format("Synchronisation was successful, stats: %s", stats);
+			reporting.end(new ReportingMessage(endSyncMsg));
+			LOG.info(endSyncMsg);
+
+		} else {
+			final String endSyncMsg = String.format("End of synchronisation with errors, stats: %s", stats);
+			reporting.error(new ReportingMessage(endSyncMsg));
+			LOG.warn(endSyncMsg);
+		}
+
+		return stats;
 	}
 
 }
