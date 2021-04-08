@@ -81,8 +81,9 @@ public class ValidationRestController {
 					String.format("startDate %s is after endDate %s", startDate, endDate),
 					HttpStatus.BAD_REQUEST);
 		}
-		//TODO:		syncService.syncDataLifecycleIndexWithOBS()
 
+		// TODO @MSc: try catch throw, see DataLifecycleTriggerRestControllerException and DataLifecycleTriggerRestController
+		// this.syncService.syncDataLifecycleIndexWithOBS(lStart, lEnd);
 	}
 
 	private void assertValidDateTimeString(final String attributeName, final String dateTimeAsString,
