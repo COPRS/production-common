@@ -2,14 +2,19 @@ package esa.s1pdgs.cpoc.validation.service;
 
 public class DataLifecycleSyncStats {
 
-	private int errors = 0;
-	private int unchanged = 0;
-	private int newCreated = 0;
-	private int familyUpdated = 0;
-	private int pathUpdated = 0;
+	private long errors = 0;
+	private long ignored = 0;
+	private long unchanged = 0;
+	private long newCreated = 0;
+	private long familyUpdated = 0;
+	private long pathUpdated = 0;
 
 	public void incrErrors() {
 		++errors;
+	}
+	
+	public void incrIgnored() {
+		++ignored;
 	}
 
 	public void incrUnchanged() {
@@ -28,30 +33,34 @@ public class DataLifecycleSyncStats {
 		++pathUpdated;
 	}
 
-	public int getErrors() {
+	public long getErrors() {
 		return errors;
 	}
+	
+	public long getIgnored() {
+		return ignored;
+	}
 
-	public int getUnchanged() {
+	public long getUnchanged() {
 		return unchanged;
 	}
 
-	public int getNewCreated() {
+	public long getNewCreated() {
 		return newCreated;
 	}
 
-	public int getFamilyUpdated() {
+	public long getFamilyUpdated() {
 		return familyUpdated;
 	}
 
-	public int getPathUpdated() {
+	public long getPathUpdated() {
 		return pathUpdated;
 	}
-
+	
 	@Override
 	public String toString() {
-		return "DataLifecycleSyncStats [errors=" + errors + ", unchanged=" + unchanged + ", newCreated="
-				+ newCreated + ", familyUpdated=" + familyUpdated + ", pathUpdated=" + pathUpdated + "]";
+		return "DataLifecycleSyncStats [errors=" + errors + ", unchanged=" + unchanged + ", ignored=" + ignored
+				+ ", newCreated=" + newCreated + ", familyUpdated=" + familyUpdated + ", pathUpdated=" + pathUpdated + "]";
 	}
 
 }

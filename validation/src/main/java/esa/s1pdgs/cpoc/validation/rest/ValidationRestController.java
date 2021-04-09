@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
+import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
 import esa.s1pdgs.cpoc.validation.service.DataLifecycleSyncService;
 import esa.s1pdgs.cpoc.validation.service.ValidationService;
 
@@ -82,8 +83,11 @@ public class ValidationRestController {
 					HttpStatus.BAD_REQUEST);
 		}
 
-		// TODO @MSc: try catch throw, see DataLifecycleTriggerRestControllerException and DataLifecycleTriggerRestController
-		// this.syncService.syncDataLifecycleIndexWithOBS(lStart, lEnd);
+		try {
+			this.syncService.syncDataLifecycleIndexWithOBS(lStart, lEnd);
+		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
+			throw new RuntimeException(HttpStatus.INTERNAL_SERVER_ERROR.toString() + ": " + e.getMessage(), e);
+		}
 	}
 
 	private void assertValidDateTimeString(final String attributeName, final String dateTimeAsString,
