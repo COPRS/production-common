@@ -86,7 +86,9 @@ public class ValidationRestController {
 		try {
 			this.syncService.syncDataLifecycleIndexWithOBS(lStart, lEnd);
 		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
-			throw new RuntimeException(HttpStatus.INTERNAL_SERVER_ERROR.toString() + ": " + e.getMessage(), e);
+			throw new ValidationRestControllerException(
+					String.format("%s - error syncing data lifecycle index with obs: %s", HttpStatus.INTERNAL_SERVER_ERROR.toString(), e.getMessage()), e,
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -102,7 +104,7 @@ public class ValidationRestController {
 		} catch (NumberFormatException e) {
 			throw new ValidationRestControllerException(
 					String.format("invalid dateTimeString on attribute %s: value: %s: %s", attributeName,
-							dateTimeAsString, e),
+							dateTimeAsString, e.getMessage()),
 					HttpStatus.BAD_REQUEST);
 		}
 	}

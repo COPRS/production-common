@@ -33,8 +33,35 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 		}
     }
     
+    public static class Quality {
+    	@JsonProperty("corrupted_element_count_long")
+    	private long corruptedElementCountLong; // S1PRO-2337
+    	
+    	@JsonProperty("missing_element_count_long")
+    	private long missingElementCountLong; // S1PRO-2337
+
+		public long getCorruptedElementCountLong() {
+			return corruptedElementCountLong;
+		}
+
+		public void setCorruptedElementCountLong(long corruptedElementCountLong) {
+			this.corruptedElementCountLong = corruptedElementCountLong;
+		}
+
+		public long getMissingElementCountLong() {
+			return missingElementCountLong;
+		}
+
+		public void setMissingElementCountLong(long missingElementCountLong) {
+			this.missingElementCountLong = missingElementCountLong;
+		}
+    }
+    
     @JsonProperty("effective_downlink")
     private EffectiveDownlink effectiveDownlink; // S1PRO-2036
+    
+    @JsonProperty("quality")
+    private Quality quality; // S1PRO-2337
     
     @JsonProperty("station_string")
     private String stationString; // S1PRO-2036
@@ -158,6 +185,14 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 		this.effectiveDownlink = effectiveDownlink;
 	}
 	
+	public Quality getQuality() {
+		return quality;
+	}
+
+	public void setQuality(Quality quality) {
+		this.quality = quality;
+	}
+
 	public String getStationString() {
 		return stationString;
 	}
