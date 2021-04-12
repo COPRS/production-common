@@ -31,7 +31,6 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput.EffectiveDownlink;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput.Quality;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -238,10 +237,8 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			
 			try {
 				// S1PRO-2337
-				final Quality quality = new Quality();
-				quality.setMissingElementCountLong(eventAdapter.qualityNumOfMissingElements());
-				quality.setCorruptedElementCountLong(eventAdapter.qualityNumOfCorruptedElements());
-				output.setQuality(quality);
+				output.setMissingElementCountLong(eventAdapter.qualityNumOfMissingElements());
+				output.setCorruptedElementCountLong(eventAdapter.qualityNumOfCorruptedElements());
 
 			} catch (IllegalArgumentException e) {
 				LOG.warn("Could not add quality information to reporting output: {}", e.getMessage());
