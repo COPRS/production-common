@@ -39,8 +39,8 @@ public class ValidationRestController {
 	}
 
 	@Async
-	@RequestMapping(method = RequestMethod.POST, path = "/syncOBSwithDataLifecycleIndex")
-	public void syncOBSwithDataLifecycleIndex(
+	@RequestMapping(method = RequestMethod.POST, path = "/syncDataLifecycleIndexFromOBS")
+	public void syncDataLifecycleIndexFromOBS(
 			@RequestParam(value = "startDate", required = true) final String startDate,
 			@RequestParam(value = "endDate", required = true) final String endDate) {
 		
@@ -57,7 +57,7 @@ public class ValidationRestController {
 					String.format("startDate %s is after endDate %s", startDate, endDate),
 					HttpStatus.BAD_REQUEST);
 		}
-		syncService.syncOBSwithDataLifecycleIndex(
+		syncService.syncDataLifecycleIndexFromOBS(
 				Date.from(lStart.atZone(ZoneId.systemDefault()).toInstant()),
 				Date.from(lEnd.atZone(ZoneId.systemDefault()).toInstant()));
 

@@ -72,7 +72,15 @@ public class DataLifecycleSyncService {
 		this.lifecycleSyncConfig = lifecycleSyncConfig;
 	}
 
-	public DataLifecycleSyncStats syncOBSwithDataLifecycleIndex(final Date startDate, final Date endDate) {
+	/**
+	 * Iterating OBS (buckets derived from product families with retention configuration) and adding missing product families
+	 * and paths to existing data lifecycle metadata entries or if needed create new entries.
+	 *
+	 * @param startDate start of the time window to limit operation
+	 * @param endDate   end time of the time window to limit operation
+	 * @return statistics
+	 */
+	public DataLifecycleSyncStats syncDataLifecycleIndexFromOBS(final Date startDate, final Date endDate) {
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncOBSwithDataLifecycleIndex");
 		final String beginSyncMsg = "Start synchronising";
@@ -261,17 +269,16 @@ public class DataLifecycleSyncService {
 		return realProducts;
 	}
 
-	public void syncDataLifecycleIndexWithOBS(LocalDateTime startDate, LocalDateTime endDate) throws DataLifecycleTriggerInternalServerErrorException {
-		if (null == startDate) {
-			startDate = LocalDateTime.of(2000, 1, 1, 0, 0, 0, 0);
-			LOG.info(String.format("no start date provided for data lifecycle metadata synchronization with OBS, using %s",
-					DateUtils.formatToMetadataDateTimeFormat(startDate)));
-		}
-		if (null == endDate) {
-			endDate = LocalDateTime.of(9999, 12, 31, 23, 59, 59, 999999999);
-			LOG.info(String.format("no end date provided for data lifecycle metadata synchronization with OBS, using %s",
-					DateUtils.formatToMetadataDateTimeFormat(endDate)));
-		}
+	/**
+	 * Iterating the data lifecycle index and checking whether the files still exist in OBS and if not removing
+	 * the path value from the data lifecycle metadata, indicating the file does not exist anymore.
+	 *
+	 * @param startDate start of the time window to limit operation
+	 * @param endDate   end time of the time window to limit operation
+	 * @throws DataLifecycleTriggerInternalServerErrorException on internal server error
+	 */
+	public void syncDataLifecycleIndexWithOBS(final LocalDateTime startDate, final LocalDateTime endDate)
+			throws DataLifecycleTriggerInternalServerErrorException {
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncDataLifecycleIndexFromOBS");
 		final String beginSyncMsg = "Start synchronising";

@@ -82,7 +82,7 @@ public class DataLifecycleSyncServiceTest {
 		doReturn(Optional.of(m1)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o1.getKey()));
 		doReturn(Optional.of(m2)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o2.getKey()));
 		
-		DataLifecycleSyncStats stats = syncService.syncOBSwithDataLifecycleIndex(new Date(), new Date());
+		DataLifecycleSyncStats stats = syncService.syncDataLifecycleIndexFromOBS(new Date(), new Date());
 		
 		assertEquals(0, stats.getErrors());
 		assertEquals(2, stats.getUnchanged());
@@ -115,7 +115,7 @@ public class DataLifecycleSyncServiceTest {
 		doReturn(Optional.of(m1)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o1.getKey()));
 		doReturn(Optional.of(m2)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o2.getKey()));
 		
-		DataLifecycleSyncStats stats = syncService.syncOBSwithDataLifecycleIndex(new Date(), new Date());
+		DataLifecycleSyncStats stats = syncService.syncDataLifecycleIndexFromOBS(new Date(), new Date());
 		
 		assertEquals(0, stats.getErrors());
 		assertEquals(1, stats.getUnchanged());
@@ -148,7 +148,7 @@ public class DataLifecycleSyncServiceTest {
 		doReturn(Optional.of(m1)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o1.getKey()));
 		doReturn(Optional.of(m2)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o2.getKey()));
 		
-		DataLifecycleSyncStats stats = syncService.syncOBSwithDataLifecycleIndex(new Date(), new Date());
+		DataLifecycleSyncStats stats = syncService.syncDataLifecycleIndexFromOBS(new Date(), new Date());
 		
 		assertEquals(0, stats.getErrors());
 		assertEquals(1, stats.getUnchanged());
@@ -177,7 +177,7 @@ public class DataLifecycleSyncServiceTest {
 		doReturn(Optional.of(m1)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o1.getKey()));
 		doReturn(Optional.empty()).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o2.getKey()));
 		
-		DataLifecycleSyncStats stats = syncService.syncOBSwithDataLifecycleIndex(new Date(), new Date());
+		DataLifecycleSyncStats stats = syncService.syncDataLifecycleIndexFromOBS(new Date(), new Date());
 		
 		assertEquals(0, stats.getErrors());
 		assertEquals(1, stats.getUnchanged());
@@ -205,7 +205,7 @@ public class DataLifecycleSyncServiceTest {
 		doReturn(Optional.of(m1)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o1.getKey()));
 		doReturn(Optional.empty()).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o2.getKey()));
 		
-		DataLifecycleSyncStats stats = syncService.syncOBSwithDataLifecycleIndex(new Date(), new Date());
+		DataLifecycleSyncStats stats = syncService.syncDataLifecycleIndexFromOBS(new Date(), new Date());
 		
 		assertEquals(0, stats.getErrors());
 		assertEquals(0, stats.getUnchanged());
@@ -238,7 +238,7 @@ public class DataLifecycleSyncServiceTest {
 		doReturn(Optional.of(m1)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o1.getKey()));
 		doReturn(Optional.of(m2)).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o2.getKey()));
 		
-		DataLifecycleSyncStats stats = syncService.syncOBSwithDataLifecycleIndex(new Date(), new Date());
+		DataLifecycleSyncStats stats = syncService.syncDataLifecycleIndexFromOBS(new Date(), new Date());
 		
 		assertEquals(1, stats.getErrors());
 		assertEquals(0, stats.getUnchanged());
@@ -272,7 +272,7 @@ public class DataLifecycleSyncServiceTest {
 		doThrow(new DataLifecycleMetadataRepositoryException("")).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o1.getKey()));
 		doThrow(new DataLifecycleMetadataRepositoryException("")).when(lifecycleMetadataRepo).findByProductName(DataLifecycleClientUtil.getProductName(o2.getKey()));
 		
-		DataLifecycleSyncStats stats = syncService.syncOBSwithDataLifecycleIndex(new Date(), new Date());
+		DataLifecycleSyncStats stats = syncService.syncDataLifecycleIndexFromOBS(new Date(), new Date());
 		
 		assertEquals(2, stats.getErrors());
 		assertEquals(0, stats.getUnchanged());
