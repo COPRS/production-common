@@ -100,6 +100,10 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 				iter.remove();
 			}
 		}
+		
+		if (!this.shortingEvictionTimeAfterCompression.isEmpty()) {
+			LOG.info("retention time update configuration found: " + this.shortingEvictionTimeAfterCompression);
+		}
 	}
 	
 	// --------------------------------------------------------------------------
