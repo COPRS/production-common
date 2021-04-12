@@ -72,9 +72,17 @@ public class DataLifecycleSyncService {
 		this.lifecycleSyncConfig = lifecycleSyncConfig;
 	}
 
-	public DataLifecycleSyncStats syncOBSwithDataLifecycleIndex(final Date startDate, final Date endDate) {
+	/**
+	 * Iterating OBS (buckets derived from product families with retention configuration) and adding missing product families
+	 * and paths to existing data lifecycle metadata entries or if needed create new entries.
+	 *
+	 * @param startDate start of the time window to limit operation
+	 * @param endDate   end time of the time window to limit operation
+	 * @return statistics
+	 */
+	public DataLifecycleSyncStats syncDataLifecycleIndexFromOBS(final Date startDate, final Date endDate) {
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncOBSwithDataLifecycleIndex");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncDataLifecycleIndexFromOBS");
 		final String beginSyncMsg = "Start synchronising";
 		reporting.begin(new ReportingMessage(beginSyncMsg));
 		LOG.info(beginSyncMsg);
@@ -89,7 +97,7 @@ public class DataLifecycleSyncService {
 			LOG.info(beginSyncFamilyMsg);
 
 			try {
-				this.syncFamily(startDate, endDate, family, reporting, stats);
+				this.syncFamily(startDate, endDate, family, reportFamily, stats);
 				final String endSyncFamilyMsg = String.format("End synchronising family %s", family);
 				reportFamily.end(new ReportingMessage(endSyncFamilyMsg));
 				LOG.info(endSyncFamilyMsg);
@@ -261,19 +269,18 @@ public class DataLifecycleSyncService {
 		return realProducts;
 	}
 
-	public void syncDataLifecycleIndexWithOBS(LocalDateTime startDate, LocalDateTime endDate) throws DataLifecycleTriggerInternalServerErrorException {
-		if (null == startDate) {
-			startDate = LocalDateTime.of(2000, 1, 1, 0, 0, 0, 0);
-			LOG.info(String.format("no start date provided for data lifecycle metadata synchronization with OBS, using %s",
-					DateUtils.formatToMetadataDateTimeFormat(startDate)));
-		}
-		if (null == endDate) {
-			endDate = LocalDateTime.of(9999, 12, 31, 23, 59, 59, 999999999);
-			LOG.info(String.format("no end date provided for data lifecycle metadata synchronization with OBS, using %s",
-					DateUtils.formatToMetadataDateTimeFormat(endDate)));
-		}
+	/**
+	 * Iterating the data lifecycle index and checking whether the files still exist in OBS and if not removing
+	 * the path value from the data lifecycle metadata, indicating the file does not exist anymore.
+	 *
+	 * @param startDate start of the time window to limit operation
+	 * @param endDate   end time of the time window to limit operation
+	 * @throws DataLifecycleTriggerInternalServerErrorException on internal server error
+	 */
+	public void syncDataLifecycleIndexWithOBS(final LocalDateTime startDate, final LocalDateTime endDate)
+			throws DataLifecycleTriggerInternalServerErrorException {
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncDataLifecycleIndexFromOBS");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncDataLifecycleIndexWithOBS");
 		final String beginSyncMsg = "Start synchronising";
 		reporting.begin(new ReportingMessage(beginSyncMsg));
 		LOG.info(beginSyncMsg);
@@ -285,18 +292,27 @@ public class DataLifecycleSyncService {
 		filtersForUncompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_UNCOMPRESSED_STORAGE, GE, startDate));
 		filtersForUncompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_UNCOMPRESSED_STORAGE, LE, endDate));
 
-		DataLifecycleSyncStats statsUncompressed;
+		final DataLifecycleSyncStats statsUncompressed = new DataLifecycleSyncStats();
+		final Reporting reportUncompressed = reporting.newReporting("SyncWithUncompressedStorage");
 		try {
-			statsUncompressed = this.syncMetadataWithOBS(pageSize, false, filtersForUncompressed);
+			final String beginSyncUncompressedMsg = "Start synchronising data lifecycle index with uncompressed storage";
+			reportUncompressed.begin(new ReportingMessage(beginSyncUncompressedMsg));
+			LOG.info(beginSyncUncompressedMsg);
+
+			this.syncMetadataWithOBS(pageSize, false, filtersForUncompressed, statsUncompressed, reportUncompressed);
+
+			final String endSyncUncompressedMsg = "End synchronising data lifecycle index with uncompressed storage";
+			reportUncompressed.end(new ReportingMessage(endSyncUncompressedMsg));
+			LOG.info(endSyncUncompressedMsg);
 		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
-			final String endSyncMsg = String.format("Premature end of synchronisation with error: %s", LogUtils.toString(e));
-			reporting.error(new ReportingMessage(endSyncMsg));
-			LOG.error(endSyncMsg);
-			throw e;
+			statsUncompressed.incrErrors();
+			final String errorMsg = String.format("Error synchronising data lifecycle index with uncompressed storage, start: %s, end: %s: %s", startDate,
+					endDate, LogUtils.toString(e));
+			reportUncompressed.error(new ReportingMessage(errorMsg));
+			LOG.warn(errorMsg);
 		}
 
-		final long totalUncompressed = statsUncompressed.getUnchanged() + statsUncompressed.getPathUpdated() + statsUncompressed.getIgnored()
-		+ statsUncompressed.getErrors();
+		final long totalUncompressed = statsUncompressed.getUnchanged() + statsUncompressed.getPathUpdated() + statsUncompressed.getIgnored();
 		LOG.info(String.format(
 				"removed paths in uncompressed storage from %d data lifecycle metadata entries of a total of %d with insertion times between %s and %s",
 				statsUncompressed.getPathUpdated(), totalUncompressed, DateUtils.formatToMetadataDateTimeFormat(startDate),
@@ -307,18 +323,27 @@ public class DataLifecycleSyncService {
 		filtersForCompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_COMPRESSED_STORAGE, GE, startDate));
 		filtersForCompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_COMPRESSED_STORAGE, LE, endDate));
 
-		DataLifecycleSyncStats statsCompressed;
+		final DataLifecycleSyncStats statsCompressed = new DataLifecycleSyncStats();
+		final Reporting reportCompressed = reporting.newReporting("SyncWithCompressedStorage");
 		try {
-			statsCompressed = this.syncMetadataWithOBS(pageSize, true, filtersForCompressed);
+			final String beginSyncCompressedMsg = "Start synchronising data lifecycle index with compressed storage";
+			reportCompressed.begin(new ReportingMessage(beginSyncCompressedMsg));
+			LOG.info(beginSyncCompressedMsg);
+
+			this.syncMetadataWithOBS(pageSize, true, filtersForCompressed, statsCompressed, reportCompressed);
+
+			final String endSyncCompressedMsg = "End synchronising data lifecycle index with compressed storage";
+			reportCompressed.end(new ReportingMessage(endSyncCompressedMsg));
+			LOG.info(endSyncCompressedMsg);
 		} catch (final DataLifecycleTriggerInternalServerErrorException e) {
-			final String endSyncMsg = String.format("Premature end of synchronisation with error: %s", LogUtils.toString(e));
-			reporting.error(new ReportingMessage(endSyncMsg));
-			LOG.error(endSyncMsg);
-			throw e;
+			statsCompressed.incrErrors();
+			final String errorMsg = String.format("Error synchronising data lifecycle index with compressed storage, start: %s, end: %s: %s", startDate,
+					endDate, LogUtils.toString(e));
+			reportCompressed.error(new ReportingMessage(errorMsg));
+			LOG.warn(errorMsg);
 		}
 
-		final long totalCompressed = statsCompressed.getUnchanged() + statsCompressed.getPathUpdated() + statsCompressed.getIgnored()
-		+ statsCompressed.getErrors();
+		final long totalCompressed = statsCompressed.getUnchanged() + statsCompressed.getPathUpdated() + statsCompressed.getIgnored();
 		LOG.info(String.format(
 				"removed paths in compressed storage from %d data lifecycle metadata entries of a total of %d with insertion times between %s and %s",
 				statsCompressed.getPathUpdated(), totalCompressed, DateUtils.formatToMetadataDateTimeFormat(startDate),
@@ -342,9 +367,8 @@ public class DataLifecycleSyncService {
 	 * Query data lifecycle index with the given filters using paging and sync the results of the query with OBS.
 	 * This is separated for compressed and uncompressed storage, depending on value of inCompressedStorage.
 	 */
-	private DataLifecycleSyncStats syncMetadataWithOBS(final int pageSize, final boolean inCompressedStorage, final List<DataLifecycleQueryFilter> filters)
-			throws DataLifecycleTriggerInternalServerErrorException {
-		final DataLifecycleSyncStats stats = new DataLifecycleSyncStats();
+	private void syncMetadataWithOBS(final int pageSize, final boolean inCompressedStorage, final List<DataLifecycleQueryFilter> filters,
+			final DataLifecycleSyncStats stats, final Reporting reporting) throws DataLifecycleTriggerInternalServerErrorException {
 		final DataLifecycleSortTerm sortTerm = new DataLifecycleSortTerm(LAST_MODIFIED, DataLifecycleSortOrder.ASCENDING);
 
 		int offset = 0;
@@ -360,7 +384,7 @@ public class DataLifecycleSyncService {
 					productsToSync.size(), inCompressedStorage ? "compressed" : "uncompressed", page, pageSize, offset));
 
 			// sync metadata of page
-			productsToSync.forEach(metadata -> this.syncMetadataWithOBS(metadata, inCompressedStorage, stats));
+			productsToSync.forEach(metadata -> this.syncMetadataWithOBS(metadata, inCompressedStorage, stats, reporting));
 
 			// calculate offset for next page
 			if (((long) offset + pageSize) > Integer.MAX_VALUE) {
@@ -368,15 +392,14 @@ public class DataLifecycleSyncService {
 			}
 			offset += pageSize;
 		} while (CollectionUtil.isNotEmpty(productsToSync));
-
-		return stats;
 	}
 
 	/**
 	 * Check whether file still exists in OBS and if not remove path from lifecycle metadata.
 	 * This is separated for compressed and uncompressed storage, depending on value of inCompressedStorage.
 	 */
-	private void syncMetadataWithOBS(DataLifecycleMetadata metadata, final boolean inCompressedStorage, final DataLifecycleSyncStats stats) {
+	private void syncMetadataWithOBS(DataLifecycleMetadata metadata, final boolean inCompressedStorage, final DataLifecycleSyncStats stats,
+			final Reporting reporting) {
 		final String pathInStorage = inCompressedStorage ? metadata.getPathInCompressedStorage() : metadata.getPathInUncompressedStorage();
 		final ProductFamily productFamily = inCompressedStorage ? metadata.getProductFamilyInCompressedStorage()
 				: metadata.getProductFamilyInUncompressedStorage();
@@ -388,10 +411,18 @@ public class DataLifecycleSyncService {
 			stats.incrUnchanged();
 			return;
 		}
+
+		final Reporting reportFile = reporting.newReporting("SyncWith" + (inCompressedStorage ? "Compressed" : "Uncompressed") + "File");
+		final String beginSyncWithFileMsg = String.format("Start synchronising data lifecycle index with %s file %s", comprsStr, pathInStorage);
+		reportFile.begin(new ReportingMessage(beginSyncWithFileMsg));
+		LOG.debug(beginSyncWithFileMsg);
+
 		if (null == productFamily) {
 			// now we do have a problem, because we have a path in storage but no product family, ignore, please do lifecycle sync from OBS first
-			LOG.warn(
-					String.format("data lifecycle entry for %s has no product family in %s storage and will be ignored", metadata.getProductName(), comprsStr));
+			final String errSyncFileMsg = String.format("Error synchronising data lifecycle index with %s file %s: product family missing", comprsStr,
+					pathInStorage);
+			reportFile.error(new ReportingMessage(errSyncFileMsg));
+			LOG.warn(errSyncFileMsg);
 			stats.incrIgnored();
 			return;
 		}
@@ -399,28 +430,44 @@ public class DataLifecycleSyncService {
 		final ObsObject obsObject = new ObsObject(productFamily, pathInStorage);
 		try {
 			if (this.obsClient.exists(obsObject)) {
+				final String endSyncFileMsg = String.format("End synchronising data lifecycle index with %s file %s: file exists in OBS, nothing to do",
+						comprsStr, pathInStorage);
+				reportFile.end(new ReportingMessage(endSyncFileMsg));
+				LOG.debug(endSyncFileMsg);
 				stats.incrUnchanged();
 				return;
 			} else {
-				LOG.info(String.format("%s does not exist in %s storage anymore, will remove path in %s storage from data lifecycle metadata", pathInStorage,
-						comprsStr, comprsStr));
 				if (inCompressedStorage) {
 					metadata.setPathInCompressedStorage(null);
 				} else {
 					metadata.setPathInUncompressedStorage(null);
 				}
 				this.lifecycleMetadataRepo.save(metadata);
+
+				final String endSyncFileMsg = String.format(
+						"End synchronising data lifecycle index with %s file %s: file does not exist in OBS anymore, removed path from data lifecycle index",
+						comprsStr, pathInStorage);
+				reportFile.end(new ReportingMessage(endSyncFileMsg));
+				LOG.info(endSyncFileMsg);
 				stats.incrPathUpdated();
 				return;
 			}
 		} catch (final SdkClientException e) {
-			LOG.error(String.format("an error occurred while checking if %s exists in %s storage, will skip: %s", pathInStorage, comprsStr,
-					LogUtils.toString(e)));
+			final String errSyncFileMsg = String.format("Error synchronising data lifecycle index with %s file %s: %s", comprsStr, pathInStorage,
+					LogUtils.toString(e));
+			reportFile.error(new ReportingMessage(errSyncFileMsg));
+			LOG.error(errSyncFileMsg);
+
+			stats.incrIgnored();
 			stats.incrErrors();
 			return;
 		} catch (final DataLifecycleMetadataRepositoryException e) {
-			LOG.error(String.format("an error occurred while removing path in %s storage from data lifecycle metadata for %s: %s", comprsStr, pathInStorage,
-					LogUtils.toString(e)));
+			final String errSyncFileMsg = String.format("Error synchronising data lifecycle index with %s file %s: %s", comprsStr, pathInStorage,
+					LogUtils.toString(e));
+			reportFile.error(new ReportingMessage(errSyncFileMsg));
+			LOG.error(errSyncFileMsg);
+
+			stats.incrIgnored();
 			stats.incrErrors();
 			return;
 		}

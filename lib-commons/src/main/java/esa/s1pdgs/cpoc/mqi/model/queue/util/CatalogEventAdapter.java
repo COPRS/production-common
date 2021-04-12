@@ -109,6 +109,14 @@ public final class CatalogEventAdapter {
 		return listValues("rawNames");
 	}
 	
+	public final Long qualityNumOfMissingElements() {
+		return getLongValue("qualityNumOfMissingElements");
+	}
+	 
+	public final Long qualityNumOfCorruptedElements() {
+		return getLongValue("qualityNumOfCorruptedElements");
+	}
+	
 	public final List<String> listValues(final String name) {
 		return (List<String>) event.getMetadata().get(name);
 	}
@@ -128,6 +136,14 @@ public final class CatalogEventAdapter {
     	final Integer value = (int) event.getMetadata().get(key);
     	return value;
     }
+    
+	private final Long getLongValue(final String key) {
+		if (event.getMetadata().get(key) == null) {
+			throw new IllegalArgumentException(String.format("Missing metadata element '%s'", key));
+		} else {
+			return (long) event.getMetadata().get(key);
+		}
+	}
 	
     private final String getStringValue(final String key, final String defaultValue)
     {
