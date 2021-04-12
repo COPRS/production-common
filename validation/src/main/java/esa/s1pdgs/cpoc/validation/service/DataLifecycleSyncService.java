@@ -169,13 +169,19 @@ public class DataLifecycleSyncService {
 
 	DataLifecycleMetadata syncFile(final ProductFamily family, final String key, final DataLifecycleSyncStats stats)
 			throws DataLifecycleMetadataRepositoryException {
+		final Date now = new Date();
 		final String productName = DataLifecycleClientUtil.getProductName(key);
 		final String fileName = DataLifecycleClientUtil.getFileName(key);
 		final Optional<DataLifecycleMetadata> existingMetadata = this.lifecycleMetadataRepo.findByProductName(productName);
+		final LocalDateTime insertionDate = LocalDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
+		final Date calculatedEvictionDate = DataLifecycleClientUtil
+				.calculateEvictionDate(this.lifecycleSyncConfig.getRetentionPolicies(), now, family, fileName);
+		final LocalDateTime evictionDate = (calculatedEvictionDate != null)
+				? LocalDateTime.ofInstant(calculatedEvictionDate.toInstant(), ZoneId.systemDefault())
+						: null;
 
 		boolean changed = false;
 		DataLifecycleMetadata metadata = null;
-
 		if (existingMetadata.isPresent()) {
 
 			metadata = existingMetadata.get();
@@ -189,9 +195,17 @@ public class DataLifecycleSyncService {
 				}
 				if (metadata.getPathInCompressedStorage() == null) {
 					metadata.setPathInCompressedStorage(key);
-					LOG.debug("Setting path {} for compressed storage");
+					LOG.debug("Setting path {} for compressed storage", key);
 					stats.incrPathUpdated();
 					changed = true;
+					if (metadata.getEvictionDateInCompressedStorage() == null) {
+						LOG.debug("Setting eviction date {} for compressed storage", evictionDate);
+						metadata.setEvictionDateInCompressedStorage(evictionDate);
+					}
+					if (metadata.getLastInsertionInCompressedStorage() == null) {
+						LOG.debug("Setting last insertion date {} for compressed storage", insertionDate);
+						metadata.setLastInsertionInCompressedStorage(insertionDate);
+					}
 				}
 			} else {
 				if (metadata.getProductFamilyInUncompressedStorage() == null) {
@@ -202,9 +216,17 @@ public class DataLifecycleSyncService {
 				}
 				if (metadata.getPathInUncompressedStorage() == null) {
 					metadata.setPathInUncompressedStorage(key);
-					LOG.debug("Setting path {} for uncompressed storage");
+					LOG.debug("Setting path {} for uncompressed storage", key);
 					stats.incrPathUpdated();
 					changed = true;
+					if (metadata.getEvictionDateInUncompressedStorage() == null) {
+						LOG.debug("Setting eviction date {} for uncompressed storage", evictionDate);
+						metadata.setEvictionDateInUncompressedStorage(evictionDate);						
+					}
+					if (metadata.getLastInsertionInUncompressedStorage() == null) {
+						LOG.debug("Setting last insertion date {} for uncompressed storage", insertionDate);
+						metadata.setLastInsertionInUncompressedStorage(insertionDate);
+					}
 				}
 			}
 
@@ -219,28 +241,20 @@ public class DataLifecycleSyncService {
 			metadata = new DataLifecycleMetadata();
 			metadata.setProductName(productName);
 
-			final Date now = new Date();
-			final LocalDateTime insertionDate = LocalDateTime.ofInstant(now.toInstant(), ZoneId.systemDefault());
-			final Date calculatedEvictionDate = DataLifecycleClientUtil
-					.calculateEvictionDate(this.lifecycleSyncConfig.getRetentionPolicies(), now, family, fileName);
-			final LocalDateTime evictionDate = (calculatedEvictionDate != null)
-					? LocalDateTime.ofInstant(calculatedEvictionDate.toInstant(), ZoneId.systemDefault())
-							: null;
-
-					if (family.isCompressed()) {
-						metadata.setProductFamilyInCompressedStorage(family);
-						metadata.setPathInCompressedStorage(key);
-						metadata.setEvictionDateInCompressedStorage(evictionDate);
-						metadata.setLastInsertionInCompressedStorage(insertionDate);
-					} else {
-						metadata.setProductFamilyInUncompressedStorage(family);
-						metadata.setPathInUncompressedStorage(key);
-						metadata.setEvictionDateInUncompressedStorage(evictionDate);
-						metadata.setLastInsertionInUncompressedStorage(insertionDate);
-					}
-					LOG.info("Adding new metadata: {}", metadata.toString());
-					stats.incrNewCreated();
-					changed = true;
+			if (family.isCompressed()) {
+				metadata.setProductFamilyInCompressedStorage(family);
+				metadata.setPathInCompressedStorage(key);
+				metadata.setEvictionDateInCompressedStorage(evictionDate);
+				metadata.setLastInsertionInCompressedStorage(insertionDate);
+			} else {
+				metadata.setProductFamilyInUncompressedStorage(family);
+				metadata.setPathInUncompressedStorage(key);
+				metadata.setEvictionDateInUncompressedStorage(evictionDate);
+				metadata.setLastInsertionInUncompressedStorage(insertionDate);
+			}
+			LOG.info("Adding new metadata: {}", metadata.toString());
+			stats.incrNewCreated();
+			changed = true;
 		}
 
 		if (changed) {
