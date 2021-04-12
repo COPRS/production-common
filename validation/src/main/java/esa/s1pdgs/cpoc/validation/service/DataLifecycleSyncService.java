@@ -82,7 +82,7 @@ public class DataLifecycleSyncService {
 	 */
 	public DataLifecycleSyncStats syncDataLifecycleIndexFromOBS(final Date startDate, final Date endDate) {
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncOBSwithDataLifecycleIndex");
+		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncDataLifecycleIndexFromOBS");
 		final String beginSyncMsg = "Start synchronising";
 		reporting.begin(new ReportingMessage(beginSyncMsg));
 		LOG.info(beginSyncMsg);
@@ -97,7 +97,7 @@ public class DataLifecycleSyncService {
 			LOG.info(beginSyncFamilyMsg);
 
 			try {
-				this.syncFamily(startDate, endDate, family, reporting, stats);
+				this.syncFamily(startDate, endDate, family, reportFamily, stats);
 				final String endSyncFamilyMsg = String.format("End synchronising family %s", family);
 				reportFamily.end(new ReportingMessage(endSyncFamilyMsg));
 				LOG.info(endSyncFamilyMsg);
