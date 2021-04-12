@@ -33,36 +33,9 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 		}
     }
     
-    public static class Quality {
-    	@JsonProperty("corrupted_element_count_long")
-    	private long corruptedElementCountLong; // S1PRO-2337
-    	
-    	@JsonProperty("missing_element_count_long")
-    	private long missingElementCountLong; // S1PRO-2337
-
-		public long getCorruptedElementCountLong() {
-			return corruptedElementCountLong;
-		}
-
-		public void setCorruptedElementCountLong(long corruptedElementCountLong) {
-			this.corruptedElementCountLong = corruptedElementCountLong;
-		}
-
-		public long getMissingElementCountLong() {
-			return missingElementCountLong;
-		}
-
-		public void setMissingElementCountLong(long missingElementCountLong) {
-			this.missingElementCountLong = missingElementCountLong;
-		}
-    }
-    
     @JsonProperty("effective_downlink")
     private EffectiveDownlink effectiveDownlink; // S1PRO-2036
-    
-    @JsonProperty("quality")
-    private Quality quality; // S1PRO-2337
-    
+
     @JsonProperty("station_string")
     private String stationString; // S1PRO-2036
     
@@ -89,6 +62,12 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	
 	@JsonProperty("raw_count_short")
 	private Integer rawCountShort; // S1PRO-1840
+	
+	@JsonProperty("corrupted_element_count_long")
+	private long corruptedElementCountLong; // S1PRO-2337
+		
+	@JsonProperty("missing_element_count_long")
+    private long missingElementCountLong; // S1PRO-2337
 	
 	// --------------------------------------------------------------------------
 	
@@ -185,12 +164,20 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 		this.effectiveDownlink = effectiveDownlink;
 	}
 	
-	public Quality getQuality() {
-		return quality;
+	public long getCorruptedElementCountLong() {
+		return corruptedElementCountLong;
 	}
 
-	public void setQuality(Quality quality) {
-		this.quality = quality;
+	public void setCorruptedElementCountLong(long corruptedElementCountLong) {
+		this.corruptedElementCountLong = corruptedElementCountLong;
+	}
+
+	public long getMissingElementCountLong() {
+		return missingElementCountLong;
+	}
+
+	public void setMissingElementCountLong(long missingElementCountLong) {
+		this.missingElementCountLong = missingElementCountLong;
 	}
 
 	public String getStationString() {

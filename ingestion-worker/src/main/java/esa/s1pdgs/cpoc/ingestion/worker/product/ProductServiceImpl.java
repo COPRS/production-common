@@ -67,18 +67,21 @@ public class ProductServiceImpl implements ProductService {
 		final String obsKey = obsKeyFor(ingestion);
 
 		//returns -1 if it is not in OBS
-		long size = obsAdapter.sizeOf(ingestion.getProductFamily(), obsKey);
+		long obsSize = obsAdapter.sizeOf(ingestion.getProductFamily(), obsKey);
 
-		LOG.debug("checking size of {} in obs: {} against new size {}", obsKey, size, ingestion.getProductSizeByte());
+		if(obsSize < 0) {
+			LOG.debug("File {} is not in obs and will be ingested", obsKey);
+			return;
+		}
 
-		if (ingestion.getProductSizeByte() >= 0 && size == ingestion.getProductSizeByte()) {
+		LOG.debug("checking obsSize of {} in obs: {} against new size {}", obsKey, obsSize, ingestion.getProductSizeByte());
+
+		if (obsSize == ingestion.getProductSizeByte()) {
 			throw new RuntimeException(
 					String.format("File %s is already in obs and has the same size, aborting ingestion", obsKey));
 		}
 
-		if(size > 0) {
-			LOG.info("File {} has new size {}, will overwrite existing one with size {}", obsKey, ingestion.getProductSizeByte(), size);
-		}
+		LOG.info("File {} has new size {}, will overwrite existing one with size {}", obsKey, ingestion.getProductSizeByte(), obsSize);
 	}
 
 	private String obsKeyFor(final IngestionJob ingestion) {
