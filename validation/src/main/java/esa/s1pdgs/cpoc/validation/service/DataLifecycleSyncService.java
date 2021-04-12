@@ -324,7 +324,7 @@ public class DataLifecycleSyncService {
 		filtersForCompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_COMPRESSED_STORAGE, LE, endDate));
 
 		final DataLifecycleSyncStats statsCompressed = new DataLifecycleSyncStats();
-		final Reporting reportCompressed = reporting.newReporting("SyncWithUncompressedStorage");
+		final Reporting reportCompressed = reporting.newReporting("SyncWithCompressedStorage");
 		try {
 			final String beginSyncCompressedMsg = "Start synchronising data lifecycle index with compressed storage";
 			reportCompressed.begin(new ReportingMessage(beginSyncCompressedMsg));
