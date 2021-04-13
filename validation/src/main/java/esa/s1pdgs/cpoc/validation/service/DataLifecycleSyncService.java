@@ -406,7 +406,7 @@ public class DataLifecycleSyncService {
 				throw new DataLifecycleTriggerInternalServerErrorException("paging offset exceeds limit of " + Integer.MAX_VALUE);
 			}
 			offset += pageSize;
-		} while (CollectionUtil.isNotEmpty(productsToSync));
+		} while (productsToSync.size() == pageSize);
 	}
 
 	/**
