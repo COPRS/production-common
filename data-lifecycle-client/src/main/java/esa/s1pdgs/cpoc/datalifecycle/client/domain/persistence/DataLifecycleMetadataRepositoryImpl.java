@@ -231,10 +231,16 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 			Integer offset = skip.orElse(0);
 			Integer pageSize = offset > this.searchResultLimit ? this.searchResultLimit : offset;
 			List<SearchHit> offsetList = this.queryOffset(queryBuilder, Optional.of(pageSize), Optional.of(0), sortTerms, false, null);
+			if (CollectionUtil.isEmpty(offsetList)) { // running out of results while 'scrolling' to offset
+				return Collections.emptyList();
+			}
 			SearchHit offsetSearchHit = offsetList.get(offsetList.size() - 1);
 
 			while (offset > this.searchResultLimit) {
 				offsetList = this.queryOffset(queryBuilder, top, Optional.of(pageSize), sortTerms, true, offsetSearchHit.getSortValues());
+				if (CollectionUtil.isEmpty(offsetList)) { // running out of results while 'scrolling' to offset
+					return Collections.emptyList();
+				}
 				offsetSearchHit = offsetList.get(offsetList.size() - 1);
 				offset = offset - offsetList.size();
 				pageSize = offset > this.searchResultLimit ? this.searchResultLimit : offset;
@@ -293,7 +299,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 
 			return Arrays.asList(searchResponse.getHits().getHits());
 		} catch (final IOException e) {
-			LOG.warn("error while finding PRIP metadata", e);
+			LOG.warn("error while finding data lifecycle metadata", e);
 		}
 
 		return Collections.emptyList();

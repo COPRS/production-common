@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.validation.service;
 
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_COMPRESSED_STORAGE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_UNCOMPRESSED_STORAGE;
-import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleRangeValueFilter.Operator.GE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleRangeValueFilter.Operator.LE;
 
@@ -10,7 +9,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -305,6 +303,8 @@ public class DataLifecycleSyncService {
 		final List<DataLifecycleQueryFilter> filtersForUncompressed = new ArrayList<>();
 		filtersForUncompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_UNCOMPRESSED_STORAGE, GE, startDate));
 		filtersForUncompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_UNCOMPRESSED_STORAGE, LE, endDate));
+		final List<DataLifecycleSortTerm> sortTermsForUncompressed = new ArrayList<>();
+		sortTermsForUncompressed.add(new DataLifecycleSortTerm(LAST_INSERTION_IN_UNCOMPRESSED_STORAGE, DataLifecycleSortOrder.ASCENDING));
 
 		final DataLifecycleSyncStats statsUncompressed = new DataLifecycleSyncStats();
 		final Reporting reportUncompressed = reporting.newReporting("SyncWithUncompressedStorage");
@@ -313,7 +313,7 @@ public class DataLifecycleSyncService {
 			reportUncompressed.begin(new ReportingMessage(beginSyncUncompressedMsg));
 			LOG.info(beginSyncUncompressedMsg);
 
-			this.syncMetadataWithOBS(pageSize, false, filtersForUncompressed, statsUncompressed, reportUncompressed);
+			this.syncMetadataWithOBS(pageSize, false, filtersForUncompressed, sortTermsForUncompressed, statsUncompressed, reportUncompressed);
 
 			final String endSyncUncompressedMsg = "End synchronising data lifecycle index with uncompressed storage";
 			reportUncompressed.end(new ReportingMessage(endSyncUncompressedMsg));
@@ -336,6 +336,8 @@ public class DataLifecycleSyncService {
 		final List<DataLifecycleQueryFilter> filtersForCompressed = new ArrayList<>();
 		filtersForCompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_COMPRESSED_STORAGE, GE, startDate));
 		filtersForCompressed.add(new DataLifecycleDateTimeFilter(LAST_INSERTION_IN_COMPRESSED_STORAGE, LE, endDate));
+		final List<DataLifecycleSortTerm> sortTermsForCompressed = new ArrayList<>();
+		sortTermsForCompressed.add(new DataLifecycleSortTerm(LAST_INSERTION_IN_COMPRESSED_STORAGE, DataLifecycleSortOrder.ASCENDING));
 
 		final DataLifecycleSyncStats statsCompressed = new DataLifecycleSyncStats();
 		final Reporting reportCompressed = reporting.newReporting("SyncWithCompressedStorage");
@@ -344,7 +346,7 @@ public class DataLifecycleSyncService {
 			reportCompressed.begin(new ReportingMessage(beginSyncCompressedMsg));
 			LOG.info(beginSyncCompressedMsg);
 
-			this.syncMetadataWithOBS(pageSize, true, filtersForCompressed, statsCompressed, reportCompressed);
+			this.syncMetadataWithOBS(pageSize, true, filtersForCompressed, sortTermsForCompressed, statsCompressed, reportCompressed);
 
 			final String endSyncCompressedMsg = "End synchronising data lifecycle index with compressed storage";
 			reportCompressed.end(new ReportingMessage(endSyncCompressedMsg));
@@ -382,15 +384,14 @@ public class DataLifecycleSyncService {
 	 * This is separated for compressed and uncompressed storage, depending on value of inCompressedStorage.
 	 */
 	private void syncMetadataWithOBS(final int pageSize, final boolean inCompressedStorage, final List<DataLifecycleQueryFilter> filters,
-			final DataLifecycleSyncStats stats, final Reporting reporting) throws DataLifecycleTriggerInternalServerErrorException {
-		final DataLifecycleSortTerm sortTerm = new DataLifecycleSortTerm(LAST_MODIFIED, DataLifecycleSortOrder.ASCENDING);
-
+			final List<DataLifecycleSortTerm> sortTerms, final DataLifecycleSyncStats stats, final Reporting reporting)
+					throws DataLifecycleTriggerInternalServerErrorException {
 		int offset = 0;
 		List<DataLifecycleMetadata> productsToSync;
 		do {
 			// get result page
 			productsToSync = CollectionUtil.nullToEmptyList(this.lifecycleMetadataRepo.findWithFilters(filters, Optional.of(pageSize),
-					Optional.of(offset), Collections.singletonList(sortTerm)));
+					Optional.of(offset), sortTerms));
 
 			final int page = (offset > 0 ? offset / pageSize : 0);
 			LOG.debug(String.format(
@@ -405,7 +406,7 @@ public class DataLifecycleSyncService {
 				throw new DataLifecycleTriggerInternalServerErrorException("paging offset exceeds limit of " + Integer.MAX_VALUE);
 			}
 			offset += pageSize;
-		} while (CollectionUtil.isNotEmpty(productsToSync));
+		} while (productsToSync.size() == pageSize);
 	}
 
 	/**
@@ -443,7 +444,7 @@ public class DataLifecycleSyncService {
 
 		final ObsObject obsObject = new ObsObject(productFamily, pathInStorage);
 		try {
-			if (this.obsClient.exists(obsObject)) {
+			if (this.obsClient.prefixExists(obsObject)) {
 				final String endSyncFileMsg = String.format("End synchronising data lifecycle index with %s file %s: file exists in OBS, nothing to do",
 						comprsStr, pathInStorage);
 				reportFile.end(new ReportingMessage(endSyncFileMsg));

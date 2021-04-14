@@ -96,7 +96,11 @@ public class TestPripElasticSearchMetadataRepo {
 		doReturn(shardInfo).when(indexResponse).getShardInfo();
 		doReturn(indexResponse).when(restHighLevelClient).index(Mockito.any(), Mockito.any());
 
-		repo.save(createPripMetadata());
+		try {
+			repo.save(createPripMetadata());
+		} catch (RuntimeException re) {
+			assertEquals("could not save PRIP metadata", re.getMessage());
+		}
 		verify(restHighLevelClient, times(1)).index(Mockito.any(), Mockito.any());
 
 	}
