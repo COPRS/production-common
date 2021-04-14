@@ -8,7 +8,11 @@
 		<version>3.31.0-SNAPSHOT</version>
 	</parent>
 	
-	<!-- only used for jacoco report creation -->
+	<!-- only used for jacoco report creation. artifact name does not start with 's1pro-core'
+	     as this module is only required for report creation and hence, not really part of
+	     s1pro-core. Furthermore, it helps in identifying all other modules in the command 
+	     to gather all dependencies
+	      -->
 	<artifactId>s1pro-jacoco-report</artifactId>
 	
 	<build>
