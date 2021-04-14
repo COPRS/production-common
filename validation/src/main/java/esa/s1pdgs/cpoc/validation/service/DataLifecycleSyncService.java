@@ -444,7 +444,7 @@ public class DataLifecycleSyncService {
 
 		final ObsObject obsObject = new ObsObject(productFamily, pathInStorage);
 		try {
-			if (this.obsClient.exists(obsObject)) {
+			if (this.obsClient.prefixExists(obsObject)) {
 				final String endSyncFileMsg = String.format("End synchronising data lifecycle index with %s file %s: file exists in OBS, nothing to do",
 						comprsStr, pathInStorage);
 				reportFile.end(new ReportingMessage(endSyncFileMsg));
