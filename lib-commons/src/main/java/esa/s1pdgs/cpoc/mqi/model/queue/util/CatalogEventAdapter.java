@@ -109,12 +109,12 @@ public final class CatalogEventAdapter {
 		return listValues("rawNames");
 	}
 	
-	public final Long qualityNumOfMissingElements() {
-		return getLongValue("qualityNumOfMissingElements");
+	public final String qualityNumOfMissingElements() {
+		return getStringValue("qualityNumOfMissingElements");
 	}
 	 
-	public final Long qualityNumOfCorruptedElements() {
-		return getLongValue("qualityNumOfCorruptedElements");
+	public final String qualityNumOfCorruptedElements() {
+		return getStringValue("qualityNumOfCorruptedElements");
 	}
 	
 	public final List<String> listValues(final String name) {

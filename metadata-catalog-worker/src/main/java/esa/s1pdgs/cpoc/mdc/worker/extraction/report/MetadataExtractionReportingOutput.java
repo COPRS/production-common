@@ -63,12 +63,6 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	@JsonProperty("raw_count_short")
 	private Integer rawCountShort; // S1PRO-1840
 	
-	@JsonProperty("corrupted_element_count_long")
-	private long corruptedElementCountLong; // S1PRO-2337
-		
-	@JsonProperty("missing_element_count_long")
-    private long missingElementCountLong; // S1PRO-2337
-	
 	// --------------------------------------------------------------------------
 	
 	public MetadataExtractionReportingOutput() {
@@ -162,22 +156,6 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	
 	public void setEffectiveDownlink(EffectiveDownlink effectiveDownlink) {
 		this.effectiveDownlink = effectiveDownlink;
-	}
-	
-	public long getCorruptedElementCountLong() {
-		return corruptedElementCountLong;
-	}
-
-	public void setCorruptedElementCountLong(long corruptedElementCountLong) {
-		this.corruptedElementCountLong = corruptedElementCountLong;
-	}
-
-	public long getMissingElementCountLong() {
-		return missingElementCountLong;
-	}
-
-	public void setMissingElementCountLong(long missingElementCountLong) {
-		this.missingElementCountLong = missingElementCountLong;
 	}
 
 	public String getStationString() {

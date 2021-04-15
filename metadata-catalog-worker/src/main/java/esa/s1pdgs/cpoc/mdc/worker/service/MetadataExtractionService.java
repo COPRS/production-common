@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mdc.worker.service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -54,7 +55,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 
 	public static final String KEY_PRODUCT_SENSING_START = "product_sensing_start_date";
 	public static final String KEY_PRODUCT_SENSING_STOP = "product_sensing_stop_date";
-
+	
+	public static final String QUALITY_CORRUPTED_ELEMENT_COUNT = "corrupted_element_count_long";
+	public static final String QUALITY_MISSING_ELEMENT_COUNT = "missing_element_count_long";
+	
 	private final AppStatusImpl appStatus;
 	private final ErrorRepoAppender errorAppender;
 	private final ProcessConfiguration processConfiguration;
@@ -101,7 +105,25 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		reporting.begin(ReportingUtils.newFilenameReportingInputFor(catJob.getProductFamily(), catJob.getProductName()),
 				new ReportingMessage("Starting metadata extraction"));
 		return new MqiMessageEventHandler.Builder<CatalogEvent>(ProductCategory.CATALOG_EVENT)
-				.onSuccess(res -> reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction")))
+				.onSuccess(res -> {
+					// S1PRO-2337
+					final GenericPublicationMessageDto<CatalogEvent> pub = res.get(0);
+					if (pub.getFamily() != ProductFamily.EDRS_SESSION) {
+						try {
+							final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
+							Map<String, String> quality = new LinkedHashMap<>();
+							quality.put(QUALITY_MISSING_ELEMENT_COUNT, eventAdapter.qualityNumOfMissingElements());
+							quality.put(QUALITY_CORRUPTED_ELEMENT_COUNT, eventAdapter.qualityNumOfCorruptedElements());
+							reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction"),
+									quality);
+						} catch (IllegalArgumentException e) {
+							LOG.warn("Could not add quality information to reporting output: {}", e.getMessage());
+							reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction"));
+						}
+					} else {
+						reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction"));
+					}
+				})
 				.onWarning(res -> reporting.warning(reportingOutput(res), new ReportingMessage("End metadata extraction")))
 				.onError(e -> reporting
 						.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e))))
@@ -234,15 +256,6 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		} else {
 			output.setMissionIdentifierString(eventAdapter.missionId());
 			output.setTypeString(pub.getFamily().name());
-			
-			try {
-				// S1PRO-2337
-				output.setMissingElementCountLong(eventAdapter.qualityNumOfMissingElements());
-				output.setCorruptedElementCountLong(eventAdapter.qualityNumOfCorruptedElements());
-
-			} catch (IllegalArgumentException e) {
-				LOG.warn("Could not add quality information to reporting output: {}", e.getMessage());
-			}
 		}
 
 		return output.build();

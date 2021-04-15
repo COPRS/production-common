@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.report;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
@@ -50,6 +51,9 @@ public interface Reporting extends ReportingFactory {
 
 		@Override
 		public void end(final ReportingOutput output, final ReportingMessage reportingMessage) {}
+		
+		@Override
+		public void end(ReportingOutput output, ReportingMessage reportingMessage, Map<String, String> quality) {}
 
 		@Override
 		public void warning(final ReportingOutput output, final ReportingMessage reportingMessage) {}
@@ -61,6 +65,7 @@ public interface Reporting extends ReportingFactory {
 		public Reporting newReporting(final String taskName) {
 			return NULL;
 		}
+
 	};
 	
 	UUID getUid();
@@ -75,6 +80,7 @@ public interface Reporting extends ReportingFactory {
 	
 	void begin(ReportingInput input, ReportingMessage reportingMessage);
 	void end(ReportingOutput output, ReportingMessage reportingMessage);
+	void end(ReportingOutput output, ReportingMessage reportingMessage, Map<String, String> quality);
 	void warning(ReportingOutput output, ReportingMessage reportingMessage);
 	void error(ReportingMessage reportingMessage);
 }
