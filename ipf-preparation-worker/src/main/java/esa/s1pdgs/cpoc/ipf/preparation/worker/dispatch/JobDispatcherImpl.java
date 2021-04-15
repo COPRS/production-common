@@ -113,8 +113,6 @@ public class JobDispatcherImpl implements JobDispatcher {
 
 		final Optional<List<AppDataJob>> jobForMess = appCat.findJobsFor(firstMessage);
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage);
-		
-		final String outputProductType = message.getBody().getOutputProductType();
 
 		// there is already a job for this message --> possible restart scenario -->
 		// just update the pod name
@@ -149,7 +147,6 @@ public class JobDispatcherImpl implements JobDispatcher {
 					job.setReportingId(reportingUid);
 					job.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
 					job.setPod(settings.getHostname());
-					job.setOutputProductType(outputProductType);
 					
 					final AppDataJob newlyCreatedJob = appCat.create(job);
 					LOGGER.info("dispatched job {}", newlyCreatedJob.getId());
