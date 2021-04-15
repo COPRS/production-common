@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.production.trigger.config;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -14,6 +15,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.production.trigger.service.GenericConsumer;
+import esa.s1pdgs.cpoc.production.trigger.service.PreparationJobPublishMessageProducer;
 import esa.s1pdgs.cpoc.production.trigger.taskTableMapping.TasktableMapper;
 
 @Configuration
@@ -55,8 +57,13 @@ public class TriggerConfig {
 				messageFilter,
 				appStatus,
 				errorRepoAppender, 
-				metadataClient,
-				taskTableMapper
+				taskTableMapper,
+				new PreparationJobPublishMessageProducer(
+						processSettings, 
+						Pattern.compile(processSettings.getSeaCoverageCheckPattern()), 
+						Pattern.compile(processSettings.getL0EwSlcCheckPattern()), 
+						metadataClient
+				)
 		);
 	}
 }
