@@ -130,8 +130,8 @@ public class LevelSliceProduct extends AbstractProduct {
 		return product.getStringValue("timeliness", "");
 	}
 	
-    public final void preselectedInputs(final List<AppDataJobPreselectedInput> preselectedInputs) {
-    	this.preselectedInputs.addAll(preselectedInputs);
+    public final void addPreselectedInputs(final AppDataJobPreselectedInput preselectedInput) {
+    	this.preselectedInputs.add(preselectedInput);
     }
 
 	@Override

@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +38,11 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
 public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
-	private static final List<String> AUX_ORB_TYPES = Arrays.asList(
+	private static final String[] AUX_ORB_TYPES = new String[] {
 			"AUX_POE",
 			"AUX_RES",
 			"AUX_PRE"
-	);
+	};
 	
 	private final MetadataClient metadataClient;
 	private final Map<String, Float> sliceOverlap;
@@ -67,8 +66,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 
 	@Override
 	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter) 
-			throws IpfPrepWorkerInputsMissingException {
-		
+			throws IpfPrepWorkerInputsMissingException {		
 		final LevelSliceProduct product = LevelSliceProduct.of(job);
 		
 		// Retrieve instrument configuration id and slice number
@@ -78,6 +76,44 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			product.setNumberSlice(file.getNumberSlice());
 			product.setDataTakeId(file.getDatatakeId());
 			product.addSlice(file);
+			
+			final TaskTableInputAdapter ttInput = taskTableAdapter
+					.firstInputContainingOneOf(product.getProductType())
+					.orElseThrow(() -> new RuntimeException(
+							String.format(
+									"Could not find input SLICE using type %s in %s", 
+									product.getProductType(), 
+									taskTableAdapter
+							)
+					));
+			
+			final TaskTableInputAlternative alt = ttInput
+					.getAlternativeForType(product.getProductType())
+					.orElseThrow(() -> new RuntimeException(
+							String.format(
+									"Could not find SLICE alternative type %s (input %s) in %s", 
+									product.getProductType(), 
+									ttInput.getReference(),
+									taskTableAdapter
+							)
+					));
+			
+			final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
+			preselected.setTaskTableInputReference(ttInput.getReference());
+			preselected.setFileType(alt.getFileType());		
+			preselected.setFileNameType(alt.getFileNameType().toString());
+			
+			final AppDataJobFile appJobFile = new AppDataJobFile(
+					file.getProductName(), 
+					file.getKeyObjectStorage(), 
+					TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStart()),
+					TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStop()),
+					file.getAdditionalProperties()
+			);
+			preselected.setFiles(Collections.singletonList(appJobFile));
+
+			LOGGER.debug("Adding preselected SLICE input: {}", preselected);			
+			product.addPreselectedInputs(preselected);
 			
 		} catch (final MetadataQueryException e) {
 			LOGGER.debug("L0 slice for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), 
@@ -93,6 +129,45 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			product.setSegmentStartDate(acn.getValidityStart());
 			product.setSegmentStopDate(acn.getValidityStop());
 			product.addAcn(acn);
+			
+			final TaskTableInputAdapter ttInput = taskTableAdapter
+					.firstInputContainingOneOf(product.getProductType())
+					.orElseThrow(() -> new RuntimeException(
+							String.format(
+									"Could not find ACN input using type %s in %s", 
+									product.getProductType(), 
+									taskTableAdapter
+							)
+					));
+						
+			final TaskTableInputAlternative alt = ttInput
+					.getAlternativeForType(product.getProductType())
+					.orElseThrow(() -> new RuntimeException(
+							String.format(
+									"Could not find ACN alternative type %s (input %s) in %s", 
+									product.getProductType(), 
+									ttInput.getReference(),
+									taskTableAdapter
+							)
+					));
+			
+			final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
+			preselected.setTaskTableInputReference(ttInput.getReference());
+			preselected.setFileType(alt.getFileType());		
+			preselected.setFileNameType(alt.getFileNameType().toString());
+			
+			final AppDataJobFile appJobFile = new AppDataJobFile(
+					acn.getProductName(), 
+					acn.getKeyObjectStorage(), 
+					TaskTableAdapter.convertDateToJobOrderFormat(acn.getValidityStart()),
+					TaskTableAdapter.convertDateToJobOrderFormat(acn.getValidityStop()),
+					acn.getAdditionalProperties()
+			);
+			preselected.setFiles(Collections.singletonList(appJobFile));
+			
+			LOGGER.debug("Adding preselected ACN input: {}", preselected);			
+			product.addPreselectedInputs(preselected);			
+			
 		} catch (final MetadataQueryException e) {
 			LOGGER.debug("L0 acn for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), 
 					Exceptions.messageOf(e));
@@ -100,7 +175,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			// S1PRO-2476: omit querying for AUX_RES & Co. ...
 			return product;
 		}
-		
+				
 		// S1PRO-2476: For AUX_RESORB, POE or PREORB, start-/stop times from ACN shall be used
 		// i.e. the "normal" LatestValCover query will not work. So we are adding these files here and not in AuxQuery
 		final Optional<TaskTableInputAdapter> opt = taskTableAdapter.firstInputContainingOneOf(AUX_ORB_TYPES);
@@ -157,9 +232,11 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 										meta.getAdditionalProperties()
 								));
 							}
-							preselected.setFiles(files);	
+							preselected.setFiles(files);
+							
 							LOGGER.debug("Adding preselected inputs: {}", preselected);
-							product.preselectedInputs(Collections.singletonList(preselected));	
+							product.addPreselectedInputs(preselected);
+							
 							foundAux = true;
 							break; // don't query any further
 						}
