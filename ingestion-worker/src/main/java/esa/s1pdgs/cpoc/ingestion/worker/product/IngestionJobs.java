@@ -46,9 +46,14 @@ public class IngestionJobs {
 	}
 	
 	public static String filename(final IngestionJob ingestion) {
-		final String nameWithoutTrailingSlash = ingestion.getKeyObjectStorage().endsWith("/") ?
-				ingestion.getKeyObjectStorage().substring(0,ingestion.getKeyObjectStorage().length()-1) :
-			    ingestion.getKeyObjectStorage();
+		final String nameWithoutTrailingSlash;
+		if ("auxip".equalsIgnoreCase(ingestion.getInboxType())) {
+			nameWithoutTrailingSlash = ingestion.getRelativePath();
+		} else {
+			nameWithoutTrailingSlash = ingestion.getKeyObjectStorage().endsWith("/") ?
+					ingestion.getKeyObjectStorage().substring(0,ingestion.getKeyObjectStorage().length()-1) :
+					    ingestion.getKeyObjectStorage();
+		}
 		
 		final int lastIndexOfSlash = nameWithoutTrailingSlash.lastIndexOf('/');
 		

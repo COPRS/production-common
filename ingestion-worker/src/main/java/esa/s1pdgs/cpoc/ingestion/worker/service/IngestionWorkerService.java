@@ -84,11 +84,18 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 	@Override
 	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IngestionJob> message) {
 		final IngestionJob ingestion = message.getBody();
+		
+		final String productName;
+		if ("auxip".equalsIgnoreCase(ingestion.getInboxType())) {
+			productName = ingestion.getRelativePath();
+		} else {
+			productName = ingestion.getProductName();
+		}
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(ingestion.getUid())
 				.newReporting("IngestionWorker");
 
-		LOG.debug("received Ingestion: {}", ingestion.getProductName());
+		LOG.debug("received Ingestion: {}", productName);
 		final URI productUri = IngestionJobs.toUri(ingestion);
 		final InboxAdapter inboxAdapter = inboxAdapterManager.getInboxAdapterFor(productUri);
 
@@ -99,9 +106,9 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		}).onError(e -> reporting.error(new ReportingMessage("Error processing of %s: %s",
 				ingestion.getKeyObjectStorage(), LogUtils.toString(e)))).publishMessageProducer(() -> {
 					reporting.begin(
-							new InboxReportingInput(ingestion.getProductName(), ingestion.getRelativePath(),
+							new InboxReportingInput(productName, ingestion.getRelativePath(),
 									ingestion.getPickupBaseURL()),
-							new ReportingMessage("Start processing of %s", ingestion.getProductName()));
+							new ReportingMessage("Start processing of %s", productName));
 					final List<Product<IngestionEvent>> result = identifyAndUpload(message, inboxAdapter, ingestion,
 							reporting);
 					return publish(result, message, reporting.getUid());

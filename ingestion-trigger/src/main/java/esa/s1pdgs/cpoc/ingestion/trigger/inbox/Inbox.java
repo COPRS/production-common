@@ -134,21 +134,28 @@ public final class Inbox {
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
 
+		final String productName;
+		if ("auxip".equalsIgnoreCase(entry.getInboxType())) {
+			productName = entry.getRelativePath();
+		} else {
+			productName = entry.getName();
+		}
+		
 		final ReportingInput input = IngestionTriggerReportingInput.newInstance(
-				entry.getName(),
+				productName,
 				family,
 				entry.getLastModified()
 		);
-		reporting.begin(input,new ReportingMessage("New file detected %s", entry.getName()));
+		reporting.begin(input,new ReportingMessage("New file detected %s", productName));
 		
 		if (!filter.accept(entry)) {
-			reporting.end(new ReportingMessage("File %s is ignored by filter.", entry.getName()));
+			reporting.end(new ReportingMessage("File %s is ignored by filter.", productName));
 			return Optional.empty();
 		}
 
 		// empty files are not accepted!
 		if (entry.getSize() == 0) {	
-			reporting.error(new ReportingMessage("File %s is empty, ignored.", entry.getName()));						
+			reporting.error(new ReportingMessage("File %s is empty, ignored.", productName));						
 			return Optional.empty();
 		}
 		
@@ -171,11 +178,11 @@ public final class Inbox {
 			);
 			reporting.end(
 					new IngestionTriggerReportingOutput(entry.getPickupURL() + "/" + entry.getRelativePath()), 
-					new ReportingMessage("File %s created IngestionJob", entry.getName())
+					new ReportingMessage("File %s created IngestionJob", productName)
 			);
 			return Optional.of(entry);
 		} catch (final Exception e) {
-			reporting.error(new ReportingMessage("File %s could not be handled: %s", entry.getName(), LogUtils.toString(e)));
+			reporting.error(new ReportingMessage("File %s could not be handled: %s", productName, LogUtils.toString(e)));
 			log.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
 		}
 		return Optional.empty();
