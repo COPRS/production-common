@@ -23,12 +23,24 @@ public final class OnDemandEventListener extends AbstractMqiListener<OnDemandEve
 	}
 
 	@Override
-	public final MqiMessageEventHandler onMessage(final GenericMessageDto<OnDemandEvent> message) throws Exception {
-		final GenericMessageDto<CatalogEvent> pseudoCatalogEventMessage = toCatalogEvent(message);
-		
+	public final MqiMessageEventHandler onMessage(final GenericMessageDto<OnDemandEvent> message) throws Exception {		
 		final OnDemandEvent onDemandEvent = message.getBody();
-		
-		return onCatalogEvent(pseudoCatalogEventMessage, tasktableMapperFor(onDemandEvent));			
+
+		return onCatalogEvent(
+				toCatalogEvent(message), 
+				tasktableMapperFor(onDemandEvent), 
+				outputProductTypeFor(onDemandEvent)
+		);			
+	}
+	
+	private final String outputProductTypeFor(final OnDemandEvent onDemandEvent) {
+		// S1PRO-2601: even if an 'outputProductType' is defined in the request, the debug flag takes a higher
+		// precedence and will upload the workingdir into the debug bucket
+		if (!onDemandEvent.isDebug()) {
+			return onDemandEvent.getOutputProductType();
+		}
+		// 'null' is a valid scenario here and means, no outputProductType filtering will be performed		
+		return null;		
 	}
 	
 	private final TasktableMapper tasktableMapperFor(final OnDemandEvent onDemandEvent) {

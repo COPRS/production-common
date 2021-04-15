@@ -51,7 +51,8 @@ abstract class AbstractMqiListener<E> implements MqiListener<E> {
 	
 	public final MqiMessageEventHandler onCatalogEvent(
 			final GenericMessageDto<CatalogEvent> mqiMessage,
-			final TasktableMapper ttMapper
+			final TasktableMapper ttMapper,
+			final String outputProductType
 	) throws Exception {
         final CatalogEvent event = mqiMessage.getBody();
         final String productName = event.getProductName();
@@ -62,15 +63,12 @@ abstract class AbstractMqiListener<E> implements MqiListener<E> {
                 
 		return new MqiMessageEventHandler.Builder<IpfPreparationJob>(ProductCategory.PREPARATION_JOBS)
 				.onSuccess(res -> {
-					if (res.size() == 0) {	      
-		                reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName)); 
-					}
-					else {
+					if (res.size() != 0) {	      
 						reporting.end(new ReportingMessage("IpfPreparationJob for product %s created", productName));
 					}
 				})
 				.onError(e -> reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e))))
-				.publishMessageProducer(() -> publishMessageProducer.createPublishingJob(reporting, mqiMessage, ttMapper))
+				.publishMessageProducer(() -> publishMessageProducer.createPublishingJob(reporting, mqiMessage, ttMapper, outputProductType))
 				.newResult();
 	}
 }

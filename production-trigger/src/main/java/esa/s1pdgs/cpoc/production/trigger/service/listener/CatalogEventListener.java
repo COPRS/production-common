@@ -19,6 +19,6 @@ public final class CatalogEventListener extends AbstractMqiListener<CatalogEvent
 
 	@Override
 	public final MqiMessageEventHandler onMessage(final GenericMessageDto<CatalogEvent> mqiMessage) throws Exception {
-		return onCatalogEvent(mqiMessage, defaultTasktableMapper);
+		return onCatalogEvent(mqiMessage, defaultTasktableMapper, null);
 	}
 }

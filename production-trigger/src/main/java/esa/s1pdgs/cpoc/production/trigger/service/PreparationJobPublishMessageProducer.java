@@ -51,7 +51,8 @@ public final class PreparationJobPublishMessageProducer {
 	public final MqiPublishingJob<IpfPreparationJob> createPublishingJob(
     		final Reporting reporting, 
     		final GenericMessageDto<CatalogEvent> mqiMessage,
-    		final TasktableMapper ttMapper
+    		final TasktableMapper ttMapper,
+    		final String outputProductType
     ) throws Exception {
         final CatalogEvent event = mqiMessage.getBody();
         final String productName = event.getProductName();
@@ -72,13 +73,19 @@ public final class PreparationJobPublishMessageProducer {
             {
             	if (l0EwSliceMaskCheck(reporting, productName, family, taskTableName)) {
             		LOGGER.debug("Tasktable for {} is {}", productName, taskTableName);
-            		messageDtos.add(dispatch(mqiMessage,reporting, taskTableName));
+            		messageDtos.add(dispatch(mqiMessage,reporting, taskTableName, outputProductType));
             	}
-            }               
+            } 
+            if (messageDtos.isEmpty()) {
+            	// TODO/FIXME replace with a better reporting end message. This needs to be tracked in REPORT-API
+            	// so for the time being, the misleading message is kept here
+                reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName)); 
+            }
             LOGGER.info("Dispatching product {}", productName);
             return new MqiPublishingJob<IpfPreparationJob>(messageDtos);          
         }
         else {
+            reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName)); 
         	LOGGER.debug("CatalogEvent for {} is ignored", productName); 
         }
         LOGGER.debug("Done handling consumption of product {}", productName);
@@ -87,11 +94,6 @@ public final class PreparationJobPublishMessageProducer {
     
     
 	private final boolean isAllowed(final String productName, final ProductFamily family, final ReportingFactory reporting) throws Exception {
-        return seaCoverageCheck(reporting, productName, family);
-	}
-
-	private boolean seaCoverageCheck(final ReportingFactory reporting, final String productName,
-			final ProductFamily family) throws Exception {
 		// S1PRO-483: check for matching products if they are over sea. If not, simply skip the
         // production
 		final Reporting seaReport = reporting.newReporting("SeaCoverageCheck");
@@ -158,7 +160,8 @@ public final class PreparationJobPublishMessageProducer {
 	private final GenericPublicationMessageDto<IpfPreparationJob> dispatch(
 			final GenericMessageDto<CatalogEvent> mqiMessage,
 			final ReportingFactory reportingFactory,
-    		final String taskTableName
+    		final String taskTableName,
+    		final String outputProductType
 	) {
         final CatalogEvent event = mqiMessage.getBody();
         final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);	
@@ -189,6 +192,7 @@ public final class PreparationJobPublishMessageProducer {
     	job.setKeyObjectStorage(event.getProductName());
     	job.setUid(reporting.getUid());
     	job.setDebug(event.isDebug());
+    	job.setOutputProductType(outputProductType);
     	
     	final GenericPublicationMessageDto<IpfPreparationJob> messageDto = new GenericPublicationMessageDto<IpfPreparationJob>(
     			mqiMessage.getId(), 
