@@ -102,7 +102,8 @@ public class Publisher {
 		execJob.setIpfPreparationJobMessage(prepJob);	
 		execJob.setDebug(prepJob.getBody().isDebug());
 		execJob.setTimedOut(job.getTimedOut());
-		execJob.setOutputProductType(job.getOutputProductType());
+		
+		final String outputProductType = prepJob.getBody().getOutputProductType();
 		
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)
@@ -115,9 +116,9 @@ public class Publisher {
 			execJob.addInput(new LevelJobInputDto(ProductFamily.JOB_ORDER.name(), joborder.getPath(), jobOrderXml));
 
 			// Add jobOrder outputs to the DTO
-			execJob.addOutputs(jobOrderAdapter.physicalOutputs());
-			execJob.addOutputs(jobOrderAdapter.regexpOutputs());
-			execJob.addOutputs(jobOrderAdapter.directoryOutputs());
+			execJob.addOutputs(jobOrderAdapter.physicalOutputs(outputProductType));
+			execJob.addOutputs(jobOrderAdapter.regexpOutputs(outputProductType));
+			execJob.addOutputs(jobOrderAdapter.directoryOutputs(outputProductType));
 			addOqcFlags(execJob);
 
 			// Add the tasks

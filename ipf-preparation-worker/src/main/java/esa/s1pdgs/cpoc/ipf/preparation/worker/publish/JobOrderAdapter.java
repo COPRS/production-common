@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -23,6 +25,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
@@ -173,32 +176,65 @@ public final class JobOrderAdapter
 			.collect(toList());
 	}
 	
-	public final List<LevelJobOutputDto> physicalOutputs() {
-		return outputsOf(jobOrder)
-				.filter(output -> output.getFileNameType() == JobOrderFileNameType.PHYSICAL
-						&& output.getDestination() == JobOrderDestination.DB)
-				.distinct()
-				.map(output -> new LevelJobOutputDto(output.getFamily().name(),
-						output.getFileName() + "^.*" + output.getFileType() + ".*$"))
-				.collect(toList());
+	@SafeVarargs
+	private final Predicate<JobOrderOutput> filenameTypeFilter(final String ... outputTypes) {	
+		final List<String> allowedTypes = CollectionUtil.toList(outputTypes); 
+		
+		// empty or null means: all are allowed
+		if (allowedTypes.isEmpty()) {
+			return output -> true;
+		}
+		return output -> allowedTypes.contains(output.getFileType());	
 	}
 	
-	public final List<LevelJobOutputDto> directoryOutputs() {
-		return outputsOf(jobOrder)
-				.filter(output -> output.getFileNameType() == JobOrderFileNameType.DIRECTORY
-						&& output.getDestination() == JobOrderDestination.DB)
-				.distinct()
-				.map(output -> new LevelJobOutputDto(output.getFamily().name(),
-						output.getFileName() + "^.*" + output.getFileType() + ".*$"))
-				.collect(toList());
+	@SafeVarargs
+	public final List<LevelJobOutputDto> physicalOutputs(final String ... outputTypes) {
+		return outputsOfFilenameType(
+				JobOrderFileNameType.PHYSICAL, 
+				output ->  new LevelJobOutputDto(
+						output.getFamily().name(), 
+						output.getFileName() + "^.*" + output.getFileType() + ".*$"
+				),
+				outputTypes
+		);
+	}
+	
+	@SafeVarargs
+	public final List<LevelJobOutputDto> directoryOutputs(final String ... outputTypes) {
+		return outputsOfFilenameType(
+				JobOrderFileNameType.DIRECTORY, 
+				output ->  new LevelJobOutputDto(
+						output.getFamily().name(), 
+						output.getFileName() + "^.*" + output.getFileType() + ".*$"
+				),
+				outputTypes
+		);
 	}
 
-	public final List<LevelJobOutputDto> regexpOutputs() {
+	@SafeVarargs
+	public final List<LevelJobOutputDto> regexpOutputs(final String ... outputTypes) {		
+		return outputsOfFilenameType(
+				JobOrderFileNameType.REGEXP, 
+				output -> new LevelJobOutputDto(output.getFamily().name(), output.getFileName()),
+				outputTypes
+		);
+	}
+	
+	final List<LevelJobOutputDto> outputsOfFilenameType(
+			final JobOrderFileNameType filenameType, 
+			final Function<JobOrderOutput,LevelJobOutputDto> levelJobOutputProvider,
+			final String ... outputTypes
+			
+	) {
+		final Predicate<JobOrderOutput> outputFilter = output -> 
+			output.getFileNameType() == filenameType &&
+			output.getDestination() == JobOrderDestination.DB;
+		
 		return outputsOf(jobOrder)
-				.filter(output -> output.getFileNameType() == JobOrderFileNameType.REGEXP
-						&& output.getDestination() == JobOrderDestination.DB)
+				.filter(filenameTypeFilter(outputTypes))
+				.filter(outputFilter)
 				.distinct()
-				.map(output -> new LevelJobOutputDto(output.getFamily().name(), output.getFileName()))
+				.map(levelJobOutputProvider)
 				.collect(toList());
 	}
 	
