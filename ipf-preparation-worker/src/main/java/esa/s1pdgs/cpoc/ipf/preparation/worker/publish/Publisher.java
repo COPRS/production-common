@@ -102,6 +102,7 @@ public class Publisher {
 		execJob.setIpfPreparationJobMessage(prepJob);	
 		execJob.setDebug(prepJob.getBody().isDebug());
 		execJob.setTimedOut(job.getTimedOut());
+		execJob.setOutputProductType(job.getOutputProductType());
 		
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)

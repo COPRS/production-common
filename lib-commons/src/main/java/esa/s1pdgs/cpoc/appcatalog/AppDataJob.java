@@ -55,6 +55,8 @@ public class AppDataJob {
      * Date of the last modification done on the job
      */
     private Date lastUpdateDate;
+    
+    private String outputProductType;
 
     /**
      * MQI messages linked to this job
@@ -363,6 +365,14 @@ public class AppDataJob {
 	public void setTimedOut(final boolean timedOut) {
 		this.timedOut = timedOut;
 	}
+	
+	public String getOutputProductType() {
+		return outputProductType;
+	}
+
+	public void setOutputProductType(final String outputProductType) {
+		this.outputProductType = outputProductType;
+	}
 
 	@Override
 	public String toString() {
@@ -371,14 +381,15 @@ public class AppDataJob {
 				+ ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
 				+ ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
 				+ ", reportingId=" + reportingId + ", prepJobMessage=" + prepJobMessage + ", processingGroup="
-				+ processingGroup + ", timedOut=" + timedOut + ", preselectedInputs=" + preselectedInputs + "]";
+				+ processingGroup + ", timedOut=" + timedOut + ", preselectedInputs=" + preselectedInputs 
+				+ ", outputProductType" + outputProductType + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(additionalInputs, creationDate, generation, id, lastUpdateDate, level, messages, pod,
 				prepJobMessage, processingGroup, product, productName, reportingId, startTime, state, stopTime,
-				taskTableName,timedOut, preselectedInputs);
+				taskTableName,timedOut, preselectedInputs, outputProductType);
 	}
 
 	@Override
@@ -408,6 +419,7 @@ public class AppDataJob {
 				&& state == other.state
 				&& Objects.equals(stopTime, other.stopTime) 
 				&& Objects.equals(taskTableName, other.taskTableName)
-				&& Objects.equals(preselectedInputs, other.preselectedInputs);
+				&& Objects.equals(preselectedInputs, other.preselectedInputs)
+				&& Objects.equals(outputProductType, other.outputProductType);
 	}
 }

@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
@@ -80,8 +81,8 @@ public class JobDispatcherImpl implements JobDispatcher {
 	        			LogUtils.toString(e)
 	        	)))
 				.publishMessageProducer(() -> {
-					if (jobs != null && !jobs.isEmpty()) {
-						AppDataJob firstJob = jobs.get(0);
+					if (CollectionUtil.isNotEmpty(jobs)) {
+						final AppDataJob firstJob = jobs.get(0);
 						
 			            final String tasktableFilename = firstJob.getTaskTableName();
 			            
@@ -106,12 +107,14 @@ public class JobDispatcherImpl implements JobDispatcher {
 	private final synchronized void handleJobs(final GenericMessageDto<IpfPreparationJob> message,
 			final List<AppDataJob> jobsFromMessage, final UUID reportingUid, final String tasktableFilename)
 			throws AbstractCodedException {
-		AppDataJob firstJob = jobsFromMessage.get(0);
+		final AppDataJob firstJob = jobsFromMessage.get(0);
 
 		final GenericMessageDto<CatalogEvent> firstMessage = firstJob.getMessages().get(0);
 
 		final Optional<List<AppDataJob>> jobForMess = appCat.findJobsFor(firstMessage);
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage);
+		
+		final String outputProductType = message.getBody().getOutputProductType();
 
 		// there is already a job for this message --> possible restart scenario -->
 		// just update the pod name
@@ -146,7 +149,8 @@ public class JobDispatcherImpl implements JobDispatcher {
 					job.setReportingId(reportingUid);
 					job.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
 					job.setPod(settings.getHostname());
-
+					job.setOutputProductType(outputProductType);
+					
 					final AppDataJob newlyCreatedJob = appCat.create(job);
 					LOGGER.info("dispatched job {}", newlyCreatedJob.getId());
 				}
@@ -158,8 +162,8 @@ public class JobDispatcherImpl implements JobDispatcher {
 	 * Returns the job of the list with the matching tasktable name. Returns null if
 	 * no matching job was found
 	 */
-	private AppDataJob getJobMatchingTasktable(List<AppDataJob> jobs, String taskTableName) {
-		for (AppDataJob job : jobs) {
+	private AppDataJob getJobMatchingTasktable(final List<AppDataJob> jobs, final String taskTableName) {
+		for (final AppDataJob job : jobs) {
 			if (job.getTaskTableName().equals(taskTableName)) {
 				return job;
 			}

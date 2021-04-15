@@ -35,6 +35,8 @@ public class IpfExecutionJob extends AbstractMessage {
      * Timeliness
      */
     private String timeliness;
+    
+    private String outputProductType; 
 
     /**
      * List of inputs needed to execute the job.<br/>
@@ -243,12 +245,20 @@ public class IpfExecutionJob extends AbstractMessage {
 	public void setTimedOut(final boolean timedOut) {
 		this.timedOut = timedOut;
 	}
+	
+	public String getOutputProductType() {
+		return outputProductType;
+	}
+
+	public void setOutputProductType(final String outputProductType) {
+		this.outputProductType = outputProductType;
+	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(creationDate, hostname, inputs, jobOrder, timeliness, keyObjectStorage, outputs, pools,
 				productFamily, productProcessMode, workDirectory,  uid, ipfPreparationJobMessage,
-				allowedActions, demandType, debug, retryCounter, timedOut);
+				allowedActions, demandType, debug, retryCounter, timedOut, outputProductType);
 	}
 
 	@Override
@@ -278,6 +288,7 @@ public class IpfExecutionJob extends AbstractMessage {
 				&& Objects.equals(uid, other.uid)
 				&& Objects.equals(ipfPreparationJobMessage, other.ipfPreparationJobMessage)
 				&& Objects.equals(allowedActions, other.getAllowedActions())
+				&& Objects.equals(outputProductType, other.outputProductType)
 		        && demandType == other.demandType
 		        && debug == other.debug
 		        && retryCounter == other.retryCounter;
@@ -290,7 +301,8 @@ public class IpfExecutionJob extends AbstractMessage {
 				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder +
 				", timeliness=" + timeliness + ", inputs=" + inputs + ", outputs=" + outputs +
 				", pools=" + pools + ", timedOut=" + timedOut + ", uid=" + uid +
-				", ipfPreparationJobMessage=" + ipfPreparationJobMessage + "]";
+				", ipfPreparationJobMessage=" + ipfPreparationJobMessage + ", outputProductType=" + 
+				outputProductType + "]";
 	}
 
 }
