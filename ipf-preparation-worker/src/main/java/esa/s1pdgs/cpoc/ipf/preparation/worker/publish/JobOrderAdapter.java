@@ -178,15 +178,15 @@ public final class JobOrderAdapter
 	}
 	
 	@SafeVarargs
-	private final Predicate<JobOrderOutput> filenameTypeFilter(final String ... outputTypes) {	
+	private final Predicate<JobOrderOutput> filenameTypeFilter(final JobOrderFileNameType fnt, final String ... outputTypes) {	
 		final List<String> allowedTypes = CollectionUtil.toList(outputTypes); 
 		
 		// empty or null means: all are allowed
 		if (allowedTypes.isEmpty() || StringUtil.isEmpty(allowedTypes.get(0))) {
-			LOGGER.debug("Using all outputs from tasktable");
+			LOGGER.debug("Using all {} outputs from tasktable", fnt);
 			return output -> true;
 		}		
-		LOGGER.debug("Using {} outputs from tasktable", allowedTypes);
+		LOGGER.debug("Using '{}' {} outputs from tasktable", allowedTypes, fnt);
 		return output -> allowedTypes.contains(output.getFileType());	
 	}
 	
@@ -234,7 +234,7 @@ public final class JobOrderAdapter
 			output.getDestination() == JobOrderDestination.DB;
 		
 		return outputsOf(jobOrder)
-				.filter(filenameTypeFilter(outputTypes))
+				.filter(filenameTypeFilter(filenameType, outputTypes))
 				.filter(outputFilter)
 				.distinct()
 				.map(levelJobOutputProvider)
