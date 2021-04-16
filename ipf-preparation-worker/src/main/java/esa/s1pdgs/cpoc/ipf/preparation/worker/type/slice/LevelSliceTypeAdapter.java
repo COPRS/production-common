@@ -158,54 +158,49 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			for (final TaskTableInputAlternative alternative : ttInput.getInput().getAlternatives()) {		
 				final SearchMetadataQuery query = taskTableAdapter.metadataSearchQueryFor(alternative);
 								
-				try {
-					if (product.preselectedInputs().isEmpty()) {
-						LOGGER.debug("Checking for {} using  (start:{}, stop:{})", alternative.getFileType(), 
-								product.getSegmentStartDate(), product.getSegmentStopDate());
+				try {	
+					LOGGER.debug("Checking for {} using  (start:{}, stop:{})", alternative.getFileType(), 
+							product.getSegmentStartDate(), product.getSegmentStopDate());
+					
+					final List<SearchMetadata> queryResults = Retries.performWithRetries(
+							() -> metadataClient.search(
+									query,
+									sanitizeDateString(product.getSegmentStartDate()),
+									sanitizeDateString(product.getSegmentStopDate()),
+									productAdapter.getSatelliteId(),
+									productAdapter.getInsConfId(),
+									productAdapter.getProcessMode(),
+									"NONE" // AUX_RES doesn't have a polarisation (i hope)
+							), 
+							"Query " + query, 
+							3, // TODO /FIXME make configurable
+							5000L // TODO /FIXME make configurable
+					);
+								
+					if (!queryResults.isEmpty()) {									
+						final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
+						preselected.setTaskTableInputReference(ttInput.getReference());
+						preselected.setFileType(alternative.getFileType());		
+						preselected.setFileNameType(alternative.getFileNameType().toString());
 						
-						final List<SearchMetadata> queryResults = Retries.performWithRetries(
-								() -> metadataClient.search(
-										query,
-										sanitizeDateString(product.getSegmentStartDate()),
-										sanitizeDateString(product.getSegmentStopDate()),
-										productAdapter.getSatelliteId(),
-										productAdapter.getInsConfId(),
-										productAdapter.getProcessMode(),
-										"NONE" // AUX_RES doesn't have a polarisation (i hope)
-								), 
-								"Query " + query, 
-								3, // TODO /FIXME make configurable
-								5000L // TODO /FIXME make configurable
-						);
-									
-						if (!queryResults.isEmpty()) {									
-							final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
-							preselected.setTaskTableInputReference(ttInput.getReference());
-							preselected.setFileType(alternative.getFileType());		
-							preselected.setFileNameType(alternative.getFileNameType().toString());
-							
-							final List<AppDataJobFile> files = new ArrayList<>();
-							for (final SearchMetadata meta : queryResults) {														
-								files.add(new AppDataJobFile(
-										meta.getProductName(), 
-										meta.getKeyObjectStorage(), 
-										TaskTableAdapter.convertDateToJobOrderFormat(meta.getValidityStart()),
-										TaskTableAdapter.convertDateToJobOrderFormat(meta.getValidityStop()),
-										meta.getAdditionalProperties()
-								));
-							}
-							preselected.setFiles(files);
-							
-							LOGGER.debug("Adding preselected inputs: {}", preselected);
-							product.addPreselectedInputs(preselected);
-							
-							foundAux = true;
-							break; // don't query any further
+						final List<AppDataJobFile> files = new ArrayList<>();
+						for (final SearchMetadata meta : queryResults) {														
+							files.add(new AppDataJobFile(
+									meta.getProductName(), 
+									meta.getKeyObjectStorage(), 
+									TaskTableAdapter.convertDateToJobOrderFormat(meta.getValidityStart()),
+									TaskTableAdapter.convertDateToJobOrderFormat(meta.getValidityStop()),
+									meta.getAdditionalProperties()
+							));
 						}
-					}
-					else {
-						LOGGER.debug("Got already following preselected inputs: {}", product.preselectedInputs());
-					}
+						preselected.setFiles(files);
+						
+						LOGGER.debug("Adding preselected inputs: {}", preselected);
+						product.addPreselectedInputs(preselected);
+						
+						foundAux = true;
+						break; // don't query any further
+					}			
 				} catch (final InterruptedException e) {
 					LOGGER.error(e);
 					throw new IpfPrepWorkerInputsMissingException(Collections.emptyMap());
