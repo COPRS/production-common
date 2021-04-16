@@ -165,7 +165,12 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				.newResult();
 	}
 
-	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException, InterruptedException {
+	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException, InterruptedException, PripPublishingException {
+		
+		if (pripMetadataAlreadyExists(publishingJob.getKeyObjectStorage())) {
+			throw new PripPublishingException(String.format("PRiP metadata for file %s already exists!", removeZipSuffix(publishingJob.getKeyObjectStorage())));
+		}
+		
 		final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
 
 		PripMetadata pripMetadata = new PripMetadata();		
@@ -236,6 +241,19 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		} else {
 			return true;
 		}
+	}
+	
+	private boolean pripMetadataAlreadyExists(final String key) throws InterruptedException {
+	 if(Retries.performWithRetries(() -> {
+		 return pripMetadataRepo.findByName(key);
+		 },
+			 "PRIP metadata query for " + key,
+			 props.getMetadataUnavailableRetriesNumber(),
+			 props.getMetadataUnavailableRetriesIntervalMs()) == null) {
+		 return false;
+	 } else {
+		 return true;
+	 }
 	}
 
 	private SearchMetadata queryMetadata(final ProductFamily productFamily, final String keyObjectStorage) throws MetadataQueryException, InterruptedException {

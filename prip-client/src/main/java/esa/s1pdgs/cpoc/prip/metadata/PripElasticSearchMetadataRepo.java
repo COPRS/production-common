@@ -137,6 +137,31 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
+	public PripMetadata findByName(String name) throws Exception {
+		LOGGER.info("finding PRIP metadata with name {}", name);
+
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		sourceBuilder.query(QueryBuilders.matchQuery(PripMetadata.FIELD_NAMES.NAME.fieldName(), name));
+
+		final SearchRequest searchRequest = new SearchRequest(ES_INDEX);
+		searchRequest.source(sourceBuilder);
+
+		PripMetadata pripMetadata = null;
+
+		final SearchResponse searchResponse = this.restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+		LOGGER.trace("response {}", searchResponse);
+
+		if (searchResponse.getHits().getHits().length > 0) {
+			pripMetadata = this.mapSearchHitToPripMetadata(searchResponse.getHits().getHits()[0]);
+			LOGGER.info("PRIP metadata with name {} found", name);
+		} else {
+			LOGGER.info("PRIP metadata with name {} not found", name);
+		}
+
+		return pripMetadata;
+	}
+
+	@Override
 	public List<PripMetadata> findAll(Optional<Integer> top, Optional<Integer> skip, List<PripSortTerm> sortTerms) {
 		LOGGER.info("finding PRIP metadata");
 
@@ -241,15 +266,19 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		List<PripMetadata> result = new ArrayList<>();
 		if (skip.orElse(0) <= 0 || skip.orElse(0) + top.orElse(0) <= this.maxSearchHits) {
 			// Paging through less than maxSearchHits -> default behaviour
-			LOGGER.info("Handling query with skip={} and top={} (max-search-hits={}) -> Use elastic classical pagination", skip.orElse(0), top.orElse(0), this.maxSearchHits);
+			LOGGER.info(
+					"Handling query with skip={} and top={} (max-search-hits={}) -> Use elastic classical pagination",
+					skip.orElse(0), top.orElse(0), this.maxSearchHits);
 			result.addAll(convert(this.query(queryBuilder, top, skip, sortTerms)));
 		} else {
 			// Paging through more than maxSearchHits ->
-			// 1. iterate to offset (first page by using default mechanism, each further page by using search_after)
+			// 1. iterate to offset (first page by using default mechanism, each further
+			// page by using search_after)
 			// 2. search_after(offset)
 			Integer offset = skip.orElse(0);
 			Integer pageSize = offset > maxSearchHits ? maxSearchHits : offset;
-			List<SearchHit> offsetList = this.queryOffset(queryBuilder, Optional.of(pageSize), Optional.of(0), sortTerms, false, null);
+			List<SearchHit> offsetList = this.queryOffset(queryBuilder, Optional.of(pageSize), Optional.of(0),
+					sortTerms, false, null);
 			SearchHit offsetSearchHit = offsetList.get(offsetList.size() - 1);
 			while (offset > maxSearchHits) {
 				offsetList = this.queryOffset(queryBuilder, top, Optional.of(pageSize), sortTerms, true,
@@ -259,7 +288,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 				pageSize = offset > maxSearchHits ? maxSearchHits : offset;
 			}
 
-			LOGGER.info("Handling query with skip={} and top={} (max-search-hits={}) -> Use elastic search_after", skip.orElse(0), top.orElse(0), this.maxSearchHits);
+			LOGGER.info("Handling query with skip={} and top={} (max-search-hits={}) -> Use elastic search_after",
+					skip.orElse(0), top.orElse(0), this.maxSearchHits);
 			offsetList = this.queryOffset(queryBuilder, top, Optional.of(pageSize), sortTerms, true,
 					offsetSearchHit.getSortValues());
 			result.addAll(convert(offsetList));
@@ -403,7 +433,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
-		//TODO Also support LineString...
+		// TODO Also support LineString...
 		if (input instanceof Polygon) {
 			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
 			final Polygon polygon = (Polygon) input;
@@ -504,11 +534,12 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		if (null != footprintJson && !footprintJson.isEmpty()) {
 			final String footprintGeoshapeType = (String) footprintJson.get(PripGeoShape.FIELD_NAMES.TYPE.fieldName());
-			
+
 			if (GeoShapeType.POLYGON.wktName().equalsIgnoreCase(footprintGeoshapeType)) {
 				final List<Object> footprintCoordinatesOuterArray = (List<Object>) footprintJson
 						.get(PripGeoShape.FIELD_NAMES.COORDINATES.fieldName());
-				final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray.get(0);
+				final List<Object> footprintCoordinatesInnerArray = (List<Object>) footprintCoordinatesOuterArray
+						.get(0);
 
 				final List<PripGeoCoordinate> pripGeoCoordinates = new ArrayList<>();
 				for (final Object coordPair : Objects.requireNonNull(footprintCoordinatesInnerArray)) {
@@ -531,11 +562,10 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 				}
 				return new GeoShapeLineString(pripGeoCoordinates);
 			} else {
-				throw new IllegalArgumentException(
-						"PRIP metadata attribute value of " + PripMetadata.FIELD_NAMES.FOOTPRINT.fieldName() + "."
-								+ PripGeoShape.FIELD_NAMES.TYPE.fieldName() + " must be '"
-								+ GeoShapeType.POLYGON.wktName() + "' or '" + 
-										GeoShapeType.LINESTRING.wktName() + "' but is '" + footprintGeoshapeType + "'!");
+				throw new IllegalArgumentException("PRIP metadata attribute value of "
+						+ PripMetadata.FIELD_NAMES.FOOTPRINT.fieldName() + "."
+						+ PripGeoShape.FIELD_NAMES.TYPE.fieldName() + " must be '" + GeoShapeType.POLYGON.wktName()
+						+ "' or '" + GeoShapeType.LINESTRING.wktName() + "' but is '" + footprintGeoshapeType + "'!");
 			}
 		}
 		return null;
