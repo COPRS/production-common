@@ -39,9 +39,9 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
 public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 	private static final String[] AUX_ORB_TYPES = new String[] {
-			"AUX_POE",
-			"AUX_RES",
-			"AUX_PRE"
+			"AUX_POEORB",
+			"AUX_RESORB",
+			"AUX_PREORB"
 	};
 	
 	private final MetadataClient metadataClient;
