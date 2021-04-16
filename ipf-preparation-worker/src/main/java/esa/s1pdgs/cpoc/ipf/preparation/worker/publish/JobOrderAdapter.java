@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.ElementMapper;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -181,9 +182,11 @@ public final class JobOrderAdapter
 		final List<String> allowedTypes = CollectionUtil.toList(outputTypes); 
 		
 		// empty or null means: all are allowed
-		if (allowedTypes.isEmpty()) {
+		if (allowedTypes.isEmpty() || StringUtil.isEmpty(allowedTypes.get(0))) {
+			LOGGER.debug("Using all outputs from tasktable");
 			return output -> true;
-		}
+		}		
+		LOGGER.debug("Using {} outputs from tasktable", allowedTypes);
 		return output -> allowedTypes.contains(output.getFileType());	
 	}
 	
