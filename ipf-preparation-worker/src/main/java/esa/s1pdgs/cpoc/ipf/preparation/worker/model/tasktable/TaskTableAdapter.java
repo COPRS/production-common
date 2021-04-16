@@ -136,7 +136,11 @@ public class TaskTableAdapter {
 					
 					for (final String mappedTypes : types) {
 						if (mappedTypes.matches(fileType)) {
-							return Optional.of(new TaskTableInputAdapter(input.getTaskTableInputReference(), ttInput));
+							return Optional.of(new TaskTableInputAdapter(
+									input.getTaskTableInputReference(), 
+									ttInput,
+									elementMapper
+							));
 						}
 					}
 				}	
