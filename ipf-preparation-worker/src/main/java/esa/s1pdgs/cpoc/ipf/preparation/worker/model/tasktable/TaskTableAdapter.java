@@ -131,9 +131,13 @@ public class TaskTableAdapter {
 				final TaskAndInput ti = optionalTask.get();
 				final TaskTableInput ttInput = ti.getInput();
 							
-				for (final TaskTableInputAlternative alternative : ttInput.getAlternatives()) {
-					if (types.contains(alternative.getFileType())) {
-						return Optional.of(new TaskTableInputAdapter(input.getTaskTableInputReference(), ttInput));
+				for (final TaskTableInputAlternative alternative : ttInput.getAlternatives()) {	
+					final String fileType = elementMapper.mappedFileType(alternative.getFileType());
+					
+					for (final String mappedTypes : types) {
+						if (mappedTypes.matches(fileType)) {
+							return Optional.of(new TaskTableInputAdapter(input.getTaskTableInputReference(), ttInput));
+						}
 					}
 				}	
 			}
