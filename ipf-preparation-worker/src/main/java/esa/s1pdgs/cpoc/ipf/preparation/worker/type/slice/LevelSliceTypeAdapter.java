@@ -131,21 +131,21 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			product.addAcn(acn);
 			
 			final TaskTableInputAdapter ttInput = taskTableAdapter
-					.firstInputContainingOneOf(product.getProductType())
+					.firstInputContainingOneOf(acn.getProductType())
 					.orElseThrow(() -> new RuntimeException(
 							String.format(
 									"Could not find ACN input using type %s in %s", 
-									product.getProductType(), 
+									acn.getProductType(), 
 									taskTableAdapter
 							)
 					));
 						
 			final TaskTableInputAlternative alt = ttInput
-					.getAlternativeForType(product.getProductType())
+					.getAlternativeForType(acn.getProductType())
 					.orElseThrow(() -> new RuntimeException(
 							String.format(
 									"Could not find ACN alternative type %s (input %s) in %s", 
-									product.getProductType(), 
+									acn.getProductType(), 
 									ttInput.getReference(),
 									taskTableAdapter
 							)
