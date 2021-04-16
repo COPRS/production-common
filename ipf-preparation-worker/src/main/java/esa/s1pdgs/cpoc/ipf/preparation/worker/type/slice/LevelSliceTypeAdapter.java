@@ -128,45 +128,7 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			product.setTotalNbOfSlice(acn.getNumberOfSlices());
 			product.setSegmentStartDate(acn.getValidityStart());
 			product.setSegmentStopDate(acn.getValidityStop());
-			product.addAcn(acn);
-			
-			final TaskTableInputAdapter ttInput = taskTableAdapter
-					.firstInputContainingOneOf(acn.getProductType())
-					.orElseThrow(() -> new RuntimeException(
-							String.format(
-									"Could not find ACN input using type %s in %s", 
-									acn.getProductType(), 
-									taskTableAdapter
-							)
-					));
-						
-			final TaskTableInputAlternative alt = ttInput
-					.getAlternativeForType(acn.getProductType())
-					.orElseThrow(() -> new RuntimeException(
-							String.format(
-									"Could not find ACN alternative type %s (input %s) in %s", 
-									acn.getProductType(), 
-									ttInput.getReference(),
-									taskTableAdapter
-							)
-					));
-			
-			final AppDataJobPreselectedInput preselected = new AppDataJobPreselectedInput();
-			preselected.setTaskTableInputReference(ttInput.getReference());
-			preselected.setFileType(alt.getFileType());		
-			preselected.setFileNameType(alt.getFileNameType().toString());
-			
-			final AppDataJobFile appJobFile = new AppDataJobFile(
-					acn.getProductName(), 
-					acn.getKeyObjectStorage(), 
-					TaskTableAdapter.convertDateToJobOrderFormat(acn.getValidityStart()),
-					TaskTableAdapter.convertDateToJobOrderFormat(acn.getValidityStop()),
-					acn.getAdditionalProperties()
-			);
-			preselected.setFiles(Collections.singletonList(appJobFile));
-			
-			LOGGER.debug("Adding preselected ACN input: {}", preselected);			
-			product.addPreselectedInputs(preselected);			
+			product.addAcn(acn);		
 			
 		} catch (final MetadataQueryException e) {
 			LOGGER.debug("L0 acn for {} not found in MDC (error was {}). Trying next time...", product.getProductName(), 
