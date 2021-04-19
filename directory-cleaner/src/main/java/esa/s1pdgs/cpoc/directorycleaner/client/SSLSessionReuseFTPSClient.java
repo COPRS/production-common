@@ -11,40 +11,46 @@ import javax.net.ssl.SSLSessionContext;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.commons.net.ftp.FTPSClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SSLSessionReuseFTPSClient extends FTPSClient {
+
+	protected final Logger logger = LoggerFactory.getLogger(SSLSessionReuseFTPSClient.class);
 
 	public SSLSessionReuseFTPSClient(String protocol, boolean isImplicit) {
 		super(protocol, isImplicit);
 	}
 	
-    // adapted from: disseminator-worker
+    // adapted from:
+    // https://trac.cyberduck.io/browser/trunk/ftp/src/main/java/ch/cyberduck/core/ftp/FTPClient.java
     @Override
     protected void _prepareDataSocket_(final Socket socket) throws IOException {
-        if (socket instanceof SSLSocket) {
-            // Control socket is SSL
+    	logger.trace("Preparing data socket" + (socket instanceof SSLSocket ? " for SSL" : " without SSL"));
+    	if (socket instanceof SSLSocket) {
             final SSLSession session = ((SSLSocket) _socket_).getSession();
             if (session.isValid()) {
+            	logger.trace("Found SSL session");
                 final SSLSessionContext context = session.getSessionContext();
                 try {
                     final Field sessionHostPortCache = context.getClass().getDeclaredField("sessionHostPortCache");
                     sessionHostPortCache.setAccessible(true);
                     final Object cache = sessionHostPortCache.get(context);
-                    final Method method = cache.getClass().getDeclaredMethod("put", Object.class, Object.class);
-                    method.setAccessible(true);
-                    method.invoke(cache, String
-                            .format("%s:%s", socket.getInetAddress().getHostName(), String.valueOf(socket.getPort()))
-                            .toLowerCase(Locale.ROOT), session);
-                    method.invoke(cache, String
-                            .format("%s:%s", socket.getInetAddress().getHostAddress(), String.valueOf(socket.getPort()))
-                            .toLowerCase(Locale.ROOT), session);
+                    final Method putMethod = cache.getClass().getDeclaredMethod("put", Object.class, Object.class);
+                    putMethod.setAccessible(true);
+                    final Method getHostMethod = socket.getClass().getMethod("getPeerHost");
+                    getHostMethod.setAccessible(true);
+                    Object peerHost = getHostMethod.invoke(socket);
+                    putMethod.invoke(cache, String.format("%s:%s", peerHost, socket.getPort()).toLowerCase(Locale.ROOT), session);
+                    logger.info("Configured data socket for SSL session reuse");
                 } catch (NoSuchFieldException e) {
-                    throw new IOException(e);
+                	logger.error("No field sessionHostPortCache in SSLSessionContext", e);
+                	throw new IOException(e);
                 } catch (Exception e) {
-                    throw new IOException(e);
+                	throw new IOException(e);
                 }
             } else {
-                //throw new IOException("Invalid SSL Session");
+            	logger.warn(String.format("SSL session %s for socket %s is not rejoinable", session, socket));
             }
         }
     }
