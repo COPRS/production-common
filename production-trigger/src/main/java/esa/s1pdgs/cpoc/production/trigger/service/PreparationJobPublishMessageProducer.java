@@ -77,9 +77,7 @@ public final class PreparationJobPublishMessageProducer {
             	}
             } 
             if (messageDtos.isEmpty()) {
-            	// TODO/FIXME replace with a better reporting end message. This needs to be tracked in REPORT-API
-            	// so for the time being, the misleading message is kept here
-                reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName)); 
+                reporting.end(new ReportingMessage("Product %s is not intersecting EW slice mask, skipping", productName)); 
             }
             LOGGER.info("Dispatching product {}", productName);
             return new MqiPublishingJob<IpfPreparationJob>(messageDtos);          
