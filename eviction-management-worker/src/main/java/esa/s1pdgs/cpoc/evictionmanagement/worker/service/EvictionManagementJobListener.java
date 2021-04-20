@@ -109,7 +109,7 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 				.newResult();
 	}
 	
-	private MqiConsumer<EvictionManagementJob> newMqiConsumer() {
+	MqiConsumer<EvictionManagementJob> newMqiConsumer() {
 		return new MqiConsumer<>(
 				mqiClient,
 				ProductCategory.EVICTION_MANAGEMENT_JOBS,
@@ -120,7 +120,7 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 				appStatus);
 	}
 
-	private MqiPublishingJob<EvictionEvent> createOutputMessage(final long inputMessageId,
+	MqiPublishingJob<EvictionEvent> createOutputMessage(final long inputMessageId,
 			final EvictionManagementJob evictionJob, final UUID reportingUid) {
 		final EvictionEvent evictionEvent = new EvictionEvent();
 		evictionEvent.setProductFamily(evictionJob.getProductFamily());
