@@ -60,7 +60,7 @@ public class DataLifecycleTriggerRestControllerTest extends RestControllerTest {
 		// TODO
 				"  }";
 
-		mockMvc.perform(get("/api/v1/products/dummyProductName").contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(get("/v1/products/dummyProductName").contentType(MediaType.APPLICATION_JSON)
 				.header("ApiKey", API_KEY)).andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(content().json(jsonContent));
@@ -68,27 +68,27 @@ public class DataLifecycleTriggerRestControllerTest extends RestControllerTest {
 	
 //	@Test
 //	public void test_getProduct_400() throws Exception {
-//		mockMvc.perform(get("/api/v1/products/invalidParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+//		mockMvc.perform(get("/v1/products/invalidParameter").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 //	        API_KEY)).andExpect(status().isBadRequest());
 //	}
 //	
 //	@Test
 //	public void test_getProduct_403() throws Exception {
-//		mockMvc.perform(get("/api/v1/products/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+//		mockMvc.perform(get("/v1/products/1").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 //	        "wrong key")).andExpect(status().isForbidden());
 //	}
 
 //	@Test
 //	public void test_getProduct_404() throws Exception {
 //		doThrow(new DataLifecycleMetadataNotFoundException("error")).when(delegator).getProduct("foo");
-//		mockMvc.perform(get("/api/v1/products/foo").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+//		mockMvc.perform(get("/v1/products/foo").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 //	        API_KEY)).andExpect(status().isNotFound());
 //	}
 
 //	@Test
 //	public void test_getProduct_500() throws Exception {
 //	    doThrow(new DataLifecycleTriggerInternalServerErrorException("error")).when(delegator).getProduct("foo");
-//	    mockMvc.perform(get("/api/v1/products/foo").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+//	    mockMvc.perform(get("/v1/products/foo").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 //	        API_KEY)).andExpect(status().isInternalServerError());
 //	}
 	
@@ -100,7 +100,7 @@ public class DataLifecycleTriggerRestControllerTest extends RestControllerTest {
 //		// TODO
 //				"  }]";
 //
-//		mockMvc.perform(get("/api/v1/products/dummyProductName").contentType(MediaType.APPLICATION_JSON)
+//		mockMvc.perform(get("/v1/products/dummyProductName").contentType(MediaType.APPLICATION_JSON)
 //				.header("ApiKey", API_KEY)).andExpect(status().isOk())
 //				.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
 //				.andExpect(content().json(jsonContent));

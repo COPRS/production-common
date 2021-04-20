@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerB
 import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("v1")
 public class DataLifecycleTriggerRestController {
 
 	// TODO: put api_key in a crypted place

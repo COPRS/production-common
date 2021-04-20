@@ -107,22 +107,20 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		return new MqiMessageEventHandler.Builder<CatalogEvent>(ProductCategory.CATALOG_EVENT)
 				.onSuccess(res -> {
 					// S1PRO-2337
+					Map<String, String> quality = new LinkedHashMap<>();
 					final GenericPublicationMessageDto<CatalogEvent> pub = res.get(0);
 					if (pub.getFamily() != ProductFamily.EDRS_SESSION) {
-						try {
-							final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
-							Map<String, String> quality = new LinkedHashMap<>();
-							quality.put(QUALITY_MISSING_ELEMENT_COUNT, eventAdapter.qualityNumOfMissingElements());
-							quality.put(QUALITY_CORRUPTED_ELEMENT_COUNT, eventAdapter.qualityNumOfCorruptedElements());
-							reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction"),
-									quality);
-						} catch (IllegalArgumentException e) {
-							LOG.warn("Could not add quality information to reporting output: {}", e.getMessage());
-							reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction"));
+						final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
+						if (eventAdapter.qualityNumOfMissingElements() != null) {
+							quality.put(QUALITY_MISSING_ELEMENT_COUNT, eventAdapter.qualityNumOfMissingElements().toString());
 						}
-					} else {
-						reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction"));
-					}
+						if (eventAdapter.qualityNumOfCorruptedElements() != null) {
+							quality.put(QUALITY_CORRUPTED_ELEMENT_COUNT, eventAdapter.qualityNumOfCorruptedElements().toString());
+						}
+					} 
+					reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction"),
+							quality);
+					
 				})
 				.onWarning(res -> reporting.warning(reportingOutput(res), new ReportingMessage("End metadata extraction")))
 				.onError(e -> reporting

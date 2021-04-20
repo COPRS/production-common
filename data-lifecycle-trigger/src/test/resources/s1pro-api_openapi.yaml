@@ -53,8 +53,9 @@ info:
       ### V1.5.2
       - updated nbRetries and pratition to integer
       - added summary to FailedProcessing
-      ### V1.6.0-Draft
+      ### V1.6.0
       - added products endpoint and schema
+      - added consistency check functions for data lifecycle
       
       ## Usage Notes
       
@@ -824,7 +825,7 @@ paths:
     post:
       tags:
       - ConsistencyCheck
-      summary: Trigger validation for inconsistency between Catalog and OBS for all products ingested in the time interval 'now-X' and 'now-Y' where X and Y are configurable. The algorithm is basically to search for all products ingested in the time frame in catalog and all files stored in the time frame in the OBS and compare both lists. Any entry only found in one of the lists is double-checked for existence in the other storage and if it's rearlly missing, it is reported via S1PRO-REPORT-API.
+      summary: Trigger validation for inconsistency between Catalog and OBS for all products ingested in the time interval 'now-X' and 'now-Y' where X and Y are configurable. The algorithm is basically to search for all products ingested in the time frame in catalog and all files stored in the time frame in the OBS and compare both lists. Any entry only found in one of the lists is double-checked for existence in the other storage and if it's really missing, it is reported via S1PRO-REPORT-API.
       operationId: validate
       responses:
         200:
@@ -834,6 +835,80 @@ paths:
               schema:
                 type: boolean
                 description: true if validation was started
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /syncDataLifecycleIndexFromOBS:
+    post:
+      tags:
+      - ConsistencyCheck
+      summary: Trigger validation for inconsistency between Data-Lifecycle and OBS for all products ingested in the time interval 'startDate' and 'endDate'. The algorithm is basically to search for all products ingested in the time frame in OBS (buckets derived from product families with retention configuration) and adding missing product families and paths to existing data lifecycle metadata entries or if needed create new entries.
+      operationId: syncDataLifecycleIndexFromOBS
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  description: start date
+                  example: '2016-01-20T12:40:37.464Z'
+                endDate:
+                  type: string
+                  description: end date
+                  example: '2016-01-21T12:40:37.464Z'
+      responses:
+        200:
+          description: OK, syncDataLifecycleIndexFromOBS was successfully triggered.
+          content: 
+            application/json:
+              schema:
+                type: boolean
+                description: true if syncDataLifecycleIndexFromOBS was started
+        403:
+          description: Forbidden, e.g. Invalid API key supplied
+          content: {}
+        500:
+          description: Internal Server Error
+          content: {}
+      deprecated: false
+      security:
+      - ApiKey: []
+  /syncDataLifecycleIndexWithOBS:
+    post:
+      tags:
+      - ConsistencyCheck
+      summary: Trigger validation for inconsistency between Data-Lifecycle and OBS for all products ingested in the time interval 'startDate' and 'endDate'. The algorithm is basically to search for all products ingested in the time frame in data lifecycle index and checking whether the files still exist in OBS and if not removing the path value from the data lifecycle metadata, indicating the file does not exist anymore.
+      operationId: syncDataLifecycleIndexWithOBS
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  description: start date
+                  example: '2016-01-20T12:40:37.464Z'
+                endDate:
+                  type: string
+                  description: end date
+                  example: '2016-01-21T12:40:37.464Z'
+      responses:
+        200:
+          description: OK, syncDataLifecycleIndexWithOBS was successfully triggered.
+          content: 
+            application/json:
+              schema:
+                type: boolean
+                description: true if syncDataLifecycleIndexWithOBS was started
         403:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
@@ -1497,6 +1572,14 @@ components:
             - L1
             - L2
             - SPP_OBS
+        tasktableName:
+          description: "name of the tasktable to use for the production. If not provided, default tasktable det"
+          type: string
+          nullable: true
+        outputProductType:
+          description: "output product type name in the tasktable for the output to upload and publish. If not defined, all outputs will be uploaded and published. `debug` takes a higher precendence than this parameter"
+          type: string
+          nullable: true            
     AbstractDto:
       description: base object for all DTO objects on failedProcessings
       type: object
@@ -1647,6 +1730,14 @@ components:
               type: string
               description: the product type
               example: AUX_RESORB
+            tasktableName:
+              description: "name of the tasktable to use for the production. If not provided, default tasktable det"
+              type: string
+              nullable: true
+            outputProductType:
+              description: "output product type name in the tasktable for the output to upload and publish. If not defined, all outputs will be uploaded and published. `debug` takes a higher precendence than this parameter"
+              type: string
+              nullable: true   
     AbstractJobDto:
       description: data transfer object for jobs
       allOf: 

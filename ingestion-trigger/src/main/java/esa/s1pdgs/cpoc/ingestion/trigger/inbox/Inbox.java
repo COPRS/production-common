@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.PositiveFileSizeFilter;
@@ -40,6 +41,8 @@ public final class Inbox {
 	private final String timeliness;
 	private final ProductNameEvaluator nameEvaluator;
 	private final int stationRetentionTime;
+	private final int publishMaxRetries;
+    private final long publishTempoRetryMs;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
@@ -52,7 +55,9 @@ public final class Inbox {
 			final int stationRetentionTime,
 			final String mode,
 			final String timeliness,
-			final ProductNameEvaluator nameEvaluator
+			final ProductNameEvaluator nameEvaluator,
+			final int publishMaxRetries,
+			final long publishTempoRetryMs
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
@@ -65,6 +70,8 @@ public final class Inbox {
 		this.mode = mode;
 		this.timeliness = timeliness;
 		this.nameEvaluator = nameEvaluator;
+		this.publishMaxRetries = publishMaxRetries;
+		this.publishTempoRetryMs = publishTempoRetryMs;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 	}
 	
@@ -162,7 +169,7 @@ public final class Inbox {
 		try {
 			final String publishedName = nameEvaluator.evaluateFrom(entry);
 			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
-			publish(
+			publishWithRetries(
 					new IngestionJob(
 						family, 
 						publishedName,
@@ -186,6 +193,15 @@ public final class Inbox {
 			log.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
 		}
 		return Optional.empty();
+	}
+	
+	private void publishWithRetries(IngestionJob ingestionJob) throws InterruptedException {
+		Retries.performWithRetries(
+				() -> {	this.publish(ingestionJob); return null;}, 
+    			"Publishing of IngestionJob for " + ingestionJob.getProductName(),
+    			publishMaxRetries,
+    			publishTempoRetryMs
+		);
 	}
 
 	private void publish(IngestionJob ingestionJob) {

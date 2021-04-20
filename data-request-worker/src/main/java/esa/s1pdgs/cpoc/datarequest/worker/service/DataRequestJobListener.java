@@ -125,7 +125,7 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 				.newResult();
 	}
 	
-	private MqiConsumer<DataRequestJob> newMqiConsumer() {
+	MqiConsumer<DataRequestJob> newMqiConsumer() {
 		return new MqiConsumer<>(
 				mqiClient,
 				ProductCategory.DATA_REQUEST_JOBS,
@@ -136,7 +136,7 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 				appStatus);
 	}
 	
-	private MqiPublishingJob<DataRequestEvent> createOutputMessage(final long inputMessageId,
+	MqiPublishingJob<DataRequestEvent> createOutputMessage(final long inputMessageId,
 			final DataRequestJob dataRequestJob, final UUID reportingUid, final DataRequestType dataRequestType) {
 		
 		final DataRequestEvent dataRequestEvent = new DataRequestEvent();
@@ -150,7 +150,7 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 		return new MqiPublishingJob<DataRequestEvent>(Collections.singletonList(outputMessage));
 	}
 
-	private boolean checkAvailableInZipBucket(final DataRequestJob dataRequestJob) throws Exception {
+	boolean checkAvailableInZipBucket(final DataRequestJob dataRequestJob) throws Exception {
 		return obsClient.exists(
 				new ObsObject(
 						CompressionEventUtil.composeCompressedProductFamily(dataRequestJob.getProductFamily()),
