@@ -92,9 +92,13 @@ final class FailedProcessingFactory
 					+ "subset of parameters will be available", id);				
 		}
 		
+		Object obj = null;
+		
 		if (predecessorMessage != null) {
-			predecessorTopic = predecessorMessage.getTopic();				
+			predecessorTopic = predecessorMessage.getTopic();
+			obj = predecessorMessage.getDto();		    
 		}		
+		
 		return new FailedProcessing(
 				id,
 				category,
@@ -113,7 +117,7 @@ final class FailedProcessingFactory
 				lastAssignmentDate,
 				failureDate,
 				failureMessage,
-				predecessorMessage,
+				obj,
 				predecessorTopic
 		);
 	}	
