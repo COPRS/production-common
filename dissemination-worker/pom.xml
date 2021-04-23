@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>de.werum.s1pdgs</groupId>
 		<artifactId>s1pro-core</artifactId>
-		<version>3.31.0</version>
+		<version>3.31.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>s1pro-core-dissemination-worker</artifactId>
