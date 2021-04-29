@@ -199,7 +199,6 @@ public class TestPlanAndReportMetadataExtractor {
    	
     	assertEquals(inputMessage.getBody().getProductName(), result.get("productName"));
     	assertEquals(inputMessage.getBody().getCreationDate(), result.get("insertionTime"));
-    	assertEquals(inputMessage.getBody().getKeyObjectStorage(), result.get("keyObjectStorage"));
 
     	verify(obsClient, times(0)).download(Mockito.any(), Mockito.any()); // no unnecessary download shall happen
     }
