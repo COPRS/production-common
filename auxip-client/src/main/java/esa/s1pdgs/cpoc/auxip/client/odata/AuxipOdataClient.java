@@ -270,7 +270,7 @@ public class AuxipOdataClient implements AuxipClient {
 		return response.getBody();
 	}
 
-	private List<AuxipProductMetadata> mapToMetadata(final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response) {
+	List<AuxipProductMetadata> mapToMetadata(final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response) {
 		final List<AuxipProductMetadata> result = new ArrayList<>();
 
 		if (null != response) {
