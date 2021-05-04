@@ -31,6 +31,8 @@ public class DirectoryCleanerProperties {
 	private int port = -1; // --> not defined
 	private boolean implicitSsl = false;
 	private boolean ftpPassiveMode = false;
+	private boolean ftpsSslSessionReuse = true;
+	private boolean useExtendedMasterSecret = false;
 	private String username = null;
 	private String password = null;
 	private String path = null;
@@ -52,7 +54,9 @@ public class DirectoryCleanerProperties {
 		return "FtpConfig [protocol=" + this.protocol + ", path=" + this.path + ", retentionTimeInDays="
 				+ this.retentionTimeInDays + ", username=" + this.username + ", passw=<NOT_SHOWN>, keyFile="
 				+ this.keyFile + ", hostname=" + this.hostname + ", port=" + this.port + ", ftpPassiveMode="
-				+ this.ftpPassiveMode + ", keystoreFile=" + (null != this.keystoreFile ? "<NOT_SHOWN>" : null)
+				+ this.ftpPassiveMode + ", ftpsSslSessionReuse=" + ftpsSslSessionReuse
+				+ ", useExtendedMasterSecret=" + useExtendedMasterSecret			
+				+ ", keystoreFile=" + (null != this.keystoreFile ? "<NOT_SHOWN>" : null)
 				+ ", keystorePass=<NOT_SHOWN>, truststoreFile=" + (null != this.truststoreFile ? "<NOT_SHOWN>" : null)
 				+ ", truststorePass=<NOT_SHOWN>, implicitSsl=" + this.implicitSsl + "]";
 	}
@@ -161,6 +165,22 @@ public class DirectoryCleanerProperties {
 
 	public void setFtpPasv(String ftpPasv) {
 		this.ftpPassiveMode = parseBooleanOrDefault(ftpPasv, false);
+	}
+	
+	public boolean getFtpsSslSessionReuse() {
+		return ftpsSslSessionReuse;
+	}
+
+	public void setFtpsSslSessionReuse(boolean ftpsSslSessionReuse) {
+		this.ftpsSslSessionReuse = ftpsSslSessionReuse;
+	}
+
+	public boolean getUseExtendedMasterSecret() {
+		return useExtendedMasterSecret;
+	}
+
+	public void setUseExtendedMasterSecret(boolean useExtendedMasterSecret) {
+		this.useExtendedMasterSecret = useExtendedMasterSecret;
 	}
 
 	public int getRetentionTimeInDays() {
