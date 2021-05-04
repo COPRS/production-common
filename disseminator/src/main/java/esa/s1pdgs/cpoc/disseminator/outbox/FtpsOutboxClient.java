@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public final class FtpsOutboxClient extends FtpOutboxClient {
 
-	private static final int EXPLICIT_FTPS_DEFAULT_PORT = 23;
+	private static final int EXPLICIT_FTPS_DEFAULT_PORT = 21;
 	private static final int IMPLICIT_FTPS_DEFAULT_PORT = 990;
 
 	public static final class Factory implements OutboxClient.Factory {
@@ -36,7 +36,8 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 
 	@Override
 	public String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
-		final FTPSClient ftpsClient = new SSLSessionReuseFTPSClient("TLS", config.isImplicitSsl());
+		final FTPSClient ftpsClient = new SSLSessionReuseFTPSClient("TLS", config.isImplicitSsl(),
+				config.getFtpsSslSessionReuse(), config.getUseExtendedMasterSecret());
 
 		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply don't configure a keystore
 		if (StringUtil.isNotBlank(config.getKeystoreFile())) {

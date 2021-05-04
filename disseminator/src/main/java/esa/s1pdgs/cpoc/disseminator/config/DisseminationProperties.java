@@ -46,6 +46,8 @@ public class DisseminationProperties {
 		private boolean implicitSsl = false;
 		
 		private boolean ftpPasv = false;
+		private boolean ftpsSslSessionReuse = true;
+		private boolean useExtendedMasterSecret = false;
 		
 		private boolean skipExisting = true;
 		
@@ -171,6 +173,22 @@ public class DisseminationProperties {
 			this.ftpPasv = ftpPasv;
 		}
 		
+		public boolean getFtpsSslSessionReuse() {
+			return ftpsSslSessionReuse;
+		}
+
+		public void setFtpsSslSessionReuse(boolean ftpsSslSessionReuse) {
+			this.ftpsSslSessionReuse = ftpsSslSessionReuse;
+		}
+
+		public boolean getUseExtendedMasterSecret() {
+			return useExtendedMasterSecret;
+		}
+
+		public void setExtendedMasterSecret(boolean useExtendedMasterSecret) {
+			this.useExtendedMasterSecret = useExtendedMasterSecret;
+		}
+		
 		public boolean isSkipExisting() {
 			return skipExisting;
 		}
@@ -209,6 +227,7 @@ public class DisseminationProperties {
 					+ ", password=<NOT_SHOWN>, keyData=<NOT_SHOWN>, hostname=" + hostname + ", port=" + port +
 					", directoryPermissions=" + directoryPermissions +	", filePermissions=" + filePermissions + ", pathEvaluator=" + pathEvaluator + ", bufferSize=" 
 					+ bufferSize+ ", ftpPasv=" + ftpPasv
+					+ ", ftpsSslSessionReuse=" + ftpsSslSessionReuse + ", useExtendedMasterSecret=" + useExtendedMasterSecret
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
 					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl 
 					+ ", skipExisting=" + skipExisting + ", chmodScriptPath=" + chmodScriptPath + "]";
