@@ -2,7 +2,7 @@
 <Ipf_Job_Order>
    <Ipf_Conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="l0JobOrderConf">
       <Processor_Name>MBU_PROC</Processor_Name>
-      <Version>01.10</Version>
+      <Version>02.00</Version>
       <Stdout_Log_Level>DEBUG</Stdout_Log_Level>
       <Stderr_Log_Level>INFO</Stderr_Log_Level>
       <Test>true</Test>
@@ -21,7 +21,7 @@
    <List_of_Ipf_Procs count="1">
       <Ipf_Proc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="standardJobOrderProc">
          <Task_Name>MBU</Task_Name>
-         <Task_Version>01.00</Task_Version>
+         <Task_Version>02.00</Task_Version>
          <List_of_Inputs count="1">
             <Input>
                <File_Type>WV_OCN__2S</File_Type>
