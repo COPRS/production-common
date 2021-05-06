@@ -30,6 +30,7 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -241,6 +242,31 @@ public class S3ObsClient extends AbstractObsClient {
 		}
 	}
 	
+	@Override
+	public void delete(ObsObject object) throws ObsException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(object);
+		String bucket = getBucketFor(object.getFamily());
+		String keyPrefix = object.getKey();
+		try {
+			LOGGER.info("Deleting all files in bucket {} with prefix {}", bucket, keyPrefix);
+			final List<String> result = s3Services.getAll(bucket, keyPrefix).stream().map(S3ObjectSummary::getKey)
+					.collect(Collectors.toList());
+			for (String key : result) {
+				LOGGER.debug("Deleting file {} in bucket {}", key, bucket);
+				s3Services.deleteFile(new DeleteObjectRequest(bucket, key));
+			}
+			String md5sumfile = keyPrefix + Md5.MD5SUM_SUFFIX;
+			if (s3Services.exist(bucket, md5sumfile)) {
+				LOGGER.info("Deleting md5sum file {} in bucket {}", md5sumfile, bucket);
+				s3Services.deleteFile(new DeleteObjectRequest(bucket, md5sumfile));
+			} else {
+				LOGGER.warn("No md5sum file exist for file {} in bucket {}", md5sumfile, bucket);
+			}
+		} catch (S3SdkClientException | ObsServiceException e) {
+			throw new ObsException(object.getFamily(), object.getKey(), e);
+		}
+	}
+	
 	public void createBucket(final ProductFamily family) throws ObsServiceException, S3SdkClientException {
 		s3Services.createBucket(getBucketFor(family));
 	}
@@ -370,4 +396,5 @@ public class S3ObsClient extends AbstractObsClient {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);			
 		}
 	}
+	
 }

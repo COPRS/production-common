@@ -27,7 +27,7 @@ public class AppDataJobPreselectedInput {
         return taskTableInputReference;
     }
 
-    public void setTaskTableInputReference(String taskTableInputReference) {
+    public void setTaskTableInputReference(final String taskTableInputReference) {
         this.taskTableInputReference = taskTableInputReference;
     }
 
@@ -35,7 +35,7 @@ public class AppDataJobPreselectedInput {
         return files;
     }
 
-    public void setFiles(List<AppDataJobFile> files) {
+    public void setFiles(final List<AppDataJobFile> files) {
         this.files = files;
     }
 
@@ -43,7 +43,7 @@ public class AppDataJobPreselectedInput {
         return fileType;
     }
 
-    public void setFileType(String fileType) {
+    public void setFileType(final String fileType) {
         this.fileType = fileType;
     }
 
@@ -51,15 +51,15 @@ public class AppDataJobPreselectedInput {
         return fileNameType;
     }
 
-    public void setFileNameType(String fileNameType) {
+    public void setFileNameType(final String fileNameType) {
         this.fileNameType = fileNameType;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AppDataJobPreselectedInput that = (AppDataJobPreselectedInput) o;
+        final AppDataJobPreselectedInput that = (AppDataJobPreselectedInput) o;
         return Objects.equals(taskTableInputReference, that.taskTableInputReference)
                 && Objects.equals(fileType, that.fileType)
                 && Objects.equals(fileNameType, that.fileNameType)
@@ -70,4 +70,10 @@ public class AppDataJobPreselectedInput {
     public int hashCode() {
         return Objects.hash(taskTableInputReference, fileType, fileNameType, files);
     }
+
+	@Override
+	public String toString() {
+		return "AppDataJobPreselectedInput [taskTableInputReference=" + taskTableInputReference + ", fileType="
+				+ fileType + ", fileNameType=" + fileNameType + ", files=" + files + "]";
+	}
 }

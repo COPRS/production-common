@@ -36,7 +36,7 @@ public class OnDemandService {
 
 	@Autowired
 	public OnDemandService(final OdipConfigurationProperties properties,
-						   final AppStatus status, final MetadataClient metadataClient, TopicConfig topicConfig, MessageProducer<OnDemandEvent> messageProducer) {
+						   final AppStatus status, final MetadataClient metadataClient, final TopicConfig topicConfig, final MessageProducer<OnDemandEvent> messageProducer) {
 		this.properties = properties;
 		this.topicConfig = topicConfig;
 		this.messageProducer = messageProducer;
@@ -51,7 +51,9 @@ public class OnDemandService {
 		final ApplicationLevel productionType = ApplicationLevel.valueOf(request.getProductionType());
 		final String mode = request.getMode();
 		final boolean debug = request.isDebug();
-		
+		final String tasktableName = request.getTasktableName();
+		final String outputProductType = request.getOutputProductType();
+
 		assertNotNull("product name", productName);
 		assertNotNull("mode", mode);
 		
@@ -61,6 +63,8 @@ public class OnDemandService {
 
 		final OnDemandEvent event = new OnDemandEvent(productFamily, keyObjectStorage, productName, productionType, mode);
 		event.setDebug(debug);
+		event.setTasktableName(tasktableName);
+		event.setOutputProductType(outputProductType);
 
 		try {
 			LOGGER.info("Querying mdc with product family '{}' and product name '{}'...", productFamily.name(), request.getProductName());
@@ -96,7 +100,7 @@ public class OnDemandService {
 		resubmit(event, status);
 	}
 
-	private void resubmit(OnDemandEvent event, AppStatus appStatus) {
+	private void resubmit(final OnDemandEvent event, final AppStatus appStatus) {
 		try {
 			LOGGER.info("(Re-)Submitting following message '{}' to topic '{}'", event, topicConfig.getTopic());
 			messageProducer.send(topicConfig.getTopic(), event);

@@ -81,7 +81,7 @@ public class SearchMetadataController {
 				results = esServices.intervalQuery(startTime, stopTime, ProductFamily.fromValue(productFamily), null);
 			}
 
-			if (results == null) {
+			if (results.isEmpty()) {
 				LOGGER.info("No results returned.");
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			}

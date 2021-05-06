@@ -7,6 +7,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.DownloadJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -45,6 +48,9 @@ public enum ProductCategory {
     PRIP_JOBS(PripPublishingJob.class),
     DISSEMINATION_JOBS(DisseminationJob.class),
     EVICTION_MANAGEMENT_JOBS(EvictionManagementJob.class),
+    EVICTION_EVENT(EvictionEvent.class),
+    DATA_REQUEST_JOBS(DataRequestJob.class),
+    DATA_REQUEST_EVENT(DataRequestEvent.class),
     LTA_DOWNLOAD_EVENT(LtaDownloadEvent.class), 
     ON_DEMAND_EVENT(OnDemandEvent.class),
     DOWNLOAD_JOB(DownloadJob.class),

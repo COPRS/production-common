@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -128,15 +130,20 @@ public final class ReportAdapter implements Reporting {
 	
 	@Override
 	public final void end(final ReportingOutput out, final ReportingMessage reportingMessage) {
-		end(Level.INFO, out, reportingMessage);
+		end(Level.INFO, out, reportingMessage, Collections.emptyMap());
 	}
+	
+	@Override
+	public void end(final ReportingOutput out, final ReportingMessage reportingMessage, final Map<String, String> quality) {
+		end(Level.INFO, out, reportingMessage, quality);
+	}	
 
 	@Override
 	public final void warning(final ReportingOutput out, final ReportingMessage reportingMessage) {
-		end(Level.WARNING, out, reportingMessage);
+		end(Level.WARNING, out, reportingMessage, Collections.emptyMap());
 	}
 	
-	private final void end(final Level level, final ReportingOutput out, final ReportingMessage reportingMessage) {
+	private final void end(final Level level, final ReportingOutput out, final ReportingMessage reportingMessage, final Map<String, String> quality) {
 		final long deltaTMillis = getDeltaMillis();
 		final long transferAmount = reportingMessage.getTransferAmount();
 		final EndTask endTask = new EndTask(
@@ -150,6 +157,9 @@ public final class ReportAdapter implements Reporting {
 		if (transferAmount != 0) {
 			endTask.setVolume(calcSize(transferAmount));
 			endTask.setRate(calcRate(transferAmount, deltaTMillis));
+		}
+		if (!quality.isEmpty()) {
+			endTask.setQuality(quality);
 		}
 		appender.report(new JacksonReportEntry(		
 				new Header(level), 
@@ -226,5 +236,5 @@ public final class ReportAdapter implements Reporting {
 		return new BigDecimal((sizeByte / 1048576.0) / (deltaTMillis / 1000.0))
 				.setScale(3, RoundingMode.FLOOR)
 				.doubleValue();
-	}	
+	}
 }

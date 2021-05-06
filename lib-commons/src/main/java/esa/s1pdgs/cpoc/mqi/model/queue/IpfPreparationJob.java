@@ -13,6 +13,7 @@ public class IpfPreparationJob extends AbstractMessage {
     private String taskTableName;
     private String startTime;    
     private String stopTime;    
+    private String outputProductType;
 
     public IpfPreparationJob() {
 		allowedActions = Collections.singletonList(AllowedAction.RESTART);
@@ -57,7 +58,13 @@ public class IpfPreparationJob extends AbstractMessage {
 	public void setStopTime(final String stopTime) {
 		this.stopTime = stopTime;
 	}
+	public String getOutputProductType() {
+		return outputProductType;
+	}
 
+	public void setOutputProductType(final String outputProductType) {
+		this.outputProductType = outputProductType;
+	}
 
 	@Override
 	public int hashCode() {
@@ -75,7 +82,8 @@ public class IpfPreparationJob extends AbstractMessage {
 			    allowedActions,
 			    demandType,
 			    retryCounter,
-			    debug
+			    debug,
+			    outputProductType
 		);
 	}
 
@@ -103,7 +111,8 @@ public class IpfPreparationJob extends AbstractMessage {
 			    && Objects.equals(eventMessage, other.eventMessage)
 			    && Objects.equals(taskTableName,other.taskTableName)
 			    && Objects.equals(startTime, other.startTime)
-			    && Objects.equals(stopTime, other.stopTime) 							
+			    && Objects.equals(stopTime, other.stopTime) 		
+			    && Objects.equals(outputProductType, other.outputProductType)
 				&& productFamily == other.productFamily;
 	}
 
@@ -114,6 +123,6 @@ public class IpfPreparationJob extends AbstractMessage {
 				+ ", productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedActions="
 				+ allowedActions + ", demandType=" + demandType + ", retryCounter="
-				+ retryCounter + ", debug=" + debug + "]";
+				+ retryCounter + ", debug=" + debug + ", outputProductType="  + outputProductType + "]";
 	}
 }

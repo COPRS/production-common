@@ -298,8 +298,12 @@ public class AuxQuery {
 	}
 
 	private AppDataJobFile merge(final JobOrderInputFile file, final JobOrderTimeInterval interval) {
-		return new AppDataJobFile(file.getFilename(), file.getKeyObjectStorage(), interval.getStart(),
-				interval.getStop());
+		return new AppDataJobFile(
+				file.getFilename(), 
+				file.getKeyObjectStorage(), 
+				interval.getStart(),
+				interval.getStop()
+		);
 	}
 
 	private List<SearchMetadata> queryAux(final SearchMetadataQuery query) throws MetadataQueryException {

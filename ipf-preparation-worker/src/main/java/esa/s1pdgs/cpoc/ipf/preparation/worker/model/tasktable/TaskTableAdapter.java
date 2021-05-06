@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
@@ -115,7 +116,9 @@ public class TaskTableAdapter {
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 	
-	public final Optional<TaskTableInputAdapter> firstInputContainingOneOf(final List<String> types) {			
+	@SafeVarargs
+	public final Optional<TaskTableInputAdapter> firstInputContainingOneOf(final String ... type) {
+		final List<String> types = CollectionUtil.toList(type);
 		for (final AppDataJobTaskInputs taskInputs : QueryUtils.buildInitialInputs(this)) {
 			for (final AppDataJobInput input : taskInputs.getInputs()) {				
 				
@@ -128,9 +131,17 @@ public class TaskTableAdapter {
 				final TaskAndInput ti = optionalTask.get();
 				final TaskTableInput ttInput = ti.getInput();
 							
-				for (final TaskTableInputAlternative alternative : ttInput.getAlternatives()) {
-					if (types.contains(alternative.getFileType())) {
-						return Optional.of(new TaskTableInputAdapter(input.getTaskTableInputReference(), ttInput));
+				for (final TaskTableInputAlternative alternative : ttInput.getAlternatives()) {	
+					final String fileType = elementMapper.mappedFileType(alternative.getFileType());
+					
+					for (final String mappedTypes : types) {
+						if (mappedTypes.matches(fileType)) {
+							return Optional.of(new TaskTableInputAdapter(
+									input.getTaskTableInputReference(), 
+									ttInput,
+									elementMapper
+							));
+						}
 					}
 				}	
 			}
@@ -299,11 +310,21 @@ public class TaskTableAdapter {
 		);
 	}
 	
-	private String convertDateToJobOrderFormat(final String metadataFormat) {
+	public static String convertDateToJobOrderFormat(final String metadataFormat) {
 		return DateUtils.convertToAnotherFormat(
 				metadataFormat,
 				AbstractMetadata.METADATA_DATE_FORMATTER,
 				JobOrderTimeInterval.DATE_FORMATTER
+		);
+	}
+
+	@Override
+	public final String toString() {
+		return String.format(
+				"Tasktable %s %s (%s)", 
+				taskTable.getProcessorName(), 
+				taskTable.getVersion(),
+				file.getName()
 		);
 	}
 }

@@ -44,8 +44,9 @@ public class IngestionTriggerServiceConfiguration {
 
 		for (final InboxConfiguration config : properties.getPolling()) {
 			try {
-				final Inbox newInbox = inboxFactory.newInbox(config);
-				LOG.info("Adding new inbox to be polled: {}",newInbox);
+				final Inbox newInbox = inboxFactory.newInbox(config, properties.getPublishMaxRetries(), properties.getPublishTempoRetryMs());
+				LOG.info("Adding new inbox to be polled: {} [publishMaxRetries={}, publishTempoRetryMs={}]", newInbox,
+						properties.getPublishMaxRetries(),	properties.getPublishTempoRetryMs());
 				inboxes.add(newInbox);
 			} catch (IllegalArgumentException | URISyntaxException e) {
 				LOG.error(e.getMessage());

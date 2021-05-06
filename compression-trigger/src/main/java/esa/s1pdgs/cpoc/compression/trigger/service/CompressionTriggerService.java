@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.compression.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.compression.trigger.config.TriggerConfigurationProperties.CategoryConfig;
@@ -30,6 +29,8 @@ import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestType;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
@@ -47,24 +48,54 @@ public class CompressionTriggerService {
 			compressionDirection = CompressionDirection.COMPRESS;
 		}
 
-		return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+		return new CompressionJob(
+				event.getKeyObjectStorage(),
+				event.getProductFamily(),
 				composeCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-				composeCompressedProductFamily(event.getProductFamily()), compressionDirection);
+				composeCompressedProductFamily(event.getProductFamily()),
+				compressionDirection);
 
 	};
 	
 	private static final CompressionJobMapper<IngestionEvent> INGESTION_MAPPER = (event, reportingId) -> {
 
 		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY)) {
-			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+			return new CompressionJob(
+					event.getKeyObjectStorage(),
+					event.getProductFamily(),
 					removeZipSuffix(event.getKeyObjectStorage()),
 					removeZipSuffixFromProductFamily(event.getProductFamily()),
 					CompressionDirection.UNCOMPRESS);
 		} else {
-			return new CompressionJob(event.getKeyObjectStorage(), event.getProductFamily(),
+			return new CompressionJob(
+					event.getKeyObjectStorage(),
+					event.getProductFamily(),
 					composeCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-					composeCompressedProductFamily(event.getProductFamily()), CompressionDirection.COMPRESS);
+					composeCompressedProductFamily(event.getProductFamily()),
+					CompressionDirection.COMPRESS);
 		}
+
+	};
+	
+	private static final CompressionJobMapper<DataRequestEvent> DATA_REQUEST_MAPPER = (event, reportingId) -> {
+		
+		CompressionDirection compressionDirection;
+		
+		
+
+		if (event.getProductFamily().toString().endsWith(SUFFIX_ZIPPRODUCTFAMILY) ||
+				event.getDataRequestType() != DataRequestType.UNCOMPRESS) {
+			compressionDirection = CompressionDirection.UNDEFINED;
+		} else {
+			compressionDirection = CompressionDirection.UNCOMPRESS;
+		}
+		
+		return new CompressionJob(
+				composeCompressedKeyObjectStorage(event.getKeyObjectStorage()), 
+				composeCompressedProductFamily(event.getProductFamily()),
+				event.getKeyObjectStorage(),
+				event.getProductFamily(),
+				compressionDirection);
 
 	};
 
@@ -127,10 +158,20 @@ public class CompressionTriggerService {
 					appStatus
 			);
 			
+		} else if (DataRequestEvent.class.isAssignableFrom(cat.getDtoClass())) {
+			return new MqiConsumer<>(
+					mqiClient,
+					cat,
+					new CompressionTriggerListener<>(DATA_REQUEST_MAPPER, errorAppender, processConfig),
+					messageFilter,
+					config.getFixedDelayMs(),
+					config.getInitDelayPolMs(),
+					appStatus
+			);
 		}
 		throw new IllegalArgumentException(
 				String.format(
-						"Invalid product category %s. Available are categories with associated dtos of type ProductionEvent or IngestionEvent",
+						"Invalid product category %s. Available are categories with associated dtos of type ProductionEvent, IngestionEvent or DataRequestEvent",
 						cat
 				)
 		);

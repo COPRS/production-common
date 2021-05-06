@@ -194,24 +194,26 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 				);
 
 				final String inputReference = input.getTaskTableInputReference();
+				
+				final AppDataJobInput mergedInput;
+								
 				if(references.contains(inputReference) && optionalTask.isPresent()) {
-
 					final TaskTableFileNameType fileNameType = optionalTask.get().getInput().alternativesOrdered()
 							.filter(a -> a.getFileType().equals(productType))
 							.findAny()
 							.map(TaskTableInputAlternative::getFileNameType).orElse(TaskTableFileNameType.BLANK);
 
-
-					mergedInputs.add(
-							new AppDataJobInput(
-									inputReference,
-									productType,
-									fileNameType.toString(),
-									input.isMandatory(),
-									toAppDataJobFiles(segmentsA, segmentsB)));
+					mergedInput = new AppDataJobInput(
+						inputReference,
+						productType,
+						fileNameType.toString(),
+						input.isMandatory(),
+						toAppDataJobFiles(segmentsA, segmentsB)							
+					);
 				} else {
-					mergedInputs.add(input);
+					mergedInput = input;
 				}
+				mergedInputs.add(mergedInput);
 			}
 
 			taskInputs.setInputs(mergedInputs);
@@ -261,23 +263,22 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	private List<AppDataJobFile> toAppDataJobFiles(final List<LevelSegmentMetadata> segmentsA, final List<LevelSegmentMetadata> segmentsB) {
 		final List<AppDataJobFile> files = new ArrayList<>();
 		for (final LevelSegmentMetadata segment : segmentsA) {
-			files.add(new AppDataJobFile(
-					segment.getProductName(),
-					segment.getKeyObjectStorage(),
-					segment.getValidityStart(),
-					segment.getValidityStop()
-			));
+			files.add(toAppDataJobFile(segment));
 		}
 		for (final LevelSegmentMetadata segment : segmentsB) {
-			files.add(new AppDataJobFile(
-					segment.getProductName(),
-					segment.getKeyObjectStorage(),
-					segment.getValidityStart(),
-					segment.getValidityStop()
-			));
+			files.add(toAppDataJobFile(segment));
 		}
 		return files;
 	}
+
+	private final AppDataJobFile toAppDataJobFile(final LevelSegmentMetadata segment) {
+		return new AppDataJobFile(
+				segment.getProductName(),
+				segment.getKeyObjectStorage(),
+				TaskTableAdapter.convertDateToJobOrderFormat(segment.getValidityStart()),
+				TaskTableAdapter.convertDateToJobOrderFormat(segment.getValidityStop())
+		);
+	} 
 
 	private void handleNonRfSegments(final AppDataJob job, final L0SegmentProduct product, final TaskTableAdapter taskTableAdapter)
 			throws IpfPrepWorkerInputsMissingException {

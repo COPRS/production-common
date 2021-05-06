@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.prip.metadata;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,15 @@ public interface PripMetadataRepository {
 	 * @return
 	 */
 	PripMetadata findById(String id);
+	
+	/**
+	 * Finds a PRIP metadata by its name. Returns null if not found.
+	 *
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
+	PripMetadata findByName(String name) throws Exception;
 
 	/**
 	 * Returns all PRIP metadata.

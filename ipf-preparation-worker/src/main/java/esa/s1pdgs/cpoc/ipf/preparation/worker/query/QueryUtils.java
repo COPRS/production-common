@@ -98,7 +98,7 @@ public class QueryUtils {
 	}
 
 	private static AppDataJobTaskInputs maybeReplace(final AppDataJobTaskInputs original, final Map<String, AppDataJobPreselectedInput> preselectedInputs) {
-		List<AppDataJobInput> inputsIncludingPreselectedInputs = original.getInputs().stream().map(input -> maybeReplace(input, preselectedInputs)).collect(toList());
+		final List<AppDataJobInput> inputsIncludingPreselectedInputs = original.getInputs().stream().map(input -> maybeReplace(input, preselectedInputs)).collect(toList());
 
 		return new AppDataJobTaskInputs(original.getTaskName(), original.getTaskVersion(), inputsIncludingPreselectedInputs);
 	}
@@ -107,7 +107,9 @@ public class QueryUtils {
 		if (preselectedInputs.containsKey(input.getTaskTableInputReference())) {
 
 			final AppDataJobPreselectedInput preselectedInput = preselectedInputs.get(input.getTaskTableInputReference());
-			final String preselectedFiles = preselectedInput.getFiles().stream().map(AppDataJobFile::getFilename).collect(joining(", "));
+			final String preselectedFiles = preselectedInput.getFiles().stream()
+					.map(AppDataJobFile::getFilename)
+					.collect(joining(", "));
 
 			LOG.debug("replacing input {} {} with preselected results {}", input.getTaskTableInputReference(), input.getFileType(), preselectedFiles);
 

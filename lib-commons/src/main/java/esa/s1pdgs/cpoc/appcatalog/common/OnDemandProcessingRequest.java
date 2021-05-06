@@ -6,11 +6,13 @@ public class OnDemandProcessingRequest {
 	private boolean debug = false;
 	private String mode;
 	private String productionType;
+	private String tasktableName = null;
+	private String outputProductType = null;
 
 	public OnDemandProcessingRequest() {
 	}
 
-	public OnDemandProcessingRequest(String productName, boolean debug, String mode, String productionType) {
+	public OnDemandProcessingRequest(final String productName, final boolean debug, final String mode, final String productionType) {
 		super();
 		this.productName = productName;
 		this.debug = debug;
@@ -22,7 +24,7 @@ public class OnDemandProcessingRequest {
 		return productName;
 	}
 
-	public void setProductName(String productName) {
+	public void setProductName(final String productName) {
 		this.productName = productName;
 	}
 
@@ -30,7 +32,7 @@ public class OnDemandProcessingRequest {
 		return debug;
 	}
 
-	public void setDebug(boolean debug) {
+	public void setDebug(final boolean debug) {
 		this.debug = debug;
 	}
 
@@ -38,7 +40,7 @@ public class OnDemandProcessingRequest {
 		return mode;
 	}
 
-	public void setMode(String mode) {
+	public void setMode(final String mode) {
 		this.mode = mode;
 	}
 
@@ -46,14 +48,32 @@ public class OnDemandProcessingRequest {
 		return productionType;
 	}
 
-	public void setProductionType(String productionType) {
+	public void setProductionType(final String productionType) {
 		this.productionType = productionType;
+	}
+		
+	public String getTasktableName() {
+		return tasktableName;
+	}
+
+	public void setTasktableName(final String tasktableName) {
+		this.tasktableName = tasktableName;
+	}
+
+	public String getOutputProductType() {
+		return outputProductType;
+	}
+
+	public void setOutputProductType(final String outputProductType) {
+		this.outputProductType = outputProductType;
 	}
 
 	@Override
 	public String toString() {
 		return "OnDemandProcessingRequest [productName=" + productName + ", debug=" + debug + ", mode=" + mode
-				+ ", productionType=" + productionType + "]";
+				+ ", productionType=" + productionType 
+				+ ", tasktableName=" + tasktableName 
+				+ ", outputProductType=" + outputProductType + "]";
 	}
 
 }

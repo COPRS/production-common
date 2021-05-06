@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.PositiveFileSizeFilter;
@@ -40,6 +41,8 @@ public final class Inbox {
 	private final String timeliness;
 	private final ProductNameEvaluator nameEvaluator;
 	private final int stationRetentionTime;
+	private final int publishMaxRetries;
+    private final long publishTempoRetryMs;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
@@ -52,7 +55,9 @@ public final class Inbox {
 			final int stationRetentionTime,
 			final String mode,
 			final String timeliness,
-			final ProductNameEvaluator nameEvaluator
+			final ProductNameEvaluator nameEvaluator,
+			final int publishMaxRetries,
+			final long publishTempoRetryMs
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
@@ -65,6 +70,8 @@ public final class Inbox {
 		this.mode = mode;
 		this.timeliness = timeliness;
 		this.nameEvaluator = nameEvaluator;
+		this.publishMaxRetries = publishMaxRetries;
+		this.publishTempoRetryMs = publishTempoRetryMs;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 	}
 	
@@ -134,28 +141,35 @@ public final class Inbox {
 		final Reporting reporting = ReportingUtils.newReportingBuilder()
 				.newReporting("IngestionTrigger");
 
+		final String productName;
+		if ("auxip".equalsIgnoreCase(entry.getInboxType())) {
+			productName = entry.getRelativePath();
+		} else {
+			productName = entry.getName();
+		}
+		
 		final ReportingInput input = IngestionTriggerReportingInput.newInstance(
-				entry.getName(),
+				productName,
 				family,
 				entry.getLastModified()
 		);
-		reporting.begin(input,new ReportingMessage("New file detected %s", entry.getName()));
+		reporting.begin(input,new ReportingMessage("New file detected %s", productName));
 		
 		if (!filter.accept(entry)) {
-			reporting.end(new ReportingMessage("File %s is ignored by filter.", entry.getName()));
+			reporting.end(new ReportingMessage("File %s is ignored by filter.", productName));
 			return Optional.empty();
 		}
 
 		// empty files are not accepted!
 		if (entry.getSize() == 0) {	
-			reporting.error(new ReportingMessage("File %s is empty, ignored.", entry.getName()));						
+			reporting.error(new ReportingMessage("File %s is empty, ignored.", productName));						
 			return Optional.empty();
 		}
 		
 		try {
 			final String publishedName = nameEvaluator.evaluateFrom(entry);
 			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
-			publish(
+			publishWithRetries(
 					new IngestionJob(
 						family, 
 						publishedName,
@@ -171,14 +185,23 @@ public final class Inbox {
 			);
 			reporting.end(
 					new IngestionTriggerReportingOutput(entry.getPickupURL() + "/" + entry.getRelativePath()), 
-					new ReportingMessage("File %s created IngestionJob", entry.getName())
+					new ReportingMessage("File %s created IngestionJob", productName)
 			);
 			return Optional.of(entry);
 		} catch (final Exception e) {
-			reporting.error(new ReportingMessage("File %s could not be handled: %s", entry.getName(), LogUtils.toString(e)));
+			reporting.error(new ReportingMessage("File %s could not be handled: %s", productName, LogUtils.toString(e)));
 			log.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
 		}
 		return Optional.empty();
+	}
+	
+	private void publishWithRetries(IngestionJob ingestionJob) throws InterruptedException {
+		Retries.performWithRetries(
+				() -> {	this.publish(ingestionJob); return null;}, 
+    			"Publishing of IngestionJob for " + ingestionJob.getProductName(),
+    			publishMaxRetries,
+    			publishTempoRetryMs
+		);
 	}
 
 	private void publish(IngestionJob ingestionJob) {

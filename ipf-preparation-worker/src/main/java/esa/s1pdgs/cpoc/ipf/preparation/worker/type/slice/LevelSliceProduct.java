@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobPreselectedInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -94,8 +95,8 @@ public class LevelSliceProduct extends AbstractProduct {
 		final AppDataJobFile slice = new AppDataJobFile(
 				file.getProductName(), 
 				file.getKeyObjectStorage(), 
-				file.getValidityStart(), 
-				file.getValidityStop()
+				TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStart()),
+				TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStop())
 		);
 		if (!slices.contains(slice)) {
 			slices.add(slice);
@@ -108,8 +109,8 @@ public class LevelSliceProduct extends AbstractProduct {
 		final AppDataJobFile acn = new AppDataJobFile(
 				file.getProductName(), 
 				file.getKeyObjectStorage(), 
-				file.getValidityStart(), 
-				file.getValidityStop()
+				TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStart()),
+				TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStop())
 		);
 		if (!acns.contains(acn)) {
 			acns.add(acn);
@@ -129,8 +130,8 @@ public class LevelSliceProduct extends AbstractProduct {
 		return product.getStringValue("timeliness", "");
 	}
 	
-    public final void preselectedInputs(final List<AppDataJobPreselectedInput> preselectedInputs) {
-    	this.preselectedInputs.addAll(preselectedInputs);
+    public final void addPreselectedInputs(final AppDataJobPreselectedInput preselectedInput) {
+    	this.preselectedInputs.add(preselectedInput);
     }
 
 	@Override

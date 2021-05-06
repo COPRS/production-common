@@ -21,7 +21,9 @@ public class OnDemandEvent extends AbstractMessage {
 	private String mode = "NOMINAL";
 	private ApplicationLevel productionType;
 	private String productType;
-	private Map<String, Object> metadata;
+	private Map<String, Object> metadata;	
+	private String tasktableName = null;
+	private String outputProductType = null;
 	
 	public OnDemandEvent() {
 		super();
@@ -71,6 +73,22 @@ public class OnDemandEvent extends AbstractMessage {
 
 	public void setProductType(final String productType) {
 		this.productType = productType;
+	}		
+
+	public String getTasktableName() {
+		return tasktableName;
+	}
+
+	public void setTasktableName(final String tasktableName) {
+		this.tasktableName = tasktableName;
+	}
+
+	public String getOutputProductType() {
+		return outputProductType;
+	}
+
+	public void setOutputProductType(final String outputProductType) {
+		this.outputProductType = outputProductType;
 	}
 
 	public Map<String, Object> getMetadata() {
@@ -84,7 +102,8 @@ public class OnDemandEvent extends AbstractMessage {
 	@Override
 	public int hashCode() {
 		return Objects.hash(metadata, mode, productName, productType, productionType, creationDate, hostname,
-				keyObjectStorage, productFamily, uid, allowedActions, demandType, debug, retryCounter);
+				keyObjectStorage, productFamily, uid, allowedActions, demandType, debug, retryCounter, tasktableName, 
+				outputProductType);
 	}
 
 	@Override
@@ -96,12 +115,21 @@ public class OnDemandEvent extends AbstractMessage {
 		if (getClass() != obj.getClass())
 			return false;
 		final OnDemandEvent other = (OnDemandEvent) obj;
-		return Objects.equals(metadata, other.metadata) && Objects.equals(mode, other.mode)
-				&& Objects.equals(productName, other.productName) && Objects.equals(productType, other.productType)
-				&& Objects.equals(productionType, other.productionType) && Objects.equals(hostname, other.hostname)
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) && productFamily == other.productFamily
-				&& Objects.equals(uid, other.uid) && Objects.equals(allowedActions, other.getAllowedActions())
-				&& demandType == other.demandType && debug == other.debug && retryCounter == other.retryCounter;
+		return Objects.equals(metadata, other.metadata) 
+				&& Objects.equals(mode, other.mode)
+				&& Objects.equals(productName, other.productName) 
+				&& Objects.equals(productType, other.productType)
+				&& Objects.equals(productionType, other.productionType) 
+				&& Objects.equals(hostname, other.hostname)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
+				&& productFamily == other.productFamily
+				&& Objects.equals(uid, other.uid) 
+				&& Objects.equals(allowedActions, other.getAllowedActions())
+				&& Objects.equals(tasktableName, other.tasktableName)
+				&& Objects.equals(outputProductType, other.outputProductType)
+				&& demandType == other.demandType 
+				&& debug == other.debug 
+				&& retryCounter == other.retryCounter;
 	}
 
 	@Override
@@ -110,7 +138,8 @@ public class OnDemandEvent extends AbstractMessage {
 				+ ", productType=" + productType + ", metadata=" + metadata + ", productFamily=" + productFamily
 				+ ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid + ", creationDate=" + creationDate
 				+ ", hostname=" + hostname + ", allowedActions=" + allowedActions + ", demandType=" + demandType
-				+ ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
+				+ ", retryCounter=" + retryCounter + ", debug=" + debug + ", tasktableName=" + tasktableName 
+				+ ", outputProductType=" + outputProductType + "]";
 	}
 
 }
