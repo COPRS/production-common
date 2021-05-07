@@ -41,6 +41,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.DevProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.MonitorLogUtils;
+import esa.s1pdgs.cpoc.ipf.execution.worker.job.WorkingDirectoryUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
@@ -132,6 +133,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	
 	private final long initDelayPollMs;
 	
+	private final WorkingDirectoryUtils workingDirUtils;
+	
 	/**
 	 */
 	@Autowired
@@ -159,6 +162,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		this.errorAppender = errorAppender;
 		this.initDelayPollMs = initDelayPollMs;
 		this.pollingIntervalMs = pollingIntervalMs;
+		
+		this.workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());
 	}
 	
 	@PostConstruct
@@ -406,6 +411,9 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             	warningMessage = "";
             }
             return new MqiPublishingJob<>(productionEvents, warningMessage);
+        } catch (Exception e) {
+        	workingDirUtils.copyWorkingDirectory(reporting, reporting.getUid(), job, ProductFamily.FAILED_WORKDIR);
+        	throw e;
 		} finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
@@ -559,6 +567,5 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// any other Exception
 		return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, LogUtils.toString(e));
 	}
-	
 	
 }

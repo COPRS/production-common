@@ -37,6 +37,7 @@ public enum ProductCategory {
     SPP_PRODUCTS(ProductionEvent.class),
     SPP_MBU_PRODUCTS(ProductionEvent.class),
     DEBUG(ProductionEvent.class),
+    FAILED_WORKDIRS(ProductionEvent.class),
     COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class),
@@ -112,6 +113,8 @@ public enum ProductCategory {
 	        	return ProductCategory.SPP_PRODUCTS;
 	        case DEBUG:
 	        	return ProductCategory.DEBUG;
+	        case FAILED_WORKDIR:
+	        	return ProductCategory.FAILED_WORKDIRS;
 			case AUXILIARY_FILE_ZIP:
 			case PLAN_AND_REPORT_ZIP:
 			case SPP_OBS_ZIP:

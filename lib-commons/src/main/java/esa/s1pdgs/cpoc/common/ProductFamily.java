@@ -33,6 +33,7 @@ public enum ProductFamily {
     L2_JOB, 
     L2_REPORT, 
     DEBUG, // for debug bucket in obs
+    FAILED_WORKDIR, // for failed working directories copied to obs
     // ZIP Product families
     AUXILIARY_FILE_ZIP, 
     L0_ACN_ZIP, 
