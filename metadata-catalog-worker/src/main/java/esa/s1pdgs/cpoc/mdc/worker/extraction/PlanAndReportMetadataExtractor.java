@@ -1,11 +1,13 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction;
 
+import java.time.ZoneId;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
@@ -37,7 +39,12 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 		metadata.put("productFamily", message.getBody().getProductFamily().name());
 		metadata.put("productName", message.getBody().getProductName());
 		metadata.put("productType", message.getBody().getProductFamily().name());
-		metadata.put("insertionTime", message.getBody().getCreationDate());
+		
+		if (message.getBody().getCreationDate() != null) {
+			String formattedCreationDate = DateUtils.formatToMetadataDateTimeFormat(
+					message.getBody().getCreationDate().toInstant().atZone(ZoneId.of("UTC")).toLocalDateTime());
+			metadata.put("insertionTime", formattedCreationDate);
+		}
 		metadata.put("url", message.getBody().getKeyObjectStorage());
 		
 		Matcher matcher = MISSION_ID_PATTERN.matcher(message.getBody().getProductName());
