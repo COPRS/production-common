@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -26,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mdc.worker.Utils;
 import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
@@ -196,9 +198,12 @@ public class TestPlanAndReportMetadataExtractor {
     	doReturn(Collections.emptyList()).when(obsClient).download(Mockito.anyList(), Mockito.any());
     	
     	final JSONObject result = extractor.extract(reporting, inputMessage);
+    	
+    	String expectedInsertionTime = DateUtils.formatToMetadataDateTimeFormat(
+    			inputMessage.getBody().getCreationDate().toInstant().atZone(ZoneId.of("UTC")).toLocalDateTime());
    	
     	assertEquals(inputMessage.getBody().getProductName(), result.get("productName"));
-    	assertEquals(inputMessage.getBody().getCreationDate(), result.get("insertionTime"));
+    	assertEquals(expectedInsertionTime, result.get("insertionTime"));
 
     	verify(obsClient, times(0)).download(Mockito.any(), Mockito.any()); // no unnecessary download shall happen
     }
