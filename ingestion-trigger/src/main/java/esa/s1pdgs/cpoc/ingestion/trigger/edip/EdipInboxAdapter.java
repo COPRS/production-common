@@ -11,8 +11,9 @@ import esa.s1pdgs.cpoc.ebip.client.EdipEntryFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.SupportsProductFamily;
 
-public class EdipInboxAdapter extends AbstractInboxAdapter {
+public class EdipInboxAdapter extends AbstractInboxAdapter implements SupportsProductFamily {
 
 	public final static String INBOX_TYPE = "edip";
 	
