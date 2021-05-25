@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Boolean filter for querying the persistence repository.
  */
-public class PripBooleanFilter extends PripQueryFilter {
+public class PripBooleanFilter extends PripQueryFilterTerm {
 
 	public enum Function {
 		EQUALS("is"), //

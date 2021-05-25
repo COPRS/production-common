@@ -9,7 +9,7 @@ public class PripDoubleFilter extends PripRangeValueFilter<Double> {
 		super(fieldName);
 	}
 
-	public PripDoubleFilter(String fieldName, Operator operator, Double value) {
+	public PripDoubleFilter(String fieldName, RelationalOperator operator, Double value) {
 		super(fieldName, operator, value);
 	}
 

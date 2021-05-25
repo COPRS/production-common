@@ -65,7 +65,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm.PripSortOrder;
-import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 
 public class ProductEntityCollectionProcessor implements EntityCollectionProcessor {
 
@@ -154,7 +154,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 
 		final ContextURL contextUrl = OlingoUtil.getContextUrl(responseEdmEntitySet, responseEdmEntityType, false);
 		final EntityCollection entityCollection = new EntityCollection();
-		List<PripQueryFilter> queryFilters = Collections.emptyList();
+		List<PripQueryFilterTerm> queryFilters = Collections.emptyList();
 
 		for (final SystemQueryOption queryOption : uriInfo.getSystemQueryOptions()) {
 			if (queryOption instanceof FilterOption && queryOption.getKind().equals(SystemQueryOptionKind.FILTER)) {

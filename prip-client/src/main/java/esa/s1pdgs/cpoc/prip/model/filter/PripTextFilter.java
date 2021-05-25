@@ -7,7 +7,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 /**
  * Text filter for querying the persistence repository.
  */
-public class PripTextFilter extends PripQueryFilter {
+public class PripTextFilter extends PripQueryFilterTerm {
 
 	public enum Function {
 		STARTS_WITH("startswith"), //

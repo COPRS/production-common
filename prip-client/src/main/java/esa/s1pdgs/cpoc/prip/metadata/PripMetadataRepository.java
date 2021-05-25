@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.prip.metadata;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +7,8 @@ import java.util.Optional;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 
 public interface PripMetadataRepository {
 
@@ -64,9 +65,25 @@ public interface PripMetadataRepository {
 	 * @param top for paging
 	 * @param skip fir paging
 	 * @return the search result
+	 * 
+	 * @deprecated use {@link #findWithFilter(PripQueryFilter, Optional, Optional)} instead
 	 */
-	default List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip) {
-		return this.findWithFilters(filters, top, skip, Collections.emptyList());
+	@Deprecated
+	default List<PripMetadata> findWithFilters(List<PripQueryFilterTerm> filters, Optional<Integer> top, Optional<Integer> skip) {
+		return this.findWithFilter(PripQueryFilterList.matchAll(filters), top, skip);
+	}
+
+	/**
+	 * Querying the repository with filter.
+	 * When filter is {@code null} or empty this is like calling {@link #findAll(Optional, Optional)}.
+	 *
+	 * @param filter to narrow the query
+	 * @param top for paging
+	 * @param skip fir paging
+	 * @return the search result
+	 */
+	default List<PripMetadata> findWithFilter(final PripQueryFilter filter, final Optional<Integer> top, final Optional<Integer> skip) {
+		return this.findWithFilter(filter, top, skip, Collections.emptyList());
 	}
 
 	/**
@@ -78,8 +95,26 @@ public interface PripMetadataRepository {
 	 * @param skip fir paging
 	 * @param sortTerms
 	 * @return the search result
+	 * 
+	 * @deprecated use {@link #findWithFilter(PripQueryFilter, Optional, Optional, List)} instead
 	 */
-	List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip, List<PripSortTerm> sortTerms);
+	@Deprecated
+	default List<PripMetadata> findWithFilters(List<PripQueryFilterTerm> filters, Optional<Integer> top, Optional<Integer> skip, List<PripSortTerm> sortTerms) {
+		return this.findWithFilter(PripQueryFilterList.matchAll(filters), top, skip, sortTerms);
+	}
+
+	/**
+	 * Querying the persistence with filter.
+	 * When filter is {@code null} or empty this is like calling {@link #findAll(Optional, Optional)}.
+	 *
+	 * @param filter to narrow the query
+	 * @param top for paging
+	 * @param skip fir paging
+	 * @param sortTerms
+	 * @return the search result
+	 */
+	List<PripMetadata> findWithFilter(final PripQueryFilter filter, final Optional<Integer> top, final Optional<Integer> skip,
+			final List<PripSortTerm> sortTerms);
 
 	/**
 	 * Counts all PRIP metadata.
@@ -94,7 +129,20 @@ public interface PripMetadataRepository {
 	 *
 	 * @param filters can be empty
 	 * @return
+	 *
+	 * @deprecated use {@link #countWithFilter(PripQueryFilter)} instead
 	 */
-	int countWithFilters(List<PripQueryFilter> filters);
+	@Deprecated
+	default int countWithFilters(List<PripQueryFilterTerm> filters) {
+		return this.countWithFilter(PripQueryFilterList.matchAll(filters));
+	}
+
+	/**
+	 * Counts PRIP metadata returned from persistence after applying the given filter.
+	 *
+	 * @param filter can be {@code null}
+	 * @return
+	 */
+	int countWithFilter(final PripQueryFilter filter);
 
 }

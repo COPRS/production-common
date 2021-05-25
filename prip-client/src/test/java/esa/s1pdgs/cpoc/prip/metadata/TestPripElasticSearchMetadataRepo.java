@@ -42,8 +42,8 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.RelationalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 @Ignore
@@ -183,15 +183,15 @@ public class TestPripElasticSearchMetadataRepo {
 		doReturn(searchHits).when(searchResponse).getHits();
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
-		final List<PripQueryFilter> creationDateIntervals = new ArrayList<>();
+		final List<PripQueryFilterTerm> creationDateIntervals = new ArrayList<>();
 
 		final PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f1.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 52));
-		f1.setOperator(Operator.LT);
+		f1.setRelationalOperator(RelationalOperator.LT);
 
 		final PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f2.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
-		f2.setOperator(Operator.GT);
+		f2.setRelationalOperator(RelationalOperator.GT);
 
 		creationDateIntervals.add(f1);
 		creationDateIntervals.add(f2);
@@ -225,7 +225,7 @@ public class TestPripElasticSearchMetadataRepo {
 		doReturn(searchHits).when(searchResponse).getHits();
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
-		final List<PripQueryFilter> nameFilters = new ArrayList<>();
+		final List<PripQueryFilterTerm> nameFilters = new ArrayList<>();
 
 		final PripTextFilter f1 = new PripTextFilter(FIELD_NAMES.NAME);
 		f1.setFunction(PripTextFilter.Function.STARTS_WITH);
@@ -276,15 +276,15 @@ public class TestPripElasticSearchMetadataRepo {
 		doReturn(searchHits).when(searchResponse).getHits();
 		doReturn(searchResponse).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
 
-		final List<PripQueryFilter> filters = new ArrayList<>();
+		final List<PripQueryFilterTerm> filters = new ArrayList<>();
 
 		final PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f1.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 53));
-		f1.setOperator(Operator.LT);
+		f1.setRelationalOperator(RelationalOperator.LT);
 
 		final PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f2.setValue(LocalDateTime.of(2019, 10, 16, 10, 48, 50));
-		f2.setOperator(Operator.GT);
+		f2.setRelationalOperator(RelationalOperator.GT);
 
 		filters.add(f1);
 		filters.add(f2);

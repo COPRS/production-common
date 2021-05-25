@@ -55,8 +55,8 @@ import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.RelationalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
 
@@ -92,7 +92,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				MethodKind.GEOINTERSECTS);
 	}
 
-	private final List<PripQueryFilter> queryFilters = new ArrayList<>();
+	private final List<PripQueryFilterTerm> queryFilters = new ArrayList<>();
 
 	public ProductsFilterVisitor() {
 	}
@@ -113,7 +113,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		case GE:
 		case LT:
 		case LE: {
-			final PripDateTimeFilter pripDateTimefilter = createDateTimeFilter(Operator.fromString(operator.name()),
+			final PripDateTimeFilter pripDateTimefilter = createDateTimeFilter(RelationalOperator.fromString(operator.name()),
 					left, right, leftOperand, rightOperand);
 			this.queryFilters.add(pripDateTimefilter);
 			LOGGER.debug("using filter: {} ", pripDateTimefilter);
@@ -224,7 +224,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
 				any.getExpression().accept(filterExpressionVisitor);
-				final List<PripQueryFilter> filters = filterExpressionVisitor.getFilters();
+				final List<PripQueryFilterTerm> filters = filterExpressionVisitor.getFilters();
 				this.queryFilters.addAll(filters);
 			} else if (uriResource instanceof UriResourceFunctionImpl) {
 				UriResourceFunctionImpl uriResourceFunctionImpl = (UriResourceFunctionImpl) uriResource;
@@ -369,7 +369,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 	}
 
-	public List<PripQueryFilter> getQueryFilters() {
+	public List<PripQueryFilterTerm> getQueryFilters() {
 		return this.queryFilters;
 	}
 
@@ -398,7 +398,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		return Optional.empty();
 	}
 
-	private static PripDateTimeFilter createDateTimeFilter(Operator operator, Object left, Object right,
+	private static PripDateTimeFilter createDateTimeFilter(RelationalOperator operator, Object left, Object right,
 			String leftOperand, String rightOperand) throws ODataApplicationException, ExpressionVisitException {
 
 		if (left instanceof Member && right instanceof Literal) {

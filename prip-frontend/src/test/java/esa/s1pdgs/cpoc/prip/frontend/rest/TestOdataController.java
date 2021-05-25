@@ -31,9 +31,9 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.Operator;
+import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.RelationalOperator;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(OdataController.class)
@@ -74,14 +74,14 @@ public class TestOdataController {
 		l.add(p1);
 		l.add(p2);
 
-		List<PripQueryFilter> creationDateFilters = new ArrayList<>();
+		List<PripQueryFilterTerm> creationDateFilters = new ArrayList<>();
 		PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f1.setValue(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
-		f1.setOperator(Operator.GT);
+		f1.setRelationalOperator(RelationalOperator.GT);
 		
 		PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f2.setValue(LocalDateTime.of(2020, 01, 06, 02, 00, 00));
-		f2.setOperator(Operator.LT);
+		f2.setRelationalOperator(RelationalOperator.LT);
 		
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -102,14 +102,14 @@ public class TestOdataController {
 		PripMetadata p1 = createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00), "name1");
 		l.add(p1);
 
-		List<PripQueryFilter> creationDateFilters = new ArrayList<>();
+		List<PripQueryFilterTerm> creationDateFilters = new ArrayList<>();
 		PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f1.setValue(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
-		f1.setOperator(Operator.GT);
+		f1.setRelationalOperator(RelationalOperator.GT);
 		
 		PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CREATION_DATE);
 		f2.setValue(LocalDateTime.of(2020, 01, 04, 00, 00, 00));
-		f2.setOperator(Operator.LT);
+		f2.setRelationalOperator(RelationalOperator.LT);
 		
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -133,14 +133,14 @@ public class TestOdataController {
 		p1.setContentDateEnd(LocalDateTime.of(2020, 1, 5, 00, 00, 00));
 		l.add(p1);
 
-		List<PripQueryFilter> creationDateFilters = new ArrayList<>();
+		List<PripQueryFilterTerm> creationDateFilters = new ArrayList<>();
 		PripDateTimeFilter f1 = new PripDateTimeFilter(FIELD_NAMES.CONTENT_DATE_START);
 		f1.setValue(LocalDateTime.of(2019, 01, 01, 00, 00, 00));
-		f1.setOperator(Operator.GT);
+		f1.setRelationalOperator(RelationalOperator.GT);
 		
 		PripDateTimeFilter f2 = new PripDateTimeFilter(FIELD_NAMES.CONTENT_DATE_END);
 		f2.setValue(LocalDateTime.of(2020, 01, 06, 02, 00, 00));
-		f2.setOperator(Operator.LT);
+		f2.setRelationalOperator(RelationalOperator.LT);
 		
 		creationDateFilters.add(f1);
 		creationDateFilters.add(f2);
@@ -160,7 +160,7 @@ public class TestOdataController {
 		PripMetadata p1 = createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00), "name1abc");
 		l.add(p1);
 
-		List<PripQueryFilter> nameFilters = new ArrayList<>();
+		List<PripQueryFilterTerm> nameFilters = new ArrayList<>();
 		
 		PripTextFilter n1 = new PripTextFilter(FIELD_NAMES.NAME);
 		n1.setFunction(PripTextFilter.Function.STARTS_WITH);
@@ -182,7 +182,7 @@ public class TestOdataController {
 		final PripMetadata metadata_ZIP = this.createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00),	"name1abc.ZIP");
 		metadata.add(metadata_ZIP);
 
-		final List<PripQueryFilter> nameFilters = new ArrayList<>();
+		final List<PripQueryFilterTerm> nameFilters = new ArrayList<>();
 		final PripTextFilter n1 = new PripTextFilter(FIELD_NAMES.NAME.fieldName(), PripTextFilter.Function.ENDS_WITH, "ZIP");
 		nameFilters.add(n1);
 
@@ -206,7 +206,7 @@ public class TestOdataController {
 		PripMetadata p1 = createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00), "name1abc");
 		l.add(p1);
 
-		List<PripQueryFilter> nameFilters = new ArrayList<>();
+		List<PripQueryFilterTerm> nameFilters = new ArrayList<>();
 		
 		PripTextFilter n1 = new PripTextFilter(FIELD_NAMES.NAME);
 		n1.setFunction(PripTextFilter.Function.CONTAINS);
@@ -230,7 +230,7 @@ public class TestOdataController {
 		l.add(p1);
 		l.add(p2);
 
-		List<PripQueryFilter> nameFilters = new ArrayList<>();
+		List<PripQueryFilterTerm> nameFilters = new ArrayList<>();
 		
 		PripTextFilter n2 = new PripTextFilter(FIELD_NAMES.NAME);
 		n2.setFunction(PripTextFilter.Function.STARTS_WITH);

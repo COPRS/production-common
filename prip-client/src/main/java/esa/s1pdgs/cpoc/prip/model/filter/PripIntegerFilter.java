@@ -9,7 +9,7 @@ public class PripIntegerFilter extends PripRangeValueFilter<Long> {
 		super(fieldName);
 	}
 
-	public PripIntegerFilter(String fieldName, Operator operator, Long value) {
+	public PripIntegerFilter(String fieldName, RelationalOperator operator, Long value) {
 		super(fieldName, operator, value);
 	}
 	

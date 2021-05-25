@@ -18,7 +18,7 @@ public class PripDateTimeFilter extends PripRangeValueFilter<LocalDateTime> {
 		this(fieldName.fieldName());
 	}
 	
-	public PripDateTimeFilter(String fieldName, Operator operator, LocalDateTime value) {
+	public PripDateTimeFilter(String fieldName, RelationalOperator operator, LocalDateTime value) {
 		super(fieldName,operator, value);
 	}
 	
@@ -26,7 +26,7 @@ public class PripDateTimeFilter extends PripRangeValueFilter<LocalDateTime> {
 	
 	@Override
 	public String toString() {
-		return this.getFieldName() + " " + (null != this.getOperator() ? this.getOperator().getOperator() : "NO_OP") + " "
+		return this.getFieldName() + " " + (null != this.getRelationalOperator() ? this.getRelationalOperator().getOperator() : "NO_OP") + " "
 				+ (null != this.getValue() ? DateUtils.formatToMetadataDateTimeFormat(this.getValue()) : null);
 	}
 

@@ -9,7 +9,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 /**
  * Geometry filter for querying the persistence repository.
  */
-public class PripGeometryFilter extends PripQueryFilter {
+public class PripGeometryFilter extends PripQueryFilterTerm {
 
 	public enum Function {
 		INTERSECTS("intersects"), //

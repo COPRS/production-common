@@ -5,12 +5,12 @@ import java.util.Objects;
 /**
  * Abstract range value filter for querying the persistence repository.
  */
-public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFilter {
+public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFilterTerm {
 	
 	private T value;
-	private Operator operator;
+	private RelationalOperator relationalOperator;
 	
-	public enum Operator {
+	public enum RelationalOperator {
 		LT("<"), //
 		LE("<="), //
 		GT(">"), //
@@ -20,7 +20,7 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 
 		private String op;
 
-		private Operator(String op) {
+		private RelationalOperator(String op) {
 			this.op = op;
 		}
 
@@ -28,7 +28,7 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 			return op;
 		}
 
-		public static Operator fromString(String operator) {
+		public static RelationalOperator fromString(String operator) {
 			if (null == operator) {
 				throw new IllegalArgumentException("operator is required");
 			}
@@ -55,7 +55,7 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 			throw new PripFilterOperatorException(String.format("operator not supported: %s", operator));
 		}
 		
-		public Operator getInverse() { // used for switching operands: x < 3 --> 3 > x
+		public RelationalOperator getInverse() { // used for switching operands: x < 3 --> 3 > x
 			switch (this) {
 			case LT:
 				return GT;
@@ -81,10 +81,10 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 		super(fieldName);
 	}
 	
-	public PripRangeValueFilter(String fieldName, Operator operator, T value) {
+	public PripRangeValueFilter(String fieldName, RelationalOperator operator, T value) {
 		this(fieldName);
 
-		this.operator = Objects.requireNonNull(operator, "operator is required!");
+		this.relationalOperator = Objects.requireNonNull(operator, "relational operator is required!");
 		this.value = Objects.requireNonNull(value, "value is required!");
 	}
 	
@@ -92,7 +92,7 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 	
 	@Override
 	public int hashCode() {
-		return super.hashCode() + Objects.hash(this.value, this.operator);
+		return super.hashCode() + Objects.hash(this.value, this.relationalOperator);
 	}
 
 	@Override
@@ -109,12 +109,12 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 
 		final PripRangeValueFilter<?> other = (PripRangeValueFilter<?>) obj;
 		return super.equals(obj) && Objects.equals(this.value, other.value)
-				&& Objects.equals(this.operator, other.operator);
+				&& Objects.equals(this.relationalOperator, other.relationalOperator);
 	}
 	
 	@Override
 	public String toString() {
-		return this.getFieldName() + " " + (null != this.operator ? this.operator.op : "NO_OP") + " " + this.getValue();
+		return this.getFieldName() + " " + (null != this.relationalOperator ? this.relationalOperator.op : "NO_OP") + " " + this.getValue();
 	}
 
 	// --------------------------------------------------------------------------
@@ -127,12 +127,12 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 		this.value = value;
 	}
 
-	public Operator getOperator() {
-		return this.operator;
+	public RelationalOperator getRelationalOperator() {
+		return this.relationalOperator;
 	}
 
-	public void setOperator(Operator operator) {
-		this.operator = operator;
+	public void setRelationalOperator(RelationalOperator operator) {
+		this.relationalOperator = operator;
 	}
 	
 }
