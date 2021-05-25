@@ -23,6 +23,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchResponse.Clusters;
 import org.elasticsearch.action.search.SearchResponseSections;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -1092,7 +1093,7 @@ public class EsServicesTest{
 		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
 		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
-		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,ShardSearchFailure.EMPTY_ARRAY,Clusters.EMPTY);
         this.mockSearchRequest(response);
         
         assertEquals(0, esServices.getSeaCoverage(ProductFamily.L0_SEGMENT, "name"));
