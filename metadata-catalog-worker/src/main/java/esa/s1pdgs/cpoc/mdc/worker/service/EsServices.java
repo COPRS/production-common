@@ -1783,7 +1783,7 @@ public class EsServices {
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
 			queryBuilder.relation(ShapeRelation.CONTAINS);
-			LOGGER.debug("Using {}", queryBuilder);
+			LOGGER.debug("Using product {} footprint {} for sea coverage check", productName, queryBuilder);
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
@@ -1793,6 +1793,7 @@ public class EsServices {
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
 			if (isNotEmpty(searchResponse)) {
+				LOGGER.debug("Using product sea coverage {}, response is not Empty  {} ", productName, searchResponse.toString());		
 				return 0; // INFO: the value range is inverse, because the maskfile contains land, not sea
 			}
 			// TODO FIXME implement coverage calculation
