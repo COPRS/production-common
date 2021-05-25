@@ -1790,6 +1790,7 @@ public class EsServices {
 
 			final SearchRequest request = new SearchRequest(LAND_MASK_FOOTPRINT_INDEX_NAME);
 			request.source(sourceBuilder);
+			LOGGER.debug("Using sea coverage search query: {}", request.source().toString());
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
 			if (isNotEmpty(searchResponse)) {
