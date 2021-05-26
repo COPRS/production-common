@@ -72,6 +72,22 @@ public class PripQueryFilterList implements PripQueryFilter {
 		return Objects.equals(this.operator, other.operator) && Objects.equals(this.filterList, other.filterList);
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+
+		int count = 0;
+		for (final PripQueryFilter filter : this.filterList) {
+			if (++count > 1) {
+				sb.append(" ").append(this.operator.name()).append(" ");
+			}
+
+			sb.append("(").append(filter.toString()).append(")");
+		}
+
+		return sb.toString();
+	}
+
 	// --------------------------------------------------------------------------
 
 	public LogicalOperator getOperator() {
