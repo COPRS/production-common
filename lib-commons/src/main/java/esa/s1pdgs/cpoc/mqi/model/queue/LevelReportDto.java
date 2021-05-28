@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
-import java.util.Objects;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
@@ -46,37 +44,32 @@ public class LevelReportDto extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(content, creationDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedActions, demandType, debug, retryCounter);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((content == null) ? 0 : content.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final LevelReportDto other = (LevelReportDto) obj;
-		return Objects.equals(content, other.content) 
-				&& Objects.equals(creationDate, other.creationDate)
-				&& Objects.equals(hostname, other.hostname) 
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		LevelReportDto other = (LevelReportDto) obj;
+		if (content == null) {
+			if (other.content != null)
+				return false;
+		} else if (!content.equals(other.content))
+			return false;
+		return true;
 	}
 
 	@Override
 	public String toString() {
 		return "LevelReportDto [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", content=" + content + ", uid=" + uid +"]";
-	}
+	}	
 }

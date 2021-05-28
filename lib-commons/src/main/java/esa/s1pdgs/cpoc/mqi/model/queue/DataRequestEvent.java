@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
@@ -30,31 +29,33 @@ public class DataRequestEvent extends AbstractMessage {
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
 	}
-
+	
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedActions, demandType, debug, retryCounter, dataRequestType, operatorName);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((dataRequestType == null) ? 0 : dataRequestType.hashCode());
+		result = prime * result + ((operatorName == null) ? 0 : operatorName.hashCode());
+		return result;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof DataRequestEvent))
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
 			return false;
 		DataRequestEvent other = (DataRequestEvent) obj;
-		return Objects.equals(creationDate, other.creationDate) 
-				&& Objects.equals(hostname, other.hostname)
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
-				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily
-		        && Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter
-				&& dataRequestType == other.dataRequestType
-				&& Objects.equals(operatorName, other.operatorName);
+		if (dataRequestType != other.dataRequestType)
+			return false;
+		if (operatorName == null) {
+			if (other.operatorName != null)
+				return false;
+		} else if (!operatorName.equals(other.operatorName))
+			return false;
+		return true;
 	}
 
 	@Override

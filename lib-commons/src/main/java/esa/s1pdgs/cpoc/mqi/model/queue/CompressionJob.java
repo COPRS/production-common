@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
@@ -54,38 +53,36 @@ public class CompressionJob extends AbstractMessage {
 	public void setCompressionDirection(final CompressionDirection compressionDirection) {
 		this.compressionDirection = compressionDirection;
 	}
-
+	
 	@Override
 	public int hashCode() {
-		return Objects.hash(compressionDirection, creationDate, hostname, keyObjectStorage, outputKeyObjectStorage,
-				outputProductFamily, productFamily, uid,
-				allowedActions, demandType, debug, retryCounter);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((compressionDirection == null) ? 0 : compressionDirection.hashCode());
+		result = prime * result + ((outputKeyObjectStorage == null) ? 0 : outputKeyObjectStorage.hashCode());
+		result = prime * result + ((outputProductFamily == null) ? 0 : outputProductFamily.hashCode());
+		return result;
 	}
-
+	
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final CompressionJob other = (CompressionJob) obj;
-		return compressionDirection == other.compressionDirection 
-				&& Objects.equals(creationDate, other.creationDate)
-				&& Objects.equals(hostname, other.hostname) 
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(outputKeyObjectStorage, other.outputKeyObjectStorage)
-				&& Objects.equals(uid, other.uid)
-				&& outputProductFamily == other.outputProductFamily 
-				&& productFamily == other.productFamily
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		CompressionJob other = (CompressionJob) obj;
+		if (compressionDirection != other.compressionDirection)
+			return false;
+		if (outputKeyObjectStorage == null) {
+			if (other.outputKeyObjectStorage != null)
+				return false;
+		} else if (!outputKeyObjectStorage.equals(other.outputKeyObjectStorage))
+			return false;
+		if (outputProductFamily != other.outputProductFamily)
+			return false;
+		return true;
 	}
 
 	@Override

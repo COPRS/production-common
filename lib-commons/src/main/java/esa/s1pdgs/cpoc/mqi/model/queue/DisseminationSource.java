@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
-import java.util.Objects;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 public class DisseminationSource {
@@ -22,7 +20,8 @@ public class DisseminationSource {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Objects.hash(keyObjectStorage, productFamily);
+		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
+		result = prime * result + ((productFamily == null) ? 0 : productFamily.hashCode());
 		return result;
 	}
 
@@ -30,10 +29,19 @@ public class DisseminationSource {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof DisseminationSource))
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
 			return false;
 		DisseminationSource other = (DisseminationSource) obj;
-		return Objects.equals(keyObjectStorage, other.keyObjectStorage) && productFamily == other.productFamily;
+		if (keyObjectStorage == null) {
+			if (other.keyObjectStorage != null)
+				return false;
+		} else if (!keyObjectStorage.equals(other.keyObjectStorage))
+			return false;
+		if (productFamily != other.productFamily)
+			return false;
+		return true;
 	}
 
 	@Override
@@ -57,4 +65,5 @@ public class DisseminationSource {
 	public void setKeyObjectStorage(String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;
 	}
+
 }

@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -80,37 +79,44 @@ public class ProductionEvent extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, mode, timeliness, oqcFlag, productFamily, productName, uid,
-				allowedActions, demandType, debug, retryCounter);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((mode == null) ? 0 : mode.hashCode());
+		result = prime * result + ((oqcFlag == null) ? 0 : oqcFlag.hashCode());
+		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
+		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final ProductionEvent other = (ProductionEvent) obj;
-		return Objects.equals(creationDate, other.creationDate) 
-				&& Objects.equals(hostname, other.hostname)
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
-				&& Objects.equals(mode, other.mode)
-				&& oqcFlag == other.oqcFlag 
-				&& productFamily == other.productFamily
-				&& Objects.equals(timeliness, other.timeliness)
-				&& Objects.equals(uid, other.uid)
-				&& Objects.equals(productName, other.productName)
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		ProductionEvent other = (ProductionEvent) obj;
+		if (mode == null) {
+			if (other.mode != null)
+				return false;
+		} else if (!mode.equals(other.mode))
+			return false;
+		if (oqcFlag != other.oqcFlag)
+			return false;
+		if (productName == null) {
+			if (other.productName != null)
+				return false;
+		} else if (!productName.equals(other.productName))
+			return false;
+		if (timeliness == null) {
+			if (other.timeliness != null)
+				return false;
+		} else if (!timeliness.equals(other.timeliness))
+			return false;
+		return true;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "ProductionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage

@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
@@ -39,49 +38,42 @@ public class CatalogEvent extends AbstractMessage {
 	public void setMetadata(final Map<String,Object> metadata) {
 		this.metadata = metadata;
 	}
-
+	
 	@Override
 	public int hashCode() {
-		return Objects.hash(
-				creationDate, 
-				hostname, 
-				productName, 
-				productType,
-				keyObjectStorage, 
-				metadata, 
-				productFamily, 
-				uid,
-				allowedActions, 
-				demandType, 
-				debug, 
-				retryCounter
-		);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
+		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
+		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		return result;
 	}
-
+	
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final CatalogEvent other = (CatalogEvent) obj;
-		return Objects.equals(creationDate, other.creationDate) 
-				&& Objects.equals(productName, other.productName)
-				&& Objects.equals(hostname, other.hostname) 
-				&& Objects.equals(productType, other.productType)
-				&& Objects.equals(metadata, other.metadata)
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		CatalogEvent other = (CatalogEvent) obj;
+		if (metadata == null) {
+			if (other.metadata != null)
+				return false;
+		} else if (!metadata.equals(other.metadata))
+			return false;
+		if (productName == null) {
+			if (other.productName != null)
+				return false;
+		} else if (!productName.equals(other.productName))
+			return false;
+		if (productType == null) {
+			if (other.productType != null)
+				return false;
+		} else if (!productType.equals(other.productType))
+			return false;
+		return true;
 	}
 
 	@Override

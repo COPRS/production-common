@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
@@ -20,25 +19,27 @@ public class EvictionManagementJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.operatorName, this.creationDate, this.hostname, this.keyObjectStorage, this.productFamily, this.uid,
-				this.allowedActions, this.demandType, this.debug, this.retryCounter);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((operatorName == null) ? 0 : operatorName.hashCode());
+		return result;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (this == obj)
 			return true;
-		}
-		if (!(obj instanceof EvictionManagementJob)) {
+		if (!super.equals(obj))
 			return false;
-		}
-		final EvictionManagementJob other = (EvictionManagementJob) obj;
-		return Objects.equals(this.operatorName, other.operatorName) && Objects.equals(this.creationDate, other.creationDate)
-				&& Objects.equals(this.hostname, other.hostname) && Objects.equals(this.keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(this.uid, other.uid) && this.productFamily == other.productFamily
-				&& Objects.equals(this.allowedActions, other.getAllowedActions())
-				&& this.demandType == other.demandType && this.debug == other.debug
-				&& this.retryCounter == other.retryCounter;
+		if (getClass() != obj.getClass())
+			return false;
+		EvictionManagementJob other = (EvictionManagementJob) obj;
+		if (operatorName == null) {
+			if (other.operatorName != null)
+				return false;
+		} else if (!operatorName.equals(other.operatorName))
+			return false;
+		return true;
 	}
 
 	@Override

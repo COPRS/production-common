@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
@@ -31,34 +30,29 @@ public class DisseminationJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedActions, demandType, debug, retryCounter);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((disseminationSources == null) ? 0 : disseminationSources.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final DisseminationJob other = (DisseminationJob) obj;
-		return Objects.equals(creationDate, other.creationDate) 
-				&& Objects.equals(hostname, other.hostname) 
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter
-		        && Objects.equals(disseminationSources, other.disseminationSources);
+		DisseminationJob other = (DisseminationJob) obj;
+		if (disseminationSources == null) {
+			if (other.disseminationSources != null)
+				return false;
+		} else if (!disseminationSources.equals(other.disseminationSources))
+			return false;
+		return true;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "DisseminationJob [disseminationSources=" + disseminationSources + ", productFamily=" + productFamily
