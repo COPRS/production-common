@@ -61,12 +61,15 @@ public class DataLifecycleTriggerConfigurationProperties {
 	
 	private long dataRequestCooldownInSec = 1200;
 	
+	private int metadataUnavailableRetriesNumber = 10;
+	private long metadataUnavailableRetriesIntervalMs = 5000;
+
 	// --------------------------------------------------------------------------
 	
 	@Override
 	public String toString() {
-		return String.format("DataLifecycleTriggerConfigurationProperties [productCategories=%s, retentionPolicies=%s, shorteningEvictionTimeAfterCompression=%s]",
-				productCategories, retentionPolicies, shorteningEvictionTimeAfterCompression);
+		return String.format("DataLifecycleTriggerConfigurationProperties [productCategories=%s, retentionPolicies=%s, shorteningEvictionTimeAfterCompression=%s, metadataUnavailableRetriesNumber=%s, metadataUnavailableRetriesIntervalMs=%s]",
+				productCategories, retentionPolicies, shorteningEvictionTimeAfterCompression, metadataUnavailableRetriesNumber, metadataUnavailableRetriesIntervalMs);
 	}
 	
 	// --------------------------------------------------------------------------
@@ -141,6 +144,22 @@ public class DataLifecycleTriggerConfigurationProperties {
 
 	public void setDataRequestCooldownInSec(long dataRequestCooldownInSec) {
 		this.dataRequestCooldownInSec = dataRequestCooldownInSec;
+	}
+
+	public int getMetadataUnavailableRetriesNumber() {
+		return metadataUnavailableRetriesNumber;
+	}
+
+	public void setMetadataUnavailableRetriesNumber(int metadataUnavailableRetriesNumber) {
+		this.metadataUnavailableRetriesNumber = metadataUnavailableRetriesNumber;
+	}
+
+	public long getMetadataUnavailableRetriesIntervalMs() {
+		return metadataUnavailableRetriesIntervalMs;
+	}
+
+	public void setMetadataUnavailableRetriesIntervalMs(long metadataUnavailableRetriesIntervalMs) {
+		this.metadataUnavailableRetriesIntervalMs = metadataUnavailableRetriesIntervalMs;
 	}
 	
 }

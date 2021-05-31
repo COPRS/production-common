@@ -82,7 +82,9 @@ public class DataLifecycleTriggerService {
 				this.metadataRepo,
 				this.configurationProperties.getPatternPersistentInUncompressedStorage(),
 				this.configurationProperties.getPatternPersistentInCompressedStorage(),
-				this.configurationProperties.getPatternAvailableInLta()
+				this.configurationProperties.getPatternAvailableInLta(),
+				configurationProperties.getMetadataUnavailableRetriesNumber(),
+				configurationProperties.getMetadataUnavailableRetriesIntervalMs()
 		);
 		return new MqiConsumer<E>(
 				mqiClient,
