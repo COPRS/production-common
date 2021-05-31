@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -18,6 +19,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.client.DataLifecycleClientUtil;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
@@ -57,6 +59,8 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	private final Pattern persistentInUncompressedStoragePattern;
 	private final Pattern persistentInCompressedStoragePattern;
 	private final Pattern availableInLtaPattern;
+	private final int metadataUnavailableRetriesNumber;
+	private final long metadataUnavailableRetriesIntervalMs;
 
 	public DataLifecycleTriggerListener(
 			final ErrorRepoAppender errorRepoAppender,
@@ -66,7 +70,9 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			final DataLifecycleMetadataRepository metadataRepo,
 			final String patternPersistentInUncompressedStorage,
 			final String patternPersistentInCompressedStorage,
-			final String patternAvailableInLta
+			final String patternAvailableInLta,
+			final int metadataUnavailableRetriesNumber,
+			final long metadataUnavailableRetriesIntervalMs
 	) {
 		this.errorRepoAppender = errorRepoAppender;
 		this.processConfig = processConfig;
@@ -81,6 +87,8 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		this.availableInLtaPattern = null != patternAvailableInLta ? Pattern.compile(patternAvailableInLta) : null;
 		this.shortingEvictionTimeAfterCompression = null != shortingEvictionTimeAfterCompression ? shortingEvictionTimeAfterCompression
 				: Collections.emptyMap();
+		this.metadataUnavailableRetriesNumber = metadataUnavailableRetriesNumber;
+		this.metadataUnavailableRetriesIntervalMs = metadataUnavailableRetriesIntervalMs;
 
 		// validate eviction time shortening configuration
 		final Iterator<Map.Entry<ProductFamily, Integer>> iter = this.shortingEvictionTimeAfterCompression.entrySet().iterator();
@@ -149,7 +157,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	// --------------------------------------------------------------------------
 	
 	/* Creating and updating data lifecycle metadata */
-	private void updateMetadata(final GenericMessageDto<E> inputMessage) throws DataLifecycleMetadataRepositoryException {
+	private void updateMetadata(final GenericMessageDto<E> inputMessage) throws DataLifecycleMetadataRepositoryException, InterruptedException {
 		final E inputEvent = inputMessage.getBody();
 		final String obsKey = inputEvent.getKeyObjectStorage();
 		
@@ -159,13 +167,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		final boolean isCompressedStorage = productFamily.isCompressed();
 		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
-		final Optional<DataLifecycleMetadata> oExistingMetadata;
-		try {
-			oExistingMetadata = this.metadataRepo.findByProductName(productName);
-		} catch (DataLifecycleMetadataRepositoryException e) {
-			LOG.error("error searching data lifecycle metadata by product name: " + LogUtils.toString(e), e);
-			throw e;
-		}
+		final Optional<DataLifecycleMetadata> oExistingMetadata = queryMetadata(productName);
 
 		final Date evictionDate = DataLifecycleClientUtil.calculateEvictionDate(this.retentionPolicies, inputEvent.getCreationDate(), productFamily, fileName);
 		LocalDateTime evictionDateTime = null;
@@ -239,6 +241,33 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		}
 	}
 
+	private Optional<DataLifecycleMetadata> queryMetadata(String productName) throws InterruptedException {
+		try {
+			return Retries.performWithRetries(() -> {
+				try {
+					Optional<DataLifecycleMetadata> metadata = metadataRepo.findByProductName(productName);
+					if (!metadata.isPresent()) {
+						throw new NoSuchElementException(String.format("No lifecycle metadata found for product name: %s", productName));
+					}					
+					return metadata;
+				} catch (DataLifecycleMetadataRepositoryException e) {
+					LOG.error("error searching data lifecycle metadata by product name: " + LogUtils.toString(e), e);
+					throw e;
+				}
+			}, 
+			"lifecycle metadata query for " + productName, 
+			metadataUnavailableRetriesNumber, 
+			metadataUnavailableRetriesIntervalMs
+			);
+		} catch (RuntimeException e) {
+			if (e.getCause() instanceof NoSuchElementException) {
+				return Optional.empty();
+			} else {
+				throw e;
+			}
+		}
+	}
+	
 	/* Removing storage path from data lifecycle metadata after eviction of product */
 	private void updateEvictedMetadata(final EvictionEvent inputEvent) throws DataLifecycleTriggerInternalServerErrorException {
 		final String obsKey = inputEvent.getKeyObjectStorage();
