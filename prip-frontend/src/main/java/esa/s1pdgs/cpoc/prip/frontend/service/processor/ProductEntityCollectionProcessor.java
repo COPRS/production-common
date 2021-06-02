@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -65,7 +64,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm.PripSortOrder;
-import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 
 public class ProductEntityCollectionProcessor implements EntityCollectionProcessor {
 
@@ -154,7 +153,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 
 		final ContextURL contextUrl = OlingoUtil.getContextUrl(responseEdmEntitySet, responseEdmEntityType, false);
 		final EntityCollection entityCollection = new EntityCollection();
-		List<PripQueryFilterTerm> queryFilters = Collections.emptyList();
+		PripQueryFilter queryFilters = null;
 
 		for (final SystemQueryOption queryOption : uriInfo.getSystemQueryOptions()) {
 			if (queryOption instanceof FilterOption && queryOption.getKind().equals(SystemQueryOptionKind.FILTER)) {
@@ -177,10 +176,10 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			// Count Request
 
 			int count = 0;
-			if (queryFilters.isEmpty()) {
+			if (null == queryFilters) {
 				count = this.pripMetadataRepository.countAll();
 			} else {
-				count = this.pripMetadataRepository.countWithFilters(queryFilters);
+				count = this.pripMetadataRepository.countWithFilter(queryFilters);
 			}
 
 			entityCollection.setCount(count);
@@ -266,10 +265,10 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			}
 
 			List<PripMetadata> queryResult;
-			if (queryFilters.isEmpty()) {
+			if (null == queryFilters) {
 				queryResult = this.pripMetadataRepository.findAll(top, skip, sortTerms);
 			} else {
-				queryResult = this.pripMetadataRepository.findWithFilters(queryFilters, top, skip, sortTerms);
+				queryResult = this.pripMetadataRepository.findWithFilter(queryFilters, top, skip, sortTerms);
 			}
 			final List<Entity> productList = entityCollection.getEntities();
 			for (final PripMetadata pripMetadata : queryResult) {

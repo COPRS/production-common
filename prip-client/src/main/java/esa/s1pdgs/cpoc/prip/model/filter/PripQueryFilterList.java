@@ -1,9 +1,11 @@
 package esa.s1pdgs.cpoc.prip.model.filter;
 
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 
 /**
  * A list of filter terms (which may be filter terms and/or filter term lists again) for querying the PRIP persistence.
@@ -11,7 +13,7 @@ import java.util.Objects;
 public class PripQueryFilterList implements PripQueryFilter {
 
 	private LogicalOperator operator;
-	private LinkedList<PripQueryFilter> filterList; // can contain filter terms and/or lists
+	private List<PripQueryFilter> filterList; // can contain filter terms and/or lists
 
 	public static enum LogicalOperator {
 		AND, OR
@@ -20,32 +22,32 @@ public class PripQueryFilterList implements PripQueryFilter {
 	// --------------------------------------------------------------------------
 
 	@SafeVarargs
-	public static final <F extends PripQueryFilter> PripQueryFilterList matchAll(F... filters) {
-		return new PripQueryFilterList(LogicalOperator.AND, Arrays.asList(filters));
+	public static final PripQueryFilterList matchAll(final PripQueryFilter... filters) {
+		return new PripQueryFilterList(LogicalOperator.AND, CollectionUtil.toList(filters));
 	}
 
-	public static final <F extends PripQueryFilter> PripQueryFilterList matchAll(List<F> filters) {
+	public static final PripQueryFilterList matchAll(final List<PripQueryFilter> filters) {
 		return new PripQueryFilterList(LogicalOperator.AND, filters);
 	}
 
 	@SafeVarargs
-	public static final <F extends PripQueryFilter> PripQueryFilterList matchAny(F... filters) {
-		return new PripQueryFilterList(LogicalOperator.OR, Arrays.asList(filters));
+	public static final PripQueryFilterList matchAny(final PripQueryFilter... filters) {
+		return new PripQueryFilterList(LogicalOperator.OR, CollectionUtil.toList(filters));
 	}
 
-	public static final <F extends PripQueryFilter> PripQueryFilterList matchAny(List<F> filters) {
+	public static final PripQueryFilterList matchAny(final List<PripQueryFilter> filters) {
 		return new PripQueryFilterList(LogicalOperator.OR, filters);
 	}
 
 	// --------------------------------------------------------------------------
 
-	public PripQueryFilterList(final LogicalOperator operator, final List<? extends PripQueryFilter> filters) {
+	public PripQueryFilterList(final LogicalOperator operator, final List<PripQueryFilter> filters) {
 		this.operator = Objects.requireNonNull(operator, "logical operator required!");
 
 		if (null != filters) {
-			this.filterList = new LinkedList<>(filters);
+			this.filterList = new ArrayList<>(filters);
 		} else {
-			this.filterList = new LinkedList<>();
+			this.filterList = new ArrayList<>();
 		}
 	}
 
@@ -98,8 +100,20 @@ public class PripQueryFilterList implements PripQueryFilter {
 		this.operator = operator;
 	}
 
-	public LinkedList<PripQueryFilter> getFilterList() {
+	public List<PripQueryFilter> getFilterList() {
 		return this.filterList;
+	}
+
+	public void addFilter(final PripQueryFilter filter) {
+		this.filterList.add(filter);
+	}
+
+	public void addFilter(final PripQueryFilter... filters) {
+		this.addFilter(CollectionUtil.toList(filters));
+	}
+
+	public void addFilter(final Collection<? extends PripQueryFilter> filters) {
+		this.filterList.addAll(filters);
 	}
 
 }
