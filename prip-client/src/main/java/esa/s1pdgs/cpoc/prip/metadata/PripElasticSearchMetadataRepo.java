@@ -175,7 +175,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	@Override
 	public List<PripMetadata> findWithFilter(final PripQueryFilter filter, final Optional<Integer> top, final Optional<Integer> skip,
 			final List<PripSortTerm> sortTerms) {
-		LOGGER.info("finding PRIP metadata with filters {}", filter);
+		LOGGER.info("finding PRIP metadata with filters: {}", filter);
 		final BoolQueryBuilder query = buildQueryWithFilter(filter);
 
 		if (query.hasClauses()) {
