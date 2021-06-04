@@ -25,6 +25,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.commons.net.util.TrustManagerUtils;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
@@ -186,6 +187,10 @@ public class ApacheFtpEdipClient implements EdipClient {
 		    }
 		    else {
 		    	ftpsClient.setTrustManager(TrustManagerUtils.getValidateServerCertificateTrustManager());
+		    }
+		    
+		    if (config.isEnableHostnameVerification()) {
+		    	ftpsClient.setHostnameVerifier(new DefaultHostnameVerifier());
 		    }
 
 			connect(ftpsClient);	    

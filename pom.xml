@@ -19,8 +19,9 @@
 		
 		<commons.logging.version>1.2</commons.logging.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
-		<commons.net.version>3.3</commons.net.version>
+		<commons.net.version>3.8.0</commons.net.version>
 		<commons.io.version>2.6</commons.io.version>
+		<httpcomponents.version>4.5.1</httpcomponents.version>
 		
 		<jacoco.version>0.7.5.201505241946</jacoco.version>
 		<json.version>20171018</json.version>
@@ -187,7 +188,6 @@
 		        <groupId>commons-net</groupId>
 		        <artifactId>commons-net</artifactId>
 		        <version>${commons.net.version}</version>
-		        <classifier>ftp</classifier>
 	      	</dependency>
 	      	
 	      	<dependency>
@@ -195,6 +195,12 @@
 		        <artifactId>commons-io</artifactId>
 		        <version>${commons.io.version}</version>
 	      	</dependency>
+	      	
+	      	<dependency>
+		        <groupId>org.apache.httpcomponents</groupId>
+		        <artifactId>httpclient</artifactId>
+		        <version>${httpcomponents.version}</version>
+	      	</dependency>	      	
 
 			<dependency>
 				<groupId>com.github.lookfirst</groupId>
