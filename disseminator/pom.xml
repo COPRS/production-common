@@ -103,7 +103,6 @@
 		<dependency>
 	        <groupId>commons-net</groupId>
 	        <artifactId>commons-net</artifactId>
-	        <classifier>ftp</classifier>
       	</dependency> 
       	
 		<dependency>

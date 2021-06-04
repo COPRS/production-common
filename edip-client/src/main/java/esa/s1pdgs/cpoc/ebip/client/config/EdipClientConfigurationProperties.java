@@ -17,11 +17,12 @@ public class EdipClientConfigurationProperties {
 		private String user;
 		private String pass;
 		private boolean trustSelfSignedCertificate = false;
-		private boolean encryptDataChannel = true;
+		private boolean encryptDataChannel = false;
 		private boolean ftpsSslSessionReuse = true;
 		private boolean useExtendedMasterSecret = false;
 		private int connectTimeoutSec = 60;
 		private boolean pasv;
+		private boolean enableHostnameVerification = false;
 		private String sslProtocol = "TLSv1.2";
 		private boolean explicitFtps = true;
 		private String keyManagerKeyStore =  "";
@@ -146,6 +147,14 @@ public class EdipClientConfigurationProperties {
 
 		public void setUseExtendedMasterSecret(boolean useExtendedMasterSecret) {
 			this.useExtendedMasterSecret = useExtendedMasterSecret;
+		}
+
+		public boolean isEnableHostnameVerification() {
+			return enableHostnameVerification;
+		}
+
+		public void setEnableHostnameVerification(boolean enableHostnameVerification) {
+			this.enableHostnameVerification = enableHostnameVerification;
 		}
 	}
 	
