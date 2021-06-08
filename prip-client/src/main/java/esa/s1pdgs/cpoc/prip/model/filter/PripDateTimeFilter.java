@@ -21,9 +21,20 @@ public class PripDateTimeFilter extends PripRangeValueFilter<LocalDateTime> {
 	public PripDateTimeFilter(String fieldName, RelationalOperator operator, LocalDateTime value) {
 		super(fieldName,operator, value);
 	}
-	
+
+	public PripDateTimeFilter(final PripDateTimeFilter filter) {
+		this(filter.getFieldName(), filter.getRelationalOperator(), filter.getValue());
+	}
+
 	// --------------------------------------------------------------------------
-	
+
+	@Override
+	public PripDateTimeFilter copy() {
+		return new PripDateTimeFilter(this);
+	}
+
+	// --------------------------------------------------------------------------
+
 	@Override
 	public String toString() {
 		return this.getFieldName() + " " + (null != this.getRelationalOperator() ? this.getRelationalOperator().getOperator() : "NO_OP") + " "

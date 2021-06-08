@@ -25,7 +25,7 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 		}
 
 		public String getOperator() {
-			return op;
+			return this.op;
 		}
 
 		public static RelationalOperator fromString(String operator) {
@@ -120,7 +120,7 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 	// --------------------------------------------------------------------------
 
 	public T getValue() {
-		return value;
+		return this.value;
 	}
 
 	public void setValue(T value) {

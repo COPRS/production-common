@@ -65,6 +65,10 @@ public class PripTextFilter extends PripQueryFilterTerm {
 		this.text = Objects.requireNonNull(text);
 	}
 
+	public PripTextFilter(final PripTextFilter filter) {
+		this(filter.getFieldName(), filter.getFunction(), filter.getText());
+	}
+
 	// --------------------------------------------------------------------------
 	
 	@Override
@@ -94,7 +98,14 @@ public class PripTextFilter extends PripQueryFilterTerm {
 		return this.getFieldName() + " " + (null != this.function ? this.function.name() : "NO_FUNCTION") + " "
 				+ this.text;
 	}
-	
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripTextFilter copy() {
+		return new PripTextFilter(this);
+	}
+
 	// --------------------------------------------------------------------------
 
 	public Function getFunction() {

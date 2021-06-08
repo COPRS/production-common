@@ -16,7 +16,17 @@ public class PripQueryFilterList implements PripQueryFilter {
 	private List<PripQueryFilter> filterList; // can contain filter terms and/or lists
 
 	public static enum LogicalOperator {
-		AND, OR
+		AND, OR;
+
+		public static LogicalOperator fromString(final String operator) {
+			if (AND.name().equalsIgnoreCase(operator)) {
+				return AND;
+			}
+			if (OR.name().equalsIgnoreCase(operator)) {
+				return OR;
+			}
+			return null;
+		}
 	}
 
 	// --------------------------------------------------------------------------

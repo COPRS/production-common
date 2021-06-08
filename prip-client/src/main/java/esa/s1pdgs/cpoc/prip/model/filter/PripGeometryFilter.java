@@ -63,6 +63,10 @@ public class PripGeometryFilter extends PripQueryFilterTerm {
 		this.geometry = Objects.requireNonNull(geometry);
 	}
 
+	public PripGeometryFilter(final PripGeometryFilter filter) {
+		this(filter.getFieldName(), filter.getFunction(), Objects.requireNonNull(filter.getGeometry()).copy());
+	}
+
 	// --------------------------------------------------------------------------
 	
 	@Override
@@ -92,7 +96,14 @@ public class PripGeometryFilter extends PripQueryFilterTerm {
 		return this.getFieldName() + " " + (null != this.function ? this.function.name() : "NO_FUNCTION") + " "
 				+ this.geometry;
 	}
-	
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripGeometryFilter copy() {
+		return new PripGeometryFilter(this);
+	}
+
 	// --------------------------------------------------------------------------
 
 	public Function getFunction() {

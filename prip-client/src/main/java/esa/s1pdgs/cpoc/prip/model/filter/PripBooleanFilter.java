@@ -53,6 +53,10 @@ public class PripBooleanFilter extends PripQueryFilterTerm {
 		this.value = (Objects.requireNonNull(value));
 	}
 
+	public PripBooleanFilter(final PripBooleanFilter filter) {
+		this(filter.getFieldName(), filter.getFunction(), filter.getValue());
+	}
+
 	// --------------------------------------------------------------------------
 	
 	@Override
@@ -82,7 +86,14 @@ public class PripBooleanFilter extends PripQueryFilterTerm {
 		return this.getFieldName() + " " + (null != this.function ? this.function.functionName : "NO_FUNCTION") + " "
 				+ this.getValue();
 	}
-	
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripBooleanFilter copy() {
+		return new PripBooleanFilter(this);
+	}
+
 	// --------------------------------------------------------------------------
 
 	public Function getFunction() {

@@ -40,6 +40,10 @@ public abstract class PripQueryFilterTerm implements PripQueryFilter {
 
 	// --------------------------------------------------------------------------
 
+	public abstract PripQueryFilterTerm copy();
+
+	// --------------------------------------------------------------------------
+
 	public String getFieldName() {
 		return this.fieldName;
 	}

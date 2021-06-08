@@ -12,5 +12,16 @@ public class PripIntegerFilter extends PripRangeValueFilter<Long> {
 	public PripIntegerFilter(String fieldName, RelationalOperator operator, Long value) {
 		super(fieldName, operator, value);
 	}
-	
+
+	public PripIntegerFilter(final PripIntegerFilter filter) {
+		this(filter.getFieldName(), filter.getRelationalOperator(), filter.getValue());
+	}
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripIntegerFilter copy() {
+		return new PripIntegerFilter(this);
+	}
+
 }

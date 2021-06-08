@@ -13,4 +13,15 @@ public class PripDoubleFilter extends PripRangeValueFilter<Double> {
 		super(fieldName, operator, value);
 	}
 
+	public PripDoubleFilter(final PripDoubleFilter filter) {
+		this(filter.getFieldName(), filter.getRelationalOperator(), filter.getValue());
+	}
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripDoubleFilter copy() {
+		return new PripDoubleFilter(this);
+	}
+
 }

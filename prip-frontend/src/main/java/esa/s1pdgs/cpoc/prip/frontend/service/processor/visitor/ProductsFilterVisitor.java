@@ -52,7 +52,6 @@ import org.locationtech.jts.io.WKTReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
@@ -279,8 +278,10 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
 				any.getExpression().accept(filterExpressionVisitor);
-				final List<PripQueryFilterTerm> filters = filterExpressionVisitor.getFilters();
-				CollectionUtil.nullToEmpty(filters).forEach(this.filterStack::push);
+				final PripQueryFilter filter = filterExpressionVisitor.getFilter();
+				if (null != filter) {
+					this.filterStack.push(filter);
+				}
 			} else if (uriResource instanceof UriResourceFunctionImpl) {
 				UriResourceFunctionImpl uriResourceFunctionImpl = (UriResourceFunctionImpl) uriResource;
 				if (EdmProvider.FUNCTION_INTERSECTS_FQN

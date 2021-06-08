@@ -1,11 +1,13 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
+import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
@@ -18,26 +20,32 @@ import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDoubleFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripFilterOperatorException;
 import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList.LogicalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
 
 public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductsFilterVisitor.class);
-	
+
+	private static final String ATT_NAME = "att/Name";
+	private static final String PLACEHOLDER = "PLACEHOLDER";
+
 	private String type = "";
-	private List<String> fieldNames = new ArrayList<String>();
-	
-	private final List<PripQueryFilterTerm> filters = new ArrayList<>();
-	
+
+	private final Deque<PripQueryFilter> filterStack = new ArrayDeque<>();
+	private String fieldname;
+
 	// --------------------------------------------------------------------------
 	
 	public AttributesFilterVisitor(String type) {
@@ -52,61 +60,180 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		
 		final String leftOperand = ProductsFilterVisitor.operandToString(left);
 		final String rightOperand = ProductsFilterVisitor.operandToString(right);
-		LOGGER.debug("got left operand: {} operator: {} right operand: {}", leftOperand, operator, rightOperand);
-		
-		String value = null;
-		
-		if ("att/Name".equals(leftOperand) && operator == BinaryOperatorKind.EQ) {
-			String fieldName = "attr_" + removeQuotes(rightOperand) + "_" + type;
-			if (!fieldNames.contains(fieldName)) {
-				fieldNames.add(fieldName);
+		LOGGER.debug(String.format("AttributesFilterVisitor got: %s %s %s", leftOperand, operator, rightOperand));
+
+		switch (operator) {
+		case OR:
+		case AND:
+			this.applyOperatorToStack(operator);
+			break;
+		default: {
+			if (ATT_NAME.equals(leftOperand) && operator == BinaryOperatorKind.EQ) { // e.g. att/Name eq 'productType'
+				final String convertedFieldName = "attr_" + removeQuotes(rightOperand) + "_" + this.type;
+
+				if (null != this.fieldname && !this.fieldname.equals(convertedFieldName)) {
+					final String msg = String.format("AttributesFilterVisitor: invalid query, only one value for %s allowed per clause, but was: %s",
+							ATT_NAME, this.fieldname + ", " + convertedFieldName);
+					LOGGER.error(msg);
+					throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				}
+
+				this.fieldname = convertedFieldName;
+				this.filterStack.push(this.buildFilter(leftOperand, operator, rightOperand));
+			} else if (ATT_NAME.equals(rightOperand) && operator == BinaryOperatorKind.EQ) {
+				final String convertedFieldName = "attr_" + removeQuotes(leftOperand) + "_" + this.type;
+
+				if (null != this.fieldname && !this.fieldname.equals(convertedFieldName)) {
+					final String msg = String.format("AttributesFilterVisitor: invalid query, only one value for %s allowed per clause, but was: %s", ATT_NAME,
+							this.fieldname + ", " + convertedFieldName);
+					LOGGER.error(msg);
+					throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				}
+
+				this.fieldname = convertedFieldName;
+				this.filterStack.push(this.buildFilter(rightOperand, operator, leftOperand));
+			} else if ("att/Value".equals(leftOperand)) {
+				final String value = rightOperand;
+				if (null != operator && StringUtil.isNotEmpty(value)) {
+					this.filterStack.push(this.buildFilter(value, operator));
+				} else {
+					final String msg = String.format("AttributesFilterVisitor: incomplete value expression (missing operator or operand): %s %s %s", ATT_NAME,
+							operator != null ? operator : "[MISSING OPERATOR]", StringUtil.isNotEmpty(value) ? value : "[MISSING VALUE]");
+					LOGGER.info(msg);
+					throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				}
+			} else if ("att/Value".equals(rightOperand)) {
+				final String value = leftOperand;
+				if (null != operator && StringUtil.isNotEmpty(value)) {
+					this.filterStack.push(this.buildFilter(value, operator));
+				} else {
+					final String msg = String.format("AttributesFilterVisitor: incomplete value expression (missing operator or operand): %s %s %s", ATT_NAME,
+							operator != null ? operator : "[MISSING OPERATOR]", StringUtil.isNotEmpty(value) ? value : "[MISSING VALUE]");
+					LOGGER.info(msg);
+					throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				}
+			} else if ((ATT_NAME.equals(leftOperand) || ATT_NAME.equals(rightOperand)) && operator != BinaryOperatorKind.EQ) {
+				final String msg = String.format("AttributesFilterVisitor: unsupported operator '%s' for '%s': only '%s' allowed", operator, ATT_NAME,
+						BinaryOperatorKind.EQ);
+				LOGGER.info(msg);
+				throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 			}
-		} else if ("att/Name".equals(rightOperand) && operator == BinaryOperatorKind.EQ) {
-			String fieldName = "attr_" + removeQuotes(leftOperand)  + "_" + type;
-			if (!fieldNames.contains(fieldName)) {
-				fieldNames.add(fieldName);
-			}
-		} else if ("att/Value".equals(leftOperand)) {
-			value = rightOperand;
-			if (null != operator && StringUtil.isNotEmpty(value)) {
-				filters.add(buildFilter(value, operator));
-			}
-		} else if ("att/Value".equals(rightOperand)) {
-			value = leftOperand;
-			if (null != operator && StringUtil.isNotEmpty(value)) {
-				filters.add(buildFilter(value, operator));
-			}
+		}
 		}
 
 		return null;
 	}
-	
+
+	private void applyOperatorToStack(final BinaryOperatorKind operator) throws ExpressionVisitException {
+		final PripQueryFilter lastStackElement = this.filterStack.pop();
+		final PripQueryFilter secondLastStackElement = this.filterStack.pop();
+
+		if (isFilterTerm(lastStackElement) && isFilterTerm(secondLastStackElement)) {
+			// if both elements are filter terms ... add them to a newly created list and push the list onto the stack
+			if (BinaryOperatorKind.AND == operator) {
+				this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElement, lastStackElement));
+			} else if (BinaryOperatorKind.OR == operator) {
+				this.filterStack.push(PripQueryFilterList.matchAny(secondLastStackElement, lastStackElement));
+			}
+		} else if (isFilterTerm(lastStackElement) && isFilterList(secondLastStackElement)) {
+			// if one element is a filter term and the other a filter list ...
+			// ... and if the operators are the same ...
+			if (LogicalOperator.fromString(operator.toString()) == ((PripQueryFilterList) secondLastStackElement).getOperator()) {
+				// ... add the term to the list and push the list onto the stack
+				this.filterStack.push(addToList((PripQueryFilterList) secondLastStackElement, lastStackElement));
+			} else /* ... and the operators differ ... */ {
+				// ... create a new list using the operator, add both to the new list and push the new list back on stack
+				if (BinaryOperatorKind.AND == operator) {
+					this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElement, lastStackElement));
+				} else if (BinaryOperatorKind.OR == operator) {
+					this.filterStack.push(PripQueryFilterList.matchAny(secondLastStackElement, lastStackElement));
+				}
+			}
+		} else if (isFilterList(lastStackElement) && isFilterTerm(secondLastStackElement)) {
+			// if one element is a filter term and the other a filter list ...
+			// ... and if the operators are the same ...
+			if (LogicalOperator.fromString(operator.toString()) == ((PripQueryFilterList) lastStackElement).getOperator()) {
+				// ... add the term to the list and push the list onto the stack
+				this.filterStack.push(addToList((PripQueryFilterList) lastStackElement, secondLastStackElement));
+			} else /* ... and the operators differ ... */ {
+				// ... create a new list using the operator, add both to the new list and push the new list back on stack
+				if (BinaryOperatorKind.AND == operator) {
+					this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElement, lastStackElement));
+				} else if (BinaryOperatorKind.OR == operator) {
+					this.filterStack.push(PripQueryFilterList.matchAny(secondLastStackElement, lastStackElement));
+				}
+			}
+		} else if (isFilterList(lastStackElement) && isFilterList(secondLastStackElement)) {
+			// if both elements are filter lists ...
+
+			final LogicalOperator parsedOperator = LogicalOperator.fromString(operator.toString());
+			final PripQueryFilterList lastStackElementList = (PripQueryFilterList) lastStackElement;
+			final PripQueryFilterList secondLastStackElementList = (PripQueryFilterList) secondLastStackElement;
+			// ... and if the three operators are the same ...
+			if (parsedOperator == lastStackElementList.getOperator() && parsedOperator == secondLastStackElementList.getOperator()) {
+				// ... unify the list and push the unified List back on stack
+				if (BinaryOperatorKind.AND == operator) {
+					final PripQueryFilterList newAndList = PripQueryFilterList.matchAll();
+					newAndList.addFilter(secondLastStackElementList.getFilterList());
+					newAndList.addFilter(lastStackElementList.getFilterList());
+					this.filterStack.push(newAndList);
+				} else if (BinaryOperatorKind.OR == operator) {
+					final PripQueryFilterList newOrList = PripQueryFilterList.matchAny();
+					newOrList.addFilter(secondLastStackElementList.getFilterList());
+					newOrList.addFilter(lastStackElementList.getFilterList());
+					this.filterStack.push(newOrList);
+				}
+			} else {
+				// ... create a new list using the operator, add both to the new list and push the new list back on stack
+				if (BinaryOperatorKind.AND == operator) {
+					this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElementList, lastStackElementList));
+				} else if (BinaryOperatorKind.OR == operator) {
+					this.filterStack.push(PripQueryFilterList.matchAny(secondLastStackElementList, lastStackElementList));
+				}
+			}
+		}
+	}
+
+	private static boolean isFilterList(final PripQueryFilter filter) {
+		return filter instanceof PripQueryFilterList;
+	}
+
+	private static boolean isFilterTerm(final PripQueryFilter filter) {
+		return filter instanceof PripQueryFilterTerm;
+	}
+
+	private static PripQueryFilterList addToList(final PripQueryFilterList list, final PripQueryFilter... filtersToAdd) {
+		list.addFilter(filtersToAdd);
+		return list;
+	}
+
 	private static String removeQuotes(String str) {
 		return StringUtil.removeTrailing(StringUtil.removeLeading(str, "'", "\""), "'","\"");
 	}
 	
 	private PripQueryFilterTerm buildFilter(String value, BinaryOperatorKind op) throws ExpressionVisitException {
-		PripQueryFilterTerm filter = null;
+		return this.buildFilter(PLACEHOLDER, op, value);
+	}
+
+	private PripQueryFilterTerm buildFilter(final String fieldName, final BinaryOperatorKind op, final String value) throws ExpressionVisitException {
+		final PripQueryFilterTerm filter;
 		try {
 			switch (this.type) {
 			case "string":
-				filter = new PripTextFilter("placeholder", PripTextFilter.Function.fromString(op.name()), value);
+				filter = new PripTextFilter(fieldName, PripTextFilter.Function.fromString(op.name()), value);
 				break;
 			case "date":
-				filter = new PripDateTimeFilter("placeholder", PripRangeValueFilter.RelationalOperator.fromString(op.name()),
+				filter = new PripDateTimeFilter(fieldName, PripRangeValueFilter.RelationalOperator.fromString(op.name()),
 						ProductsFilterVisitor.convertToLocalDateTime(value));
 				break;
 			case "long":
-				filter = new PripIntegerFilter("placeholder", PripRangeValueFilter.RelationalOperator.fromString(op.name()),
-						Long.valueOf(value));
+				filter = new PripIntegerFilter(fieldName, PripRangeValueFilter.RelationalOperator.fromString(op.name()), Long.valueOf(value));
 				break;
 			case "double":
-				filter = new PripDoubleFilter("placeholder", PripRangeValueFilter.RelationalOperator.fromString(op.name()),
-						Double.valueOf(value));
+				filter = new PripDoubleFilter(fieldName, PripRangeValueFilter.RelationalOperator.fromString(op.name()), Double.valueOf(value));
 				break;
 			case "boolean":
-				filter = new PripBooleanFilter("placeholder", PripBooleanFilter.Function.fromString(op.name()),
-						Boolean.valueOf(value));
+				filter = new PripBooleanFilter(fieldName, PripBooleanFilter.Function.fromString(op.name()), Boolean.valueOf(value));
 				break;
 			default:
 				throw new ExpressionVisitException("unsupported type: " + this.type);
@@ -169,17 +296,69 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	
 	// --------------------------------------------------------------------------
 
-	public List<PripQueryFilterTerm> getFilters() {
-		if (fieldNames.size() == 0) {
-			return Collections.emptyList();
-		} else if (fieldNames.size() == 1) {
-			String fieldName = fieldNames.get(0);
-			for (PripQueryFilterTerm filter: filters) {
-				filter.setFieldName(fieldName);				
+	public PripQueryFilter getFilter() throws ExpressionVisitException, ODataApplicationException {
+		if (this.filterStack.size() == 1) {
+			final PripQueryFilter filter = this.filterStack.pop();
+			LOGGER.debug(String.format("AttributesFilterVisitor returns (unconverted): %s", filter));
+
+			if (isFilterTerm(filter)) { // one term is not enough, we need at least a list with two terms (attribute name + attribute value)
+				final String msg = "AttributesFilterVisitor: incomplete query, attribute name or value missing";
+				LOGGER.error(msg);
+				throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 			}
-			return filters;
+
+			final PripQueryFilter convertedFilter = this.convertFilterStructure((PripQueryFilterList) filter);
+			LOGGER.debug(String.format("AttributesFilterVisitor returns: %s", convertedFilter));
+			return convertedFilter;
 		} else {
-			return Collections.singletonList(new PripTextFilter("productFamily", Function.EQUALS, "'n/a'"));
+			final String reason = this.filterStack.isEmpty() ? "empty filter stack after traversing expression tree"
+					: "more than one result on filter stack after traversing expression tree";
+			final String msg = "AttributesFilterVisitor: incomplete filter expression, " + reason;
+			LOGGER.error(msg);
+			throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+		}
+	}
+
+	private PripQueryFilter convertFilterStructure(final PripQueryFilterList parentFilterList) throws ODataApplicationException {
+		final List<PripQueryFilter> copyList = new ArrayList<>();
+		final List<PripQueryFilter> childFilters = parentFilterList.getFilterList();
+
+		for (final PripQueryFilter childFilter : CollectionUtil.nullToEmpty(childFilters)) {
+			if (isFilterList(childFilter)) {
+				final PripQueryFilterList childFilterList = (PripQueryFilterList) childFilter;
+
+				// dig deeper
+				final PripQueryFilter filtersFromDeeperLevels = this.convertFilterStructure(childFilterList);
+				if (null != filtersFromDeeperLevels) {
+					copyList.add(filtersFromDeeperLevels);
+				}
+
+			} else if (isFilterTerm(childFilter)) {
+				final PripQueryFilterTerm childFilterTerm = (PripQueryFilterTerm) childFilter;
+
+				if (!ATT_NAME.equals(childFilterTerm.getFieldName())) { // don't copy att/Name filters, we just use their value stored in this.fieldname
+					final PripQueryFilterTerm copy = childFilterTerm.copy();
+
+					if (PLACEHOLDER.equals(copy.getFieldName())) { // replace with real field name
+						copy.setFieldName(this.fieldname);
+					}
+
+					copyList.add(copy);
+				}
+			}
+		}
+
+		if (copyList.isEmpty()) {
+			return null;
+		} else if (1 == copyList.size()) {
+			return copyList.get(0); // direct return = the filter subtree gets shortened
+		} else if (LogicalOperator.OR == parentFilterList.getOperator()) {
+			return PripQueryFilterList.matchAny(copyList);
+		} else if (LogicalOperator.AND == parentFilterList.getOperator()) {
+			return PripQueryFilterList.matchAll(copyList);
+		} else {
+			throw new ODataApplicationException(String.format("unsupported operator: %s", parentFilterList.getOperator()),
+					HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 		}
 	}
 
