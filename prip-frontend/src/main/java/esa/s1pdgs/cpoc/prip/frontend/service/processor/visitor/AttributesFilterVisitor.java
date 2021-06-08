@@ -1,8 +1,6 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
@@ -43,7 +41,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
 	private String type = "";
 
-	private final Deque<PripQueryFilter> filterStack = new ArrayDeque<>();
+	private final FilterStack filterStack = new FilterStack();
 	private String fieldname;
 
 	// --------------------------------------------------------------------------
@@ -65,7 +63,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		switch (operator) {
 		case OR:
 		case AND:
-			this.applyOperatorToStack(operator);
+			this.filterStack.applyOperator(operator);
 			break;
 		default: {
 			if (ATT_NAME.equals(leftOperand) && operator == BinaryOperatorKind.EQ) { // e.g. att/Name eq 'productType'
@@ -99,7 +97,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 				} else {
 					final String msg = String.format("AttributesFilterVisitor: incomplete value expression (missing operator or operand): %s %s %s", ATT_NAME,
 							operator != null ? operator : "[MISSING OPERATOR]", StringUtil.isNotEmpty(value) ? value : "[MISSING VALUE]");
-					LOGGER.info(msg);
+					LOGGER.error(msg);
 					throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 				}
 			} else if ("att/Value".equals(rightOperand)) {
@@ -109,102 +107,19 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 				} else {
 					final String msg = String.format("AttributesFilterVisitor: incomplete value expression (missing operator or operand): %s %s %s", ATT_NAME,
 							operator != null ? operator : "[MISSING OPERATOR]", StringUtil.isNotEmpty(value) ? value : "[MISSING VALUE]");
-					LOGGER.info(msg);
+					LOGGER.error(msg);
 					throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 				}
 			} else if ((ATT_NAME.equals(leftOperand) || ATT_NAME.equals(rightOperand)) && operator != BinaryOperatorKind.EQ) {
 				final String msg = String.format("AttributesFilterVisitor: unsupported operator '%s' for '%s': only '%s' allowed", operator, ATT_NAME,
 						BinaryOperatorKind.EQ);
-				LOGGER.info(msg);
+				LOGGER.error(msg);
 				throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 			}
 		}
 		}
 
 		return null;
-	}
-
-	private void applyOperatorToStack(final BinaryOperatorKind operator) throws ExpressionVisitException {
-		final PripQueryFilter lastStackElement = this.filterStack.pop();
-		final PripQueryFilter secondLastStackElement = this.filterStack.pop();
-
-		if (isFilterTerm(lastStackElement) && isFilterTerm(secondLastStackElement)) {
-			// if both elements are filter terms ... add them to a newly created list and push the list onto the stack
-			if (BinaryOperatorKind.AND == operator) {
-				this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElement, lastStackElement));
-			} else if (BinaryOperatorKind.OR == operator) {
-				this.filterStack.push(PripQueryFilterList.matchAny(secondLastStackElement, lastStackElement));
-			}
-		} else if (isFilterTerm(lastStackElement) && isFilterList(secondLastStackElement)) {
-			// if one element is a filter term and the other a filter list ...
-			// ... and if the operators are the same ...
-			if (LogicalOperator.fromString(operator.toString()) == ((PripQueryFilterList) secondLastStackElement).getOperator()) {
-				// ... add the term to the list and push the list onto the stack
-				this.filterStack.push(addToList((PripQueryFilterList) secondLastStackElement, lastStackElement));
-			} else /* ... and the operators differ ... */ {
-				// ... create a new list using the operator, add both to the new list and push the new list back on stack
-				if (BinaryOperatorKind.AND == operator) {
-					this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElement, lastStackElement));
-				} else if (BinaryOperatorKind.OR == operator) {
-					this.filterStack.push(PripQueryFilterList.matchAny(secondLastStackElement, lastStackElement));
-				}
-			}
-		} else if (isFilterList(lastStackElement) && isFilterTerm(secondLastStackElement)) {
-			// if one element is a filter term and the other a filter list ...
-			// ... and if the operators are the same ...
-			if (LogicalOperator.fromString(operator.toString()) == ((PripQueryFilterList) lastStackElement).getOperator()) {
-				// ... add the term to the list and push the list onto the stack
-				this.filterStack.push(addToList((PripQueryFilterList) lastStackElement, secondLastStackElement));
-			} else /* ... and the operators differ ... */ {
-				// ... create a new list using the operator, add both to the new list and push the new list back on stack
-				if (BinaryOperatorKind.AND == operator) {
-					this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElement, lastStackElement));
-				} else if (BinaryOperatorKind.OR == operator) {
-					this.filterStack.push(PripQueryFilterList.matchAny(secondLastStackElement, lastStackElement));
-				}
-			}
-		} else if (isFilterList(lastStackElement) && isFilterList(secondLastStackElement)) {
-			// if both elements are filter lists ...
-
-			final LogicalOperator parsedOperator = LogicalOperator.fromString(operator.toString());
-			final PripQueryFilterList lastStackElementList = (PripQueryFilterList) lastStackElement;
-			final PripQueryFilterList secondLastStackElementList = (PripQueryFilterList) secondLastStackElement;
-			// ... and if the three operators are the same ...
-			if (parsedOperator == lastStackElementList.getOperator() && parsedOperator == secondLastStackElementList.getOperator()) {
-				// ... unify the list and push the unified List back on stack
-				if (BinaryOperatorKind.AND == operator) {
-					final PripQueryFilterList newAndList = PripQueryFilterList.matchAll();
-					newAndList.addFilter(secondLastStackElementList.getFilterList());
-					newAndList.addFilter(lastStackElementList.getFilterList());
-					this.filterStack.push(newAndList);
-				} else if (BinaryOperatorKind.OR == operator) {
-					final PripQueryFilterList newOrList = PripQueryFilterList.matchAny();
-					newOrList.addFilter(secondLastStackElementList.getFilterList());
-					newOrList.addFilter(lastStackElementList.getFilterList());
-					this.filterStack.push(newOrList);
-				}
-			} else {
-				// ... create a new list using the operator, add both to the new list and push the new list back on stack
-				if (BinaryOperatorKind.AND == operator) {
-					this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElementList, lastStackElementList));
-				} else if (BinaryOperatorKind.OR == operator) {
-					this.filterStack.push(PripQueryFilterList.matchAny(secondLastStackElementList, lastStackElementList));
-				}
-			}
-		}
-	}
-
-	private static boolean isFilterList(final PripQueryFilter filter) {
-		return filter instanceof PripQueryFilterList;
-	}
-
-	private static boolean isFilterTerm(final PripQueryFilter filter) {
-		return filter instanceof PripQueryFilterTerm;
-	}
-
-	private static PripQueryFilterList addToList(final PripQueryFilterList list, final PripQueryFilter... filtersToAdd) {
-		list.addFilter(filtersToAdd);
-		return list;
 	}
 
 	private static String removeQuotes(String str) {
@@ -216,6 +131,11 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	}
 
 	private PripQueryFilterTerm buildFilter(final String fieldName, final BinaryOperatorKind op, final String value) throws ExpressionVisitException {
+
+		if (ATT_NAME.equals(fieldName)) {
+			return new PripTextFilter(fieldName, PripTextFilter.Function.fromString(op.name()), value);
+		}
+
 		final PripQueryFilterTerm filter;
 		try {
 			switch (this.type) {
@@ -299,7 +219,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 	public PripQueryFilter getFilter() throws ExpressionVisitException, ODataApplicationException {
 		if (this.filterStack.size() == 1) {
 			final PripQueryFilter filter = this.filterStack.pop();
-			LOGGER.debug(String.format("AttributesFilterVisitor returns (unconverted): %s", filter));
+			LOGGER.trace(String.format("AttributesFilterVisitor returns (unconverted): %s", filter));
 
 			if (isFilterTerm(filter)) { // one term is not enough, we need at least a list with two terms (attribute name + attribute value)
 				final String msg = "AttributesFilterVisitor: incomplete query, attribute name or value missing";
@@ -307,9 +227,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 				throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 			}
 
-			final PripQueryFilter convertedFilter = this.convertFilterStructure((PripQueryFilterList) filter);
-			LOGGER.debug(String.format("AttributesFilterVisitor returns: %s", convertedFilter));
-			return convertedFilter;
+			return this.convertFilterStructure((PripQueryFilterList) filter);
 		} else {
 			final String reason = this.filterStack.isEmpty() ? "empty filter stack after traversing expression tree"
 					: "more than one result on filter stack after traversing expression tree";
@@ -360,6 +278,14 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 			throw new ODataApplicationException(String.format("unsupported operator: %s", parentFilterList.getOperator()),
 					HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 		}
+	}
+
+	private static boolean isFilterList(final PripQueryFilter filter) {
+		return filter instanceof PripQueryFilterList;
+	}
+
+	private static boolean isFilterTerm(final PripQueryFilter filter) {
+		return filter instanceof PripQueryFilterTerm;
 	}
 
 }

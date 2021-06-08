@@ -12,10 +12,8 @@ import static esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -58,8 +56,6 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList;
-import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.RelationalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
@@ -96,8 +92,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				MethodKind.GEOINTERSECTS);
 	}
 
-	private final PripQueryFilterList rootFilterList = PripQueryFilterList.matchAny();
-	private final Deque<PripQueryFilter> filterStack = new ArrayDeque<>();
+	private final FilterStack filterStack = new FilterStack();
 
 	public ProductsFilterVisitor() {
 	}
@@ -109,12 +104,12 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		final String leftOperand = operandToString(left);
 		final String rightOperand = operandToString(right);
 
-		LOGGER.debug("got left operand: {} operator: {} right operand: {}", leftOperand, operator, rightOperand);
+		LOGGER.debug("got: {} {} {}", leftOperand, operator, rightOperand);
 
 		switch (operator) {
 		case OR:
 		case AND:
-			this.applyOperatorToStack(operator);
+			this.filterStack.applyOperator(operator);
 			break;
 		case GT:
 		case GE:
@@ -123,7 +118,6 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			final PripDateTimeFilter pripDateTimefilter = createDateTimeFilter(RelationalOperator.fromString(operator.name()),
 					left, right, leftOperand, rightOperand);
 			this.filterStack.push(pripDateTimefilter);
-			LOGGER.debug("using filter: {} ", pripDateTimefilter);
 			break;
 		}
 		case EQ: {
@@ -133,7 +127,6 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				return null;
 			}
 			this.filterStack.push(textFilter);
-			LOGGER.debug("using filter: {} ", textFilter);
 			break;
 		}
 		default:
@@ -141,53 +134,6 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 
 		return null;
-	}
-
-	private void applyOperatorToStack(final BinaryOperatorKind operator) throws ExpressionVisitException {
-		final PripQueryFilter lastStackElement = this.filterStack.pop();
-		final PripQueryFilter secondLastStackElement = this.filterStack.pop();
-
-		if (BinaryOperatorKind.AND == operator) {
-			if (isFilterTerm(lastStackElement) && isFilterTerm(secondLastStackElement)) {
-				// if both elements are filter terms ... add them to a newly created AND list and push the list onto the stack
-				this.filterStack.push(PripQueryFilterList.matchAll(secondLastStackElement, lastStackElement));
-			} else if (isFilterTerm(lastStackElement) && isFilterList(secondLastStackElement)) {
-				// if one element is a filter term and the other a filter list ... add the term to the list and push the list onto the stack
-				this.filterStack.push(addToList((PripQueryFilterList) secondLastStackElement, lastStackElement));
-			} else if (isFilterList(lastStackElement) && isFilterTerm(secondLastStackElement)) {
-				// if one element is a filter term and the other a filter list ... add the term to the list and push the list onto the stack
-				this.filterStack.push(addToList((PripQueryFilterList) lastStackElement, secondLastStackElement));
-			} else {
-				final String errMsg = String.format("Unexpected operation while applying operator on filter stack: %s %s %s", secondLastStackElement,
-						operator.name(), lastStackElement);
-				LOGGER.error(errMsg);
-				throw new ExpressionVisitException(errMsg);
-			}
-		} else if (BinaryOperatorKind.OR == operator) {
-			if (this.rootFilterList.equals(lastStackElement)) {
-				// if one element is the root filter list (OR list) ... add the other filter the root filter list and push the root filter list onto the stack
-				this.filterStack.push(addToList(this.rootFilterList, secondLastStackElement));
-			} else if (this.rootFilterList.equals(secondLastStackElement)) {
-				// if one element is the root filter list (OR list) ... add the other filter the root filter list and push the root filter list onto the stack
-				this.filterStack.push(addToList(this.rootFilterList, lastStackElement));
-			} else {
-				// if none element is the root filter list ... add both filters to the root filter list and push the root filter list onto the stack
-				this.filterStack.push(addToList(this.rootFilterList, secondLastStackElement, lastStackElement));
-			}
-		}
-	}
-
-	private static boolean isFilterList(final PripQueryFilter filter) {
-		return filter instanceof PripQueryFilterList;
-	}
-
-	private static boolean isFilterTerm(final PripQueryFilter filter) {
-		return filter instanceof PripQueryFilterTerm;
-	}
-
-	private static PripQueryFilterList addToList(final PripQueryFilterList list, final PripQueryFilter... filtersToAdd) {
-		list.addFilter(filtersToAdd);
-		return list;
 	}
 
 	@Override
@@ -204,7 +150,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			return null;
 		}
 
-		LOGGER.debug("got method {}", methodCall.name());
+		LOGGER.debug("got method: {}", methodCall.name());
 
 		if (parameters.size() != 2 || !(parameters.get(0) instanceof Member)
 				|| !(parameters.get(1) instanceof Literal)) {
@@ -229,7 +175,6 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		final PripTextFilter textFilter = new PripTextFilter(pripFieldName, filterFunction, text);
 
 		this.filterStack.push(textFilter);
-		LOGGER.debug("using filter: {} ", textFilter);
 
 		return null;
 	}
@@ -252,7 +197,11 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 		Object result = member;
 		String type = "*";
+		boolean ignored = true;
+		LOGGER.debug(String.format("iterating: %s", member.getResourcePath().getUriResourceParts()));
+
 		for (UriResource uriResource : member.getResourcePath().getUriResourceParts()) {
+			LOGGER.debug(String.format("           %s (%s)", uriResource, uriResource.getKind()));
 			if (uriResource instanceof UriResourceNavigation) {
 				UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) uriResource;
 				String typeRepresentation = uriResourceNavigation.getSegmentValue(true);
@@ -274,13 +223,20 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 					break;
 				default:
 				}
+				LOGGER.debug(String.format("               %s -> %s", typeRepresentation, type));
 			} else if (uriResource instanceof UriResourceLambdaAny) {
 				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
-				any.getExpression().accept(filterExpressionVisitor);
+				final Expression expression = any.getExpression();
+				LOGGER.debug(String.format("               visit AttributesFilterVisitor(%s) for: %s", type, expression));
+				
+				expression.accept(filterExpressionVisitor);
 				final PripQueryFilter filter = filterExpressionVisitor.getFilter();
+				LOGGER.debug(String.format("AttributesFilterVisitor returns: %s", filter));
+				
 				if (null != filter) {
 					this.filterStack.push(filter);
+					ignored = false;
 				}
 			} else if (uriResource instanceof UriResourceFunctionImpl) {
 				UriResourceFunctionImpl uriResourceFunctionImpl = (UriResourceFunctionImpl) uriResource;
@@ -290,12 +246,14 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 						.equals(uriResourceFunctionImpl.getFunction().getFullQualifiedName())) {
 					this.filterStack.push(
 							handleGeometricFunction(uriResourceFunctionImpl.getParameters(), uriResourceFunctionImpl.getFunction().getFullQualifiedName()));
+					ignored = false;
 				}
 			} else if (uriResource instanceof UriResourceLambdaAll) {
 				throw new ODataApplicationException("Unsupported lambda expression on filter expression: all",
 						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
 		}
+		LOGGER.debug(String.format("           %s.", ignored ? "ignored" : "done"));
 		return result;
 	}
 
@@ -426,14 +384,16 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 	}
 
-	public PripQueryFilter getQueryFilters() throws ODataApplicationException {
+	public PripQueryFilter getFilter() throws ODataApplicationException {
 		if (this.filterStack.isEmpty()) {
 			return null;
 		} else if (this.filterStack.size() == 1) {
 			return this.filterStack.pop();
 		} else {
-			LOGGER.error("Incomplete filter expression: more than one result on filter stack after traversing expression tree");
-			throw new ODataApplicationException("Incomplete filter expression", HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+			final String msg = String.format("Incomplete filter expression: more than one result on filter stack after traversing expression tree -> %s",
+					this.filterStack);
+			LOGGER.error(msg);
+			throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 		}
 	}
 

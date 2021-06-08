@@ -162,7 +162,8 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 				try {
 					final ProductsFilterVisitor productFilterVistor = new ProductsFilterVisitor();
 					expression.accept(productFilterVistor); // also has a return value, which is currently not needed
-					queryFilters =  productFilterVistor.getQueryFilters();
+					queryFilters =  productFilterVistor.getFilter();
+					LOGGER.debug(String.format("ProductsFilterVisitor returns: %s", queryFilters));
 				} catch (ExpressionVisitException | ODataApplicationException e) {
 					LOGGER.error("Invalid or unsupported filter expression: {}", filterOption.getText(), e);
 					response.setStatusCode(HttpStatusCode.BAD_REQUEST.getStatusCode());
