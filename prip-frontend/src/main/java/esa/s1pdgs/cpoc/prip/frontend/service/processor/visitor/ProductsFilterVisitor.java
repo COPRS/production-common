@@ -52,10 +52,13 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.RelationalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
@@ -66,6 +69,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Map<String, FIELD_NAMES> PRIP_DATETIME_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_TEXT_PROPERTY_FIELD_NAMES;
+	private static final Map<String, FIELD_NAMES> PRIP_INTEGER_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_SUPPORTED_PROPERTY_FIELD_NAMES;
 	private static final List<String> PRIP_PRODUCTION_TYPES;
 	private static final List<MethodKind> SUPPORTED_METHODS;
@@ -81,9 +85,13 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(Name.name(), FIELD_NAMES.NAME);
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
 
+		PRIP_INTEGER_PROPERTY_FIELD_NAMES = new HashMap<>();
+		PRIP_INTEGER_PROPERTY_FIELD_NAMES.put(EntityTypeProperties.ContentLength.name(), FIELD_NAMES.CONTENT_LENGTH);
+
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES = new HashMap<>();
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_DATETIME_PROPERTY_FIELD_NAMES);
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_TEXT_PROPERTY_FIELD_NAMES);
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_INTEGER_PROPERTY_FIELD_NAMES);
 
 		PRIP_PRODUCTION_TYPES = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
 				.map(v -> v.getName()).collect(Collectors.toList());
@@ -114,19 +122,14 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		case GT:
 		case GE:
 		case LT:
-		case LE: {
-			final PripDateTimeFilter pripDateTimefilter = createDateTimeFilter(RelationalOperator.fromString(operator.name()),
-					left, right, leftOperand, rightOperand);
-			this.filterStack.push(pripDateTimefilter);
-			break;
-		}
+		case LE:
 		case EQ: {
-			final PripTextFilter textFilter = createTextFilter(Function.fromString(operator.name()), left, right,
-					leftOperand, rightOperand);
-			if (null == textFilter) {
+			final PripQueryFilterTerm filter = createFilter(operator, left, right, leftOperand, rightOperand);
+			if (null == filter) {
 				return null;
 			}
-			this.filterStack.push(textFilter);
+
+			this.filterStack.push(filter);
 			break;
 		}
 		default:
@@ -253,7 +256,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
 		}
-		LOGGER.debug(String.format("           %s.", ignored ? "ignored" : "done"));
+		LOGGER.debug(String.format("           %s.", ignored ? "visitMember: ignored" : "visitMember: done"));
 		return result;
 	}
 
@@ -406,12 +409,43 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		return text;
 	}
 
+	private static boolean isDateComparison(final Object leftOperandExpression, final String leftOperandString, final Object rightOperandExpression,
+			final String rightOperandString) {
+		return isDateComparison(leftOperandExpression, leftOperandString) || isDateComparison(rightOperandExpression, rightOperandString);
+	}
+
+	private static boolean isDateComparison(final Object operandExpression, final String operandString) {
+		return operandExpression instanceof Member && isDateField(operandString);
+	}
+
 	private static boolean isDateField(String odataFieldName) {
 		return PRIP_DATETIME_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
 	}
 
+	private static boolean isTextComparison(final Object leftOperandExpression, final String leftOperandString, final Object rightOperandExpression,
+			final String rightOperandString) {
+		return isTextComparison(leftOperandExpression, leftOperandString) || isTextComparison(rightOperandExpression, rightOperandString);
+	}
+
+	private static boolean isTextComparison(final Object operandExpression, final String operandString) {
+		return operandExpression instanceof Member && isTextField(operandString);
+	}
+
 	private static boolean isTextField(String odataFieldName) {
 		return PRIP_TEXT_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
+	}
+
+	private static boolean isIntegerComparison(final Object leftOperandExpression, final String leftOperandString, final Object rightOperandExpression,
+			final String rightOperandString) {
+		return isIntegerComparison(leftOperandExpression, leftOperandString) || isIntegerComparison(rightOperandExpression, rightOperandString);
+	}
+
+	private static boolean isIntegerComparison(final Object operandExpression, final String operandString) {
+		return operandExpression instanceof Member && isIntegerField(operandString);
+	}
+
+	private static boolean isIntegerField(String odataFieldName) {
+		return PRIP_INTEGER_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
 	}
 
 	private static Optional<String> mapToPripFieldName(String odataFieldName) {
@@ -420,6 +454,23 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 
 		return Optional.empty();
+	}
+
+	private static PripQueryFilterTerm createFilter(final BinaryOperatorKind operator, final Object left, final Object right, final String leftOperand,
+			final String rightOperand) throws ODataApplicationException, ExpressionVisitException {
+
+		if (isTextComparison(left, leftOperand, right, rightOperand)) {
+			return createTextFilter(Function.fromString(operator.name()), left, right, leftOperand, rightOperand);
+		} else if (isDateComparison(left, leftOperand, right, rightOperand)) {
+			return createDateTimeFilter(RelationalOperator.fromString(operator.name()), left, right, leftOperand, rightOperand);
+		} else if (isIntegerComparison(left, leftOperand, right, rightOperand)) {
+			return createIntegerFilter(RelationalOperator.fromString(operator.name()), left, right, leftOperand, rightOperand);
+		} else {
+			final String msg = String.format("Unsupported operation: %s %s %s", leftOperand != null ? leftOperand : "''", operator,
+					rightOperand != null ? rightOperand : "''");
+			LOGGER.error(msg);
+			throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+		}
 	}
 
 	private static PripDateTimeFilter createDateTimeFilter(RelationalOperator operator, Object left, Object right,
@@ -473,6 +524,23 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 		throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand + " "
 				+ function.getFunctionName() + " " + rightOperand, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+	}
+
+	private static PripIntegerFilter createIntegerFilter(final RelationalOperator operator, final Object left, final Object right, final String leftOperand,
+			final String rightOperand) throws ODataApplicationException, ExpressionVisitException {
+
+		if (left instanceof Member && right instanceof Literal) {
+			if (isIntegerField(leftOperand)) {
+				return new PripIntegerFilter(mapToPripFieldName(leftOperand).orElse(null), operator, Long.valueOf(rightOperand));
+			}
+		} else if (left instanceof Literal && right instanceof Member) {
+			if (isIntegerField(rightOperand)) {
+				return new PripIntegerFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getInverse(), Long.valueOf(leftOperand));
+			}
+		}
+
+		throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand + " " + operator.getOperator() + " " + rightOperand,
+				HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 	}
 
 }
