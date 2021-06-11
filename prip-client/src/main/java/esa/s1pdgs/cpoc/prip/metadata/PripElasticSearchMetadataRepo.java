@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -54,6 +55,7 @@ import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm.PripSortOrder;
+import esa.s1pdgs.cpoc.prip.model.filter.NestableQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
@@ -247,22 +249,22 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			final LogicalOperator operator) {
 		switch (filter.getRelationalOperator()) {
 		case LT:
-			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).lt(filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).lt(filter.getValue()), filter);
 			break;
 		case LE:
-			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).lte(filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).lte(filter.getValue()), filter);
 			break;
 		case GT:
-			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).gt(filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).gt(filter.getValue()), filter);
 			break;
 		case GE:
-			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).gte(filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).gte(filter.getValue()), filter);
 			break;
 		case EQ:
-			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()), filter);
 			break;
 		case NE:
-			appendQueryNegated(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()));
+			appendQueryNegated(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()), filter);
 			break;
 		default:
 			throw new IllegalArgumentException(String.format("relational filter operator not supported: %s", filter.getRelationalOperator().name()));
@@ -272,17 +274,17 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	private static void buildQueryWithTextFilter(final PripTextFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
 		case STARTS_WITH:
-			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())));
+			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())), filter);
 			break;
 		case ENDS_WITH:
-			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s", filter.getText())));
+			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s", filter.getText())), filter);
 			break;
 		case CONTAINS:
-			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())));
+			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())), filter);
 			break;
 		case EQUALS:
 			appendQuery(queryBuilder, operator,
-					QueryBuilders.matchQuery(filter.getFieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND));
+					QueryBuilders.matchQuery(filter.getFieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND), filter);
 			break;
 		default:
 			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
@@ -292,33 +294,76 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	private static void buildQueryWithBooleanFilter(final PripBooleanFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
 		case EQUALS:
-			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
 			break;
 		case EQUALS_NOT:
-			appendQueryNegated(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			appendQueryNegated(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+	
+	private static void buildQueryWithGeometryFilter(final PripGeometryFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
+		switch (filter.getFunction()) {
+		case INTERSECTS:
+			try {
+				appendQuery(queryBuilder, operator, QueryBuilders.geoIntersectionQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())), filter);
+			} catch (final IOException e) {
+				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
+			break;
+		case DISJOINTS:
+			try {
+				appendQuery(queryBuilder, operator, QueryBuilders.geoDisjointQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())), filter);
+			} catch (final IOException e) {
+				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
+			break;
+		case WITHIN:
+			try {
+				appendQuery(queryBuilder, operator, QueryBuilders.geoWithinQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())), filter);
+			} catch (final IOException e) {
+				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
 			break;
 		default:
 			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
 		}
 	}
 
-	private static void appendQuery(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend) {
+	private static void appendQuery(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
+			final PripQueryFilter filter) {
+		final QueryBuilder query;
+		if (filter instanceof NestableQueryFilter && ((NestableQueryFilter) filter).isNested()) {
+			query = QueryBuilders.nestedQuery(((NestableQueryFilter) filter).getPath(), queryToAppend, ScoreMode.None);
+		} else {
+			query = queryToAppend;
+		}
+
 		if (LogicalOperator.AND == operator) {
-			queryBuilder.must(queryToAppend);
+			queryBuilder.must(query);
 		} else if (LogicalOperator.OR == operator) {
-			queryBuilder.should(queryToAppend);
+			queryBuilder.should(query);
 		} else {
 			throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
 		}
 	}
 
-	private static void appendQueryNegated(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend) {
+	private static void appendQueryNegated(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
+			final PripQueryFilter filter) {
+		final QueryBuilder query;
+		if (filter instanceof NestableQueryFilter && ((NestableQueryFilter) filter).isNested()) {
+			query = QueryBuilders.nestedQuery(((NestableQueryFilter) filter).getPath(), queryToAppend, ScoreMode.None);
+		} else {
+			query = queryToAppend;
+		}
+		
 		if (LogicalOperator.AND == operator) {
-			queryBuilder.mustNot(queryToAppend);
+			queryBuilder.mustNot(query);
 		} else if (LogicalOperator.OR == operator) {
-			// TODO: does this work as expected?
 			// there is no should_not, so we use should(must_not(match(value)))
-			queryBuilder.should(QueryBuilders.boolQuery().mustNot(queryToAppend));
+			queryBuilder.should(QueryBuilders.boolQuery().mustNot(query));
 		} else {
 			throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
 		}
@@ -459,34 +504,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			}
 		}
 		return result;
-	}
-
-	private static void buildQueryWithGeometryFilter(final PripGeometryFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
-		switch (filter.getFunction()) {
-		case INTERSECTS:
-			try {
-				appendQuery(queryBuilder, operator, QueryBuilders.geoIntersectionQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
-			} catch (final IOException e) {
-				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
-			}
-			break;
-		case DISJOINTS:
-			try {
-				appendQuery(queryBuilder, operator, QueryBuilders.geoDisjointQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
-			} catch (final IOException e) {
-				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
-			}
-			break;
-		case WITHIN:
-			try {
-				appendQuery(queryBuilder, operator, QueryBuilders.geoWithinQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
-			} catch (final IOException e) {
-				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
-			}
-			break;
-		default:
-			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
-		}
 	}
 
 	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {

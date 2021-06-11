@@ -5,9 +5,12 @@ import java.util.Objects;
 /**
  * An abstract filter for querying the persistence repository.
  */
-public abstract class PripQueryFilterTerm implements PripQueryFilter {
+public abstract class PripQueryFilterTerm implements PripQueryFilter, NestableQueryFilter {
 
 	private String fieldName;
+
+	private boolean nested = false;
+	private String path;
 
 	// --------------------------------------------------------------------------
 
@@ -15,11 +18,36 @@ public abstract class PripQueryFilterTerm implements PripQueryFilter {
 		this.fieldName = Objects.requireNonNull(fieldName, "field name required!");
 	}
 
+	protected PripQueryFilterTerm(final String fieldName, final boolean nested, final String path) {
+		this(fieldName);
+
+		this.setNested(nested);
+		this.setPath(path);
+	}
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public void makeNested(final String path) {
+		this.path = Objects.requireNonNull(path);
+		this.nested = true;
+	}
+
+	@Override
+	public boolean isNested() {
+		return this.nested;
+	}
+
+	@Override
+	public String getPath() {
+		return this.path;
+	}
+
 	// --------------------------------------------------------------------------
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.fieldName);
+		return Objects.hash(this.fieldName, this.nested, this.path);
 	}
 
 	@Override
@@ -35,7 +63,7 @@ public abstract class PripQueryFilterTerm implements PripQueryFilter {
 		}
 
 		final PripQueryFilterTerm other = (PripQueryFilterTerm) obj;
-		return Objects.equals(this.fieldName, other.fieldName);
+		return Objects.equals(this.fieldName, other.fieldName) && Objects.equals(this.nested, other.nested) && Objects.equals(this.path, other.path);
 	}
 
 	// --------------------------------------------------------------------------
@@ -50,6 +78,14 @@ public abstract class PripQueryFilterTerm implements PripQueryFilter {
 
 	public void setFieldName(String fieldName) {
 		this.fieldName = fieldName;
+	}
+
+	protected void setPath(final String path) {
+		this.path = path;
+	}
+
+	protected void setNested(final boolean nested) {
+		this.nested = nested;
 	}
 
 }

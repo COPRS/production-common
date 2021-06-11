@@ -13,15 +13,15 @@ public class PripIntegerFilter extends PripRangeValueFilter<Long> {
 		super(fieldName, operator, value);
 	}
 
-	public PripIntegerFilter(final PripIntegerFilter filter) {
-		this(filter.getFieldName(), filter.getRelationalOperator(), filter.getValue());
+	private PripIntegerFilter(String fieldName, RelationalOperator operator, Long value, boolean nested, String path) {
+		super(fieldName, operator, value, nested, path);
 	}
 
 	// --------------------------------------------------------------------------
 
 	@Override
 	public PripIntegerFilter copy() {
-		return new PripIntegerFilter(this);
+		return new PripIntegerFilter(this.getFieldName(), this.getRelationalOperator(), this.getValue(), this.isNested(), this.getPath());
 	}
 
 }

@@ -56,15 +56,15 @@ public class PripGeometryFilter extends PripQueryFilterTerm {
 		this(fieldName.fieldName());
 	}
 
-	public PripGeometryFilter(String fieldName, Function function, Geometry geometry) {
-		this(fieldName);
+	private PripGeometryFilter(String fieldName, Function function, Geometry geometry, boolean nested, String path) {
+		super(fieldName, nested, path);
 
 		this.function = Objects.requireNonNull(function);
 		this.geometry = Objects.requireNonNull(geometry);
 	}
 
-	public PripGeometryFilter(final PripGeometryFilter filter) {
-		this(filter.getFieldName(), filter.getFunction(), Objects.requireNonNull(filter.getGeometry()).copy());
+	public PripGeometryFilter(String fieldName, Function function, Geometry geometry) {
+		this(fieldName, function, geometry, false, null);
 	}
 
 	// --------------------------------------------------------------------------
@@ -101,7 +101,8 @@ public class PripGeometryFilter extends PripQueryFilterTerm {
 
 	@Override
 	public PripGeometryFilter copy() {
-		return new PripGeometryFilter(this);
+		return new PripGeometryFilter(this.getFieldName(), this.getFunction(), this.getGeometry() != null ? this.getGeometry().copy() : null, this.isNested(),
+				this.getPath());
 	}
 
 	// --------------------------------------------------------------------------

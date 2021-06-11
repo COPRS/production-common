@@ -45,16 +45,16 @@ public class PripBooleanFilter extends PripQueryFilterTerm {
 	public PripBooleanFilter(String fieldName) {
 		super(fieldName);
 	}
-	
-	public PripBooleanFilter(String fieldName, Function function, Boolean value) {
-		this(fieldName);
+
+	private PripBooleanFilter(String fieldName, Function function, Boolean value, boolean nested, String path) {
+		super(fieldName, nested, path);
 
 		this.function = Objects.requireNonNull(function);
 		this.value = (Objects.requireNonNull(value));
 	}
 
-	public PripBooleanFilter(final PripBooleanFilter filter) {
-		this(filter.getFieldName(), filter.getFunction(), filter.getValue());
+	public PripBooleanFilter(String fieldName, Function function, Boolean value) {
+		this(fieldName, function, value, false, null);
 	}
 
 	// --------------------------------------------------------------------------
@@ -91,7 +91,7 @@ public class PripBooleanFilter extends PripQueryFilterTerm {
 
 	@Override
 	public PripBooleanFilter copy() {
-		return new PripBooleanFilter(this);
+		return new PripBooleanFilter(this.getFieldName(), this.getFunction(), this.getValue(), this.isNested(), this.getPath());
 	}
 
 	// --------------------------------------------------------------------------

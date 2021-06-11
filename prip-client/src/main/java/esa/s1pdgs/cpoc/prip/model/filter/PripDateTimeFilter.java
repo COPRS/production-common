@@ -22,15 +22,15 @@ public class PripDateTimeFilter extends PripRangeValueFilter<LocalDateTime> {
 		super(fieldName,operator, value);
 	}
 
-	public PripDateTimeFilter(final PripDateTimeFilter filter) {
-		this(filter.getFieldName(), filter.getRelationalOperator(), filter.getValue());
+	private PripDateTimeFilter(String fieldName, RelationalOperator operator, LocalDateTime value, boolean nested, String path) {
+		super(fieldName, operator, value, nested, path);
 	}
 
 	// --------------------------------------------------------------------------
 
 	@Override
 	public PripDateTimeFilter copy() {
-		return new PripDateTimeFilter(this);
+		return new PripDateTimeFilter(this.getFieldName(), this.getRelationalOperator(), this.getValue(), this.isNested(), this.getPath());
 	}
 
 	// --------------------------------------------------------------------------

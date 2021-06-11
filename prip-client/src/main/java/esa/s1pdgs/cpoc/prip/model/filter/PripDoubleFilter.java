@@ -13,15 +13,15 @@ public class PripDoubleFilter extends PripRangeValueFilter<Double> {
 		super(fieldName, operator, value);
 	}
 
-	public PripDoubleFilter(final PripDoubleFilter filter) {
-		this(filter.getFieldName(), filter.getRelationalOperator(), filter.getValue());
+	private PripDoubleFilter(String fieldName, RelationalOperator operator, Double value, boolean nested, String path) {
+		super(fieldName, operator, value, nested, path);
 	}
 
 	// --------------------------------------------------------------------------
 
 	@Override
 	public PripDoubleFilter copy() {
-		return new PripDoubleFilter(this);
+		return new PripDoubleFilter(this.getFieldName(), this.getRelationalOperator(), this.getValue(), this.isNested(), this.getPath());
 	}
 
 }
