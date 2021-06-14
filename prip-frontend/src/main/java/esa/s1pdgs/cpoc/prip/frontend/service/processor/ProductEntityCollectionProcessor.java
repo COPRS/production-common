@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -154,7 +153,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 
 		final ContextURL contextUrl = OlingoUtil.getContextUrl(responseEdmEntitySet, responseEdmEntityType, false);
 		final EntityCollection entityCollection = new EntityCollection();
-		List<PripQueryFilter> queryFilters = Collections.emptyList();
+		PripQueryFilter queryFilters = null;
 
 		for (final SystemQueryOption queryOption : uriInfo.getSystemQueryOptions()) {
 			if (queryOption instanceof FilterOption && queryOption.getKind().equals(SystemQueryOptionKind.FILTER)) {
@@ -163,7 +162,8 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 				try {
 					final ProductsFilterVisitor productFilterVistor = new ProductsFilterVisitor();
 					expression.accept(productFilterVistor); // also has a return value, which is currently not needed
-					queryFilters =  productFilterVistor.getQueryFilters();
+					queryFilters =  productFilterVistor.getFilter();
+					LOGGER.debug(String.format("ProductsFilterVisitor returns: %s", queryFilters));
 				} catch (ExpressionVisitException | ODataApplicationException e) {
 					LOGGER.error("Invalid or unsupported filter expression: {}", filterOption.getText(), e);
 					response.setStatusCode(HttpStatusCode.BAD_REQUEST.getStatusCode());
@@ -177,10 +177,10 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			// Count Request
 
 			int count = 0;
-			if (queryFilters.isEmpty()) {
+			if (null == queryFilters) {
 				count = this.pripMetadataRepository.countAll();
 			} else {
-				count = this.pripMetadataRepository.countWithFilters(queryFilters);
+				count = this.pripMetadataRepository.countWithFilter(queryFilters);
 			}
 
 			entityCollection.setCount(count);
@@ -266,10 +266,10 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			}
 
 			List<PripMetadata> queryResult;
-			if (queryFilters.isEmpty()) {
+			if (null == queryFilters) {
 				queryResult = this.pripMetadataRepository.findAll(top, skip, sortTerms);
 			} else {
-				queryResult = this.pripMetadataRepository.findWithFilters(queryFilters, top, skip, sortTerms);
+				queryResult = this.pripMetadataRepository.findWithFilter(queryFilters, top, skip, sortTerms);
 			}
 			final List<Entity> productList = entityCollection.getEntities();
 			for (final PripMetadata pripMetadata : queryResult) {

@@ -7,7 +7,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 /**
  * Text filter for querying the persistence repository.
  */
-public class PripTextFilter extends PripQueryFilter {
+public class PripTextFilter extends PripQueryFilterTerm {
 
 	public enum Function {
 		STARTS_WITH("startswith"), //
@@ -58,11 +58,15 @@ public class PripTextFilter extends PripQueryFilter {
 		this(fieldName.fieldName());
 	}
 
-	public PripTextFilter(String fieldName, Function function, String text) {
-		this(fieldName);
+	private PripTextFilter(String fieldName, Function function, String text, boolean nested, String path) {
+		super(fieldName, nested, path);
 
 		this.function = Objects.requireNonNull(function);
 		this.text = Objects.requireNonNull(text);
+	}
+
+	public PripTextFilter(String fieldName, Function function, String text) {
+		this(fieldName, function, text, false, null);
 	}
 
 	// --------------------------------------------------------------------------
@@ -94,7 +98,14 @@ public class PripTextFilter extends PripQueryFilter {
 		return this.getFieldName() + " " + (null != this.function ? this.function.name() : "NO_FUNCTION") + " "
 				+ this.text;
 	}
-	
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripTextFilter copy() {
+		return new PripTextFilter(this.getFieldName(), this.getFunction(), this.getText(), this.isNested(), this.getPath());
+	}
+
 	// --------------------------------------------------------------------------
 
 	public Function getFunction() {

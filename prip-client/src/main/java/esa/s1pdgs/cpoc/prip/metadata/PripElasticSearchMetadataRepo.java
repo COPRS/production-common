@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -31,6 +32,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.geometry.Geometry;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -53,9 +55,13 @@ import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm.PripSortOrder;
+import esa.s1pdgs.cpoc.prip.model.filter.NestableQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList.LogicalOperator;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
@@ -64,7 +70,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	private static final Logger LOGGER = LogManager.getLogger(PripElasticSearchMetadataRepo.class);
 	private static final String ES_INDEX = "prip";
-	private int maxSearchHits;
+	private final int maxSearchHits;
 
 	private final RestHighLevelClient restHighLevelClient;
 
@@ -169,94 +175,197 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
-	public List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top,
-			Optional<Integer> skip, List<PripSortTerm> sortTerms) {
-		LOGGER.info("finding PRIP metadata with filters {}", filters);
+	public List<PripMetadata> findWithFilter(final PripQueryFilter filter, final Optional<Integer> top, final Optional<Integer> skip,
+			final List<PripSortTerm> sortTerms) {
+		LOGGER.info("finding PRIP metadata with filters: {}", filter);
+		final BoolQueryBuilder query = buildQueryWithFilter(filter);
 
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildQueryWithFilters(filters, queryBuilder);
-
-		return this.queryWithOffset(queryBuilder, top, skip, sortTerms);
-	}
-
-	private static void buildQueryWithFilters(List<? extends PripQueryFilter> filters, BoolQueryBuilder queryBuilder) {
-		for (final PripQueryFilter filter : CollectionUtil.nullToEmpty(filters)) {
-			if (filter instanceof PripRangeValueFilter) {
-				buildQueryWithRangeValueFilter((PripRangeValueFilter<?>) filter, queryBuilder);
-			} else if (filter instanceof PripTextFilter) {
-				buildQueryWithTextFilter((PripTextFilter) filter, queryBuilder);
-			} else if (filter instanceof PripBooleanFilter) {
-				buildQueryWithBooleanFilter((PripBooleanFilter) filter, queryBuilder);
-			} else if (filter instanceof PripGeometryFilter) {
-				buildQueryWithGeometryFilter((PripGeometryFilter) filter, queryBuilder);
-			} else {
-				throw new IllegalArgumentException(
-						String.format("filter type not supported: %s", filter.getClass().getSimpleName()));
-			}
+		if (query.hasClauses()) {
+			return this.queryWithOffset(query, top, skip, sortTerms);
+		} else {
+			return this.findAll(top, skip, sortTerms);
 		}
 	}
 
-	private static void buildQueryWithRangeValueFilter(PripRangeValueFilter<?> filter, BoolQueryBuilder queryBuilder) {
-		switch (filter.getOperator()) {
+	private static BoolQueryBuilder buildQueryWithFilter(final PripQueryFilter rootFilter) {
+		final BoolQueryBuilder rootQuery = QueryBuilders.boolQuery();
+
+		if (rootFilter instanceof PripQueryFilterTerm) {
+			// a single filter term at root level must match, therefore using AND operator for query
+			final LogicalOperator operator = LogicalOperator.AND;
+			appendFilterTerm(rootQuery, operator, (PripQueryFilterTerm) rootFilter);
+
+		} else if (rootFilter instanceof PripQueryFilterList) {
+			// dig deeper into the filter hierarchy
+			appendFilterList(rootQuery, (PripQueryFilterList) rootFilter);
+		} else {
+			throw new IllegalArgumentException(String.format("filter type not supported: %s", rootFilter.getClass().getSimpleName()));
+		}
+
+		return rootQuery;
+	}
+
+	private static void appendFilterList(final BoolQueryBuilder queryBuilder, final PripQueryFilterList filterList) {
+		final LogicalOperator operator = filterList.getOperator();
+		final List<PripQueryFilter> filters = CollectionUtil.nullToEmptyList((filterList).getFilterList());
+
+		filters.forEach(filter -> {
+			if (filter instanceof PripQueryFilterTerm) {
+				appendFilterTerm(queryBuilder, operator, (PripQueryFilterTerm) filter);
+
+			} else if (filter instanceof PripQueryFilterList) {
+				final BoolQueryBuilder subQuery = QueryBuilders.boolQuery();
+				appendFilterList(subQuery, (PripQueryFilterList) filter);
+
+				// append sub query
+				if (LogicalOperator.AND == operator) {
+					queryBuilder.must(subQuery);
+				} else if (LogicalOperator.OR == operator) {
+					queryBuilder.should(subQuery);
+				} else {
+					throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
+				}
+			} else {
+				throw new IllegalArgumentException(String.format("filter type not supported: %s", filter.getClass().getSimpleName()));
+			}
+		});
+	}
+
+	private static void appendFilterTerm(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final PripQueryFilterTerm filterTerm) {
+		if (filterTerm instanceof PripRangeValueFilter) {
+			buildQueryWithRangeValueFilter((PripRangeValueFilter<?>) filterTerm, queryBuilder, operator);
+		} else if (filterTerm instanceof PripTextFilter) {
+			buildQueryWithTextFilter((PripTextFilter) filterTerm, queryBuilder, operator);
+		} else if (filterTerm instanceof PripBooleanFilter) {
+			buildQueryWithBooleanFilter((PripBooleanFilter) filterTerm, queryBuilder, operator);
+		} else if (filterTerm instanceof PripGeometryFilter) {
+			buildQueryWithGeometryFilter((PripGeometryFilter) filterTerm, queryBuilder, operator);
+		} else {
+			throw new IllegalArgumentException(String.format("filter type not supported: %s", filterTerm.getClass().getSimpleName()));
+		}
+	}
+
+	private static void buildQueryWithRangeValueFilter(final PripRangeValueFilter<?> filter, final BoolQueryBuilder queryBuilder,
+			final LogicalOperator operator) {
+		switch (filter.getRelationalOperator()) {
 		case LT:
-			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).lt(filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).lt(filter.getValue()), filter);
 			break;
 		case LE:
-			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).lte(filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).lte(filter.getValue()), filter);
 			break;
 		case GT:
-			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).gt(filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).gt(filter.getValue()), filter);
 			break;
 		case GE:
-			queryBuilder.must(QueryBuilders.rangeQuery(filter.getFieldName()).gte(filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.rangeQuery(filter.getFieldName()).gte(filter.getValue()), filter);
 			break;
 		case EQ:
-			queryBuilder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()), filter);
 			break;
 		case NE:
-			queryBuilder.mustNot(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()));
+			appendQueryNegated(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue()), filter);
 			break;
 		default:
-			throw new IllegalArgumentException(
-					String.format("filter operator not supported: %s", filter.getOperator().name()));
+			throw new IllegalArgumentException(String.format("relational filter operator not supported: %s", filter.getRelationalOperator().name()));
 		}
 	}
 
-	private static void buildQueryWithTextFilter(PripTextFilter filter, BoolQueryBuilder queryBuilder) {
+	private static void buildQueryWithTextFilter(final PripTextFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
 		case STARTS_WITH:
-			queryBuilder
-					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())));
+			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())), filter);
 			break;
 		case ENDS_WITH:
-			queryBuilder
-					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s", filter.getText())));
+			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s", filter.getText())), filter);
 			break;
 		case CONTAINS:
-			queryBuilder
-					.must(QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())));
+			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())), filter);
 			break;
 		case EQUALS:
-			queryBuilder.must(QueryBuilders.matchQuery(filter.getFieldName(), filter.getText())
-					.fuzziness(Fuzziness.ZERO).operator(Operator.AND));
+			appendQuery(queryBuilder, operator,
+					QueryBuilders.matchQuery(filter.getFieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND), filter);
 			break;
 		default:
-			throw new IllegalArgumentException(
-					String.format("not supported filter function: %s", filter.getFunction().name()));
+			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
 		}
 	}
 
-	private static void buildQueryWithBooleanFilter(PripBooleanFilter filter, BoolQueryBuilder queryBuilder) {
+	private static void buildQueryWithBooleanFilter(final PripBooleanFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
 		case EQUALS:
-			queryBuilder.must(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
 			break;
 		case EQUALS_NOT:
-			queryBuilder.mustNot(QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()));
+			appendQueryNegated(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
 			break;
 		default:
-			throw new IllegalArgumentException(
-					String.format("not supported filter function: %s", filter.getFunction().name()));
+			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+	
+	private static void buildQueryWithGeometryFilter(final PripGeometryFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
+		switch (filter.getFunction()) {
+		case INTERSECTS:
+			try {
+				appendQuery(queryBuilder, operator, QueryBuilders.geoIntersectionQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())), filter);
+			} catch (final IOException e) {
+				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
+			break;
+		case DISJOINTS:
+			try {
+				appendQuery(queryBuilder, operator, QueryBuilders.geoDisjointQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())), filter);
+			} catch (final IOException e) {
+				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
+			break;
+		case WITHIN:
+			try {
+				appendQuery(queryBuilder, operator, QueryBuilders.geoWithinQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())), filter);
+			} catch (final IOException e) {
+				throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+			}
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+
+	private static void appendQuery(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
+			final PripQueryFilter filter) {
+		final QueryBuilder query;
+		if (filter instanceof NestableQueryFilter && ((NestableQueryFilter) filter).isNested()) {
+			query = QueryBuilders.nestedQuery(((NestableQueryFilter) filter).getPath(), queryToAppend, ScoreMode.None);
+		} else {
+			query = queryToAppend;
+		}
+
+		if (LogicalOperator.AND == operator) {
+			queryBuilder.must(query);
+		} else if (LogicalOperator.OR == operator) {
+			queryBuilder.should(query);
+		} else {
+			throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
+		}
+	}
+
+	private static void appendQueryNegated(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
+			final PripQueryFilter filter) {
+		final QueryBuilder query;
+		if (filter instanceof NestableQueryFilter && ((NestableQueryFilter) filter).isNested()) {
+			query = QueryBuilders.nestedQuery(((NestableQueryFilter) filter).getPath(), queryToAppend, ScoreMode.None);
+		} else {
+			query = queryToAppend;
+		}
+		
+		if (LogicalOperator.AND == operator) {
+			queryBuilder.mustNot(query);
+		} else if (LogicalOperator.OR == operator) {
+			// there is no should_not, so we use should(must_not(match(value)))
+			queryBuilder.should(QueryBuilders.boolQuery().mustNot(query));
+		} else {
+			throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
 		}
 	}
 
@@ -395,41 +504,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			}
 		}
 		return result;
-	}
-
-	private static void buildQueryWithGeometryFilter(PripGeometryFilter filter, BoolQueryBuilder queryBuilder) {
-		switch (filter.getFunction()) {
-		case INTERSECTS:
-			try {
-				queryBuilder.must(QueryBuilders.geoIntersectionQuery(filter.getFieldName(),
-						convertGeometry(filter.getGeometry())));
-			} catch (final IOException e) {
-				throw new IllegalArgumentException(
-						String.format("not supported filter function: %s", filter.getFunction().name()));
-			}
-			break;
-		case DISJOINTS:
-			try {
-				queryBuilder.must(
-						QueryBuilders.geoDisjointQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
-			} catch (final IOException e) {
-				throw new IllegalArgumentException(
-						String.format("not supported filter function: %s", filter.getFunction().name()));
-			}
-			break;
-		case WITHIN:
-			try {
-				queryBuilder.must(
-						QueryBuilders.geoWithinQuery(filter.getFieldName(), convertGeometry(filter.getGeometry())));
-			} catch (final IOException e) {
-				throw new IllegalArgumentException(
-						String.format("not supported filter function: %s", filter.getFunction().name()));
-			}
-			break;
-		default:
-			throw new IllegalArgumentException(
-					String.format("not supported filter function: %s", filter.getFunction().name()));
-		}
 	}
 
 	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
@@ -578,13 +652,15 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	@Override
-	public int countWithFilters(List<PripQueryFilter> filters) {
-		LOGGER.info("counting PRIP metadata with filters {}", filters);
+	public int countWithFilter(final PripQueryFilter filter) {
+		LOGGER.info("counting PRIP metadata with filters {}", filter);
+		final BoolQueryBuilder query = buildQueryWithFilter(filter);
 
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildQueryWithFilters(filters, queryBuilder);
-
-		return this.count(queryBuilder);
+		if (query.hasClauses()) {
+			return this.count(query);
+		} else {
+			return this.countAll();
+		}
 	}
 
 	private int count(BoolQueryBuilder queryBuilder) {

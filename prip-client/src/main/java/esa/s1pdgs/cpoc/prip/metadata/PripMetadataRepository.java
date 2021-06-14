@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.prip.metadata;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -57,29 +56,30 @@ public interface PripMetadataRepository {
 	List<PripMetadata> findAll(Optional<Integer> top, Optional<Integer> skip, List<PripSortTerm> sortTerms);
 
 	/**
-	 * Querying the repository with filters.
-	 * When filters are empty this is like calling {@link #findAll(Optional, Optional)}.
+	 * Querying the repository with filter.
+	 * When filter is {@code null} or empty this is like calling {@link #findAll(Optional, Optional)}.
 	 *
-	 * @param filters to narrow the query
+	 * @param filter to narrow the query
 	 * @param top for paging
 	 * @param skip fir paging
 	 * @return the search result
 	 */
-	default List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip) {
-		return this.findWithFilters(filters, top, skip, Collections.emptyList());
+	default List<PripMetadata> findWithFilter(final PripQueryFilter filter, final Optional<Integer> top, final Optional<Integer> skip) {
+		return this.findWithFilter(filter, top, skip, Collections.emptyList());
 	}
 
 	/**
-	 * Querying the repository with filters.
-	 * When filters are empty this is like calling {@link #findAll(Optional, Optional)}.
+	 * Querying the persistence with filter.
+	 * When filter is {@code null} or empty this is like calling {@link #findAll(Optional, Optional)}.
 	 *
-	 * @param filters to narrow the query
+	 * @param filter to narrow the query
 	 * @param top for paging
 	 * @param skip fir paging
 	 * @param sortTerms
 	 * @return the search result
 	 */
-	List<PripMetadata> findWithFilters(List<PripQueryFilter> filters, Optional<Integer> top, Optional<Integer> skip, List<PripSortTerm> sortTerms);
+	List<PripMetadata> findWithFilter(final PripQueryFilter filter, final Optional<Integer> top, final Optional<Integer> skip,
+			final List<PripSortTerm> sortTerms);
 
 	/**
 	 * Counts all PRIP metadata.
@@ -89,12 +89,11 @@ public interface PripMetadataRepository {
 	int countAll();
 
 	/**
-	 * Counts PRIP metadata by creation date and name using date time and name filters.
-	 * Each of the the result matches with all filters provided for the fields 'creationDate' and 'name'.
+	 * Counts PRIP metadata returned from persistence after applying the given filter.
 	 *
-	 * @param filters can be empty
+	 * @param filter can be {@code null}
 	 * @return
 	 */
-	int countWithFilters(List<PripQueryFilter> filters);
+	int countWithFilter(final PripQueryFilter filter);
 
 }
