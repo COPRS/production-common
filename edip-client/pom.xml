@@ -26,7 +26,11 @@
 	<dependency>
         <groupId>commons-net</groupId>
         <artifactId>commons-net</artifactId>
-        <classifier>ftp</classifier>
+     </dependency>
+     <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpcomponents.version}</version>
      </dependency>
      <dependency>
 		<groupId>junit</groupId>

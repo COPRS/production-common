@@ -25,6 +25,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.ftp.FTPSClient;
 import org.apache.commons.net.util.TrustManagerUtils;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
@@ -34,6 +35,7 @@ import esa.s1pdgs.cpoc.ebip.client.EdipClient;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntry;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntryFilter;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntryImpl;
+import esa.s1pdgs.cpoc.ebip.client.apacheftp.ftpsclient.SSLSessionReuseFTPSClient;
 import esa.s1pdgs.cpoc.ebip.client.apacheftp.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.ebip.client.config.EdipClientConfigurationProperties.EdipHostConfiguration;
 
@@ -131,7 +133,8 @@ public class ApacheFtpEdipClient implements EdipClient {
 		}	
 		else {
 			// FTPS client creation			
-			final FTPSClient ftpsClient = new FTPSClient(config.getSslProtocol(), !config.isExplicitFtps());
+			final FTPSClient ftpsClient = new SSLSessionReuseFTPSClient(config.getSslProtocol(),
+					!config.isExplicitFtps(), config.isFtpsSslSessionReuse(), config.isUseExtendedMasterSecret());
 			ftpsClient.setDefaultTimeout(config.getConnectTimeoutSec() * 1000);
 			ftpsClient.setConnectTimeout(config.getConnectTimeoutSec() * 1000);
 			ftpsClient.setDataTimeout(config.getConnectTimeoutSec() * 1000);
@@ -185,12 +188,21 @@ public class ApacheFtpEdipClient implements EdipClient {
 		    else {
 		    	ftpsClient.setTrustManager(TrustManagerUtils.getValidateServerCertificateTrustManager());
 		    }
+		    
+		    if (config.isEnableHostnameVerification()) {
+		    	ftpsClient.setHostnameVerifier(new DefaultHostnameVerifier());
+		    }
 
 			connect(ftpsClient);	    
 		    ftpsClient.execPBSZ(0);
 	        assertPositiveCompletion(ftpsClient);
-	        
-		    ftpsClient.execPROT("P");
+
+	        if (config.isEncryptDataChannel()) {
+	        	ftpsClient.execPROT("P");
+	        } else {
+	        	ftpsClient.execPROT("C");
+	        }
+	        assertPositiveCompletion(ftpsClient);
 		    
 		    return ftpsClient;
 		}
