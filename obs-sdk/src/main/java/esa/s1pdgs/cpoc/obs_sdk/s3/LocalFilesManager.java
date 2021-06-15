@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -19,21 +20,27 @@ public class LocalFilesManager {
 
     private final Path localFilesLocation;
 
-    public LocalFilesManager(Path localFilesLocation) {
+    private LocalFilesManager(Path localFilesLocation) {
         this.localFilesLocation = localFilesLocation;
+    }
+
+    public static LocalFilesManager createFor(final Path localFilesLocation) {
+        LOG.info("creating local files manager for cache location {}", localFilesLocation);
+        return new LocalFilesManager(localFilesLocation);
     }
 
     /**
      * @param in   content of the file to download as stream
-     * @param name name of the file
+     * @param name name of the file (may include prefix)
      * @return a {@link FileHandle} implementing {@link AutoCloseable} which deletes the File on {@link AutoCloseable#close()}
      * @throws IOException when the stream could not be downloaded as file
      */
     public FileHandle downLoadAndProvideAsFile(InputStream in, final String name) throws IOException {
 
-        LOG.info("downloading {} to {}", name, localFilesLocation);
+        final Path lastPathElement = Paths.get(name).getFileName();
+        LOG.info("downloading {} to {}", lastPathElement, localFilesLocation);
 
-        final Path filePath = localFilesLocation.resolve(name);
+        final Path filePath = localFilesLocation.resolve(lastPathElement);
         final Md5SumCalculationHelper md5SumCalculationHelper = Md5SumCalculationHelper.createFor(in);
 
         Files.copy(md5SumCalculationHelper.getInputStream(), filePath);

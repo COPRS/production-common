@@ -81,7 +81,7 @@ public class ObsConfigurationProperties {
 	@Value("${max-input-stream-buffer-size-mb:1024}")
 	private int maxInputStreamBufferSizeMb;
 
-	@Value("${upload.cache.location:/tmp/uploadCache}")
+	@Value("${upload.cache.location:/tmp}")
 	private String uploadCacheLocation;
 
 	private Map<ProductFamily, String> bucket = new HashMap<>();
@@ -263,9 +263,11 @@ public class ObsConfigurationProperties {
 		return "ObsConfigurationProperties [backend=" + backend + ", userId=" + userId + ", userSecret=" + userSecret
 				+ ", endpoint=" + endpoint + ", endpointRegion=" + endpointRegion + ", tenantId=" + tenantId
 				+ ", tenantName=" + tenantName + ", authMethod=" + authMethod + ", multipartUploadThreshold="
-				+ multipartUploadThreshold + ", minUploadPartSize=" + minUploadPartSize + ", maxRetries=" + maxRetries+ ", maxObsRetries=" + maxObsRetries
-				+ ", backoffBaseDelay=" + backoffBaseDelay + ", backoffThrottledBaseDelay=" + backoffThrottledBaseDelay
-				+ ", backoffMaxDelay=" + backoffMaxDelay + ", timeoutShutdown=" + timeoutShutdown + ", timeoutDownExec="
-				+ timeoutDownExec + ", timeoutUpExec=" + timeoutUpExec + ", disableChunkedEncoding=" + disableChunkedEncoding + ", bucket=" + bucket + "]";
+				+ multipartUploadThreshold + ", minUploadPartSize=" + minUploadPartSize + ", maxRetries="
+				+ maxRetries+ ", maxObsRetries=" + maxObsRetries + ", backoffBaseDelay=" + backoffBaseDelay
+				+ ", backoffThrottledBaseDelay=" + backoffThrottledBaseDelay + ", backoffMaxDelay=" + backoffMaxDelay
+				+ ", timeoutShutdown=" + timeoutShutdown + ", timeoutDownExec=" + timeoutDownExec + ", timeoutUpExec="
+				+ timeoutUpExec + ", disableChunkedEncoding=" + disableChunkedEncoding + ", bucket=" + bucket
+				+ ", uploadCacheLocation=" + uploadCacheLocation + "]";
 	}
 }
