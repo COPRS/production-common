@@ -119,7 +119,8 @@ public class S3ObsClient extends AbstractObsClient {
 					client,
 					manager,
 					config.getMaxObsRetries(),
-					config.getBackoffThrottledBaseDelay());
+					config.getBackoffThrottledBaseDelay(),
+					new LocalFilesManager(config.getUploadCacheLocation()));
 			
 			return new S3ObsClient(config, s3Services, factory);
 		}

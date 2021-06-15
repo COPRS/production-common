@@ -104,16 +104,17 @@ public class S3ObsServices {
 	 */
 	private final int retryDelay;
 
-	private final LocalFilesManager localFilesManager = new LocalFilesManager(Paths.get("/tmp/localFiles")); //TODO inject as constr. parameter
+	private final LocalFilesManager localFilesManager;
 
 	/**
 	 */
 	public S3ObsServices(final AmazonS3 s3client, final TransferManager s3tm, final int numRetries,
-			final int retryDelay) {
+			final int retryDelay, final LocalFilesManager localFilesManager) {
 		this.s3client = s3client;
 		this.s3tm = s3tm;
 		this.numRetries = numRetries;
 		this.retryDelay = retryDelay;
+		this.localFilesManager = localFilesManager;
 	}
 
 	/**

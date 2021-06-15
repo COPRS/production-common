@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.obs_sdk;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,6 +80,9 @@ public class ObsConfigurationProperties {
 
 	@Value("${max-input-stream-buffer-size-mb:1024}")
 	private int maxInputStreamBufferSizeMb;
+
+	@Value("${upload.cache.location:/tmp/uploadCache}")
+	private String uploadCacheLocation;
 
 	private Map<ProductFamily, String> bucket = new HashMap<>();
 	
@@ -247,6 +252,10 @@ public class ObsConfigurationProperties {
 
 	public int getMaxInputStreamBufferSize() {
 		return maxInputStreamBufferSizeMb * 1024 * 1024;
+	}
+
+	public Path getUploadCacheLocation() {
+		return Paths.get(uploadCacheLocation);
 	}
 
 	@Override
