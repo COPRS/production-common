@@ -10,9 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.security.DigestInputStream;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -104,6 +103,8 @@ public class S3ObsServices {
 	 * Delay before retrying
 	 */
 	private final int retryDelay;
+
+	private final LocalFilesManager localFilesManager = new LocalFilesManager(Paths.get("/tmp/localFiles")); //TODO inject as constr. parameter
 
 	/**
 	 */
@@ -458,14 +459,11 @@ public class S3ObsServices {
 	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in, final long contentLength) throws S3ObsServiceException, S3SdkClientException {
 		{
 			for (int retryCount = 1;; retryCount++) {
-				try {
+				try (final LocalFilesManager.FileHandle fileHandle = localFilesManager.downLoadAndProvideAsFile(in, keyName)){
 					log(format("Uploading object %s in bucket %s", keyName, bucketName));
 
-					final DigestInputStream digestInputStream = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
+					final Upload upload = s3tm.upload(bucketName, keyName, fileHandle.getFile());
 
-					final ObjectMetadata metadata = new ObjectMetadata();
-					metadata.setContentLength(contentLength);
-					final Upload upload = s3tm.upload(bucketName, keyName, digestInputStream, metadata);
 					upload.addProgressListener(
 							(final ProgressEvent progressEvent)
 									-> LOGGER.trace(format("Uploading object %s in bucket %s: progress %s",
@@ -477,7 +475,7 @@ public class S3ObsServices {
 						final UploadResult result = upload.waitForUploadResult();
 						log(format("Upload object %s in bucket %s succeeded", keyName, bucketName));
 
-						return new Md5.Entry(md5Of(digestInputStream.getMessageDigest()), result.getETag(), keyName);
+						return new Md5.Entry(fileHandle.getMd5Sum(), result.getETag(), keyName);
 					} catch (final InterruptedException e) {
 						throw new S3ObsServiceException(bucketName, keyName,
 								"Upload fails: interrupted during waiting multipart upload completion", e);
@@ -504,11 +502,11 @@ public class S3ObsServices {
 						throw new S3SdkClientException(bucketName, keyName,
 								format("Upload fails: %s", sce.getMessage()), sce);
 					}
-				} catch (final NoSuchAlgorithmException e) {
-					//thrown by MessageDigest.getInstance("MD5"), which should not happen
+				} catch (Exception e) {
 					throw new S3SdkClientException(bucketName, keyName,
 							format("Upload fails: %s", e.getMessage()), e);
 				}
+
 			}
 		}
 	}
