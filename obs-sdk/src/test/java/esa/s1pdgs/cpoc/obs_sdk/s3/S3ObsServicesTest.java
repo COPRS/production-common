@@ -542,22 +542,22 @@ public class S3ObsServicesTest {
     }
 
     @Test
-    public void testUploadStreamNominal() throws S3ObsServiceException, S3SdkClientException, IOException {
+    public void testUploadStreamNominal() throws S3SdkClientException, IOException {
         try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
-            service.uploadStream(BCK_OBJ_EXIST, "key-test", in, 100);
+            service.uploadStream(BCK_OBJ_EXIST, "key-test", in);
             verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
                     eq("key-test"), any(InputStream.class), argThat(hasContentLength(100)));
         }
     }
 
     @Test
-    public void testUploadStreamSDKException() throws IOException, S3ObsServiceException, S3SdkClientException {
+    public void testUploadStreamSDKException() throws IOException, S3SdkClientException {
         try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
             thrown.expect(S3SdkClientException.class);
             thrown.expect(hasProperty("bucket", is(BCK_EXC_SDK)));
             thrown.expect(hasProperty("key", is("key-test")));
             thrown.expectCause(instanceOf(SdkClientException.class));
-            service.uploadStream(BCK_EXC_SDK, "key-test", in, 100);
+            service.uploadStream(BCK_EXC_SDK, "key-test", in);
         }
     }
 
@@ -579,7 +579,7 @@ public class S3ObsServicesTest {
 	public void testReadMd5StreamAndGetFiles_OneFile_1() throws IOException {
 
 		try (FileInputStream md5stream = new FileInputStream(
-				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+                "src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum")) {
 
 			List<String> files = service.readMd5StreamAndGetFiles(
 					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/manifest.safe", md5stream);
@@ -593,7 +593,7 @@ public class S3ObsServicesTest {
 	public void testReadMd5StreamAndGetFiles_OneFile_2() throws IOException {
 
 		try (FileInputStream md5stream = new FileInputStream(
-				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+                "src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum")) {
 
 			List<String> files = service.readMd5StreamAndGetFiles(
 					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/data/D1D09290000100212001", md5stream);
@@ -607,7 +607,7 @@ public class S3ObsServicesTest {
 	public void testReadMd5StreamAndGetFiles_OneFile_notexist() throws IOException {
 
 		try (FileInputStream md5stream = new FileInputStream(
-				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+                "src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum")) {
 
 			List<String> files = service.readMd5StreamAndGetFiles(
 					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE/notexist", md5stream);
@@ -620,7 +620,7 @@ public class S3ObsServicesTest {
 	public void testReadMd5StreamAndGetFiles_Directory() throws IOException {
 		
 		try (FileInputStream md5stream = new FileInputStream(
-				new File("src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum"))) {
+                "src/test/resources/S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE.md5sum")) {
 			
 			List<String> files = service.readMd5StreamAndGetFiles(
 					"S1__AUX_WND_V20181002T120000_G20180929T061310.SAFE", md5stream);

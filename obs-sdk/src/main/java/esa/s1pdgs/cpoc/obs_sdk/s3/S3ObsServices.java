@@ -10,18 +10,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
@@ -47,7 +44,6 @@ import com.amazonaws.services.s3.transfer.model.UploadResult;
 import com.amazonaws.util.IOUtils;
 
 import esa.s1pdgs.cpoc.obs_sdk.Md5;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 
 /**
  * Provides services to manage objects in the object storage wia the AmazonS3
@@ -157,7 +153,7 @@ public class S3ObsServices {
 	 * Check if bucket exists
 	 * 
 	 */
-	public boolean bucketExist(final String bucketName) throws S3SdkClientException, S3ObsServiceException {
+	public boolean bucketExist(final String bucketName) throws S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {
 			try {
 				return s3client.doesBucketExistV2(bucketName);
@@ -362,22 +358,6 @@ public class S3ObsServices {
 		return result;
 	}
 
-	public final Map<String, InputStream> getAllAsInputStream(final String bucketName, final String prefix)
-			throws S3ObsServiceException, S3SdkClientException {
-		final Map<String, InputStream> result = new LinkedHashMap<>();
-
-		try {
-			for (final S3ObjectSummary summary : getAll(bucketName, prefix)) {
-				final String key = summary.getKey();
-				final S3Object obj = s3client.getObject(bucketName, key);
-				result.put(key, new S3ObsInputStream(obj, obj.getObjectContent()));
-			}
-			return result;
-		} catch (final com.amazonaws.SdkClientException e) {
-			throw new S3ObsServiceException(bucketName, prefix, format("Listing fails: %s", e.getMessage()), e);
-		}
-	}
-
 	public final InputStream getAsInputStream(final String bucketName, final String key) throws S3ObsServiceException {
 		try {
 			final S3Object obj = s3client.getObject(bucketName, key);
@@ -426,7 +406,7 @@ public class S3ObsServices {
 		InputStream in  = null;
 		try {
 			in = new FileInputStream(uploadFile);
-			return uploadStream(bucketName, keyName, in, uploadFile.length());
+			return uploadStream(bucketName, keyName, in);
 		} catch (final FileNotFoundException e) {
 			throw new S3SdkClientException(bucketName, keyName, "could not create input stream for file "+ uploadFile, e);
 		} finally {
@@ -456,7 +436,7 @@ public class S3ObsServices {
 		return fileList;
 	}
 
-	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in, final long contentLength) throws S3ObsServiceException, S3SdkClientException {
+	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in) throws S3SdkClientException {
 		{
 			for (int retryCount = 1;; retryCount++) {
 				try (final LocalFilesManager.FileHandle fileHandle = localFilesManager.downLoadAndProvideAsFile(in, keyName)){
@@ -511,11 +491,6 @@ public class S3ObsServices {
 		}
 	}
 
-	private String md5Of(final MessageDigest messageDigest) {
-		final byte[] hash = messageDigest.digest();
-		return Hex.encodeHexString(hash, true);
-	}
-
 	public void setExpirationTime(final String bucketName, final String prefix, final Instant expirationDate) {
 		BucketLifecycleConfiguration lifecycleConfiguration = s3client.getBucketLifecycleConfiguration(new GetBucketLifecycleConfigurationRequest(bucketName));
 
@@ -550,7 +525,7 @@ public class S3ObsServices {
 	}
 
 	public void createBucket(final String bucketName)
-			throws ObsServiceException, S3SdkClientException {
+			throws S3SdkClientException {
 		for (int retryCount = 1;; retryCount++) {
 			try {
 				s3client.createBucket(bucketName);
@@ -576,7 +551,7 @@ public class S3ObsServices {
 	/**
 	 */
 	public ObjectListing listObjectsFromBucket(final String bucketName)
-			throws S3ObsServiceException, S3SdkClientException {
+			throws S3SdkClientException {
 
 		for (int retryCount = 1;; retryCount++) {
 			try {
@@ -603,7 +578,7 @@ public class S3ObsServices {
 	/**
 	 */
 	public ObjectListing listNextBatchOfObjectsFromBucket(final String bucketName,
-			final ObjectListing previousObjectListing) throws S3ObsServiceException, S3SdkClientException {
+			final ObjectListing previousObjectListing) throws S3SdkClientException {
 
 		for (int retryCount = 1;; retryCount++) {
 			try {
@@ -686,17 +661,6 @@ public class S3ObsServices {
 					"Size query for object %s from bucket %s returned %s results", prefix, bucketName, results.size()));
 		}
 		return results.get(0).getSize();
-	}
-
-	public String getChecksum(final String bucketName, final String prefix) throws S3SdkClientException {
-		log(format("Get checksum of object %s from bucket %s", prefix, bucketName));
-		final List<S3ObjectSummary> results = getAll(bucketName, prefix);
-		if (results.size() != 1) {
-			throw new S3SdkClientException(bucketName, prefix,
-					format("Checksum query for object %s from bucket %s returned %s results", prefix, bucketName,
-							results.size()));
-		}
-		return results.get(0).getETag();
 	}
 
 	public URL createTemporaryDownloadUrl(final String bucketName, final String key, final long expirationTimeInSeconds)
