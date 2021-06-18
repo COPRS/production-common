@@ -518,7 +518,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			}
 			return new PolygonBuilder(coordBuilder).buildGeometry();
 		} else {
-			throw new IllegalArgumentException(String.format("not supported geometry: %s", input.getClass().getName()));
+			throw new IllegalArgumentException(String.format("not supported geometry: %s", (null != input) ? input.getClass().getName() : "null"));
 		}
 
 	}

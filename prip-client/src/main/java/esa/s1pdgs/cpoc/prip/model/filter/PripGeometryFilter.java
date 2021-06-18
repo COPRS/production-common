@@ -60,7 +60,7 @@ public class PripGeometryFilter extends PripQueryFilterTerm {
 		super(fieldName, nested, path);
 
 		this.function = Objects.requireNonNull(function);
-		this.geometry = Objects.requireNonNull(geometry);
+		this.geometry = geometry;
 	}
 
 	public PripGeometryFilter(String fieldName, Function function, Geometry geometry) {

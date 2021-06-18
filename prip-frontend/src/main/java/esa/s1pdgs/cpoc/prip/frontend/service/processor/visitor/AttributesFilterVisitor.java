@@ -92,21 +92,21 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 				this.filterStack.push(this.buildFilter(rightOperand, operator, leftOperand));
 			} else if ("att/Value".equals(leftOperand)) {
 				final String value = rightOperand;
-				if (null != operator && StringUtil.isNotEmpty(value)) {
+				if (StringUtil.isNotEmpty(value)) {
 					this.filterStack.push(this.buildFilter(value, operator));
 				} else {
 					final String msg = String.format("AttributesFilterVisitor: incomplete value expression (missing operator or operand): %s %s %s", ATT_NAME,
-							operator != null ? operator : "[MISSING OPERATOR]", StringUtil.isNotEmpty(value) ? value : "[MISSING VALUE]");
+							operator, StringUtil.isNotEmpty(value) ? value : "[MISSING VALUE]");
 					LOGGER.error(msg);
 					throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 				}
 			} else if ("att/Value".equals(rightOperand)) {
 				final String value = leftOperand;
-				if (null != operator && StringUtil.isNotEmpty(value)) {
+				if (StringUtil.isNotEmpty(value)) {
 					this.filterStack.push(this.buildFilter(value, operator));
 				} else {
 					final String msg = String.format("AttributesFilterVisitor: incomplete value expression (missing operator or operand): %s %s %s", ATT_NAME,
-							operator != null ? operator : "[MISSING OPERATOR]", StringUtil.isNotEmpty(value) ? value : "[MISSING VALUE]");
+							operator, StringUtil.isNotEmpty(value) ? value : "[MISSING VALUE]");
 					LOGGER.error(msg);
 					throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
 				}
