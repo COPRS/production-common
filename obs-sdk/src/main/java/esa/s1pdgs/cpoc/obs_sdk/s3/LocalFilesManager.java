@@ -6,11 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
-import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +44,7 @@ public class LocalFilesManager {
         return new FileHandle(filePath.toFile(), md5SumCalculationHelper.getMd5Sum());
     }
 
-    public static final class FileHandle implements AutoCloseable {
+    public static final class FileHandle  {
 
         private final File file;
         private final String md5Sum;
@@ -56,19 +52,6 @@ public class LocalFilesManager {
         private FileHandle(final File file, final String md5Sum) {
             this.file = file;
             this.md5Sum = md5Sum;
-        }
-
-        @Override
-        public void close() throws Exception {
-            try {
-                if (!file.delete()) {
-                    LOG.error("the file {} has not been deleted", file.getName());
-                } else {
-                    LOG.info("deleted {}", file.getName());
-                }
-            } catch (Exception e) {
-                LOG.error("the file {} could not be deleted", file.getName(), e);
-            }
         }
 
         public File getFile() {
@@ -80,30 +63,4 @@ public class LocalFilesManager {
         }
     }
 
-    public static class Md5SumCalculationHelper {
-        private final DigestInputStream digestIn;
-
-        public static Md5SumCalculationHelper createFor(final InputStream in) {
-            return new Md5SumCalculationHelper(in);
-        }
-
-        private Md5SumCalculationHelper(final InputStream in) {
-            try {
-                this.digestIn = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
-            } catch (NoSuchAlgorithmException e) {
-                throw new IllegalStateException("could not create message digest for algorithm MD5");
-            }
-        }
-
-        public InputStream getInputStream() {
-            return digestIn;
-        }
-
-        public String getMd5Sum() {
-            {
-                final byte[] hash = digestIn.getMessageDigest().digest();
-                return Hex.encodeHexString(hash, true);
-            }
-        }
-    }
 }

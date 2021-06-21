@@ -10,9 +10,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +47,8 @@ import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
 import com.amazonaws.util.IOUtils;
 
+import esa.s1pdgs.cpoc.common.steps.UndoableStep;
+import esa.s1pdgs.cpoc.common.steps.UndoableStepsHandler;
 import esa.s1pdgs.cpoc.obs_sdk.Md5;
 
 /**
@@ -100,6 +106,7 @@ public class S3ObsServices {
 	private final int retryDelay;
 
 	private final LocalFilesManager localFilesManager;
+	private final Path localFilesLocation = Paths.get("/tmp"); //TODO
 
 	/**
 	 */
@@ -437,58 +444,17 @@ public class S3ObsServices {
 	}
 
 	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in) throws S3SdkClientException {
-		{
-			for (int retryCount = 1;; retryCount++) {
-				try (final LocalFilesManager.FileHandle fileHandle = localFilesManager.downLoadAndProvideAsFile(in, keyName)){
-					log(format("Uploading object %s in bucket %s", keyName, bucketName));
+		final Path lastPathElement = Paths.get(keyName).getFileName();
 
-					final Upload upload = s3tm.upload(bucketName, keyName, fileHandle.getFile());
+		final Md5SumCalculationHelper md5SumCalculationHelper = Md5SumCalculationHelper.createFor(in);
+		final Path localFilePath = localFilesLocation.resolve(lastPathElement);
+		final DownloadFileStep downloadFileStep = new DownloadFileStep(localFilePath, md5SumCalculationHelper.getInputStream());
+		final UploadFileStep uploadFileStep = new UploadFileStep(this, localFilePath.toFile(), keyName, bucketName);
+		final DeleteFileStep deleteFileStep = new DeleteFileStep(localFilePath.toFile());
 
-					upload.addProgressListener(
-							(final ProgressEvent progressEvent)
-									-> LOGGER.trace(format("Uploading object %s in bucket %s: progress %s",
-									keyName,
-									bucketName,
-									progressEvent.toString())));
+		new UndoableStepsHandler(downloadFileStep, uploadFileStep, deleteFileStep).perform();
 
-					try {
-						final UploadResult result = upload.waitForUploadResult();
-						log(format("Upload object %s in bucket %s succeeded", keyName, bucketName));
-
-						return new Md5.Entry(fileHandle.getMd5Sum(), result.getETag(), keyName);
-					} catch (final InterruptedException e) {
-						throw new S3ObsServiceException(bucketName, keyName,
-								"Upload fails: interrupted during waiting multipart upload completion", e);
-					}
-
-				} catch (final com.amazonaws.SdkClientException sce) {
-					if (retryCount <= numRetries) {						
-						if (retryCount == 1) {
-							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
-									bucketName, retryCount, numRetries);																					
-							LOGGER.debug("Exception is", sce);
-						}
-						else {
-							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
-									bucketName, retryCount, numRetries);
-						}						
-						try {
-							Thread.sleep(retryDelay);
-						} catch (final InterruptedException e) {
-							throw new S3SdkClientException(bucketName, keyName,
-									format("Upload fails: %s", sce.getMessage()), sce);
-						}
-					} else {
-						throw new S3SdkClientException(bucketName, keyName,
-								format("Upload fails: %s", sce.getMessage()), sce);
-					}
-				} catch (Exception e) {
-					throw new S3SdkClientException(bucketName, keyName,
-							format("Upload fails: %s", e.getMessage()), e);
-				}
-
-			}
-		}
+		return new Md5.Entry(md5SumCalculationHelper.getMd5Sum(), uploadFileStep.uploadResult().getETag(), keyName); //TODO filename?
 	}
 
 	public void setExpirationTime(final String bucketName, final String prefix, final Instant expirationDate) {
@@ -676,6 +642,144 @@ public class S3ObsServices {
 			return s3client.generatePresignedUrl(generatePresignedUrlRequest);
 		} catch (final AmazonServiceException e) {
 			throw new S3SdkClientException(bucketName, key, "Could not create temporary download URL");
+		}
+	}
+
+	public static class DownloadFileStep implements UndoableStep {
+
+		private final Path destination;
+		private final InputStream inputStream;
+
+		public DownloadFileStep(Path destination, InputStream inputStream) {
+			this.destination = destination;
+			this.inputStream = inputStream;
+		}
+
+		@Override
+		public void perform() {
+			try {
+				Files.copy(inputStream,destination);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public void undo() {
+			if (Files.exists(destination)) {
+				try {
+					Files.delete(destination) ;
+				} catch (IOException e) {
+					throw new RuntimeException(destination + "could not be deleted", e);
+				}
+			}
+		}
+	}
+
+	public static class UploadFileStep implements  UndoableStep {
+
+		final S3ObsServices s3Services;
+		final File file;
+		final String keyName;
+		final String bucketName;
+		UploadResult uploadResult = null;
+
+		public UploadFileStep(S3ObsServices s3Services, File file, String keyName, String bucketName) {
+			this.s3Services = s3Services;
+			this.file = file;
+			this.keyName = keyName;
+			this.bucketName = bucketName;
+		}
+
+		@Override
+		public void perform() {
+
+			for (int retryCount = 1; ; retryCount++) {
+				try {
+					s3Services.log(format("Uploading object %s in bucket %s", keyName, bucketName));
+
+					final Upload upload = s3Services.s3tm.upload(bucketName, keyName, file);
+
+					upload.addProgressListener(
+							(final ProgressEvent progressEvent)
+									-> LOGGER.trace(format("Uploading object %s in bucket %s: progress %s",
+									keyName,
+									bucketName,
+									progressEvent.toString())));
+
+					try {
+						uploadResult = upload.waitForUploadResult();
+						s3Services.log(format("Upload object %s in bucket %s succeeded", keyName, bucketName));
+						return;
+					} catch (final InterruptedException e) {
+						throw new S3ObsServiceException(bucketName, keyName,
+								"Upload fails: interrupted during waiting multipart upload completion", e);
+					}
+
+				} catch (final com.amazonaws.SdkClientException sce) {
+					if (retryCount <= s3Services.numRetries) {
+						if (retryCount == 1) {
+							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
+									bucketName, retryCount, s3Services.numRetries);
+							LOGGER.debug("Exception is", sce);
+						} else {
+							LOGGER.warn("Upload object {} to bucket {} failed: Attempt : {}/{}", keyName,
+									bucketName, retryCount, s3Services.numRetries);
+						}
+						try {
+							Thread.sleep(s3Services.retryDelay);
+						} catch (final InterruptedException e) {
+							throw new RuntimeException(new S3SdkClientException(bucketName, keyName,
+									format("Upload fails: %s", sce.getMessage()), sce));
+						}
+					} else {
+						throw new RuntimeException(new S3SdkClientException(bucketName, keyName,
+								format("Upload fails: %s", sce.getMessage()), sce));
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(new S3SdkClientException(bucketName, keyName,
+							format("Upload fails: %s", e.getMessage()), e));
+				}
+
+			}
+
+
+		}
+
+		@Override
+		public void undo() {
+			try {
+				s3Services.deleteFile(new DeleteObjectRequest(bucketName, keyName));
+			} catch (S3ObsServiceException | S3SdkClientException e) {
+				throw new RuntimeException("could not delete s3://" + bucketName + "/" + keyName);
+			}
+		}
+
+		public UploadResult uploadResult() {
+			return uploadResult;
+		}
+	}
+
+	public static class DeleteFileStep implements UndoableStep {
+
+		private final File file;
+
+		public DeleteFileStep(File file) {
+			this.file = file;
+		}
+
+		@Override
+		public void perform() {
+			if(file.exists()) {
+				if(!file.delete()) {
+					throw new RuntimeException(file + " has not been deleted");
+				}
+			}
+		}
+
+		@Override
+		public void undo() {
+			//nothing to do here
 		}
 	}
 }

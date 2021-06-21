@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.common.steps;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
@@ -17,6 +18,10 @@ public class UndoableStepsHandler {
 
     public UndoableStepsHandler(final List<UndoableStep> stepsTodo) {
         this.stepsTodo = new ArrayDeque<>(stepsTodo);
+    }
+
+    public UndoableStepsHandler(UndoableStep... stepsTodo) {
+        this.stepsTodo = new ArrayDeque<>(Arrays.asList(stepsTodo));
     }
 
     public void perform() {
