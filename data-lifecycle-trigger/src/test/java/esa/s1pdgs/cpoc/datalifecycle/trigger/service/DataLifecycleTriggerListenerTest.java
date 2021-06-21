@@ -39,6 +39,10 @@ public class DataLifecycleTriggerListenerTest {
 			// nothing
 		}
 		@Override
+		public void saveAndRefresh(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
+			// nothing
+		}
+		@Override
 		public DataLifecycleMetadata saveAndGet(DataLifecycleMetadata metadata)
 				throws DataLifecycleMetadataRepositoryException {
 			return null;
