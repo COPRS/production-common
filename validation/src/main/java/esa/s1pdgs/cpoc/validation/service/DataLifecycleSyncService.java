@@ -457,7 +457,7 @@ public class DataLifecycleSyncService {
 				} else {
 					metadata.setPathInUncompressedStorage(null);
 				}
-				this.lifecycleMetadataRepo.save(metadata);
+				this.lifecycleMetadataRepo.saveAndRefresh(metadata);
 
 				final String endSyncFileMsg = String.format(
 						"End synchronising data lifecycle index with %s file %s: file does not exist in OBS anymore, removed path from data lifecycle index",
