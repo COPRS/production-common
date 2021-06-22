@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -178,8 +179,9 @@ public class DataLifecycleSyncService {
 				? LocalDateTime.ofInstant(calculatedEvictionDate.toInstant(), ZoneId.systemDefault())
 						: null;
 
-		boolean changed = false;
-		DataLifecycleMetadata metadata = null;
+		final DataLifecycleMetadata metadata;
+		final Map<String,Object> updateMetadata = new HashMap<>();
+		
 		if (existingMetadata.isPresent()) {
 
 			metadata = existingMetadata.get();
@@ -187,49 +189,62 @@ public class DataLifecycleSyncService {
 			if (family.isCompressed()) {
 				if (metadata.getProductFamilyInCompressedStorage() == null) {
 					metadata.setProductFamilyInCompressedStorage(family);
+					updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_COMPRESSED_STORAGE.fieldName(),
+							metadata.getProductFamilyInCompressedStorage());
 					LOG.debug("Setting family {} on {} for compressed storage", family, key);
 					stats.incrFamilyUpdated();
-					changed = true;
 				}
 				if (metadata.getPathInCompressedStorage() == null) {
 					metadata.setPathInCompressedStorage(key);
+					updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE.fieldName(),
+							metadata.getPathInCompressedStorage());
 					LOG.debug("Setting path {} for compressed storage", key);
 					stats.incrPathUpdated();
-					changed = true;
 					if (metadata.getEvictionDateInCompressedStorage() == null) {
 						LOG.debug("Setting eviction date {} for compressed storage", evictionDate);
 						metadata.setEvictionDateInCompressedStorage(evictionDate);
+						updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName(),
+								metadata.getEvictionDateInCompressedStorage());
 					}
 					if (metadata.getLastInsertionInCompressedStorage() == null) {
 						LOG.debug("Setting last insertion date {} for compressed storage", insertionDate);
 						metadata.setLastInsertionInCompressedStorage(insertionDate);
+						updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_COMPRESSED_STORAGE.fieldName(),
+								metadata.getLastInsertionInCompressedStorage());
 					}
 				}
 			} else {
 				if (metadata.getProductFamilyInUncompressedStorage() == null) {
 					metadata.setProductFamilyInUncompressedStorage(family);
+					updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE.fieldName(),
+							metadata.getProductFamilyInUncompressedStorage());
 					LOG.debug("Setting family {} on {} for uncompressed storage", family, key);
 					stats.incrFamilyUpdated();
-					changed = true;
 				}
 				if (metadata.getPathInUncompressedStorage() == null) {
 					metadata.setPathInUncompressedStorage(key);
+					updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE.fieldName(),
+							metadata.getPathInUncompressedStorage());
 					LOG.debug("Setting path {} for uncompressed storage", key);
 					stats.incrPathUpdated();
-					changed = true;
 					if (metadata.getEvictionDateInUncompressedStorage() == null) {
 						LOG.debug("Setting eviction date {} for uncompressed storage", evictionDate);
-						metadata.setEvictionDateInUncompressedStorage(evictionDate);						
+						metadata.setEvictionDateInUncompressedStorage(evictionDate);
+						updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(),
+								metadata.getEvictionDateInUncompressedStorage());
 					}
 					if (metadata.getLastInsertionInUncompressedStorage() == null) {
 						LOG.debug("Setting last insertion date {} for uncompressed storage", insertionDate);
 						metadata.setLastInsertionInUncompressedStorage(insertionDate);
+						updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_UNCOMPRESSED_STORAGE.fieldName(),
+								metadata.getLastInsertionInUncompressedStorage());
 					}
 				}
 			}
 
-			if (changed) {
-				LOG.info("Updating metadata: {}", metadata);
+			if (!updateMetadata.isEmpty()) {
+				LOG.info("Updating metadata of product {}: {}", productName, updateMetadata);
+				this.lifecycleMetadataRepo.update(productName, updateMetadata);
 			} else {
 				stats.incrUnchanged();
 				LOG.debug("Metadata for file {} is complete", key);
@@ -241,22 +256,40 @@ public class DataLifecycleSyncService {
 
 			if (family.isCompressed()) {
 				metadata.setProductFamilyInCompressedStorage(family);
+				updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_COMPRESSED_STORAGE.fieldName(),
+						metadata.getProductFamilyInCompressedStorage());
+				
 				metadata.setPathInCompressedStorage(key);
+				updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE.fieldName(),
+						metadata.getPathInCompressedStorage());
+				
 				metadata.setEvictionDateInCompressedStorage(evictionDate);
+				updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName(),
+						metadata.getEvictionDateInCompressedStorage());
+				
 				metadata.setLastInsertionInCompressedStorage(insertionDate);
+				updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_COMPRESSED_STORAGE.fieldName(),
+						metadata.getLastInsertionInCompressedStorage());
 			} else {
 				metadata.setProductFamilyInUncompressedStorage(family);
+				updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE.fieldName(),
+						metadata.getProductFamilyInUncompressedStorage());
+				
 				metadata.setPathInUncompressedStorage(key);
+				updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE.fieldName(),
+						metadata.getPathInUncompressedStorage());
+				
 				metadata.setEvictionDateInUncompressedStorage(evictionDate);
+				updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(),
+						metadata.getEvictionDateInUncompressedStorage());
+				
 				metadata.setLastInsertionInUncompressedStorage(insertionDate);
+				updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_UNCOMPRESSED_STORAGE.fieldName(),
+						metadata.getLastInsertionInUncompressedStorage());
 			}
 			LOG.info("Adding new metadata: {}", metadata.toString());
+			this.lifecycleMetadataRepo.upsert(metadata, updateMetadata);
 			stats.incrNewCreated();
-			changed = true;
-		}
-
-		if (changed) {
-			this.lifecycleMetadataRepo.save(metadata);
 		}
 		return metadata;
 	}
@@ -452,12 +485,13 @@ public class DataLifecycleSyncService {
 				stats.incrUnchanged();
 				return;
 			} else {
+				final Map<String,Object> updateMetadata = new HashMap<>();
 				if (inCompressedStorage) {
-					metadata.setPathInCompressedStorage(null);
+					updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE.fieldName(), null);
 				} else {
-					metadata.setPathInUncompressedStorage(null);
+					updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE.fieldName(), null);
 				}
-				this.lifecycleMetadataRepo.saveAndRefresh(metadata);
+				this.lifecycleMetadataRepo.updateAndRefresh(metadata.getProductName(), updateMetadata);
 
 				final String endSyncFileMsg = String.format(
 						"End synchronising data lifecycle index with %s file %s: file does not exist in OBS anymore, removed path from data lifecycle index",
