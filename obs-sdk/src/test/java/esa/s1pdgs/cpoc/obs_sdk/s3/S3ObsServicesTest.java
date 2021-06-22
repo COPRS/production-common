@@ -136,7 +136,7 @@ public class S3ObsServicesTest {
         listObjects2.add("root/key3");
 
         // Build service
-        service = new S3ObsServices(s3client, s3tm, 3, 500, LocalFilesManager.createFor(tmp.newFolder().toPath()));
+        service = new S3ObsServices(s3client, s3tm, 3, 500, tmp.newFolder().toPath());
         serviceSpy = Mockito.spy(service);
         mockAmazonS3Client();
         mockAmazonS3TransferManager();

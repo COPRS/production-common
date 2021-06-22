@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -105,18 +104,17 @@ public class S3ObsServices {
 	 */
 	private final int retryDelay;
 
-	private final LocalFilesManager localFilesManager;
-	private final Path localFilesLocation = Paths.get("/tmp"); //TODO
+	private final Path localFilesLocation;
 
 	/**
 	 */
 	public S3ObsServices(final AmazonS3 s3client, final TransferManager s3tm, final int numRetries,
-			final int retryDelay, final LocalFilesManager localFilesManager) {
+			final int retryDelay, final Path localFilesManager) {
 		this.s3client = s3client;
 		this.s3tm = s3tm;
 		this.numRetries = numRetries;
 		this.retryDelay = retryDelay;
-		this.localFilesManager = localFilesManager;
+		this.localFilesLocation = localFilesManager;
 	}
 
 	/**
@@ -444,17 +442,21 @@ public class S3ObsServices {
 	}
 
 	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in) throws S3SdkClientException {
-		final Path lastPathElement = Paths.get(keyName).getFileName();
+		try {
+			final Path lastPathElement = Paths.get(keyName).getFileName();
 
-		final Md5SumCalculationHelper md5SumCalculationHelper = Md5SumCalculationHelper.createFor(in);
-		final Path localFilePath = localFilesLocation.resolve(lastPathElement);
-		final DownloadFileStep downloadFileStep = new DownloadFileStep(localFilePath, md5SumCalculationHelper.getInputStream());
-		final UploadFileStep uploadFileStep = new UploadFileStep(this, localFilePath.toFile(), keyName, bucketName);
-		final DeleteFileStep deleteFileStep = new DeleteFileStep(localFilePath.toFile());
+			final Md5SumCalculationHelper md5SumCalculationHelper = Md5SumCalculationHelper.createFor(in);
+			final Path localFilePath = localFilesLocation.resolve(lastPathElement);
+			final DownloadFileStep downloadFileStep = new DownloadFileStep(localFilePath, md5SumCalculationHelper.getInputStream());
+			final UploadFileStep uploadFileStep = new UploadFileStep(this, localFilePath.toFile(), keyName, bucketName);
+			final DeleteFileStep deleteFileStep = new DeleteFileStep(localFilePath.toFile());
 
-		new UndoableStepsHandler(downloadFileStep, uploadFileStep, deleteFileStep).perform();
+			new UndoableStepsHandler(downloadFileStep, uploadFileStep, deleteFileStep).perform();
 
-		return new Md5.Entry(md5SumCalculationHelper.getMd5Sum(), uploadFileStep.uploadResult().getETag(), keyName); //TODO filename?
+			return new Md5.Entry(md5SumCalculationHelper.getMd5Sum(), uploadFileStep.uploadResult().getETag(), keyName); //TODO filename?
+		} catch (Exception e) {
+			throw new S3SdkClientException(bucketName, keyName, "error during uploading file", e);
+		}
 	}
 
 	public void setExpirationTime(final String bucketName, final String prefix, final Instant expirationDate) {
