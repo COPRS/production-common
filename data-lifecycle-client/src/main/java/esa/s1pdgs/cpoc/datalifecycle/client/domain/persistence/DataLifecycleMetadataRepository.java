@@ -21,8 +21,6 @@ public interface DataLifecycleMetadataRepository {
 
 	void saveAndRefresh(@NonNull DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException;
 
-	DataLifecycleMetadata saveAndGet(@NonNull DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException;
-
 	void upsert(@NonNull DataLifecycleMetadata insertMetadata, @NonNull Map<String, Object> updateMetadata)
 			throws DataLifecycleMetadataRepositoryException;
 
@@ -32,6 +30,8 @@ public interface DataLifecycleMetadataRepository {
 	void update(@NonNull String productName, Map<String, Object> updateMetadata) throws DataLifecycleMetadataRepositoryException;
 
 	void updateAndRefresh(@NonNull String productName, @NonNull Map<String, Object> updateMetadata) throws DataLifecycleMetadataRepositoryException;
+
+	DataLifecycleMetadata updateAndGet(@NonNull String productName, @NonNull Map<String, Object> updateMetadata) throws DataLifecycleMetadataRepositoryException;
 	
 	Optional<DataLifecycleMetadata> findByProductName(@NonNull String productName) throws DataLifecycleMetadataRepositoryException;
 

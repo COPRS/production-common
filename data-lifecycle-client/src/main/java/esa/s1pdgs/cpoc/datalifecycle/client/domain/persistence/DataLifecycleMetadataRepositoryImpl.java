@@ -106,9 +106,9 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	}
 		
 	@Override
-	public DataLifecycleMetadata saveAndGet(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
-		this.saveAndRefresh(metadata);
-		return this.findByProductName(metadata.getProductName())
+	public DataLifecycleMetadata updateAndGet(@NonNull String productName, @NonNull Map<String, Object> updateMetadata) throws DataLifecycleMetadataRepositoryException {
+		this.updateAndRefresh(productName, updateMetadata);
+		return this.findByProductName(productName)
 				.orElseThrow(() -> new DataLifecycleMetadataRepositoryException("error reading product data after saving"));
 	}
 
