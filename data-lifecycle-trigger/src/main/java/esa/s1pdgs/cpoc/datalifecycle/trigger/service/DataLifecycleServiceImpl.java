@@ -349,21 +349,23 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	private DataLifecycleMetadata updateRetention(@NonNull DataLifecycleMetadata dataLifecycleMetadata, LocalDateTime evictionTimeInCompressedStorage,
 			LocalDateTime evictionTimeInUncompressedStorage)
 					throws DataLifecycleMetadataRepositoryException, DataLifecycleMetadataNotFoundException {
+		final Map<String,Object> updateFields = new HashMap<>();
+		
 		// uncompressed
 		if (null != evictionTimeInUncompressedStorage) {
-			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(evictionTimeInUncompressedStorage);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(), evictionTimeInUncompressedStorage);
 		} else { // freeze
-			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(FOREVER);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(), FOREVER);
 		}
 
 		// compressed
 		if (null != evictionTimeInCompressedStorage) {
-			dataLifecycleMetadata.setEvictionDateInCompressedStorage(evictionTimeInCompressedStorage);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName(), evictionTimeInCompressedStorage);
 		} else { // freeze
-			dataLifecycleMetadata.setEvictionDateInCompressedStorage(FOREVER);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName(), FOREVER);
 		}
 
-		return this.lifecycleMetadataRepo.saveAndGet(dataLifecycleMetadata);
+		return this.lifecycleMetadataRepo.updateAndGet(dataLifecycleMetadata.getProductName(), updateFields);
 	}
 
 	private int evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,
