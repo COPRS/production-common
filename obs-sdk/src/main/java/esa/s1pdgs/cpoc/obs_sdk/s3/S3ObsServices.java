@@ -48,6 +48,7 @@ import com.amazonaws.util.IOUtils;
 
 import esa.s1pdgs.cpoc.common.steps.UndoableStep;
 import esa.s1pdgs.cpoc.common.steps.UndoableStepsHandler;
+import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.obs_sdk.Md5;
 
 /**
@@ -447,9 +448,9 @@ public class S3ObsServices {
 
 			final Md5SumCalculationHelper md5SumCalculationHelper = Md5SumCalculationHelper.createFor(in);
 			final Path localFilePath = localFilesLocation.resolve(lastPathElement);
-			final DownloadFileStep downloadFileStep = new DownloadFileStep(localFilePath, md5SumCalculationHelper.getInputStream());
+			final DownloadFileStep downloadFileStep = new DownloadFileStep(localFilePath, md5SumCalculationHelper.getInputStream(), this);
 			final UploadFileStep uploadFileStep = new UploadFileStep(this, localFilePath.toFile(), keyName, bucketName);
-			final DeleteFileStep deleteFileStep = new DeleteFileStep(localFilePath.toFile());
+			final DeleteFileStep deleteFileStep = new DeleteFileStep(localFilePath.toFile(), this);
 
 			new UndoableStepsHandler(downloadFileStep, uploadFileStep, deleteFileStep).perform();
 
@@ -651,30 +652,34 @@ public class S3ObsServices {
 
 		private final Path destination;
 		private final InputStream inputStream;
+		private final S3ObsServices s3ObsServices;
 
-		public DownloadFileStep(Path destination, InputStream inputStream) {
+		public DownloadFileStep(Path destination, InputStream inputStream, S3ObsServices s3ObsServices) {
 			this.destination = destination;
 			this.inputStream = inputStream;
+			this.s3ObsServices = s3ObsServices;
 		}
 
 		@Override
 		public void perform() {
 			try {
-				Files.copy(inputStream,destination);
-			} catch (IOException e) {
+				Retries.performWithRetries(
+						() -> Files.copy(inputStream, destination),
+						"download to " + destination,
+						s3ObsServices.numRetries, s3ObsServices.retryDelay);
+			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
 		}
 
 		@Override
 		public void undo() {
-			if (Files.exists(destination)) {
-				try {
-					Files.delete(destination) ;
-				} catch (IOException e) {
-					throw new RuntimeException(destination + "could not be deleted", e);
-				}
-			}
+			DeleteFile.withRetries(destination, s3ObsServices.numRetries, s3ObsServices.retryDelay);
+		}
+
+		@Override
+		public String toString() {
+			return "download of " + destination;
 		}
 	}
 
@@ -742,10 +747,7 @@ public class S3ObsServices {
 					throw new RuntimeException(new S3SdkClientException(bucketName, keyName,
 							format("Upload fails: %s", e.getMessage()), e));
 				}
-
 			}
-
-
 		}
 
 		@Override
@@ -764,24 +766,38 @@ public class S3ObsServices {
 
 	public static class DeleteFileStep implements UndoableStep {
 
-		private final File file;
+		private final Path filePath;
+		private final S3ObsServices s3ObsServices;
 
-		public DeleteFileStep(File file) {
-			this.file = file;
+		public DeleteFileStep(File file, S3ObsServices s3ObsServices) {
+			this.filePath = file.toPath();
+			this.s3ObsServices = s3ObsServices;
 		}
 
 		@Override
 		public void perform() {
-			if(file.exists()) {
-				if(!file.delete()) {
-					throw new RuntimeException(file + " has not been deleted");
-				}
-			}
+			DeleteFile.withRetries(filePath, s3ObsServices.numRetries, s3ObsServices.retryDelay);
 		}
 
 		@Override
 		public void undo() {
 			//nothing to do here
+		}
+	}
+
+	private static class DeleteFile {
+		static void withRetries(final Path path, final int numRetries, final long retryDelay) {
+			try {
+				Retries.performWithRetries(() ->
+				{
+					if (Files.exists(path)) {
+						Files.delete(path);
+					}
+					return null;
+				}, "name", numRetries, retryDelay);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(path + "could not be deleted", e);
+			}
 		}
 	}
 }

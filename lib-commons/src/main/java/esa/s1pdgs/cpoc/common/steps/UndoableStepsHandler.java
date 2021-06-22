@@ -36,7 +36,7 @@ public class UndoableStepsHandler {
 
     private void perform(Queue<UndoableStep> tasksTodo, Stack<UndoableStep> tasksDone) {
         while (!tasksTodo.isEmpty()) {
-            final UndoableStep currentStep = tasksTodo.peek();
+            final UndoableStep currentStep = tasksTodo.peek(); //don't remove head, we want to used as info in fail scenario
             LOG.info("performing step: {}", currentStep);
             currentStep.perform();
             tasksDone.add(currentStep);
@@ -47,7 +47,7 @@ public class UndoableStepsHandler {
     private void rollback(Stack<UndoableStep> tasksDone) {
         try {
             while (!tasksDone.isEmpty()) {
-                UndoableStep currentStep = tasksDone.peek();
+                UndoableStep currentStep = tasksDone.peek(); // don't remove head, is used for fail scenario
                 LOG.info("rolling back step: {}", currentStep);
                 currentStep.undo();
                 tasksDone.pop();
