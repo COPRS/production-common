@@ -48,6 +48,30 @@ public class DataLifecycleTriggerListenerTest {
 			return null;
 		};
 		@Override
+		public void upsert(DataLifecycleMetadata insertMetadata, Map<String, Object> updateMetadata)
+				throws DataLifecycleMetadataRepositoryException {
+			// nothing
+			
+		}
+		@Override
+		public void upsertAndRefresh(DataLifecycleMetadata insertMetadata, Map<String, Object> updateMetadata)
+				throws DataLifecycleMetadataRepositoryException {
+			// nothing
+			
+		}
+		@Override
+		public void update(String productName, Map<String, Object> updateMetadata)
+				throws DataLifecycleMetadataRepositoryException {
+			// nothing
+			
+		}
+		@Override
+		public void updateAndRefresh(String productName, Map<String, Object> updateMetadata)
+				throws DataLifecycleMetadataRepositoryException {
+			// nothing
+			
+		}
+		@Override
 		public Optional<DataLifecycleMetadata> findByProductName(String productName)
 				throws DataLifecycleMetadataRepositoryException {
 			return Optional.empty();
