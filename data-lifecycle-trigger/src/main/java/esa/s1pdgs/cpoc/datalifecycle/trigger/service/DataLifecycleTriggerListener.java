@@ -20,7 +20,6 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.datalifecycle.client.DataLifecycleClientUtil;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
@@ -60,8 +59,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	private final Pattern persistentInUncompressedStoragePattern;
 	private final Pattern persistentInCompressedStoragePattern;
 	private final Pattern availableInLtaPattern;
-	private final int metadataUnavailableRetriesNumber;
-	private final long metadataUnavailableRetriesIntervalMs;
 
 	public DataLifecycleTriggerListener(
 			final ErrorRepoAppender errorRepoAppender,
@@ -71,9 +68,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			final DataLifecycleMetadataRepository metadataRepo,
 			final String patternPersistentInUncompressedStorage,
 			final String patternPersistentInCompressedStorage,
-			final String patternAvailableInLta,
-			final int metadataUnavailableRetriesNumber,
-			final long metadataUnavailableRetriesIntervalMs
+			final String patternAvailableInLta
 	) {
 		this.errorRepoAppender = errorRepoAppender;
 		this.processConfig = processConfig;
@@ -88,8 +83,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		this.availableInLtaPattern = null != patternAvailableInLta ? Pattern.compile(patternAvailableInLta) : null;
 		this.shortingEvictionTimeAfterCompression = null != shortingEvictionTimeAfterCompression ? shortingEvictionTimeAfterCompression
 				: Collections.emptyMap();
-		this.metadataUnavailableRetriesNumber = metadataUnavailableRetriesNumber;
-		this.metadataUnavailableRetriesIntervalMs = metadataUnavailableRetriesIntervalMs;
 
 		// validate eviction time shortening configuration
 		final Iterator<Map.Entry<ProductFamily, Integer>> iter = this.shortingEvictionTimeAfterCompression.entrySet().iterator();
@@ -269,33 +262,6 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 			throw e;
 		}
 	}
-
-	private Optional<DataLifecycleMetadata> queryMetadata(String productName) throws InterruptedException {
-		try {
-			return Retries.performWithRetries(() -> {
-				try {
-					Optional<DataLifecycleMetadata> metadata = metadataRepo.findByProductName(productName);
-					if (!metadata.isPresent()) {
-						throw new NoSuchElementException(String.format("No lifecycle metadata found for product name: %s", productName));
-					}					
-					return metadata;
-				} catch (DataLifecycleMetadataRepositoryException e) {
-					LOG.error("error searching data lifecycle metadata by product name: " + LogUtils.toString(e), e);
-					throw e;
-				}
-			}, 
-			"lifecycle metadata query for " + productName, 
-			metadataUnavailableRetriesNumber, 
-			metadataUnavailableRetriesIntervalMs
-			);
-		} catch (RuntimeException e) {
-			if (e.getCause() instanceof NoSuchElementException) {
-				return Optional.empty();
-			} else {
-				throw e;
-			}
-		}
-	}
 	
 	/* Removing storage path from data lifecycle metadata after eviction of product */
 	private void updateEvictedMetadata(final EvictionEvent inputEvent)
@@ -306,7 +272,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 
 		final Optional<DataLifecycleMetadata> oExistingMetadata;
 		try {
-			oExistingMetadata = queryMetadata(productName);
+			oExistingMetadata = metadataRepo.findByProductName(productName);
 		} catch (final NoSuchElementException e) {
 			LOG.error("error updating lifecycle metadata due to eviction of " + productName + ": " + LogUtils.toString(e), e);
 			throw e;
