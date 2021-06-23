@@ -248,8 +248,8 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 						metadata.getLastInsertionInUncompressedStorage());
 			}
 
-			LOG.debug(String.format("upserting lifecycle metadata with uncompressed storage information for product %s with update to '%s' or index of '%s'"),
-					metadata.getProductName(), updateFields, metadata);
+			LOG.debug(String.format("upserting lifecycle metadata with uncompressed storage information for product %s with update to '%s' or index of '%s'",
+					metadata.getProductName(), updateFields, metadata));
 		}
 		
 		metadata.setAvailableInLta(this.isAvailableInLta(obsKey));
