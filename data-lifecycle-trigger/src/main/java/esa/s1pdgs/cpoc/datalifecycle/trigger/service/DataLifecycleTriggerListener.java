@@ -218,7 +218,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 				} else {
 					metadata.setEvictionDateInUncompressedStorage(shortenedEvictionDate);
 					updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(),
-							metadata.getLastInsertionInUncompressedStorage());
+							metadata.getEvictionDateInUncompressedStorage());
 					LOG.info("shortening eviction date in uncompressed storage after compression of %s to %s", productName, shortenedEvictionDate);
 				}
 			}
