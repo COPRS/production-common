@@ -31,11 +31,13 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Streams;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -275,6 +277,8 @@ public abstract class AbstractObsClient implements ObsClient {
 		try {
 			final List<Md5.Entry> md5s = uploadStreams(objects, true, reportingFactory);
 			uploadMd5Sum(baseKeyOf(objects), md5s);
+		} catch ( final S3ObsUnrecoverableException e) {
+			throw new ObsUnrecoverableException(e);
 		} catch (final SdkClientException exc) {
 			throw new ObsParallelAccessException(exc);
 		}

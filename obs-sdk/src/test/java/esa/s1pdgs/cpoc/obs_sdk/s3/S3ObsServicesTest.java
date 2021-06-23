@@ -542,7 +542,7 @@ public class S3ObsServicesTest {
     }
 
     @Test
-    public void testUploadStreamNominal() throws S3SdkClientException, IOException {
+    public void testUploadStreamNominal() throws S3SdkClientException, IOException, S3ObsUnrecoverableException {
         try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
             service.uploadStream(BCK_OBJ_EXIST, "key-test", in);
             verify(s3tm, times(1)).upload(eq(BCK_OBJ_EXIST),
@@ -551,7 +551,7 @@ public class S3ObsServicesTest {
     }
 
     @Test
-    public void testUploadStreamSDKException() throws IOException, S3SdkClientException {
+    public void testUploadStreamSDKException() throws IOException, S3SdkClientException, S3ObsUnrecoverableException {
         try (InputStream in = getClass().getResourceAsStream("/testfile1.txt")) {
             thrown.expect(S3SdkClientException.class);
             thrown.expect(hasProperty("bucket", is(BCK_EXC_SDK)));

@@ -249,7 +249,7 @@ public class S3ObsClientTest {
     }
 
     @Test
-    public void testUploadStreamNoContent() throws IOException, S3SdkClientException, AbstractCodedException, ObsEmptyFileException {
+    public void testUploadStreamNoContent() throws IOException, S3SdkClientException, AbstractCodedException, ObsEmptyFileException, S3ObsUnrecoverableException {
         thrown.expect(ObsEmptyFileException.class);
         thrown.expectMessage("key-exist");
 

@@ -46,6 +46,7 @@ import com.amazonaws.services.s3.transfer.Upload;
 import com.amazonaws.services.s3.transfer.model.UploadResult;
 import com.amazonaws.util.IOUtils;
 
+import esa.s1pdgs.cpoc.common.AppState;
 import esa.s1pdgs.cpoc.common.steps.UndoableStep;
 import esa.s1pdgs.cpoc.common.steps.UndoableStepsHandler;
 import esa.s1pdgs.cpoc.common.utils.Retries;
@@ -442,7 +443,7 @@ public class S3ObsServices {
 		return fileList;
 	}
 
-	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in) throws S3SdkClientException {
+	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in) throws S3SdkClientException, S3ObsUnrecoverableException {
 		try {
 			final Path lastPathElement = Paths.get(keyName).getFileName();
 
@@ -455,6 +456,8 @@ public class S3ObsServices {
 			new UndoableStepsHandler(downloadFileStep, uploadFileStep, deleteFileStep).perform();
 
 			return new Md5.Entry(md5SumCalculationHelper.getMd5Sum(), uploadFileStep.uploadResult().getETag(), keyName); //TODO filename?
+		} catch (FileDeletionException e) {
+			throw new S3ObsUnrecoverableException(bucketName, keyName, "could not delete local file", e);
 		} catch (Exception e) {
 			throw new S3SdkClientException(bucketName, keyName, "error during uploading file", e);
 		}
@@ -795,9 +798,15 @@ public class S3ObsServices {
 					}
 					return null;
 				}, "name", numRetries, retryDelay);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(path + "could not be deleted", e);
+			} catch (Exception e) {
+				throw new FileDeletionException(path + "could not be deleted", e);
 			}
+		}
+	}
+
+	static class FileDeletionException extends RuntimeException {
+		public FileDeletionException(String message, Throwable cause) {
+			super(message, cause);
 		}
 	}
 }

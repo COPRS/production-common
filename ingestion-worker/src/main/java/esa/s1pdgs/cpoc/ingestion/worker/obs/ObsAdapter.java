@@ -7,9 +7,11 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterEntry;
@@ -26,20 +28,29 @@ public class ObsAdapter {
     private final ObsClient obsClient;
     private final ReportingFactory reportingFactory;
     private final boolean copyInputStreamToBuffer;
+    private final AppStatus appStatus;
 
     public ObsAdapter(
             final ObsClient obsClient,
             final ReportingFactory reportingFactory,
-            final boolean copyInputStreamToBuffer
-    ) {
+            final boolean copyInputStreamToBuffer,
+            final AppStatus appStatus
+            ) {
         this.obsClient = obsClient;
         this.reportingFactory = reportingFactory;
         this.copyInputStreamToBuffer = copyInputStreamToBuffer;
+        this.appStatus = appStatus;
     }
 
     public final void upload(final ProductFamily family, final List<InboxAdapterEntry> entries, final String obsKey) throws ObsEmptyFileException {
         try {
             obsClient.uploadStreams(toUploadObjects(family, entries), reportingFactory);
+        } catch (final ObsUnrecoverableException e) {
+            appStatus.setShallBeStopped(true);
+            appStatus.forceStopping();
+            throw new RuntimeException(
+                    String.format("Error uploading %s (%s): %s", obsKey, family, LogUtils.toString(e))
+            );
         } catch (final AbstractCodedException e) {
             throw new RuntimeException(
                     String.format("Error uploading %s (%s): %s", obsKey, family, LogUtils.toString(e))
