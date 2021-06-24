@@ -5,9 +5,11 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -149,7 +151,7 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	// --------------------------------------------------------------------------
 	
 	/* Creating and updating data lifecycle metadata */
-	private void updateMetadata(final GenericMessageDto<E> inputMessage) throws DataLifecycleMetadataRepositoryException {
+	private void updateMetadata(final GenericMessageDto<E> inputMessage) throws DataLifecycleMetadataRepositoryException, InterruptedException {
 		final E inputEvent = inputMessage.getBody();
 		final String obsKey = inputEvent.getKeyObjectStorage();
 		
@@ -159,31 +161,38 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		final boolean isCompressedStorage = productFamily.isCompressed();
 		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
-		final Optional<DataLifecycleMetadata> oExistingMetadata;
-		try {
-			oExistingMetadata = this.metadataRepo.findByProductName(productName);
-		} catch (DataLifecycleMetadataRepositoryException e) {
-			LOG.error("error searching data lifecycle metadata by product name: " + LogUtils.toString(e), e);
-			throw e;
-		}
-
 		final Date evictionDate = DataLifecycleClientUtil.calculateEvictionDate(this.retentionPolicies, inputEvent.getCreationDate(), productFamily, fileName);
 		LocalDateTime evictionDateTime = null;
 		if (null != evictionDate) {
 			evictionDateTime = LocalDateTime.ofInstant(evictionDate.toInstant(), ZoneId.of("UTC"));
 		}
 		
-		final DataLifecycleMetadata metadata = oExistingMetadata.orElse(new DataLifecycleMetadata() );
-		metadata.setProductName(productName);
+		final DataLifecycleMetadata metadata = new DataLifecycleMetadata();
+		final Map<String,Object> updateFields = new HashMap<>();
+
+		metadata.setProductName(productName); // _id field (hence no update field)
 		
 		if (isCompressedStorage) {
 			metadata.setEvictionDateInCompressedStorage(evictionDateTime);
-			metadata.setPathInCompressedStorage(obsKey);
-			metadata.setPersistentInCompressedStorage(this.isPersistentInCompressedStorage(obsKey));
-			metadata.setProductFamilyInCompressedStorage(productFamily);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName(),
+					metadata.getEvictionDateInCompressedStorage());
 
+			metadata.setPathInCompressedStorage(obsKey);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE.fieldName(),
+					metadata.getPathInCompressedStorage());
+
+			metadata.setPersistentInCompressedStorage(this.isPersistentInCompressedStorage(obsKey));
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_COMPRESSED_STORAGE.fieldName(),
+					metadata.getPersistentInCompressedStorage());
+
+			metadata.setProductFamilyInCompressedStorage(productFamily);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_COMPRESSED_STORAGE.fieldName(),
+					metadata.getProductFamilyInCompressedStorage());
+			
 			if (needsInsertionTimeUpdate(inputEvent)) {
 				metadata.setLastInsertionInCompressedStorage(now);
+				updateFields.put(DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_COMPRESSED_STORAGE.fieldName(),
+						metadata.getLastInsertionInCompressedStorage());
 			}
 
 			if (needsEvictionTimeShorteningInUncompressedStorage(inputEvent, this.shortingEvictionTimeAfterCompression)) {
@@ -208,47 +217,63 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 							DateUtils.formatToMetadataDateTimeFormat(shortenedEvictionDate)));
 				} else {
 					metadata.setEvictionDateInUncompressedStorage(shortenedEvictionDate);
+					updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(),
+							metadata.getEvictionDateInUncompressedStorage());
 					LOG.info("shortening eviction date in uncompressed storage after compression of %s to %s", productName, shortenedEvictionDate);
 				}
 			}
 
-			LOG.debug(String.format("%s lifecycle metadata with information for compressed storage: %s",
-					(oExistingMetadata.isPresent() ? "updating" : "creating"), metadata));
+			LOG.debug(String.format("upserting lifecycle metadata with compressed storage information for product %s with update to '%s' or index of '%s'",
+					metadata.getProductName(), updateFields, metadata));
 		} else {
 			metadata.setEvictionDateInUncompressedStorage(evictionDateTime);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(),
+					metadata.getEvictionDateInUncompressedStorage());
+			
 			metadata.setPathInUncompressedStorage(obsKey);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE.fieldName(),
+					metadata.getPathInUncompressedStorage());
+			
 			metadata.setPersistentInUncompressedStorage(this.isPersistentInUncompressedStorage(obsKey));
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_UNCOMPRESSED_STORAGE.fieldName(),
+					metadata.getPersistentInUncompressedStorage());
+			
 			metadata.setProductFamilyInUncompressedStorage(productFamily);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE.fieldName(),
+					metadata.getProductFamilyInUncompressedStorage());
 
 			if (needsInsertionTimeUpdate(inputEvent)) {
 				metadata.setLastInsertionInUncompressedStorage(now);
+				updateFields.put(DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_UNCOMPRESSED_STORAGE.fieldName(),
+						metadata.getLastInsertionInUncompressedStorage());
 			}
 
-			LOG.debug(String.format("%s lifecycle metadata with information for uncompressed storage: %s",
-					(oExistingMetadata.isPresent() ? "updating" : "creating"), metadata));
+			LOG.debug(String.format("upserting lifecycle metadata with uncompressed storage information for product %s with update to '%s' or index of '%s'",
+					metadata.getProductName(), updateFields, metadata));
 		}
 		
 		metadata.setAvailableInLta(this.isAvailableInLta(obsKey));
 		
 		try {
-			this.metadataRepo.save(metadata);
+			this.metadataRepo.upsert(metadata, updateFields);
 		} catch (DataLifecycleMetadataRepositoryException e) {
 			LOG.error("error saving data lifecycle metadata for " + productFamily.name() + ": "
 					+ fileName + ": " + LogUtils.toString(e), e);
 			throw e;
 		}
 	}
-
+	
 	/* Removing storage path from data lifecycle metadata after eviction of product */
-	private void updateEvictedMetadata(final EvictionEvent inputEvent) throws DataLifecycleTriggerInternalServerErrorException {
+	private void updateEvictedMetadata(final EvictionEvent inputEvent)
+			throws DataLifecycleTriggerInternalServerErrorException, InterruptedException {
 		final String obsKey = inputEvent.getKeyObjectStorage();
 		final String productName = DataLifecycleClientUtil.getProductName(obsKey);
 		final boolean isCompressedStorage = inputEvent.getProductFamily().isCompressed();
 
 		final Optional<DataLifecycleMetadata> oExistingMetadata;
 		try {
-			oExistingMetadata = this.metadataRepo.findByProductName(productName);
-		} catch (final DataLifecycleMetadataRepositoryException e) {
+			oExistingMetadata = metadataRepo.findByProductName(productName);
+		} catch (final NoSuchElementException e) {
 			LOG.error("error updating lifecycle metadata due to eviction of " + productName + ": " + LogUtils.toString(e), e);
 			throw e;
 		}
@@ -259,19 +284,19 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 					"error updating lifecycle metadata due to eviction of " + productName + ": no lifecycle metadata found");
 		}
 
-		final DataLifecycleMetadata metadata = oExistingMetadata.get();
+		final Map<String,Object> updateFields = new HashMap<>();
 
 		// erase storage path as it is no longer valid
 		if (isCompressedStorage) {
-			metadata.setPathInCompressedStorage(null);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE.fieldName(), null);
 			LOG.debug("erasing path in compressed storage from lifecycle metadata due to eviction of: " + productName);
 		} else {
-			metadata.setPathInUncompressedStorage(null);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE.fieldName(), null);
 			LOG.debug("erasing path in uncompressed storage from lifecycle metadata due to eviction of: " + productName);
 		}
 
 		try {
-			this.metadataRepo.save(metadata);
+			this.metadataRepo.update(productName, updateFields);
 		} catch (final DataLifecycleMetadataRepositoryException e) {
 			LOG.error("error updating lifecycle metadata due to eviction of " + productName + ": " + LogUtils.toString(e), e);
 			throw e;

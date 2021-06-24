@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.directorycleaner.util.Utils;
 
 public class MyOceanFtpsDirectoryCleaner extends MyOceanFtpDirectoryCleaner {
 
-	private static final int EXPLICIT_FTPS_DEFAULT_PORT = 23;
+	private static final int EXPLICIT_FTPS_DEFAULT_PORT = 21;
 	private static final int IMPLICIT_FTPS_DEFAULT_PORT = 990;
 
 	// --------------------------------------------------------------------------
@@ -31,7 +31,8 @@ public class MyOceanFtpsDirectoryCleaner extends MyOceanFtpDirectoryCleaner {
 
 	@Override
 	protected FTPSClient connectAndLogin() throws Exception {
-		final FTPSClient ftpsClient = new SSLSessionReuseFTPSClient("TLS", this.config.isImplicitSsl());
+		final FTPSClient ftpsClient = new SSLSessionReuseFTPSClient("TLS", this.config.isImplicitSsl(),
+				config.getFtpsSslSessionReuse(), config.getUseExtendedMasterSecret());
 		ftpsClient.addProtocolCommandListener(new PrintCommandListener(new LogPrintWriter(this.logger::debug), true));
 
 		if (StringUtil.isNotBlank(this.config.getKeystoreFile())) {

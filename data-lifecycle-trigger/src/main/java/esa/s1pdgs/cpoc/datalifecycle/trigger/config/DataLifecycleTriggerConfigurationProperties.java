@@ -142,5 +142,5 @@ public class DataLifecycleTriggerConfigurationProperties {
 	public void setDataRequestCooldownInSec(long dataRequestCooldownInSec) {
 		this.dataRequestCooldownInSec = dataRequestCooldownInSec;
 	}
-	
+
 }

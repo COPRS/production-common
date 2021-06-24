@@ -143,6 +143,8 @@ public class DisseminationWorkerProperties {
 		private int port = -1; // --> not defined
 		private boolean implicitSsl = false;
 		private boolean ftpPassiveMode = false;
+		private boolean ftpsSslSessionReuse = true;
+		private boolean useExtendedMasterSecret = false;
 		private String username = null;
 		private String password = null;
 		private String path = null;
@@ -281,6 +283,22 @@ public class DisseminationWorkerProperties {
 		public boolean isFtpPassiveMode() {
 			return this.ftpPassiveMode;
 		}
+		
+		public boolean getFtpsSslSessionReuse() {
+			return ftpsSslSessionReuse;
+		}
+
+		public void setFtpsSslSessionReuse(boolean ftpsSslSessionReuse) {
+			this.ftpsSslSessionReuse = ftpsSslSessionReuse;
+		}
+
+		public boolean getUseExtendedMasterSecret() {
+			return useExtendedMasterSecret;
+		}
+
+		public void setUseExtendedMasterSecret(boolean useExtendedMasterSecret) {
+			this.useExtendedMasterSecret = useExtendedMasterSecret;
+		}
 
 		public boolean isSkipExisting() {
 			return this.skipExisting;
@@ -303,7 +321,9 @@ public class DisseminationWorkerProperties {
 			return "OutboxConfiguration [protocol=" + this.protocol + ", path=" + this.path + ", username="
 					+ this.username + ", password=<NOT_SHOWN>, keyFile=" + this.keyFile + ", hostname=" + this.hostname
 					+ ", port=" + this.port + ", bufferSize=" + this.bufferSize + ", ftpPassiveMode="
-					+ this.ftpPassiveMode + ", keystoreFile=" + this.keystoreFile
+					+ this.ftpPassiveMode + ", ftpsSslSessionReuse=" + ftpsSslSessionReuse
+					+ ", useExtendedMasterSecret=" + useExtendedMasterSecret
+					+ ", keystoreFile=" + this.keystoreFile
 					+ ", keystorePass=<NOT_SHOWN>, truststoreFile=" + this.truststoreFile
 					+ ", truststorePass=<NOT_SHOWN>, implicitSsl=" + this.implicitSsl + ", skipExisting="
 					+ this.skipExisting + ", chmodScriptPath=" + this.chmodScriptPath + "]";
