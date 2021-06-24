@@ -143,20 +143,25 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		}
 		final WriteRequest<?> request;
 		if (!updateMetadata.isEmpty()) {
-			LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+			final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 			updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName(), (Object)now);
-			insertMetadata.setLastModified(now);
+
 			if (pureUpdate) {
 				request = new UpdateRequest(this.elasticsearchIndex, productName)
 						.doc(updateMetadata);
-			} else {
+			} else if (null != insertMetadata) {
+				insertMetadata.setLastModified(now);
 				request = new UpdateRequest(this.elasticsearchIndex, productName)
 						.doc(updateMetadata)
 						.upsert(insertMetadata.toJson().toString(), XContentType.JSON);
+			} else {
+				throw new IllegalArgumentException("insert metadata missing for upsert!");
 			}
-		} else {
+		} else if (null != insertMetadata) {
 			request = new IndexRequest(this.elasticsearchIndex).id(productName)
 					.source(insertMetadata.toJson().toString(), XContentType.JSON);
+		} else {
+			throw new IllegalArgumentException("nothing to save: at least insert metadata or update metadata is required");
 		}
 		if(refreshImmediately) {
 			request.setRefreshPolicy(RefreshPolicy.IMMEDIATE); // <-- we want the changes to be available immediately
