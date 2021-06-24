@@ -105,17 +105,20 @@ public class S3ObsServices {
 	 */
 	private final int retryDelay;
 
+	/**
+	 * location for temporary files for parallel upload
+	 */
 	private final Path localFilesLocation;
 
 	/**
 	 */
 	public S3ObsServices(final AmazonS3 s3client, final TransferManager s3tm, final int numRetries,
-			final int retryDelay, final Path localFilesManager) {
+			final int retryDelay, final Path localFilesLocation) {
 		this.s3client = s3client;
 		this.s3tm = s3tm;
 		this.numRetries = numRetries;
 		this.retryDelay = retryDelay;
-		this.localFilesLocation = localFilesManager;
+		this.localFilesLocation = localFilesLocation;
 	}
 
 	/**

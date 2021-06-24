@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -102,19 +103,37 @@ public class S3ObsClient extends AbstractObsClient {
 				clientBuilder.disableChunkedEncoding();
 			}
 			final AmazonS3 client = clientBuilder.build();
-			
+
+			final long minimumUploadPartSize = config.getMinUploadPartSize() * 1024 * 1024;
+			final long multipartUploadThreshold = config.getMultipartUploadThreshold() * 1024 * 1024;
+
 			final TransferManager manager = TransferManagerBuilder.standard()
-					.withMinimumUploadPartSize(config.getMinUploadPartSize() * 1024 * 1024)
-					.withMultipartUploadThreshold(config.getMultipartUploadThreshold() * 1024 * 1024)
+					.withMinimumUploadPartSize(minimumUploadPartSize)
+					.withMultipartUploadThreshold(multipartUploadThreshold)
 					.withS3Client(client)
 					.build();
+
+			LOGGER.info(
+					"created transferManager with minimumUploadPartSize: {} multipartUploadThreshold: {}",
+					minimumUploadPartSize,
+					multipartUploadThreshold);
+
+			final int maxObsRetries = config.getMaxObsRetries();
+			final int backoffThrottledBaseDelay = config.getBackoffThrottledBaseDelay();
+			final Path uploadCacheLocation = config.getUploadCacheLocation();
 
 			final S3ObsServices s3Services = new S3ObsServices(
 					client,
 					manager,
-					config.getMaxObsRetries(),
-					config.getBackoffThrottledBaseDelay(),
-					config.getUploadCacheLocation());
+					maxObsRetries,
+					backoffThrottledBaseDelay,
+					uploadCacheLocation);
+
+			LOGGER.info(
+					"created s3ObsServices with maxRetries: {} retriesDelay: {} uploadCacheLocation: {}",
+					maxObsRetries,
+					backoffThrottledBaseDelay,
+					uploadCacheLocation);
 			
 			return new S3ObsClient(config, s3Services, factory);
 		}
