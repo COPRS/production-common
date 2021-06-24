@@ -15,7 +15,7 @@ public class Retries {
 			final int numRetries, 
 			final long retrySleep
 	) throws InterruptedException {
-		Objects.requireNonNull(command);
+		Objects.requireNonNull(command, "command must not be null");
 
     	int attempt = 0;
     	while (true) {
