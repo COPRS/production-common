@@ -231,11 +231,11 @@ public class S3ObsServices {
 							// Download object
 							log(format("Downloading object %s from bucket %s in %s", key, bucketName, localFilePath));
 							File localFile = new File(localFilePath);
-							if (localFile.getParentFile() != null) {
-								localFile.getParentFile().mkdirs();
-							}
 							try {
-								localFile.createNewFile();
+								if (localFile.getParentFile() != null) {
+									Files.createDirectories(localFile.getParentFile().toPath());
+								}
+								Files.createFile(localFile.toPath());
 							} catch (final IOException ioe) {
 								throw new S3ObsServiceException(bucketName, key,
 										"Directory creation fails for " + localFilePath, ioe);
@@ -251,7 +251,7 @@ public class S3ObsServices {
 								if (!key.equals(filename)) {
 									log(format("==debug filename=%s, key=%s", filename, key));
 									final File fTo = new File(targetDir + filename);
-									localFile.renameTo(fTo);
+									Files.move(localFile.toPath(), fTo.toPath());
 									localFile = fTo;
 								}
 							}
@@ -272,7 +272,7 @@ public class S3ObsServices {
 
 		}
 	}
-	
+
 	List<String> getExpectedFiles(final String bucketName, final String prefixKey) throws S3ObsServiceException {
 
 		final String md5FileName = Md5.md5KeyFor(prefixKey);
