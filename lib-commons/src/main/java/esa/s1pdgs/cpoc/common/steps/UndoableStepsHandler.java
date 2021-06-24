@@ -40,7 +40,7 @@ public class UndoableStepsHandler {
             LOG.info("performing step: {}", currentStep);
             currentStep.perform();
             tasksDone.add(currentStep);
-            tasksTodo.poll();
+            tasksTodo.remove();
         }
     }
 

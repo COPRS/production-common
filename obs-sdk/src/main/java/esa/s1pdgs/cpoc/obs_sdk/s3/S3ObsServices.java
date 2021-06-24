@@ -649,8 +649,7 @@ public class S3ObsServices {
 						s3Services.numRetries,
 						s3Services.retryDelay);
 			} catch (Exception e) {
-				throw new RuntimeException(new S3SdkClientException(bucketName, keyName,
-						format("Upload fails: %s", e.getMessage()), e));
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 
