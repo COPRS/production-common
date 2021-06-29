@@ -147,9 +147,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		    if (!StringUtils.isEmpty(config.getKeyManagerKeyStore()))
 		    {
 		      final String keystorePass = config.getKeyManagerKeyStorePassword();
-		      LOG.debug("keystorePass: '{}'", keystorePass);
 
-		      LOG.debug("keyManagerKeyStore: '{}'", config.getKeyManagerKeyStore());
 		      final KeyStore keyStore = newKeyStore(
 		          Streams.getInputStream(config.getKeyManagerKeyStore()),
 		          keystorePass
@@ -214,11 +212,8 @@ public class ApacheFtpEdipClient implements EdipClient {
 			throws Exception {
 	    try
 	    {
-        	LOG.debug("keystore default type: '{}'", KeyStore.getDefaultType());
 	      final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-	      LOG.debug("char array: '{}'", keystorePass.toCharArray());
 	      keystore.load(inputStream, keystorePass.toCharArray());
-	      LOG.debug("keystore: '{}'", keystore);
 	      return keystore;
 	    }
 	    finally
