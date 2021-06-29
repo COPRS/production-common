@@ -62,7 +62,6 @@ public class ApacheFtpEdipClient implements EdipClient {
 		
 		client.logout();
 		client.disconnect();
-		LOG.debug("Client returns result: {}", result);
 		return result;
 	}
 	
@@ -241,7 +240,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		final List<FTPFile> ftpFiles = Arrays.asList(client.listFiles(path.toString()));
 		FTPFile ftpFile = ftpFiles.size() == 1 ? ftpFiles.get(0) : null;
 		if (null != ftpFile && !ftpFile.isDirectory() && null != path && null != path.getParent()) {
-			EdipEntry edipEntry = toEdipEntry(path, ftpFile);
+			EdipEntry edipEntry = toEdipEntry(path.getParent(), ftpFile);
 			return Optional.of(Collections.singletonList(edipEntry));
 		}
 		return Optional.empty();
