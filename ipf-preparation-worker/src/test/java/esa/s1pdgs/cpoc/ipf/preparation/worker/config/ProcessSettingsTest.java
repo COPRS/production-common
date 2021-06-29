@@ -35,7 +35,7 @@ public class ProcessSettingsTest {
 		assertEquals("NRT", l0ProcessSettings.getParams().get("Processing_Mode"));
 		assertEquals("10", l0ProcessSettings.getParams().get("Timeout"));
 		
-		assertTrue(5 == l0ProcessSettings.getOutputregexps().size());
+		assertTrue(6 == l0ProcessSettings.getOutputregexps().size());
 		assertTrue(l0ProcessSettings.getOutputregexps().containsKey("AN_RAW__0S"));
 		assertTrue(l0ProcessSettings.getOutputregexps().containsKey("REP_EFEP_"));
 		assertEquals("^S1[A-B]_N[1-6]_RAW__0S.*$", l0ProcessSettings.getOutputregexps().get("AN_RAW__0S"));

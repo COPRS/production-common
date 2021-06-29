@@ -74,9 +74,12 @@ public class TestInbox {
                 "topic",
                 productFamily,
                 "WILE",
+                0,
                 "NOMINAL",
                 "FAST24",
-                new FlatProductNameEvaluator()
+                new FlatProductNameEvaluator(),
+                10,
+                1000
         );
         uut.poll();
 
@@ -108,9 +111,12 @@ public class TestInbox {
                 "topic",
                 productFamily,
 				"WILE",
+				0,
 				"NOMINAL",
                 "FAST24",
-                new FlatProductNameEvaluator()
+                new FlatProductNameEvaluator(),
+                10,
+                1000
         );
         uut.poll();
 
@@ -146,9 +152,12 @@ public class TestInbox {
                 "topic",
                 productFamily,
 				"WILE",
+				0,
 				"NOMINAL",
                 "FAST24",
-                new FlatProductNameEvaluator()
+                new FlatProductNameEvaluator(),
+                10,
+                1000
         );
         uut.poll();
 
@@ -173,9 +182,12 @@ public class TestInbox {
                 "topic",
                 productFamily,
 				"WILE",
+				0,
 				"NOMINAL",
                 "FAST24",
-                new FlatProductNameEvaluator()
+                new FlatProductNameEvaluator(),
+                10,
+                1000
         );
         
         // old entry shall be ignored

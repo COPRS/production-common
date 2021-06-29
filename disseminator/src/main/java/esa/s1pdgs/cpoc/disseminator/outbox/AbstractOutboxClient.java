@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
@@ -19,9 +19,9 @@ public abstract class AbstractOutboxClient implements OutboxClient {
 	
 	protected final ObsClient obsClient;
 	protected final OutboxConfiguration config;
-	private final PathEvaluater pathEvaluator;
+	private final PathEvaluator pathEvaluator;
 	
-	public AbstractOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater pathEvaluator) {
+	public AbstractOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator pathEvaluator) {
 		this.obsClient = obsClient;
 		this.config = config;
 		this.pathEvaluator = pathEvaluator;

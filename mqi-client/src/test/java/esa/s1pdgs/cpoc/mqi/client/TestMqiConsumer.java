@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -95,6 +97,28 @@ public class TestMqiConsumer {
 		uut.run();		
 		verify(fakeClient).ack(ackArgument.capture(),Mockito.eq(ProductCategory.AUXILIARY_FILES));
 		assertEquals(Ack.ERROR, ackArgument.getValue().getAck());
+
+	}
+	
+	@Test
+	public final void testOnListenerUncheckedError_ShallAcknowledgeNegatively() throws Exception {
+		// let it only poll once
+		doReturn(true).when(fakeappStatus).isInterrupted();
+		doReturn(mess).when(fakeClient).next(Mockito.eq(ProductCategory.AUXILIARY_FILES));
+		doThrow(new OutOfMemoryError("Expected")).when(fakeListener).onMessage(Mockito.any());
+		
+		final MqiConsumer<?> uut = new MqiConsumer<>(
+				fakeClient, 
+				ProductCategory.AUXILIARY_FILES, 
+				fakeListener,
+				Collections.EMPTY_LIST,
+				1000L,
+				0L,
+				fakeappStatus
+		);
+		
+		uut.run();
+		verify(fakeappStatus).forceStopping();
 
 	}
 	

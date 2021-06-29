@@ -16,8 +16,9 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.AbstractInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.SupportsProductFamily;
 
-public class FilesystemInboxAdapter extends AbstractInboxAdapter {
+public class FilesystemInboxAdapter extends AbstractInboxAdapter implements SupportsProductFamily {
 	public FilesystemInboxAdapter(
 			final InboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 	

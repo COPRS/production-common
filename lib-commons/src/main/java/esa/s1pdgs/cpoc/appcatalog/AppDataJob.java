@@ -71,6 +71,12 @@ public class AppDataJob {
      */
     private List<AppDataJobTaskInputs> additionalInputs;
 
+	/**
+	 * Inputs preselected by  main input search, which
+	 * should not be queries by AuxQuery any more
+	 */
+	private List<AppDataJobPreselectedInput> preselectedInputs;
+
     /**
      * Generations of the job
      */
@@ -271,7 +277,15 @@ public class AppDataJob {
         this.additionalInputs = additionalInputs;
     }
 
-    /**
+	public List<AppDataJobPreselectedInput> getPreselectedInputs() {
+		return preselectedInputs;
+	}
+
+	public void setPreselectedInputs(final List<AppDataJobPreselectedInput> preselectedInputs) {
+		this.preselectedInputs = preselectedInputs;
+	}
+
+	/**
      * @return the generations
      */
     public AppDataJobGeneration getGeneration() {
@@ -357,14 +371,14 @@ public class AppDataJob {
 				+ ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
 				+ ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
 				+ ", reportingId=" + reportingId + ", prepJobMessage=" + prepJobMessage + ", processingGroup="
-				+ processingGroup + ", timedOut=" + timedOut + "]";
+				+ processingGroup + ", timedOut=" + timedOut + ", preselectedInputs=" + preselectedInputs + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(additionalInputs, creationDate, generation, id, lastUpdateDate, level, messages, pod,
 				prepJobMessage, processingGroup, product, productName, reportingId, startTime, state, stopTime,
-				taskTableName,timedOut);
+				taskTableName,timedOut, preselectedInputs);
 	}
 
 	@Override
@@ -393,6 +407,7 @@ public class AppDataJob {
 				&& Objects.equals(startTime, other.startTime) 
 				&& state == other.state
 				&& Objects.equals(stopTime, other.stopTime) 
-				&& Objects.equals(taskTableName, other.taskTableName);
+				&& Objects.equals(taskTableName, other.taskTableName)
+				&& Objects.equals(preselectedInputs, other.preselectedInputs);
 	}
 }

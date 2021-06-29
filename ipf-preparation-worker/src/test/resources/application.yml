@@ -118,6 +118,7 @@ process:
     ZS_RAW__0S: ^S1[A-B]_Z[1-6]_RAW__0S.*$
     REP_L0PSA_: ^S1[A|B|_]_OPER_REP_ACQ.*$
     REP_EFEP_: ^S1[A|B|_]_OPER_REP_PASS.*.EOF$  
+    REP_MBU_: ^s1[a-b]-[0-9a-z]{2}[0-9a-z]{1}-mbu-(vv|hh)-.*$
   appcatalog:
     host-uri: http://localhost:8080
     max-retries: 5

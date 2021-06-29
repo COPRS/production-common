@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
@@ -123,42 +126,66 @@ public class OutputProcessor {
 	private final ApplicationProperties properties;
 	
 	private final boolean debugMode;
-	
-	private final String uploadPrefix;
 
 	public static enum AcquisitionMode {
-		EW, IW, SM, WV
+		EW, IW, SM, WV, RF
 	}
 
 	/**
-	 * Constructor
+	 * FIXME replace legacy constructor
+	 * Legacy Constructor
 	 * 
 	 */
-	public OutputProcessor(final ObsClient obsClient, final OutputProcuderFactory procuderFactory,
-			final GenericMessageDto<IpfExecutionJob> inputMessage, final String listFile, final int sizeUploadBatch,
-			final String prefixMonitorLogs, final ApplicationLevel appLevel, final ApplicationProperties properties) {
+	@Deprecated
+	public OutputProcessor(
+			final ObsClient obsClient, 
+			final OutputProcuderFactory procuderFactory,
+			final GenericMessageDto<IpfExecutionJob> inputMessage, 
+			final String listFile, 
+			final int sizeUploadBatch,
+			final String prefixMonitorLogs, 
+			final ApplicationLevel appLevel, 
+			final ApplicationProperties properties
+	) {
+		this(
+				obsClient,
+				procuderFactory, 
+				inputMessage.getBody().getWorkDirectory(),
+				listFile,
+				inputMessage,
+				inputMessage.getBody().getOutputs(),
+				sizeUploadBatch,
+				prefixMonitorLogs,
+				appLevel,
+				properties,
+				inputMessage.getDto().isDebug()				
+		);	
+	}
+	
+	public OutputProcessor(
+			final ObsClient obsClient, 
+			final OutputProcuderFactory procuderFactory, 
+			final String workDirectory,
+			final String listFile, 
+			final GenericMessageDto<IpfExecutionJob> inputMessage, 
+			final List<LevelJobOutputDto> authorizedOutputs,
+			final int sizeUploadBatch, 
+			final String prefixMonitorLogs, 
+			final ApplicationLevel appLevel, 
+			final ApplicationProperties properties,
+			final boolean debugMode
+	) {
 		this.obsClient = obsClient;
 		this.procuderFactory = procuderFactory;
+		this.workDirectory = workDirectory;
 		this.listFile = listFile;
 		this.inputMessage = inputMessage;
-		this.authorizedOutputs = inputMessage.getBody().getOutputs();
-		this.workDirectory = inputMessage.getBody().getWorkDirectory();
+		this.authorizedOutputs = authorizedOutputs;
 		this.sizeUploadBatch = sizeUploadBatch;
 		this.prefixMonitorLogs = prefixMonitorLogs;
 		this.appLevel = appLevel;
 		this.properties = properties;
-		this.debugMode = inputMessage.getDto().isDebug();
-		
-		// FIXME: this needs to be removed from the constructor, but at the moment it'S the easiest way until refactoring
-		// story is implemented
-		if (debugMode) {
-			uploadPrefix = inputMessage.getBody().getKeyObjectStorage() + "-" + 
-					inputMessage.getBody().getRetryCounter() + "/";
-		}
-		else {
-			uploadPrefix = "";
-		}
-		
+		this.debugMode = debugMode;
 	}
 
 	/**
@@ -241,7 +268,7 @@ public class OutputProcessor {
 								new ReportingMessage("Checking if %s is a ghost candidate", productName)
 						);
 						
-						final boolean ghostCandidate = isGhostCandidate(productName);
+						final boolean ghostCandidate = isGhostCandidate(file);
 
 						LOGGER.info("Output {} is recognized as belonging to the family {}", productName, family);
 						
@@ -268,7 +295,7 @@ public class OutputProcessor {
 					}
 					else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
-								matchOutput.getFamily());
+								matchOutput.getFamily());						
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
 								inputMessage.getBody().getProductProcessMode(),oqcFlag));
@@ -302,6 +329,7 @@ public class OutputProcessor {
 				case L1_ACN:
 				case L2_SLICE:
 				case L2_ACN:
+				case SPP_MBU: //just trying
 				case SPP_OBS: //just trying
 				case S3_AUX:
 				case S3_CAL:
@@ -333,6 +361,17 @@ public class OutputProcessor {
 		}
 		return productSize;
 	}
+
+	static boolean isPartial(final File file) {		
+		final File manifest = new File(file,"manifest.safe");
+		try {
+			return manifest.exists() && FileUtils.readFile(manifest)
+					.contains("<productConsolidation>PARTIAL</productConsolidation>");
+		} catch (final InternalErrorException e) {
+			LOGGER.error(Exceptions.messageOf(e), e);
+			return false;
+		}
+	}
 	
 	
 
@@ -345,7 +384,8 @@ public class OutputProcessor {
 	 *         product. If an error occurs during the extraction, the product will
 	 *         be identified as non-ghost
 	 */
-	boolean isGhostCandidate(final String productName) {
+	boolean isGhostCandidate(final File file) {
+		final String productName = file.getName();
 		LOGGER.info("Performing ghost candidate check for product '{}'", productName);
 
 		// Something completely unexpected was provided as product Name
@@ -399,6 +439,18 @@ public class OutputProcessor {
 
 		LOGGER.info("Information used for ghost candidate detection: duration {}, acquisitionMode {}",
 				duration.getSeconds(), acquisitionMode);
+		
+		// S1PRO-2420: PARTIAL products of RF products shall be treated as ghosts
+		if (acquisitionMode == AcquisitionMode.RF) {	
+			if (isPartial(file)){
+				LOGGER.info("Partial RF {} marked as ghost", productName);
+				return true;
+			}
+			else {
+				LOGGER.info("RF {} is not ghost", productName);
+				return false;
+			}
+		}
 
 		// if the configured length is smaller than the duration, its a candidate
 		final long ghostLength = ghostLength(acquisitionMode);
@@ -531,7 +583,7 @@ public class OutputProcessor {
 	private FileObsUploadObject newUploadObject(final ProductFamily family, final String productName, final File file) {
 		return new FileObsUploadObject(
 				family, 
-				uploadPrefix + productName, 
+				productName, 
 				file
 		);
 	}
@@ -616,25 +668,41 @@ public class OutputProcessor {
 	/**
 	 * Function which process all the output of L0 process
 	 */
-	public List<GenericPublicationMessageDto<ProductionEvent>> processOutput(final ReportingFactory reportingFactory, final UUID uuid) throws Exception {
-		// Extract files
-		final List<String> lines = extractFiles();
-
+	public List<GenericPublicationMessageDto<ProductionEvent>> processOutput(
+			final ReportingFactory reportingFactory, 
+			final UUID uuid,
+			final IpfExecutionJob job			  
+	) throws Exception {
 		// Sort outputs
 		final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
-		List<ObsQueueMessage> outputToPublish = new ArrayList<>();
-		List<FileQueueMessage> reportToPublish = new ArrayList<>();
+		final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
+		final List<FileQueueMessage> reportToPublish = new ArrayList<>();
 			
-		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 		// S1PRO-1856: for debug, no publishing and upload will be into OBS DEBUG bucket
-		if (debugMode) {
-			for (final FileObsUploadObject obj : uploadBatch) {
-				// TODO add prefix
-				obj.setFamily(ProductFamily.DEBUG);
-			}
-			outputToPublish = new ArrayList<>();
-			reportToPublish = new ArrayList<>();
+		if (debugMode) {			
+			final String debugPrefix = debugOutputPrefix(properties.getHostname(),uuid,job);	
+
+			final FileObsUploadObject upload = newUploadObject(
+					ProductFamily.DEBUG, 
+					debugPrefix, 
+					new File(workDirectory)
+			);
+			obsClient.upload(Collections.singletonList(upload), reportingFactory);		
+			
+			// always fail, if debug mode is set		
+			throw new IllegalStateException(
+					String.format(
+							"Successfully produced outputs in debugMode and uploaded results to debug bucket at: %s", 
+							debugPrefix
+					)
+			); 			
 		}
+
+		// Extract files
+		final List<String> lines = extractFiles();
+		
+		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
+	
 
 		// Upload per batch the output
 		// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
@@ -646,21 +714,21 @@ public class OutputProcessor {
 				uuid
 		);
 		// Publish reports
-		processReports(reportToPublish, uuid);
-		
-		// always fail, if debug mode is set
-		if (debugMode) {
-			throw new IllegalStateException(
-					String.format(
-							"Successfully produced outputs in debugMode and uploaded results to debug bucket at: %s", 
-							uploadPrefix
-					)
-			); 
-		}		
+		processReports(reportToPublish, uuid);	
 		return res;
-
 	}
 	
+	final String debugOutputPrefix(	
+			final String hostname,
+			final UUID uuid,
+			final IpfExecutionJob job
+	) {
+		return hostname + "_" + 
+				job.getKeyObjectStorage() + "_" + 
+				uuid.toString() + "_" + 
+				job.getRetryCounter();
+	}
+
 	private long size(final File file) throws InternalErrorException {
 		try {
 			final Path folder = file.toPath();

@@ -46,28 +46,36 @@ import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripGeoShape;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class MappingUtil {
-	
+
 	private static final int MILLIS_PER_SECOND = 1000;
-	
+
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
 		URI uri = MappingUtil.createId(rawBaseUri, EdmProvider.ES_PRODUCTS_NAME, pripMetadata.getId());
 		Entity entity = new Entity()
 				.addProperty(new Property(null, Id.name(), ValueType.PRIMITIVE, pripMetadata.getId()))
 				.addProperty(new Property(null, Name.name(), ValueType.PRIMITIVE, pripMetadata.getName()))
 				.addProperty(new Property(null, ContentType.name(), ValueType.PRIMITIVE, pripMetadata.getContentType()))
-				.addProperty(new Property(null, ContentLength.name(), ValueType.PRIMITIVE, pripMetadata.getContentLength()))
-				.addProperty(new Property(null, ContentDate.name(), ValueType.COMPLEX, convertToContentDate(pripMetadata.getContentDateStart(), pripMetadata.getContentDateEnd())))
-				.addProperty(new Property(null, PublicationDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
-				.addProperty(new Property(null, EvictionDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
-				.addProperty(new Property(null, ProductionType.name(), ValueType.ENUM, mapToProductionType(esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION)))
-				.addProperty(new Property(null, Checksum.name(), ValueType.COLLECTION_COMPLEX, mapToChecksumList(pripMetadata.getChecksums())))
-				.addProperty(new Property(null, Footprint.name(), ValueType.GEOSPATIAL, mapToGeospatial(pripMetadata.getFootprint())));
+				.addProperty(
+						new Property(null, ContentLength.name(), ValueType.PRIMITIVE, pripMetadata.getContentLength()))
+				.addProperty(new Property(null, ContentDate.name(), ValueType.COMPLEX,
+						convertToContentDate(pripMetadata.getContentDateStart(), pripMetadata.getContentDateEnd())))
+				.addProperty(new Property(null, PublicationDate.name(), ValueType.PRIMITIVE,
+						convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
+				.addProperty(new Property(null, EvictionDate.name(), ValueType.PRIMITIVE,
+						convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
+				.addProperty(new Property(null, ProductionType.name(), ValueType.ENUM,
+						mapToProductionType(esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION)))
+				.addProperty(new Property(null, Checksum.name(), ValueType.COLLECTION_COMPLEX,
+						mapToChecksumList(pripMetadata.getChecksums())))
+				.addProperty(new Property(null, Footprint.name(), ValueType.GEOSPATIAL,
+						mapToGeospatial(pripMetadata.getFootprint())));
 
 		entity.setMediaContentType(pripMetadata.getContentType());
 		entity.setId(uri);
@@ -81,20 +89,35 @@ public class MappingUtil {
 
 		// TODO sort attributes
 		if (null != pripMetadata.getAttributes()) {
-			for(Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
+			for (Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
 				final FullQualifiedName valueType;
 				final int firstSeparatorPosition = entrySet.getKey().indexOf('_');
 				final int lastSeparatorPosition = entrySet.getKey().lastIndexOf('_');
 				switch (entrySet.getKey().substring(lastSeparatorPosition + 1)) {
-					case "string": valueType = EdmProvider.STRING_TYPE_FQN; break;
-					case "long": valueType = EdmProvider.INT_64_TYPE_FQN; break;
-					case "double": valueType = EdmProvider.DOUBLE_TYPE_FQN; break;
-					case "boolean": valueType = EdmProvider.BOOLEAN_TYPE_FQN; break;
-					case "date": valueType = EdmProvider.DATE_TIME_OFFSET_TYPE_FQN; break;
-					default: throw new RuntimeException(String.format("Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
+				case "string":
+					valueType = EdmProvider.STRING_TYPE_FQN;
+					break;
+				case "long":
+					valueType = EdmProvider.INT_64_TYPE_FQN;
+					break;
+				case "double":
+					valueType = EdmProvider.DOUBLE_TYPE_FQN;
+					break;
+				case "boolean":
+					valueType = EdmProvider.BOOLEAN_TYPE_FQN;
+					break;
+				case "date":
+					valueType = EdmProvider.DATE_TIME_OFFSET_TYPE_FQN;
+					break;
+				default:
+					throw new RuntimeException(String.format(
+							"Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
 				}
-				final Object value = valueType == EdmProvider.DATE_TIME_OFFSET_TYPE_FQN ? convertLocalDateTimeToTimestamp((LocalDateTime)entrySet.getValue()) : entrySet.getValue();
-				final String odataPropertyName = entrySet.getKey().substring(firstSeparatorPosition + 1, lastSeparatorPosition);
+				final Object value = valueType == EdmProvider.DATE_TIME_OFFSET_TYPE_FQN
+						? convertLocalDateTimeToTimestamp((LocalDateTime) entrySet.getValue())
+						: entrySet.getValue();
+				final String odataPropertyName = entrySet.getKey().substring(firstSeparatorPosition + 1,
+						lastSeparatorPosition);
 				final Entity attributeEntity = new Entity();
 				attributeEntity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, odataPropertyName));
 				attributeEntity.addProperty(new Property(null, "ValueType", ValueType.PRIMITIVE, valueType));
@@ -139,46 +162,50 @@ public class MappingUtil {
 			throw new ODataRuntimeException("Unable to create id for entity: " + entitySetName, e);
 		}
 	}
-	
+
 	public static Timestamp convertLocalDateTimeToTimestamp(LocalDateTime localDateTime) {
 		if (null != localDateTime) {
 			try {
-	            Instant instant = localDateTime.toInstant(ZoneOffset.UTC);
+				Instant instant = localDateTime.toInstant(ZoneOffset.UTC);
 				Timestamp stamp = new Timestamp(instant.getEpochSecond() * MILLIS_PER_SECOND);
 				stamp.setNanos(instant.getNano() / 1000000 * 1000000); // results in cutting off places
-	            return stamp;
-	        } catch (ArithmeticException ex) {
-	            throw new IllegalArgumentException(ex);
-	        }
+				return stamp;
+			} catch (ArithmeticException ex) {
+				throw new IllegalArgumentException(ex);
+			}
 		} else {
 			return null;
 		}
 	}
-	
+
 	public static ComplexValue convertToContentDate(LocalDateTime contentDateStart, LocalDateTime contentDateEnd) {
 		ComplexValue complexValue = new ComplexValue();
-		complexValue.getValue().add(new Property(null, Start.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(contentDateStart)));
-		complexValue.getValue().add(new Property(null, End.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(contentDateEnd)));
+		complexValue.getValue().add(new Property(null, Start.name(), ValueType.PRIMITIVE,
+				convertLocalDateTimeToTimestamp(contentDateStart)));
+		complexValue.getValue().add(
+				new Property(null, End.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(contentDateEnd)));
 		return complexValue;
 	}
-	
+
 	public static List<ComplexValue> mapToChecksumList(List<Checksum> checksums) {
 		List<ComplexValue> listOfComplexValues = new ArrayList<>();
 		if (null != checksums) {
 			for (Checksum checksum : checksums) {
 				ComplexValue complexValue = new ComplexValue();
-				complexValue.getValue().add(new Property(null, Algorithm.name(), ValueType.PRIMITIVE, checksum.getAlgorithm()));
+				complexValue.getValue()
+						.add(new Property(null, Algorithm.name(), ValueType.PRIMITIVE, checksum.getAlgorithm()));
 				complexValue.getValue().add(new Property(null, Value.name(), ValueType.PRIMITIVE, checksum.getValue()));
-				complexValue.getValue().add(new Property(null, ChecksumDate.name(), ValueType.PRIMITIVE, convertLocalDateTimeToTimestamp(checksum.getDate())));
+				complexValue.getValue().add(new Property(null, ChecksumDate.name(), ValueType.PRIMITIVE,
+						convertLocalDateTimeToTimestamp(checksum.getDate())));
 				listOfComplexValues.add(complexValue);
 			}
 		}
 		return listOfComplexValues;
 	}
-	
+
 	public static Geospatial mapToGeospatial(PripGeoShape footprint) {
 		Geospatial result = null;
-		if(null != footprint && footprint instanceof GeoShapePolygon) {
+		if (null != footprint) {
 			SRID srid = SRID.valueOf(String.valueOf(footprint.getSRID()));
 			List<Point> points = new ArrayList<>();
 			for (PripGeoCoordinate coordinates : footprint.getCoordinates()) {
@@ -186,9 +213,14 @@ public class MappingUtil {
 				p.setX(coordinates.getLongitude());
 				p.setY(coordinates.getLatitude());
 				points.add(p);
-			}			
+			}
 			LineString lineString = new LineString(Dimension.GEOGRAPHY, srid, points);
-			result = new Polygon(Dimension.GEOGRAPHY, srid, null, lineString);
+
+			if (footprint instanceof GeoShapePolygon) {
+				result = new Polygon(Dimension.GEOGRAPHY, srid, null, lineString);
+			} else if (footprint instanceof GeoShapeLineString) {
+				result = lineString;
+			}
 		}
 		return result;
 	}

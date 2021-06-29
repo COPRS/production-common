@@ -73,7 +73,7 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 	
 	// --------------------------------------------------------------------------
 	
-	private final MqiPublishingJob<CatalogJob> newPublicationMessage(
+	final MqiPublishingJob<CatalogJob> newPublicationMessage(
 			final Reporting reporting, 
 			final GenericMessageDto<E> message
 	) {

@@ -35,7 +35,7 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
     
     @JsonProperty("effective_downlink")
     private EffectiveDownlink effectiveDownlink; // S1PRO-2036
-    
+
     @JsonProperty("station_string")
     private String stationString; // S1PRO-2036
     
@@ -157,7 +157,7 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	public void setEffectiveDownlink(EffectiveDownlink effectiveDownlink) {
 		this.effectiveDownlink = effectiveDownlink;
 	}
-	
+
 	public String getStationString() {
 		return stationString;
 	}

@@ -5,6 +5,10 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
@@ -15,12 +19,16 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class ProductServiceImpl implements ProductService {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ProductServiceImpl.class);
+
 	private final ObsClient obsClient;
 	private final boolean bufferInput;
+	private final AppStatus appStatus;
 
-	public ProductServiceImpl(final ObsClient obsClient, final boolean bufferInput) {
+	public ProductServiceImpl(final ObsClient obsClient, final boolean bufferInput, AppStatus appStatus) {
 		this.obsClient = obsClient;
 		this.bufferInput = bufferInput;
+		this.appStatus = appStatus;
 	}
 
 	@Override
@@ -31,9 +39,7 @@ public class ProductServiceImpl implements ProductService {
 			final ReportingFactory reportingFactory
 	) throws Exception {		
 		final URI uri = IngestionJobs.toUri(ingestion);
-
 		final ObsAdapter obsAdapter = newObsAdapterFor(reportingFactory);
-
 		final String obsKey = obsKeyFor(ingestion);
 
 		final IngestionEvent dto = new IngestionEvent(
@@ -45,13 +51,40 @@ public class ProductServiceImpl implements ProductService {
 				ingestion.getMode(),
 				ingestion.getTimeliness()
 		);
-		final Product<IngestionEvent> prod = new Product<>(family, uri, dto);
+
+		checkExistingInObs(obsAdapter, ingestion);
+		upload(obsAdapter, ingestion, family, inboxAdapter, uri, obsKey);
+
+		return Collections.singletonList(new Product<>(family, uri, dto));
+	}
+
+	private void upload(ObsAdapter obsAdapter, IngestionJob ingestion, ProductFamily family, InboxAdapter inboxAdapter, URI uri, String obsKey) throws Exception {
 		obsAdapter.upload(
-				family, 
+				family,
 				inboxAdapter.read(uri, ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getProductSizeByte()),
 				obsKey
 		);
-		return Collections.singletonList(prod);
+	}
+
+	private void checkExistingInObs(final ObsAdapter obsAdapter, final IngestionJob ingestion) {
+		final String obsKey = obsKeyFor(ingestion);
+
+		//returns -1 if it is not in OBS
+		long obsSize = obsAdapter.sizeOf(ingestion.getProductFamily(), obsKey);
+
+		if(obsSize < 0) {
+			LOG.debug("File {} is not in obs and will be ingested", obsKey);
+			return;
+		}
+
+		LOG.debug("checking obsSize of {} in obs: {} against new size {}", obsKey, obsSize, ingestion.getProductSizeByte());
+
+		if (obsSize == ingestion.getProductSizeByte()) {
+			throw new RuntimeException(
+					String.format("File %s is already in obs and has the same size, aborting ingestion", obsKey));
+		}
+
+		LOG.info("File {} has new size {}, will overwrite existing one with size {}", obsKey, ingestion.getProductSizeByte(), obsSize);
 	}
 
 	private String obsKeyFor(final IngestionJob ingestion) {
@@ -67,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private ObsAdapter newObsAdapterFor(final ReportingFactory reportingFactory) {
-		return new ObsAdapter(obsClient, reportingFactory, bufferInput);
+		return new ObsAdapter(obsClient, reportingFactory, bufferInput, appStatus);
 	}
 
 }

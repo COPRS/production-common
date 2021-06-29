@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -28,7 +28,8 @@ public class DataLifecycleTriggerService {
 			ProductCategory.INGESTION_EVENT,
 			ProductCategory.PRODUCTION_EVENT,
 			ProductCategory.COMPRESSED_PRODUCTS,
-			ProductCategory.LTA_DOWNLOAD_EVENT
+			ProductCategory.LTA_DOWNLOAD_EVENT,
+			ProductCategory.EVICTION_EVENT
 	);
 	
 	private final DataLifecycleTriggerConfigurationProperties configurationProperties;
@@ -77,10 +78,13 @@ public class DataLifecycleTriggerService {
 				errorRepoAppender, 
 				processConfig,
 				configurationProperties.getRetentionPolicies(),
+				configurationProperties.getShorteningEvictionTimeAfterCompression(),
 				this.metadataRepo,
 				this.configurationProperties.getPatternPersistentInUncompressedStorage(),
 				this.configurationProperties.getPatternPersistentInCompressedStorage(),
-				this.configurationProperties.getPatternAvailableInLta()
+				this.configurationProperties.getPatternAvailableInLta(),
+				configurationProperties.getMetadataUnavailableRetriesNumber(),
+				configurationProperties.getMetadataUnavailableRetriesIntervalMs()
 		);
 		return new MqiConsumer<E>(
 				mqiClient,

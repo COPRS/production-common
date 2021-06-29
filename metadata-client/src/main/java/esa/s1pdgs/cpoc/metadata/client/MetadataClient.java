@@ -542,6 +542,52 @@ public class MetadataClient {
 		LOGGER.debug("Got intersection {}", isIntersecting);
 		return isIntersecting;
 	}
+	
+	public boolean isIntersectingEwSlcMask(final ProductFamily family, final String productName) throws MetadataQueryException {
+		MetadataCatalogRestPath metadataCatalogRestPath;
+		switch (family) {
+			case L0_SLICE: metadataCatalogRestPath = MetadataCatalogRestPath.L0_SLICE; break;  
+			default: throw new RuntimeException(String.format("ProductFamily %s not supported for EW SLC mask intersection check", family));
+		}
+		
+		final String uri = this.metadataBaseUri + metadataCatalogRestPath.path() + "/" + family + "/"
+				+ productName + "/isIntersectingEwSlcMask";
+
+		final String commandDescription = String.format("call rest metadata for EW SLC mask intersection check on %s", uri);
+
+		final ResponseEntity<Boolean> result = performWithRetries(commandDescription, () -> {
+			int notAvailableRetries = 10;
+			LOGGER.debug(commandDescription);
+			ResponseEntity<Boolean> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
+			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+				LOGGER.debug("Product not available yet. Waiting...");
+				try {
+					Thread.sleep(this.retryInMillis);
+				} catch (final InterruptedException e) {
+					throw new MetadataQueryException(e.getMessage(), e);
+				}
+				notAvailableRetries--;
+				LOGGER.debug("Retrying call rest metadata for EW SLC mask intersection check on  {}", uri);
+				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
+				if (notAvailableRetries <= 0) {
+					LOGGER.trace("Max number of retries reached for {}", productName);
+					break;
+				}
+			}
+			handleReturnValueErrors(uri, response);
+			return response;
+		});
+
+		if (result == null) {
+			throw new MetadataQueryException("Query for EW SLC mask intersection returns no result for " + productName);
+		}
+		final Boolean isIntersecting = result.getBody();
+		if (isIntersecting == null) {
+			throw new MetadataQueryException("Query for EW SLC mask intersection returns no result body for " + productName);
+		}
+		LOGGER.debug("Got intersection {}", isIntersecting);
+		return isIntersecting;
+	}
 
 	/**
 	 * Refresh the index determined by product family and type, to ensure new

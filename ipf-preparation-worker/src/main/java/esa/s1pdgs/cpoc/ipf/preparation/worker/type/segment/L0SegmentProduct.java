@@ -15,8 +15,11 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
+import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
 
 public class L0SegmentProduct extends AbstractProduct {	
 	static final String RFC_TYPE = "RF_RAW__0S";
@@ -91,18 +94,25 @@ public class L0SegmentProduct extends AbstractProduct {
 		
 		final AppDataJobFile segment = new AppDataJobFile(
 				metadata.getProductName(), 
-				metadata.getKeyObjectStorage(), 
-				metadata.getValidityStart(),
-				metadata.getValidityStop(),
+				metadata.getKeyObjectStorage(), 				
+				TaskTableAdapter.convertDateToJobOrderFormat(metadata.getValidityStart()),
+				TaskTableAdapter.convertDateToJobOrderFormat(metadata.getValidityStop()),
 				toMetadataMap(metadata)
 		);
 
 		if(isRfc()) {
 			/*
 			 * s1pro-2175:
-			 * For RFC products, the start time can differ for the same datatake, so do not mix them together in the same job!
+			 * For RFC products, the start time can differ for the same datatake, so do not mix 
+			 * them together in the same job!
 			 */
-			if (!res.contains(segment) && product.getStartTime().equals(segment.getStartDate())) {
+			final String startDate = DateUtils.convertToAnotherFormat(
+					segment.getStartDate(),
+					JobOrderTimeInterval.DATE_FORMATTER,
+					AbstractMetadata.METADATA_DATE_FORMATTER
+					
+			);			
+			if (!res.contains(segment) && product.getStartTime().equals(startDate)) {
 				mergeSegmentInto(metadata, res, segment);
 			}
 
@@ -114,7 +124,7 @@ public class L0SegmentProduct extends AbstractProduct {
 		
 	}
 
-	private void mergeSegmentInto(LevelSegmentMetadata metadata, List<AppDataJobFile> res, AppDataJobFile segment) {
+	private void mergeSegmentInto(final LevelSegmentMetadata metadata, final List<AppDataJobFile> res, final AppDataJobFile segment) {
 		// Take only latest segment
 		final List<AppDataJobFile> updated = merge(res, segment, metadata.getPolarisation());
 		product.setProductsFor(metadata.getPolarisation(), updated);
@@ -209,9 +219,24 @@ public class L0SegmentProduct extends AbstractProduct {
 		meta.setKeyObjectStorage(file.getKeyObs());
 		meta.setPolarisation(polarisation);
 		meta.setProductName(file.getFilename());
-		meta.setValidityStart(file.getStartDate());
-		meta.setValidityStop(file.getEndDate());
+		
+		final String startMetadataFormat = DateUtils.convertToAnotherFormat(
+				file.getStartDate(),
+				JobOrderTimeInterval.DATE_FORMATTER,
+				AbstractMetadata.METADATA_DATE_FORMATTER
+				
+		);
+		final String stopMetadataFormat = DateUtils.convertToAnotherFormat(
+				file.getEndDate(),
+				JobOrderTimeInterval.DATE_FORMATTER,
+				AbstractMetadata.METADATA_DATE_FORMATTER
+				
+		);		
+		meta.setValidityStart(startMetadataFormat);
+		meta.setValidityStop(stopMetadataFormat);
 		meta.setInsertionTime(file.getMetadata().get(INSERTION_TIME));
 		return meta;	
 	}
+	
+	
 }

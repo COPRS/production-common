@@ -46,6 +46,10 @@ public class ProcessSettings {
     
 	private String seaCoverageCheckPattern = "$a"; // per default, don't match anything
 	
+	private String l0EwSlcCheckPattern = "$a";
+	
+	private String l0EwSlcTaskTableName = "EW_RAW__0_SLC";
+	
     private String blacklistPattern;
     
     private long fixedDelayMs;
@@ -84,6 +88,22 @@ public class ProcessSettings {
 
 	public void setSeaCoverageCheckPattern(final String seaCoverageCheckPattern) {
 		this.seaCoverageCheckPattern = seaCoverageCheckPattern;
+	}
+	
+	public String getL0EwSlcCheckPattern() {
+		return l0EwSlcCheckPattern;
+	}
+
+	public void setL0EwSlcCheckPattern(String l0EwSlcCheckPattern) {
+		this.l0EwSlcCheckPattern = l0EwSlcCheckPattern;
+	}
+	
+	public String getL0EwSlcTaskTableName() {
+		return l0EwSlcTaskTableName;
+	}
+
+	public void setL0EwSlcTaskTableName(String l0EwSlcTaskTableName) {
+		this.l0EwSlcTaskTableName = l0EwSlcTaskTableName;
 	}
 
     public String getBlacklistPattern() {

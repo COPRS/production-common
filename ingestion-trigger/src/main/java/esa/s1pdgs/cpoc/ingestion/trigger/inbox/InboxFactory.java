@@ -63,7 +63,7 @@ public class InboxFactory {
 		return ignoreFilesBeforeDate;				
 	}
 	
-	public Inbox newInbox(final InboxConfiguration config) throws URISyntaxException {
+	public Inbox newInbox(final InboxConfiguration config, final int publishMaxRetries, final long publishTempoRetryMs) throws URISyntaxException {
 		return new Inbox(
 				newInboxAdapter(config),
 				new JoinedFilter(
@@ -76,9 +76,12 @@ public class InboxFactory {
 				config.getTopic(),
 				config.getFamily(),
 				config.getStationName(),
+				config.getStationRetentionTime(),
 				config.getMode(),
 				config.getTimeliness(),
-				newProductNameEvaluatorFor(config)				
+				newProductNameEvaluatorFor(config),
+				publishMaxRetries,
+				publishTempoRetryMs
 		);
 	}
 	

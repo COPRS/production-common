@@ -49,7 +49,7 @@ public class RequestRepositoryController {
 	public List<FailedProcessing> getFailedProcessings(
 			@RequestHeader(name="ApiKey", required=true) final String apiKey
 	) {
-		LOGGER.info("get the list of failed processings");
+		LOGGER.debug("get the list of failed processings");
 		assertValidApiKey(apiKey);
 		return requestRepository.getFailedProcessings();
 	}
@@ -58,7 +58,7 @@ public class RequestRepositoryController {
 	public Long getFailedProcessingsCount(
 			@RequestHeader(name="ApiKey", required=true) final String apiKey
 	) {
-		LOGGER.info("get failed processings count");
+		LOGGER.debug("get failed processings count");
 		assertValidApiKey(apiKey);
 		return requestRepository.getFailedProcessingsCount();
 	}
@@ -75,7 +75,7 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
 	) {
-		LOGGER.info("get the failed processing with id {}", id);
+		LOGGER.debug("get the failed processing with id {}", id);
 		assertValidApiKey(apiKey);
 		final FailedProcessing failedProcessing = requestRepository.getFailedProcessingById(parseId(id));
 		assertElementFound("failed request", failedProcessing, id);
@@ -94,12 +94,12 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
 	) {
-		LOGGER.info("restart the failed processing with id {}", id);
+		LOGGER.debug("restart the failed processing with id {}", id);
 		assertValidApiKey(apiKey);				
 		final long idInt = parseId(id);
 		try {
 			requestRepository.restartAndDeleteFailedProcessing(idInt);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			assertElementFound("failed processing", null, String.format("%s: %s", id, e));
 		}
 		return new ApiResponse("FailedProcessing", "restart", Collections.singletonList(idInt), Collections.emptyList());
@@ -117,12 +117,12 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
 	) {
-		LOGGER.info("resubmit the failed processing with id {}", id);
+		LOGGER.debug("resubmit the failed processing with id {}", id);
 		assertValidApiKey(apiKey);				
 		final long idInt = parseId(id);
 		try {
 			requestRepository.restartAndDeleteFailedProcessing(idInt);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			assertElementFound("failed processing", null, String.format("%s: %s", id, e));
 		}
 		return new ApiResponse("FailedProcessing", "resubmit", Collections.singletonList(idInt), Collections.emptyList());
@@ -140,12 +140,12 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
 	) {
-		LOGGER.info("reevaluate the failed processing with id {}", id);
+		LOGGER.debug("reevaluate the failed processing with id {}", id);
 		assertValidApiKey(apiKey);				
 		final long idInt = parseId(id);
 		try {
 			requestRepository.reevaluateAndDeleteFailedProcessing(idInt);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			assertElementFound("failed processing", null, String.format("%s: %s", id, e));
 		}
 		return new ApiResponse("FailedProcessing", "reevaluate", Collections.singletonList(idInt), Collections.emptyList());
@@ -163,12 +163,12 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
 	) {
-		LOGGER.info("delete the failed processing with id {}", id);
+		LOGGER.debug("delete the failed processing with id {}", id);
 		assertValidApiKey(apiKey);
 		final long idInt = parseId(id);
 		try {
 			requestRepository.deleteFailedProcessing(idInt);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			assertElementFound("failed processing", null, id);
 		}
 		return new ApiResponse("FailedProcessing", "delete", Collections.singletonList(idInt), Collections.emptyList());
@@ -177,9 +177,9 @@ public class RequestRepositoryController {
 	@RequestMapping(method = RequestMethod.POST,  path = "failedProcessings/delete")
 	public ApiResponse deleteFailedProcessings(
 			@RequestHeader("ApiKey") final String apiKey,
-			@RequestBody IdListDto ids
+			@RequestBody final IdListDto ids
 	) {
-		LOGGER.info("delete the failed processings with id {}", ids);
+		LOGGER.debug("delete the failed processings with id {}", ids);
 		assertValidApiKey(apiKey);
 		
 		final List<Long> success = new ArrayList<>();
@@ -190,7 +190,7 @@ public class RequestRepositoryController {
 			try {
 				requestRepository.deleteFailedProcessing(idInt);
 				success.add(idInt);
-			} catch (IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				failed.add(idInt);
 			}
 		}
@@ -202,7 +202,7 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@RequestBody final IdListDto ids
 	) {
-		LOGGER.info("restart the failed processings with id {}", ids);
+		LOGGER.debug("restart the failed processings with id {}", ids);
 		assertValidApiKey(apiKey);
 		
 		final List<Long> success = new ArrayList<>();
@@ -213,7 +213,7 @@ public class RequestRepositoryController {
 			try {
 				requestRepository.restartAndDeleteFailedProcessing(idInt);
 				success.add(idInt);
-			} catch (IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				failed.add(idInt);
 			}
 		}
@@ -225,7 +225,7 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@RequestBody final IdListDto ids
 	) {
-		LOGGER.info("resubmit the failed processings with id {}", ids);
+		LOGGER.debug("resubmit the failed processings with id {}", ids);
 		assertValidApiKey(apiKey);
 		
 		final List<Long> success = new ArrayList<>();
@@ -236,7 +236,7 @@ public class RequestRepositoryController {
 			try {
 				requestRepository.restartAndDeleteFailedProcessing(idInt);
 				success.add(idInt);
-			} catch (IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				failed.add(idInt);
 			}
 		}
@@ -248,7 +248,7 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@RequestBody final IdListDto ids
 	) {
-		LOGGER.info("reevaluate the failed processings with id {}", ids);
+		LOGGER.debug("reevaluate the failed processings with id {}", ids);
 		assertValidApiKey(apiKey);
 		
 		final List<Long> success = new ArrayList<>();
@@ -259,7 +259,7 @@ public class RequestRepositoryController {
 			try {
 				requestRepository.reevaluateAndDeleteFailedProcessing(idInt);
 				success.add(idInt);
-			} catch (IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				failed.add(idInt);
 			}
 		}
@@ -270,7 +270,7 @@ public class RequestRepositoryController {
 	public List<String> getProcessingTypes(
 			@RequestHeader("ApiKey") final String apiKey
 	) {
-		LOGGER.info("get the list of processing types");
+		LOGGER.debug("get the list of processing types");
 		assertValidApiKey(apiKey);
 		return requestRepository.getProcessingTypes();
 	}
@@ -280,7 +280,7 @@ public class RequestRepositoryController {
 			@RequestHeader("ApiKey") final String apiKey,
 			@PathVariable("id") final String id
 	) {
-		LOGGER.info("get processing with id {}", id);
+		LOGGER.debug("get processing with id {}", id);
 		assertValidApiKey(apiKey);		
 		final Processing result = requestRepository.getProcessing(parseId(id));
 		assertElementFound("processing", result, id);
@@ -295,7 +295,7 @@ public class RequestRepositoryController {
 			@RequestParam(value = "pageSize", required = false) final Integer pageSize,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "0") final Integer pageNumber
 	) {		
-		LOGGER.info("get the list of processings");
+		LOGGER.debug("get the list of processings");
 		assertValidApiKey(apiKey);		
 		return requestRepository.getProcessings(pageSize, pageNumber, processingType, toMessageStates(processingStatus));
     }
@@ -306,7 +306,7 @@ public class RequestRepositoryController {
 			@RequestParam(value = "processingType", required = false) final List<String> processingType,
 			@RequestParam(value = "processingStatus", required = false) final List<String> processingStatus
 	) {		
-		LOGGER.info("get processings count");
+		LOGGER.debug("get processings count");
 		assertValidApiKey(apiKey);		
 		return requestRepository.getProcessingsCount(processingType, toMessageStates(processingStatus));
     }
@@ -322,7 +322,7 @@ public class RequestRepositoryController {
 			return processingStatus.stream()
 					.map(s -> MessageState.valueOf(s))
 					.collect(Collectors.toList());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RequestRepositoryControllerException(
 					String.format(
 							"invalid message states provided: %s (allowed are: %s)", 
@@ -346,7 +346,7 @@ public class RequestRepositoryController {
 	static final long parseId(final String idString) throws RequestRepositoryControllerException {
 		try {
 			return Long.parseLong(idString);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			throw new RequestRepositoryControllerException(
 					String.format(
 							"invalid id error while getting the failed processings with id %s: %s", 
@@ -358,7 +358,7 @@ public class RequestRepositoryController {
 		}
 	}
 	
-	static final void assertElementFound(String name, Object element, String id) {
+	static final void assertElementFound(final String name, final Object element, final String id) {
 		if (element == null) {
 			throw new RequestRepositoryControllerException(
 					String.format("%s not found, id %s", name, id), 

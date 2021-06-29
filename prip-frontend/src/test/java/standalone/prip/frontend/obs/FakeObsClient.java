@@ -125,6 +125,11 @@ public class FakeObsClient implements ObsClient {
 		} catch (final MalformedURLException e) {
 		}
 		return url;
+	}
+
+	@Override
+	public void delete(ObsObject object) throws ObsException, ObsServiceException {
+		// TODO Auto-generated method stub
 	}	
 
 }

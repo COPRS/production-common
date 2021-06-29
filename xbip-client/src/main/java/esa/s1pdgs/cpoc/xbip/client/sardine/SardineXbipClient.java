@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.sardine.DavResource;
 import com.github.sardine.Sardine;
 
+import esa.s1pdgs.cpoc.common.errors.SardineRuntimeException;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.xbip.client.XbipClient;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntry;
@@ -55,7 +56,7 @@ public class SardineXbipClient implements XbipClient {
 					3000);
 		} catch (InterruptedException e) {
 			LOG.error("retries interrupted");
-			throw new RuntimeException(e);
+			throw new SardineRuntimeException(e);
 		}
 	}
 
@@ -64,7 +65,7 @@ public class SardineXbipClient implements XbipClient {
 		try {
 			return sardine.get(entry.getUri().toString());
 		} catch (final IOException e) {
-			throw new RuntimeException(
+			throw new SardineRuntimeException(
 					String.format("Error on retrieving input stream for %s: %s", entry, e.getMessage()),
 					e
 			);

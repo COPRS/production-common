@@ -115,6 +115,7 @@ public class TestFileDescriptorBuilder {
         job.setKeyObjectStorage("512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         job.setRelativePath("512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         job.setProductFamily(ProductFamily.EDRS_SESSION);
+        job.setStationName("WILE");
         
         final FileDescriptorBuilder uut = newDescriptorForPattern(PATTERN_EDRS);
         final EdrsSessionFileDescriptor result = uut.buildEdrsSessionFileDescriptor(
@@ -154,6 +155,7 @@ public class TestFileDescriptorBuilder {
         job.setKeyObjectStorage("L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         job.setRelativePath("L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         job.setProductFamily(ProductFamily.EDRS_SESSION);
+        job.setStationName("WILE");
   
         final FileDescriptorBuilder uut = newDescriptorForPattern(PATTERN_EDRS);
         final EdrsSessionFileDescriptor result = uut.buildEdrsSessionFileDescriptor(

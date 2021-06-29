@@ -10,33 +10,37 @@ import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.commons.net.ftp.FTPSClient;
 
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.outbox.ftpsclient.SSLSessionReuseFTPSClient;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public final class FtpsOutboxClient extends FtpOutboxClient {
+
+	private static final int EXPLICIT_FTPS_DEFAULT_PORT = 21;
+	private static final int IMPLICIT_FTPS_DEFAULT_PORT = 990;
+
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
-		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator eval) {
 			return new FtpsOutboxClient(obsClient, config, eval);
-		}			
+		}
 	}
-	
-	private static final int DEFAULT_PORT = 990;
 
-	public FtpsOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater pathEvaluator) {
+	public FtpsOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator pathEvaluator) {
 		super(obsClient, config, pathEvaluator);
 	}
 
 	@Override
 	public String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {
-		final FTPSClient ftpsClient = new FTPSClient("TLS", true);
+		final FTPSClient ftpsClient = new SSLSessionReuseFTPSClient("TLS", config.isImplicitSsl(),
+				config.getFtpsSslSessionReuse(), config.getUseExtendedMasterSecret());
 
-		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply
-		// don't configure a keystore
-		if (config.getKeystoreFile() != null) {
+		// if a keystore is configured, client authentication will be enabled. If it shall not be used, simply don't configure a keystore
+		if (StringUtil.isNotBlank(config.getKeystoreFile())) {
 			final KeyStore keyStore = newKeyStore(Utils.getInputStream(config.getKeystoreFile()),
 					config.getKeystorePass());
 
@@ -48,38 +52,36 @@ public final class FtpsOutboxClient extends FtpOutboxClient {
 			ftpsClient.setKeyManager(keyManagers[0]);
 			ftpsClient.setWantClientAuth(true);
 		}
-		
-		if (config.getTruststoreFile() != null) {
+
+		if (StringUtil.isNotBlank(config.getTruststoreFile())) {
 			final KeyStore trustStore = newKeyStore(Utils.getInputStream(config.getTruststoreFile()),
 					config.getTruststorePass());
 
 			final TrustManagerFactory trustManagerFactory = TrustManagerFactory
 					.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 			trustManagerFactory.init(trustStore);
-			
-		    final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-		    ftpsClient.setTrustManager(trustManagers[0]);
+
+			final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+			ftpsClient.setTrustManager(trustManagers[0]);
 		}
-		
-		final int port = (config.getPort() > 0) ? config.getPort(): DEFAULT_PORT;
+
+		final int port = config.getPort() > 0 ? config.getPort() : (config.isImplicitSsl() ? IMPLICIT_FTPS_DEFAULT_PORT : EXPLICIT_FTPS_DEFAULT_PORT);
 		ftpsClient.connect(config.getHostname(), port);
-	    assertPositiveCompletion(ftpsClient);
-	    
-	    ftpsClient.execPBSZ(0);
-        assertPositiveCompletion(ftpsClient);
-        
-	    ftpsClient.execPROT("P");
-        assertPositiveCompletion(ftpsClient);
-        
-        return performTransfer(obsObject, ftpsClient, reportingFactory);
-	}	
-	
-	static final KeyStore newKeyStore(final InputStream in, final String password)
-			throws Exception {
+		assertPositiveCompletion(ftpsClient);
+
+		ftpsClient.execPBSZ(0);
+		assertPositiveCompletion(ftpsClient);
+
+		ftpsClient.execPROT("P");
+		assertPositiveCompletion(ftpsClient);
+
+		return performTransfer(obsObject, ftpsClient, reportingFactory);
+	}
+
+	static final KeyStore newKeyStore(final InputStream in, final String password) throws Exception {
 		final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keystore.load(in, password.toCharArray());
 		return keystore;
 	}
-	
 
 }

@@ -32,7 +32,6 @@ public class SDKCustomDefaultRetryCondition
     /**
      * Constructor
      * 
-     * @param maxNumberRetries
      */
     public SDKCustomDefaultRetryCondition(final int maxNumberRetries) {
         this.maxNumberRetries = maxNumberRetries;

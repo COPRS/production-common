@@ -1,18 +1,25 @@
 package esa.s1pdgs.cpoc.disseminator.outbox;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Base64;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -20,27 +27,66 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public final class SftpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {				
 		@Override
-		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {		
-			return new SftpOutboxClient(obsClient, config, eval);
-		}			
+		public OutboxClient newClient(
+				final ObsClient obsClient, 
+				final OutboxConfiguration config, 
+				final PathEvaluator eval
+		) {
+			final JSch client = new JSch();
+
+			if (StringUtil.isNotEmpty(config.getKeyData())) {
+				try {
+					final Path private_key = Files.createTempFile("", "private_key");
+					FileUtils.writeFile(
+							private_key.toFile(), 
+							new String(Base64.getDecoder().decode(config.getKeyData()))
+					);
+					client.addIdentity(private_key.toString());
+				} catch (IOException | InternalErrorException | JSchException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			return new SftpOutboxClient(
+					obsClient, 
+					client, 
+					config, 
+					eval, 
+					config.getFilePermissions(), 
+					config.getDirectoryPermissions()
+			);
+		}
 	}
 	
 	private static final Logger LOG = LogManager.getLogger(SftpOutboxClient.class);
 	
 	private static final int DEFAULT_PORT = 22;
+
+	private final JSch client;
 	
-	SftpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+	private final String filePermissions;
+	
+	private final String directoryPermissions;
+
+	SftpOutboxClient(
+			final ObsClient obsClient, 
+			final JSch sshClient, 
+			final OutboxConfiguration config, 
+			final PathEvaluator eval,
+			final String filePermissions,
+			final String directoryPermissions
+	) {
 		super(obsClient, config, eval);
+		this.client = sshClient;
+		this.filePermissions = filePermissions;
+		this.directoryPermissions = directoryPermissions;
 	}
 
 	@Override
-	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) throws Exception {	
-		final JSch client = new JSch();
+	public final String transfer(final ObsObject obsObject, final ReportingFactory reportingFactory) 
+			throws Exception {	
+
 		final int port = config.getPort() > 0 ? config.getPort() : DEFAULT_PORT;
-		
-		if (config.getKeyFile() != null) {
-			client.addIdentity(config.getKeyFile());
-		}
+
 	    final Session session = client.getSession(config.getUsername(), config.getHostname(), port);
 	    if (config.getPassword() != null) {
 	    	session.setPassword(config.getPassword());
@@ -75,12 +121,20 @@ public final class SftpOutboxClient extends AbstractOutboxClient {
 						} catch (final SftpException e) {
 							// thrown, if directory does not exist
 							LOG.info("Creating directory {}", currentPath);
-							channel.mkdir(currentPath);
+							channel.mkdir(currentPath);	
+							if (StringUtil.isNotEmpty(directoryPermissions)) {
+				    			LOG.info("Chmod {} dir {}", directoryPermissions, currentPath.toString());
+								channel.chmod(Integer.parseInt(directoryPermissions, 8), currentPath.toString());
+							}
 						}
 	    			}		    			
 	    			try (final InputStream in = stream(obsObject.getFamily(), entry)) {
 	    				LOG.info("Uploading {} to {}", entry, dest);
-	    				channel.put(in, dest.toString());	    				
+	    				channel.put(in, dest.toString());
+	    				if (StringUtil.isNotEmpty(filePermissions)) {
+	    		  			LOG.info("Chmod {} file {}", filePermissions, dest.toString());
+		    				channel.chmod(Integer.parseInt(filePermissions, 8), dest.toString());
+	    				}
 	    			}
 	    		}
 				return retVal;

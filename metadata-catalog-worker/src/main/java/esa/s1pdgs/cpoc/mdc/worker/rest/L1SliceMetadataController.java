@@ -35,11 +35,4 @@ public class L1SliceMetadataController extends AbstractMetadataController<L1Slic
 		return getResponse(productName, family, () -> esServices.isIntersectingOceanMask(family, productName));
     }
 	
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{family}/{productName:.+}/isIntersectingEwSlcMask")
-    public ResponseEntity<Boolean> isIntersectingEwSlcMask(
-            @PathVariable(name = "family") ProductFamily family,
-            @PathVariable(name = "productName") String productName) {		
-		return getResponse(productName, family, () -> esServices.isIntersectingEwSlcMask(family, productName));
-    }
-	
 }

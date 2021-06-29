@@ -17,10 +17,14 @@ public class EdipClientConfigurationProperties {
 		private String user;
 		private String pass;
 		private boolean trustSelfSignedCertificate = false;
+		private boolean encryptDataChannel = false;
+		private boolean ftpsSslSessionReuse = true;
+		private boolean useExtendedMasterSecret = false;
 		private int connectTimeoutSec = 60;
 		private boolean pasv;
-		private String sslProtocol = "TLS";
-		private boolean explictFtps = true;
+		private boolean enableHostnameVerification = false;
+		private String sslProtocol = "TLSv1.2";
+		private boolean explicitFtps = true;
 		private String keyManagerKeyStore =  "";
 		private String keyManagerKeyStorePassword = "changeit"; // default JKS password
 		private String trustManagerKeyStore =  "";
@@ -81,12 +85,12 @@ public class EdipClientConfigurationProperties {
 			this.sslProtocol = sslProtocol;
 		}
 
-		public boolean isExplictFtps() {
-			return explictFtps;
+		public boolean isExplicitFtps() {
+			return explicitFtps;
 		}
 
-		public void setExplictFtps(final boolean explictFtps) {
-			this.explictFtps = explictFtps;
+		public void setExplicitFtps(final boolean explicitFtps) {
+			this.explicitFtps = explicitFtps;
 		}
 
 		public String getKeyManagerKeyStore() {
@@ -119,6 +123,38 @@ public class EdipClientConfigurationProperties {
 
 		public void setTrustManagerKeyStorePassword(final String trustManagerKeyStorePassword) {
 			this.trustManagerKeyStorePassword = trustManagerKeyStorePassword;
+		}
+
+		public boolean isEncryptDataChannel() {
+			return encryptDataChannel;
+		}
+
+		public void setEncryptDataChannel(boolean encryptDataChannel) {
+			this.encryptDataChannel = encryptDataChannel;
+		}
+
+		public boolean isFtpsSslSessionReuse() {
+			return ftpsSslSessionReuse;
+		}
+
+		public void setFtpsSslSessionReuse(boolean ftpsSslSessionReuse) {
+			this.ftpsSslSessionReuse = ftpsSslSessionReuse;
+		}
+
+		public boolean isUseExtendedMasterSecret() {
+			return useExtendedMasterSecret;
+		}
+
+		public void setUseExtendedMasterSecret(boolean useExtendedMasterSecret) {
+			this.useExtendedMasterSecret = useExtendedMasterSecret;
+		}
+
+		public boolean isEnableHostnameVerification() {
+			return enableHostnameVerification;
+		}
+
+		public void setEnableHostnameVerification(boolean enableHostnameVerification) {
+			this.enableHostnameVerification = enableHostnameVerification;
 		}
 	}
 	

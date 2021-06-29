@@ -16,8 +16,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +41,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.DevProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.MonitorLogUtils;
+import esa.s1pdgs.cpoc.ipf.execution.worker.job.WorkingDirectoryUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
@@ -132,6 +133,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	
 	private final long initDelayPollMs;
 	
+	private final WorkingDirectoryUtils workingDirUtils;
+	
 	/**
 	 */
 	@Autowired
@@ -159,6 +162,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		this.errorAppender = errorAppender;
 		this.initDelayPollMs = initDelayPollMs;
 		this.pollingIntervalMs = pollingIntervalMs;
+		
+		this.workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());
 	}
 	
 	@PostConstruct
@@ -229,6 +234,9 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				.contains(properties.getLevel())) {
 			outputListFile = job.getWorkDirectory() + "product.LIST";
 			category = ProductCategory.S3_PRODUCTS;
+		} else if(properties.getLevel() == ApplicationLevel.SPP_MBU) {
+			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
+			category = ProductCategory.SPP_MBU_PRODUCTS;
 		} else if(properties.getLevel() == ApplicationLevel.SPP_OBS) {
 			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
 			category = ProductCategory.SPP_PRODUCTS;
@@ -259,18 +267,30 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				obsClient, 
 				job.getWorkDirectory(), 
 				job.getInputs(),
-				this.properties.getSizeBatchDownload(), 
+				properties.getSizeBatchDownload(), 
 				getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
 				procExecutor, 
-				this.properties.getLevel(),
-				this.properties.getPathJobOrderXslt()
+				properties.getLevel(),
+				properties.getPathJobOrderXslt()
 		);
 
-		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, procuderFactory, message, outputListFile,
-				this.properties.getSizeBatchUpload(), getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
-				this.properties.getLevel(), properties);
+//		this.authorizedOutputs = inputMessage.getBody().getOutputs();
+//		this.workDirectory = inputMessage.getBody().getWorkDirectory();
+//		this.debugMode = inputMessage.getDto().isDebug();
 		
-		
+		final OutputProcessor outputProcessor = new OutputProcessor(
+				obsClient, 
+				procuderFactory, 
+				message.getBody().getWorkDirectory(),
+				outputListFile,
+				message, 
+				message.getBody().getOutputs(),
+				properties.getSizeBatchUpload(), 
+				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
+				properties.getLevel(), 
+				properties,
+				message.getDto().isDebug()
+	    );		
 		reporting.begin(
 				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
 				new ReportingMessage("Start job processing")
@@ -331,7 +351,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
         try {
             LOGGER.info("{} Starting process executor",
                     getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));
-            procCompletionSrv.submit(procExecutor);
+            final Future<?> submittedFuture = procCompletionSrv.submit(procExecutor);
             poolProcessing = true;
             
             final List<ObsDownloadObject> downloadToBatch;
@@ -345,14 +365,19 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
                         getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
                 downloadToBatch = Collections.emptyList();
             }
-            this.waitForPoolProcessesEnding(procCompletionSrv);
+            waitForPoolProcessesEnding(
+            		getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job), 
+            		submittedFuture, 
+            		procCompletionSrv,
+            		properties.getTmProcAllTasksS() * 1000L
+            );
             poolProcessing = false;
             
             if (devProperties.getStepsActivation().get("upload")) {
                 checkThreadInterrupted();
                 LOGGER.info("{} Processing l0 outputs",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-                productionEvents.addAll(outputProcessor.processOutput(reporting, reporting.getUid()));
+                productionEvents.addAll(outputProcessor.processOutput(reporting, reporting.getUid(), job));
             } else {
                 LOGGER.info("{} Processing l0 outputs bypasssed",
                         getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
@@ -386,6 +411,9 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             	warningMessage = "";
             }
             return new MqiPublishingJob<>(productionEvents, warningMessage);
+        } catch (Exception e) {
+        	workingDirUtils.copyWorkingDirectory(reporting, reporting.getUid(), job, ProductFamily.FAILED_WORKDIR);
+        	throw e;
 		} finally {
             cleanJobProcessing(job, poolProcessing, procExecutorSrv);
         }
@@ -418,21 +446,41 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 
 	/**
 	 * Wait for the processes execution completion
-	 * 
 	 */
-	protected void waitForPoolProcessesEnding(final ExecutorCompletionService<Void> procCompletionSrv)
-			throws InterruptedException, AbstractCodedException {
-		checkThreadInterrupted();
+	// TODO FIXME this needs to be cleaned up to have a self contained cancellation process
+	protected void waitForPoolProcessesEnding(
+			final String message,
+			final Future<?> submittedFuture,
+			final ExecutorCompletionService<Void> procCompletionSrv,
+			final long timeoutMilliSeconds
+	) throws InterruptedException, AbstractCodedException {
 		try {
-			procCompletionSrv.take().get(properties.getTmProcAllTasksS(), TimeUnit.SECONDS);
+			checkThreadInterrupted();
+			final Future<?> future = procCompletionSrv.poll(timeoutMilliSeconds, TimeUnit.MILLISECONDS);
+			// timeout scenario
+			if (future == null) {
+				submittedFuture.cancel(true);
+				throw new InterruptedException();
+			}	
+			if (future.isCancelled()) {
+				LOGGER.debug("{}: cancelled", message);
+				throw new InterruptedException();
+			}		
+			future.get();
+			LOGGER.debug("{}: successfully executed", message);
 		} catch (final ExecutionException e) {
 			if (e.getCause() instanceof AbstractCodedException) {
 				throw (AbstractCodedException) e.getCause();
 			} else {
 				throw new InternalErrorException(e.getMessage(), e);
 			}
-		} catch (final TimeoutException e) {
-			throw new InternalErrorException(e.getMessage(), e);
+		}
+		// timeout scenario: 
+		catch (final InterruptedException e) {
+			final String errMess = String.format("%s: Timeout after %s seconds",  message, properties.getTmProcAllTasksS());
+			
+			LOGGER.debug(errMess);
+			throw new InternalErrorException(errMess, e);
 		}
 	}
 
@@ -519,6 +567,5 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// any other Exception
 		return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, LogUtils.toString(e));
 	}
-	
 	
 }

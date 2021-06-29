@@ -1,11 +1,14 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobPreselectedInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProduct;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -13,6 +16,8 @@ import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 public class LevelSliceProduct extends AbstractProduct {
 	private static final String SLICE = "slice";
 	private static final String ACN = "acn";
+	
+	private final List<AppDataJobPreselectedInput> preselectedInputs = new ArrayList<>();
 	
 	public LevelSliceProduct(final AppDataJobProductAdapter product) {
 		super(product);
@@ -90,8 +95,8 @@ public class LevelSliceProduct extends AbstractProduct {
 		final AppDataJobFile slice = new AppDataJobFile(
 				file.getProductName(), 
 				file.getKeyObjectStorage(), 
-				file.getValidityStart(), 
-				file.getValidityStop()
+				TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStart()),
+				TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStop())
 		);
 		if (!slices.contains(slice)) {
 			slices.add(slice);
@@ -104,8 +109,8 @@ public class LevelSliceProduct extends AbstractProduct {
 		final AppDataJobFile acn = new AppDataJobFile(
 				file.getProductName(), 
 				file.getKeyObjectStorage(), 
-				file.getValidityStart(), 
-				file.getValidityStop()
+				TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStart()),
+				TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStop())
 		);
 		if (!acns.contains(acn)) {
 			acns.add(acn);
@@ -124,4 +129,13 @@ public class LevelSliceProduct extends AbstractProduct {
 	public final String getTimeliness() {
 		return product.getStringValue("timeliness", "");
 	}
+	
+    public final void addPreselectedInputs(final AppDataJobPreselectedInput preselectedInput) {
+    	this.preselectedInputs.add(preselectedInput);
+    }
+
+	@Override
+	public List<AppDataJobPreselectedInput> preselectedInputs() {
+		return preselectedInputs;
+	}	
 }

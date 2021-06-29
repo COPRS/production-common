@@ -44,7 +44,7 @@ public class EdmProviderTest {
 				new FullQualifiedName("OData.CSC", "Checksum"), //
 				new FullQualifiedName("OData.CSC", "ProductionType"), //
 				new FullQualifiedName("OData.CSC", "TimeRange"),
-				EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName()), //
+				EdmPrimitiveTypeKind.Geometry.getFullQualifiedName()), //
 				properties.stream().map(p -> p.getTypeAsFQNObject()).collect(Collectors.toList()));
 		
 		assertEquals(Arrays.asList(false, false, false, false, false, false, true, false, false, false),

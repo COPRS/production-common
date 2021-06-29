@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -50,6 +52,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
+import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
@@ -66,6 +69,9 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class PripPublishingJobListener implements MqiListener<PripPublishingJob> {
 
 	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
+	
+	private static final String PATTERN_STR = "^S1[AB]_OPER_AUX_QCSTDB_.*$";
+	private static final Pattern PATTERN_NO_MDC = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
 
 	private final GenericMqiClient mqiClient;
 	private final List<MessageFilter> messageFilter;
@@ -73,6 +79,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 	private final MetadataClient metadataClient;
 	private final long pollingIntervalMs;
 	private final long pollingInitialDelayMs;
+	private final String footprintIsLineStringCondition;
 	private final PripMetadataRepository pripMetadataRepo;
 	private final AppStatus appStatus;
 	private final ApplicationProperties props;
@@ -88,6 +95,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 			final PripMetadataRepository pripMetadataRepo,
 			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
 			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
+			@Value("${prip-worker.metadata-mapping.footprint-is-linestring-regexp:}") final String footprintIsLineStringCondition,
 			final AppStatus appStatus,
 			final ApplicationProperties props,
 			final ErrorRepoAppender errorAppender
@@ -99,6 +107,7 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		this.pripMetadataRepo = pripMetadataRepo;
 		this.pollingIntervalMs = pollingIntervalMs;
 		this.pollingInitialDelayMs = pollingInitialDelayMs;
+		this.footprintIsLineStringCondition = footprintIsLineStringCondition;
 		this.appStatus = appStatus;
 		this.props = props;
 		this.errorAppender = errorAppender;
@@ -156,13 +165,13 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 				.newResult();
 	}
 
-	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException, InterruptedException {
+	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException, InterruptedException, PripPublishingException {
+		
+		if (pripMetadataAlreadyExists(publishingJob.getKeyObjectStorage())) {
+			throw new PripPublishingException(String.format("PRiP metadata for file %s already exists!", removeZipSuffix(publishingJob.getKeyObjectStorage())));
+		}
+		
 		final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
-
-		final SearchMetadata searchMetadata = queryMetadata(
-				publishingJob.getProductFamily(),
-				publishingJob.getKeyObjectStorage()
-		);
 
 		PripMetadata pripMetadata = new PripMetadata();		
 		pripMetadata.setId(UUID.randomUUID());
@@ -177,34 +186,76 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 		pripMetadata
 				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
 		
-		// ValidityStart: mandatory field, only optional when plan and report
-		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStart())) {
-			pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
-		}
+		if(mdcQuery(publishingJob.getKeyObjectStorage())) {
 		
-		// ValidityStop: mandatory field, only optional when plan and report
-		if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStop())) {
-			pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
-		}
-				
-		Map<String, Object> pripAttributes = mdcToPripMapper.map(publishingJob.getKeyObjectStorage(),
-				searchMetadata.getProductType(), searchMetadata.getAdditionalProperties());		
-		pripMetadata.setAttributes(pripAttributes);
-		
-		final List<PripGeoCoordinate> coordinates = new ArrayList<>();
-		if (null != searchMetadata.getFootprint()) {
-			for (final List<Double> p : searchMetadata.getFootprint()) {
-				coordinates.add(new PripGeoCoordinate(p.get(0), p.get(1)));
+			final SearchMetadata searchMetadata = queryMetadata(
+					publishingJob.getProductFamily(),
+					publishingJob.getKeyObjectStorage()
+			);
+			
+			// ValidityStart: mandatory field, only optional when plan and report
+			if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStart())) {
+				pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
 			}
+			
+			// ValidityStop: mandatory field, only optional when plan and report
+			if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStop())) {
+				pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
+			}
+					
+			Map<String, Object> pripAttributes = mdcToPripMapper.map(publishingJob.getKeyObjectStorage(),
+					searchMetadata.getProductType(), searchMetadata.getAdditionalProperties());		
+			pripMetadata.setAttributes(pripAttributes);
+			
+			final List<PripGeoCoordinate> coordinates = new ArrayList<>();
+			if (null != searchMetadata.getFootprint()) {
+				LOGGER.debug("Footprint given with {} coordinates", searchMetadata.getFootprint().size());
+				for (final List<Double> p : searchMetadata.getFootprint()) {
+					coordinates.add(new PripGeoCoordinate(p.get(0), p.get(1)));
+				}
+			}
+			if (!coordinates.isEmpty()) {
+				// Differentiate polygon and linestring!
+				boolean isLineString = pripMetadata.getName().matches(footprintIsLineStringCondition);
+				LOGGER.debug("Product '{}' matching '{}': {}", pripMetadata.getName(), footprintIsLineStringCondition, isLineString);
+				if (isLineString) {
+					LOGGER.debug("Assuming that footprint with {} points is of type 'linestring'", coordinates.size());
+					pripMetadata.setFootprint(new GeoShapeLineString(coordinates));
+				} else if (coordinates.size() >= 4) {
+					pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
+				} else {
+					LOGGER.warn("No valid footprint of type 'polygon' (must be >= 4 points) -> Footprint ignored!");
+				}
+			}		
 		}
-		if (!coordinates.isEmpty()) {
-			pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
-		}	
 		pripMetadataRepo.save(pripMetadata);
 
 		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
 	}
 	
+	private boolean mdcQuery(String key) {
+		final Matcher m = PATTERN_NO_MDC.matcher(key);
+
+		if (m.matches()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	private boolean pripMetadataAlreadyExists(final String key) throws InterruptedException {
+	 if(Retries.performWithRetries(() -> {
+		 return pripMetadataRepo.findByName(key);
+		 },
+			 "PRIP metadata query for " + key,
+			 props.getMetadataUnavailableRetriesNumber(),
+			 props.getMetadataUnavailableRetriesIntervalMs()) == null) {
+		 return false;
+	 } else {
+		 return true;
+	 }
+	}
+
 	private SearchMetadata queryMetadata(final ProductFamily productFamily, final String keyObjectStorage) throws MetadataQueryException, InterruptedException {
 		return Retries.performWithRetries(() -> {
 				return metadataClient.queryByFamilyAndProductName(

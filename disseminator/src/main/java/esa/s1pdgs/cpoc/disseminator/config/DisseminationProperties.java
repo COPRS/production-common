@@ -26,9 +26,12 @@ public class DisseminationProperties {
 		private String path = null;
 		private String username = null;
 		private String password = null;
-		private String keyFile = null;
+		private String keyData = null;
 		private String hostname = "localhost";
 		private int port = -1; // --> not defined
+		
+		private String filePermissions = null;
+		private String directoryPermissions = null;
 		
 		private String keystoreFile = null;
 		private String keystorePass = "changeit";
@@ -40,9 +43,11 @@ public class DisseminationProperties {
 		
 		private int bufferSize = 8 * 1014 * 1024;
 		
-		private boolean implicitSsl = true;
+		private boolean implicitSsl = false;
 		
 		private boolean ftpPasv = false;
+		private boolean ftpsSslSessionReuse = true;
+		private boolean useExtendedMasterSecret = false;
 		
 		private boolean skipExisting = true;
 		
@@ -52,7 +57,7 @@ public class DisseminationProperties {
 			return protocol;
 		}
 		
-		public void setProtocol(Protocol protocol) {
+		public void setProtocol(final Protocol protocol) {
 			this.protocol = protocol;
 		}
 		
@@ -60,7 +65,7 @@ public class DisseminationProperties {
 			return path;
 		}
 		
-		public void setPath(String path) {
+		public void setPath(final String path) {
 			this.path = path;
 		}
 		
@@ -68,7 +73,7 @@ public class DisseminationProperties {
 			return username;
 		}
 		
-		public void setUsername(String username) {
+		public void setUsername(final String username) {
 			this.username = username;
 		}
 		
@@ -76,23 +81,23 @@ public class DisseminationProperties {
 			return password;
 		}
 		
-		public void setPassword(String password) {
+		public void setPassword(final String password) {
 			this.password = password;
 		}
-		
-		public String getKeyFile() {
-			return keyFile;
+
+		public String getKeyData() {
+			return keyData;
 		}
-		
-		public void setKeyFile(String keyFile) {
-			this.keyFile = keyFile;
+
+		public void setKeyData(final String keyData) {
+			this.keyData = keyData;
 		}
 
 		public String getHostname() {
 			return hostname;
 		}
 
-		public void setHostname(String hostname) {
+		public void setHostname(final String hostname) {
 			this.hostname = hostname;
 		}
 
@@ -100,7 +105,7 @@ public class DisseminationProperties {
 			return port;
 		}
 
-		public void setPort(int port) {
+		public void setPort(final int port) {
 			this.port = port;
 		}
 
@@ -108,7 +113,7 @@ public class DisseminationProperties {
 			return keystoreFile;
 		}
 
-		public void setKeystoreFile(String keystoreFile) {
+		public void setKeystoreFile(final String keystoreFile) {
 			this.keystoreFile = keystoreFile;
 		}
 
@@ -116,7 +121,7 @@ public class DisseminationProperties {
 			return keystorePass;
 		}
 
-		public void setKeystorePass(String keystorePass) {
+		public void setKeystorePass(final String keystorePass) {
 			this.keystorePass = keystorePass;
 		}
 
@@ -124,7 +129,7 @@ public class DisseminationProperties {
 			return truststoreFile;
 		}
 
-		public void setTruststoreFile(String truststoreFile) {
+		public void setTruststoreFile(final String truststoreFile) {
 			this.truststoreFile = truststoreFile;
 		}
 
@@ -132,7 +137,7 @@ public class DisseminationProperties {
 			return truststorePass;
 		}
 
-		public void setTruststorePass(String truststorePass) {
+		public void setTruststorePass(final String truststorePass) {
 			this.truststorePass = truststorePass;
 		}
 		
@@ -140,7 +145,7 @@ public class DisseminationProperties {
 			return implicitSsl;
 		}
 
-		public void setImplicitSsl(boolean implicitSsl) {
+		public void setImplicitSsl(final boolean implicitSsl) {
 			this.implicitSsl = implicitSsl;
 		}
 		
@@ -148,7 +153,7 @@ public class DisseminationProperties {
 			return pathEvaluator;
 		}
 
-		public void setPathEvaluator(String pathEvaluator) {
+		public void setPathEvaluator(final String pathEvaluator) {
 			this.pathEvaluator = pathEvaluator;
 		}
 		
@@ -156,7 +161,7 @@ public class DisseminationProperties {
 			return bufferSize;
 		}
 
-		public void setBufferSize(int bufferSize) {
+		public void setBufferSize(final int bufferSize) {
 			this.bufferSize = bufferSize;
 		}
 		
@@ -164,15 +169,31 @@ public class DisseminationProperties {
 			return ftpPasv;
 		}
 
-		public void setFtpPasv(boolean ftpPasv) {
+		public void setFtpPasv(final boolean ftpPasv) {
 			this.ftpPasv = ftpPasv;
+		}
+		
+		public boolean getFtpsSslSessionReuse() {
+			return ftpsSslSessionReuse;
+		}
+
+		public void setFtpsSslSessionReuse(boolean ftpsSslSessionReuse) {
+			this.ftpsSslSessionReuse = ftpsSslSessionReuse;
+		}
+
+		public boolean getUseExtendedMasterSecret() {
+			return useExtendedMasterSecret;
+		}
+
+		public void setExtendedMasterSecret(boolean useExtendedMasterSecret) {
+			this.useExtendedMasterSecret = useExtendedMasterSecret;
 		}
 		
 		public boolean isSkipExisting() {
 			return skipExisting;
 		}
 
-		public void setSkipExisting(boolean skipExisting) {
+		public void setSkipExisting(final boolean skipExisting) {
 			this.skipExisting = skipExisting;
 		}
 
@@ -180,15 +201,33 @@ public class DisseminationProperties {
 			return chmodScriptPath;
 		}
 
-		public void setChmodScriptPath(String chmodScriptPath) {
+		public void setChmodScriptPath(final String chmodScriptPath) {
 			this.chmodScriptPath = chmodScriptPath;
+		}
+		
+		public String getFilePermissions() {
+			return filePermissions;
+		}
+
+		public void setFilePermissions(final String filePermissions) {
+			this.filePermissions = filePermissions;
+		}
+
+		public String getDirectoryPermissions() {
+			return directoryPermissions;
+		}
+
+		public void setDirectoryPermissions(final String directoryPermissions) {
+			this.directoryPermissions = directoryPermissions;
 		}
 
 		@Override
 		public String toString() {
 			return "OutboxConfiguration [protocol=" + protocol + ", path=" + path + ", username=" + username
-					+ ", password=<NOT_SHOWN>, keyFile=" + keyFile + ", hostname=" + hostname + ", port=" + port + 
-					", pathEvaluator=" + pathEvaluator + ", bufferSize=" + bufferSize+ ", ftpPasv=" + ftpPasv
+					+ ", password=<NOT_SHOWN>, keyData=<NOT_SHOWN>, hostname=" + hostname + ", port=" + port +
+					", directoryPermissions=" + directoryPermissions +	", filePermissions=" + filePermissions + ", pathEvaluator=" + pathEvaluator + ", bufferSize=" 
+					+ bufferSize+ ", ftpPasv=" + ftpPasv
+					+ ", ftpsSslSessionReuse=" + ftpsSslSessionReuse + ", useExtendedMasterSecret=" + useExtendedMasterSecret
 					+ ", keystoreFile=" + keystoreFile + ", keystorePass=<NOT_SHOWN>, truststoreFile="
 					+ truststoreFile + ", truststorePass=<NOT_SHOWN>, implicitSsl=" + implicitSsl 
 					+ ", skipExisting=" + skipExisting + ", chmodScriptPath=" + chmodScriptPath + "]";
@@ -203,7 +242,7 @@ public class DisseminationProperties {
 			return target;
 		}
 
-		public void setTarget(String target) {
+		public void setTarget(final String target) {
 			this.target = target;
 		}
 
@@ -211,7 +250,7 @@ public class DisseminationProperties {
 			return regex;
 		}
 
-		public void setRegex(String regex) {
+		public void setRegex(final String regex) {
 			this.regex = regex;
 		}
 
@@ -237,7 +276,7 @@ public class DisseminationProperties {
 		return pollingIntervalMs;
 	}
 	
-	public void setPollingIntervalMs(long pollingIntervalMs) {
+	public void setPollingIntervalMs(final long pollingIntervalMs) {
 		this.pollingIntervalMs = pollingIntervalMs;
 	}
 	
@@ -245,7 +284,7 @@ public class DisseminationProperties {
 		return maxRetries;
 	}
 	
-	public void setMaxRetries(int maxRetries) {
+	public void setMaxRetries(final int maxRetries) {
 		this.maxRetries = maxRetries;
 	}
 	
@@ -253,7 +292,7 @@ public class DisseminationProperties {
 		return tempoRetryMs;
 	}
 	
-	public void setTempoRetryMs(long tempoRetryMs) {
+	public void setTempoRetryMs(final long tempoRetryMs) {
 		this.tempoRetryMs = tempoRetryMs;
 	}
 	
@@ -261,7 +300,7 @@ public class DisseminationProperties {
 		return hostname;
 	}
 	
-	public void setHostname(String hostname) {
+	public void setHostname(final String hostname) {
 		this.hostname = hostname;
 	}
 	
@@ -269,7 +308,7 @@ public class DisseminationProperties {
 		return outboxes;
 	}
 
-	public void setOutboxes(Map<String, OutboxConfiguration> outboxes) {
+	public void setOutboxes(final Map<String, OutboxConfiguration> outboxes) {
 		this.outboxes = outboxes;
 	}
 
@@ -277,7 +316,7 @@ public class DisseminationProperties {
 		return categories;
 	}
 	
-	public void setCategories(Map<ProductCategory, List<DisseminationTypeConfiguration>> categories) {
+	public void setCategories(final Map<ProductCategory, List<DisseminationTypeConfiguration>> categories) {
 		this.categories = categories;
 	}
 
@@ -285,7 +324,7 @@ public class DisseminationProperties {
 		return disableOverpassCheck;
 	}
 
-	public void setDisableOverpassCheck(boolean disableOverpassCheck) {
+	public void setDisableOverpassCheck(final boolean disableOverpassCheck) {
 		this.disableOverpassCheck = disableOverpassCheck;
 	}
 
@@ -293,7 +332,7 @@ public class DisseminationProperties {
 		return overpassCoverageCheckPattern;
 	}
 
-	public void setOverpassCoverageCheckPattern(String overpassCoverageCheckPattern) {
+	public void setOverpassCoverageCheckPattern(final String overpassCoverageCheckPattern) {
 		this.overpassCoverageCheckPattern = overpassCoverageCheckPattern;
 	}
 
@@ -301,7 +340,7 @@ public class DisseminationProperties {
 		return minOverpassCoveragePercentage;
 	}
 
-	public void setMinOverpassCoveragePercentage(int minOverpassCoveragePercentage) {
+	public void setMinOverpassCoveragePercentage(final int minOverpassCoveragePercentage) {
 		this.minOverpassCoveragePercentage = minOverpassCoveragePercentage;
 	}
 	

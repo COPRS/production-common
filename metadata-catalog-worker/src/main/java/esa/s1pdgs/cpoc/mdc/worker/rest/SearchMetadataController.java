@@ -81,7 +81,7 @@ public class SearchMetadataController {
 				results = esServices.intervalQuery(startTime, stopTime, ProductFamily.fromValue(productFamily), null);
 			}
 
-			if (results == null) {
+			if (results.isEmpty()) {
 				LOGGER.info("No results returned.");
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			}
@@ -293,7 +293,7 @@ public class SearchMetadataController {
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						productType, ProductFamily.fromValue(productFamily), processMode, satellite);
+						productType, ProductFamily.fromValue(productFamily), satellite);
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
@@ -307,7 +307,7 @@ public class SearchMetadataController {
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						productType, ProductFamily.fromValue(productFamily), processMode, satellite);
+						productType, ProductFamily.fromValue(productFamily), satellite);
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
@@ -348,12 +348,7 @@ public class SearchMetadataController {
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestStopValidity".equals(mode)) {
-				final SearchMetadata f = esServices.latestStopValidity(
-						convertDateForSearch(startDate, -dt0,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						convertDateForSearch(stopDate, dt1,
-								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						productType, ProductFamily.fromValue(productFamily), processMode, satellite);
+				final SearchMetadata f = esServices.latestStopValidity(productType, ProductFamily.fromValue(productFamily), satellite);
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
@@ -367,7 +362,7 @@ public class SearchMetadataController {
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						productType, ProductFamily.fromValue(productFamily), processMode, satellite);
+						productType, ProductFamily.fromValue(productFamily), satellite);
 
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),

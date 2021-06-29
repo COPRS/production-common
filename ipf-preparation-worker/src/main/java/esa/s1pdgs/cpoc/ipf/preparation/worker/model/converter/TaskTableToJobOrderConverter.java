@@ -17,16 +17,19 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
-import esa.s1pdgs.cpoc.xml.model.joborder.SppObsJobOrderBreakpoint;
-import esa.s1pdgs.cpoc.xml.model.joborder.SppObsJobOrderConf;
-import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderBreakpoint;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderOutput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderProcParam;
 import esa.s1pdgs.cpoc.xml.model.joborder.L0JobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.L1JobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.L2JobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.SppMbuJobOrderBreakpoint;
+import esa.s1pdgs.cpoc.xml.model.joborder.SppMbuJobOrderConf;
+import esa.s1pdgs.cpoc.xml.model.joborder.SppMbuJobOrderProc;
+import esa.s1pdgs.cpoc.xml.model.joborder.SppObsJobOrderBreakpoint;
+import esa.s1pdgs.cpoc.xml.model.joborder.SppObsJobOrderConf;
 import esa.s1pdgs.cpoc.xml.model.joborder.SppObsJobOrderProc;
+import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderBreakpoint;
 import esa.s1pdgs.cpoc.xml.model.joborder.StandardJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderDestination;
 import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
@@ -69,17 +72,16 @@ public class TaskTableToJobOrderConverter implements SuperConverter<TaskTable, J
 				new TaskTableTaskToJobOrderProc(allInputsWithIdOf(tObj), productMode, tObj.getLevel());
 
 		final JobOrder order = new JobOrder();
-	//	AbstractJobOrderConf conf = tObj.getLevel() == ApplicationLevel.L0 ? new L0JobOrderConf() : new L1JobOrderConf();
-		AbstractJobOrderConf conf;
-		if (tObj.getLevel() == ApplicationLevel.L0) {
-			conf = new L0JobOrderConf();
-		} else if (tObj.getLevel() == ApplicationLevel.L2) {
-			conf = new L2JobOrderConf();
-		} else if(tObj.getLevel() == ApplicationLevel.SPP_OBS) {
-			conf = new SppObsJobOrderConf();
-		} else {
-			conf = new L1JobOrderConf();
+
+		final AbstractJobOrderConf conf;
+		switch(tObj.getLevel()) {
+			case L0: conf = new L0JobOrderConf(); break;
+			case L2: conf = new L2JobOrderConf(); break;
+			case SPP_MBU: conf = new SppMbuJobOrderConf(); break;
+			case SPP_OBS: conf = new SppObsJobOrderConf(); break;
+			default: conf = new L1JobOrderConf();
 		}
+
 		conf.setProcessorName(tObj.getProcessorName());
 		conf.setVersion(tObj.getVersion());
 		if (tObj.getTest() == TaskTableTestEnum.YES) {
@@ -183,20 +185,22 @@ class TaskTableTaskToJobOrderProc implements SuperConverter<NamedEntry<TaskTable
 		final TaskTableOuputToJobOrderOutput outputConverter = new TaskTableOuputToJobOrderOutput();
 		final AbstractJobOrderProc rObj;
 
-		if(applicationLevel == ApplicationLevel.SPP_OBS) {
-			rObj = new SppObsJobOrderProc();
-		} else {
-			rObj = new StandardJobOrderProc();
+		switch (applicationLevel) {
+			case SPP_MBU:
+				rObj = new SppMbuJobOrderProc();
+				rObj.setBreakpoint(new SppMbuJobOrderBreakpoint());
+				break;
+			case SPP_OBS:
+				rObj = new SppObsJobOrderProc();
+				rObj.setBreakpoint(new SppObsJobOrderBreakpoint());
+				break;
+			default:
+				rObj = new StandardJobOrderProc();
+				rObj.setBreakpoint(new StandardJobOrderBreakpoint());
 		}
 
 		rObj.setTaskName(tObj.getEntry().getName());
 		rObj.setTaskVersion(tObj.getEntry().getVersion());
-
-		if(applicationLevel == ApplicationLevel.SPP_OBS) {
-			rObj.setBreakpoint(new SppObsJobOrderBreakpoint());
-		} else {
-			rObj.setBreakpoint(new StandardJobOrderBreakpoint());
-		}
 
 		rObj.addOutputs(outputConverter.convertToList(tObj.getEntry().getOutputs()));
 

@@ -4,7 +4,6 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +47,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.type.s3.S3TypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.AspPropertiesAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.segment.L0SegmentTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.slice.LevelSliceTypeAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppMbuTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsPropertiesAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.spp.SppObsTypeAdapter;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -147,68 +147,70 @@ public class IpfPreparationWorkerConfiguration {
 	public ProductTypeAdapter typeAdapter(
 			final Function<File, TaskTableAdapter> tasktableAdapterForFile
 	) {
-		if (processSettings.getLevel() == ApplicationLevel.L0) {
-			return new EdrsSessionTypeAdapter(
-					metadataClient, 
-					AiopPropertiesAdapter.of(aiopProperties),
-					new EdrsSessionProductValidator()
-			);
-		}
-		else if (processSettings.getLevel() == ApplicationLevel.L0_SEGMENT) {
-			return new L0SegmentTypeAdapter(
-					metadataClient, 
-					AspPropertiesAdapter.of(this.aspProperties)
-			);			
-		}
-		else if (EnumSet.of(ApplicationLevel.L1, ApplicationLevel.L2).contains(processSettings.getLevel())) {
-			final Map<String, Float> sliceOverlap = settings.getTypeOverlap();
-			final Map<String, Float> sliceLength = settings.getTypeSliceLength();			
-			final Map<String,String> timelinessMapping = settings.getJoborderTimelinessCategoryMapping();
-	
-			return new LevelSliceTypeAdapter(
-					metadataClient, 
-					sliceOverlap, 
-					sliceLength,
-					timelinessMapping
-			);			
-		} else if (EnumSet.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1, ApplicationLevel.S3_L2).contains(processSettings.getLevel())) {
-			return new S3TypeAdapter(
-					metadataClient,
-					taskTableFactory,
-					elementMapper,
-					processSettings,
-					settings,
-					s3TypeAdapterSettings
-			);
-		} else if (processSettings.getLevel() == ApplicationLevel.S3_PDU) {
-			return new PDUTypeAdapter(
-					metadataClient,
-					elementMapper,
-					settings,
-					processSettings,
-					pduSettings
-			);
-		} else if (processSettings.getLevel() == ApplicationLevel.SPP_OBS) {
-			return new SppObsTypeAdapter(metadataClient, SppObsPropertiesAdapter.of(sppObsProperties));
-		} 
-		throw new IllegalArgumentException(
-				String.format(
-						"Unsupported Application Level '%s'. Available are: %s", 
-						processSettings.getLevel(),
-						Arrays.asList(
-								ApplicationLevel.L0, 
-								ApplicationLevel.L0_SEGMENT, 
-								ApplicationLevel.L1, 
-								ApplicationLevel.L2,
-								ApplicationLevel.S3_L0,
-								ApplicationLevel.S3_L1,
-								ApplicationLevel.S3_L2,
-								ApplicationLevel.S3_PDU,
-								ApplicationLevel.SPP_OBS
-						)
-				)
-		);
 		
+		switch(processSettings.getLevel()) {
+			case L0:
+				return new EdrsSessionTypeAdapter(
+						metadataClient, 
+						AiopPropertiesAdapter.of(aiopProperties),
+						new EdrsSessionProductValidator()
+				);
+			case L0_SEGMENT:
+				return new L0SegmentTypeAdapter(
+						metadataClient, 
+						AspPropertiesAdapter.of(this.aspProperties)
+				);
+			case L1: case L2:
+				return new LevelSliceTypeAdapter(
+						metadataClient, 
+						settings.getTypeOverlap(), 
+						settings.getTypeSliceLength(),
+						settings.getJoborderTimelinessCategoryMapping(),
+						timeoutCheckerFor()
+				);			
+			case S3_L0: case S3_L1: case S3_L2:
+				return new S3TypeAdapter(
+						metadataClient,
+						taskTableFactory,
+						elementMapper,
+						processSettings,
+						settings,
+						s3TypeAdapterSettings
+				);
+			case S3_PDU:
+				return new PDUTypeAdapter(
+						metadataClient,
+						elementMapper,
+						settings,
+						processSettings,
+						pduSettings
+				);
+			case SPP_MBU:
+				return new SppMbuTypeAdapter(
+						metadataClient
+				);
+			case SPP_OBS:
+				return new SppObsTypeAdapter(metadataClient, SppObsPropertiesAdapter.of(sppObsProperties));
+			default:
+				throw new IllegalArgumentException(
+						String.format(
+								"Unsupported Application Level '%s'. Available are: %s", 
+								processSettings.getLevel(),
+								Arrays.asList(
+										ApplicationLevel.L0, 
+										ApplicationLevel.L0_SEGMENT, 
+										ApplicationLevel.L1, 
+										ApplicationLevel.L2,
+										ApplicationLevel.S3_L0,
+										ApplicationLevel.S3_L1,
+										ApplicationLevel.S3_L2,
+										ApplicationLevel.S3_PDU,
+										ApplicationLevel.SPP_MBU,
+										ApplicationLevel.SPP_OBS
+										)
+								)
+						);
+		}
 	}
 	
 	@Bean
@@ -325,7 +327,7 @@ public class IpfPreparationWorkerConfiguration {
 	private InputTimeoutChecker inputWaitTimeoutFor(final TaskTable taskTable) {
 		final List<InputWaitingConfig> configsForTaskTable = new ArrayList<>();
 		for (final InputWaitingConfig config : settings.getInputWaiting()) {
-			if (taskTable.getProcessorName().equals(config.getProcessorNameRegexp()) &&
+			if (taskTable.getProcessorName().matches(config.getProcessorNameRegexp()) &&
 				taskTable.getVersion().matches(config.getProcessorVersionRegexp())) 
 			{			
 				configsForTaskTable.add(config);

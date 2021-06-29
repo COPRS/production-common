@@ -1,9 +1,13 @@
 package esa.s1pdgs.cpoc.mqi.server.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -86,12 +90,7 @@ public class MessageConsumptionController<T extends AbstractMessage> {
     	if (!topicPriorities.containsKey(category)) {
             throw new MqiCategoryNotAvailable(category, "consumer");
     	}
-    	final GenericMessageDto<? extends AbstractMessage> message = nextMessageByCat(category);
-        // if no message and consumer is pause => resume it
-        if (message == null) {
-            topicPriorities.get(category).keySet().forEach(consumptionController::resume);
-        }
-        return message;
+        return nextMessageByCat(category);
     }
 
     final Comparator<AppCatMessageDto<? extends AbstractMessage>> priorityComparatorFor(final ProductCategory category) {
@@ -123,6 +122,9 @@ public class MessageConsumptionController<T extends AbstractMessage> {
     @SuppressWarnings("unchecked")
     private GenericMessageDto<? extends AbstractMessage> nextMessageByCat(final ProductCategory category) throws AbstractCodedException {
         final List<AppCatMessageDto<T>> messages = messagePersistence.next(category, appProperties.getHostname());
+
+        resumeConsumersForEmptyTopics(category, messages);
+
         if (messages != null)
         {
             messages.sort(priorityComparatorFor(category));
@@ -132,7 +134,28 @@ public class MessageConsumptionController<T extends AbstractMessage> {
                 }
             }
         }
+
         return null;
+    }
+
+    private void resumeConsumersForEmptyTopics(ProductCategory category, List<AppCatMessageDto<T>> messages) {
+        final List<String> topicsWithMessages = topicsWithMessages(messages);
+        final List<String> topicsToResume = new ArrayList<>(allTopicsFor(category));
+        topicsToResume.removeAll(topicsWithMessages);
+
+        topicsToResume.forEach(consumptionController::resume);
+    }
+
+    private Set<String> allTopicsFor(final ProductCategory category) {
+        return topicPriorities.get(category).keySet();
+    }
+
+    private List<String> topicsWithMessages(List<AppCatMessageDto<T>> messages) {
+        if(messages == null) {
+            return Collections.emptyList();
+        }
+
+        return messages.stream().map(AppCatMessageDto::getTopic).distinct().collect(Collectors.toList());
     }
 
     /**

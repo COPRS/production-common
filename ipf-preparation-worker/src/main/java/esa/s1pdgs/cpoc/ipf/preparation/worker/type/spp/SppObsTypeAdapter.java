@@ -10,11 +10,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.ipf.preparation.worker.query.QueryUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
@@ -24,10 +28,11 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableFileNameType;
 
 public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SppObsPropertiesAdapter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SppObsTypeAdapter.class);
 
     private static final DateTimeFormatter JO_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
     private final MetadataClient metadataClient;
@@ -39,7 +44,7 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
     }
 
     @Override
-    public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) {
+    public Product mainInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdapter) {
 
         Assert.notNull(job, "Provided AppDataJob is null");
         Assert.notNull(job.getProduct(), "Provided AppDataJobProduct is null");
@@ -62,11 +67,29 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
                                     JO_TIME_FORMATTER
                             )
                     ));
-
+            
+        	final List<AppDataJobTaskInputs> appDataJobTaskInputs = QueryUtils.buildInitialInputs(tasktableAdapter);
+        	final AppDataJobTaskInputs originalInput = appDataJobTaskInputs.get(0);
+        	final AppDataJobInput first = originalInput.getInputs().get(0);
+        	final AppDataJobFile file = new AppDataJobFile(
+        			auxResorb.getProductName(),
+        			auxResorb.getProductName(),
+        			TaskTableAdapter.convertDateToJobOrderFormat(auxResorb.getStartTime()),
+        			TaskTableAdapter.convertDateToJobOrderFormat(auxResorb.getStopTime())
+        	);
+        	final AppDataJobInput input = new AppDataJobInput(
+        			first.getTaskTableInputReference(),
+        			"AUX_RES",
+        			TaskTableFileNameType.PHYSICAL.toString(),
+        			first.isMandatory(),
+        			Collections.singletonList(file)
+        	);
+      		originalInput.setInputs(Collections.singletonList(input));
+      		auxResorb.overridingInputs(appDataJobTaskInputs);
+      		LOGGER.debug("Added AUXRESORB {}", originalInput);
         } catch (final MetadataQueryException e) {
             LOGGER.error("Error on query execution, retrying next time", e);
         }
-
         return auxResorb;
     }
 
@@ -93,8 +116,8 @@ public class SppObsTypeAdapter extends AbstractProductTypeAdapter implements Pro
     }
 
     @Override
-	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) {
-		AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
+	public List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) {
+		final AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 
         final CatalogEventAdapter catalogEvent = CatalogEventAdapter.of(appDataJob);
         final AuxResorbProduct auxResorb = AuxResorbProduct.of(appDataJob);

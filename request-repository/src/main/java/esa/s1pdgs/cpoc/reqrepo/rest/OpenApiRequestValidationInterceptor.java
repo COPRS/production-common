@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.reqrepo.rest;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,15 +41,15 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, 
 	}
 	
 	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
+	public void addInterceptors(final InterceptorRegistry registry) {
 		registry.addInterceptor(this);
 	}
 	
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {		
+	public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {		
 		final String path = request.getContextPath() + request.getServletPath();
 		if (disableValidation) {
-			LOGGER.debug("Skipping OpenAPI specification validation");
+			LOGGER.trace("Skipping OpenAPI specification validation");
 		} else if (pathExclusionPattern.matcher(path).matches()) {
 			LOGGER.debug(String.format("Skipping OpenAPI specification validation for path: %s", path));
 		} else {
@@ -59,7 +58,7 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, 
 				@SuppressWarnings("unused")
 				final RequestParameters requestParameters = requestValidator.validate(servletRequest);
 				LOGGER.debug(String.format("Check against OpenAPI specification successful. Valid request: %s", request));
-			} catch (ValidationException e) {
+			} catch (final ValidationException e) {
 				LOGGER.debug(String.format("Check against OpenAPI specification failed. Invalid request: %s", request));
 		        response.sendError(HttpStatus.BAD_REQUEST.value());
 				return false;

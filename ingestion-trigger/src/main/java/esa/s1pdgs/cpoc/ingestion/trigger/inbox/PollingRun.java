@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 
@@ -40,28 +43,40 @@ final class PollingRun {
 		this.newElements = newElements;
 	}
 	
-	static PollingRun newInstance(final Set<InboxEntry> persistedContent, final List<InboxEntry> pickupContent) {
+	static PollingRun newInstance(final Set<InboxEntry> persistedContent, final List<InboxEntry> pickupContent,
+			final int stationRetentionTime) {
 		// determine the entries that have been deleted from inbox to remove them from persistence
-		final Set<InboxEntry> finishedElements = new HashSet<>(persistedContent);
+		final LocalDateTime threshold = LocalDateTime.now(ZoneOffset.UTC)
+				.minusDays(0 <= stationRetentionTime ? stationRetentionTime : 0);
+		// I. make sure to keep entries persisted for at least [stationRetentionTime] days
+		final Set<InboxEntry> finishedElements = CollectionUtil.nullToEmpty(persistedContent).stream()
+				.filter(entry -> null == entry.getKnownSince() || threshold.isAfter(entry.getKnownSince()))
+				.collect(Collectors.toSet());
+		// II. then, if they aren't on the pickup anymore, consider them finished (= delete them)
 		finishedElements.removeAll(pickupContent);
-		
+
 		// detect all elements that are considered "new" on the inbox
 		final List<InboxEntry> newElements = new ArrayList<>(pickupContent);
 		newElements.removeAll(persistedContent);
 		Collections.sort(newElements, COMP);
-		
-		return new PollingRun(
-				persistedContent, 
-				new HashSet<>(pickupContent), 
-				finishedElements, 
-				newElements
-		);
+
+		return new PollingRun(persistedContent, new HashSet<>(pickupContent), finishedElements, newElements);
 	}
 
-	static PollingRun newInstanceWithoutProductFamily(final Set<InboxEntry> persistedContent, final List<InboxEntry> pickupContent) {
+	static PollingRun newInstanceWithoutProductFamily(final Set<InboxEntry> persistedContent, final List<InboxEntry> pickupContent,
+			final int stationRetentionTime) {
 		// omitting product family comparison S1PRO-2395
+		
 		// determine the entries that have been deleted from inbox to remove them from persistence
-		final Set<InboxEntry> finishedElements = new HashSet<>(subtractWithoutProductFamily(persistedContent, pickupContent));
+		final LocalDateTime threshold = LocalDateTime.now(ZoneOffset.UTC)
+				.minusDays(0 <= stationRetentionTime ? stationRetentionTime : 0);
+		// I. make sure to keep entries persisted for at least [stationRetentionTime] days
+		final Set<InboxEntry> oldElements = CollectionUtil.nullToEmpty(persistedContent).stream()
+				.filter(entry -> null == entry.getKnownSince() || threshold.isAfter(entry.getKnownSince()))
+				.collect(Collectors.toSet());
+		// II. then, if they aren't on the pickup anymore, consider them finished (= delete them)
+		final Set<InboxEntry> finishedElements = new HashSet<>(
+				subtractWithoutProductFamily(oldElements, pickupContent));
 
 		// detect all elements that are considered "new" on the inbox
 		final List<InboxEntry> newElements = subtractWithoutProductFamily(pickupContent, persistedContent);

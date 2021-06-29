@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +31,7 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -89,12 +91,6 @@ public class S3ObsClient extends AbstractObsClient {
 				clientConfig.setProxyPort(port);
 			}
 
-//			final RetryPolicy retryPolicy = new RetryPolicy(new SDKCustomDefaultRetryCondition(config.getMaxRetries()),
-//					new PredefinedBackoffStrategies.SDKDefaultBackoffStrategy(config.getBackoffBaseDelay(),
-//							config.getBackoffThrottledBaseDelay(), config.getBackoffMaxDelay()),
-//					config.getMaxRetries(), true);
-//			clientConfig.setRetryPolicy(retryPolicy);
-			
 			final AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard()
 					.withClientConfiguration(clientConfig)
 					.withEndpointConfiguration(
@@ -107,18 +103,37 @@ public class S3ObsClient extends AbstractObsClient {
 				clientBuilder.disableChunkedEncoding();
 			}
 			final AmazonS3 client = clientBuilder.build();
-			
+
+			final long minimumUploadPartSize = config.getMinUploadPartSize() * 1024 * 1024;
+			final long multipartUploadThreshold = config.getMultipartUploadThreshold() * 1024 * 1024;
+
 			final TransferManager manager = TransferManagerBuilder.standard()
-					.withMinimumUploadPartSize(config.getMinUploadPartSize() * 1024 * 1024)
-					.withMultipartUploadThreshold(config.getMultipartUploadThreshold() * 1024 * 1024)
+					.withMinimumUploadPartSize(minimumUploadPartSize)
+					.withMultipartUploadThreshold(multipartUploadThreshold)
 					.withS3Client(client)
 					.build();
+
+			LOGGER.info(
+					"created transferManager with minimumUploadPartSize: {} multipartUploadThreshold: {}",
+					minimumUploadPartSize,
+					multipartUploadThreshold);
+
+			final int maxObsRetries = config.getMaxObsRetries();
+			final int backoffThrottledBaseDelay = config.getBackoffThrottledBaseDelay();
+			final Path uploadCacheLocation = config.getUploadCacheLocation();
 
 			final S3ObsServices s3Services = new S3ObsServices(
 					client,
 					manager,
-					config.getMaxObsRetries(),
-					config.getBackoffThrottledBaseDelay());
+					maxObsRetries,
+					backoffThrottledBaseDelay,
+					uploadCacheLocation);
+
+			LOGGER.info(
+					"created s3ObsServices with maxRetries: {} retriesDelay: {} uploadCacheLocation: {}",
+					maxObsRetries,
+					backoffThrottledBaseDelay,
+					uploadCacheLocation);
 			
 			return new S3ObsClient(config, s3Services, factory);
 		}
@@ -138,19 +153,19 @@ public class S3ObsClient extends AbstractObsClient {
 	}
 
 	@Override
-	public boolean exists(final ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean exists(final ObsObject object) throws SdkClientException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return s3Services.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
 
 	@Override
-	public boolean prefixExists(final ObsObject object) throws SdkClientException, ObsServiceException {
+	public boolean prefixExists(final ObsObject object) throws SdkClientException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return s3Services.getNbObjects(getBucketFor(object.getFamily()), object.getKey()) > 0;
 	}
 
 	@Override
-	public List<File> downloadObject(final ObsDownloadObject object) throws SdkClientException, ObsServiceException {
+	public List<File> downloadObject(final ObsDownloadObject object) throws SdkClientException {
 		final String bucket = getBucketFor(object.getFamily());
 		LOGGER.debug("downloadObjectsWithPrefix from bucket {} with prefix {}", bucket, object.getKey());
 		final List<File> res = s3Services.downloadObjectsWithPrefix(bucket, object.getKey(), object.getTargetDir(),
@@ -162,7 +177,7 @@ public class S3ObsClient extends AbstractObsClient {
 
 	@Override
 	public void uploadObject(final FileObsUploadObject object)
-			throws SdkClientException, ObsServiceException, ObsException {
+			throws SdkClientException, ObsException {
 		final List<Md5.Entry> fileList = new ArrayList<>();
 		if (object.getFile().isDirectory()) {
 			fileList.addAll(
@@ -180,7 +195,7 @@ public class S3ObsClient extends AbstractObsClient {
 	 */
 	@Override
 	public Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException {
-		return s3Services.uploadStream(getBucketFor(object.getFamily()), object.getKey(), maybeWithBuffer(object), object.getContentLength());
+		return s3Services.uploadStream(getBucketFor(object.getFamily()), object.getKey(), maybeWithBuffer(object));
 	}
 
 	/**
@@ -241,13 +256,38 @@ public class S3ObsClient extends AbstractObsClient {
 		}
 	}
 	
+	@Override
+	public void delete(ObsObject object) throws ObsException, ObsServiceException {
+		ValidArgumentAssertion.assertValidArgument(object);
+		String bucket = getBucketFor(object.getFamily());
+		String keyPrefix = object.getKey();
+		try {
+			LOGGER.info("Deleting all files in bucket {} with prefix {}", bucket, keyPrefix);
+			final List<String> result = s3Services.getAll(bucket, keyPrefix).stream().map(S3ObjectSummary::getKey)
+					.collect(Collectors.toList());
+			for (String key : result) {
+				LOGGER.debug("Deleting file {} in bucket {}", key, bucket);
+				s3Services.deleteFile(new DeleteObjectRequest(bucket, key));
+			}
+			String md5sumfile = keyPrefix + Md5.MD5SUM_SUFFIX;
+			if (s3Services.exist(bucket, md5sumfile)) {
+				LOGGER.info("Deleting md5sum file {} in bucket {}", md5sumfile, bucket);
+				s3Services.deleteFile(new DeleteObjectRequest(bucket, md5sumfile));
+			} else {
+				LOGGER.warn("No md5sum file exist for file {} in bucket {}", md5sumfile, bucket);
+			}
+		} catch (S3SdkClientException | ObsServiceException e) {
+			throw new ObsException(object.getFamily(), object.getKey(), e);
+		}
+	}
+	
 	public void createBucket(final ProductFamily family) throws ObsServiceException, S3SdkClientException {
 		s3Services.createBucket(getBucketFor(family));
 	}
 
 	@Override
 	public List<ObsObject> getObsObjectsOfFamilyWithinTimeFrame(final ProductFamily family, final Date timeFrameBegin,
-			final Date timeFrameEnd) throws SdkClientException, ObsServiceException {
+			final Date timeFrameEnd) throws SdkClientException {
 		ValidArgumentAssertion.assertValidArgument(family);
 		ValidArgumentAssertion.assertValidArgument(timeFrameBegin);
 		ValidArgumentAssertion.assertValidArgument(timeFrameEnd);
@@ -370,4 +410,5 @@ public class S3ObsClient extends AbstractObsClient {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);			
 		}
 	}
+	
 }

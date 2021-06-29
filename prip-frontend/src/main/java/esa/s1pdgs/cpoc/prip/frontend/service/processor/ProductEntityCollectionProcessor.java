@@ -3,8 +3,10 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -32,6 +34,7 @@ import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceComplexProperty;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourcePrimitiveProperty;
@@ -72,19 +75,18 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 	private ServiceMetadata serviceMetadata;
 	private final PripMetadataRepository pripMetadataRepository;
 
-	private static final List<String> SORTABLE_FIELDS;
+	private static final Map<String, PripMetadata.FIELD_NAMES> SORTABLE_FIELDS;
 	static {
-		SORTABLE_FIELDS = new ArrayList<>();
-		SORTABLE_FIELDS.add(FIELD_NAMES.CREATION_DATE.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.EVICTION_DATE.fieldName());
-		SORTABLE_FIELDS.add(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.Start);
-		SORTABLE_FIELDS.add(EntityTypeProperties.ContentDate + "/" + EntityTypeProperties.End);
-		SORTABLE_FIELDS.add(FIELD_NAMES.NAME.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.CONTENT_LENGTH.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.PRODUCT_FAMILY.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.PRODUCTION_TYPE.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.CONTENT_TYPE.fieldName());
-		SORTABLE_FIELDS.add(FIELD_NAMES.ID.fieldName());
+		SORTABLE_FIELDS = new HashMap<>();
+		SORTABLE_FIELDS.put(EntityTypeProperties.PublicationDate.name(), PripMetadata.FIELD_NAMES.CREATION_DATE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.EvictionDate.name(), PripMetadata.FIELD_NAMES.EVICTION_DATE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentDate.name() + "/" + EntityTypeProperties.Start.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_START);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentDate.name() + "/" + EntityTypeProperties.End.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_END);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentLength.name(), PripMetadata.FIELD_NAMES.CONTENT_LENGTH);
+		SORTABLE_FIELDS.put(EntityTypeProperties.Name.name(), PripMetadata.FIELD_NAMES.NAME);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ProductionType.name(), PripMetadata.FIELD_NAMES.PRODUCTION_TYPE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.ContentType.name(), PripMetadata.FIELD_NAMES.CONTENT_TYPE);
+		SORTABLE_FIELDS.put(EntityTypeProperties.Id.name(), PripMetadata.FIELD_NAMES.ID);
 	}
 
 	// --------------------------------------------------------------------------
@@ -170,8 +172,20 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			}
 		}
 
-		if (null == uriInfo.getCountOption() || !uriInfo.getCountOption().getValue()) {
+		if (null != uriInfo.getCountOption() && uriInfo.getCountOption().getValue()) {
 
+			// Count Request
+
+			int count = 0;
+			if (queryFilters.isEmpty()) {
+				count = this.pripMetadataRepository.countAll();
+			} else {
+				count = this.pripMetadataRepository.countWithFilters(queryFilters);
+			}
+
+			entityCollection.setCount(count);
+		}
+			
 			// List of Entities Request
 
 			Optional<Integer> top = Optional.empty();
@@ -215,14 +229,30 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 							if (StringUtil.isNotBlank(edmProperty.getName())) {
 								final String fieldName = edmProperty.getName();
 
-								if (SORTABLE_FIELDS.contains(fieldName)) {
-									sortFieldName = FIELD_NAMES.fromString(fieldName);
+								if (SORTABLE_FIELDS.containsKey(fieldName)) {
+									sortFieldName = SORTABLE_FIELDS.get(fieldName);
 								} else {
 									throw new ODataApplicationException(
 											"Invalid value for $orderby: field name '" + fieldName
-											+ "' is not supported! Supported field names: " + SORTABLE_FIELDS,
+											+ "' is not supported! Supported field names: " + SORTABLE_FIELDS.keySet(),
 											HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 								}
+							}
+						} else if (uriResource instanceof UriResourceComplexProperty) {
+							final UriResourceComplexProperty complexProperty = (UriResourceComplexProperty) uriResource;
+							final String complexTypeAttrName = complexProperty.getSegmentValue();
+							final UriResource subElement = resourcePath.getUriResourceParts().get(1);
+							final String subElementAttrName = subElement.getSegmentValue();
+							final String complexTypePath = complexTypeAttrName + "/" + subElementAttrName;
+
+							if (SORTABLE_FIELDS.containsKey(complexTypePath)) {
+								sortFieldName = SORTABLE_FIELDS.get(complexTypePath);
+							} else {
+								throw new ODataApplicationException(
+										"Invalid value for $orderby: field name '" + complexTypePath
+												+ "' is not supported! Supported field names: "
+												+ SORTABLE_FIELDS.keySet(),
+										HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 							}
 						}
 					}
@@ -231,6 +261,8 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 						sortTerms.add(new PripSortTerm(sortFieldName, sortOrder));
 					}
 				}
+
+				LOGGER.debug("using sort terms: " + sortTerms);
 			}
 
 			List<PripMetadata> queryResult;
@@ -254,31 +286,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
 			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
 
-		} else {
-
-			// Count Request
-
-			int count = 0;
-			if (queryFilters.isEmpty()) {
-				count = this.pripMetadataRepository.countAll();
-			} else {
-				count = this.pripMetadataRepository.countWithFilters(queryFilters);
-			}
-
-			entityCollection.setCount(count);
-
-			// serialize
-			final InputStream serializedContent = this.serializeEntityCollection(entityCollection,
-					responseEdmEntityType, request.getRawBaseUri(), startEdmEntitySet.getName(), contextUrl,
-					responseFormat, uriInfo, expandOptions);
-
-			response.setContent(serializedContent);
-			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-
-			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
-
-		}
+		
 	}
 
 	// --------------------------------------------------------------------------

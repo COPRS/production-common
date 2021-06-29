@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobPreselectedInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 
@@ -25,6 +26,10 @@ public interface Product {
 	AppDataJobProduct toProduct();
 
 	default List<AppDataJobTaskInputs> overridingInputs() {
+		return Collections.emptyList();
+	}
+	
+	default List<AppDataJobPreselectedInput> preselectedInputs() {
 		return Collections.emptyList();
 	}
 }

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.common.utils;
 
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -14,6 +15,8 @@ public class Retries {
 			final int numRetries, 
 			final long retrySleep
 	) throws InterruptedException {
+		Objects.requireNonNull(command, "command must not be null");
+
     	int attempt = 0;
     	while (true) {
     		try {

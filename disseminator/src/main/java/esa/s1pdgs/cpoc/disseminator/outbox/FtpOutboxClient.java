@@ -10,7 +10,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.disseminator.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -20,14 +20,14 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public class FtpOutboxClient extends AbstractOutboxClient {
 	public static final class Factory implements OutboxClient.Factory {
 		@Override
-		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater eval) {
+		public OutboxClient newClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator eval) {
 			return new FtpOutboxClient(obsClient, config, eval);
 		}			
 	}
 	
 	private static final int DEFAULT_PORT = 21;
 	
-	public FtpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluater pathEvaluator) {
+	public FtpOutboxClient(final ObsClient obsClient, final OutboxConfiguration config, final PathEvaluator pathEvaluator) {
 		super(obsClient, config, pathEvaluator);
 	}
 	
@@ -60,7 +60,12 @@ public class FtpOutboxClient extends AbstractOutboxClient {
 	        	logger.debug("Using active");
 		        ftpClient.enterLocalActiveMode();
 	        }
-	        assertPositiveCompletion(ftpClient);        
+
+			// we connect to s1pro-mock-dissemination-svc (k8s service for mock pod),
+			// but initiation of data transfer may come from s1pro-mock-dissemination-ftps (docker image inside pod)
+			ftpClient.setRemoteVerificationEnabled(false);
+
+			assertPositiveCompletion(ftpClient);
 	        
 			final Path path = evaluatePathFor(obsObject);	
 			final String retVal = config.getProtocol().toString().toLowerCase() + "://" + config.getHostname() + 
@@ -95,7 +100,10 @@ public class FtpOutboxClient extends AbstractOutboxClient {
     				logger.info("Uploading {} to {}", entry, dest);
     				ftpClient.storeFile(dest.toString(), in);
     				assertPositiveCompletion(ftpClient);	    				
-    			}
+    			} catch (IOException e) {
+    				logger.error("could not transfer {}", obsObject.getKey(), e);
+    				throw e;
+				}
     		}
 			return retVal;
     	}

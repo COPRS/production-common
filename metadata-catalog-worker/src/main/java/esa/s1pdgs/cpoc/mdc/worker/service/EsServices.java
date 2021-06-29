@@ -133,16 +133,16 @@ public class EsServices {
 		}
 	}
 
-	public void createMetadataWithRetries(final JSONObject product, final String productName, final int numRetries,
+	public String createMetadataWithRetries(final JSONObject product, final String productName, final int numRetries,
 			final long retrySleep) throws InterruptedException {
-		Retries.performWithRetries(() -> {
+		return Retries.performWithRetries(() -> {
 			if (!isMetadataExist(product)) {
 				LOGGER.debug("Creating metadata in ES for product {}", productName);
-				createMetadata(product);
+				return createMetadata(product);
 			} else {
 				LOGGER.debug("ES already contains metadata for product {}", productName);
 			}
-			return null;
+			return "";
 		}, "Create metadata " + product, numRetries, retrySleep);
 	}
 
@@ -151,7 +151,10 @@ public class EsServices {
 	 * index named [productType] with id [productName]
 	 * 
 	 */
-	void createMetadata(final JSONObject product) throws Exception {
+	String createMetadata(final JSONObject product) throws Exception {
+		
+		String warningMessage = "";
+		
 		try {
 			final String productType;
 			final ProductFamily family = ProductFamily.valueOf(product.getString("productFamily"));
@@ -184,15 +187,15 @@ public class EsServices {
 				final String result = e.getMessage();
 				boolean fixed = false;
 				if (result.contains("failed to parse field [sliceCoordinates] of type [geo_shape]")) {
-					LOGGER.warn(
-							"Parsing error occurred for sliceCoordinates, dropping them as workaround for #S1PRO-783");
+					warningMessage = "Parsing error occurred for sliceCoordinates, dropping them as workaround for #S1PRO-783";
+					LOGGER.warn(warningMessage);
 					product.remove("sliceCoordinates");
 					fixed = true;
 				}
 
 				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
-					LOGGER.warn(
-							"Parsing error occurred for segmentCoordinates, dropping them as workaround for #S1PRO-783");
+					warningMessage = "Parsing error occurred for segmentCoordinates, dropping them as workaround for #S1PRO-783";
+					LOGGER.warn(warningMessage);
 					product.remove("segmentCoordinates");
 					fixed = true;
 				}
@@ -219,6 +222,7 @@ public class EsServices {
 		} catch (JSONException | IOException e) {
 			throw new Exception(e);
 		}
+		return warningMessage;
 	}
 
 	public void createMaskFootprintData(final MaskType maskType, final JSONObject product, final String id) throws Exception {
@@ -489,7 +493,7 @@ public class EsServices {
 	}
 
 	public SearchMetadata latestValidity(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+										 final ProductFamily productFamily, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -780,7 +784,7 @@ public class EsServices {
 
 					r.add(local);
 				}
-				return checkIfFullyCoverage(r, beginDate, endDate, 0);
+				return checkIfFullyCoverage(r, beginDate);
 			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
@@ -789,8 +793,7 @@ public class EsServices {
 		return null;
 	}
 
-	private List<SearchMetadata> checkIfFullyCoverage(final List<SearchMetadata> products, final String beginDateStr,
-			final String endDateStr, final int gapThresholdMillis) {
+	private List<SearchMetadata> checkIfFullyCoverage(final List<SearchMetadata> products, final String beginDateStr) {
 		final LocalDateTime beginDate = DateUtils.parse(beginDateStr);
 		final LocalDateTime endDate = DateUtils.parse(beginDateStr);
 
@@ -807,12 +810,12 @@ public class EsServices {
 			 */
 			final long startTime = DateUtils.parse(product.getValidityStart()).toEpochSecond(ZoneOffset.UTC);
 			final long stopTime = DateUtils.parse(product.getValidityStop()).toEpochSecond(ZoneOffset.UTC);
-			if ((startTime <= refTime + gapThresholdMillis) && (stopTime > refTime)) {
+			if ((startTime <= refTime) && (stopTime > refTime)) {
 				refTime = stopTime;
 			}
 		}
 
-		if ((refTime + gapThresholdMillis) >= (endDate.toEpochSecond(ZoneOffset.UTC) + gapThresholdMillis)) {
+		if ((refTime) >= (endDate.toEpochSecond(ZoneOffset.UTC))) {
 			// No gaps, full coverage, return all results
 			return products;
 		}
@@ -821,8 +824,8 @@ public class EsServices {
 		return Collections.emptyList();
 	}
 
-	public SearchMetadata latestStopValidity(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+	public SearchMetadata latestStopValidity(final String productType,
+											 final ProductFamily productFamily, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -924,6 +927,10 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 
+		if(r == null) {
+			return null;
+		}
+
 		final SearchMetadata local = new SearchMetadata();
 		local.setProductName(r.get("productName").toString());
 		local.setProductType(r.get("productType").toString());
@@ -956,7 +963,7 @@ public class EsServices {
 	 * @return latest product with intersecting validity time
 	 */
 	public SearchMetadata lastValIntersect(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+										   final ProductFamily productFamily, final String satelliteId) throws Exception {
 
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
@@ -1014,7 +1021,7 @@ public class EsServices {
 	 *                   search itself throws an error
 	 */
 	public SearchMetadata latestValCoverClosest(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+												final ProductFamily productFamily, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
@@ -1255,10 +1262,11 @@ public class EsServices {
 		final SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.source(sourceBuilder);
 
+		final List<SearchMetadata> result = new ArrayList<>();
+		
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
 			if (this.isNotEmpty(searchResponse)) {
-				final List<SearchMetadata> r = new ArrayList<>();
 				for (final SearchHit hit : searchResponse.getHits().getHits()) {
 					final Map<String, Object> source = hit.getSourceAsMap();
 					final SearchMetadata local = new SearchMetadata();
@@ -1282,16 +1290,13 @@ public class EsServices {
 						}
 					}
 					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
-					r.add(local);
+					result.add(local);
 				}
-
-				return r;
 			}
 		} catch (final IOException e) {
 			throw new Exception(e.getMessage());
 		}
-
-		return null;
+		return result;
 	}
 	
 	/**
@@ -1444,16 +1449,28 @@ public class EsServices {
 		if (null != coordinates && coordinates.containsKey("coordinates") && coordinates.containsKey("type")) {
 			final String type = (String) coordinates.get("type");
 			final List<Object> firstArray = (List<Object>) coordinates.get("coordinates");
-			if (null != firstArray && "polygon".equalsIgnoreCase(type)) {
-				final List<Object> secondArray = (List<Object>) firstArray.get(0);
-				for (final Object arr : secondArray) {
-					final List<Double> p = new ArrayList<>();
-					final List<Number> coords = (List<Number>) arr;
-					final double lon = coords.get(0).doubleValue();
-					final double lat = coords.get(1).doubleValue();
-					p.add(lon);
-					p.add(lat);
-					footprint.add(p);
+			if (null != firstArray ) {
+				if ("polygon".equalsIgnoreCase(type)) {
+					final List<Object> secondArray = (List<Object>) firstArray.get(0);
+					for (final Object arr : secondArray) {
+						final List<Double> p = new ArrayList<>();
+						final List<Number> coords = (List<Number>) arr;
+						final double lon = coords.get(0).doubleValue();
+						final double lat = coords.get(1).doubleValue();
+						p.add(lon);
+						p.add(lat);
+						footprint.add(p);
+					}
+				} else if ("linestring".equalsIgnoreCase(type)) {
+					for (final Object arr : firstArray) {
+						final List<Double> p = new ArrayList<>();
+						final List<Number> coords = (List<Number>) arr;
+						final double lon = coords.get(0).doubleValue();
+						final double lat = coords.get(1).doubleValue();
+						p.add(lon);
+						p.add(lat);
+						footprint.add(p);
+					}
 				}
 			}
 		}
@@ -1766,16 +1783,18 @@ public class EsServices {
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
 			queryBuilder.relation(ShapeRelation.CONTAINS);
-			LOGGER.debug("Using {}", queryBuilder);
+			LOGGER.debug("Using product {} footprint {} for sea coverage check", productName, queryBuilder);
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
 
 			final SearchRequest request = new SearchRequest(LAND_MASK_FOOTPRINT_INDEX_NAME);
 			request.source(sourceBuilder);
+			LOGGER.trace("Using sea coverage search query: {}", request.source().toString());
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
 			if (isNotEmpty(searchResponse)) {
+				LOGGER.trace("Using product sea coverage {}, response is not Empty  {} ", productName, searchResponse.toString());		
 				return 0; // INFO: the value range is inverse, because the maskfile contains land, not sea
 			}
 			// TODO FIXME implement coverage calculation
@@ -1810,11 +1829,7 @@ public class EsServices {
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (isNotEmpty(searchResponse)) {
-				return true; 
-			} else {	
-				return false;
-			}
+			return isNotEmpty(searchResponse);
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for EW SLC mask intersection", e);
 		}
@@ -1880,11 +1895,7 @@ public class EsServices {
 			request.source(sourceBuilder);
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (isNotEmpty(searchResponse)) {
-				return true; 
-			} else {	
-				return false;
-			}
+			return isNotEmpty(searchResponse);
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for ocean mask intersection", e);
 		}
@@ -1999,7 +2010,7 @@ public class EsServices {
 		return false;
 	}
 	
-	private final String getIndexForFilename(final ProductFamily family, final String productName) {	
+	private String getIndexForFilename(final ProductFamily family, final String productName) {
 		if (ProductFamily.AUXILIARY_FILE == family) {	
 			// FIXME: idea here is to use the same config as for metadata extraction in order to 
 			// detect the correct product type.

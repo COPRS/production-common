@@ -24,7 +24,7 @@ public final class AspPropertiesAdapter {
 	private final int waitingTimeHoursMinimalNrtPt;
 	private final int waitingTimeHoursNominalNrtPt;
 	
-	private boolean disableTimeout;
+	private final boolean disableTimeout;
 	
 	// --------------------------------------------------------------------------
 	
@@ -42,7 +42,7 @@ public final class AspPropertiesAdapter {
 		this.waitingTimeHoursNominalNrtPt = waitingTimeHoursNominalNrtPt;
 	}
 
-	public static final AspPropertiesAdapter of(final AspProperties props) {        
+	public static AspPropertiesAdapter of(final AspProperties props) {
         return new AspPropertiesAdapter(
         		props.isDisableTimeout(),
         		props.getWaitingTimeHoursMinimalFast(),
@@ -65,27 +65,23 @@ public final class AspPropertiesAdapter {
     	Long minimalTimeout = null;
     	Long nominalTimeout = null;
 		if ("PT".equals(timeliness) || "NRT".equals(timeliness)) {
-			minimalTimeout = Long.valueOf( this.waitingTimeHoursMinimalNrtPt);
-			nominalTimeout = Long.valueOf( this.waitingTimeHoursNominalNrtPt);
+			minimalTimeout = (long) this.waitingTimeHoursMinimalNrtPt;
+			nominalTimeout = (long) this.waitingTimeHoursNominalNrtPt;
 		} else if ("FAST24".equals(timeliness)) {
-			minimalTimeout = Long.valueOf( this.waitingTimeHoursMinimalFast);
-			nominalTimeout = Long.valueOf( this.waitingTimeHoursNominalFast);
+			minimalTimeout = (long) this.waitingTimeHoursMinimalFast;
+			nominalTimeout = (long) this.waitingTimeHoursNominalFast;
 		}
 		
-		if (null != minimalTimeout && null != nominalTimeout) {
+		if (null != minimalTimeout) {
 			final LocalDateTime sensingStopTime = DateUtils.parse(sensingEndTimeStr);
-			//final Date jobCreationDate = job.getGeneration().getCreationDate();
 			final Date jobCreationDate = job.getCreationDate();
 			final LocalDateTime jobCreationDateTime = LocalDateTime.ofInstant(jobCreationDate.toInstant(), ZoneId.of("UTC"));
-			
-			final LocalDateTime timeoutThreshold;
-			if(sensingStopTime.plusHours(nominalTimeout).minusHours(minimalTimeout).isBefore(now)) {
-				timeoutThreshold = jobCreationDateTime.plusHours(minimalTimeout);
-			}else {
-				timeoutThreshold = sensingStopTime.plusHours(nominalTimeout);
-			}
-			
-			if(!now.isBefore(timeoutThreshold)) {
+
+
+			// wait at least jobCreation + minimal but no longer than sensing stop + nominal
+			final LocalDateTime timeoutThreshold = max(sensingStopTime.plusHours(nominalTimeout), jobCreationDateTime.plusHours(minimalTimeout));
+
+			if(now.isAfter(timeoutThreshold)) {
 				LOGGER.warn("Timeout reached for product {}", product.getProductName());
 				return true;
 			}else {
@@ -95,6 +91,14 @@ public final class AspPropertiesAdapter {
 		}
 
 		return false;
+	}
+
+	private static LocalDateTime max(LocalDateTime a, LocalDateTime b) {
+		if (a.isAfter(b)) {
+			return a;
+		}
+
+		return b;
 	}
 
 }

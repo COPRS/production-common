@@ -82,11 +82,11 @@ public abstract class AbstractJobOrderProc {
                 .collect(Collectors.toList()));
         this.nbOutputs = this.outputs.size();
         if (obj.getBreakpoint() != null) {
-            if(applicationLevel == ApplicationLevel.SPP_OBS) {
-                setBreakpoint(new SppObsJobOrderBreakpoint(obj.getBreakpoint()));
-            } else {
-                setBreakpoint(new StandardJobOrderBreakpoint(obj.getBreakpoint()));
-            }
+        	switch (applicationLevel) {
+        		case SPP_MBU: setBreakpoint(new SppMbuJobOrderBreakpoint(obj.getBreakpoint())); break;
+        		case SPP_OBS: setBreakpoint(new SppObsJobOrderBreakpoint(obj.getBreakpoint())); break;
+        		default: setBreakpoint(new StandardJobOrderBreakpoint(obj.getBreakpoint()));
+        	}
         }
         this.taskName = obj.getTaskName();
         this.taskVersion = obj.getTaskVersion();

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.query;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -16,6 +17,7 @@ import org.springframework.util.StringUtils;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobPreselectedInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
@@ -130,7 +132,14 @@ public class AuxQuery {
 
 	private List<AppDataJobTaskInputs> inputsOf(final AppDataJob job) {
 		if (isEmpty(job.getAdditionalInputs())) {
-			return QueryUtils.buildInitialInputs(taskTableAdapter);
+			if(job.getPreselectedInputs() != null && !job.getPreselectedInputs().isEmpty()) {
+				LOGGER.info("for job {} {} adding preselected inputs with following references {}",
+						job.getId(),
+						job.getProductName(),
+						job.getPreselectedInputs().stream().map(AppDataJobPreselectedInput::getTaskTableInputReference).collect(joining(", ")));
+			}
+
+			return QueryUtils.includingPreselected(QueryUtils.buildInitialInputs(taskTableAdapter), job.getPreselectedInputs());
 		}
 
 		return job.getAdditionalInputs();
@@ -289,8 +298,12 @@ public class AuxQuery {
 	}
 
 	private AppDataJobFile merge(final JobOrderInputFile file, final JobOrderTimeInterval interval) {
-		return new AppDataJobFile(file.getFilename(), file.getKeyObjectStorage(), interval.getStart(),
-				interval.getStop());
+		return new AppDataJobFile(
+				file.getFilename(), 
+				file.getKeyObjectStorage(), 
+				interval.getStart(),
+				interval.getStop()
+		);
 	}
 
 	private List<SearchMetadata> queryAux(final SearchMetadataQuery query) throws MetadataQueryException {
@@ -314,7 +327,7 @@ public class AuxQuery {
 
 	// S1PRO-707: only "AUX_ECE" requires to query polarisation
 	private String polarisationFor(final String productType) {
-		if ("AUX_ECE".equals(productType.toUpperCase())) {
+		if ("AUX_ECE".equalsIgnoreCase(productType)) {
 			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(job.getProduct());
 
 			final String polarisation = productAdapter.getStringValue("polarisation", "NONE").toUpperCase();

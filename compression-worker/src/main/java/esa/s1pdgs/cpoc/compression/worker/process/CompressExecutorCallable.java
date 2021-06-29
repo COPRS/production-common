@@ -104,7 +104,14 @@ public class CompressExecutorCallable implements Callable<Void> {
 				process.destroy();
 			}
 		}        
-
+        
+        if (r != 0) {
+        	LOGGER.warn("[task {}] [workDirectory {}]  Exit code: {}", binaryPath, workDirectory, r);
+        	throw new InternalErrorException("Exit code of compression/uncompression script != 0: " + r);
+        } else {
+        	LOGGER.debug("[task {}] [workDirectory {}]  Exit code: {}", binaryPath, workDirectory, r);
+        }
+        
         return new TaskResult(binaryPath, r);
     }
 	

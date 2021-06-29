@@ -23,6 +23,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchResponse.Clusters;
 import org.elasticsearch.action.search.SearchResponseSections;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -46,10 +47,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.es.ElasticsearchDAO;
+import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
@@ -525,7 +528,7 @@ public class EsServicesTest{
         this.mockSearchRequest(response);
         
         try {
-            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "satelliteId");
             assertEquals("Search metadata are not equals", expectedResult, result);
         } catch (final Exception e) {
             fail("Exception occurred: " + e.getMessage());
@@ -535,7 +538,7 @@ public class EsServicesTest{
     @Test(expected = Exception.class)
     public void lastValIntersectIOExceptionTest() throws Exception {
         this.mockSearchRequestThrowIOException();
-        esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+        esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "satelliteId");
     }
     
     @Test
@@ -556,7 +559,7 @@ public class EsServicesTest{
         this.mockSearchRequest(response);
         
         try {
-            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "processMode", "satelliteId");
+            final SearchMetadata result = esServices.lastValIntersect("beginDate", "endDate", "productType", ProductFamily.L0_SEGMENT, "satelliteId");
             assertEquals("Search metadata are not equals", null, result);
         } catch (final Exception e) {
             fail("Exception occurred: " + e.getMessage());
@@ -1090,7 +1093,7 @@ public class EsServicesTest{
 		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
 		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
 		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
-		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,ShardSearchFailure.EMPTY_ARRAY,Clusters.EMPTY);
         this.mockSearchRequest(response);
         
         assertEquals(0, esServices.getSeaCoverage(ProductFamily.L0_SEGMENT, "name"));
@@ -1347,4 +1350,418 @@ public class EsServicesTest{
         
         assertEquals(0, esServices.getOverpassCoverage(ProductFamily.L0_SEGMENT, "name"));
     }
+    
+    @Test
+    public final void productNameQuery() throws IOException {
+    	
+    	//Expected result
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductType("product_type");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+		expectedResult.setFootprint(new ArrayList<>());
+		expectedResult.setSwathtype("UNDEFINED");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {
+			{
+			    put("startTime", "2000-01-01T00:00:00.000000Z");
+			    put("stopTime", "2001-01-01T00:00:00.000000Z");
+			    put("productName", "name");
+			    put("url", "url");
+			    put("productType", "product_type");
+			}});
+		
+		//Response 
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\","
+		        + "\"productType\": \"product_type\"}");
+		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
+		final GetResponse getResponse = new GetResponse(getResult);
+		
+		//Mocking the get Request
+		this.mockGetRequest(getResponse);
+		
+		try {
+			SearchMetadata result = esServices.productNameQuery("L0_SEGMENT", "name");
+			assertEquals("Search metadata are not equals", expectedResult, result);
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+    	
+    }
+    
+    @Test
+    public final void latestValidityClosest() throws IOException {
+    	
+    	// Product
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("2012-05-05T10:10:12.000120Z");
+		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("startTime", "2012-05-05T10:10:12.000120Z");
+		    put("stopTime", "2019-05-05T10:10:12.001230Z");
+		    put("productName", "name");
+		    put("url", "url");
+		    put("productType", "product_type");
+		}});
+		
+		//Response
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"startTime\":\"2012-05-05T10:10:12.000120Z\",\"stopTime\":"
+		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			final SearchMetadata result = esServices.latestValidityClosest("2012-05-05T10:10:12.000120Z", "2019-05-05T10:10:12.001230Z", "product_type", ProductFamily.L2_ACN, "FAST", "A");
+			assertEquals("Search metadata are not equals", expectedResult, result);
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+    }
+    
+	@Test
+    public final void createMaskFootprintData() throws IOException {
+    	
+    	final IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
+    	this.mockIndexRequest(response);
+
+		final JSONObject product = new JSONObject();
+		product.put("productName", "name");
+		product.put("productType", "type");
+		product.put("productFamily", "L0_SLICE");
+
+		try {
+			esServices.createMaskFootprintData(MaskType.EW_SLC, product, "id");
+		} catch (Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+    }
+	
+	@Test
+	public final void valCover() throws IOException {
+		// Product
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("validityStartTime", "2000-01-01T00:00:00.000000Z");
+		    put("validityStopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		}});
+		
+		//Response
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\",\"validityStopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			final List<SearchMetadata> result = esServices.valCover("type", ProductFamily.L0_ACN, 
+			        "beginDate", "endDate", "satelliteId", 6, "NRT");
+			assertEquals("Search metadata are not equals", expectedResult, result.get(0));
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+    public final void latestValidity() throws IOException {
+    	
+    	// Product
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("2012-05-05T10:10:12.000120Z");
+		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("validityStartTime", "2012-05-05T10:10:12.000120Z");
+		    put("validityStopTime", "2019-05-05T10:10:12.001230Z");
+		    put("productName", "name");
+		    put("url", "url");
+		    put("productType", "product_type");
+		}});
+		
+		//Response
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.000120Z\",\"validityStopTime\":"
+		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			final SearchMetadata result = esServices.latestValidity("2012-05-05T10:10:12.000120Z", "2019-05-05T10:10:12.001230Z", "product_type", ProductFamily.L2_ACN, "A");
+			assertEquals("Search metadata are not equals", expectedResult, result);
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public final void fullCoverage() throws IOException {
+		// Product
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("2012-05-05T10:10:12.000120Z");
+		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("startTime", "2012-05-05T10:10:12.000120Z");
+		    put("stopTime", "2019-05-05T10:10:12.001230Z");
+		    put("productName", "name");
+		    put("url", "url");
+		    put("productType", "product_type");
+		}});
+		
+		//Response
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"startTime\":\"2012-05-05T10:10:12.000120Z\",\"stopTime\":"
+		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			final List<SearchMetadata> result = esServices.fullCoverage("2012-05-05T10:10:12.000120Z", "2019-05-05T10:10:12.001230Z", "product_type", ProductFamily.L2_ACN, "FAST", "A");
+			assertEquals("Search metadata are not equals", expectedResult, result.get(0));
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+    public final void latestStopValidity() throws IOException {
+    	
+    	// Product
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("2012-05-05T10:10:12.000120Z");
+		expectedResult.setValidityStop("2019-05-05T10:10:12.001230Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("validityStartTime", "2012-05-05T10:10:12.000120Z");
+		    put("validityStopTime", "2019-05-05T10:10:12.001230Z");
+		    put("productName", "name");
+		    put("url", "url");
+		    put("productType", "product_type");
+		}});
+		
+		//Response
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"validityStartTime\":\"2012-05-05T10:10:12.000120Z\",\"validityStopTime\":"
+		        + "\"2019-05-05T10:10:12.001230Z\", \"productType\": \"product_type\"}");
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			final SearchMetadata result = esServices.latestStopValidity("product_type", ProductFamily.L2_ACN, "A");
+			assertEquals("Search metadata are not equals", expectedResult, result);
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public final void latestValCoverClosest() throws IOException {
+		// Product
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("startTime", "2000-01-01T00:00:00.000000Z");
+		    put("stopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		}});
+		
+		//Response
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			final SearchMetadata result = esServices.latestValCoverClosest("2000-01-01T00:00:00.000000Z", "2001-01-01T00:00:00.000000Z", "type", ProductFamily.L0_ACN, 
+			        "satelliteId");
+			assertEquals("Search metadata are not equals", expectedResult, result);
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public final void intervalQuery() throws IOException {
+		// Product
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {{
+		    put("startTime", "2000-01-01T00:00:00.000000Z");
+		    put("stopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		}});
+		
+		//Response
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\"}");
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			final List<SearchMetadata> result = esServices.intervalQuery("2000-01-01T00:00:00.000000Z", "2001-01-01T00:00:00.000000Z", ProductFamily.L0_ACN, 
+					"type");
+			assertEquals("Search metadata are not equals", expectedResult, result.get(0));
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public final void intervalTypeQuery() throws IOException {
+		// Product
+		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setProductType("product_type");
+		expectedResult.setKeyObjectStorage("url");
+		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
+		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
+		expectedResult.setMissionId("missionId");
+		
+		//Response
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
+		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
+		        + "\"2001-01-01T00:00:00.000000Z\", \"productType\": \"product_type\", \"missionId\": \"missionId\"}");
+		final SearchHit hit = new SearchHit(1);
+		hit.sourceRef(source);
+		final SearchHit[] hits = {hit};
+		final TotalHits totalHits = new TotalHits(1, Relation.EQUAL_TO);
+		final SearchHits searchHits = new SearchHits(hits, totalHits, 1.0F);
+		final SearchResponseSections searchResponsSections = new SearchResponseSections(searchHits, null, null, false, Boolean.FALSE, null, 0);
+		final SearchResponse response = new SearchResponse(searchResponsSections, "1", 1,1,0,25,null,null);
+		
+		//Mocking the search request
+		this.mockSearchRequest(response);
+		
+		try {
+			final List<SearchMetadata> result = esServices.intervalTypeQuery("2000-01-01T00:00:00.000000Z", "2001-01-01T00:00:00.000000Z", ProductFamily.L0_ACN, 
+					"type", "satelliteId");
+			assertEquals("Search metadata are not equals", expectedResult, result.get(0));
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public final void auxiliaryQuery() throws IOException {
+
+		final AuxMetadata expectedResult = new AuxMetadata("name", "type", "url", "2000-01-01T00:00:00.000000Z",
+				"2001-01-01T00:00:00.000000Z", "missionId", "satelliteId", "UNDEFINED", new HashMap<String,String>() {{
+				    put("validityStartTime", "2000-01-01T00:00:00.000000Z");
+				    put("validityStopTime", "2001-01-01T00:00:00.000000Z");
+				    put("productName", "name");
+				    put("productType", "type");
+				    put("url", "url");
+				    put("missionId","missionId");
+				    put("satelliteId","satelliteId");
+				}});
+
+		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"productType\": \"type\","
+				+ "\"url\":\"url\",\"validityStartTime\":\"2000-01-01T00:00:00.000000Z\","
+				+ "\"validityStopTime\":\"2001-01-01T00:00:00.000000Z\",\"missionId\":\"missionId\","
+				+ "\"satelliteId\":\"satelliteId\"}");
+
+		// Result with boolean at true for isExist
+		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO,
+				SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
+		final GetResponse getResponse = new GetResponse(getResult);
+
+		// Mocking the get Request
+		this.mockGetRequest(getResponse);
+
+		try {
+			final AuxMetadata result = esServices.auxiliaryQuery("type", "name");
+			assertEquals("Search metadata are not equals", expectedResult, result);
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
 }

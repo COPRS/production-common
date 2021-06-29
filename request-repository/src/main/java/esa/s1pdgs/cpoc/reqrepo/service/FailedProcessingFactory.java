@@ -27,7 +27,6 @@ final class FailedProcessingFactory
 	private String topic;
 	private Object dto;		
 	private String predecessorTopic = null;
-	private Object predecessorDto = null;
 	private String failedPod;
 	private Date failureDate;
 	private String failureMessage;
@@ -93,9 +92,13 @@ final class FailedProcessingFactory
 					+ "subset of parameters will be available", id);				
 		}
 		
+		Object obj = null;
+		
 		if (predecessorMessage != null) {
-			predecessorTopic = predecessorMessage.getTopic();				
+			predecessorTopic = predecessorMessage.getTopic();
+			obj = predecessorMessage.getDto();		    
 		}		
+		
 		return new FailedProcessing(
 				id,
 				category,
@@ -114,7 +117,7 @@ final class FailedProcessingFactory
 				lastAssignmentDate,
 				failureDate,
 				failureMessage,
-				predecessorDto,
+				obj,
 				predecessorTopic
 		);
 	}	

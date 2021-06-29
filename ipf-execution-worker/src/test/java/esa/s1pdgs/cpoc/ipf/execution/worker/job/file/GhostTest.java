@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -39,34 +40,38 @@ public class GhostTest {
 				ApplicationLevel.L0, properties);
 	}
 
+	private final boolean isGhostCandidate(final String name) {
+		return processor.isGhostCandidate(new File(name));
+	}
+	
 	@Test
 	public void testInvalidProductName() {
-		assertEquals(false, processor.isGhostCandidate("S1A_IW_RAW__IAMINVALID"));
+		assertEquals(false, isGhostCandidate("S1A_IW_RAW__IAMINVALID"));
 		assertEquals(false,
-				processor.isGhostCandidate("S1A_IW_RAW__0SVV_XXXX0810T225025_XXXX810T225412_028513_033938_569F"));
+				isGhostCandidate("S1A_IW_RAW__0SVV_XXXX0810T225025_XXXX810T225412_028513_033938_569F"));
 
 		assertEquals(false,
-				processor.isGhostCandidate("S1A_FB_RAW__0SVV_20190810T225025_20190810T225412_028513_033938_569F"));
+				isGhostCandidate("S1A_FB_RAW__0SVV_20190810T225025_20190810T225412_028513_033938_569F"));
 	}
 
 	@Test
 	public void testLegacyCompatibility() {
 		assertEquals(false,
-				processor.isGhostCandidate("S1A_IW_RAW__0SVV_20190810T225025_20190810T225412_028513_033938_569F"));
+				isGhostCandidate("S1A_IW_RAW__0SVV_20190810T225025_20190810T225412_028513_033938_569F"));
 		assertEquals(false,
-				processor.isGhostCandidate("S1A_IW_RAW__0SVH_20190810T225025_20190810T225412_028513_033938_F24F"));
+				isGhostCandidate("S1A_IW_RAW__0SVH_20190810T225025_20190810T225412_028513_033938_F24F"));
 		assertEquals(true,
-				processor.isGhostCandidate("S1A_IW_RAW__0SVH_20190810T225412_20190810T225412_028513_033938_271A"));
+				isGhostCandidate("S1A_IW_RAW__0SVH_20190810T225412_20190810T225412_028513_033938_271A"));
 		assertEquals(true,
-				processor.isGhostCandidate("S1A_IW_RAW__0SVV_20190810T225412_20190810T225412_028513_033938_CFA2"));
+				isGhostCandidate("S1A_IW_RAW__0SVV_20190810T225412_20190810T225412_028513_033938_CFA2"));
 	}
 	
 	@Test
 	public void testSMAquisitionMode() {
 		assertEquals(true,
-				processor.isGhostCandidate("S1B_S6_RAW__0SHH_20181001T065647_20181001T065649_012955_017ED9_79B7.SAFE"));
+				isGhostCandidate("S1B_S6_RAW__0SHH_20181001T065647_20181001T065649_012955_017ED9_79B7.SAFE"));
 		assertEquals(false,
-				processor.isGhostCandidate("S1B_S7_RAW__0SHH_20181001T065647_20181001T065649_012955_017ED9_79B7.SAFE"));
+				isGhostCandidate("S1B_S7_RAW__0SHH_20181001T065647_20181001T065649_012955_017ED9_79B7.SAFE"));
 		
 	}
 }

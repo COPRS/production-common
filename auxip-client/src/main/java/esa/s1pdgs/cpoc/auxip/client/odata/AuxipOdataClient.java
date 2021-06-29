@@ -78,8 +78,10 @@ public class AuxipOdataClient implements AuxipClient {
 		this.contentLengthAttrName = Objects.requireNonNull(hostConfig.getContentLengthAttrName(),
 				"content length attribute name must not be null!");
 
-		this.rootServiceUrl = URI.create(
-				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!"));
+		final String baseUri = 
+				Objects.requireNonNull(this.hostConfig.getServiceRootUri(), "the root service URL must not be null!");
+		
+		rootServiceUrl = toNormalizedUri(baseUri);
 
 		this.disabled = !"basic".equalsIgnoreCase(hostConfig.getAuthType())
 				&& !"oauth2".equalsIgnoreCase(hostConfig.getAuthType());
@@ -94,6 +96,15 @@ public class AuxipOdataClient implements AuxipClient {
 
 		this.downloadClient = downloadClient;
 		this.context = context;
+	}
+	
+	// S1PRO-2414: Trailing slash is required here for URI resolve to work properly. However, for ingestion-worker
+	// does not work if the trailing '/' is already configured, so we need the logic here
+	static final URI toNormalizedUri(final String configuredUri) {
+		if (!configuredUri.endsWith("/")) {
+			return URI.create(configuredUri + "/");
+		}
+		return URI.create(configuredUri);
 	}
 
 	// --------------------------------------------------------------------------
@@ -128,6 +139,8 @@ public class AuxipOdataClient implements AuxipClient {
 
 		return result;
 	}
+	
+	
 
 	@Override
 	public InputStream read(@NonNull final UUID productMetadataId) {
@@ -136,7 +149,6 @@ public class AuxipOdataClient implements AuxipClient {
 			return new NullInputStream(0);
 		}
 
-		// FIXME trailing slash is mandatory for this to work
 		final URI productDownloadUrl = this.rootServiceUrl
 				.resolve("Products(" + productMetadataId.toString() + ")/$value");
 
@@ -258,7 +270,7 @@ public class AuxipOdataClient implements AuxipClient {
 		return response.getBody();
 	}
 
-	private List<AuxipProductMetadata> mapToMetadata(final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response) {
+	List<AuxipProductMetadata> mapToMetadata(final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response) {
 		final List<AuxipProductMetadata> result = new ArrayList<>();
 
 		if (null != response) {

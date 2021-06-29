@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.disseminator.FakeObsClient;
 import esa.s1pdgs.cpoc.disseminator.config.DisseminationProperties.OutboxConfiguration;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -132,7 +132,7 @@ public class TestFtpOutboxClient {
 				
 		final File dir = new File(userDir, testDir.toPath().toString());
 		
-		final FtpOutboxClient uut = new FtpOutboxClient(fakeObsClient, config, PathEvaluater.NULL);		
+		final FtpOutboxClient uut = new FtpOutboxClient(fakeObsClient, config, PathEvaluator.NULL);		
 		uut.transfer(new ObsObject(ProductFamily.BLANK, "my/little/file"), ReportingFactory.NULL);
 		
 		final File expectedFile = new File(dir, "my/little/file");

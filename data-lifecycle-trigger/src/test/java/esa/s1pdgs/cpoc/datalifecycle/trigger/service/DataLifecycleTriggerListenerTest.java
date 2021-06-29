@@ -1,23 +1,32 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties.RetentionPolicy;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.model.DataLifecycleMetadata;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepository;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.domain.persistence.DataLifecycleMetadataRepositoryException;
-import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
+import esa.s1pdgs.cpoc.datalifecycle.client.DataLifecycleClientUtil;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.RetentionPolicy;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQueryFilter;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
+import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.LtaDownloadEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 
 public class DataLifecycleTriggerListenerTest {
 	
@@ -25,13 +34,36 @@ public class DataLifecycleTriggerListenerTest {
 	
 	private DataLifecycleMetadataRepository metadataRepoMock = new DataLifecycleMetadataRepository() {
 		@Override
-		public void save(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
+		public void save(DataLifecycleMetadata metadata)
+				throws DataLifecycleMetadataRepositoryException {
 			// nothing
 		}
 		@Override
-		public Optional<DataLifecycleMetadata> findByProductName(String name)
+		public DataLifecycleMetadata saveAndGet(DataLifecycleMetadata metadata)
+				throws DataLifecycleMetadataRepositoryException {
+			return null;
+		};
+		@Override
+		public Optional<DataLifecycleMetadata> findByProductName(String productName)
 				throws DataLifecycleMetadataRepositoryException {
 			return Optional.empty();
+		}
+		@Override
+		public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp,
+				Optional<Integer> top, Optional<Integer> skip, List<DataLifecycleSortTerm> sortTerms)
+						throws DataLifecycleMetadataRepositoryException {
+			return Collections.emptyList();
+		}
+		@Override
+		public List<DataLifecycleMetadata> findByProductNames(List<String> productNames)
+				throws DataLifecycleMetadataRepositoryException {
+			return Collections.emptyList();
+		}
+		@Override
+		public List<DataLifecycleMetadata> findWithFilters(List<DataLifecycleQueryFilter> filters,
+				Optional<Integer> top, Optional<Integer> skip,	List<DataLifecycleSortTerm> sortTerms)
+						throws DataLifecycleMetadataRepositoryException {
+			return Collections.emptyList();
 		}
 	};
 	
@@ -74,88 +106,68 @@ public class DataLifecycleTriggerListenerTest {
 		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
 		final String obsKey = "L20191204153633245000201/DCS_02_L20191204153633245000201_ch2_DSDB_00027.raw";
 		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final Date evictionDate = dtl.calculateEvictionDate(retentionPolicies, creationDate, ProductFamily.EDRS_SESSION,
-				dtl.getFileName(obsKey));
+		final Date evictionDate = DataLifecycleClientUtil.calculateEvictionDate(retentionPolicies, creationDate, ProductFamily.EDRS_SESSION,
+				DataLifecycleClientUtil.getFileName(obsKey));
 		Assert.assertEquals(Instant.parse("2000-01-05T00:00:00.00z"), evictionDate.toInstant());
 	}
-	
+
 	@Test
-	public void toEvictionManagementJob_EDRS_SESSSION() {
-		
-		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
-		final String obsKey = "L20191204153633245000201/DCS_02_L20191204153633245000201_ch2_DSDB_00027.raw";
-		final ProductFamily productFamily = ProductFamily.EDRS_SESSION;
-		
-		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
-		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
-		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
-		Assert.assertEquals(Date.from(Instant.parse("2000-01-05T00:00:00.00z")), evictionManagementJob.getEvictionDate());
-		Assert.assertEquals(false, evictionManagementJob.isUnlimited());
-		Assert.assertEquals(obsKey, evictionManagementJob.getKeyObjectStorage());
-	}
-	
-	@Test
-	public void toEvictionManagementJob_AUX_PP1() {
-		
-		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
-		final String obsKey = "S1A_AUX_PP1";
-		final ProductFamily productFamily = ProductFamily.AUXILIARY_FILE;
-		
-		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
-		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
-		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
-		Assert.assertEquals(null, evictionManagementJob.getEvictionDate());
-		Assert.assertEquals(true, evictionManagementJob.isUnlimited());
-		Assert.assertEquals(obsKey, evictionManagementJob.getKeyObjectStorage());
-	}
-	
-	@Test
-	public void toEvictionManagementJob_L2_ACN_ZIP() {
-		
-		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
-		final String obsKey = "S1B_S1_OCN__2SS.zip";
-		final ProductFamily productFamily = ProductFamily.L2_ACN_ZIP;
-		
-		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
-		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
-		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
-		Assert.assertEquals(Date.from(Instant.parse("2000-01-08T00:00:00.00z")), evictionManagementJob.getEvictionDate());
-		Assert.assertEquals(false, evictionManagementJob.isUnlimited());
-		Assert.assertEquals(obsKey, evictionManagementJob.getKeyObjectStorage());
-		
-	}
-	
-	@Test
-	public void toEvictionManagementJob_NOT_CONFIGURED() {
-		
-		final Date creationDate = Date.from(Instant.parse("2000-01-01T00:00:00.00z"));
-		final String obsKey = "S1A_S1_RAW__0SD";
-		final ProductFamily productFamily = ProductFamily.L0_SLICE;
-		
-		final IngestionEvent inputEvent = toInputEvent(creationDate, obsKey, productFamily);
-		
-		final DataLifecycleTriggerListener<IngestionEvent> dtl = new DataLifecycleTriggerListener<>(null, null, null, this.metadataRepoMock, null, null, null);
-		final EvictionManagementJob evictionManagementJob = dtl.toEvictionManagementJob(inputEvent, retentionPolicies, UUID.randomUUID());
-		Assert.assertEquals(productFamily, evictionManagementJob.getProductFamily());
-		Assert.assertEquals(null, evictionManagementJob.getEvictionDate());
-		Assert.assertEquals(true, evictionManagementJob.isUnlimited());
-		Assert.assertEquals(obsKey, evictionManagementJob.getKeyObjectStorage());
-		
+	public void needsInsertionTimeUpdate() {
+		final AbstractMessage yes[] = { new IngestionEvent(), new CompressionEvent(), new ProductionEvent(), new LtaDownloadEvent() };
+		final AbstractMessage no[] = { new EvictionEvent() /* and all the others */ };
+
+		for (final AbstractMessage event : yes) {
+			Assert.assertTrue("expected " + event.getClass().getSimpleName() + " to need insertion time update",
+					DataLifecycleTriggerListener.needsInsertionTimeUpdate(event));
+		}
+
+		for (final AbstractMessage event : no) {
+			Assert.assertFalse("expected " + event.getClass().getSimpleName() + " to NOT need insertion time update",
+					DataLifecycleTriggerListener.needsInsertionTimeUpdate(event));
+		}
 	}
 
-	private IngestionEvent toInputEvent(final Date creationDate, final String obsKey, final ProductFamily productFamily) {
-		final IngestionEvent inputEvent = new IngestionEvent();
-		inputEvent.setCreationDate(creationDate);
-		inputEvent.setKeyObjectStorage(obsKey);
-		inputEvent.setProductFamily(productFamily);
-		return inputEvent;
+	@Test
+	public void needsEvictionTimeShorteningInUncompressedStorage() {
+		final AbstractMessage yes[] = { //
+				new CompressionEvent(ProductFamily.L1_SLICE_ZIP, null, null), //
+				new CompressionEvent(ProductFamily.L1_ACN_ZIP, null, null) //
+		};
+
+		final EvictionEvent evictionEvent1 = new EvictionEvent();
+		evictionEvent1.setProductFamily(ProductFamily.L1_SLICE);
+		final EvictionEvent evictionEvent2 = new EvictionEvent();
+		evictionEvent2.setProductFamily(ProductFamily.L1_SLICE_ZIP);
+		final LtaDownloadEvent ltaDownloadEvent1 = new LtaDownloadEvent();
+		ltaDownloadEvent1.setProductFamily(ProductFamily.L1_ACN);
+		final LtaDownloadEvent ltaDownloadEvent2 = new LtaDownloadEvent();
+		ltaDownloadEvent2.setProductFamily(ProductFamily.L1_ACN_ZIP);
+
+		final AbstractMessage no[] = { //
+				new CompressionEvent(ProductFamily.L1_SLICE, null, null), //
+				new CompressionEvent(ProductFamily.L1_ACN, null, null), //
+				new IngestionEvent(ProductFamily.L1_SLICE, null, null, 0, null, null, null), //
+				new IngestionEvent(ProductFamily.L1_SLICE_ZIP, null, null, 0, null, null, null), //
+				new ProductionEvent(null, null, ProductFamily.L1_ACN), //
+				new ProductionEvent(null, null, ProductFamily.L1_ACN_ZIP), //
+				evictionEvent1, evictionEvent2, //
+				ltaDownloadEvent1, ltaDownloadEvent2 //
+				/* and all the others */
+		};
+
+		final Map<ProductFamily, Integer> shortingEvictionTimeAfterCompression = new HashMap<>();
+		shortingEvictionTimeAfterCompression.put(ProductFamily.L1_SLICE_ZIP, 6);
+		shortingEvictionTimeAfterCompression.put(ProductFamily.L1_ACN_ZIP, 6);
+
+		for (final AbstractMessage event : yes) {
+			Assert.assertTrue("expected " + event.getClass().getSimpleName() + "[" + event.getProductFamily() + "] to need eviction time update",
+					DataLifecycleTriggerListener.needsEvictionTimeShorteningInUncompressedStorage(event, shortingEvictionTimeAfterCompression));
+		}
+
+		for (final AbstractMessage event : no) {
+			Assert.assertFalse("expected " + event.getClass().getSimpleName() + "[" + event.getProductFamily() + "] to NOT need eviction time update",
+					DataLifecycleTriggerListener.needsEvictionTimeShorteningInUncompressedStorage(event, shortingEvictionTimeAfterCompression));
+		}
 	}
 
 }

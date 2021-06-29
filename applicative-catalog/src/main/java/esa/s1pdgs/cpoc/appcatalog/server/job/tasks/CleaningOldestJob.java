@@ -110,6 +110,12 @@ public class CleaningOldestJob {
         );
         cleanJobsByStateAndCategory(
                 state,
+                ApplicationLevel.SPP_MBU,
+                maxAgeJobsLevelProducts.get(state.name().toLowerCase()),
+                isError
+        );
+        cleanJobsByStateAndCategory(
+                state,
                 ApplicationLevel.SPP_OBS,
                 maxAgeJobsLevelProducts.get(state.name().toLowerCase()),
                 isError

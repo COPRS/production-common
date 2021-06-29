@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.disseminator.outbox.FtpsOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.LocalOutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.OutboxClient;
 import esa.s1pdgs.cpoc.disseminator.outbox.SftpOutboxClient;
-import esa.s1pdgs.cpoc.disseminator.path.PathEvaluater;
+import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.disseminator.report.OverpassCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.disseminator.service.DisseminationException;
 import esa.s1pdgs.cpoc.disseminator.service.DisseminationService;
@@ -93,7 +93,7 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
     	for (final Map.Entry<String, OutboxConfiguration> entry : properties.getOutboxes().entrySet()) {	
     		final String target = entry.getKey();
     		final OutboxConfiguration config = entry.getValue();    	
-    		final PathEvaluater eval = PathEvaluater.newInstance(config);
+    		final PathEvaluator eval = PathEvaluator.newInstance(config);
 
     		final OutboxClient outboxClient = FACTORIES.getOrDefault(config.getProtocol(), OutboxClient.Factory.NOT_DEFINED_ERROR)
     				.newClient(obsClient, config, eval);    		
@@ -178,10 +178,10 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 				);
 			} else{
 				if (!disableOverpassCheck) {
-					LOG.warn("Ignoring file %s of ProductFamily of %s because it is not over overpass", body.getKeyObjectStorage(), body.getProductFamily());
+					LOG.warn("Ignoring file {} of ProductFamily of {} because it is not over overpass", body.getKeyObjectStorage(), body.getProductFamily());
 					reporting.end(new ReportingMessage("File %s of ProductFamily of %s is ignored because it is not over overpass", body.getKeyObjectStorage(), body.getProductFamily()));
 				} else {
-					LOG.warn("Ignoring file %s of ProductFamily of %s", body.getKeyObjectStorage(), body.getProductFamily());
+					LOG.warn("Ignoring file {} of ProductFamily of {}", body.getKeyObjectStorage(), body.getProductFamily());
 					reporting.end(new ReportingMessage("File %s of ProductFamily of %s is ignored", body.getKeyObjectStorage(), body.getProductFamily()));
 				}
 			}
@@ -222,7 +222,7 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 				}
 	        }
         } else {
-        	LOG.trace("Skipping overpass check. Product %s does not match pattern %s", productName, overpassCoverageCheckPattern.pattern());
+        	LOG.trace("Skipping overpass check. Product {} does not match pattern {}", productName, overpassCoverageCheckPattern.pattern());
         	return true;
         }
 	}

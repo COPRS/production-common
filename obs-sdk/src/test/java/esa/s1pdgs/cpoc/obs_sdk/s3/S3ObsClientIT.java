@@ -5,7 +5,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -55,6 +58,7 @@ import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:obs-aws-s3.properties")
 @ContextConfiguration(classes = {ObsConfigurationProperties.class})
@@ -477,6 +481,6 @@ public class S3ObsClientIT {
         assertTrue(uut.exists(new ObsObject(auxiliaryFiles, testFileName1)));
 
         final String md5 = uut.getChecksum(new ObsObject(auxiliaryFiles, testFileName1));
-        assertThat(md5, is(equalTo("98f6bcd4621d373cade4e832627b4f6")));
+        assertThat(md5, is(equalTo("098f6bcd4621d373cade4e832627b4f6")));
     }
 }

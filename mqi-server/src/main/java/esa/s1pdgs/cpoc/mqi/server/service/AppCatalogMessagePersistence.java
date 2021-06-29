@@ -120,6 +120,7 @@ public class AppCatalogMessagePersistence<T extends AbstractMessage> implements 
                     }
                 }
                 break;
+            case READ: // double consumption of same message
             default:
                 // Message assigned
                 LOGGER.debug("Message {} assigned to this pod. Pausing consumption ...", result.getId());

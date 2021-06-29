@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
@@ -41,12 +42,15 @@ public class TestProductServiceImpl {
 	@Mock
 	InboxAdapter inboxAdapter;
 
+	@Mock
+	private AppStatus appStatus;
+
 	ProcessConfiguration processConfiguration;
-	
+
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
-		uut = new ProductServiceImpl(obsClient, true);
+		uut = new ProductServiceImpl(obsClient, true, appStatus);
 		
 		doReturn(false).when(nonExistentFile).exists();
 		doReturn(false).when(nonExistentFile).canRead();

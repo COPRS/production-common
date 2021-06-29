@@ -34,6 +34,7 @@ public class TestSppMbuProductMetadataExtractor {
 		Assert.assertEquals("2019-06-28T19:10:00.000000Z", file1json.get("stopTime"));
 		Assert.assertEquals("016900", file1json.get("absoluteOrbitNumber"));
 		Assert.assertEquals("01FCE3", file1json.get("missionDataTakeId"));
+		Assert.assertEquals("001", file1json.get("idInColumn"));
 		
 		Assert.assertEquals("s1b-wv2-mbu-hh-20190628t191011-20190628t191014-016900-01fce3-002_C26C.bufr",
 				file2json.get("productName"));
@@ -47,5 +48,6 @@ public class TestSppMbuProductMetadataExtractor {
 		Assert.assertEquals("2019-06-28T19:10:14.000000Z", file2json.get("stopTime"));
 		Assert.assertEquals("016900", file2json.get("absoluteOrbitNumber"));
 		Assert.assertEquals("01FCE3", file2json.get("missionDataTakeId"));
+		Assert.assertEquals("002", file2json.get("idInColumn"));
 	}
 }

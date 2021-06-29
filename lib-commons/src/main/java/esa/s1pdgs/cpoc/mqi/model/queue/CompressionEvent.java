@@ -4,7 +4,6 @@ import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeC
 import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedProductFamily;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
@@ -27,35 +26,27 @@ public class CompressionEvent extends AbstractMessage {
 	public CompressionDirection getCompressionDirection() {
 		return this.compressionDirection;
 	}
-
+	
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, keyObjectStorage, productFamily, uid, compressionDirection,
-				allowedActions, demandType, debug, retryCounter);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((compressionDirection == null) ? 0 : compressionDirection.hashCode());
+		return result;
 	}
-
+	
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final CompressionEvent other = (CompressionEvent) obj;
-		return Objects.equals(creationDate, other.creationDate) 
-				&& Objects.equals(hostname, other.hostname)
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
-				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily
-		        && compressionDirection == other.compressionDirection
-		        && Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		CompressionEvent other = (CompressionEvent) obj;
+		if (compressionDirection != other.compressionDirection)
+			return false;
+		return true;
 	}
 
 	@Override

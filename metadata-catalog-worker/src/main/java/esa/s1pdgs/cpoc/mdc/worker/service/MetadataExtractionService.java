@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mdc.worker.service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -54,7 +55,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 
 	public static final String KEY_PRODUCT_SENSING_START = "product_sensing_start_date";
 	public static final String KEY_PRODUCT_SENSING_STOP = "product_sensing_stop_date";
-
+	
+	public static final String QUALITY_CORRUPTED_ELEMENT_COUNT = "corrupted_element_count_long";
+	public static final String QUALITY_MISSING_ELEMENT_COUNT = "missing_element_count_long";
+	
 	private final AppStatusImpl appStatus;
 	private final ErrorRepoAppender errorAppender;
 	private final ProcessConfiguration processConfiguration;
@@ -101,7 +105,24 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		reporting.begin(ReportingUtils.newFilenameReportingInputFor(catJob.getProductFamily(), catJob.getProductName()),
 				new ReportingMessage("Starting metadata extraction"));
 		return new MqiMessageEventHandler.Builder<CatalogEvent>(ProductCategory.CATALOG_EVENT)
-				.onSuccess(res -> reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction")))
+				.onSuccess(res -> {
+					// S1PRO-2337
+					Map<String, String> quality = new LinkedHashMap<>();
+					final GenericPublicationMessageDto<CatalogEvent> pub = res.get(0);
+					if (pub.getFamily() != ProductFamily.EDRS_SESSION) {
+						final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(pub);
+						if (eventAdapter.qualityNumOfMissingElements() != null) {
+							quality.put(QUALITY_MISSING_ELEMENT_COUNT, eventAdapter.qualityNumOfMissingElements().toString());
+						}
+						if (eventAdapter.qualityNumOfCorruptedElements() != null) {
+							quality.put(QUALITY_CORRUPTED_ELEMENT_COUNT, eventAdapter.qualityNumOfCorruptedElements().toString());
+						}
+					} 
+					reporting.end(reportingOutput(res), new ReportingMessage("End metadata extraction"),
+							quality);
+					
+				})
+				.onWarning(res -> reporting.warning(reportingOutput(res), new ReportingMessage("End metadata extraction")))
 				.onError(e -> reporting
 						.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e))))
 				.publishMessageProducer(() -> handleMessage(message, reporting)).newResult();
@@ -113,6 +134,20 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 		errorAppender.send(
 				new FailedProcessingDto(processConfiguration.getHostname(), new Date(), error.getMessage(), message));
 	}
+	
+	@Override
+	public void onWarning(final GenericMessageDto<CatalogJob> message, final String warningMessage) {
+		LOG.warn(warningMessage);
+				
+		final FailedProcessingDto failedProcessing = new FailedProcessingDto(
+        		processConfiguration.getHostname(),
+        		new Date(), 
+        		String.format("Warning on handling CatalogJob message %s: %s", message.getId(), warningMessage), 
+        		message
+        );
+        errorAppender.send(failedProcessing);
+	}
+	
 
 	private String determineOutputKeyDependentOnProductFamilyAndTimeliness(final CatalogEvent event) {
 
@@ -165,9 +200,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 			metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 		}
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
-
-		esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertion().getMaxRetries(),
-				properties.getProductInsertion().getTempoRetryMs());
+		
+		String warningMessage = 
+				esServices.createMetadataWithRetries(metadata, productName, properties.getProductInsertion().getMaxRetries(),
+						properties.getProductInsertion().getTempoRetryMs());
 
 		final CatalogEvent event = toCatalogEvent(message.getBody(), metadata);
 		event.setUid(reporting.getUid());
@@ -175,7 +211,7 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 				message.getId(), event.getProductFamily(), event);
 		messageDto.setInputKey(message.getInputKey());
 		messageDto.setOutputKey(determineOutputKeyDependentOnProductFamilyAndTimeliness(event));
-		return new MqiPublishingJob<CatalogEvent>(Collections.singletonList(messageDto));
+		return new MqiPublishingJob<CatalogEvent>(Collections.singletonList(messageDto), warningMessage);
 	}
 
 	private final ReportingOutput reportingOutput(final List<GenericPublicationMessageDto<CatalogEvent>> pubs) {

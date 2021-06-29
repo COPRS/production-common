@@ -1,69 +1,62 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
-import java.util.Date;
-import java.util.Objects;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class EvictionManagementJob extends AbstractMessage {
 
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-	private Date evictionDate;
+	private String operatorName;
 
-	private boolean unlimited;
-	
+	// --------------------------------------------------------------------------
+
 	public EvictionManagementJob() {
 		super();
-		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
+		this.setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
-	public Date getEvictionDate() {
-		return evictionDate;
-	}
-
-	public void setEvictionDate(final Date evictionDate) {
-		this.evictionDate = evictionDate;
-	}
-
-	public boolean isUnlimited() {
-		return unlimited;
-	}
-
-	public void setUnlimited(boolean unlimited) {
-		this.unlimited = unlimited;
-	}
+	// --------------------------------------------------------------------------
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(evictionDate, unlimited, creationDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedActions, demandType, debug, retryCounter);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((operatorName == null) ? 0 : operatorName.hashCode());
+		return result;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof EvictionManagementJob))
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
 			return false;
 		EvictionManagementJob other = (EvictionManagementJob) obj;
-		return Objects.equals(evictionDate, other.evictionDate) && Objects.equals(creationDate, other.creationDate)
-				&& Objects.equals(hostname, other.hostname) && Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(uid, other.uid) && productFamily == other.productFamily
-				&& unlimited == other.unlimited
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		if (operatorName == null) {
+			if (other.operatorName != null)
+				return false;
+		} else if (!operatorName.equals(other.operatorName))
+			return false;
+		return true;
 	}
 
 	@Override
 	public String toString() {
 		return String.format(
-				"EvictionManagementJob [productFamily=%s, keyObjectStorage=%s, creationDate=%s, unlimited=%s, evictionDate=%s]",
-				productFamily, keyObjectStorage, creationDate, unlimited, evictionDate);
+				"EvictionManagementJob [productFamily=%s, keyObjectStorage=%s, creationDate=%s, operatorName=%s]",
+				this.productFamily, this.keyObjectStorage, this.creationDate, this.operatorName);
+	}
+
+	// --------------------------------------------------------------------------
+
+	public String getOperatorName() {
+		return this.operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
 	}
 
 }

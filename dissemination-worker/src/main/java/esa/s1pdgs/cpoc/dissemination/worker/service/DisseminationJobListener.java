@@ -180,7 +180,7 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 		return new MqiPublishingJob<DisseminationJob>(Collections.emptyList());
 	}
 
-	private Map<OutboxConnection, OutboxClient> findMatchingOutboxes(String obsKey) {
+	Map<OutboxConnection, OutboxClient> findMatchingOutboxes(String obsKey) {
 		final Map<OutboxConnection, OutboxClient> matchingOutboxes = new HashMap<>();
 
 		for (final OutboxConnection outboxConnection : CollectionUtil.nullToEmpty(this.config.getOutboxConnections())) {
@@ -212,10 +212,10 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 	private List<ObsObject> assertExist(final List<DisseminationSource> files) throws InterruptedException {
 		return Retries.performWithRetries(() -> {
 			return this.assertExistInObs(files);
-		}, "assert files exist in OBS: " + files, this.config.getObsMaxRetries(), this.config.getObsTempoRetryMs());
+		}, "assert files exists in OBS: " + files, this.config.getObsMaxRetries(), this.config.getObsTempoRetryMs());
 	}
 
-	private List<ObsObject> assertExistInObs(final List<DisseminationSource> files)
+	List<ObsObject> assertExistInObs(final List<DisseminationSource> files)
 			throws ObsServiceException, SdkClientException {
 		final List<ObsObject> result = new ArrayList<>();
 

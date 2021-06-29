@@ -6,7 +6,7 @@
 	<parent>
 	  <groupId>de.werum.s1pdgs</groupId>
 	  <artifactId>s1pro-core</artifactId>
-	  <version>3.30.0-SNAPSHOT</version>
+	  <version>3.32.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>s1pro-core-metadata-catalog-worker</artifactId>
 	<packaging>jar</packaging>
@@ -165,7 +165,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-		          <skipTests>true</skipTests>
+		          <skipTests>false</skipTests>
 		        </configuration>
 			</plugin>
 			<plugin>

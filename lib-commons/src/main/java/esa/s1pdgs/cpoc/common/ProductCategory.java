@@ -7,6 +7,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.DownloadJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -32,7 +35,9 @@ public enum ProductCategory {
     LEVEL_REPORTS(LevelReportDto.class), 
     LEVEL_SEGMENTS(ProductionEvent.class),
     SPP_PRODUCTS(ProductionEvent.class),
+    SPP_MBU_PRODUCTS(ProductionEvent.class),
     DEBUG(ProductionEvent.class),
+    FAILED_WORKDIRS(ProductionEvent.class),
     COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class),
@@ -44,6 +49,9 @@ public enum ProductCategory {
     PRIP_JOBS(PripPublishingJob.class),
     DISSEMINATION_JOBS(DisseminationJob.class),
     EVICTION_MANAGEMENT_JOBS(EvictionManagementJob.class),
+    EVICTION_EVENT(EvictionEvent.class),
+    DATA_REQUEST_JOBS(DataRequestJob.class),
+    DATA_REQUEST_EVENT(DataRequestEvent.class),
     LTA_DOWNLOAD_EVENT(LtaDownloadEvent.class), 
     ON_DEMAND_EVENT(OnDemandEvent.class),
     DOWNLOAD_JOB(DownloadJob.class),
@@ -99,10 +107,14 @@ public enum ProductCategory {
 	        case L1C:
 	        case L2A:
 	        	return ProductCategory.LEVEL_INPUT;
+	        case SPP_MBU:
+	        	return ProductCategory.SPP_MBU_PRODUCTS;
 	        case SPP_OBS:
 	        	return ProductCategory.SPP_PRODUCTS;
 	        case DEBUG:
 	        	return ProductCategory.DEBUG;
+	        case FAILED_WORKDIR:
+	        	return ProductCategory.FAILED_WORKDIRS;
 			case AUXILIARY_FILE_ZIP:
 			case PLAN_AND_REPORT_ZIP:
 			case SPP_OBS_ZIP:

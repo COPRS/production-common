@@ -95,7 +95,7 @@ public class TestProductEntityCollectionProcessor {
 		ODataResponse odataResponse = new ODataResponse();
 		uut.readEntityCollection(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
 		
-		Mockito.verify(pripMetadataRepositoryMock, times(1)).findAll(Optional.empty(), Optional.empty());
+		Mockito.verify(pripMetadataRepositoryMock, times(1)).findAll(Optional.empty(), Optional.empty(), Collections.emptyList());
 		assertEquals(HttpStatusCode.OK.getStatusCode(), odataResponse.getStatusCode());
 		assertEquals("expected result", IOUtils.toString(odataResponse.getContent(), StandardCharsets.UTF_8));
 	}

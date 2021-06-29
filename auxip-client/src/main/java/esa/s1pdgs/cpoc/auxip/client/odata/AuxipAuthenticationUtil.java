@@ -77,8 +77,18 @@ public final class AuxipAuthenticationUtil {
 						"error retrieving oauth access token from " + oauthAuthUrl + ": no response");
 			}
 			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				String responseBodyString = "empty";
+				final HttpEntity entity = response.getEntity();
+				if (null != entity) {
+					final InputStream responseBodyStream = entity.getContent();
+					if (null != responseBodyStream) {
+						responseBodyString = IOUtils.toString(responseBodyStream, StandardCharsets.UTF_8);
+					}
+				}
+
 				throw new AuxipClientOauthException("error retrieving oauth access token from " + oauthAuthUrl
-						+ ": status code " + response.getStatusLine().getStatusCode());
+						+ ": status code " + response.getStatusLine().getStatusCode() + "\nbody: "
+						+ responseBodyString);
 			}
 
 			final HttpEntity responseEntity = response.getEntity();

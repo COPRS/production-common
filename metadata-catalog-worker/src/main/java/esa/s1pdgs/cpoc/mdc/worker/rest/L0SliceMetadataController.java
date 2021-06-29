@@ -35,6 +35,13 @@ public class L0SliceMetadataController extends AbstractMetadataController<L0Slic
             @PathVariable(name = "productName") String productName) {		
 		return getResponse(productName, family, () -> esServices.getSeaCoverage(family, productName));
     }
+	
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{family}/{productName:.+}/isIntersectingEwSlcMask")
+    public ResponseEntity<Boolean> isIntersectingEwSlcMask(
+            @PathVariable(name = "family") ProductFamily family,
+            @PathVariable(name = "productName") String productName) {		
+		return getResponse(productName, family, () -> esServices.isIntersectingEwSlcMask(family, productName));
+    }
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productName:.+}")
 	public ResponseEntity<L0SliceMetadata> get(@PathVariable(name = "productName") String productName) {

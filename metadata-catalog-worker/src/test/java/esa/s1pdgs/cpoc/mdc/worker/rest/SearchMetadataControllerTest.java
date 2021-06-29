@@ -50,7 +50,7 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	}
 	
 	private void mockSearchMetadataLastValIntersect(SearchMetadata response) throws Exception {
-        doReturn(response).when(esServices).lastValIntersect(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(ProductFamily.class),Mockito.any(String.class),Mockito.any(String.class));
+        doReturn(response).when(esServices).lastValIntersect(Mockito.any(String.class),Mockito.any(String.class),Mockito.any(String.class),Mockito.any(ProductFamily.class),Mockito.any(String.class));
     }
 
 	private void mockSearchMetadataNotPresentException() throws Exception {

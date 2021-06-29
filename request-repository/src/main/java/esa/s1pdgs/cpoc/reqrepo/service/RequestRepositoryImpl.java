@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.reqrepo.service;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,24 @@ public class RequestRepositoryImpl implements RequestRepository {
 
 		if (failedProcessingDto.getPredecessor() != null) {
 			final MqiMessage predecessorMessage = mqiMessageRepository.findById(failedProcessingDto.getPredecessor().getId());
-			factory.predecessorMessage(predecessorMessage);
+			if (predecessorMessage != null) {
+				factory.predecessorMessage(predecessorMessage);
+			}
+			else {
+				// S1PRO-2302: in case the MqiMessage is already gone, a new one needs to be created in order
+				// to allow resubmission/reevaluate.				
+				final GenericMessageDto<?> predecessorDto = failedProcessingDto.getPredecessor(); 
+				
+				final MqiMessage messageClone = new MqiMessage();
+		
+				messageClone.setId(predecessorDto.getId());
+				messageClone.setCreationDate(new Date());
+				messageClone.setState(MessageState.READ);
+				messageClone.setTopic(predecessorDto.getInputKey());
+				messageClone.setDto(predecessorDto.getDto());
+				
+				factory.predecessorMessage(messageClone);
+			}			
 		}
 		final FailedProcessing failedProcessing = factory.newFailedProcessing();		
 		failedProcessingRepo.save(failedProcessing);

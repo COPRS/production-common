@@ -89,11 +89,11 @@ public class AppCatJobService {
 		);	
 	}
 	
-	public final Optional<AppDataJob> findJobForDatatakeId(
+	public final Optional<List<AppDataJob>> findJobsForDatatakeId(
 			final String dataTakeId,
 			final String productType
 	) throws AbstractCodedException {
-		return first(
+		return returnOrEmpty(
 				appCatClient.findByProductDataTakeId(productType, dataTakeId), 
 				String.format("dataTakeId %s", dataTakeId)
 		);	
@@ -143,7 +143,8 @@ public class AppCatJobService {
 					if (queried != null) {
 						final AppDataJobProduct prod = queried.toProduct();
 						job.setProduct(prod);						
-						job.setAdditionalInputs(queried.overridingInputs());					
+						job.setAdditionalInputs(queried.overridingInputs());
+						job.setPreselectedInputs(queried.preselectedInputs());
 						
 						// dirty workaround for segment and session scenario
 						final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);

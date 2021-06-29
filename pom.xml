@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.werum.s1pdgs</groupId>
 	<artifactId>s1pro-core</artifactId>
-	<version>3.30.0-SNAPSHOT</version>
+	<version>3.32.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -19,10 +19,13 @@
 		
 		<commons.logging.version>1.2</commons.logging.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
-		<commons.net.version>3.3</commons.net.version>
+		<commons.net.version>3.8.0</commons.net.version>
 		<commons.io.version>2.6</commons.io.version>
-		
-		<jacoco.version>0.7.5.201505241946</jacoco.version>
+		<httpcomponents.version>4.5.1</httpcomponents.version>
+
+		<!-- jacoco.version>0.7.5.201505241946</jacoco.version-->
+		<jacoco.version>0.7.7.201606060606</jacoco.version>
+
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
 		<openapi4j.version>1.0.4</openapi4j.version>
@@ -59,9 +62,14 @@
 					<version>2.19.1</version>
 				</plugin>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
-				    <version>${spring.boot.version}</version>
+					<version>${spring.boot.version}</version>
 					<configuration>
 						<excludes>
 							<exclude>
@@ -105,7 +113,7 @@
 						<includeTests>false</includeTests>
 						<outputDirectory>target/html-reports</outputDirectory>
 					</configuration>
-				</plugin>	
+				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
@@ -115,8 +123,8 @@
 							<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
 						</systemPropertyVariables>
 					</configuration>
-				</plugin>			
-			</plugins>	
+				</plugin>
+			</plugins>
 		</pluginManagement>
 	</build>
 	
@@ -187,13 +195,18 @@
 		        <groupId>commons-net</groupId>
 		        <artifactId>commons-net</artifactId>
 		        <version>${commons.net.version}</version>
-		        <classifier>ftp</classifier>
 	      	</dependency>
 	      	
 	      	<dependency>
 		        <groupId>commons-io</groupId>
 		        <artifactId>commons-io</artifactId>
 		        <version>${commons.io.version}</version>
+	      	</dependency>
+
+	      	<dependency>
+		        <groupId>org.apache.httpcomponents</groupId>
+		        <artifactId>httpclient</artifactId>
+		        <version>${httpcomponents.version}</version>
 	      	</dependency>
 
 			<dependency>
@@ -354,12 +367,16 @@
  		<module>prip-frontend</module>
 		<module>prip-client</module>
 		<module>data-lifecycle-trigger</module>
-		<module>data-lifecycle-worker</module>
+		<module>data-lifecycle-client</module>
+		<module>data-request-worker</module>
+		<module>eviction-management-worker</module>
 		<module>validation</module>
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
 		<module>xml-tools</module>
 		<module>dissemination-trigger</module>
     	<module>dissemination-worker</module>
+    	<module>directory-cleaner</module>
+    	<module>jacoco-report</module>
 	</modules>
 </project>

@@ -69,7 +69,7 @@ public class LevelSegmentControllerTest extends RestControllerTest {
     public void metadataNotPresentTest() throws Exception {
         doThrow(new MetadataNotPresentException("name")).when(esServices).getLevelSegmentMetadataFor(Mockito.anyString());
         request(get("/level_segment/name"))
-        .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+        .andExpect(MockMvcResultMatchers.status().isNoContent());
         verify(esServices, times(1)).getLevelSegmentMetadataFor(Mockito.eq("name"));
     }
     

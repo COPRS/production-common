@@ -1,7 +1,7 @@
 ####
 #The image that is used to deploy the build environment and compile all source code.
 #### 
-FROM maven:3.5.3-jdk-8 as buildenv
+FROM registry.tools.s1pdgs.eu/anonymous/maven:3.5.3-jdk-8 as buildenv
 
 WORKDIR /app
 COPY . /app/
@@ -14,7 +14,7 @@ RUN mvn ${MAVEN_ARGS} -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xm
 ####
 
 # scratch seems not to work for some reason, we go for alpine...
-FROM alpine as final
+FROM registry.tools.s1pdgs.eu/anonymous/alpine as final
 ARG COMMIT_ID
 ARG BRANCH_TEXT
 
@@ -47,6 +47,8 @@ COPY --from=buildenv /app/prip-trigger/target /app/prip-trigger/target
 COPY --from=buildenv /app/prip-worker/target /app/prip-worker/target
 COPY --from=buildenv /app/prip-frontend/target /app/prip-frontend/target
 COPY --from=buildenv /app/data-lifecycle-trigger/target /app/data-lifecycle-trigger/target
-COPY --from=buildenv /app/data-lifecycle-worker/target /app/data-lifecycle-worker/target
+COPY --from=buildenv /app/data-request-worker/target /app/data-request-worker/target
+COPY --from=buildenv /app/eviction-management-worker/target /app/eviction-management-worker/target
 COPY --from=buildenv /app/dissemination-trigger/target /app/dissemination-trigger/target
 COPY --from=buildenv /app/dissemination-worker/target /app/dissemination-worker/target
+COPY --from=buildenv /app/directory-cleaner/target /app/directory-cleaner/target
