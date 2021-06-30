@@ -46,8 +46,7 @@ public class ObsAdapter {
         try {
             obsClient.uploadStreams(toUploadObjects(family, entries), reportingFactory);
         } catch (final ObsUnrecoverableException e) {
-            appStatus.setShallBeStopped(true);
-            appStatus.forceStopping();
+            appStatus.getStatus().setFatalError();
             throw new RuntimeException(
                     String.format("Error uploading %s (%s): %s", obsKey, family, LogUtils.toString(e))
             );
