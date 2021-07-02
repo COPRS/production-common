@@ -55,6 +55,7 @@ public class SppProductMetadataExtractor extends AbstractMetadataExtractor {
 			metadataJSON.put("startTime", DateUtils.convertToMetadataDateTimeFormat(m.group(9)));
 			metadataJSON.put("stopTime", DateUtils.convertToMetadataDateTimeFormat(m.group(10)));
 			metadataJSON.put("absoluteOrbitNumber", m.group(11));
+			metadataJSON.put("url", productName);
 		} else {
 			throw new MetadataExtractionException(
 					new Exception("metadata could not be extracted from productname: " + productName));
