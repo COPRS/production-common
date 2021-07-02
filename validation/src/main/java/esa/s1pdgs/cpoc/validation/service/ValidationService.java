@@ -164,18 +164,18 @@ public class ValidationService {
 			/*
 			 * Step 3: Validate all OBS files found
 			 */
-			for (ObsObject o : obsResults.values()) {
+			for (String key : extractRealKeysForObsValidation(obsResults.values())) {
 				
 				final Reporting obsReporting = reporting.newReporting("ValidateObs");
 				try {
-					obsReporting.begin(new ReportingMessage("Validating %s", o.getKey()));
-					obsClient.validate(new ObsObject(family, o.getKey()));
-					obsReporting.end(new ReportingMessage("%s is valid", o.getKey()));
+					obsReporting.begin(new ReportingMessage("Validating %s", key));
+					obsClient.validate(new ObsObject(family, key));
+					obsReporting.end(new ReportingMessage("%s is valid",key));
 				} catch (ObsServiceException | ObsValidationException ex) {
-					obsReporting.error(new ReportingMessage("%s is invalid: %s", o.getKey(), ex.getMessage()));
+					obsReporting.error(new ReportingMessage("%s is invalid: %s", key, ex.getMessage()));
 					// Validation failed for that object.
 					LOGGER.debug(ex);
-					discrepancies.add(new Discrepancy(o.getKey(), ex.getMessage()));
+					discrepancies.add(new Discrepancy(key, ex.getMessage()));
 				}
 			}
 
@@ -239,6 +239,25 @@ public class ValidationService {
 						new DataLifecycleTextFilter(field, DataLifecycleTextFilter.Function.EQUALS, key)),
 				Optional.empty(), Optional.empty(), Collections.emptyList());
 		return result.isEmpty();
+	}
+	
+	Set<String> extractRealKeysForObsValidation(final Collection<ObsObject> obsResults) {
+		
+		final Set<String> realProducts = new HashSet<>();
+		for (final ObsObject obsResult : obsResults) {
+			final String key = obsResult.getKey();
+			final int index = key.indexOf("/");
+			String realKey = null;
+
+			if (index != -1) {
+				realKey = key.substring(0, index);
+			} else {
+				realKey = key;
+			}
+			LOGGER.trace("key is {}", realKey);
+			realProducts.add(realKey);
+		}
+		return realProducts;
 	}
 
 	Set<String> extractRealKeysForMDC(final Collection<ObsObject> obsResults, final ProductFamily family) {
