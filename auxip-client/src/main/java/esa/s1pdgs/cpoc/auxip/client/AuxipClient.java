@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.auxip.client;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.UUID;
 
 import org.springframework.lang.NonNull;
 
-public interface AuxipClient {
+public interface AuxipClient extends Closeable {
 	
 	/**
 	 * Returns the product metadata from an AUXIP interface.
