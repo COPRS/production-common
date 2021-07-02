@@ -154,15 +154,12 @@ public class ValidationService {
 				try {
 					metadataClient.queryByFamilyAndProductName(family.name(), key);
 					// exists in MDC
-					realKeys.remove(key);
 				} catch (final MetadataQueryException e) {
 					// not exists in MDC
 					final Discrepancy discrepancy = new Discrepancy(key, "Exists in OBS, but not in MDC");
 					discrepancies.add(discrepancy);					
 				}
-				
 			}
-			LOGGER.info("Found {} keys that are in OBS, but not in MetadataCatalog", realKeys.size());
 			
 			/*
 			 * Step 3: Validate all OBS files found
