@@ -167,9 +167,14 @@ public final class StringUtil {
 
 	public static String stackTraceToString(Throwable e) {
 		final StringWriter sw = new StringWriter();
-		e.printStackTrace(new PrintWriter(sw));
+		final String str;
 
-		return sw.toString();
+		try (final PrintWriter pw = new PrintWriter(sw)) {
+			e.printStackTrace(pw);
+			str = sw.toString();
+		}
+
+		return str;
 	}
 
 	/**

@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.ingestion.worker.inbox;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.auxip.client.AuxipClient;
@@ -17,10 +16,10 @@ public class AuxipInboxAdapter implements InboxAdapter {
     }
 
     @Override
-    public List<InboxAdapterEntry> read(final URI uri, final String name, final String relativePath, final long size) {
+    public InboxAdapterResponse read(final URI uri, final String name, final String relativePath, final long size) {
         final AuxipClient auxipClient = clientFactory.newAuxipClient(uri);
         final InputStream in = auxipClient.read(UUID.fromString(name));
-        return Collections.singletonList(new InboxAdapterEntry(relativePath, in, size));
+        return new InboxAdapterResponse(Collections.singletonList(new InboxAdapterEntry(relativePath, in, size)), auxipClient);
     }
 
     @Override

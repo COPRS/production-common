@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ingestion.worker.inbox;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
@@ -41,20 +40,15 @@ public class TestFilesystemInboxAdapter {
 	
 	@Test
 	public final void testRead_OnSingleNonDirectoryFile_ShallReturnOneStream() throws Exception {
-		final List<InboxAdapterEntry> in = uut.read(singleFile.toURI(), singleFile.getName(), "", 123L);
-		try {
+		try (final InboxAdapterResponse response = uut.read(singleFile.toURI(), singleFile.getName(), "", 123L)) {
+			final List<InboxAdapterEntry> in = response.getResult();
 			assertEquals(1, in.size());
 			
 			try (final InputStream is = in.get(0).inputStream()) {
 				final List<String> lines = IOUtils.readLines(is, Charset.defaultCharset());
 				assertEquals(1, lines.size());
 				assertEquals(SINGLE_FILE_CONTENT, lines.get(0));
-			}			
-		}
-		finally {
-			for (final Closeable clsbl : in) {
-				clsbl.close();
-			}			
+			}
 		}
 	}
 
@@ -110,10 +104,12 @@ public class TestFilesystemInboxAdapter {
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
-		final List<InboxAdapterEntry> entries = uut.read(uri, job.getProductName(), "", 123L);
-		assertEquals(1, entries.size());		
-		final InboxAdapterEntry entry = entries.get(0);
-		assertEquals("S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", entry.key());
+		try (final InboxAdapterResponse response = uut.read(uri, job.getProductName(), "", 123L)) {
+			final List<InboxAdapterEntry> entries = response.getResult();
+			assertEquals(1, entries.size());
+			final InboxAdapterEntry entry = entries.get(0);
+			assertEquals("S1B__MPS__________017080/ch01/DCS_95_S1B__MPS__________017080_ch1_DSIB.xml", entry.key());
+		}
 	}
 	
 	@Test
@@ -145,11 +141,10 @@ public class TestFilesystemInboxAdapter {
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
-		final List<InboxAdapterEntry> entries = uut.read(uri, job.getProductName(), "", 123L);
-		entries.stream()
-			.forEach(e -> System.out.println(e));
-		
-		System.out.println(entries);
+		try (final InboxAdapterResponse response = uut.read(uri, job.getProductName(), "", 123L)) {
+			final List<InboxAdapterEntry> entries = response.getResult();
+			entries.stream().forEach(e -> System.out.println(e));
+		}
 		
 //		assertEquals(1, entries.size());		
 //		final InboxAdapterEntry entry = entries.get(0);
