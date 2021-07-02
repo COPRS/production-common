@@ -16,7 +16,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,7 +33,6 @@ import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
-import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
@@ -41,9 +42,10 @@ import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQue
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleTextFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
+import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
+import esa.s1pdgs.cpoc.datalifecycle.trigger.config.DataLifecycleTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleMetadataNotFoundException;
 import esa.s1pdgs.cpoc.datalifecycle.trigger.service.error.DataLifecycleTriggerBadRequestException;
-import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
 import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
@@ -347,21 +349,23 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	private DataLifecycleMetadata updateRetention(@NonNull DataLifecycleMetadata dataLifecycleMetadata, LocalDateTime evictionTimeInCompressedStorage,
 			LocalDateTime evictionTimeInUncompressedStorage)
 					throws DataLifecycleMetadataRepositoryException, DataLifecycleMetadataNotFoundException {
+		final Map<String,Object> updateFields = new HashMap<>();
+		
 		// uncompressed
 		if (null != evictionTimeInUncompressedStorage) {
-			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(evictionTimeInUncompressedStorage);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(), evictionTimeInUncompressedStorage);
 		} else { // freeze
-			dataLifecycleMetadata.setEvictionDateInUncompressedStorage(FOREVER);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE.fieldName(), FOREVER);
 		}
 
 		// compressed
 		if (null != evictionTimeInCompressedStorage) {
-			dataLifecycleMetadata.setEvictionDateInCompressedStorage(evictionTimeInCompressedStorage);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName(), evictionTimeInCompressedStorage);
 		} else { // freeze
-			dataLifecycleMetadata.setEvictionDateInCompressedStorage(FOREVER);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE.fieldName(), FOREVER);
 		}
 
-		return this.lifecycleMetadataRepo.saveAndGet(dataLifecycleMetadata);
+		return this.lifecycleMetadataRepo.updateAndGet(dataLifecycleMetadata.getProductName(), updateFields);
 	}
 
 	private int evict(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed, boolean forceUncompressed,
@@ -373,9 +377,9 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 		// uncompressed
 		final String pathInUncompressedStorage = dataLifecycleMetadata.getPathInUncompressedStorage();
 		final LocalDateTime evictionDateInUncompressedStorage = dataLifecycleMetadata.getEvictionDateInUncompressedStorage();
-
 		if (StringUtil.isNotBlank(pathInUncompressedStorage)
 				&& (forceUncompressed || (null != evictionDateInUncompressedStorage && now.isAfter(evictionDateInUncompressedStorage)))) {
+			
 			final ProductFamily productFamilyInUncompressedStorage = dataLifecycleMetadata.getProductFamilyInUncompressedStorage();
 			if (null == productFamilyInUncompressedStorage || ProductFamily.BLANK == productFamilyInUncompressedStorage) {
 				throw new DataLifecycleTriggerInternalServerErrorException(
@@ -430,7 +434,7 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 	private boolean sendDataRequest(final DataLifecycleMetadata dataLifecycleMetadata, final String operatorName)
 			throws DataLifecycleTriggerInternalServerErrorException {
 		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
-
+		final Map<String,Object> updateFields = new HashMap<>();
 		if (null == dataLifecycleMetadata.getLastDataRequest()
 				|| now.minusSeconds(this.dataRequestCooldown).isAfter(dataLifecycleMetadata.getLastDataRequest())) {
 			final ProductFamily productFamily = dataLifecycleMetadata.getProductFamilyInUncompressedStorage();
@@ -454,7 +458,9 @@ public class DataLifecycleServiceImpl implements DataLifecycleService {
 			LOG.debug("sending data request: " + dataRequestJob);
 			this.publish(dataRequestJob);
 			dataLifecycleMetadata.setLastDataRequest(now);
-			this.lifecycleMetadataRepo.save(dataLifecycleMetadata);
+			updateFields.put(DataLifecycleMetadata.FIELD_NAME.LAST_DATA_REQUEST.fieldName(),
+					dataLifecycleMetadata.getLastDataRequest());
+			this.lifecycleMetadataRepo.update(dataLifecycleMetadata.getProductName(), updateFields);
 			return true;
 		} else {
 			LOG.debug(String.format("omit sending a data request for '%s', because of active cooldown, ending %s",dataLifecycleMetadata.getProductName(),DateUtils

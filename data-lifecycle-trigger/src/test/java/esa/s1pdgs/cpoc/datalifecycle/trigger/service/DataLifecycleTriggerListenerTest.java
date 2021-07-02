@@ -1,26 +1,19 @@
 package esa.s1pdgs.cpoc.datalifecycle.trigger.service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.datalifecycle.client.DataLifecycleClientUtil;
-import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
-import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.RetentionPolicy;
-import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQueryFilter;
-import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
-import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
@@ -31,41 +24,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 public class DataLifecycleTriggerListenerTest {
 	
 	List<RetentionPolicy> retentionPolicies = new ArrayList<>();
-	
-	private DataLifecycleMetadataRepository metadataRepoMock = new DataLifecycleMetadataRepository() {
-		@Override
-		public void save(DataLifecycleMetadata metadata)
-				throws DataLifecycleMetadataRepositoryException {
-			// nothing
-		}
-		@Override
-		public DataLifecycleMetadata saveAndGet(DataLifecycleMetadata metadata)
-				throws DataLifecycleMetadataRepositoryException {
-			return null;
-		};
-		@Override
-		public Optional<DataLifecycleMetadata> findByProductName(String productName)
-				throws DataLifecycleMetadataRepositoryException {
-			return Optional.empty();
-		}
-		@Override
-		public List<DataLifecycleMetadata> findByEvictionDateBefore(LocalDateTime timestamp,
-				Optional<Integer> top, Optional<Integer> skip, List<DataLifecycleSortTerm> sortTerms)
-						throws DataLifecycleMetadataRepositoryException {
-			return Collections.emptyList();
-		}
-		@Override
-		public List<DataLifecycleMetadata> findByProductNames(List<String> productNames)
-				throws DataLifecycleMetadataRepositoryException {
-			return Collections.emptyList();
-		}
-		@Override
-		public List<DataLifecycleMetadata> findWithFilters(List<DataLifecycleQueryFilter> filters,
-				Optional<Integer> top, Optional<Integer> skip,	List<DataLifecycleSortTerm> sortTerms)
-						throws DataLifecycleMetadataRepositoryException {
-			return Collections.emptyList();
-		}
-	};
 	
 	@Before
 	public void init() {

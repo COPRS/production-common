@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.lang.NonNull;
@@ -18,8 +19,20 @@ public interface DataLifecycleMetadataRepository {
 
 	void save(@NonNull DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException;
 
-	DataLifecycleMetadata saveAndGet(@NonNull DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException;
+	void saveAndRefresh(@NonNull DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException;
 
+	void upsert(@NonNull DataLifecycleMetadata insertMetadata, @NonNull Map<String, Object> updateMetadata)
+			throws DataLifecycleMetadataRepositoryException;
+
+	void upsertAndRefresh(@NonNull DataLifecycleMetadata insertMetadata, @NonNull Map<String, Object> updateMetadata)
+			throws DataLifecycleMetadataRepositoryException;
+
+	void update(@NonNull String productName, Map<String, Object> updateMetadata) throws DataLifecycleMetadataRepositoryException;
+
+	void updateAndRefresh(@NonNull String productName, @NonNull Map<String, Object> updateMetadata) throws DataLifecycleMetadataRepositoryException;
+
+	DataLifecycleMetadata updateAndGet(@NonNull String productName, @NonNull Map<String, Object> updateMetadata) throws DataLifecycleMetadataRepositoryException;
+	
 	Optional<DataLifecycleMetadata> findByProductName(@NonNull String productName) throws DataLifecycleMetadataRepositoryException;
 
 	List<DataLifecycleMetadata> findByProductNames(@NonNull List<String> productNames) throws DataLifecycleMetadataRepositoryException;

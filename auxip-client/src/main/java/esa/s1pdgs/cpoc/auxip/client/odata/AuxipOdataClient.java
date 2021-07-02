@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.auxip.client.odata;
 
 import java.io.BufferedInputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -108,6 +109,29 @@ public class AuxipOdataClient implements AuxipClient {
 	}
 
 	// --------------------------------------------------------------------------
+	
+	@Override
+	public void close() throws IOException {
+		// try to close client download client
+		if (this.downloadClient instanceof Closeable) {
+			try {
+				((Closeable) this.downloadClient).close();
+			} catch (final IOException e) {
+				// ¯\_(ツ)_/¯
+				LOG.warn(String.format("error closing auxip download client %s: %s", this.downloadClient, StringUtil.stackTraceToString(e)));
+			}
+		}
+		
+		// try to close client odata client
+		if (this.odataClient instanceof Closeable) { // currently, ODataClient is not Closeable though
+			try {
+				((Closeable) this.odataClient).close();
+			} catch (final IOException e) {
+				// ¯\_(ツ)_/¯
+				LOG.warn(String.format("error closing auxip odata client %s: %s", this.odataClient, StringUtil.stackTraceToString(e)));
+			}
+		}
+	}
 
 	@Override
 	public boolean isDisabled() {

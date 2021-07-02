@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.xbip.client.sardine;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -18,6 +19,7 @@ import com.github.sardine.Sardine;
 
 import esa.s1pdgs.cpoc.common.errors.SardineRuntimeException;
 import esa.s1pdgs.cpoc.common.utils.Retries;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.xbip.client.XbipClient;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntry;
 import esa.s1pdgs.cpoc.xbip.client.XbipEntryFilter;
@@ -34,6 +36,19 @@ public class SardineXbipClient implements XbipClient {
 		this.sardine = sardine;
 		this.url = url;
 		this.programmaticRecursion = programmaticRecursion;
+	}
+	
+	@Override
+	public void close() throws IOException {
+		// try to close sardine webdav client
+		if (null != this.sardine) {
+			try {
+				this.sardine.shutdown();
+			} catch (final IOException e) {
+				// ¯\_(ツ)_/¯
+				LOG.warn(String.format("error closing sardine webdav client %s: %s", this.sardine, StringUtil.stackTraceToString(e)));
+			}
+		}
 	}
 	
 	@Override

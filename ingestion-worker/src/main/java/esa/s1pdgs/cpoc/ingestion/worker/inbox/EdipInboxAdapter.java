@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.ebip.client.EdipClient;
@@ -21,14 +20,15 @@ public final class EdipInboxAdapter implements InboxAdapter {
 	}
 
 	@Override
-	public final List<InboxAdapterEntry> read(final URI uri, final String name, final String relativePath, final long size) throws Exception {
+	public final InboxAdapterResponse read(final URI uri, final String name, final String relativePath, final long size) throws Exception {
 		final EdipClient client = edipClientFactory.newEdipClient(uri);	
 		final Path basePath = IngestionJobs.basePath(uri, name);
 		
-		// only list the content of the specified url
-		return client.list(EdipEntryFilter.ALLOW_ALL).stream()
-			.map(x -> toInboxAdapterEntry(basePath, x, client.read(x)))
-			.collect(Collectors.toList());
+		return new InboxAdapterResponse(
+				// TODO: only list the content of the specified url
+				client.list(EdipEntryFilter.ALLOW_ALL).stream()
+				.map(x -> toInboxAdapterEntry(basePath, x, client.read(x)))
+				.collect(Collectors.toList()), client);
 	}
 
 	@Override

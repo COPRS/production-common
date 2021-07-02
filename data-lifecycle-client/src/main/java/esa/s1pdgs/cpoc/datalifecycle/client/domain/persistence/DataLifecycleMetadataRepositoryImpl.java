@@ -1,10 +1,21 @@
 
 package esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence;
 
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.AVAILABLE_IN_LTA;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_COMPRESSED_STORAGE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.EVICTION_DATE_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_DATA_REQUEST;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_INSERTION_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PATH_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PATH_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PERSISTENT_IN_UNCOMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_COMPRESSED_STORAGE;
+import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME;
-import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.*;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,11 +33,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.Fuzziness;
@@ -85,63 +97,96 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	
 	@Override
 	public void save(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
-		metadata.setLastModified(LocalDateTime.now(ZoneId.of("UTC")));
-		
-		final IndexRequest request = new IndexRequest(this.elasticsearchIndex).id(metadata.getProductName())
-				.source(metadata.toJson().toString(), XContentType.JSON);
-		LOG.debug("product data lifecycle metadata save request ("
-				+ this.elasticsearchClient.getLowLevelClient().getNodes().get(0).getHost() + "): " + request);
-
-		try {
-			final IndexResponse response = this.elasticsearchClient.index(request, RequestOptions.DEFAULT);
-
-			if (DocWriteResponse.Result.CREATED == response.getResult()
-					|| DocWriteResponse.Result.UPDATED == response.getResult()) {
-				LOG.debug("successfully saved product data lifecycle metadata " + metadata);
-			} else {
-				final ReplicationResponse.ShardInfo shardInfo = response.getShardInfo();
-				if (shardInfo.getFailed() > 0) {
-					final StringBuilder errBuilder = new StringBuilder(
-							"data lifecycle metadata could not be saved successfully for product: "
-									+ metadata.getProductName());
-					for (final ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
-						errBuilder.append("\nsaving error: " + failure.reason());
-					}
-					throw new DataLifecycleMetadataRepositoryException(errBuilder.toString());
-				}
-			}
-		} catch (final IOException e) {
-			throw new DataLifecycleMetadataRepositoryException("error saving product data lifecycle metadata ("
-					+ metadata.getProductName() + "): " + e.getMessage(), e);
-		}
+		this.save(metadata.getProductName(), metadata, Collections.emptyMap(), false, false);
 	}
 
 	@Override
-	public DataLifecycleMetadata saveAndGet(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
-		metadata.setLastModified(LocalDateTime.now(ZoneId.of("UTC")));
+	public void saveAndRefresh(DataLifecycleMetadata metadata) throws DataLifecycleMetadataRepositoryException {
+		this.save(metadata.getProductName(), metadata, Collections.emptyMap(), false, true);
+	}
+		
+	@Override
+	public DataLifecycleMetadata updateAndGet(@NonNull String productName, @NonNull Map<String, Object> updateMetadata) throws DataLifecycleMetadataRepositoryException {
+		this.updateAndRefresh(productName, updateMetadata);
+		return this.findByProductName(productName)
+				.orElseThrow(() -> new DataLifecycleMetadataRepositoryException("error reading product data after saving"));
+	}
 
-		final IndexRequest request = new IndexRequest(this.elasticsearchIndex).id(metadata.getProductName())
-				.source(metadata.toJson().toString(), XContentType.JSON);
-		request.setRefreshPolicy(RefreshPolicy.IMMEDIATE); // <-- we need the updated data immediately
+	@Override
+	public void upsert(final DataLifecycleMetadata insertMetadata, final Map<String, Object> updateMetadata)
+			throws DataLifecycleMetadataRepositoryException {
+		this.save(insertMetadata.getProductName(), insertMetadata, updateMetadata, false, false);
+	}
+
+	@Override
+	public void upsertAndRefresh(final DataLifecycleMetadata insertMetadata, final Map<String, Object> updateMetadata)
+			throws DataLifecycleMetadataRepositoryException {
+		this.save(insertMetadata.getProductName(), insertMetadata, updateMetadata, false, true);
+	}
+	
+	@Override
+	public void update(final String productName, final Map<String, Object> updateMetadata)
+			throws DataLifecycleMetadataRepositoryException {
+		this.save(productName, null, updateMetadata, true, false);
+	}
+
+	@Override
+	public void updateAndRefresh(final String productName, final Map<String, Object> updateMetadata)
+			throws DataLifecycleMetadataRepositoryException {
+		this.save(productName, null, updateMetadata, true, true);
+	}
+	
+	private void save(final String productName, final DataLifecycleMetadata insertMetadata, final Map<String, Object> updateMetadata,
+			final boolean pureUpdate, final boolean refreshImmediately) throws DataLifecycleMetadataRepositoryException {
+		if (null != insertMetadata && insertMetadata.getProductName() != productName) {
+			throw new IllegalStateException(String.format("Productname %s does not match %s", productName, insertMetadata));
+		}
+		final WriteRequest<?> request;
+		if (!updateMetadata.isEmpty()) {
+			final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+			updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName(), (Object)now);
+
+			if (pureUpdate) {
+				request = new UpdateRequest(this.elasticsearchIndex, productName)
+						.doc(updateMetadata);
+			} else if (null != insertMetadata) {
+				insertMetadata.setLastModified(now);
+				request = new UpdateRequest(this.elasticsearchIndex, productName)
+						.doc(updateMetadata)
+						.upsert(insertMetadata.toJson().toString(), XContentType.JSON);
+			} else {
+				throw new IllegalArgumentException("insert metadata missing for upsert!");
+			}
+		} else if (null != insertMetadata) {
+			request = new IndexRequest(this.elasticsearchIndex).id(productName)
+					.source(insertMetadata.toJson().toString(), XContentType.JSON);
+		} else {
+			throw new IllegalArgumentException("nothing to save: at least insert metadata or update metadata is required");
+		}
+		if(refreshImmediately) {
+			request.setRefreshPolicy(RefreshPolicy.IMMEDIATE); // <-- we want the changes to be available immediately
+		}
 
 		LOG.debug("product data lifecycle metadata save request ("
 				+ this.elasticsearchClient.getLowLevelClient().getNodes().get(0).getHost() + "): " + request);
 
 		try {
-			final IndexResponse response = this.elasticsearchClient.index(request, RequestOptions.DEFAULT);
+			final DocWriteResponse response;
+			if (request instanceof UpdateRequest) {
+				response = this.elasticsearchClient.update((UpdateRequest)request, RequestOptions.DEFAULT);
+			} else {
+				response = this.elasticsearchClient.index((IndexRequest)request, RequestOptions.DEFAULT);
+			}
 
 			if (DocWriteResponse.Result.CREATED == response.getResult()
 					|| DocWriteResponse.Result.UPDATED == response.getResult()) {
-				LOG.debug("successfully saved product data lifecycle metadata " + metadata);
-
-				return this.findByProductName(metadata.getProductName())
-						.orElseThrow(() -> new DataLifecycleMetadataRepositoryException("error reading product data after saving"));
+				LOG.debug("successfully saved product data lifecycle metadata " + insertMetadata);
 			} else {
 				final ReplicationResponse.ShardInfo shardInfo = response.getShardInfo();
 				if (shardInfo.getFailed() > 0) {
 					final StringBuilder errBuilder = new StringBuilder(
 							"data lifecycle metadata could not be saved successfully for product: "
-									+ metadata.getProductName());
+									+ productName);
 					for (final ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
 						errBuilder.append("\nsaving error: " + failure.reason());
 					}
@@ -150,14 +195,14 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 
 				throw new DataLifecycleMetadataRepositoryException(
 						"data lifecycle metadata could not be saved successfully (but no error message returned from persistence) for product: "
-								+ metadata.getProductName());
+								+ productName);
 			}
 		} catch (final IOException e) {
 			throw new DataLifecycleMetadataRepositoryException("error saving product data lifecycle metadata ("
-					+ metadata.getProductName() + "): " + e.getMessage(), e);
+					+ productName + "): " + e.getMessage(), e);
 		}
 	}
-
+	
 	@Override
 	public Optional<DataLifecycleMetadata> findByProductName(String name) throws DataLifecycleMetadataRepositoryException {
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();

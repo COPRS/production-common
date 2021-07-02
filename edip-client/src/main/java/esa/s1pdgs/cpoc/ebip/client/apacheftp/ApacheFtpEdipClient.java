@@ -74,8 +74,8 @@ public class ApacheFtpEdipClient implements EdipClient {
 				@Override
 				public void close() throws IOException {	
 					if (client.isConnected()) {
+						super.close();
 						client.completePendingCommand();
-						super.close();			
 						client.logout();
 						client.disconnect();
 						assertPositiveCompletion(client);

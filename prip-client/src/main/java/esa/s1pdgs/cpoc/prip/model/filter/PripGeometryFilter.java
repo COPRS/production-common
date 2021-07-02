@@ -9,7 +9,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 /**
  * Geometry filter for querying the persistence repository.
  */
-public class PripGeometryFilter extends PripQueryFilter {
+public class PripGeometryFilter extends PripQueryFilterTerm {
 
 	public enum Function {
 		INTERSECTS("intersects"), //
@@ -56,11 +56,15 @@ public class PripGeometryFilter extends PripQueryFilter {
 		this(fieldName.fieldName());
 	}
 
-	public PripGeometryFilter(String fieldName, Function function, Geometry geometry) {
-		this(fieldName);
+	private PripGeometryFilter(String fieldName, Function function, Geometry geometry, boolean nested, String path) {
+		super(fieldName, nested, path);
 
 		this.function = Objects.requireNonNull(function);
-		this.geometry = Objects.requireNonNull(geometry);
+		this.geometry = geometry;
+	}
+
+	public PripGeometryFilter(String fieldName, Function function, Geometry geometry) {
+		this(fieldName, function, geometry, false, null);
 	}
 
 	// --------------------------------------------------------------------------
@@ -92,7 +96,15 @@ public class PripGeometryFilter extends PripQueryFilter {
 		return this.getFieldName() + " " + (null != this.function ? this.function.name() : "NO_FUNCTION") + " "
 				+ this.geometry;
 	}
-	
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripGeometryFilter copy() {
+		return new PripGeometryFilter(this.getFieldName(), this.getFunction(), this.getGeometry() != null ? this.getGeometry().copy() : null, this.isNested(),
+				this.getPath());
+	}
+
 	// --------------------------------------------------------------------------
 
 	public Function getFunction() {
