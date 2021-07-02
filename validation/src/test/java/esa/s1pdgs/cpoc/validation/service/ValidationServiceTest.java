@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.validation.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -20,6 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleTextFilter;
@@ -115,6 +117,8 @@ public class ValidationServiceTest {
 		doReturn(obsResults).when(obsClient).listInterval(Mockito.eq(ProductFamily.AUXILIARY_FILE),
 				Mockito.eq(Date.from(localDateTimeStart.atZone(ZoneId.of("UTC")).toInstant())),
 				Mockito.eq(Date.from(localDateTimeStop.atZone(ZoneId.of("UTC")).toInstant())));
+		
+		doThrow(new MetadataQueryException("")).when(metadataClient).queryByFamilyAndProductName(ProductFamily.AUXILIARY_FILE.name(), "IAMNOTINTHEMETADATA");
 		
 		// OBS does have 6 elements, but two are actually the same product
 		assertEquals(5,validationService.extractRealKeysForMDC(obsResults.values(),ProductFamily.AUXILIARY_FILE).size());
