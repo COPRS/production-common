@@ -164,7 +164,7 @@ public class ValidationService {
 			/*
 			 * Step 3: Validate all OBS files found
 			 */
-			for (String key : extractRealKeysForObsValidation(obsResults.values())) {
+			for (String key : extractRealKeysForObsValidation(obsResults.values(), family)) {
 				
 				final Reporting obsReporting = reporting.newReporting("ValidateObs");
 				try {
@@ -241,7 +241,7 @@ public class ValidationService {
 		return result.isEmpty();
 	}
 	
-	Set<String> extractRealKeysForObsValidation(final Collection<ObsObject> obsResults) {
+	Set<String> extractRealKeysForObsValidation(final Collection<ObsObject> obsResults, final ProductFamily family) {
 		
 		final Set<String> realProducts = new HashSet<>();
 		for (final ObsObject obsResult : obsResults) {
@@ -249,7 +249,9 @@ public class ValidationService {
 			final int index = key.indexOf("/");
 			String realKey = null;
 
-			if (index != -1) {
+			if (family == ProductFamily.EDRS_SESSION) {
+				realKey = key;
+			} else if (index != -1) {
 				realKey = key.substring(0, index);
 			} else {
 				realKey = key;
