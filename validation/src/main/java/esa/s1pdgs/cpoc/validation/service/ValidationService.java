@@ -164,7 +164,7 @@ public class ValidationService {
 			/*
 			 * Step 3: Validate all OBS files found
 			 */
-			for (String key : extractRealKeysForObsValidation(obsResults.values(), family)) {
+			for (String key : extractRealKeys(obsResults.values(), family)) {
 				
 				final Reporting obsReporting = reporting.newReporting("ValidateObs");
 				try {
@@ -214,7 +214,7 @@ public class ValidationService {
 
 		LOGGER.info("Check that everything that is in OBS is also in the Data Lifecycle index");
 
-		for (String key : extractRealKeysForDataLifecycle(obsObjects, family)) {
+		for (String key : extractRealKeys(obsObjects, family)) {
 			if (isNotPresentInDataLifecycleIndex(key)) {
 				LOGGER.trace("Exists in OBS, but not in Data Lifecycle Index: {}", key);
 				final Discrepancy discrepancy = new Discrepancy(key,
@@ -241,7 +241,7 @@ public class ValidationService {
 		return result.isEmpty();
 	}
 	
-	Set<String> extractRealKeysForObsValidation(final Collection<ObsObject> obsResults, final ProductFamily family) {
+	Set<String> extractRealKeys(final Collection<ObsObject> obsResults, final ProductFamily family) {
 		
 		final Set<String> realProducts = new HashSet<>();
 		for (final ObsObject obsResult : obsResults) {
@@ -287,34 +287,6 @@ public class ValidationService {
 			if (key.endsWith(".zip")) {
 				// Special case zipped products. The MDC key does not contain the zip!
 				realKey = realKey.substring(0, key.lastIndexOf(".zip"));
-			}
-			LOGGER.trace("key is {}", realKey);
-			realProducts.add(realKey);
-		}
-		return realProducts;
-	}
-	
-	Set<String> extractRealKeysForDataLifecycle(final Collection<ObsObject> obsResults, final ProductFamily family) {
-		final Set<String> realProducts = new HashSet<>();
-		for (final ObsObject obsResult : obsResults) {
-			final String key = obsResult.getKey();
-			final int index = key.indexOf("/");
-			String realKey = null;
-
-			if (family == ProductFamily.EDRS_SESSION) {
-				realKey = key;
-				/*
-				 * EDRS_Sessions are just queried on raw and not containg DSIB. So we are
-				 * removing them from the check
-				 */
-				if (realKey.endsWith("DSIB.xml")) {
-					LOGGER.debug("Ignoring DSIB file: {}", realKey);
-					continue;
-				}
-			} else if (index != -1) {
-				realKey = key.substring(0, index);
-			} else {
-				realKey = key;
 			}
 			LOGGER.trace("key is {}", realKey);
 			realProducts.add(realKey);
