@@ -289,8 +289,8 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
 				properties.getLevel(), 
 				properties,
-				message.getDto().isDebug()
-	    );		
+				message.getDto().isDebug(),
+				appStatus);
 		reporting.begin(
 				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
 				new ReportingMessage("Start job processing")

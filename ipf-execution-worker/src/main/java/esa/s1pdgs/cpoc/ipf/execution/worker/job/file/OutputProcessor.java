@@ -14,17 +14,20 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
@@ -127,7 +130,9 @@ public class OutputProcessor {
 	
 	private final boolean debugMode;
 
-	public static enum AcquisitionMode {
+	private final AppStatus appStatus;
+
+	public enum AcquisitionMode {
 		EW, IW, SM, WV, RF
 	}
 
@@ -158,23 +163,23 @@ public class OutputProcessor {
 				prefixMonitorLogs,
 				appLevel,
 				properties,
-				inputMessage.getDto().isDebug()				
-		);	
+				inputMessage.getDto().isDebug(),
+				null);
 	}
 	
 	public OutputProcessor(
-			final ObsClient obsClient, 
-			final OutputProcuderFactory procuderFactory, 
+			final ObsClient obsClient,
+			final OutputProcuderFactory procuderFactory,
 			final String workDirectory,
-			final String listFile, 
-			final GenericMessageDto<IpfExecutionJob> inputMessage, 
+			final String listFile,
+			final GenericMessageDto<IpfExecutionJob> inputMessage,
 			final List<LevelJobOutputDto> authorizedOutputs,
-			final int sizeUploadBatch, 
-			final String prefixMonitorLogs, 
-			final ApplicationLevel appLevel, 
+			final int sizeUploadBatch,
+			final String prefixMonitorLogs,
+			final ApplicationLevel appLevel,
 			final ApplicationProperties properties,
-			final boolean debugMode
-	) {
+			final boolean debugMode,
+			AppStatus appStatus) {
 		this.obsClient = obsClient;
 		this.procuderFactory = procuderFactory;
 		this.workDirectory = workDirectory;
@@ -186,6 +191,7 @@ public class OutputProcessor {
 		this.appLevel = appLevel;
 		this.properties = properties;
 		this.debugMode = debugMode;
+		this.appStatus = appStatus;
 	}
 
 	/**
@@ -379,7 +385,7 @@ public class OutputProcessor {
 	 * This method takes the product name and returns if this product is a possible
 	 * candidate for a ghost product
 	 * 
-	 * @param productName The product name of the product that should be checked
+	 * @param file The product file that should be checked
 	 * @return Either true or false depending if the product was identified as ghost
 	 *         product. If an error occurs during the extraction, the product will
 	 *         be identified as non-ghost
@@ -579,6 +585,16 @@ public class OutputProcessor {
 		res.addAll(publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid));
 		return res;
 	}
+
+	private List<GenericPublicationMessageDto<ProductionEvent>> handleUnrecoverableObsError(Callable<List<GenericPublicationMessageDto<ProductionEvent>>> obsUploadCallable) throws Exception {
+
+		try {
+			return obsUploadCallable.call();
+		} catch (ObsUnrecoverableException e) {
+			appStatus.getStatus().setFatalError();
+			throw e;
+		}
+	}
 	
 	private FileObsUploadObject newUploadObject(final ProductFamily family, final String productName, final File file) {
 		return new FileObsUploadObject(
@@ -707,12 +723,13 @@ public class OutputProcessor {
 		// Upload per batch the output
 		// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
 		//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);
-		final List<GenericPublicationMessageDto<ProductionEvent>> res = processProducts(
-				reportingFactory,
-				uploadBatch,
-				outputToPublish,
-				uuid
-		);
+		final List<GenericPublicationMessageDto<ProductionEvent>> res = handleUnrecoverableObsError(() ->
+				processProducts(
+						reportingFactory,
+						uploadBatch,
+						outputToPublish,
+						uuid
+				));
 		// Publish reports
 		processReports(reportToPublish, uuid);	
 		return res;

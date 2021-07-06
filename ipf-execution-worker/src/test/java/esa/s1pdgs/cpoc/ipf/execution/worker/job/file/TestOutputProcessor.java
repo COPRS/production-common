@@ -38,7 +38,7 @@ public class TestOutputProcessor {
 				null, 
 				null, 
 				null, 
-				true
-		);
+				true,
+                null);
 	}
 }

@@ -605,7 +605,7 @@ public class S3ObsServices {
 
 		@Override
 		public String toString() {
-			return "download of " + destination;
+			return format("download stream to %s", destination);
 		}
 	}
 
@@ -665,6 +665,11 @@ public class S3ObsServices {
 			}
 		}
 
+		@Override
+		public String toString() {
+			return format("upload file %s to %s/%s", file, bucketName, keyName);
+		}
+
 		public UploadResult uploadResult() {
 			return uploadResult;
 		}
@@ -688,6 +693,11 @@ public class S3ObsServices {
 		@Override
 		public void undo() {
 			//nothing to do here
+		}
+
+		@Override
+		public String toString() {
+			return format("delete %s", filePath);
 		}
 	}
 
