@@ -238,12 +238,21 @@ public class ApacheFtpEdipClient implements EdipClient {
 			throw new RuntimeException(String.format("Cannot list path: %s", path));
 		}
 		final List<FTPFile> ftpFiles = Arrays.asList(client.listFiles(path.toString()));
-		FTPFile ftpFile = ftpFiles.size() == 1 ? ftpFiles.get(0) : null;
-		if (null != ftpFile && !ftpFile.isDirectory() && null != path && null != path.getParent()) {
-			EdipEntry edipEntry = toEdipEntry(path.getParent(), ftpFile);
+		final FTPFile ftpFile = ftpFiles.size() == 1 ? ftpFiles.get(0) : null;
+		if (isNotDirectory(path, ftpFile)) {
+			final EdipEntry edipEntry = toEdipEntry(path.getParent(), ftpFile);
 			return Optional.of(Collections.singletonList(edipEntry));
 		}
 		return Optional.empty();
+	}
+
+	final boolean isNotDirectory(final Path path, final FTPFile ftpFile) {
+		return null != ftpFile && 
+				!ftpFile.isDirectory() && 
+				// dirty workaround for bug that some FTP servers may return something like '../myFile.txt'
+				!ftpFile.getName().startsWith("..") &&
+				null != path && 
+				null != path.getParent();
 	}
 	
 	private List<EdipEntry> listRecursively(
