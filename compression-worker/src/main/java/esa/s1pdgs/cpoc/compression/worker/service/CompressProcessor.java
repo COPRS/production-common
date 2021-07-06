@@ -56,6 +56,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.obs_sdk.UnrecoverableErrorAwareObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -90,7 +91,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 	) {
 		this.appStatus = appStatus;
 		this.properties = properties;
-		this.obsClient = obsClient;
+		this.obsClient = new UnrecoverableErrorAwareObsClient(obsClient, e -> appStatus.getStatus().setFatalError());
 		this.producerFactory = producerFactory;
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
@@ -161,6 +162,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 			
 						checkThreadInterrupted();
 						LOGGER.info("Uploading compressed/uncompressed outputs for {}", job);
+
 						final List<GenericPublicationMessageDto<CompressionEvent>> compressionEventDtos = fileUploader.processOutput(report);
 						
 						// ugly workaround for impossible casting issue:

@@ -26,7 +26,7 @@ public class TestOutputProcessor {
 		System.out.println(actual);
 	}
 	
-	private final OutputProcessor newOutputProcessor() {
+	private OutputProcessor newOutputProcessor() {
 		return new OutputProcessor(
 				null, 
 				null, 
@@ -38,7 +38,6 @@ public class TestOutputProcessor {
 				null, 
 				null, 
 				null, 
-				true,
-                null);
+				true);
 	}
 }

@@ -65,6 +65,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.UnrecoverableErrorAwareObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
@@ -154,7 +155,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		this.appStatus = appStatus;
 		this.devProperties = devProperties;
 		this.properties = properties;
-		this.obsClient = obsClient;
+		this.obsClient = new UnrecoverableErrorAwareObsClient(obsClient, e -> appStatus.getStatus().setFatalError());
 		this.procuderFactory = procuderFactory;
 		this.mqiClient = mqiClient;
 		this.messageFilter = messageFilter;
@@ -279,7 +280,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 //		this.debugMode = inputMessage.getDto().isDebug();
 		
 		final OutputProcessor outputProcessor = new OutputProcessor(
-				obsClient, 
+				obsClient,
 				procuderFactory, 
 				message.getBody().getWorkDirectory(),
 				outputListFile,
@@ -289,8 +290,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
 				properties.getLevel(), 
 				properties,
-				message.getDto().isDebug(),
-				appStatus);
+				message.getDto().isDebug());
 		reporting.begin(
 				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
 				new ReportingMessage("Start job processing")

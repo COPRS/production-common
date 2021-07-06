@@ -38,7 +38,7 @@ public class WorkingDirectoryUtils {
 		obsClient.upload(Collections.singletonList(upload), reporting);
 	}
 
-	private final String ipfExecutionErrorPrefix(final String hostname, final UUID uuid, final IpfExecutionJob job) {
+	private String ipfExecutionErrorPrefix(final String hostname, final UUID uuid, final IpfExecutionJob job) {
 		return hostname + "_" + job.getKeyObjectStorage() + "_" + uuid.toString() + "_" + job.getRetryCounter();
 	}
 
