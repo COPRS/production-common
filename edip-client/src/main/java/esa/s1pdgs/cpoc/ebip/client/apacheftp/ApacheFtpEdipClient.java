@@ -272,6 +272,12 @@ public class ApacheFtpEdipClient implements EdipClient {
 				continue;
 			}	
 			
+			// dirty workaround for '..' issue:
+			if (ftpFile.getName().startsWith("..")) {
+				LOG.trace("Ignoring {}", entry);
+				continue;				
+			}
+			
 			if (ftpFile.isDirectory()) {
 				LOG.trace("Found dir {}", entry);
 				result.addAll(listRecursively(client, entry.getPath(), filter));
