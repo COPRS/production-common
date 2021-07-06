@@ -12,11 +12,13 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterResponse;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -44,7 +46,7 @@ public class TestProductServiceImpl {
 	ProcessConfiguration processConfiguration;
 	
 	@Before
-	public void setup() {
+	public void setup() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		uut = new ProductServiceImpl(obsClient, true);
 		
@@ -62,6 +64,9 @@ public class TestProductServiceImpl {
 		doReturn(true).when(notWritableFile).canRead();
 		doReturn(false).when(notWritableFile).canWrite();
 		doReturn("notWritableFile").when(notWritableFile).toString();
+		
+		doReturn(new InboxAdapterResponse(null, null)).when(inboxAdapter).read(
+				Mockito.any(), Mockito.anyString(), Mockito.anyString(), Mockito.anyLong());
 	}
 	
 	@Test
