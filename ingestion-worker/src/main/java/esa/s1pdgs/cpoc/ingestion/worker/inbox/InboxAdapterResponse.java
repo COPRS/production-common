@@ -39,7 +39,7 @@ public class InboxAdapterResponse implements Closeable {
 				entry.close();
 			} catch (final IOException e) {
 				// ¯\_(ツ)_/¯
-				LOG.warn(String.format("error closing input stream of %s: %", entry, StringUtil.stackTraceToString(e)));
+				LOG.warn(String.format("error closing input stream of %s: %s", entry, StringUtil.stackTraceToString(e)));
 			}
 		});
 
@@ -49,7 +49,7 @@ public class InboxAdapterResponse implements Closeable {
 				((Closeable) this.inboxClient).close();
 			} catch (final IOException e) {
 				// ¯\_(ツ)_/¯
-				LOG.warn(String.format("error closing inbox client %s: %", this.inboxClient, StringUtil.stackTraceToString(e)));
+				LOG.warn(String.format("error closing inbox client %s: %s", this.inboxClient, StringUtil.stackTraceToString(e)));
 			}
 		}
 	}
