@@ -36,7 +36,7 @@ public class EdipInboxAdapter extends AbstractInboxAdapter implements SupportsPr
 				.map(p -> new EntrySupplier(p.getPath(), () -> newInboxEntryFor(p)));
 	}
 	
-	private final InboxEntry newInboxEntryFor(final EdipEntry edipEntry) {
+	final InboxEntry newInboxEntryFor(final EdipEntry edipEntry) {
 		return inboxEntryFactory.newInboxEntry(
 				inboxURL,
 				edipEntry.getPath(),
