@@ -251,15 +251,9 @@ public class ApacheFtpEdipClient implements EdipClient {
 
 	final boolean isNotDirectory(final Path path, final FTPFile ftpFile) {
 		
-		LOG.debug("path = {}", path);
-		LOG.debug("path.getParent() = {}", path.getParent());
-		LOG.debug("ftpFile.isDirectory() = {}", ftpFile.isDirectory());
-		LOG.debug("ftpFile.getName() = {}", ftpFile.getName());
-		
-		
 		return null != ftpFile && 
 				!ftpFile.isDirectory() && 
-				!pathEqualsFtpFileName(path, ftpFile) &&
+				pathEqualsFtpFileName(path, ftpFile) &&
 				null != path && 
 				null != path.getParent();
 	}
