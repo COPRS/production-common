@@ -6,6 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import esa.s1pdgs.cpoc.ebip.client.EdipClient;
 import esa.s1pdgs.cpoc.ebip.client.EdipClientFactory;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntry;
@@ -13,6 +16,8 @@ import esa.s1pdgs.cpoc.ebip.client.EdipEntryFilter;
 import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionJobs;
 
 public final class EdipInboxAdapter implements InboxAdapter {	
+	
+	private static final Logger LOG = LoggerFactory.getLogger(EdipInboxAdapter.class);
 	private final EdipClientFactory edipClientFactory;
 	
 	public EdipInboxAdapter(final EdipClientFactory edipClientFactory) {
@@ -42,7 +47,11 @@ public final class EdipInboxAdapter implements InboxAdapter {
 	}
 	
 	private final InboxAdapterEntry toInboxAdapterEntry(final Path parent, final EdipEntry entry, final InputStream in) {
-		final Path thisPath = Paths.get(entry.getUri().getPath());		
+		final Path thisPath = Paths.get(entry.getUri().getPath());
+		LOG.debug("entry.getUri() = {}", entry.getUri());
+		LOG.debug("entry.getUri().getPath() = {}", entry.getUri().getPath());
+		LOG.debug("thisPath = {}", thisPath);
+		LOG.debug("parent.relativize(thisPath).toString() = {}", parent.relativize(thisPath).toString());
 		return new InboxAdapterEntry(parent.relativize(thisPath).toString(), in, entry.getSize());
 	}
 }

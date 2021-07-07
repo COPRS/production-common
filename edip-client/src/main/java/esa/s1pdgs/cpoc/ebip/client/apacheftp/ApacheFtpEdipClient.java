@@ -54,6 +54,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 	public final List<EdipEntry> list(final EdipEntryFilter filter) throws IOException {
 		LOG.debug("Listing {}", uri.getPath());
 		final Path uriPath = Paths.get(uri.getPath());
+		LOG.debug("uriPath = {}", uriPath);
 		
 		final FTPClient client = connectedClient();
 		
@@ -62,6 +63,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		
 		client.logout();
 		client.disconnect();
+		LOG.debug("Client returns result = {}", result);
 		return result;
 	}
 	
@@ -240,6 +242,7 @@ public class ApacheFtpEdipClient implements EdipClient {
 		final List<FTPFile> ftpFiles = Arrays.asList(client.listFiles(path.toString()));
 		final FTPFile ftpFile = ftpFiles.size() == 1 ? ftpFiles.get(0) : null;
 		if (isNotDirectory(path, ftpFile)) {
+			LOG.debug("is not a dir");
 			final EdipEntry edipEntry = toEdipEntry(path.getParent(), ftpFile);
 			return Optional.of(Collections.singletonList(edipEntry));
 		}
@@ -247,6 +250,13 @@ public class ApacheFtpEdipClient implements EdipClient {
 	}
 
 	final boolean isNotDirectory(final Path path, final FTPFile ftpFile) {
+		
+		LOG.debug("path = {}", path);
+		LOG.debug("path.getParent() = {}", path.getParent());
+		LOG.debug("ftpFile.isDirectory() = {}", ftpFile.isDirectory());
+		LOG.debug("ftpFile.getName() = {}", ftpFile.getName());
+		
+		
 		return null != ftpFile && 
 				!ftpFile.isDirectory() && 
 				// dirty workaround for bug that some FTP servers may return something like '../myFile.txt'
