@@ -76,12 +76,12 @@
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 		</dependency>
-		
+
 		<!-- Tests -->
 		<dependency>
 			<groupId>junit</groupId>

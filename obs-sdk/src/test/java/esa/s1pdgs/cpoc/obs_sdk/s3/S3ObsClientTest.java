@@ -1,16 +1,21 @@
 package esa.s1pdgs.cpoc.obs_sdk.s3;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -88,8 +93,6 @@ public class S3ObsClientTest {
     /**
      * Initialization
      *
-     * @throws ObsServiceException
-     * @throws S3SdkClientException
      */
     @Before
     public void init() throws ObsServiceException, S3SdkClientException {
@@ -109,7 +112,7 @@ public class S3ObsClientTest {
                 .when(service).uploadFile(Mockito.anyString(),
                 Mockito.anyString(), any());
         doReturn(new Md5.Entry("dummy", "dummy", "dummy")).when(service).uploadStream(Mockito.anyString(),
-                Mockito.anyString(), any(InputStream.class), anyLong());
+                Mockito.anyString(), any(InputStream.class));
 
         final ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setLastModified(new Date(expectedLastModified.toEpochMilli()));
@@ -142,11 +145,9 @@ public class S3ObsClientTest {
     /**
      * Test exist
      *
-     * @throws ObsServiceException
-     * @throws SdkClientException
      */
     @Test
-    public void testExist() throws ObsServiceException, SdkClientException {
+    public void testExist() throws SdkClientException {
         boolean ret = client.exists(new ObsObject(ProductFamily.L0_ACN, "key-exist"));
         assertTrue(ret);
         verify(service, times(1)).exist(eq("l0-acns"), eq("key-exist"));
@@ -159,11 +160,9 @@ public class S3ObsClientTest {
     /**
      * Test prefixExist
      *
-     * @throws ObsServiceException
-     * @throws SdkClientException
      */
     @Test
-    public void testPrefixExist() throws ObsServiceException, SdkClientException {
+    public void testPrefixExist() throws SdkClientException {
         boolean ret = client.prefixExists(new ObsObject(ProductFamily.L0_SLICE, "key-exist"));
         assertTrue(ret);
         verify(service, times(1)).getNbObjects(eq("l0-slices"),
@@ -176,11 +175,9 @@ public class S3ObsClientTest {
 
     /**
      * Test downloadObject
-     * @throws ObsServiceException
-     * @throws SdkClientException
      */
     @Test
-    public void testDownloadObject() throws ObsServiceException, SdkClientException {
+    public void testDownloadObject() throws SdkClientException {
         client.downloadObject(new ObsDownloadObject(ProductFamily.AUXILIARY_FILE, "key-exist", "target-dir"));
         verify(service, times(1)).downloadObjectsWithPrefix(eq("auxiliary-files"),
                 eq("key-exist"), eq("target-dir"), eq(false));
@@ -192,12 +189,9 @@ public class S3ObsClientTest {
 
     /**
      * Test uploadObject when directory
-     * @throws ObsServiceException
-     * @throws SdkClientException
-     * @throws ObsException
      */
     @Test
-    public void testUploadObjectDirectory() throws ObsServiceException, SdkClientException, ObsException {
+    public void testUploadObjectDirectory() throws SdkClientException, ObsException {
         client.uploadObject(new FileObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("target")));
 
         verify(service, times(1)).uploadDirectory(eq("l0-acns"),
@@ -214,12 +208,9 @@ public class S3ObsClientTest {
 
     /**
      * Test uploadObject when file
-     * @throws ObsServiceException
-     * @throws SdkClientException
-     * @throws ObsException
      */
     @Test
-    public void testUploadObjectFile() throws ObsServiceException, SdkClientException, ObsException {
+    public void testUploadObjectFile() throws SdkClientException, ObsException {
         client.uploadObject(new FileObsUploadObject(ProductFamily.L0_ACN, "key-exist", new File("pom.xml")));
         verify(service, times(1))
                 .uploadFile(eq("l0-acns"), eq("key-exist"), eq(new File("pom.xml")));
@@ -234,7 +225,7 @@ public class S3ObsClientTest {
         }
 
         verify(service, times(1))
-                .uploadStream(eq("l0-acns"), eq("key-exist"), any(InputStream.class), anyLong());
+                .uploadStream(eq("l0-acns"), eq("key-exist"), any(InputStream.class));
     }
 
     @Test
@@ -254,11 +245,11 @@ public class S3ObsClientTest {
         }
 
         verify(service, times(1))
-                .uploadStream(eq("l0-acns"), eq("key-exist"), any(InputStream.class), anyLong());
+                .uploadStream(eq("l0-acns"), eq("key-exist"), any(InputStream.class));
     }
 
     @Test
-    public void testUploadStreamNoContent() throws IOException, ObsServiceException, S3SdkClientException, AbstractCodedException, ObsEmptyFileException {
+    public void testUploadStreamNoContent() throws IOException, S3SdkClientException, AbstractCodedException, ObsEmptyFileException, S3ObsUnrecoverableException {
         thrown.expect(ObsEmptyFileException.class);
         thrown.expectMessage("key-exist");
 
@@ -267,7 +258,7 @@ public class S3ObsClientTest {
         }
 
         verify(service, times(0))
-                .uploadStream(any(), any(), any(InputStream.class), anyLong());
+                .uploadStream(any(), any(), any(InputStream.class));
     }
 
     @Test
@@ -290,7 +281,7 @@ public class S3ObsClientTest {
     }
 
     @Test
-    public void testGetListOfObjectsOfTimeFrameOfFamilyOneExists() throws ObsServiceException, SdkClientException {
+    public void testGetListOfObjectsOfTimeFrameOfFamilyOneExists() throws SdkClientException {
 
         final Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
         final Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
@@ -316,7 +307,7 @@ public class S3ObsClientTest {
     }
 
     @Test
-    public void testGetListOfObjectsOfTimeFrameOfFamilyNoneExists() throws ObsServiceException, SdkClientException {
+    public void testGetListOfObjectsOfTimeFrameOfFamilyNoneExists() throws SdkClientException {
 
         final Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
         final Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
@@ -342,7 +333,7 @@ public class S3ObsClientTest {
 
     @Test
     public void testGetListOfObjectsOfTimeFrameOfFamilyWithTruncatedList()
-            throws ObsServiceException, SdkClientException {
+            throws SdkClientException {
 
         final Date timeFrameBegin = Date.from(Instant.parse("2020-01-01T00:00:00Z"));
         final Date timeFrameEnd = Date.from(Instant.parse("2020-01-03T00:00:00Z"));
@@ -388,7 +379,7 @@ public class S3ObsClientTest {
     }
 
     @Test
-    public void testExistsValidArgumentAssertion() throws AbstractCodedException {
+    public void testExistsValidArgumentAssertion() {
         assertThatThrownBy(() -> client.exists(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
         assertThatThrownBy(() -> client.exists(new ObsObject(null, "key"))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
         assertThatThrownBy(() -> client.exists(new ObsObject(ProductFamily.AUXILIARY_FILE, null))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key: null");
@@ -396,7 +387,7 @@ public class S3ObsClientTest {
     }
 
     @Test
-    public void testPrefixExistsValidArgumentAssertion() throws AbstractCodedException {
+    public void testPrefixExistsValidArgumentAssertion() {
         assertThatThrownBy(() -> client.prefixExists(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
         assertThatThrownBy(() -> client.prefixExists(new ObsObject(null, "key"))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
         assertThatThrownBy(() -> client.prefixExists(new ObsObject(ProductFamily.AUXILIARY_FILE, null))).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key: null");
@@ -404,14 +395,14 @@ public class S3ObsClientTest {
     }
 
     @Test
-    public void testGetObsObjectsOfFamilyWithinTimeFrameValidArgumentAssertion() throws AbstractCodedException {
+    public void testGetObsObjectsOfFamilyWithinTimeFrameValidArgumentAssertion() {
         assertThatThrownBy(() -> client.getObsObjectsOfFamilyWithinTimeFrame(null, new Date(), new Date())).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
         assertThatThrownBy(() -> client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.AUXILIARY_FILE, null, new Date())).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid date: null");
         assertThatThrownBy(() -> client.getObsObjectsOfFamilyWithinTimeFrame(ProductFamily.AUXILIARY_FILE, new Date(), null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid date: null");
     }
 
     @Test
-    public void testMoveValidArgumentAssertion() throws AbstractCodedException {
+    public void testMoveValidArgumentAssertion() {
         assertThatThrownBy(() -> client.move(null, ProductFamily.AUXILIARY_FILE)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid object: null");
         assertThatThrownBy(() -> client.move(new ObsObject(null, "key"), ProductFamily.AUXILIARY_FILE)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
         assertThatThrownBy(() -> client.move(new ObsObject(ProductFamily.AUXILIARY_FILE, null), ProductFamily.AUXILIARY_FILE)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid key: null");
@@ -420,7 +411,7 @@ public class S3ObsClientTest {
     }
 
     @Test
-    public void testListValidArgumentAssertion() throws AbstractCodedException {
+    public void testListValidArgumentAssertion() {
         assertThatThrownBy(() -> client.list(null, "prefix")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
         assertThatThrownBy(() -> client.list(ProductFamily.AUXILIARY_FILE, null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix: null");
         assertThatThrownBy(() -> client.list(ProductFamily.AUXILIARY_FILE, "")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix (empty)");
@@ -428,7 +419,7 @@ public class S3ObsClientTest {
 
 
     @Test
-    public void testGetAllAsInputStreamValidArgumentAssertion() throws AbstractCodedException {
+    public void testGetAllAsInputStreamValidArgumentAssertion() {
         assertThatThrownBy(() -> client.getAsStream(null, "prefix")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid product family: null");
         assertThatThrownBy(() -> client.getAsStream(ProductFamily.AUXILIARY_FILE, null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix: null");
         assertThatThrownBy(() -> client.getAsStream(ProductFamily.AUXILIARY_FILE, "")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Invalid prefix (empty)");

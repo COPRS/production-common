@@ -27,9 +27,6 @@ public class S3SdkClientException extends SdkClientException {
     /**
      * Constructor
      * 
-     * @param key
-     * @param bucket
-     * @param cause
      */
     public S3SdkClientException(final String bucket, final String key,
             final String message) {
@@ -41,9 +38,6 @@ public class S3SdkClientException extends SdkClientException {
     /**
      * Constructor
      * 
-     * @param key
-     * @param bucket
-     * @param cause
      */
     public S3SdkClientException(final String bucket, final String key,
             final String message, final Throwable cause) {
@@ -69,7 +63,6 @@ public class S3SdkClientException extends SdkClientException {
     /**
      * Override the getMessage function
      * 
-     * @return
      */
     public String getMessage() {
         return String.format(

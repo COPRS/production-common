@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -28,6 +29,9 @@ public class ObsAdapterTest {
 
     @Mock
     ObsClient obsClient;
+
+    @Mock
+    AppStatus appStatus;
 
     @Before
     public void initMocks() {
@@ -44,7 +48,7 @@ public class ObsAdapterTest {
         when(obsClient.exists(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"))).thenReturn(true);
         when(obsClient.size(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"))).thenReturn(559967L);
 
-        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false);
+        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false, appStatus);
 
         assertThat(uut.sizeOf(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"), is(equalTo(559967L)));
 
@@ -68,7 +72,7 @@ public class ObsAdapterTest {
         when(obsClient.size(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE/support/s1-aux-cal.xsd"))).thenReturn(9723L);
         when(obsClient.size(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE/support/s1-object-types.xsd"))).thenReturn(63114L);
 
-        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false);
+        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false, appStatus);
 
         assertThat(uut.sizeOf(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE"), is(equalTo(1558640L + 3509L + 9723L + 63114L)));
 
@@ -85,7 +89,7 @@ public class ObsAdapterTest {
     public void sizeOfNonExisting() throws SdkClientException, ObsException {
         when(obsClient.exists(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"))).thenReturn(false);
 
-        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false);
+        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false, appStatus);
 
         assertThat(uut.sizeOf(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"), is(equalTo(-1L)));
 
@@ -98,7 +102,7 @@ public class ObsAdapterTest {
     @Test
     public void sizeOfWithExceptionDuringExists() throws SdkClientException {
         when(obsClient.exists(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"))).thenThrow(new SdkClientException("ERROR"));
-        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false);
+        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false, appStatus);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> uut.sizeOf(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"));
         assertThat(exception.getMessage(), startsWith("Error while retrieving size for obs object with key AUX1.EOF:"));
@@ -109,7 +113,7 @@ public class ObsAdapterTest {
         when(obsClient.exists(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE"))).thenReturn(false);
         when(obsClient.prefixExists(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE"))).thenThrow(new SdkClientException("ERROR"));
 
-        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false);
+        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false, appStatus);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> uut.sizeOf(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE"));
         assertThat(exception.getMessage(), startsWith("Error while retrieving size for obs object with key AUX2.SAFE:"));
@@ -120,7 +124,7 @@ public class ObsAdapterTest {
         when(obsClient.exists(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"))).thenReturn(true);
         when(obsClient.size(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"))).thenThrow(new ObsException(ProductFamily.AUXILIARY_FILE, "AUX1.EOF", new RuntimeException("ERROR")));
 
-        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false);
+        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false, appStatus);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> uut.sizeOf(ProductFamily.AUXILIARY_FILE, "AUX1.EOF"));
         assertThat(exception.getMessage(), startsWith("Error while retrieving size for obs object with key AUX1.EOF:"));
@@ -132,7 +136,7 @@ public class ObsAdapterTest {
         when(obsClient.prefixExists(new ObsObject(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE"))).thenReturn(true);
         when(obsClient.list(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE")).thenThrow(new SdkClientException("ERROR"));
 
-        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false);
+        ObsAdapter uut = new ObsAdapter(obsClient, ReportingFactory.NULL, false, appStatus);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> uut.sizeOf(ProductFamily.AUXILIARY_FILE, "AUX2.SAFE"));
         assertThat(exception.getMessage(), startsWith("Error while retrieving size for obs object with key AUX2.SAFE:"));
