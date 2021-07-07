@@ -259,12 +259,30 @@ public class ApacheFtpEdipClient implements EdipClient {
 		
 		return null != ftpFile && 
 				!ftpFile.isDirectory() && 
-				// dirty workaround for bug that some FTP servers may return something like '../myFile.txt'
-				!ftpFile.getName().startsWith("..") &&
+				!pathEqualsFtpFileName(path, ftpFile) &&
 				null != path && 
 				null != path.getParent();
 	}
 	
+	private boolean pathEqualsFtpFileName(final Path path, final FTPFile ftpFile) {
+		
+		Path ftpFilePath = Paths.get(ftpFile.getName()).getFileName();
+		Path uriPath = path.getFileName();
+		
+		LOG.debug("Paths.get(ftpFile.getName()).getFileName() = {}", ftpFilePath);
+		LOG.debug("path.getFileName() = {}", uriPath);
+		
+		if(ftpFilePath == null && uriPath == null) {
+			return true;
+		}
+		if (ftpFilePath == null || uriPath == null) {
+			return false; 
+		}
+		
+		return ftpFilePath.toString().equals(uriPath.toString());
+				
+	}
+
 	private List<EdipEntry> listRecursively(
 			final FTPClient client, 
 			final Path path, 
