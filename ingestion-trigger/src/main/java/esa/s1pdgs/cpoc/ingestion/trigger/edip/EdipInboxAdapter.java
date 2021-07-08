@@ -43,9 +43,6 @@ public class EdipInboxAdapter extends AbstractInboxAdapter implements SupportsPr
 	
 	final InboxEntry newInboxEntryFor(final EdipEntry edipEntry) {
 		
-		LOG.debug("inboxURL = {}", inboxURL);
-		LOG.debug("edipEntry.getPath() = {}", edipEntry.getPath());
-		
 		return inboxEntryFactory.newInboxEntry(
 				inboxURL,
 				edipEntry.getPath(),

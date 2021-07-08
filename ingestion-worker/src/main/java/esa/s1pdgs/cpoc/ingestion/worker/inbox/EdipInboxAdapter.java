@@ -48,10 +48,6 @@ public final class EdipInboxAdapter implements InboxAdapter {
 	
 	private final InboxAdapterEntry toInboxAdapterEntry(final Path parent, final EdipEntry entry, final InputStream in) {
 		final Path thisPath = Paths.get(entry.getUri().getPath());
-		LOG.debug("entry.getUri() = {}", entry.getUri());
-		LOG.debug("entry.getUri().getPath() = {}", entry.getUri().getPath());
-		LOG.debug("thisPath = {}", thisPath);
-		LOG.debug("parent.relativize(thisPath).toString() = {}", parent.relativize(thisPath).toString());
 		return new InboxAdapterEntry(parent.relativize(thisPath).toString(), in, entry.getSize());
 	}
 }
