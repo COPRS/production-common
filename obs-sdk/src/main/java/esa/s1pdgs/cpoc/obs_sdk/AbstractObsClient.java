@@ -66,15 +66,15 @@ public abstract class AbstractObsClient implements ObsClient {
 		return configuration.getBucketFor(family);
 	}
 
-    protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException;
+    protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException;
     
-    protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
+    protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsException;
 
 	protected abstract Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
 
     private List<File> downloadObjects(final List<ObsDownloadObject> objects,
 									   final boolean parallel, final ReportingFactory reportingFactory)
-            throws SdkClientException, ObsServiceException, ObsException {
+            throws SdkClientException, ObsException {
     	
     	final List<File> files = new ArrayList<>();
         if (objects.size() > 1 && parallel) {
@@ -138,7 +138,7 @@ public abstract class AbstractObsClient implements ObsClient {
 
 	private void uploadObjects(final List<FileObsUploadObject> objects,
 							   final boolean parallel, final ReportingFactory reportingFactory)
-            throws SdkClientException, ObsServiceException, ObsException {
+            throws SdkClientException, ObsException {
         if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
             final ExecutorService workerThread =
@@ -284,7 +284,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		}
 	}
 
-	private final void assertIsNotEmpty(final List<StreamObsUploadObject> objects) throws ObsEmptyFileException {
+	private void assertIsNotEmpty(final List<StreamObsUploadObject> objects) throws ObsEmptyFileException {
 		String emptyElementKey = "";
 		
 		for (final StreamObsUploadObject o : objects) {
@@ -480,17 +480,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		void call() throws Exception;
 	}
 	
-	static Callable<List<String>> wrapStringList(final StringListCallable callable) {
-		return callable::call;
-	}
-	
-	@FunctionalInterface
-	interface StringListCallable {
-		List<String> call() throws Exception;
-	}
-
-	public void uploadMd5Sum(final ObsObject object, final List<Md5.Entry> md5Sums) throws ObsServiceException, S3SdkClientException {
-	}
+	protected abstract void uploadMd5Sum(final ObsObject object, final List<Md5.Entry> md5Sums) throws ObsServiceException, S3SdkClientException;
 
 	protected ObsConfigurationProperties getConfiguration() {
 		return this.configuration;
