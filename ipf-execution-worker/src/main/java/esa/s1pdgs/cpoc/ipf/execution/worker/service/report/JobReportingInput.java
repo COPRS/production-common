@@ -14,19 +14,24 @@ public class JobReportingInput extends AbstractFilenameReportingProduct implemen
 	@JsonProperty("job_order_id_string")
 	private String jobOrderUuid;
 	
-	public JobReportingInput(final ReportingFilenameEntries entries, final String jobOrderUuid) {
+	@JsonProperty("ipf_release_string")
+	private String ipfVersion;
+	
+	public JobReportingInput(final ReportingFilenameEntries entries, final String jobOrderUuid,
+			final String ipfVersion) {
 		super(entries);
 		this.jobOrderUuid = jobOrderUuid;
+		this.ipfVersion = ipfVersion;
 	}
 	
 	@JsonIgnore
 	public static final JobReportingInput newInstance(
 			final List<ReportingFilenameEntry> entries,
-			final String jobOrderUuid
+			final String jobOrderUuid,
+			final String ipfVersion
 	) {		
-		return new JobReportingInput(new ReportingFilenameEntries(entries), jobOrderUuid);
+		return new JobReportingInput(new ReportingFilenameEntries(entries), jobOrderUuid, ipfVersion);
 	}
-	
 
 	public String getJobOrderUuid() {
 		return jobOrderUuid;
@@ -35,4 +40,13 @@ public class JobReportingInput extends AbstractFilenameReportingProduct implemen
 	public void setJobOrderUuid(final String jobOrderUuid) {
 		this.jobOrderUuid = jobOrderUuid;
 	}
+
+	public String getIpfVersion() {
+		return ipfVersion;
+	}
+
+	public void setIpfVersion(String ipfVersion) {
+		this.ipfVersion = ipfVersion;
+	}
+
 }
