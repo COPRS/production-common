@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -578,16 +581,21 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	
 	private String extractIpfVersionFromJobOrder(final IpfExecutionJob job) {
 		try {
-			final File jobOrderPath = new File(job.getJobOrder());
-			final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			final Document document = documentBuilder.parse(jobOrderPath);
-			final XPath xPath = XPathFactory.newInstance().newXPath();
-			final XPathExpression xPathExpression = xPath.compile("//*[local-name()='Version']/text()");                    
-			final Node node = (Node) xPathExpression.evaluate(document, XPathConstants.NODE);
-			return node.getNodeValue();
+			for (LevelJobInputDto inputDto: job.getInputs()) {
+				if (ProductFamily.JOB_ORDER.equals(ProductFamily.fromValue(inputDto.getFamily()))) {
+					InputStream inputStream = new ByteArrayInputStream(inputDto.getContentRef().getBytes(StandardCharsets.UTF_8));
+					final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+					final Document document = documentBuilder.parse(inputStream);
+					final XPath xPath = XPathFactory.newInstance().newXPath();
+					final XPathExpression xPathExpression = xPath.compile("//*[local-name()='Version']/text()");                    
+					final Node node = (Node) xPathExpression.evaluate(document, XPathConstants.NODE);
+					return node.getNodeValue();
+				}
+			}
+			throw new RuntimeException();
 		} catch (Exception e) {
 			LOGGER.warn(String.format("Could not extract IPF version from job order of job: %s", job.getUid()));
-			return "undefined";
+			return "not defined";
 		}
 	}
 
