@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,12 +24,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -292,7 +303,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 				properties,
 				message.getDto().isDebug());
 		reporting.begin(
-				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName),	
+				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName, extractIpfVersionFromJobOrder(job)),	
 				new ReportingMessage("Start job processing")
 		);
 		return new MqiMessageEventHandler.Builder<ProductionEvent>(category)
@@ -568,4 +579,24 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		return new ReportingMessage("[code {}] {}", ErrorCode.INTERNAL_ERROR, LogUtils.toString(e));
 	}
 	
+	private String extractIpfVersionFromJobOrder(final IpfExecutionJob job) {
+		try {
+			for (LevelJobInputDto inputDto: job.getInputs()) {
+				if (ProductFamily.JOB_ORDER.equals(ProductFamily.fromValue(inputDto.getFamily()))) {
+					InputStream inputStream = new ByteArrayInputStream(inputDto.getContentRef().getBytes(StandardCharsets.UTF_8));
+					final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+					final Document document = documentBuilder.parse(inputStream);
+					final XPath xPath = XPathFactory.newInstance().newXPath();
+					final XPathExpression xPathExpression = xPath.compile("//*[local-name()='Version']/text()");                    
+					final Node node = (Node) xPathExpression.evaluate(document, XPathConstants.NODE);
+					return node.getNodeValue();
+				}
+			}
+			throw new RuntimeException();
+		} catch (Exception e) {
+			LOGGER.warn(String.format("Could not extract IPF version from job order of job: %s", job.getUid()));
+			return "not defined";
+		}
+	}
+
 }
