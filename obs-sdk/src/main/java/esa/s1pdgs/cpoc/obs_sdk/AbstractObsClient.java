@@ -265,6 +265,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		try {
 			uploadObjects(objects, true, reportingFactory);
 		} catch (final SdkClientException exc) {
+			undoPartialFailedUpload(objects);
 			throw new ObsParallelAccessException(exc);
 		}
 	}
@@ -278,9 +279,24 @@ public abstract class AbstractObsClient implements ObsClient {
 			final List<Md5.Entry> md5s = uploadStreams(objects, true, reportingFactory);
 			uploadMd5Sum(baseKeyOf(objects), md5s);
 		} catch ( final S3ObsUnrecoverableException e) {
+			undoPartialFailedUpload(objects);
 			throw new ObsUnrecoverableException(e);
 		} catch (final SdkClientException exc) {
+			undoPartialFailedUpload(objects);
 			throw new ObsParallelAccessException(exc);
+		}
+	}
+
+	private <T extends ObsUploadObject>  void undoPartialFailedUpload(final List<T> uploadObjects) {
+		LOGGER.info("undo partial upload of multiple object: " + uploadObjects.stream().map(uO -> uO.getFamily() + ":" + uO.getKey()).collect(Collectors.joining(", ")));
+		for(final T uploadObject : uploadObjects) {
+			try {
+				LOGGER.info("deleting " + uploadObject);
+				delete(uploadObject);
+			} catch (ObsException | ObsServiceException e) {
+				LOGGER.error("deletion of " + uploadObject + " failed", e);
+				// don't rethrow the exception because it would suppress original exception
+			}
 		}
 	}
 

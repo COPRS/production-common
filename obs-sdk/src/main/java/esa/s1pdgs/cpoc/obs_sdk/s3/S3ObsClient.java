@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -178,14 +179,11 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public void uploadObject(final FileObsUploadObject object)
 			throws SdkClientException, ObsException {
-		final List<Md5.Entry> fileList = new ArrayList<>();
 		if (object.getFile().isDirectory()) {
-			fileList.addAll(
-					s3Services.uploadDirectory(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
+			uploadMd5Sum(object, s3Services.uploadDirectory(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
 		} else {
-			fileList.add(s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey(), object.getFile()));
+			uploadMd5Sum(object, Collections.singletonList(s3Services.uploadFile(getBucketFor(object.getFamily()), object.getKey(), object.getFile())));
 		}
-		uploadMd5Sum(object, fileList);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.compression.worker.file;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +90,7 @@ public class FileUploader {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		obsClient.upload(Arrays.asList(new FileObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
+		obsClient.upload(Collections.singletonList(new FileObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
         return publishAccordingUploadFiles(NOT_KEY_OBS, outputToPublish);
 	}
 
