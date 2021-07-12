@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mdc.worker.Utils;
 import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.mdc.worker.config.RfiConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
@@ -151,8 +152,10 @@ public class TestLevelProductMetadataExtractor {
 	    			mdBuilder, 
 	    			fileDescriptorBuilder, 
 	    			testDir.getPath(), 
-	    			new ProcessConfiguration(), 
-	    			obsClient
+	    			new ProcessConfiguration(),
+	    			new RfiConfiguration(),
+	    			obsClient,
+	    			xmlConverter
 	    );
 	}
 
