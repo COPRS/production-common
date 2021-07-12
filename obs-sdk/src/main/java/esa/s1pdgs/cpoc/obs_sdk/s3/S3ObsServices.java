@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
@@ -409,13 +410,12 @@ public class S3ObsServices {
 
 	public Md5.Entry uploadStream(final String bucketName, final String keyName, final InputStream in) throws S3SdkClientException, S3ObsUnrecoverableException {
 		try {
-			final Path lastPathElement = Paths.get(keyName).getFileName();
-
 			final Md5SumCalculationHelper md5SumCalculationHelper = Md5SumCalculationHelper.createFor(in);
-			final Path localFilePath = localFilesLocation.resolve(lastPathElement);
-			final DownloadFileStep downloadFileStep = new DownloadFileStep(localFilePath, md5SumCalculationHelper.getInputStream(), this);
+
+			final Path localFilePath = localFilePathFor(keyName);
+			final DownloadFileStep downloadFileStep = new DownloadFileStep(bucketName, keyName, localFilePath, md5SumCalculationHelper.getInputStream(), this);
 			final UploadFileStep uploadFileStep = new UploadFileStep(this, localFilePath.toFile(), keyName, bucketName);
-			final DeleteFileStep deleteFileStep = new DeleteFileStep(localFilePath.toFile(), this);
+			final DeleteFileStep deleteFileStep = new DeleteFileStep(localFilePath, this);
 
 			new UndoableStepsHandler(downloadFileStep, uploadFileStep, deleteFileStep).perform();
 
@@ -425,6 +425,12 @@ public class S3ObsServices {
 		} catch (Exception e) {
 			throw new S3SdkClientException(bucketName, keyName, "error during uploading file", e);
 		}
+	}
+
+	private Path localFilePathFor(String keyName) {
+		final String randomPrefix = RandomStringUtils.randomAlphanumeric(4);
+		final String lastPathElement = randomPrefix + "_" + Paths.get(keyName).getFileName().toString();
+		return localFilesLocation.resolve(lastPathElement);
 	}
 
 	public void setExpirationTime(final String bucketName, final String prefix, final Instant expirationDate) {
@@ -579,11 +585,13 @@ public class S3ObsServices {
 		private final Path destination;
 		private final InputStream inputStream;
 		private final S3ObsServices s3ObsServices;
+		private final String bucketPlusKey;
 
-		public DownloadFileStep(Path destination, InputStream inputStream, S3ObsServices s3ObsServices) {
+		public DownloadFileStep(final String bucket, final String key, final Path destination, final InputStream inputStream, final S3ObsServices s3ObsServices) {
 			this.destination = destination;
 			this.inputStream = inputStream;
 			this.s3ObsServices = s3ObsServices;
+			bucketPlusKey = bucket + "/" + key;
 		}
 
 		@Override
@@ -605,7 +613,7 @@ public class S3ObsServices {
 
 		@Override
 		public String toString() {
-			return format("download stream to %s", destination);
+			return format("download for %s stream to %s", bucketPlusKey, destination);
 		}
 	}
 
@@ -680,8 +688,8 @@ public class S3ObsServices {
 		private final Path filePath;
 		private final S3ObsServices s3ObsServices;
 
-		public DeleteFileStep(File file, S3ObsServices s3ObsServices) {
-			this.filePath = file.toPath();
+		public DeleteFileStep(Path path, S3ObsServices s3ObsServices) {
+			this.filePath = path;
 			this.s3ObsServices = s3ObsServices;
 		}
 
