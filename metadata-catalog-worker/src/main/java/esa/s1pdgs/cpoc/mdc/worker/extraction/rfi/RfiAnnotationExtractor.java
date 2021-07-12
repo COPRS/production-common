@@ -65,50 +65,45 @@ public class RfiAnnotationExtractor {
 			int rfiNbPolarisationsDetected = 0;
 			int rfiNbPolarisationsMitigated = 0;
 
-			String swath = (String) metadata.get("swathtype");
+			downloadAnnotationDirectory(reportingFactory, family, keyObjectStorage, localDirectory);
 
-			if (swath != null && !swath.startsWith("S")) {
+			Path annotationDirectory = Paths.get(localDirectory).resolve(keyObjectStorage)
+					.resolve(rfiConfiguration.getAnnotationDirectoryName());
+			Path rfiDirectory = annotationDirectory.resolve(rfiConfiguration.getRfiDirectoryName());
 
-				downloadAnnotationDirectory(reportingFactory, family, keyObjectStorage, localDirectory);
+			if (Files.exists(rfiDirectory)) {
 
-				Path annotationDirectory = Paths.get(localDirectory).resolve(keyObjectStorage)
-						.resolve(rfiConfiguration.getAnnotationDirectoryName());
-				Path rfiDirectory = annotationDirectory.resolve(rfiConfiguration.getRfiDirectoryName());
+				Stream<Path> annotationFiles;
+				Stream<Path> rfiFiles;
+				try {
+					annotationFiles = Files.list(annotationDirectory);
+					rfiFiles = Files.list(rfiDirectory);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 
-				if (Files.exists(rfiDirectory)) {
+				if (rfiFiles.count() > 0) {
 
-					Stream<Path> annotationFiles;
-					Stream<Path> rfiFiles;
+					Pattern patternAnnotation = Pattern.compile(rfiConfiguration.getAnnotationFilePattern(),
+							Pattern.CASE_INSENSITIVE);
+
 					try {
-						annotationFiles = Files.list(annotationDirectory);
-						rfiFiles = Files.list(rfiDirectory);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
+						rfiNbPolarisationsDetected = calculateRfiNbPolarisationsDetected(
+								rfiFiles.map(p -> p.toFile()).collect(Collectors.toList()));
 
-					if (rfiFiles.count() > 0) {
+						rfiMitigationPerformed = getRfiMitigationPerformedFromAnnotationFile(
+								annotationFiles.filter(p -> !Files.isDirectory(p))
+										.filter(p -> patternAnnotation.matcher(p.getFileName().toString()).matches())
+										.map(p -> p.toFile()).collect(Collectors.toList()));
 
-						Pattern patternAnnotation = Pattern.compile(rfiConfiguration.getAnnotationFilePattern(),
-								Pattern.CASE_INSENSITIVE);
-
-						try {
-							rfiNbPolarisationsDetected = calculateRfiNbPolarisationsDetected(
-									rfiFiles.map(p -> p.toFile()).collect(Collectors.toList()));
-
-							rfiMitigationPerformed = getRfiMitigationPerformedFromAnnotationFile(annotationFiles
-									.filter(p -> !Files.isDirectory(p))
-									.filter(p -> patternAnnotation.matcher(p.getFileName().toString()).matches())
-									.map(p -> p.toFile()).collect(Collectors.toList()));
-
-						} finally {
-							if (rfiFiles != null) {
-								rfiFiles.close();
-							}
-							if (annotationFiles != null) {
-								annotationFiles.close();
-							}
-							FileUtils.delete(annotationDirectory.toFile().getPath());
+					} finally {
+						if (rfiFiles != null) {
+							rfiFiles.close();
 						}
+						if (annotationFiles != null) {
+							annotationFiles.close();
+						}
+						FileUtils.delete(annotationDirectory.toFile().getPath());
 					}
 				}
 			}
@@ -116,6 +111,12 @@ public class RfiAnnotationExtractor {
 			if (RfiMitigationPerformed.ALWAYS == rfiMitigationPerformed
 					|| RfiMitigationPerformed.BASED_ON_NOISE_MEAS == rfiMitigationPerformed) {
 				rfiNbPolarisationsMitigated = rfiNbPolarisationsDetected;
+			}
+
+			String swath = (String) metadata.get("swathtype");
+			if (swath != null && swath.startsWith("S")) {
+				// special SM handling
+				rfiNbPolarisationsDetected = 0;
 			}
 
 			metadata.put("rfiMitigationPerformed", rfiMitigationPerformed.stringRepresentation());
