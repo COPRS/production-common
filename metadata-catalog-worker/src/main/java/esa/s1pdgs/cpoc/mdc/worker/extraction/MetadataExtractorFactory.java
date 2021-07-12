@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.mdc.worker.config.RfiConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
@@ -28,16 +29,18 @@ public class MetadataExtractorFactory {
 	private final XmlConverter xmlConverter;
 	private final ObsClient obsClient;
 	private final ProcessConfiguration processConfiguration;
+	private final RfiConfiguration rfiConfiguration;
 
 	@Autowired
 	public MetadataExtractorFactory(final EsServices esServices, final MetadataExtractorConfig extractorConfig,
 			final XmlConverter xmlConverter, final ObsClient obsClient, final ProcessConfiguration processConfiguration,
-			final MdcWorkerConfigurationProperties properties) {
+			final MdcWorkerConfigurationProperties properties, final RfiConfiguration rfiConfiguration) {
 		this.esServices = esServices;
 		this.extractorConfig = extractorConfig;
 		this.xmlConverter = xmlConverter;
 		this.obsClient = obsClient;
 		this.processConfiguration = processConfiguration;
+		this.rfiConfiguration = rfiConfiguration;
 	}
 
 	public MetadataExtractor newMetadataExtractorFor(final ProductCategory category, final CategoryConfig config) {		
@@ -102,8 +105,10 @@ public class MetadataExtractorFactory {
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
-		    			processConfiguration, 
-		    			obsClient
+		    			processConfiguration,
+		    			rfiConfiguration,
+		    			obsClient,
+		    			xmlConverter
 		    	);
 		    case SPP_PRODUCTS:
 		    	return new SppProductMetadataExtractor(
