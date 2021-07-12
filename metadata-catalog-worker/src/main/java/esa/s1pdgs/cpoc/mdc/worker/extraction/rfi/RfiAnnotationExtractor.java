@@ -26,6 +26,7 @@ import org.w3c.dom.Node;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
+import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.config.RfiConfiguration;
@@ -37,7 +38,10 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
+import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.message.output.RfiOutput;
 
 public class RfiAnnotationExtractor {
 
@@ -61,67 +65,91 @@ public class RfiAnnotationExtractor {
 			throws MetadataExtractionException {
 
 		if (family == ProductFamily.L1_SLICE) {
-			RfiMitigationPerformed rfiMitigationPerformed = RfiMitigationPerformed.NOT_SUPPORTED;
-			int rfiNbPolarisationsDetected = 0;
-			int rfiNbPolarisationsMitigated = 0;
 
-			downloadAnnotationDirectory(reportingFactory, family, keyObjectStorage, localDirectory);
+			final Reporting rfiReporting = reportingFactory.newReporting("RfiMitigation");
+			rfiReporting
+					.begin(new ReportingMessage("Start extraction of RFI metadata from product %s", keyObjectStorage));
 
-			Path annotationDirectory = Paths.get(localDirectory).resolve(keyObjectStorage)
-					.resolve(rfiConfiguration.getAnnotationDirectoryName());
-			Path rfiDirectory = annotationDirectory.resolve(rfiConfiguration.getRfiDirectoryName());
+			try {
 
-			if (Files.exists(rfiDirectory)) {
+				RfiMitigationPerformed rfiMitigationPerformed = RfiMitigationPerformed.NOT_SUPPORTED;
+				int rfiNbPolarisationsDetected = 0;
+				int rfiNbPolarisationsMitigated = 0;
 
-				Stream<Path> annotationFiles;
-				Stream<Path> rfiFiles;
-				try {
-					annotationFiles = Files.list(annotationDirectory);
-					rfiFiles = Files.list(rfiDirectory);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				downloadAnnotationDirectory(reportingFactory, family, keyObjectStorage, localDirectory);
 
-				if (rfiFiles.count() > 0) {
+				Path annotationDirectory = Paths.get(localDirectory).resolve(keyObjectStorage)
+						.resolve(rfiConfiguration.getAnnotationDirectoryName());
+				Path rfiDirectory = annotationDirectory.resolve(rfiConfiguration.getRfiDirectoryName());
 
-					Pattern patternAnnotation = Pattern.compile(rfiConfiguration.getAnnotationFilePattern(),
-							Pattern.CASE_INSENSITIVE);
+				if (Files.exists(rfiDirectory)) {
 
+					Stream<Path> annotationFiles;
+					Stream<Path> rfiFiles;
 					try {
-						rfiNbPolarisationsDetected = calculateRfiNbPolarisationsDetected(
-								rfiFiles.map(p -> p.toFile()).collect(Collectors.toList()));
+						annotationFiles = Files.list(annotationDirectory);
+						rfiFiles = Files.list(rfiDirectory);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
 
-						rfiMitigationPerformed = getRfiMitigationPerformedFromAnnotationFile(
-								annotationFiles.filter(p -> !Files.isDirectory(p))
-										.filter(p -> patternAnnotation.matcher(p.getFileName().toString()).matches())
-										.map(p -> p.toFile()).collect(Collectors.toList()));
+					if (rfiFiles.count() > 0) {
 
-					} finally {
-						if (rfiFiles != null) {
-							rfiFiles.close();
+						Pattern patternAnnotation = Pattern.compile(rfiConfiguration.getAnnotationFilePattern(),
+								Pattern.CASE_INSENSITIVE);
+
+						try {
+							rfiNbPolarisationsDetected = calculateRfiNbPolarisationsDetected(
+									rfiFiles.map(p -> p.toFile()).collect(Collectors.toList()));
+
+							rfiMitigationPerformed = getRfiMitigationPerformedFromAnnotationFile(annotationFiles
+									.filter(p -> !Files.isDirectory(p))
+									.filter(p -> patternAnnotation.matcher(p.getFileName().toString()).matches())
+									.map(p -> p.toFile()).collect(Collectors.toList()));
+
+						} finally {
+							if (rfiFiles != null) {
+								rfiFiles.close();
+							}
+							if (annotationFiles != null) {
+								annotationFiles.close();
+							}
+							FileUtils.delete(annotationDirectory.toFile().getPath());
 						}
-						if (annotationFiles != null) {
-							annotationFiles.close();
-						}
-						FileUtils.delete(annotationDirectory.toFile().getPath());
 					}
 				}
-			}
 
-			if (RfiMitigationPerformed.ALWAYS == rfiMitigationPerformed
-					|| RfiMitigationPerformed.BASED_ON_NOISE_MEAS == rfiMitigationPerformed) {
-				rfiNbPolarisationsMitigated = rfiNbPolarisationsDetected;
-			}
+				if (RfiMitigationPerformed.ALWAYS == rfiMitigationPerformed
+						|| RfiMitigationPerformed.BASED_ON_NOISE_MEAS == rfiMitigationPerformed) {
+					rfiNbPolarisationsMitigated = rfiNbPolarisationsDetected;
+				}
 
-			String swath = (String) metadata.get("swathtype");
-			if (swath != null && swath.startsWith("S")) {
-				// special SM handling
-				rfiNbPolarisationsDetected = 0;
-			}
+				String swath = (String) metadata.get("swathtype");
+				if (swath != null && swath.startsWith("S")) {
+					// special SM handling
+					rfiNbPolarisationsDetected = 0;
+				}
 
-			metadata.put("rfiMitigationPerformed", rfiMitigationPerformed.stringRepresentation());
-			metadata.put("rfiNbPolarisationsDetected", rfiNbPolarisationsDetected);
-			metadata.put("rfiNbPolarisationsMitigated", rfiNbPolarisationsMitigated);
+				metadata.put("rfiMitigationPerformed", rfiMitigationPerformed.stringRepresentation());
+				metadata.put("rfiNbPolarisationsDetected", rfiNbPolarisationsDetected);
+				metadata.put("rfiNbPolarisationsMitigated", rfiNbPolarisationsMitigated);
+
+				RfiOutput rfiOutput = new RfiOutput();
+				rfiOutput.setL1ProductName(keyObjectStorage);
+				rfiOutput.setRfiMitigationPerformed(rfiMitigationPerformed.stringRepresentation());
+				rfiOutput.setRfiNbPolarisationsDetected(rfiNbPolarisationsDetected);
+				rfiOutput.setRfiNbPolarisationsMitigated(rfiNbPolarisationsMitigated);
+
+				rfiReporting.end(rfiOutput,
+						new ReportingMessage("End extraction of RFI metadata from product %s", keyObjectStorage));
+
+			} catch (Exception e) {
+
+				rfiReporting.error(new ReportingMessage("Error extraction of RFI metadata from product %s: %s",
+						keyObjectStorage, LogUtils.toString(e)));
+
+				throw e;
+			}
 		}
 	}
 
