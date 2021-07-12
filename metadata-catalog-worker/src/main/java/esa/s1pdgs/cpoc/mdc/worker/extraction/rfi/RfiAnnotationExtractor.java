@@ -67,7 +67,7 @@ public class RfiAnnotationExtractor {
 
 			String swath = (String) metadata.get("swathtype");
 
-			if (swath != null && !swath.equals("SM")) {
+			if (swath != null && !swath.startsWith("S")) {
 
 				downloadAnnotationDirectory(reportingFactory, family, keyObjectStorage, localDirectory);
 
@@ -101,8 +101,12 @@ public class RfiAnnotationExtractor {
 									.map(p -> p.toFile()).collect(Collectors.toList()));
 
 						} finally {
-							rfiFiles.close();
-							annotationFiles.close();
+							if (rfiFiles != null) {
+								rfiFiles.close();
+							}
+							if (annotationFiles != null) {
+								annotationFiles.close();
+							}
 							FileUtils.delete(annotationDirectory.toFile().getPath());
 						}
 					}
