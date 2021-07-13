@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -82,41 +81,27 @@ public class RfiAnnotationExtractor {
 						.resolve(rfiConfiguration.getAnnotationDirectoryName());
 				Path rfiDirectory = annotationDirectory.resolve(rfiConfiguration.getRfiDirectoryName());
 
-				if (Files.exists(rfiDirectory)) {
+				try {
 
-					Stream<Path> annotationFiles;
-					Stream<Path> rfiFiles;
-					try {
-						annotationFiles = Files.list(annotationDirectory);
-						rfiFiles = Files.list(rfiDirectory);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-
-					if (rfiFiles.count() > 0) {
+					if (Files.exists(rfiDirectory) && Files.list(rfiDirectory).count() > 0) {
 
 						Pattern patternAnnotation = Pattern.compile(rfiConfiguration.getAnnotationFilePattern(),
 								Pattern.CASE_INSENSITIVE);
 
-						try {
-							rfiNbPolarisationsDetected = calculateRfiNbPolarisationsDetected(
-									rfiFiles.map(p -> p.toFile()).collect(Collectors.toList()));
+						rfiNbPolarisationsDetected = calculateRfiNbPolarisationsDetected(
+								Files.list(rfiDirectory).map(p -> p.toFile()).collect(Collectors.toList()));
 
-							rfiMitigationPerformed = getRfiMitigationPerformedFromAnnotationFile(annotationFiles
-									.filter(p -> !Files.isDirectory(p))
-									.filter(p -> patternAnnotation.matcher(p.getFileName().toString()).matches())
-									.map(p -> p.toFile()).collect(Collectors.toList()));
+						rfiMitigationPerformed = getRfiMitigationPerformedFromAnnotationFile(
+								Files.list(annotationDirectory).filter(p -> !Files.isDirectory(p))
+										.filter(p -> patternAnnotation.matcher(p.getFileName().toString()).matches())
+										.map(p -> p.toFile()).collect(Collectors.toList()));
 
-						} finally {
-							if (rfiFiles != null) {
-								rfiFiles.close();
-							}
-							if (annotationFiles != null) {
-								annotationFiles.close();
-							}
-							FileUtils.delete(annotationDirectory.toFile().getPath());
-						}
 					}
+
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				} finally {
+					FileUtils.delete(annotationDirectory.toFile().getPath());
 				}
 
 				if (RfiMitigationPerformed.ALWAYS == rfiMitigationPerformed
