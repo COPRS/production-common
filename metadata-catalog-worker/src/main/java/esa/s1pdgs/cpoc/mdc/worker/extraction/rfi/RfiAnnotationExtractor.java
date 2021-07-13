@@ -176,6 +176,11 @@ public class RfiAnnotationExtractor {
 			try {
 				RfiAnnotation rfiAnnotation = (RfiAnnotation) xmlConverter
 						.convertFromXMLToObject(rfi.getAbsolutePath());
+				
+				if (rfiAnnotation == null || rfiAnnotation.getDetectionFromNoiseReports() == null) {
+					LOG.debug("Ignoring file, can not extract RFI informaton: {}", rfi.getName());
+					continue;
+				}
 
 				boolean hPol = patternFilePolH.matcher(rfi.getName()).matches();
 				boolean vPol = patternFilePolV.matcher(rfi.getName()).matches();
