@@ -63,6 +63,7 @@ public class TestRfiAnnotationExtractor {
 		List<File> rfiFiles = new ArrayList<>();
 		
 		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hh-20200120t190115-20200120t190209-030888-038b84-001.xml"));
+		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hv-20200120t190115-20200120t190209-030888-038b84-002.xml"));
 		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hv-20200120t190115-20200120t190209-030888-038b84-004.xml"));
 		
 		Assert.assertEquals(1, uut.calculateRfiNbPolarisationsDetected(rfiFiles));
@@ -74,6 +75,20 @@ public class TestRfiAnnotationExtractor {
 		
 		List<File> rfiFiles = new ArrayList<>();
 		
+		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hh-20200120t190115-20200120t190209-030888-038b84-003.xml"));
+		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hv-20200120t190115-20200120t190209-030888-038b84-004.xml"));
+		
+		Assert.assertEquals(2, uut.calculateRfiNbPolarisationsDetected(rfiFiles));
+		
+	}
+	
+	@Test
+	public void calculateRfiNbPolarisationsDetected_0_2() throws MetadataExtractionException {
+		
+		List<File> rfiFiles = new ArrayList<>();
+		
+		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hh-20200120t190115-20200120t190209-030888-038b84-001.xml"));
+		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hv-20200120t190115-20200120t190209-030888-038b84-002.xml"));
 		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hh-20200120t190115-20200120t190209-030888-038b84-003.xml"));
 		rfiFiles.add(new File("src/test/resources/rfi/rfi-s1a-ew-grd-hv-20200120t190115-20200120t190209-030888-038b84-004.xml"));
 		
