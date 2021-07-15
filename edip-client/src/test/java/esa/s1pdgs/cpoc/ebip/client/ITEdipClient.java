@@ -169,7 +169,7 @@ public class ITEdipClient {
 	@Test
 	public final void testPollAndRetrieval() throws Exception {		
 		final URI uri = new URI("ftps://localhost:4321/NOMINAL/");
-		final ApacheFtpEdipClient uut = new ApacheFtpEdipClient(newConfig(), uri);
+		final ApacheFtpEdipClient uut = new ApacheFtpEdipClient(newConfig(), uri, false);
 		final List<EdipEntry> entries = uut.list(EdipEntryFilter.ALLOW_ALL);
 		assertEquals(2, entries.size());
 		System.err.println(entries);
@@ -187,7 +187,7 @@ public class ITEdipClient {
 	@Test
 	public final void testRetrieval() throws Exception {		
 		final URI uri = new URI("ftps://localhost:4321/NOMINAL/S1A/S1A_20200120185900030888/DCS_01_S1A_20200120185900030888_ch1_DSIB.xml");
-		final ApacheFtpEdipClient uut = new ApacheFtpEdipClient(newConfig(), uri);
+		final ApacheFtpEdipClient uut = new ApacheFtpEdipClient(newConfig(), uri, false);
 		final List<EdipEntry> entries = uut.list(EdipEntryFilter.ALLOW_ALL);
 		
 		System.err.println(entries);

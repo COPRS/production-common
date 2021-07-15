@@ -44,10 +44,12 @@ public class ApacheFtpEdipClient implements EdipClient {
 
 	private final EdipHostConfiguration config;
 	private final URI uri;
+    private final boolean directoryListing;
 	
-	public ApacheFtpEdipClient(final EdipHostConfiguration config, final URI uri) {
+	public ApacheFtpEdipClient(final EdipHostConfiguration config, final URI uri, final boolean directoryListing) {
 		this.config = config;
 		this.uri = uri;
+		this.directoryListing = directoryListing;
 	}
 
 	@Override
@@ -57,8 +59,18 @@ public class ApacheFtpEdipClient implements EdipClient {
 		
 		final FTPClient client = connectedClient();
 		
-		final List<EdipEntry> result = getIfNotDirectory(client, uriPath)
-				.orElse(listRecursively(client, uriPath, filter));	
+		List<EdipEntry> result = new ArrayList<>();
+		
+		/*
+		 * S1OPS-582: Dirty workaround for Plan & Report QC files listing 
+		 */
+		if (directoryListing) {
+			result = listDirectory(client, uriPath, filter);
+		} else {
+		
+			result = getIfNotDirectory(client, uriPath)
+					.orElse(listRecursively(client, uriPath, filter));
+		}
 		
 		client.logout();
 		client.disconnect();
@@ -269,6 +281,26 @@ public class ApacheFtpEdipClient implements EdipClient {
 		
 		return ftpFilePath.toString().equals(uriPath.toString());
 				
+	}
+	
+	private List<EdipEntry> listDirectory(final FTPClient client, final Path path, final EdipEntryFilter filter)
+			throws IOException {
+		final List<EdipEntry> result = new ArrayList<>();
+
+		for (final FTPFile ftpFile : client.listFiles(path.toString())) {
+			final EdipEntry entry = toEdipEntry(path, ftpFile);
+			// System.err.println("FOO " + entry);
+			if (!filter.accept(entry)) {
+				LOG.trace("{} ignored by {}", entry, filter);
+				continue;
+			}
+
+			if (ftpFile.isDirectory()) {
+				result.add(entry);
+			}
+		}
+
+		return result;
 	}
 
 	private List<EdipEntry> listRecursively(

@@ -26,7 +26,7 @@ public class EdipInboxAdapterFactory implements InboxAdapterFactory {
 
 	@Override
 	public InboxAdapter newInboxAdapter(final URI inbox, final InboxConfiguration inboxConfig) {
-		return new EdipInboxAdapter(inbox, edipClientFactory.newEdipClient(inbox), inboxEntryFactory,
+		return new EdipInboxAdapter(inbox, edipClientFactory.newEdipClient(inbox, inboxConfig.isFtpDirectoryListing()), inboxEntryFactory,
 				inboxConfig.getStationName(), inboxConfig.getFamily());
 	}
 

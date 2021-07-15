@@ -20,8 +20,8 @@ public class ApacheFtpEdipClientFactory implements EdipClientFactory {
 	}
 
 	@Override
-	public EdipClient newEdipClient(final URI serverUrl) {
-		return new ApacheFtpEdipClient(configFor(serverUrl), serverUrl);
+	public EdipClient newEdipClient(final URI serverUrl, final boolean directoryListing) {
+		return new ApacheFtpEdipClient(configFor(serverUrl), serverUrl, directoryListing);
 	}
 	
 	private final EdipHostConfiguration configFor(final URI serverUrl) {

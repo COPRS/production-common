@@ -23,6 +23,8 @@ public class InboxConfiguration {
 	private ProductFamily family = ProductFamily.BLANK;
 	
 	private int stationRetentionTime = 0; // how many days to keep persisted data about inbox files at a minimum
+	
+	private boolean ftpDirectoryListing = false;
 
 	public String getType() {
 		return type;
@@ -127,6 +129,14 @@ public class InboxConfiguration {
 	public void setStationRetentionTime(int stationRetentionTime) {
 		this.stationRetentionTime = stationRetentionTime;
 	}
+	
+	public boolean isFtpDirectoryListing() {
+		return ftpDirectoryListing;
+	}
+
+	public void setFtpDirectoryListing(boolean ftpDirectoryListing) {
+		this.ftpDirectoryListing = ftpDirectoryListing;
+	}
 
 	@Override
 	public String toString() {
@@ -136,4 +146,5 @@ public class InboxConfiguration {
 				+ sessionNameGroupIndex + ", ignoreFilesBeforeDate=" + ignoreFilesBeforeDate + ", family=" + family
 				+ ", stationRetentionTime=" + stationRetentionTime + "]";
 	}
+
 }
