@@ -26,7 +26,7 @@ public final class EdipInboxAdapter implements InboxAdapter {
 
 	@Override
 	public final InboxAdapterResponse read(final URI uri, final String name, final String relativePath, final long size) throws Exception {
-		final EdipClient client = edipClientFactory.newEdipClient(uri);	
+		final EdipClient client = edipClientFactory.newEdipClient(uri, false);	
 		final Path basePath = IngestionJobs.basePath(uri, name);
 		
 		return new InboxAdapterResponse(
