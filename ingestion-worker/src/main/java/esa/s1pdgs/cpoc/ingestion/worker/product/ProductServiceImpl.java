@@ -8,8 +8,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterResponse;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
@@ -22,10 +24,12 @@ public class ProductServiceImpl implements ProductService {
 
 	private final ObsClient obsClient;
 	private final boolean bufferInput;
+	private final AppStatus appStatus;
 
-	public ProductServiceImpl(final ObsClient obsClient, final boolean bufferInput) {
+	public ProductServiceImpl(final ObsClient obsClient, final boolean bufferInput, AppStatus appStatus) {
 		this.obsClient = obsClient;
 		this.bufferInput = bufferInput;
+		this.appStatus = appStatus;
 	}
 
 	@Override
@@ -56,11 +60,14 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private void upload(ObsAdapter obsAdapter, IngestionJob ingestion, ProductFamily family, InboxAdapter inboxAdapter, URI uri, String obsKey) throws Exception {
-		obsAdapter.upload(
-				family,
-				inboxAdapter.read(uri, ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getProductSizeByte()),
-				obsKey
-		);
+		try (final InboxAdapterResponse response = inboxAdapter.read(
+				uri, ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getProductSizeByte())) {
+			obsAdapter.upload(
+					family,
+					response.getResult(),
+					obsKey
+			);
+		}
 	}
 
 	private void checkExistingInObs(final ObsAdapter obsAdapter, final IngestionJob ingestion) {
@@ -97,7 +104,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private ObsAdapter newObsAdapterFor(final ReportingFactory reportingFactory) {
-		return new ObsAdapter(obsClient, reportingFactory, bufferInput);
+		return new ObsAdapter(obsClient, reportingFactory, bufferInput, appStatus);
 	}
 
 }

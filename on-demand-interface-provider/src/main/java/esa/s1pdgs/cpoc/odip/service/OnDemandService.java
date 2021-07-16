@@ -44,7 +44,7 @@ public class OnDemandService {
 		this.metadataClient = metadataClient;
 	}
 
-	public void submit(final OnDemandProcessingRequest request) {
+	public OnDemandEvent submit(final OnDemandProcessingRequest request) {
 		LOGGER.info("(Re-)Submitting following request {}", request);
 
 		final String productName = request.getProductName();
@@ -98,6 +98,8 @@ public class OnDemandService {
 		}
 
 		resubmit(event, status);
+		
+		return event;
 	}
 
 	private void resubmit(final OnDemandEvent event, final AppStatus appStatus) {

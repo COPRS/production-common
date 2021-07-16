@@ -127,7 +127,7 @@ public class OutputProcessor {
 	
 	private final boolean debugMode;
 
-	public static enum AcquisitionMode {
+	public enum AcquisitionMode {
 		EW, IW, SM, WV, RF
 	}
 
@@ -158,23 +158,21 @@ public class OutputProcessor {
 				prefixMonitorLogs,
 				appLevel,
 				properties,
-				inputMessage.getDto().isDebug()				
-		);	
+				inputMessage.getDto().isDebug());
 	}
 	
 	public OutputProcessor(
-			final ObsClient obsClient, 
-			final OutputProcuderFactory procuderFactory, 
+			final ObsClient obsClient,
+			final OutputProcuderFactory procuderFactory,
 			final String workDirectory,
-			final String listFile, 
-			final GenericMessageDto<IpfExecutionJob> inputMessage, 
+			final String listFile,
+			final GenericMessageDto<IpfExecutionJob> inputMessage,
 			final List<LevelJobOutputDto> authorizedOutputs,
-			final int sizeUploadBatch, 
-			final String prefixMonitorLogs, 
-			final ApplicationLevel appLevel, 
+			final int sizeUploadBatch,
+			final String prefixMonitorLogs,
+			final ApplicationLevel appLevel,
 			final ApplicationProperties properties,
-			final boolean debugMode
-	) {
+			final boolean debugMode) {
 		this.obsClient = obsClient;
 		this.procuderFactory = procuderFactory;
 		this.workDirectory = workDirectory;
@@ -191,7 +189,7 @@ public class OutputProcessor {
 	/**
 	 * Extract the list of outputs from a file
 	 * 
-	 * @throws InternalErrorException
+	 * @throws InternalErrorException when file cannot be read
 	 */
 	private List<String> extractFiles() throws InternalErrorException {
 		LOGGER.info("{} 1 - Extracting list of outputs", prefixMonitorLogs);
@@ -379,7 +377,7 @@ public class OutputProcessor {
 	 * This method takes the product name and returns if this product is a possible
 	 * candidate for a ghost product
 	 * 
-	 * @param productName The product name of the product that should be checked
+	 * @param file The product file that should be checked
 	 * @return Either true or false depending if the product was identified as ghost
 	 *         product. If an error occurs during the extraction, the product will
 	 *         be identified as non-ghost
@@ -579,7 +577,7 @@ public class OutputProcessor {
 		res.addAll(publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid));
 		return res;
 	}
-	
+
 	private FileObsUploadObject newUploadObject(final ProductFamily family, final String productName, final File file) {
 		return new FileObsUploadObject(
 				family, 
@@ -687,7 +685,7 @@ public class OutputProcessor {
 					debugPrefix, 
 					new File(workDirectory)
 			);
-			obsClient.upload(Collections.singletonList(upload), reportingFactory);		
+			obsClient.upload(Collections.singletonList(upload), reportingFactory);
 			
 			// always fail, if debug mode is set		
 			throw new IllegalStateException(
@@ -708,11 +706,10 @@ public class OutputProcessor {
 		// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
 		//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);
 		final List<GenericPublicationMessageDto<ProductionEvent>> res = processProducts(
-				reportingFactory,
-				uploadBatch,
-				outputToPublish,
-				uuid
-		);
+						reportingFactory,
+						uploadBatch,
+						outputToPublish,
+						uuid);
 		// Publish reports
 		processReports(reportToPublish, uuid);	
 		return res;

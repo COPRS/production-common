@@ -103,8 +103,9 @@ public class TestEdrsMetadataExtractor {
         doNothing().when(appStatus).setError(Mockito.anyString());
         doReturn(true).when(mqiService).ack(Mockito.any(), Mockito.any());
 
-        inputMessage = new GenericMessageDto<CatalogJob>(123, "",
-                Utils.newCatalogJob("D_123_ch01_DSDB.RAW", "WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW", ProductFamily.EDRS_SESSION, null, "WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW"));
+        CatalogJob job = Utils.newCatalogJob("D_123_ch01_DSDB.RAW", "WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW", ProductFamily.EDRS_SESSION, null, "WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW");
+        job.setStationName("WILE");
+        inputMessage = new GenericMessageDto<CatalogJob>(123, "", job);
         
 		final FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(
 				testDir, 

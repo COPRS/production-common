@@ -31,11 +31,13 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Streams;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
+import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -64,15 +66,15 @@ public abstract class AbstractObsClient implements ObsClient {
 		return configuration.getBucketFor(family);
 	}
 
-    protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException, ObsServiceException;
+    protected abstract List<File> downloadObject(ObsDownloadObject object) throws SdkClientException;
     
-    protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsServiceException, ObsException;
+    protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsException;
 
 	protected abstract Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
 
     private List<File> downloadObjects(final List<ObsDownloadObject> objects,
 									   final boolean parallel, final ReportingFactory reportingFactory)
-            throws SdkClientException, ObsServiceException, ObsException {
+            throws SdkClientException, ObsException {
     	
     	final List<File> files = new ArrayList<>();
         if (objects.size() > 1 && parallel) {
@@ -136,7 +138,7 @@ public abstract class AbstractObsClient implements ObsClient {
 
 	private void uploadObjects(final List<FileObsUploadObject> objects,
 							   final boolean parallel, final ReportingFactory reportingFactory)
-            throws SdkClientException, ObsServiceException, ObsException {
+            throws SdkClientException, ObsException {
         if (objects.size() > 1 && parallel) {
             // Upload objects in parallel
             final ExecutorService workerThread =
@@ -263,6 +265,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		try {
 			uploadObjects(objects, true, reportingFactory);
 		} catch (final SdkClientException exc) {
+			undoPartialFailedUpload(objects);
 			throw new ObsParallelAccessException(exc);
 		}
 	}
@@ -275,12 +278,29 @@ public abstract class AbstractObsClient implements ObsClient {
 		try {
 			final List<Md5.Entry> md5s = uploadStreams(objects, true, reportingFactory);
 			uploadMd5Sum(baseKeyOf(objects), md5s);
+		} catch ( final S3ObsUnrecoverableException e) {
+			undoPartialFailedUpload(objects);
+			throw new ObsUnrecoverableException(e);
 		} catch (final SdkClientException exc) {
+			undoPartialFailedUpload(objects);
 			throw new ObsParallelAccessException(exc);
 		}
 	}
 
-	private final void assertIsNotEmpty(final List<StreamObsUploadObject> objects) throws ObsEmptyFileException {
+	private <T extends ObsUploadObject>  void undoPartialFailedUpload(final List<T> uploadObjects) {
+		LOGGER.info("undo partial upload of multiple object: " + uploadObjects.stream().map(uO -> uO.getFamily() + ":" + uO.getKey()).collect(Collectors.joining(", ")));
+		for(final T uploadObject : uploadObjects) {
+			try {
+				LOGGER.info("deleting " + uploadObject);
+				delete(uploadObject);
+			} catch (ObsException | ObsServiceException e) {
+				LOGGER.error("deletion of " + uploadObject + " failed", e);
+				// don't rethrow the exception because it would suppress original exception
+			}
+		}
+	}
+
+	private void assertIsNotEmpty(final List<StreamObsUploadObject> objects) throws ObsEmptyFileException {
 		String emptyElementKey = "";
 		
 		for (final StreamObsUploadObject o : objects) {
@@ -476,17 +496,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		void call() throws Exception;
 	}
 	
-	static Callable<List<String>> wrapStringList(final StringListCallable callable) {
-		return callable::call;
-	}
-	
-	@FunctionalInterface
-	interface StringListCallable {
-		List<String> call() throws Exception;
-	}
-
-	public void uploadMd5Sum(final ObsObject object, final List<Md5.Entry> md5Sums) throws ObsServiceException, S3SdkClientException {
-	}
+	protected abstract void uploadMd5Sum(final ObsObject object, final List<Md5.Entry> md5Sums) throws ObsServiceException, S3SdkClientException;
 
 	protected ObsConfigurationProperties getConfiguration() {
 		return this.configuration;

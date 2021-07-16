@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -246,41 +245,72 @@ public class IpfExecutionJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, hostname, inputs, jobOrder, timeliness, keyObjectStorage, outputs, pools,
-				productFamily, productProcessMode, workDirectory,  uid, ipfPreparationJobMessage,
-				allowedActions, demandType, debug, retryCounter, timedOut);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((inputs == null) ? 0 : inputs.hashCode());
+		result = prime * result + ((ipfPreparationJobMessage == null) ? 0 : ipfPreparationJobMessage.hashCode());
+		result = prime * result + ((jobOrder == null) ? 0 : jobOrder.hashCode());
+		result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
+		result = prime * result + ((pools == null) ? 0 : pools.hashCode());
+		result = prime * result + ((productProcessMode == null) ? 0 : productProcessMode.hashCode());
+		result = prime * result + (timedOut ? 1231 : 1237);
+		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
+		result = prime * result + ((workDirectory == null) ? 0 : workDirectory.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final IpfExecutionJob other = (IpfExecutionJob) obj;
-		return Objects.equals(creationDate, other.creationDate) 
-				&& Objects.equals(hostname, other.hostname)
-				&& Objects.equals(inputs, other.inputs) 
-				&& Objects.equals(jobOrder, other.jobOrder)
-				&& Objects.equals(timeliness, other.timeliness)
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
-				&& Objects.equals(outputs, other.outputs)
-				&& Objects.equals(pools, other.pools) 
-				&& productFamily == other.productFamily
-				&& timedOut == other.timedOut
-				&& Objects.equals(productProcessMode, other.productProcessMode)
-				&& Objects.equals(workDirectory, other.workDirectory)
-				&& Objects.equals(uid, other.uid)
-				&& Objects.equals(ipfPreparationJobMessage, other.ipfPreparationJobMessage)
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		IpfExecutionJob other = (IpfExecutionJob) obj;
+		if (inputs == null) {
+			if (other.inputs != null)
+				return false;
+		} else if (!inputs.equals(other.inputs))
+			return false;
+		if (ipfPreparationJobMessage == null) {
+			if (other.ipfPreparationJobMessage != null)
+				return false;
+		} else if (!ipfPreparationJobMessage.equals(other.ipfPreparationJobMessage))
+			return false;
+		if (jobOrder == null) {
+			if (other.jobOrder != null)
+				return false;
+		} else if (!jobOrder.equals(other.jobOrder))
+			return false;
+		if (outputs == null) {
+			if (other.outputs != null)
+				return false;
+		} else if (!outputs.equals(other.outputs))
+			return false;
+		if (pools == null) {
+			if (other.pools != null)
+				return false;
+		} else if (!pools.equals(other.pools))
+			return false;
+		if (productProcessMode == null) {
+			if (other.productProcessMode != null)
+				return false;
+		} else if (!productProcessMode.equals(other.productProcessMode))
+			return false;
+		if (timedOut != other.timedOut)
+			return false;
+		if (timeliness == null) {
+			if (other.timeliness != null)
+				return false;
+		} else if (!timeliness.equals(other.timeliness))
+			return false;
+		if (workDirectory == null) {
+			if (other.workDirectory != null)
+				return false;
+		} else if (!workDirectory.equals(other.workDirectory))
+			return false;
+		return true;
 	}
 
 	@Override

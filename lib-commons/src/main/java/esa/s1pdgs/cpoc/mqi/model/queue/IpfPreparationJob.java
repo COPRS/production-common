@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Collections;
-import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
@@ -68,52 +67,54 @@ public class IpfPreparationJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(
-				creationDate, 
-				hostname, 
-				keyObjectStorage,
-				productFamily, 
-				uid,
-			    level,
-			    eventMessage,
-			    taskTableName,
-			    startTime,  
-			    stopTime,   
-			    allowedActions,
-			    demandType,
-			    retryCounter,
-			    debug,
-			    outputProductType
-		);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((eventMessage == null) ? 0 : eventMessage.hashCode());
+		result = prime * result + ((level == null) ? 0 : level.hashCode());
+		result = prime * result + ((outputProductType == null) ? 0 : outputProductType.hashCode());
+		result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
+		result = prime * result + ((stopTime == null) ? 0 : stopTime.hashCode());
+		result = prime * result + ((taskTableName == null) ? 0 : taskTableName.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final IpfPreparationJob other = (IpfPreparationJob) obj;
-		return Objects.equals(creationDate, other.creationDate) 			
-				&& Objects.equals(hostname, other.hostname)
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(uid, other.uid)
-			    && Objects.equals(level,other.level)	    
-			    && Objects.equals(allowedActions, other.allowedActions)
-			    && Objects.equals(demandType, other.demandType)
-			    && Objects.equals(retryCounter, other.retryCounter)
-			    && Objects.equals(debug, other.debug)			    
-			    && Objects.equals(eventMessage, other.eventMessage)
-			    && Objects.equals(taskTableName,other.taskTableName)
-			    && Objects.equals(startTime, other.startTime)
-			    && Objects.equals(stopTime, other.stopTime) 		
-			    && Objects.equals(outputProductType, other.outputProductType)
-				&& productFamily == other.productFamily;
+		IpfPreparationJob other = (IpfPreparationJob) obj;
+		if (eventMessage == null) {
+			if (other.eventMessage != null)
+				return false;
+		} else if (!eventMessage.equals(other.eventMessage))
+			return false;
+		if (level != other.level)
+			return false;
+		if (outputProductType == null) {
+			if (other.outputProductType != null)
+				return false;
+		} else if (!outputProductType.equals(other.outputProductType))
+			return false;
+		if (startTime == null) {
+			if (other.startTime != null)
+				return false;
+		} else if (!startTime.equals(other.startTime))
+			return false;
+		if (stopTime == null) {
+			if (other.stopTime != null)
+				return false;
+		} else if (!stopTime.equals(other.stopTime))
+			return false;
+		if (taskTableName == null) {
+			if (other.taskTableName != null)
+				return false;
+		} else if (!taskTableName.equals(other.taskTableName))
+			return false;
+		return true;
 	}
 
 	@Override
@@ -125,4 +126,5 @@ public class IpfPreparationJob extends AbstractMessage {
 				+ allowedActions + ", demandType=" + demandType + ", retryCounter="
 				+ retryCounter + ", debug=" + debug + ", outputProductType="  + outputProductType + "]";
 	}
+
 }

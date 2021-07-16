@@ -1272,7 +1272,12 @@ public class EsServices {
 					final SearchMetadata local = new SearchMetadata();
 					local.setProductName(source.get("productName").toString());
 					local.setProductType(source.get("productType").toString());
-					local.setKeyObjectStorage(source.get("url").toString());
+					
+					if (source.containsKey("url")) {
+						local.setKeyObjectStorage(source.get("url").toString());
+					} else {
+						local.setKeyObjectStorage(source.get("productName").toString());
+					}
 					if (source.containsKey("startTime")) {
 						try {
 							local.setValidityStart(
@@ -1783,16 +1788,18 @@ public class EsServices {
 			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
 					extractPolygonFrom(response));
 			queryBuilder.relation(ShapeRelation.CONTAINS);
-			LOGGER.debug("Using {}", queryBuilder);
+			LOGGER.debug("Using product {} footprint {} for sea coverage check", productName, queryBuilder);
 			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 			sourceBuilder.query(queryBuilder);
 			sourceBuilder.size(SIZE_LIMIT);
 
 			final SearchRequest request = new SearchRequest(LAND_MASK_FOOTPRINT_INDEX_NAME);
 			request.source(sourceBuilder);
+			LOGGER.trace("Using sea coverage search query: {}", request.source().toString());
 
 			final SearchResponse searchResponse = elasticsearchDAO.search(request);
 			if (isNotEmpty(searchResponse)) {
+				LOGGER.trace("Using product sea coverage {}, response is not Empty  {} ", productName, searchResponse.toString());		
 				return 0; // INFO: the value range is inverse, because the maskfile contains land, not sea
 			}
 			// TODO FIXME implement coverage calculation

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.auxip.client.AuxipClientFactory;
 import esa.s1pdgs.cpoc.auxip.client.config.AuxipClientConfigurationProperties;
 import esa.s1pdgs.cpoc.ebip.client.EdipClientFactory;
@@ -82,8 +83,8 @@ public class InboxAdapterManagerConfiguration {
 	@Bean
 	@Autowired
 	public ProductService productService(
-			final ObsClient obsClient
-	) {
-		return new ProductServiceImpl(obsClient, properties.isBufferInputs());
+			final ObsClient obsClient,
+			final AppStatus appStatus) {
+		return new ProductServiceImpl(obsClient, properties.isBufferInputs(), appStatus);
 	}
 }

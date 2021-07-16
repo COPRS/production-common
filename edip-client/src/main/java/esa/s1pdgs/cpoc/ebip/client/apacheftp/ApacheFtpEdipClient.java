@@ -44,10 +44,12 @@ public class ApacheFtpEdipClient implements EdipClient {
 
 	private final EdipHostConfiguration config;
 	private final URI uri;
+    private final boolean directoryListing;
 	
-	public ApacheFtpEdipClient(final EdipHostConfiguration config, final URI uri) {
+	public ApacheFtpEdipClient(final EdipHostConfiguration config, final URI uri, final boolean directoryListing) {
 		this.config = config;
 		this.uri = uri;
+		this.directoryListing = directoryListing;
 	}
 
 	@Override
@@ -57,8 +59,18 @@ public class ApacheFtpEdipClient implements EdipClient {
 		
 		final FTPClient client = connectedClient();
 		
-		final List<EdipEntry> result = getIfNotDirectory(client, uriPath)
-				.orElse(listRecursively(client, uriPath, filter));	
+		List<EdipEntry> result = new ArrayList<>();
+		
+		/*
+		 * S1OPS-582: Dirty workaround for Plan & Report QC files listing 
+		 */
+		if (directoryListing) {
+			result = listDirectory(client, uriPath, filter);
+		} else {
+		
+			result = getIfNotDirectory(client, uriPath)
+					.orElse(listRecursively(client, uriPath, filter));
+		}
 		
 		client.logout();
 		client.disconnect();
@@ -74,8 +86,8 @@ public class ApacheFtpEdipClient implements EdipClient {
 				@Override
 				public void close() throws IOException {	
 					if (client.isConnected()) {
+						super.close();
 						client.completePendingCommand();
-						super.close();			
 						client.logout();
 						client.disconnect();
 						assertPositiveCompletion(client);
@@ -238,14 +250,59 @@ public class ApacheFtpEdipClient implements EdipClient {
 			throw new RuntimeException(String.format("Cannot list path: %s", path));
 		}
 		final List<FTPFile> ftpFiles = Arrays.asList(client.listFiles(path.toString()));
-		FTPFile ftpFile = ftpFiles.size() == 1 ? ftpFiles.get(0) : null;
-		if (null != ftpFile && !ftpFile.isDirectory() && null != path && null != path.getParent()) {
-			EdipEntry edipEntry = toEdipEntry(path.getParent(), ftpFile);
+		final FTPFile ftpFile = ftpFiles.size() == 1 ? ftpFiles.get(0) : null;
+		if (isNotDirectory(path, ftpFile)) {
+			final EdipEntry edipEntry = toEdipEntry(path.getParent(), ftpFile);
 			return Optional.of(Collections.singletonList(edipEntry));
 		}
 		return Optional.empty();
 	}
+
+	final boolean isNotDirectory(final Path path, final FTPFile ftpFile) {
+		
+		return null != ftpFile && 
+				!ftpFile.isDirectory() && 
+				pathEqualsFtpFileName(path, ftpFile) &&
+				null != path && 
+				null != path.getParent();
+	}
 	
+	private boolean pathEqualsFtpFileName(final Path path, final FTPFile ftpFile) {
+		
+		Path ftpFilePath = Paths.get(ftpFile.getName()).getFileName();
+		Path uriPath = path.getFileName();
+
+		if(ftpFilePath == null && uriPath == null) {
+			return true;
+		}
+		if (ftpFilePath == null || uriPath == null) {
+			return false; 
+		}
+		
+		return ftpFilePath.toString().equals(uriPath.toString());
+				
+	}
+	
+	private List<EdipEntry> listDirectory(final FTPClient client, final Path path, final EdipEntryFilter filter)
+			throws IOException {
+		final List<EdipEntry> result = new ArrayList<>();
+
+		for (final FTPFile ftpFile : client.listFiles(path.toString())) {
+			final EdipEntry entry = toEdipEntry(path, ftpFile);
+			// System.err.println("FOO " + entry);
+			if (!filter.accept(entry)) {
+				LOG.trace("{} ignored by {}", entry, filter);
+				continue;
+			}
+
+			if (ftpFile.isDirectory()) {
+				result.add(entry);
+			}
+		}
+
+		return result;
+	}
+
 	private List<EdipEntry> listRecursively(
 			final FTPClient client, 
 			final Path path, 
@@ -262,6 +319,12 @@ public class ApacheFtpEdipClient implements EdipClient {
 				LOG.trace("{} ignored by {}", entry, filter);
 				continue;
 			}	
+			
+			// dirty workaround for '..' issue:
+			if (ftpFile.getName().startsWith("..")) {
+				LOG.trace("Ignoring {}", entry);
+				continue;				
+			}
 			
 			if (ftpFile.isDirectory()) {
 				LOG.trace("Found dir {}", entry);

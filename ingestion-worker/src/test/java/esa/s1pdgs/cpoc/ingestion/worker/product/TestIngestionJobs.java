@@ -68,5 +68,13 @@ public class TestIngestionJobs {
 		ingestionJob.setKeyObjectStorage("S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.SAFE/");		
 		assertEquals("S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.SAFE", IngestionJobs.filename(ingestionJob));
 	}
-
+	
+	@Test
+	public final void testBasePath_NoSubdirectory_ShallReturnRootPath() throws URISyntaxException {		
+		final String name = "S1__OPER_MSK__LAND__V20140403T210200_G20190711T113000.SAFE";
+		final URI newProd = new URI(
+				"https://prip.sentinel1.eo.esa.int:443/" + name
+		);
+		assertEquals("/", IngestionJobs.basePath(newProd, name).toString());
+	}
 }

@@ -38,6 +38,11 @@ public class TestMqiMessageRepo {
     @Autowired
     private MqiMessageRepo uut;
 
+    /*
+     * This doesn't seems to be working. A possible work around can be to download the package manually, so it is not downloaded
+     * at runtime anymore causing issues with the Werum-Proxy. E.g. under linux:
+     * mkdir -p ~/.embedmongo/linux && cd .embedmongo/linux && wget https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.5.5.tgz 
+     */
 	{
 		if ("http://proxy.net.werum:8080/".equals(System.getenv("http_proxy"))) {
 			System.setProperty("http.proxyHost", "proxy.net.werum");

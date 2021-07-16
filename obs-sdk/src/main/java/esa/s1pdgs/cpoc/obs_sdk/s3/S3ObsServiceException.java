@@ -27,9 +27,6 @@ public class S3ObsServiceException extends ObsServiceException {
     /**
      * Constructor
      * 
-     * @param key
-     * @param bucket
-     * @param cause
      */
     public S3ObsServiceException(final String bucket, final String key,
             final String message) {
@@ -41,9 +38,6 @@ public class S3ObsServiceException extends ObsServiceException {
     /**
      * Constructor
      * 
-     * @param key
-     * @param bucket
-     * @param cause
      */
     public S3ObsServiceException(final String bucket, final String key,
             final String message, final Throwable cause) {
@@ -69,7 +63,6 @@ public class S3ObsServiceException extends ObsServiceException {
     /**
      * Override the getMessage function
      * 
-     * @return
      */
     public String getMessage() {
         return String.format(

@@ -137,44 +137,46 @@ public class ValidationService {
 			obsResults = obsClient.listInterval(ProductFamily.valueOf(family.name()), startDate, endDate);
 			LOGGER.info("OBS query for family '{}' returned {} results", family, obsResults.size());
 
-			/*
-			 * Step 2: We are doing a query on the metadata of the family and getting all
-			 * entries form the catalog that is available. Then we instruct the obs client
-			 * to validate if these entries are valid.
-			 */
 			final List<Discrepancy> discrepancies = new ArrayList<>();
-			for (final SearchMetadata smd : metadataResults) {
-				// If its a zipped family, we need to extend the filename
-				String key = smd.getKeyObjectStorage();
-				if (family.name().endsWith("_ZIP")) {
-					key += ".zip";
-				}
-				final Reporting obsReporting = reporting.newReporting("ValidateObs");
-				try {
-					obsReporting.begin(new ReportingMessage("Validating %s", key));
-					obsClient.validate(new ObsObject(family, key));
-					obsReporting.end(new ReportingMessage("%s is valid", key));
-				} catch (ObsServiceException | ObsValidationException ex) {
-					obsReporting.error(new ReportingMessage("%s is invalid: %s", key, ex.getMessage()));
-					// Validation failed for that object.
-					LOGGER.debug(ex);
-					discrepancies.add(new Discrepancy(smd.getKeyObjectStorage(), ex.getMessage()));
-				}
-			}
-
+			
 			/*
-			 * Step 3: After we know that the catalog data is valid within the OBS, we check
-			 * if there are additional products stored within that are not expects.
+			 * Step 2: Compare all files found in OBS if they are present in the MDC.
 			 */
 			final Set<String> realKeys = extractRealKeysForMDC(obsResults.values(), family);
 			for (final SearchMetadata smd : metadataResults) {
 				realKeys.remove(smd.getKeyObjectStorage());
 			}
 
-			LOGGER.info("Found {} keys that are in OBS, but not in MetadataCatalog", realKeys.size());
 			for (final String key : realKeys) {
-				final Discrepancy discrepancy = new Discrepancy(key, "Exists in OBS, but not in MDC");
-				discrepancies.add(discrepancy);
+				/*
+				 * Check if key is in MDC (might be not in the results of the previous MDC query interval)
+				 */
+				try {
+					metadataClient.queryByFamilyAndProductName(family.name(), key);
+					// exists in MDC
+				} catch (final MetadataQueryException e) {
+					// not exists in MDC
+					final Discrepancy discrepancy = new Discrepancy(key, "Exists in OBS, but not in MDC");
+					discrepancies.add(discrepancy);					
+				}
+			}
+			
+			/*
+			 * Step 3: Validate all OBS files found
+			 */
+			for (String key : extractRealKeys(obsResults.values(), family)) {
+				
+				final Reporting obsReporting = reporting.newReporting("ValidateObs");
+				try {
+					obsReporting.begin(new ReportingMessage("Validating %s", key));
+					obsClient.validate(new ObsObject(family, key));
+					obsReporting.end(new ReportingMessage("%s is valid",key));
+				} catch (ObsServiceException | ObsValidationException ex) {
+					obsReporting.error(new ReportingMessage("%s is invalid: %s", key, ex.getMessage()));
+					// Validation failed for that object.
+					LOGGER.debug(ex);
+					discrepancies.add(new Discrepancy(key, ex.getMessage()));
+				}
 			}
 
 			/*
@@ -212,7 +214,7 @@ public class ValidationService {
 
 		LOGGER.info("Check that everything that is in OBS is also in the Data Lifecycle index");
 
-		for (String key : extractRealKeysForDataLifecycle(obsObjects, family)) {
+		for (String key : extractRealKeys(obsObjects, family)) {
 			if (isNotPresentInDataLifecycleIndex(key)) {
 				LOGGER.trace("Exists in OBS, but not in Data Lifecycle Index: {}", key);
 				final Discrepancy discrepancy = new Discrepancy(key,
@@ -237,6 +239,27 @@ public class ValidationService {
 						new DataLifecycleTextFilter(field, DataLifecycleTextFilter.Function.EQUALS, key)),
 				Optional.empty(), Optional.empty(), Collections.emptyList());
 		return result.isEmpty();
+	}
+	
+	Set<String> extractRealKeys(final Collection<ObsObject> obsResults, final ProductFamily family) {
+		
+		final Set<String> realProducts = new HashSet<>();
+		for (final ObsObject obsResult : obsResults) {
+			final String key = obsResult.getKey();
+			final int index = key.indexOf("/");
+			String realKey = null;
+
+			if (family == ProductFamily.EDRS_SESSION) {
+				realKey = key;
+			} else if (index != -1) {
+				realKey = key.substring(0, index);
+			} else {
+				realKey = key;
+			}
+			LOGGER.trace("key is {}", realKey);
+			realProducts.add(realKey);
+		}
+		return realProducts;
 	}
 
 	Set<String> extractRealKeysForMDC(final Collection<ObsObject> obsResults, final ProductFamily family) {
@@ -264,34 +287,6 @@ public class ValidationService {
 			if (key.endsWith(".zip")) {
 				// Special case zipped products. The MDC key does not contain the zip!
 				realKey = realKey.substring(0, key.lastIndexOf(".zip"));
-			}
-			LOGGER.trace("key is {}", realKey);
-			realProducts.add(realKey);
-		}
-		return realProducts;
-	}
-	
-	Set<String> extractRealKeysForDataLifecycle(final Collection<ObsObject> obsResults, final ProductFamily family) {
-		final Set<String> realProducts = new HashSet<>();
-		for (final ObsObject obsResult : obsResults) {
-			final String key = obsResult.getKey();
-			final int index = key.indexOf("/");
-			String realKey = null;
-
-			if (family == ProductFamily.EDRS_SESSION) {
-				realKey = key;
-				/*
-				 * EDRS_Sessions are just queried on raw and not containg DSIB. So we are
-				 * removing them from the check
-				 */
-				if (realKey.endsWith("DSIB.xml")) {
-					LOGGER.debug("Ignoring DSIB file: {}", realKey);
-					continue;
-				}
-			} else if (index != -1) {
-				realKey = key.substring(0, index);
-			} else {
-				realKey = key;
 			}
 			LOGGER.trace("key is {}", realKey);
 			realProducts.add(realKey);

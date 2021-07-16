@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -27,37 +26,33 @@ public class PripPublishingJob extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(creationDate, evictionDate, hostname, keyObjectStorage, productFamily, uid,
-				allowedActions, demandType, debug, retryCounter);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((evictionDate == null) ? 0 : evictionDate.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (!super.equals(obj))
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		final PripPublishingJob other = (PripPublishingJob) obj;
-		return Objects.equals(creationDate, other.creationDate) 
-				&& Objects.equals(evictionDate, other.evictionDate)
-				&& Objects.equals(hostname, other.hostname) 
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
-				&& Objects.equals(uid, other.uid)
-				&& productFamily == other.productFamily
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-		        && demandType == other.demandType
-		        && debug == other.debug
-		        && retryCounter == other.retryCounter;
+		PripPublishingJob other = (PripPublishingJob) obj;
+		if (evictionDate == null) {
+			if (other.evictionDate != null)
+				return false;
+		} else if (!evictionDate.equals(other.evictionDate))
+			return false;
+		return true;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "PripPublishingJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", creationDate="
 				+ creationDate + ", hostname=" + hostname + ", evictionDate=" + evictionDate + ", uid=" + uid +"]";
 	}
+
 }

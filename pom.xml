@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.werum.s1pdgs</groupId>
 	<artifactId>s1pro-core</artifactId>
-	<version>3.31.3</version>
+	<version>3.32.0</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -22,10 +22,10 @@
 		<commons.net.version>3.8.0</commons.net.version>
 		<commons.io.version>2.6</commons.io.version>
 		<httpcomponents.version>4.5.1</httpcomponents.version>
-		
-		<!-- jacoco.version>0.7.5.201505241946</jacoco.version-->		
-		<jacoco.version>0.7.7.201606060606</jacoco.version>		
-		
+
+		<!-- jacoco.version>0.7.5.201505241946</jacoco.version-->
+		<jacoco.version>0.7.7.201606060606</jacoco.version>
+
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
 		<openapi4j.version>1.0.4</openapi4j.version>
@@ -202,12 +202,12 @@
 		        <artifactId>commons-io</artifactId>
 		        <version>${commons.io.version}</version>
 	      	</dependency>
-	      	
+
 	      	<dependency>
 		        <groupId>org.apache.httpcomponents</groupId>
 		        <artifactId>httpclient</artifactId>
 		        <version>${httpcomponents.version}</version>
-	      	</dependency>	      	
+	      	</dependency>
 
 			<dependency>
 				<groupId>com.github.lookfirst</groupId>

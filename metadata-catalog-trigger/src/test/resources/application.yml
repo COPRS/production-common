@@ -5,7 +5,7 @@ spring:
     
 # Logging
 logging:
-  config: ${log4j_filename:config/log4j2.yml}
+  config: classpath:log4j2-test.yml
 
 # KAFKA config for error queue
 kafka:

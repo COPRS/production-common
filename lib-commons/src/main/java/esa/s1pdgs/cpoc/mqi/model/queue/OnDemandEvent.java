@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -101,37 +100,62 @@ public class OnDemandEvent extends AbstractMessage {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(metadata, mode, productName, productType, productionType, creationDate, hostname,
-				keyObjectStorage, productFamily, uid, allowedActions, demandType, debug, retryCounter, tasktableName, 
-				outputProductType);
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
+		result = prime * result + ((mode == null) ? 0 : mode.hashCode());
+		result = prime * result + ((outputProductType == null) ? 0 : outputProductType.hashCode());
+		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
+		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
+		result = prime * result + ((productionType == null) ? 0 : productionType.hashCode());
+		result = prime * result + ((tasktableName == null) ? 0 : tasktableName.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final OnDemandEvent other = (OnDemandEvent) obj;
-		return Objects.equals(metadata, other.metadata) 
-				&& Objects.equals(mode, other.mode)
-				&& Objects.equals(productName, other.productName) 
-				&& Objects.equals(productType, other.productType)
-				&& Objects.equals(productionType, other.productionType) 
-				&& Objects.equals(hostname, other.hostname)
-				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) 
-				&& productFamily == other.productFamily
-				&& Objects.equals(uid, other.uid) 
-				&& Objects.equals(allowedActions, other.getAllowedActions())
-				&& Objects.equals(tasktableName, other.tasktableName)
-				&& Objects.equals(outputProductType, other.outputProductType)
-				&& demandType == other.demandType 
-				&& debug == other.debug 
-				&& retryCounter == other.retryCounter;
+		OnDemandEvent other = (OnDemandEvent) obj;
+		if (metadata == null) {
+			if (other.metadata != null)
+				return false;
+		} else if (!metadata.equals(other.metadata))
+			return false;
+		if (mode == null) {
+			if (other.mode != null)
+				return false;
+		} else if (!mode.equals(other.mode))
+			return false;
+		if (outputProductType == null) {
+			if (other.outputProductType != null)
+				return false;
+		} else if (!outputProductType.equals(other.outputProductType))
+			return false;
+		if (productName == null) {
+			if (other.productName != null)
+				return false;
+		} else if (!productName.equals(other.productName))
+			return false;
+		if (productType == null) {
+			if (other.productType != null)
+				return false;
+		} else if (!productType.equals(other.productType))
+			return false;
+		if (productionType != other.productionType)
+			return false;
+		if (tasktableName == null) {
+			if (other.tasktableName != null)
+				return false;
+		} else if (!tasktableName.equals(other.tasktableName))
+			return false;
+		return true;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "OnDemandEvent [productName=" + productName + ", mode=" + mode + ", productionType=" + productionType

@@ -113,7 +113,7 @@ public class MetadataTriggerService {
 		}
 	}
 	
-	private final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
+	final MqiConsumer<?> newMqiConsumerFor(final ProductCategory cat, final CategoryConfig config) {
 		LOG.debug("Creating MQI consumer for category {} using {}", cat, config);
 		if (cat == ProductCategory.INGESTION_EVENT) {
 			return new MqiConsumer<IngestionEvent>(

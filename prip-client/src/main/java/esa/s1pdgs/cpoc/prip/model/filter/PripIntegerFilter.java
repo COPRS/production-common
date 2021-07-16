@@ -9,8 +9,19 @@ public class PripIntegerFilter extends PripRangeValueFilter<Long> {
 		super(fieldName);
 	}
 
-	public PripIntegerFilter(String fieldName, Operator operator, Long value) {
+	public PripIntegerFilter(String fieldName, RelationalOperator operator, Long value) {
 		super(fieldName, operator, value);
 	}
-	
+
+	private PripIntegerFilter(String fieldName, RelationalOperator operator, Long value, boolean nested, String path) {
+		super(fieldName, operator, value, nested, path);
+	}
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripIntegerFilter copy() {
+		return new PripIntegerFilter(this.getFieldName(), this.getRelationalOperator(), this.getValue(), this.isNested(), this.getPath());
+	}
+
 }

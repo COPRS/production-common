@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Boolean filter for querying the persistence repository.
  */
-public class PripBooleanFilter extends PripQueryFilter {
+public class PripBooleanFilter extends PripQueryFilterTerm {
 
 	public enum Function {
 		EQUALS("is"), //
@@ -45,12 +45,16 @@ public class PripBooleanFilter extends PripQueryFilter {
 	public PripBooleanFilter(String fieldName) {
 		super(fieldName);
 	}
-	
-	public PripBooleanFilter(String fieldName, Function function, Boolean value) {
-		this(fieldName);
+
+	private PripBooleanFilter(String fieldName, Function function, Boolean value, boolean nested, String path) {
+		super(fieldName, nested, path);
 
 		this.function = Objects.requireNonNull(function);
 		this.value = (Objects.requireNonNull(value));
+	}
+
+	public PripBooleanFilter(String fieldName, Function function, Boolean value) {
+		this(fieldName, function, value, false, null);
 	}
 
 	// --------------------------------------------------------------------------
@@ -82,7 +86,14 @@ public class PripBooleanFilter extends PripQueryFilter {
 		return this.getFieldName() + " " + (null != this.function ? this.function.functionName : "NO_FUNCTION") + " "
 				+ this.getValue();
 	}
-	
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public PripBooleanFilter copy() {
+		return new PripBooleanFilter(this.getFieldName(), this.getFunction(), this.getValue(), this.isNested(), this.getPath());
+	}
+
 	// --------------------------------------------------------------------------
 
 	public Function getFunction() {

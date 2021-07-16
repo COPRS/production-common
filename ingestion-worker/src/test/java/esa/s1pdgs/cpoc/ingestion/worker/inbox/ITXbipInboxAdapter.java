@@ -1,8 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.worker.inbox;
 
 import java.net.URI;
-import java.util.List;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +24,12 @@ public class ITXbipInboxAdapter {
 		
 		final XbipInboxAdapter uut = new XbipInboxAdapter(xbipFactory);
 		
-		final List<InboxAdapterEntry> entries = uut.read(
-				new URI("https://cgs01.sentinel1.eo.esa.int/NOMINAL/S1A/DCS_04_20200403151525031965_dat/"), 
-				"DCS_04_20200403151525031965_dat", "", 123L
-		);
-		entries.forEach(e -> System.out.println(e));
+		try (final InboxAdapterResponse response = uut.read(
+				new URI("https://cgs01.sentinel1.eo.esa.int/NOMINAL/S1A/DCS_04_20200403151525031965_dat/"),
+				"DCS_04_20200403151525031965_dat", "", 123L))
+		{
+			response.getResult().forEach(e -> System.out.println(e));
+		}
 	}
 	
 }

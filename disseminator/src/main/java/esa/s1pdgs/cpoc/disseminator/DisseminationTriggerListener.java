@@ -178,10 +178,10 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 				);
 			} else{
 				if (!disableOverpassCheck) {
-					LOG.warn("Ignoring file %s of ProductFamily of %s because it is not over overpass", body.getKeyObjectStorage(), body.getProductFamily());
+					LOG.warn("Ignoring file {} of ProductFamily of {} because it is not over overpass", body.getKeyObjectStorage(), body.getProductFamily());
 					reporting.end(new ReportingMessage("File %s of ProductFamily of %s is ignored because it is not over overpass", body.getKeyObjectStorage(), body.getProductFamily()));
 				} else {
-					LOG.warn("Ignoring file %s of ProductFamily of %s", body.getKeyObjectStorage(), body.getProductFamily());
+					LOG.warn("Ignoring file {} of ProductFamily of {}", body.getKeyObjectStorage(), body.getProductFamily());
 					reporting.end(new ReportingMessage("File %s of ProductFamily of %s is ignored", body.getKeyObjectStorage(), body.getProductFamily()));
 				}
 			}
@@ -222,7 +222,7 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 				}
 	        }
         } else {
-        	LOG.trace("Skipping overpass check. Product %s does not match pattern %s", productName, overpassCoverageCheckPattern.pattern());
+        	LOG.trace("Skipping overpass check. Product {} does not match pattern {}", productName, overpassCoverageCheckPattern.pattern());
         	return true;
         }
 	}
