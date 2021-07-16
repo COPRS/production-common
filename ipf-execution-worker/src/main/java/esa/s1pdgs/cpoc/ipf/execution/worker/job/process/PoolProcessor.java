@@ -75,13 +75,6 @@ public class PoolProcessor {
     
     private final List<String> plainTextLoggingTasks;
 
-    /**
-     * @param pool
-     * @param jobOrderPath
-     * @param workDirectory
-     * @param prefixMonitorLogs
-     * @param timeoutProcessOneTaskS
-     */
     public PoolProcessor(final LevelJobPoolDto pool, final String jobOrderPath,
             final String workDirectory, final String prefixLogs,
             final long tmProcessOneTaskS, final List<String> plainTextLoggingTasks) {
@@ -99,7 +92,7 @@ public class PoolProcessor {
     // S1PRO-1561: Since some IPF already log in JSON format, it needs to be dumped directly into the log
     // without further JSON wrapping. For such tasks, LogUtils.PLAINTEXT logger is used.
     // All other tasks need to be configured, i.e. their output is wrapped in JSON by using the local logger
-    private final Consumer<String> getLogConsumerForTask(final String binaryPath) {
+    private Consumer<String> getLogConsumerForTask(final String binaryPath) {
     	for (final String plainTextLoggingTaskPattern : plainTextLoggingTasks) {
     		if (binaryPath.matches(plainTextLoggingTaskPattern)) {
     	    	return TaskCallable.LOGGER::info;      			
@@ -113,7 +106,6 @@ public class PoolProcessor {
      * W>hen one fails (exit code > 127 or exception raised), all the other
      * running tasks are shutdown and an exception is raised
      * 
-     * @throws AbstractCodedException
      */
     public void process(final ReportingFactory reportingFactory) throws AbstractCodedException {
         boolean stopAllProcessCall = false;     
@@ -168,7 +160,6 @@ public class PoolProcessor {
     /**
      * Return if thread is interrupted
      * 
-     * @return
      */
     private boolean isInterrupted() {
         return Thread.currentThread().isInterrupted();
@@ -180,10 +171,6 @@ public class PoolProcessor {
      * if 0 < code <= 127 => warning <br/>
      * if 127 < code => raise exception
      * 
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws TimeoutException
-     * @throws IpfExecutionWorkerProcessExecutionException
      */
     private void waitNextTaskResult() throws InterruptedException,
             ExecutionException, TimeoutException, IpfExecutionWorkerProcessExecutionException {
@@ -194,7 +181,11 @@ public class PoolProcessor {
         if (exitCode == 0) {
             LOGGER.info("{} 2 - Task {} successfully executed", this.prefixLogs,
                     task);
-        } else if ((exitCode >= 0 && exitCode < 128) || exitCode == 255 && task.contains("S1AIOProcessor")/* special case aio single channel session S1PRO-1512 FIXME*/) {
+        } else if (
+                (exitCode >= 0 && exitCode < 128)
+                        || (exitCode == 255 && task.contains("S1AIOProcessor")) // FIXME special case aio single channel session S1PRO-1512
+                        || exitCode == 134 && task.toLowerCase().contains("procmain") // FIXME special case for LPC1ProcMain error after processing during cleanup S1OPS-464
+        ) {
             LOGGER.warn("{} 2 - Task {} exit with warning code {}",
                     this.prefixLogs, task, exitCode);
         } else {
@@ -206,7 +197,6 @@ public class PoolProcessor {
 
     /**
      * Stop all tasks
-     * @throws InterruptedException
      */
     private void stopAllTasks() throws InterruptedException {
         this.execSrv.shutdownNow();
