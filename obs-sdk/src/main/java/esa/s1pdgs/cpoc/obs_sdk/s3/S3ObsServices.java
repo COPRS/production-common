@@ -429,7 +429,13 @@ public class S3ObsServices {
 
 	private Path localFilePathFor(String keyName) {
 		final String randomPrefix = RandomStringUtils.randomAlphanumeric(4);
-		final String lastPathElement = randomPrefix + "_" + Paths.get(keyName).getFileName().toString();
+		final Path fileName = Paths.get(keyName).getFileName();
+
+		if(fileName == null) {
+			throw new RuntimeException("cannot derive file name from key " + keyName);
+		}
+
+		final String lastPathElement = randomPrefix + "_" + fileName;
 		return localFilesLocation.resolve(lastPathElement);
 	}
 
