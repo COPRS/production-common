@@ -145,8 +145,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 	
 	private final long initDelayPollMs;
 	
-	private final WorkingDirectoryUtils workingDirUtils;
-	
 	/**
 	 */
 	@Autowired
@@ -160,6 +158,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			final List<MessageFilter> messageFilter,
 			final ErrorRepoAppender errorAppender,
 			final StatusService mqiStatusService,
+			
 			@Value("${process.init-delay-poll-ms}") final long initDelayPollMs,
 			@Value("${process.fixed-delay-ms}") final long pollingIntervalMs
 	) {
@@ -174,8 +173,6 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		this.errorAppender = errorAppender;
 		this.initDelayPollMs = initDelayPollMs;
 		this.pollingIntervalMs = pollingIntervalMs;
-		
-		this.workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());
 	}
 	
 	@PostConstruct
@@ -423,6 +420,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
             }
             return new MqiPublishingJob<>(productionEvents, warningMessage);
         } catch (Exception e) {
+        	WorkingDirectoryUtils workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());
         	workingDirUtils.copyWorkingDirectory(reporting, reporting.getUid(), job, ProductFamily.FAILED_WORKDIR);
         	throw e;
 		} finally {
