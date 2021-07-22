@@ -172,11 +172,12 @@ public final class ReportAdapter implements Reporting {
 
 	@Override
 	public final void error(final ReportingMessage reportingMessage) {
+		final long deltaTMillis = getDeltaMillis();
 		final Task endTask = new EndTask(
 				uid.toString(), 
 				taskName, 
 				Status.NOK, 
-				0,
+				calcDuration(deltaTMillis),
 				ReportingOutput.NULL,
 				input
 		);
