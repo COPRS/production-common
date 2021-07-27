@@ -128,13 +128,12 @@ public class SardineXbipClient implements XbipClient {
 			// ignore own URL (like PIC) on recursion
 			if (davResource.isDirectory() && !uri.toString().equals(url)) {
 				LOG.trace("Scanning subdirectory {}", davResource.getName());
-				
-				if(davResource.getContentLength() > -1) {
-					result.addAll(listAllRecursively(uri.toString(), filter));					
-				} else {
-					LOG.trace("Ignoring directory with length = -1 {}", davResource.getName());
-				}
-				
+				result.addAll(listAllRecursively(uri.toString(), filter));					
+				continue;
+			}
+			
+			if(davResource.isDirectory() && davResource.getContentLength() == -1) {
+				LOG.trace("Ignoring directory with length = -1 {}", davResource.getName());
 				continue;
 			}
 			
