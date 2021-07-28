@@ -96,7 +96,7 @@ public class SardineXbipClient implements XbipClient {
 		);
 	}
 	
-	private URI toUri(final DavResource davResource) {
+	URI toUri(final DavResource davResource) {
 		// ok, some servers (like our test server) only return the absolute path as an URI.
 		// So this is a workaround to fix such conditions
 		if (!davResource.getHref().toString().startsWith(url.toString())) {
@@ -115,7 +115,7 @@ public class SardineXbipClient implements XbipClient {
 	}
 	
 	// S1PRO-1847: Programmatic server tree traversal
-	private List<XbipEntry> listAllRecursively(final String url, final XbipEntryFilter filter) throws IOException {
+	List<XbipEntry> listAllRecursively(final String url, final XbipEntryFilter filter) throws IOException {
 		final List<XbipEntry> result = new ArrayList<>();
 		for (final DavResource davResource : sardine.list(url, 1)) {
 			// ignore hidden files (like PIC)
