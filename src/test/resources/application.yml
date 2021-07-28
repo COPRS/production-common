@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: csgrs-native-api
+
+# Logging
+logging:
+  level:
+    root: ERROR
+    de.werum.csgrs: DEBUG
+    org.springframework: INFO
+    org.apache: INFO
+
+# REST controller
+server:
+  port: 8080
