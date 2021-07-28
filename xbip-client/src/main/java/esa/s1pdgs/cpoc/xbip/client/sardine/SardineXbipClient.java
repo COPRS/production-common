@@ -132,6 +132,9 @@ public class SardineXbipClient implements XbipClient {
 				continue;
 			}
 			
+			LOG.info("--- " + davResource.getName() + ";" + davResource.isDirectory() + ";"
+					+ davResource.getContentLength());
+			
 			if(davResource.isDirectory() && davResource.getContentLength() == -1) {
 				LOG.trace("Ignoring directory with length = -1 {}", davResource.getName());
 				continue;
