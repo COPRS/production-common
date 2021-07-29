@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.werum.csgrs.nativeapi.service.NativeApiService;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/${native-api.version}")
 public class NativeApiRestController {
 
 	public static final Logger LOGGER = LogManager.getLogger(NativeApiRestController.class);
