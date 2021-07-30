@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -100,7 +101,8 @@ public class TestFilesystemInboxAdapter {
 				"MPS_",
 				"NOMINAL",
                 "FAST24",
-				"file"
+				"file",
+				Collections.emptyMap()
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
@@ -137,7 +139,8 @@ public class TestFilesystemInboxAdapter {
 				"MPS_",
 				"NOMINAL",
                 "FAST24",
-				"file"
+				"file",
+				Collections.emptyMap()
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
