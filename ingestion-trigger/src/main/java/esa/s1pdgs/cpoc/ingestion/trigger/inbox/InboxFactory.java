@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
+import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractorImpl;
 import esa.s1pdgs.cpoc.ingestion.trigger.auxip.AuxipInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.edip.EdipInboxAdapter;
@@ -81,8 +83,18 @@ public class InboxFactory {
 				config.getTimeliness(),
 				newProductNameEvaluatorFor(config),
 				publishMaxRetries,
-				publishTempoRetryMs
+				publishTempoRetryMs,
+				newPathMetadataExtractor(config)
 		);
+	}
+	
+	// TODO / FIXME
+	private final PathMetadataExtractor newPathMetadataExtractor(final InboxConfiguration config) {
+		if (config.getPathPattern() == null) {
+			return PathMetadataExtractor.NULL;
+		}
+		return new PathMetadataExtractorImpl(Pattern.compile(config.getPathPattern(), Pattern.CASE_INSENSITIVE),
+				config.getPathMetadataElements());
 	}
 	
 	private final String normalizeInputUrl(final String configuredUrl) {

@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,11 @@ public class IngestionTriggerServiceConfiguration {
 
 		for (final InboxConfiguration config : properties.getPolling()) {
 			try {
-				final Inbox newInbox = inboxFactory.newInbox(config, properties.getPublishMaxRetries(), properties.getPublishTempoRetryMs());
+				final Inbox newInbox = inboxFactory.newInbox(
+						config, 
+						properties.getPublishMaxRetries(), 
+						properties.getPublishTempoRetryMs()
+			    );
 				LOG.info("Adding new inbox to be polled: {} [publishMaxRetries={}, publishTempoRetryMs={}]", newInbox,
 						properties.getPublishMaxRetries(),	properties.getPublishTempoRetryMs());
 				inboxes.add(newInbox);
@@ -53,5 +56,5 @@ public class IngestionTriggerServiceConfiguration {
 			}
 		}
 		return new IngestionTriggerService(inboxes, status);
-	}	
+	}
 }

@@ -1,6 +1,9 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
@@ -11,6 +14,7 @@ public class CatalogJob extends AbstractMessage {
     private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
     private String timeliness;
     private String stationName;
+	private Map<String,String> additionalMetadata = new HashMap<>();
     
     public CatalogJob() {
     	super();
@@ -64,57 +68,37 @@ public class CatalogJob extends AbstractMessage {
 	public void setStationName(final String stationName) {
 		this.stationName = stationName;
 	}
-	
+	public Map<String, String> getAdditionalMetadata() {
+		return additionalMetadata;
+	}
+
+	public void setAdditionalMetadata(final Map<String, String> additionalMetadata) {
+		this.additionalMetadata = additionalMetadata;
+	}
+
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((mode == null) ? 0 : mode.hashCode());
-		result = prime * result + ((oqcFlag == null) ? 0 : oqcFlag.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
-		result = prime * result + ((stationName == null) ? 0 : stationName.hashCode());
-		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
+		result = prime * result
+				+ Objects.hash(additionalMetadata, mode, oqcFlag, productName, relativePath, stationName, timeliness);
 		return result;
 	}
-	
+
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CatalogJob other = (CatalogJob) obj;
-		if (mode == null) {
-			if (other.mode != null)
-				return false;
-		} else if (!mode.equals(other.mode))
-			return false;
-		if (oqcFlag != other.oqcFlag)
-			return false;
-		if (productName == null) {
-			if (other.productName != null)
-				return false;
-		} else if (!productName.equals(other.productName))
-			return false;
-		if (relativePath == null) {
-			if (other.relativePath != null)
-				return false;
-		} else if (!relativePath.equals(other.relativePath))
-			return false;
-		if (stationName == null) {
-			if (other.stationName != null)
-				return false;
-		} else if (!stationName.equals(other.stationName))
-			return false;
-		if (timeliness == null) {
-			if (other.timeliness != null)
-				return false;
-		} else if (!timeliness.equals(other.timeliness))
-			return false;
-		return true;
+		final CatalogJob other = (CatalogJob) obj;
+		return Objects.equals(additionalMetadata, other.additionalMetadata) && Objects.equals(mode, other.mode)
+				&& oqcFlag == other.oqcFlag && Objects.equals(productName, other.productName)
+				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(stationName, other.stationName)
+				&& Objects.equals(timeliness, other.timeliness);
 	}
 
 	@Override
@@ -122,7 +106,8 @@ public class CatalogJob extends AbstractMessage {
 		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productName=" + productName
 				+ ", relativePath=" + relativePath + ", mode=" + mode + ", oqcFlag=" + oqcFlag
-				+ ", timeliness=" + timeliness + ", uid=" + uid + ", stationName=" + stationName + "]";
+				+ ", timeliness=" + timeliness + ", uid=" + uid + ", stationName=" + stationName + 
+				", additionalMetadata="  + additionalMetadata+ "]";
 	}
 
 }

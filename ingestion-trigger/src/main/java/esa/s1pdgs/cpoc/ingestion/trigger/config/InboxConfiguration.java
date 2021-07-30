@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
@@ -25,12 +27,15 @@ public class InboxConfiguration {
 	private int stationRetentionTime = 0; // how many days to keep persisted data about inbox files at a minimum
 	
 	private boolean ftpDirectoryListing = false;
+	
+	private String pathPattern = null;
+	private Map<String,Integer> pathMetadataElements = new HashMap<>();
 
 	public String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -126,7 +131,7 @@ public class InboxConfiguration {
 		return stationRetentionTime;
 	}
 
-	public void setStationRetentionTime(int stationRetentionTime) {
+	public void setStationRetentionTime(final int stationRetentionTime) {
 		this.stationRetentionTime = stationRetentionTime;
 	}
 	
@@ -134,8 +139,24 @@ public class InboxConfiguration {
 		return ftpDirectoryListing;
 	}
 
-	public void setFtpDirectoryListing(boolean ftpDirectoryListing) {
+	public void setFtpDirectoryListing(final boolean ftpDirectoryListing) {
 		this.ftpDirectoryListing = ftpDirectoryListing;
+	}		
+
+	public String getPathPattern() {
+		return pathPattern;
+	}
+
+	public void setPathPattern(final String pathPattern) {
+		this.pathPattern = pathPattern;
+	}
+
+	public Map<String, Integer> getPathMetadataElements() {
+		return pathMetadataElements;
+	}
+
+	public void setPathMetadataElements(final Map<String, Integer> pathMetadataElements) {
+		this.pathMetadataElements = pathMetadataElements;
 	}
 
 	@Override
@@ -144,7 +165,8 @@ public class InboxConfiguration {
 				+ ignoreRegex + ", topic=" + topic + ", stationName=" + stationName + ", mode=" + mode + ", timeliness="
 				+ timeliness + ", sessionNamePattern=" + sessionNamePattern + ", sessionNameGroupIndex="
 				+ sessionNameGroupIndex + ", ignoreFilesBeforeDate=" + ignoreFilesBeforeDate + ", family=" + family
-				+ ", stationRetentionTime=" + stationRetentionTime + "]";
+				+ ", stationRetentionTime=" + stationRetentionTime + ", pathPattern=" + pathPattern+ ", pathMetadataElements=" 
+				+ pathMetadataElements + "]";
 	}
 
 }

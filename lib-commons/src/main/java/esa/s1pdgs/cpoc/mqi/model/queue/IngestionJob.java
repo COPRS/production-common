@@ -1,6 +1,9 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -35,6 +38,8 @@ public class IngestionJob extends AbstractMessage {
 	private String mode;
 	
 	private String timeliness;
+	
+	private Map<String,String> additionalMetadata = new HashMap<>();
 		
 	public IngestionJob() {
 		super();
@@ -51,7 +56,8 @@ public class IngestionJob extends AbstractMessage {
 			final String stationName,
 			final String mode,
 			final String timeliness,
-			final String inboxType
+			final String inboxType,
+			final Map<String,String> additionalMetadata
 	) {
 		super(family, productName);
 		this.pickupBaseURL 		= pickupBaseURL;
@@ -63,6 +69,7 @@ public class IngestionJob extends AbstractMessage {
 		this.mode               = mode;
 		this.timeliness         = timeliness;
 		this.inboxType          = inboxType;
+		this.additionalMetadata	= additionalMetadata;
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
@@ -110,7 +117,7 @@ public class IngestionJob extends AbstractMessage {
 		return mode;
 	}
 
-	public void setMode(String mode) {
+	public void setMode(final String mode) {
 		this.mode = mode;
 	}
 
@@ -118,7 +125,7 @@ public class IngestionJob extends AbstractMessage {
 		return timeliness;
 	}
 
-	public void setTimeliness(String timeliness) {
+	public void setTimeliness(final String timeliness) {
 		this.timeliness = timeliness;
 	}
 
@@ -126,81 +133,65 @@ public class IngestionJob extends AbstractMessage {
 		return inboxType;
 	}
 
-	public void setInboxType(String inboxType) {
+	public void setInboxType(final String inboxType) {
 		this.inboxType = inboxType;
+	}
+	
+	public Map<String, String> getAdditionalMetadata() {
+		return additionalMetadata;
+	}
+
+	public void setAdditionalMetadata(final Map<String, String> additionalMetadata) {
+		this.additionalMetadata = additionalMetadata;
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((inboxType == null) ? 0 : inboxType.hashCode());
-		result = prime * result + ((mode == null) ? 0 : mode.hashCode());
-		result = prime * result + ((pickupBaseURL == null) ? 0 : pickupBaseURL.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		result = prime * result + (int) (productSizeByte ^ (productSizeByte >>> 32));
-		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
-		result = prime * result + ((stationName == null) ? 0 : stationName.hashCode());
-		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
+		result = prime * result + Objects.hash(
+				additionalMetadata,
+				inboxType,
+				mode,
+				pickupBaseURL,
+				productName,
+				productSizeByte,
+				relativePath,
+				stationName,
+				timeliness
+	    );
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		IngestionJob other = (IngestionJob) obj;
-		if (inboxType == null) {
-			if (other.inboxType != null)
-				return false;
-		} else if (!inboxType.equals(other.inboxType))
-			return false;
-		if (mode == null) {
-			if (other.mode != null)
-				return false;
-		} else if (!mode.equals(other.mode))
-			return false;
-		if (pickupBaseURL == null) {
-			if (other.pickupBaseURL != null)
-				return false;
-		} else if (!pickupBaseURL.equals(other.pickupBaseURL))
-			return false;
-		if (productName == null) {
-			if (other.productName != null)
-				return false;
-		} else if (!productName.equals(other.productName))
-			return false;
-		if (productSizeByte != other.productSizeByte)
-			return false;
-		if (relativePath == null) {
-			if (other.relativePath != null)
-				return false;
-		} else if (!relativePath.equals(other.relativePath))
-			return false;
-		if (stationName == null) {
-			if (other.stationName != null)
-				return false;
-		} else if (!stationName.equals(other.stationName))
-			return false;
-		if (timeliness == null) {
-			if (other.timeliness != null)
-				return false;
-		} else if (!timeliness.equals(other.timeliness))
-			return false;
-		return true;
+		
+		final IngestionJob other = (IngestionJob) obj;
+		return Objects.equals(additionalMetadata, other.additionalMetadata)
+				&& Objects.equals(inboxType, other.inboxType) 
+				&& Objects.equals(mode, other.mode)
+				&& Objects.equals(pickupBaseURL, other.pickupBaseURL) 
+				&& Objects.equals(productName, other.productName)
+				&& productSizeByte == other.productSizeByte 
+				&& Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(stationName, other.stationName) 
+				&& Objects.equals(timeliness, other.timeliness);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
 				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +
 				", productSizeByte=" + productSizeByte + ", stationName=" + stationName + ", mode=" + mode +
-				", timeliness=" + timeliness + ", inboxType=" + inboxType + "]";
+				", timeliness=" + timeliness + ", inboxType=" + inboxType + ", additionalMetadata=" + 
+				additionalMetadata + "]";
 	}
 
 }

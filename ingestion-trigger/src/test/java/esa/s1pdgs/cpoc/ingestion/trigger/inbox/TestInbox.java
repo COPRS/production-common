@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,14 +15,19 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
@@ -79,7 +85,8 @@ public class TestInbox {
                 "FAST24",
                 new FlatProductNameEvaluator(),
                 10,
-                1000
+                1000,
+                PathMetadataExtractor.NULL
         );
         uut.poll();
 
@@ -116,7 +123,8 @@ public class TestInbox {
                 "FAST24",
                 new FlatProductNameEvaluator(),
                 10,
-                1000
+                1000,
+                PathMetadataExtractor.NULL
         );
         uut.poll();
 
@@ -157,7 +165,8 @@ public class TestInbox {
                 "FAST24",
                 new FlatProductNameEvaluator(),
                 10,
-                1000
+                1000,
+                PathMetadataExtractor.NULL
         );
         uut.poll();
 
@@ -187,7 +196,8 @@ public class TestInbox {
                 "FAST24",
                 new FlatProductNameEvaluator(),
                 10,
-                1000
+                1000,
+                PathMetadataExtractor.NULL
         );
         
         // old entry shall be ignored
@@ -201,4 +211,46 @@ public class TestInbox {
         assertFalse(ignored.isPresent());
         assertTrue(accepted.isPresent());
     }
+    
+    @ParameterizedTest
+	@MethodSource("inboxEntryProvider")
+    public final void testAbsolutePathOf(final String url, final String relPath, final String expected) throws Exception {
+    	final InboxEntry entry = new InboxEntry();
+    	entry.setPickupURL(url);
+    	entry.setRelativePath(relPath);
+    	
+        final Inbox uut = new Inbox(
+                fakeAdapter,
+                new JoinedFilter(new MinimumModificationDateFilter(new Date(123456))),
+                new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
+                fakeMessageProducer,
+                "topic",
+                ProductFamily.EDRS_SESSION,
+				"WILE",
+				0,
+				"NOMINAL",
+                "FAST24",
+                new FlatProductNameEvaluator(),
+                10,
+                1000,
+                PathMetadataExtractor.NULL
+        );
+        assertEquals(expected, uut.absolutePathOf(entry));
+    }
+
+	static Stream<Arguments> inboxEntryProvider() {
+        return Stream.of(
+            Arguments.of(
+            		"https://cgs10.sentinel1.eo.esa.int/NOMINAL", 
+            		"S1A/DCS_01_S1A_20210109073807036058_dat/ch_2/DCS_01_S1A_20210109073807036058_ch2_DSDB_00019.raw",
+            		"/NOMINAL/S1A/DCS_01_S1A_20210109073807036058_dat/ch_2/DCS_01_S1A_20210109073807036058_ch2_DSDB_00019.raw"
+            ),
+            Arguments.of(
+            		"https://cgs10.sentinel1.eo.esa.int/NOMINAL/S1A", 
+            		"DCS_01_S1A_20210109073807036058_dat/ch_2/DCS_01_S1A_20210109073807036058_ch2_DSDB_00019.raw",
+            		"/NOMINAL/S1A/DCS_01_S1A_20210109073807036058_dat/ch_2/DCS_01_S1A_20210109073807036058_ch2_DSDB_00019.raw"
+            )
+        );
+    }
+    
 }

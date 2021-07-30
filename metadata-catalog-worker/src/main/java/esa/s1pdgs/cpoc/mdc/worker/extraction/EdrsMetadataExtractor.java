@@ -1,18 +1,20 @@
 package esa.s1pdgs.cpoc.mdc.worker.extraction;
 
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -44,7 +46,7 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 
         final EdrsSessionFileDescriptor edrsFileDescriptor = fileDescriptorBuilder.buildEdrsSessionFileDescriptor(
 			product, 
-			pathExtractor.metadataFrom(catJob),
+			additionalMetadataFor(catJob),
 			catJob
         );        
         // Only when it is a DSIB
@@ -65,4 +67,19 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
         return mdBuilder.buildEdrsSessionFileRaw(edrsFileDescriptor);
 	}
 
+	private Map<String, String> additionalMetadataFor(final CatalogJob catJob) {
+	    final Map<String,String> additionalMetadata = new LinkedHashMap<>();
+	    additionalMetadata.putAll(catJob.getAdditionalMetadata());
+	    
+	    // S1OPS-971: This is a workaround to keep the old requests working: Only if additionalMetadata
+	    // is already provided with the CatalogJob, the path evaluation will be omitted
+	    // Once all metadata path based extraction is moved to ingestion trigger and there are no
+	    // old requests within the system, this conditional check can be removed.
+	    if (additionalMetadata.isEmpty()) {
+		    for (final Map.Entry<String,String> entry : pathExtractor.metadataFrom(catJob.getRelativePath()).entrySet()) {
+		    	additionalMetadata.put(entry.getKey(), entry.getValue());
+		    }	
+	    } 
+		return additionalMetadata;
+	}
 }

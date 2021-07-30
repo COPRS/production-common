@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker.extraction.path;
+package esa.s1pdgs.cpoc.common.metadata;
 
 import static org.junit.Assert.assertEquals;
 
@@ -85,7 +85,7 @@ S1B/20200120162933019903/DCS_01_S1B_20200120162933019903_ch2_DSDB_00035.raw
 		final PathMetadataExtractor uut = new PathMetadataExtractorImpl(pattern, conf);
 
 		
-		final Map<String,String> actual = uut.metadataFrom(job);
+		final Map<String,String> actual = uut.metadataFrom(job.getRelativePath());
 //		assertEquals("WILE", actual.get("stationCode"));
 		assertEquals("S1", actual.get("missionId"));
 		assertEquals("B", actual.get("satelliteId"));

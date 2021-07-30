@@ -1,6 +1,9 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
@@ -17,7 +20,8 @@ public class IngestionEvent extends AbstractMessage {
 	private String stationName;
 	private String mode;
 	private String timeliness;
-	
+	private Map<String,String> additionalMetadata = new HashMap<>();
+		
 	public IngestionEvent() {
 		super();
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
@@ -78,7 +82,7 @@ public class IngestionEvent extends AbstractMessage {
 		return mode;
 	}
 
-	public void setMode(String mode) {
+	public void setMode(final String mode) {
 		this.mode = mode;
 	}
 
@@ -86,67 +90,49 @@ public class IngestionEvent extends AbstractMessage {
 		return timeliness;
 	}
 
-	public void setTimeliness(String timeliness) {
+	public void setTimeliness(final String timeliness) {
 		this.timeliness = timeliness;
 	}
+	
+	public Map<String, String> getAdditionalMetadata() {
+		return additionalMetadata;
+	}
 
+	public void setAdditionalMetadata(final Map<String, String> additionalMetadata) {
+		this.additionalMetadata = additionalMetadata;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((mode == null) ? 0 : mode.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		result = prime * result + (int) (productSizeByte ^ (productSizeByte >>> 32));
-		result = prime * result + ((relativePath == null) ? 0 : relativePath.hashCode());
-		result = prime * result + ((stationName == null) ? 0 : stationName.hashCode());
-		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
+		result = prime * result + Objects
+				.hash(additionalMetadata, mode, productName, productSizeByte, relativePath, stationName, timeliness);
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		IngestionEvent other = (IngestionEvent) obj;
-		if (mode == null) {
-			if (other.mode != null)
-				return false;
-		} else if (!mode.equals(other.mode))
-			return false;
-		if (productName == null) {
-			if (other.productName != null)
-				return false;
-		} else if (!productName.equals(other.productName))
-			return false;
-		if (productSizeByte != other.productSizeByte)
-			return false;
-		if (relativePath == null) {
-			if (other.relativePath != null)
-				return false;
-		} else if (!relativePath.equals(other.relativePath))
-			return false;
-		if (stationName == null) {
-			if (other.stationName != null)
-				return false;
-		} else if (!stationName.equals(other.stationName))
-			return false;
-		if (timeliness == null) {
-			if (other.timeliness != null)
-				return false;
-		} else if (!timeliness.equals(other.timeliness))
-			return false;
-		return true;
+		final IngestionEvent other = (IngestionEvent) obj;
+		return Objects.equals(additionalMetadata, other.additionalMetadata) && Objects.equals(mode, other.mode)
+				&& Objects.equals(productName, other.productName) && productSizeByte == other.productSizeByte
+				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(stationName, other.stationName)
+				&& Objects.equals(timeliness, other.timeliness);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "IngestionEvent [productName=" + productName + ", productFamily=" + productFamily + ", keyObjectStorage=" 
 				+ keyObjectStorage + ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + 
-				relativePath + ", mode=" + mode +", uid=" + uid +", productSizeByte=" + productSizeByte + ", stationName=" + stationName +", timeliness=" + timeliness + "]";
+				relativePath + ", mode=" + mode +", uid=" + uid +", productSizeByte=" + productSizeByte +
+				", stationName=" + stationName +", timeliness=" + timeliness + ", additionalMetadata=" + additionalMetadata 
+				+ "]";
 	}
 }
 

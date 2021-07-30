@@ -1,15 +1,19 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
@@ -43,6 +47,7 @@ public final class Inbox {
 	private final int stationRetentionTime;
 	private final int publishMaxRetries;
     private final long publishTempoRetryMs;
+    private final PathMetadataExtractor pathMetadataExtractor;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
@@ -57,7 +62,8 @@ public final class Inbox {
 			final String timeliness,
 			final ProductNameEvaluator nameEvaluator,
 			final int publishMaxRetries,
-			final long publishTempoRetryMs
+			final long publishTempoRetryMs,
+			final PathMetadataExtractor pathMetadataExtractor
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
@@ -73,6 +79,7 @@ public final class Inbox {
 		this.publishMaxRetries = publishMaxRetries;
 		this.publishTempoRetryMs = publishTempoRetryMs;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
+		this.pathMetadataExtractor = pathMetadataExtractor;
 	}
 	
 	public final void poll() {
@@ -168,6 +175,10 @@ public final class Inbox {
 		
 		try {
 			final String publishedName = nameEvaluator.evaluateFrom(entry);
+
+			// S1OPS-971: Use the entire path element for the rule evaluation
+			final String absolutePath = absolutePathOf(entry);
+
 			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
 			publishWithRetries(
 					new IngestionJob(
@@ -180,7 +191,8 @@ public final class Inbox {
 						stationName,
 						mode,
 						timeliness,
-						entry.getInboxType()
+						entry.getInboxType(),
+						pathMetadataExtractor.metadataFrom(absolutePath)
 					)
 			);
 			reporting.end(
@@ -195,7 +207,14 @@ public final class Inbox {
 		return Optional.empty();
 	}
 	
-	private void publishWithRetries(IngestionJob ingestionJob) throws InterruptedException {
+	final String absolutePathOf(final InboxEntry entry) throws URISyntaxException {		
+		final URI uri = new URIBuilder(entry.getPickupURL()).build();			
+		final Path absolutePath = Paths.get(uri.getPath()).resolve(entry.getRelativePath())
+				.toAbsolutePath();		
+		return absolutePath.toString();
+	}
+	
+	private void publishWithRetries(final IngestionJob ingestionJob) throws InterruptedException {
 		Retries.performWithRetries(
 				() -> {	this.publish(ingestionJob); return null;}, 
     			"Publishing of IngestionJob for " + ingestionJob.getProductName(),
@@ -204,7 +223,7 @@ public final class Inbox {
 		);
 	}
 
-	private void publish(IngestionJob ingestionJob) {
+	private void publish(final IngestionJob ingestionJob) {
 		try {
 			messageProducer.send(topic, ingestionJob);
 		} catch (final Exception e) {

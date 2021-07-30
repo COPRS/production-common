@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
+import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractorImpl;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
@@ -16,8 +18,6 @@ import esa.s1pdgs.cpoc.mdc.worker.config.RfiConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractor;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.path.PathMetadataExtractorImpl;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
