@@ -65,8 +65,8 @@
 			<version>${spring.boot.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-slf4j-impl</artifactId>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jul-to-slf4j</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
