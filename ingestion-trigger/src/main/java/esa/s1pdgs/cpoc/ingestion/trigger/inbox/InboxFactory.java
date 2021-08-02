@@ -98,17 +98,8 @@ public class InboxFactory {
 	}
 	
 	private final String normalizeInputUrl(final String configuredUrl) {
-		String result = configuredUrl;
-		
-		if (configuredUrl.startsWith("/")) {
-			result = "file://" + configuredUrl;
-		}		
-		if (configuredUrl.endsWith("/")) {
-			result = configuredUrl.substring(0, configuredUrl.length()-1);
-		}
-		return result;		
+		return configuredUrl.startsWith("/") ? "file://" + configuredUrl : configuredUrl;
 	}
-	
 	
 	private final InboxAdapterFactory newInboxAdapterFactory(final String type, final String url) {
 		if("prip".equals(type)) {
