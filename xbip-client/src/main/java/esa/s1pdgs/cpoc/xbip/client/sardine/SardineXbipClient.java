@@ -68,7 +68,7 @@ public class SardineXbipClient implements XbipClient {
 					"list",
 					5,
 					3000);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			LOG.error("retries interrupted");
 			throw new SardineRuntimeException(e);
 		}

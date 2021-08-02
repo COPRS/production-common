@@ -9,6 +9,7 @@ import java.net.Proxy.Type;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -44,13 +46,13 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 	public SardineXbipClientFactory(final XbipClientConfigurationProperties config) {
 		this.config = config;
 	}
-
+	
 	@Override
 	public XbipClient newXbipClient(final URI serverUrl) {	
 		final XbipHostConfiguration config = hostConfigFor(serverUrl.getHost());
 		return new SardineXbipClient(				
 				newSardineFor(config, serverUrl), 
-				serverUrl,
+				ensureEndsWithSlash(serverUrl),
 				config.getProgrammaticRecursion()
 		);
 	}
@@ -98,8 +100,24 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 		return null;
 	}
 	
+	// apparently, xbip requires a trailing slash
+	private final URI ensureEndsWithSlash(final URI serverUrl) {
+		if (!serverUrl.getPath().endsWith("/")) {
+			try {
+				return new URIBuilder(serverUrl)
+						.setPath(serverUrl.getPath() + "/")
+						.build();
+			} catch (final URISyntaxException e) {
+				throw new RuntimeException(
+						"Error handling URI " + serverUrl, 
+						e
+				);
+			}
+		}
+		return serverUrl;		
+	}
 		
-	private Sardine newSardineFor(final XbipHostConfiguration hostConfig, URI serverUrl) {
+	private Sardine newSardineFor(final XbipHostConfiguration hostConfig, final URI serverUrl) {
 		Sardine sardine = null;
 		
 		if (hostConfig.isTrustSelfSignedCertificate()) {
@@ -154,7 +172,7 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 			try {
 				sardine.enablePreemptiveAuthentication(serverUrl.toURL()); // S1PRO-1862
 				LOG.debug("Enabling preemptive basic authentication for xbip interface to server {}", hostConfig.getServerName());
-			} catch (MalformedURLException e) {
+			} catch (final MalformedURLException e) {
 				LOG.warn("Error enabling preemptive basic authentication for xbip interface to server {}: {}", hostConfig.getServerName(), e.getMessage());
 			}
 		}

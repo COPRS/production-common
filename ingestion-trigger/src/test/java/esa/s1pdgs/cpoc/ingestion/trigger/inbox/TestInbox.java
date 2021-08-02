@@ -246,7 +246,7 @@ public class TestInbox {
             		"/NOMINAL/S1A/DCS_01_S1A_20210109073807036058_dat/ch_2/DCS_01_S1A_20210109073807036058_ch2_DSDB_00019.raw"
             ),
             Arguments.of(
-            		"https://cgs10.sentinel1.eo.esa.int/NOMINAL/S1A", 
+            		"https://cgs10.sentinel1.eo.esa.int/NOMINAL/S1A/", 
             		"DCS_01_S1A_20210109073807036058_dat/ch_2/DCS_01_S1A_20210109073807036058_ch2_DSDB_00019.raw",
             		"/NOMINAL/S1A/DCS_01_S1A_20210109073807036058_dat/ch_2/DCS_01_S1A_20210109073807036058_ch2_DSDB_00019.raw"
             )
