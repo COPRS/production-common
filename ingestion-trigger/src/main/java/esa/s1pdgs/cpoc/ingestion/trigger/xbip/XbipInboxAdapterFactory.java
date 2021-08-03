@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.xbip;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,14 +28,33 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 	}
 	
 	@Override
-	public InboxAdapter newInboxAdapter(final URI inbox, final InboxConfiguration inboxConfig) {
+	public InboxAdapter newInboxAdapter(final URI inbox, final InboxConfiguration inboxConfig) {		
+		final URI inboxUri = ensureEndsWithSlash(inbox);		
 		return new XbipInboxAdapter(
 				inbox, 
-				xbipClientFactory.newXbipClient(inbox), 
+				xbipClientFactory.newXbipClient(inboxUri), 
 				inboxEntryFactory,
 				inboxConfig.getStationName(),
 				inboxConfig.getFamily()
 		);
+	}
+	
+	
+	// apparently, webdav requires a trailing slash
+	private final URI ensureEndsWithSlash(final URI serverUrl) {
+		if (!serverUrl.getPath().endsWith("/")) {
+			try {
+				return new URIBuilder(serverUrl)
+						.setPath(serverUrl.getPath() + "/")
+						.build();
+			} catch (final URISyntaxException e) {
+				throw new RuntimeException(
+						"Error handling URI " + serverUrl, 
+						e
+				);
+			}
+		}
+		return serverUrl;		
 	}
 
 }
