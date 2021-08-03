@@ -8,8 +8,6 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-
 public class TestPathMetadataExtractorImpl {	
 	/*
 	 * Example rel paths:
@@ -56,22 +54,9 @@ S1B/20200120162933019903/DCS_01_S1B_20200120162933019903_ch2_DSDB_00035.raw
 	}
 	
 
-	private void runWith(final String path) {		
-		final CatalogJob job = new CatalogJob();
-		job.setRelativePath(path);	
-		
+	private void runWith(final String path) {				
 		final String regex = "^([a-z_]{4}/)?([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?"
 				+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml))$";
-		
-//		final String regex = "^([a-z_]{4}/)?([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?"
-//				+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]{24})_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml))$";
-		
-		// (DCS_[0-9]{2}_([a-zA-Z0-9_]{24})_(ch[12])_DSIB\\.xml)
-		// (DCS_[0-9]{2}_([a-zA-Z0-9_]{24})_(ch[12])_DSDB_([0-9]{5})\\.(raw|aisp))
-		
-		// (DCS_[0-9]{2}_([a-zA-Z0-9_]{24})_(ch[12])_(DSDB|_DSIB).*\\.(raw|aisp))
-		
-		System.out.println(regex);
 		
 		final Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		
@@ -85,12 +70,47 @@ S1B/20200120162933019903/DCS_01_S1B_20200120162933019903_ch2_DSDB_00035.raw
 		final PathMetadataExtractor uut = new PathMetadataExtractorImpl(pattern, conf);
 
 		
-		final Map<String,String> actual = uut.metadataFrom(job.getRelativePath());
+		final Map<String,String> actual = uut.metadataFrom(path);
 //		assertEquals("WILE", actual.get("stationCode"));
 		assertEquals("S1", actual.get("missionId"));
 		assertEquals("B", actual.get("satelliteId"));
 		assertEquals("L20180724144436762001030", actual.get("sessionId"));
 		assertEquals("1", actual.get("channelId"));
+	}
+	
+	// S1OPS-971: test new regex
+	@Test
+	public final void testNewRegex() {
+//	      path-pattern: ^/NOMINAL/(S1)(B)/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml))$
+//	    	      # Metadata key to group
+//	    	      path-metadata-elements:
+//	    	        missionId: 1
+//	    	        satelliteId: 2
+//	    	        sessionId: 6
+//	    	        channelId: 7
+		
+		final String regex = "^/NOMINAL/(S1)(B)/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?"
+				+ "(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml))$";
+				
+		final Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+		
+		final Map<String,Integer> conf = new HashMap<>();
+//		conf.put("stationCode", 1);
+		conf.put("missionId", 1);
+		conf.put("satelliteId", 2);
+		conf.put("sessionId", 6);
+		conf.put("channelId", 7);
+		
+		final PathMetadataExtractor uut = new PathMetadataExtractorImpl(pattern, conf);
+
+		final String path = "/NOMINAL/S1B/L20180724144436762001030/ch_1/DCS_04_20180724144436762001030_ch1_DSIB.xml";
+		final Map<String,String> actual = uut.metadataFrom(path);
+//		assertEquals("WILE", actual.get("stationCode"));
+		assertEquals("S1", actual.get("missionId"));
+		assertEquals("B", actual.get("satelliteId"));
+		assertEquals("20180724144436762001030", actual.get("sessionId"));
+		assertEquals("1", actual.get("channelId"));
+		
 	}
 
 }
