@@ -17,4 +17,4 @@ native-api:
 
 # REST controller
 server:
-  port: 8888
+  port: 8080
