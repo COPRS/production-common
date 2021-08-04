@@ -3,6 +3,6 @@ FROM openjdk:8-jre-slim
 WORKDIR /app
 COPY target/*native-api*.jar app.jar
 
-EXPOSE 8888
+EXPOSE 8080
 
 ENTRYPOINT [ "java", "-jar", "app.jar" ]
