@@ -75,6 +75,14 @@ And then compile and package the updated source code, build the new Docker image
 ```console
 $ mvn clean package && ./standalone.sh remove all && ./standalone.sh build && ./standalone.sh run
 ```
+Or with the `update` shorthand:
+```console
+$ mvn clean package && ./standalone.sh update
+```
+Or even shorter including the maven command with:
+```console
+$ ./standalone.sh update api
+```
 
 ## Saving and Loading the Docker Image
 A ready built Docker image can be saved to a file that can be loaded into Docker on another machine. So the user would not have to compile and package the software and build the Docker image himself.
