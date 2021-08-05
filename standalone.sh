@@ -12,7 +12,7 @@ TARGET_DIR="target"
 
 
 function print_usage() {
-    printf "usage: %s [build | save | load | run | start | stop | remove [container | image | all]]\n" "$(basename "$0")";
+    printf "usage: %s [build | save | load | run | start | stop | remove [container | image | all] | update [api]]\n" "$(basename "$0")";
 }
 
 function docker_list_containers() {
@@ -126,6 +126,13 @@ if [ "$#" -eq 1 ]; then
         stop)
             docker_stop_container;
             ;;
+        update|u)
+            docker_stop_container;
+            docker_remove_container;
+            docker_remove_image;
+            docker_build_image;
+            docker_run;
+            ;;
         remove|rm)
             printf "more arguments required for action: %s\n" "$action";
             print_usage;
@@ -141,8 +148,6 @@ elif [ "$#" -eq 2 ]; then
     target="$2"
     case $action in
         remove|rm)
-            echo "remove"
-            
             case $target in
                 container|c)
                     docker_remove_container;
@@ -154,6 +159,22 @@ elif [ "$#" -eq 2 ]; then
                     docker_stop_container;
                     docker_remove_container;
                     docker_remove_image;
+                    ;;
+                *)
+                    printf "unknown target for %s action: %s\n" "$action" "$target";
+                    print_usage;
+                    ;;
+            esac
+            ;;
+        update|u)
+            case $target in
+                api|a)
+                    mvn clean package
+                    docker_stop_container;
+                    docker_remove_container;
+                    docker_remove_image;
+                    docker_build_image;
+                    docker_run;
                     ;;
                 *)
                     printf "unknown target for %s action: %s\n" "$action" "$target";
