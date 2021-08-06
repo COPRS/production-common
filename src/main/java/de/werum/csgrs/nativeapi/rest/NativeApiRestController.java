@@ -1,5 +1,9 @@
 package de.werum.csgrs.nativeapi.rest;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,12 @@ public class NativeApiRestController {
 		LOGGER.debug("Received ping request");
 		final String version = this.nativeApiService.getNativeApiVersion();
 		return ResponseEntity.ok("{\"apiVersion\":\"" + (null != version && !version.isEmpty() ? version : "UNKNOWN") + "\"}");
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/metadata/missions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Map<String, List<String>> getMissions() {
+		LOGGER.debug("request received: /metadata/missions");
+		return Collections.singletonMap("missions", this.nativeApiService.getMissions());
 	}
 
 }
