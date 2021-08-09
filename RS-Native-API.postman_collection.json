@@ -11,12 +11,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8888/api/v1/ping",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/v1/ping",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "8888",
 					"path": [
 						"api",
 						"v1",
@@ -32,12 +30,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8888/api/v1/metadata/missions",
-					"protocol": "http",
+					"raw": "{{base_url}}/api/v1/metadata/missions",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "8888",
 					"path": [
 						"api",
 						"v1",
@@ -47,6 +43,88 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "get product types for mission",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/v1/metadata/productTypes?missionName=s1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"metadata",
+						"productTypes"
+					],
+					"query": [
+						{
+							"key": "missionName",
+							"value": "s1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get attributes for type and mission",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/v1/metadata/attributes?missionName=s1&productType=l1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"metadata",
+						"attributes"
+					],
+					"query": [
+						{
+							"key": "missionName",
+							"value": "s1"
+						},
+						{
+							"key": "productType",
+							"value": "l1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8888"
 		}
 	]
 }
