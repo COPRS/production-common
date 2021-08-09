@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.werum.csgrs.nativeapi.service.NativeApiService;
@@ -39,6 +40,20 @@ public class NativeApiRestController {
 	public Map<String, List<String>> getMissions() {
 		LOGGER.debug("request received: /metadata/missions");
 		return Collections.singletonMap("missions", this.nativeApiService.getMissions());
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/metadata/productTypes", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Map<String, List<String>> getProductTypes(@RequestParam(value = "missionName", required = true) final String missionName) {
+		LOGGER.debug("request received: /metadata/productTypes");
+		return Collections.singletonMap("productTypes", this.nativeApiService.getProductTypes(missionName));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/metadata/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Map<String, Map<String, String>> getAttributes(
+			@RequestParam(value = "missionName", required = true) final String missionName,
+			@RequestParam(value = "productType", required = true) final String productType) {
+		LOGGER.debug("request received: /metadata/attributes");
+		return Collections.singletonMap("attributes", this.nativeApiService.getAttributes(missionName, productType));
 	}
 
 }
