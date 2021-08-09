@@ -91,4 +91,35 @@ public class NativeApiServiceImpl implements NativeApiService {
 		return new ArrayList<>(missions);
 	}
 
+	@Override
+	public List<String> getProductTypes(String missionName) {
+		if (null != missionName && !missionName.isEmpty() && this.missionToTypeToAttributes.containsKey(missionName)) {
+			final Map<String, Map<String, String>> productTypesToAttributes = this.missionToTypeToAttributes.get(missionName);
+			
+			if (null != productTypesToAttributes && !productTypesToAttributes.isEmpty()) {
+				return new ArrayList<>(productTypesToAttributes.keySet());
+			}
+		}
+
+		return Collections.emptyList();
+	}
+
+	@Override
+	public Map<String, String> getAttributes(String missionName, String productType) {
+		if (null != missionName && !missionName.isEmpty() && null != productType && !productType.isEmpty()
+				&& this.missionToTypeToAttributes.containsKey(missionName)) {
+			final Map<String, Map<String, String>> productTypesToAttributes = this.missionToTypeToAttributes.get(missionName);
+
+			if (null != productTypesToAttributes && !productTypesToAttributes.isEmpty()	&& productTypesToAttributes.containsKey(productType)) {
+				final Map<String, String> attributes = productTypesToAttributes.get(productType);
+
+				if (null != attributes && !attributes.isEmpty()) {
+					return new HashMap<>(attributes);
+				}
+			}
+		}
+
+		return Collections.emptyMap();
+	}
+
 }
