@@ -16,8 +16,10 @@ server:
 
 # Native API config
 native-api:
-  # version
-  version: v1
+  # major version (used as part of the API base path)
+  major-version: v1
+  # version (to communicate minor changes that are compatible with the major version)
+  version: 1.0
   
   attributes-of-mission:
   - mission-name: s1

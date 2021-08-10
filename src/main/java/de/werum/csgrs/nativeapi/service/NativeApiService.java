@@ -1,7 +1,6 @@
 package de.werum.csgrs.nativeapi.service;
 
 import java.util.List;
-import java.util.Map;
 
 public interface NativeApiService {
 
@@ -11,6 +10,6 @@ public interface NativeApiService {
 
 	List<String> getProductTypes(final String missionName);
 
-	Map<String, String> getAttributes(final String missionName, final String productType);
+	List<String> getAttributes(final String missionName, final String productType);
 
 }

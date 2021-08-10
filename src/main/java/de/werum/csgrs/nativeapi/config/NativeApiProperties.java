@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("native-api")
 public class NativeApiProperties {
 
+	private String majorVersion;
 	private String version;
 
 	private List<AttributesOfMission> attributesOfMission = new LinkedList<>();
@@ -59,11 +60,19 @@ public class NativeApiProperties {
 		}
 	}
 
+	public String getMajorVersion() {
+		return this.majorVersion;
+	}
+
+	public void setMajorVersion(final String majorVersion) {
+		this.majorVersion = majorVersion;
+	}
+
 	public String getVersion() {
 		return this.version;
 	}
 
-	public void setVersion(String version) {
+	public void setVersion(final String version) {
 		this.version = version;
 	}
 
@@ -71,7 +80,7 @@ public class NativeApiProperties {
 		return this.attributesOfMission;
 	}
 
-	public void setAttributesOfMission(List<AttributesOfMission> attributesOfMission) {
+	public void setAttributesOfMission(final List<AttributesOfMission> attributesOfMission) {
 		this.attributesOfMission = attributesOfMission;
 	}
 
