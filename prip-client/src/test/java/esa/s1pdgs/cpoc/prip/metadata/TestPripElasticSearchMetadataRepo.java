@@ -32,11 +32,11 @@ import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.RecoverableDataAccessException;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
@@ -46,7 +46,6 @@ import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.RelationalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
-@Ignore
 public class TestPripElasticSearchMetadataRepo {
 
 	@Mock
@@ -149,14 +148,6 @@ public class TestPripElasticSearchMetadataRepo {
 
 		final List<PripMetadata> result = repo.findAll(Optional.empty(), Optional.empty());
 
-		assertEquals(0, result.size());
-	}
-
-	@Test
-	public void testFindAllWithFailure() throws IOException {
-
-		doThrow(new IOException("testexecption")).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
-		final List<PripMetadata> result = repo.findAll(Optional.empty(), Optional.empty());
 		assertEquals(0, result.size());
 	}
 
@@ -288,6 +279,31 @@ public class TestPripElasticSearchMetadataRepo {
 
 		assertTrue(result.contains(pripMetadata1));
 		assertTrue(result.contains(pripMetadata2));
+	}
+	
+	@Test(expected=RecoverableDataAccessException.class)
+	public void testFindById_OnIOException_ShallThrowRecoverableDataAccessException() throws IOException {
+		doThrow(IOException.class).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
+		repo.findById("1");
+	}
+
+	@Test(expected=RecoverableDataAccessException.class)
+	public void testFindByName_OnIOException_ShallThrowRecoverableDataAccessException() throws IOException {
+		doThrow(IOException.class).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
+		repo.findByName("1");		
+	}
+
+	@Test(expected=RecoverableDataAccessException.class)
+	public void testFindAll_OnIOException_ShallThrowRecoverableDataAccessException() throws IOException {
+		doThrow(IOException.class).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
+		repo.findAll(Optional.empty(), Optional.empty());
+	}
+
+	@Test(expected=RecoverableDataAccessException.class)
+	public void testFindWithFilter_OnIOException_ShallThrowRecoverableDataAccessException() throws IOException {
+		doThrow(IOException.class).when(restHighLevelClient).search(Mockito.any(), Mockito.any());
+		PripTextFilter filter = new PripTextFilter(FIELD_NAMES.NAME.fieldName(), PripTextFilter.Function.CONTAINS, "foobar");
+		repo.findWithFilter(filter, Optional.empty(), Optional.empty());
 	}
 
 	private PripMetadata createPripMetadata() {

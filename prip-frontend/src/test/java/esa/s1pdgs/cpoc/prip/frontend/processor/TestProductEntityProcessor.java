@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.prip.frontend.processor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 
 import java.io.ByteArrayInputStream;
@@ -31,6 +33,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.RecoverableDataAccessException;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
@@ -83,11 +86,11 @@ public class TestProductEntityProcessor {
 	}
 
 	@Test
-	public void TestReadEntity_OnExistentProduct_ShallReturnStatusOk() throws ODataApplicationException, ODataLibraryException, IOException {
+	public void testReadEntity_OnExistentProduct_ShallReturnStatusOk() throws ODataApplicationException, ODataLibraryException, IOException {
 		final String entitySetName = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000001";
 		final String baseUri = "http://example.org";
-		final String odataPath = "/" + entitySetName + "(%27" + uuid + "%27)";
+		final String odataPath = "/" + entitySetName + "(" + uuid + ")";
 
 		final PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
@@ -123,11 +126,11 @@ public class TestProductEntityProcessor {
 	}
 
 	@Test
-	public void TestReadEntity_OnNonExistentProduct_ShallReturnStatusNotFound() throws ODataApplicationException, ODataLibraryException {
+	public void testReadEntity_OnNonExistentProduct_ShallReturnStatusNotFound() throws ODataApplicationException, ODataLibraryException {
 		final String entity = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000002";
 		final String baseUri = "http://example.org";
-		final String odataPath = "/" + entity + "(%27" + uuid + "%27)";
+		final String odataPath = "/" + entity + "(" + uuid + ")";
 
 		doReturn(null).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
 
@@ -156,12 +159,50 @@ public class TestProductEntityProcessor {
 	}
 	
 	@Test
-	public void TestReadMediaEntity_OnExistentProduct_ShallReturnStatusTemoraryRedirect()
+	public void testReadEntity_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailabl()
+			throws ODataApplicationException, ODataLibraryException, IOException {
+		final String entitySetName = "Products";
+		final String uuid = "00000000-0000-0000-0000-000000000001";
+		final String baseUri = "http://example.org";
+		final String odataPath = "/" + entitySetName + "(" + uuid + ")";
+
+		final PripMetadata pripMetadata = new PripMetadata();
+		pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+		
+		doThrow(RecoverableDataAccessException.class).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+		doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+		doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+		doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+		doReturn(Arrays.asList(uriResourceEntitySetMock)).when(uriInfoMock).getUriResourceParts();
+
+		doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+		doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+		
+		doReturn("Id").when(uriParameterMock).getName();
+		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
+		
+		doReturn(entitySetName).when(edmEntitySetMock).getName();
+		
+		final ODataResponse odataResponse = new ODataResponse();
+		try {
+			uut.readEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+			fail("Required exception wasn't thrown");
+		} catch (ODataApplicationException e) {
+			assertEquals(HttpStatusCode.SERVICE_UNAVAILABLE.getStatusCode(), e.getStatusCode());
+		}
+		
+		Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+	}
+	
+	@Test
+	public void testReadMediaEntity_OnExistentProduct_ShallReturnStatusTemoraryRedirect()
 			throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
 		final String entitySetName = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000001";
 		final String baseUri = "http://example.org";
-		final String odataPath = "/" + entitySetName + "(%27" + uuid + "%27)";
+		final String odataPath = "/" + entitySetName + "(" + uuid + ")";
 
 		final PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
@@ -194,12 +235,12 @@ public class TestProductEntityProcessor {
 	}
 	
 	@Test
-	public void TestReadMediaEntity_OnNonExistentProduct_ShallReturnStatusNotFound()
+	public void testReadMediaEntity_OnNonExistentProduct_ShallReturnStatusNotFound()
 			throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
 		final String entitySetName = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000001";
 		final String baseUri = "http://example.org";
-		final String odataPath = "/" + entitySetName + "(%27" + uuid + "%27)";
+		final String odataPath = "/" + entitySetName + "(" + uuid + ")";
 
 		doReturn(null).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
 

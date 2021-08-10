@@ -41,6 +41,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -136,14 +137,15 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			}
 
 		} catch (final IOException e) {
-			LOGGER.warn("error while finding PRIP metadata", e);
+			LOGGER.error("error while finding PRIP metadata", e);
+			throw new RecoverableDataAccessException("Could not read from Elasticsearch", e);
 		}
 		LOGGER.info("finding PRIP metadata successful");
 		return pripMetadata;
 	}
 
 	@Override
-	public PripMetadata findByName(String name) throws Exception {
+	public PripMetadata findByName(String name) {
 		LOGGER.info("finding PRIP metadata with name {}", name);
 
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
@@ -154,14 +156,19 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		PripMetadata pripMetadata = null;
 
-		final SearchResponse searchResponse = this.restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-		LOGGER.trace("response {}", searchResponse);
-
-		if (searchResponse.getHits().getHits().length > 0) {
-			pripMetadata = this.mapSearchHitToPripMetadata(searchResponse.getHits().getHits()[0]);
-			LOGGER.info("PRIP metadata with name {} found", name);
-		} else {
-			LOGGER.info("PRIP metadata with name {} not found", name);
+		try {
+			final SearchResponse searchResponse = this.restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+			LOGGER.trace("response {}", searchResponse);
+	
+			if (searchResponse.getHits().getHits().length > 0) {
+				pripMetadata = this.mapSearchHitToPripMetadata(searchResponse.getHits().getHits()[0]);
+				LOGGER.info("PRIP metadata with name {} found", name);
+			} else {
+				LOGGER.info("PRIP metadata with name {} not found", name);
+			}
+		} catch (IOException e) {
+			LOGGER.error("error while finding PRIP metadata", e);
+			throw new RecoverableDataAccessException("Could not read from Elasticsearch", e);
 		}
 
 		return pripMetadata;
@@ -490,7 +497,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 			searchHits = Arrays.asList(searchResponse.getHits().getHits());
 		} catch (final IOException e) {
-			LOGGER.warn("error while finding PRIP metadata", e);
+			LOGGER.error("error while finding PRIP metadata", e);
+			throw new RecoverableDataAccessException("Could not read from Elasticsearch", e);
 		}
 		return searchHits;
 	}
@@ -679,6 +687,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			LOGGER.info("counting PRIP metadata successful, number of hits {}", count);
 		} catch (final IOException e) {
 			LOGGER.error("error while counting PRIP metadata", e);
+			throw new RecoverableDataAccessException("Could not read from Elasticsearch", e);
 		}
 		return count;
 	}

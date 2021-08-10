@@ -51,6 +51,7 @@ import org.apache.olingo.server.core.uri.queryoption.ExpandItemImpl;
 import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.RecoverableDataAccessException;
 
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
@@ -61,8 +62,8 @@ import esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVis
 import esa.s1pdgs.cpoc.prip.frontend.utils.OlingoUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
+import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm.PripSortOrder;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 
@@ -177,10 +178,15 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			// Count Request
 
 			int count = 0;
-			if (null == queryFilters) {
-				count = this.pripMetadataRepository.countAll();
-			} else {
-				count = this.pripMetadataRepository.countWithFilter(queryFilters);
+			try {
+				if (null == queryFilters) {
+					count = this.pripMetadataRepository.countAll();
+				} else {
+					count = this.pripMetadataRepository.countWithFilter(queryFilters);
+				}
+			} catch (RecoverableDataAccessException e) {
+				throw new ODataApplicationException(HttpStatusCode.SERVICE_UNAVAILABLE.getInfo(),
+						HttpStatusCode.SERVICE_UNAVAILABLE.getStatusCode(), Locale.ROOT);
 			}
 
 			entityCollection.setCount(count);
@@ -266,10 +272,15 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			}
 
 			List<PripMetadata> queryResult;
-			if (null == queryFilters) {
-				queryResult = this.pripMetadataRepository.findAll(top, skip, sortTerms);
-			} else {
-				queryResult = this.pripMetadataRepository.findWithFilter(queryFilters, top, skip, sortTerms);
+			try {
+				if (null == queryFilters) {
+					queryResult = this.pripMetadataRepository.findAll(top, skip, sortTerms);
+				} else {
+					queryResult = this.pripMetadataRepository.findWithFilter(queryFilters, top, skip, sortTerms);
+				}
+			} catch (RecoverableDataAccessException e) {
+				throw new ODataApplicationException(HttpStatusCode.SERVICE_UNAVAILABLE.getInfo(),
+						HttpStatusCode.SERVICE_UNAVAILABLE.getStatusCode(), Locale.ROOT);
 			}
 			final List<Entity> productList = entityCollection.getEntities();
 			for (final PripMetadata pripMetadata : queryResult) {
