@@ -92,7 +92,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 	}
 
 	@Override
-	public List<String> getProductTypes(String missionName) {
+	public List<String> getProductTypes(final String missionName) {
 		if (null != missionName && !missionName.isEmpty() && this.missionToTypeToAttributes.containsKey(missionName)) {
 			final Map<String, Map<String, String>> productTypesToAttributes = this.missionToTypeToAttributes.get(missionName);
 			
@@ -105,7 +105,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 	}
 
 	@Override
-	public Map<String, String> getAttributes(String missionName, String productType) {
+	public List<String> getAttributes(final String missionName, final String productType) {
 		if (null != missionName && !missionName.isEmpty() && null != productType && !productType.isEmpty()
 				&& this.missionToTypeToAttributes.containsKey(missionName)) {
 			final Map<String, Map<String, String>> productTypesToAttributes = this.missionToTypeToAttributes.get(missionName);
@@ -114,12 +114,12 @@ public class NativeApiServiceImpl implements NativeApiService {
 				final Map<String, String> attributes = productTypesToAttributes.get(productType);
 
 				if (null != attributes && !attributes.isEmpty()) {
-					return new HashMap<>(attributes);
+					return new ArrayList<>(attributes.keySet());
 				}
 			}
 		}
 
-		return Collections.emptyMap();
+		return Collections.emptyList();
 	}
 
 }
