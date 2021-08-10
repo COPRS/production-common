@@ -11,13 +11,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/v1/ping",
+					"raw": "{{base_url}}/api/{{major_version}}/ping",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"api",
-						"v1",
+						"{{major_version}}",
 						"ping"
 					]
 				}
@@ -30,14 +30,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/v1/metadata/missions",
+					"raw": "{{base_url}}/api/{{major_version}}/missions",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"api",
-						"v1",
-						"metadata",
+						"{{major_version}}",
 						"missions"
 					]
 				}
@@ -50,21 +49,16 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/v1/metadata/productTypes?missionName=s1",
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/productTypes",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"api",
-						"v1",
-						"metadata",
+						"{{major_version}}",
+						"missions",
+						"s1",
 						"productTypes"
-					],
-					"query": [
-						{
-							"key": "missionName",
-							"value": "s1"
-						}
 					]
 				}
 			},
@@ -76,25 +70,18 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/v1/metadata/attributes?missionName=s1&productType=l1",
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/productTypes/l1/attributes",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"api",
-						"v1",
-						"metadata",
+						"{{major_version}}",
+						"missions",
+						"s1",
+						"productTypes",
+						"l1",
 						"attributes"
-					],
-					"query": [
-						{
-							"key": "missionName",
-							"value": "s1"
-						},
-						{
-							"key": "productType",
-							"value": "l1"
-						}
 					]
 				}
 			},
@@ -125,6 +112,10 @@
 		{
 			"key": "base_url",
 			"value": "http://localhost:8888"
+		},
+		{
+			"key": "major_version",
+			"value": "v1"
 		}
 	]
 }
