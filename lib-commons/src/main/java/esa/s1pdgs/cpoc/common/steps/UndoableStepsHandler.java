@@ -36,11 +36,10 @@ public class UndoableStepsHandler {
 
     private void perform(Queue<UndoableStep> tasksTodo, Stack<UndoableStep> tasksDone) {
         while (!tasksTodo.isEmpty()) {
-            final UndoableStep currentStep = tasksTodo.peek(); //don't remove head, we want to used as info in fail scenario
+            final UndoableStep currentStep = tasksTodo.poll();
+            tasksDone.add(currentStep);
             LOG.info("performing step: {}", currentStep);
             currentStep.perform();
-            tasksDone.add(currentStep);
-            tasksTodo.remove();
         }
     }
 
