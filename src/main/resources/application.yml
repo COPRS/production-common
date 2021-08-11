@@ -14,13 +14,22 @@ logging:
 server:
   port: 8080
 
+# OpenAPI validator configuration
+openapi:
+  # Dis/Enableds openapi validation
+  disable-validation: false
+  # Path exclusion regexp
+  path-exclusion-regex: ^\/(app\/status|error)$
+  # Path to spec file
+  definition-file: /app/openapi/native-api_openapi.yml
+
 # Native API config
 native-api:
   # major version (used as part of the API base path)
   major-version: v1
   # version (to communicate minor changes that are compatible with the major version)
   version: 1.0
-  
+
   attributes-of-mission:
   - mission-name: s1
     attributes-of-product-type:

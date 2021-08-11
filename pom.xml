@@ -1,6 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="https://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.werum.csgrs</groupId>
 	<artifactId>csgrs-native-api</artifactId>
@@ -17,6 +17,8 @@
 		<spring.boot.version>2.3.2.RELEASE</spring.boot.version>
 		<commons.logging.version>1.2</commons.logging.version>
 		<jacoco.version>0.7.7.201606060606</jacoco.version>
+		<openapi4j.version>1.0.4</openapi4j.version>
+		<jackson.version>2.11.1</jackson.version>
 
 		<project.build.finalName>csgrs-native-api</project.build.finalName>
 		<project.artifactId>csgrs-native-api</project.artifactId>
@@ -36,6 +38,38 @@
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>${commons.logging.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openapi4j</groupId>
+			<artifactId>openapi-operation-validator</artifactId>
+			<version>${openapi4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openapi4j</groupId>
+			<artifactId>openapi-operation-servlet</artifactId>
+			<version>${openapi4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openapi4j</groupId>
+			<artifactId>openapi-schema-validator</artifactId>
+			<version>${openapi4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openapi4j</groupId>
+			<artifactId>openapi-parser</artifactId>
+			<version>${openapi4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 
 		<dependency>
