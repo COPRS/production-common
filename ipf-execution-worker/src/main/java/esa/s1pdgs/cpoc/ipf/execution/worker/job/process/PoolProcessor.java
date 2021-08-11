@@ -181,11 +181,7 @@ public class PoolProcessor {
         if (exitCode == 0) {
             LOGGER.info("{} 2 - Task {} successfully executed", this.prefixLogs,
                     task);
-        } else if (
-                (exitCode >= 0 && exitCode < 128)
-                        || (exitCode == 255 && task.contains("S1AIOProcessor")) // FIXME special case aio single channel session S1PRO-1512
-                        || exitCode == 134 && task.toLowerCase().contains("procmain") // FIXME special case for LPC1ProcMain error after processing during cleanup S1OPS-464
-        ) {
+        } else if ((exitCode >= 0 && exitCode < 128) || exitCode == 255 && task.contains("S1AIOProcessor")/* special case aio single channel session S1PRO-1512 FIXME*/) {
             LOGGER.warn("{} 2 - Task {} exit with warning code {}",
                     this.prefixLogs, task, exitCode);
         } else {
