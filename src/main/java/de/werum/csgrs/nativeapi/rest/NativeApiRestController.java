@@ -9,13 +9,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import de.werum.csgrs.nativeapi.service.NativeApiService;
 
+@CrossOrigin
 @RestController
 @RequestMapping("api/${native-api.major-version}")
 public class NativeApiRestController {
@@ -36,6 +34,7 @@ public class NativeApiRestController {
 		return ResponseEntity.ok("{\"apiVersion\":\"" + (null != version && !version.isEmpty() ? version : "UNKNOWN") + "\"}");
 	}
 
+	
 	@RequestMapping(method = RequestMethod.GET, path = "/missions", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Map<String, List<String>> getMissions() {
 		LOGGER.debug("request received: /missions");
