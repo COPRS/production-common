@@ -19,9 +19,14 @@ openapi:
   # Dis/Enableds openapi validation
   disable-validation: false
   # Path exclusion regexp
-  path-exclusion-regex: ^\/(app\/status|error)$
+  path-exclusion-regex: ^\/(app\/status|error|openapi\/v3\/doc|openapi\/v3\/doc.yaml)$
   # Path to spec file
   definition-file: /app/openapi/native-api_openapi.yml
+
+# url path to generated openapi definition document
+springdoc:
+  api-docs:
+    path: /openapi/v3/doc
 
 # Native API config
 native-api:
