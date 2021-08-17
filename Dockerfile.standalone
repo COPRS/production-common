@@ -8,7 +8,7 @@ RUN mkdir config
 COPY /src/main/resources/application.yml /app/config/application.yml
 
 RUN mkdir openapi
-COPY /src/main/resources/native-api_openapi.yml /app/openapi/native-api_openapi.yml
+COPY /src/main/resources/native-api_openapi-gen.yml /app/openapi/native-api_openapi.yml
 
 EXPOSE 8080
 
