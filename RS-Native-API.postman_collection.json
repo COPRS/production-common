@@ -25,6 +25,44 @@
 			"response": []
 		},
 		{
+			"name": "get openapi definition JSON",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/openapi/v3/doc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"openapi",
+						"v3",
+						"doc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get openapi definition YAML",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/openapi/v3/doc.yaml",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"openapi",
+						"v3",
+						"doc.yaml"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "get supported missions",
 			"request": {
 				"method": "GET",

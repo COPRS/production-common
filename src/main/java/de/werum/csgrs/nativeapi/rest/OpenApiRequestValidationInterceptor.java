@@ -12,12 +12,13 @@ import org.openapi4j.operation.validator.adapters.server.servlet.ServletRequest;
 import org.openapi4j.operation.validator.model.Request;
 import org.openapi4j.operation.validator.validation.RequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import de.werum.csgrs.nativeapi.config.OpenApiRequestValidatorConfiguration;
 
 @Component
 public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, WebMvcConfigurer {
@@ -29,12 +30,10 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, 
 	private final Pattern pathExclusionPattern;
 
 	@Autowired
-	public OpenApiRequestValidationInterceptor(final RequestValidator requestValidator,
-			@Value("${openapi.disable-validation:false}") final boolean disableValidation,
-			@Value("${openapi.path-exclusion-regex:}") final String pathExclusionRegex) {
+	public OpenApiRequestValidationInterceptor(final OpenApiRequestValidatorConfiguration openapiConfig, final RequestValidator requestValidator) {
 		this.requestValidator = requestValidator;
-		this.disableValidation = disableValidation;
-		this.pathExclusionPattern = Pattern.compile(pathExclusionRegex);
+		this.disableValidation = openapiConfig.getDisableValidation();
+		this.pathExclusionPattern = Pattern.compile(openapiConfig.getPathExclusionRegex());
 	}
 
 	@Override
@@ -57,8 +56,8 @@ public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, 
 				this.requestValidator.validate(servletRequest);
 				LOG.debug(String.format("Check against OpenAPI definition successful. Valid request: %s", request));
 			} catch (final ValidationException e) {
-				LOG.debug(String.format("Check against OpenAPI definition failed. Invalid request: %s", request));
-				response.sendError(HttpStatus.BAD_REQUEST.value());
+				LOG.debug(String.format("Check against OpenAPI definition failed for: %s Reason: %s", request, e.getMessage()));
+				response.sendError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
 				return false;
 			}
 		}
