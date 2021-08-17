@@ -17,7 +17,7 @@
 		<spring.boot.version>2.3.2.RELEASE</spring.boot.version>
 		<commons.logging.version>1.2</commons.logging.version>
 		<jacoco.version>0.7.7.201606060606</jacoco.version>
-		<openapi4j.version>1.0.4</openapi4j.version>
+		<openapi4j.version>1.0.5</openapi4j.version>
 		<jackson.version>2.11.1</jackson.version>
 
 		<project.build.finalName>csgrs-native-api</project.build.finalName>
@@ -41,24 +41,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.openapi4j</groupId>
-			<artifactId>openapi-operation-validator</artifactId>
-			<version>${openapi4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openapi4j</groupId>
-			<artifactId>openapi-operation-servlet</artifactId>
-			<version>${openapi4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openapi4j</groupId>
-			<artifactId>openapi-schema-validator</artifactId>
-			<version>${openapi4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openapi4j</groupId>
-			<artifactId>openapi-parser</artifactId>
-			<version>${openapi4j.version}</version>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.26</version>
 		</dependency>
 
 		<dependency>
@@ -122,6 +107,19 @@
 			<!--scope>import</scope-->
 			<scope>compile</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-webmvc-core</artifactId>
+			<version>1.4.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openapi4j</groupId>
+			<artifactId>openapi-operation-servlet</artifactId>
+			<version>${openapi4j.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -203,6 +201,11 @@
 						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
 					</systemPropertyVariables>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-maven-plugin</artifactId>
+				<version>1.3</version>
 			</plugin>
 		</plugins>
 	</build>
