@@ -1,137 +1,127 @@
 #!/bin/bash
 
-IMAGE_FILE_API="Dockerfile.standalone"
-IMAGE_TAG_API="rs-native-api-img"
-IMAGE_GROUP_LABEL="de.werum.eo.image.group=reference-system"
-
-CONTAINER_NAME_API="rs-native-api"
-CONTAINER_GROUP_LABEL="de.werum.eo.container.group=reference-system"
-CONTAINER_PORT_API=8888
-
-TARGET_DIR="target"
+COMPOSE_FILE="docker-compose.standalone"
+GROUP_LABEL="de.werum.eo.group=reference-system"
 
 
 function print_usage() {
-    printf "usage: %s [build | save | load | run | start | stop | remove [container | image | all] | update [api]]\n" "$(basename "$0")";
+    printf "\nusage: %s [up | down | start | stop | remove [container | image | all] | update [api]]\n" "$(basename "$0")";
+    printf "       up: build docker images (if necessary) and start containers (for api and elasticsearch) with docker-compose\n";
+    printf "     down: stop and remove containers, networks, ... with docker-compose\n";
+    printf "    start: start the containers with docker-compose, need to already exist\n";
+    printf "     stop: stop the running containers with docker-compose\n";
+    printf "   remove:\n";
+    printf "        container: delete the docker containers\n";
+    printf "            image: delete the docker images\n";
+    printf "              all: delete docker containers and images\n";
+    printf "   update: stops and deletes containers, deletes old and builds new images and starts containers with docker-compose \n";
+    printf "              api: same as 'update' but does 'mvn clean package' before, so that code changes are taken into account\n";
+    printf "\nrequirements:\n";
+    printf "         - docker (installed and running)\n";
+    printf "         - docker-compose (installed)\n";
+    printf "         - mvn (Maven, installed)\n";
+    printf "\n==--> ideally, all you ever need to do is 'update api' <--==\n\n";
+}
+
+function check_requirements() {
+    printf "checking if requirements for this tool are met ...\n"
+    
+    if ! command -v docker &> /dev/null ; then
+        printf "docker could not be found, but is needed to use this tool. exit.\n"
+        exit 1
+    fi
+    printf "    - docker found\n"
+
+    if ! command -v docker-compose &> /dev/null ; then
+        printf "docker-compose could not be found, but is needed to use this tool. exit.\n"
+        exit 1
+    fi
+    printf "    - docker-compose found\n"
+
+    if ! command -v mvn &> /dev/null ; then
+        printf "maven could not be found, but is needed to use this tool. exit.\n"
+        exit 1
+    fi
+    printf "    - mvn found\n"
+    printf "all requirements met.\n"
 }
 
 function docker_list_containers() {
-    printf "\nlisting docker containers for: $CONTAINER_GROUP_LABEL\n"
-    docker ps -a --filter "label=$CONTAINER_GROUP_LABEL"
+    printf "listing docker containers for: %s\n" $GROUP_LABEL
+    docker ps -a --filter "label=$GROUP_LABEL"
 }
 
 function docker_list_images() {
-    printf "\nlisting docker images for: $IMAGE_GROUP_LABEL\n"
-    docker images --filter "label=$IMAGE_GROUP_LABEL"
+    printf "listing docker images for: %s\n" $GROUP_LABEL
+    docker images --filter "label=$GROUP_LABEL"
 }
 
-function docker_build_image() {
-    printf "\nbuilding docker image: $IMAGE_TAG_API\n"
+function docker_remove_images() {
+    printf "removing all docker images with label: %s ...\n" $GROUP_LABEL
 
-    if [ ! -f $IMAGE_FILE_API ]; then
-        printf "\n$IMAGE_FILE_API does not exist. stopping execution.\n"
-        exit 1
-    fi
+    docker images --filter=label=$GROUP_LABEL --format "{{.ID}}" | while read -r line ; do
+        docker image rm "$line"
+    done
 
-    if [ ! -f $TARGET_DIR/*.jar ]; then
-        printf "\nthe directory $TARGET_DIR/ with application jar does not exist. stopping execution.\ndo: mvn package\n"
-        exit 1
-    fi
-
-    docker build --tag $IMAGE_TAG_API --label $IMAGE_GROUP_LABEL --file $IMAGE_FILE_API .
     docker_list_images;
 }
 
-function docker_save_image() {
-    zipped_image="$TARGET_DIR/$IMAGE_TAG_API.tar.gz"
-    printf "\nsaving docker image: $IMAGE_TAG_API -> $zipped_image\n"
+function docker_remove_containers() {
+    printf "removing all docker containers with label: %s ...\n" $GROUP_LABEL
 
-    if [ ! -d $TARGET_DIR ]; then
-        printf "\nthe directory $TARGET_DIR/ does not exist. trying to create it ...\n"
-        mkdir $TARGET_DIR
+    docker ps --filter=label=$GROUP_LABEL --format "{{.ID}}" | while read -r line ; do
+        docker rm "$line"
+    done
 
-        if [ ! -d $TARGET_DIR ]; then
-            printf "\ndirectory $TARGET_DIR/ couldn't be created. stopping execution.\n"
-            exit 1
-        fi
-    fi
-
-    #docker save --output $TARGET_DIR/$IMAGE_TAG_API.tar $IMAGE_TAG_API:latest
-    docker save $IMAGE_TAG_API:latest | gzip > $zipped_image
-    ls -la $TARGET_DIR | grep $zipped_image
-}
-
-function docker_load_image() {
-    zipped_image="$TARGET_DIR/$IMAGE_TAG_API.tar.gz"
-    printf "\nloading docker image: $zipped_image\n"
-
-    if [ ! -f $zipped_image ]; then
-        printf "\n$zipped_image could not be found. stopping execution.\n"
-        exit 1
-    fi
-
-    docker load --input $zipped_image
-    docker_list_images;
-}
-
-function docker_remove_image() {
-    printf "\nremoving docker image: $IMAGE_TAG_API ...\n"
-    docker image rm $IMAGE_TAG_API
-    docker_list_images;
-}
-
-function docker_run() {
-    printf "\nrunning docker container: $CONTAINER_NAME_API\n"
-    docker run -d -p $CONTAINER_PORT_API:8080 --name $CONTAINER_NAME_API --label $CONTAINER_GROUP_LABEL $IMAGE_TAG_API
     docker_list_containers;
 }
 
-function docker_start_container() {
-    printf "\nstarting docker container: $CONTAINER_NAME_API\n"
-    docker start $CONTAINER_NAME_API
+function docker_compose_up() {
+    printf "running docker containers with docker-compose ...\n"
+    docker-compose --file $COMPOSE_FILE up -d
     docker_list_containers;
 }
 
-function docker_stop_container() {
-    printf "\nstopping docker container: $CONTAINER_NAME_API\n"
-    docker stop $CONTAINER_NAME_API
+function docker_compose_start() {
+    printf "starting docker containers with docker-compose: ...\n"
+    docker-compose --file $COMPOSE_FILE start
     docker_list_containers;
 }
 
-function docker_remove_container() {
-    printf "\nremoving docker container: $CONTAINER_NAME_API\n"
-    docker rm $CONTAINER_NAME_API
+function docker_compose_stop() {
+    printf "stopping docker containers with docker-compose ...\n"
+    docker-compose --file $COMPOSE_FILE stop
+    docker_list_containers;
+}
+
+function docker_compose_down() {
+    printf "stopping docker containers with docker-compose ...\n"
+    docker-compose --file $COMPOSE_FILE down
     docker_list_containers;
 }
 
 if [ "$#" -eq 1 ]; then
+    check_requirements;
     # handling one arg
     action="$1"
     case $action in
-        build|b)
-            docker_build_image;
+        up)
+            docker_compose_up;
             ;;
-        save|s)
-            docker_save_image;
-            ;;
-        load|l)
-            docker_load_image;
-            ;;
-        run|r)
-            docker_run;
+        down)
+            docker_compose_down;
             ;;
         start)
-            docker_start_container;
+            docker_compose_start;
             ;;
         stop)
-            docker_stop_container;
+            docker_compose_stop;
             ;;
         update|u)
-            docker_stop_container;
-            docker_remove_container;
-            docker_remove_image;
-            docker_build_image;
-            docker_run;
+            docker_compose_down;
+            docker_remove_containers;
+            docker_remove_images;
+            docker_compose_up;
             ;;
         remove|rm)
             printf "more arguments required for action: %s\n" "$action";
@@ -143,6 +133,7 @@ if [ "$#" -eq 1 ]; then
             ;;
     esac
 elif [ "$#" -eq 2 ]; then
+    check_requirements;
     # handling two args
     action="$1"
     target="$2"
@@ -150,15 +141,15 @@ elif [ "$#" -eq 2 ]; then
         remove|rm)
             case $target in
                 container|c)
-                    docker_remove_container;
+                    docker_remove_containers;
                     ;;
                 image|i)
-                    docker_remove_image;
+                    docker_remove_images;
                     ;;
                 all|a)
-                    docker_stop_container;
-                    docker_remove_container;
-                    docker_remove_image;
+                    #docker_compose_down;
+                    docker_remove_containers;
+                    docker_remove_images;
                     ;;
                 *)
                     printf "unknown target for %s action: %s\n" "$action" "$target";
@@ -170,11 +161,10 @@ elif [ "$#" -eq 2 ]; then
             case $target in
                 api|a)
                     mvn clean package
-                    docker_stop_container;
-                    docker_remove_container;
-                    docker_remove_image;
-                    docker_build_image;
-                    docker_run;
+                    docker_compose_down;
+                    docker_remove_containers;
+                    docker_remove_images;
+                    docker_compose_up;
                     ;;
                 *)
                     printf "unknown target for %s action: %s\n" "$action" "$target";
@@ -188,6 +178,6 @@ elif [ "$#" -eq 2 ]; then
             ;;
     esac
 else
-    echo "missing arguments"
+    printf "missing arguments\n"
     print_usage;
 fi
