@@ -17,8 +17,8 @@ services:
         networks:
             - rs-api-net
         ports:
-            - 9200:9200
-            - 9300:9300
+            - 9222:9200
+            - 9333:9300
 
     rs_native_api:
         #image: rs-native-api-img
@@ -28,7 +28,7 @@ services:
             context: "."
             dockerfile: "./Dockerfile.standalone"
             labels:
-                - "de.werum.eo.group=reference-system"
+                de.werum.eo.group: reference-system
         networks:
             - "rs-api-net"
         ports:
