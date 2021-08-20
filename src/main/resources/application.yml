@@ -19,7 +19,7 @@ openapi:
   # Dis/Enableds openapi validation
   disable-validation: false
   # Path exclusion regexp
-  path-exclusion-regex: ^\/(app\/status|error|openapi\/v3\/doc|openapi\/v3\/doc.yaml)$
+  path-exclusion-regex: ^\/(app\/status|error|openapi\/v3\/doc|openapi\/v3\/doc.yaml|api\/v1\/prip)$
   # Path to spec file
   definition-file: /app/openapi/native-api_openapi.yml
 
@@ -28,12 +28,31 @@ springdoc:
   api-docs:
     path: /openapi/v3/doc
 
+# Elastic Search config
+elasticsearch:
+  # Host of Elasticsearch cluster
+  host: elastic4api
+  # Port of Elasticsearch cluster                                        
+  port: 9200
+  # Timeout in milliseconds of connection to the cluster
+  connect-timeout-ms: 2000
+  # Timeout in milliseconds of the socket to the cluster
+  socket-timeout-ms: 10000
+
+# PRIP client config
+prip-client:
+  repository:
+    # Maximum number of search hits that can be retrieved at a time
+    max-search-hits: 1000
+
 # Native API config
 native-api:
   # major version (used as part of the API base path)
   major-version: v1
   # version (to communicate minor changes that are compatible with the major version)
   version: 1.0
+  # Time in seconds until a download URL expires
+  download-url-expiration-time-in-seconds: 600
 
   attributes-of-mission:
   - mission-name: s1

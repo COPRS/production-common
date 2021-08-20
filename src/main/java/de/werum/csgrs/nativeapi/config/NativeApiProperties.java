@@ -16,6 +16,7 @@ public class NativeApiProperties {
 
 	private String majorVersion;
 	private String version;
+	private Long downloadUrlExpirationTimeInSeconds;
 
 	private List<AttributesOfMission> attributesOfMission = new LinkedList<>();
 
@@ -82,6 +83,14 @@ public class NativeApiProperties {
 
 	public void setAttributesOfMission(final List<AttributesOfMission> attributesOfMission) {
 		this.attributesOfMission = attributesOfMission;
+	}
+
+	public Long getDownloadUrlExpirationTimeInSeconds() {
+		return this.downloadUrlExpirationTimeInSeconds;
+	}
+
+	public void setDownloadUrlExpirationTimeInSeconds(final Long downloadUrlExpirationTimeInSeconds) {
+		this.downloadUrlExpirationTimeInSeconds = downloadUrlExpirationTimeInSeconds;
 	}
 
 }

@@ -14,8 +14,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- dependency version definitions -->
+		<s1pro.version>3.32.1</s1pro.version>
 		<spring.boot.version>2.3.2.RELEASE</spring.boot.version>
 		<commons.logging.version>1.2</commons.logging.version>
+		<slf4j.version>1.7.30</slf4j.version>
 		<jacoco.version>0.7.7.201606060606</jacoco.version>
 		<openapi4j.version>1.0.5</openapi4j.version>
 		<jackson.version>2.11.1</jackson.version>
@@ -35,9 +37,21 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-prip-client</artifactId>
+			<version>${s1pro.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>${commons.logging.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
 		</dependency>
 
 		<dependency>
