@@ -12,4 +12,6 @@ public interface NativeApiService {
 
 	List<String> getAttributes(final String missionName, final String productType);
 
+	Long pripCount();
+
 }

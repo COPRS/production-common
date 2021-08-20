@@ -2,6 +2,7 @@
 
 COMPOSE_FILE="docker-compose.standalone"
 GROUP_LABEL="de.werum.eo.group=reference-system"
+ELASTIC_CONTAINER_NAME="elastic4api"
 
 
 function print_usage() {
@@ -20,7 +21,8 @@ function print_usage() {
     printf "         - docker (installed and running)\n";
     printf "         - docker-compose (installed)\n";
     printf "         - mvn (Maven, installed)\n";
-    printf "\n==--> ideally, all you ever need to do is 'update api' <--==\n\n";
+    printf "\n      ==--> first time or new API code? use 'update api' <--==\n";
+    printf "\n==--> from then use 'start' and 'stop' to keep database changes <--==\n\n";
 }
 
 function check_requirements() {
@@ -100,6 +102,15 @@ function docker_compose_down() {
     docker_list_containers;
 }
 
+function init_prip_index() {
+    printf "creating prip elasticserach index ...\n"
+    docker exec $ELASTIC_CONTAINER_NAME bash -c "curl -XPUT \"http://localhost:9200/prip\" -H 'Content-Type: application/json' -d '{\"mappings\":{\"properties\":{\"id\": {\"type\":\"keyword\"},\"obsKey\":{\"type\":\"keyword\"},\"name\":{\"type\":\"keyword\"},\"productFamily\":{\"type\":\"keyword\"},\"contentType\":{\"type\":\"keyword\"},\"contentLength\":{\"type\":\"long\"},\"contentDateStart\":{\"type\":\"date\"},\"contentDateEnd\":{\"type\":\"date\"},\"creationDate\":{\"type\":\"date\"},\"evictionDate\":{\"type\":\"date\"},\"checksum\":{\"type\":\"nested\",\"properties\":{\"algorithm\":{\"type\":\"keyword\"},\"value\":{\"type\":\"keyword\"},\"checksum_date\":{\"type\":\"date\"}}},\"footprint\":{\"type\":\"geo_shape\",\"tree\":\"geohash\"}}}}' 2>&1"
+
+    printf "\nimporting test data into prip index ...\n"
+    docker exec $ELASTIC_CONTAINER_NAME bash -c "curl -XPOST \"http://localhost:9200/_bulk\" -H 'Content-Type: application/json' --data-binary @prip-testdata.json 2>&1"
+    printf "\n"
+}
+
 if [ "$#" -eq 1 ]; then
     check_requirements;
     # handling one arg
@@ -122,6 +133,9 @@ if [ "$#" -eq 1 ]; then
             docker_remove_containers;
             docker_remove_images;
             docker_compose_up;
+            printf "give elasticsearch some time (30s) to come up ..."
+            sleep 30s
+            init_prip_index;
             ;;
         remove|rm)
             printf "more arguments required for action: %s\n" "$action";
@@ -165,6 +179,9 @@ elif [ "$#" -eq 2 ]; then
                     docker_remove_containers;
                     docker_remove_images;
                     docker_compose_up;
+                    printf "give elasticsearch some time (30s) to come up ..."
+                    sleep 30s
+                    init_prip_index;
                     ;;
                 *)
                     printf "unknown target for %s action: %s\n" "$action" "$target";

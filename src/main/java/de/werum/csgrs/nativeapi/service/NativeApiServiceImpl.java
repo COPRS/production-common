@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import de.werum.csgrs.nativeapi.config.NativeApiProperties;
 import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfMission;
 import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfProductType;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 
 @Service
 public class NativeApiServiceImpl implements NativeApiService {
@@ -25,9 +26,12 @@ public class NativeApiServiceImpl implements NativeApiService {
 
 	private final Map<String, Map<String, Map<String, String>>> missionToTypeToAttributes = new HashMap<>();
 
-	@Autowired
-	public NativeApiServiceImpl(final NativeApiProperties apiProperties) {
+	private final PripMetadataRepository pripRepo;
 
+	@Autowired
+	public NativeApiServiceImpl(final NativeApiProperties apiProperties, final PripMetadataRepository pripMetadataRepository) {
+
+		this.pripRepo = pripMetadataRepository;
 		this.apiProperties = apiProperties;
 
 		if (apiProperties.getAttributesOfMission() != null) {
@@ -120,6 +124,12 @@ public class NativeApiServiceImpl implements NativeApiService {
 		}
 
 		return Collections.emptyList();
+	}
+
+	@Override
+	public Long pripCount() {
+		// temporary method, checking for working prip connection
+		return Long.valueOf(this.pripRepo.countAll());
 	}
 
 }

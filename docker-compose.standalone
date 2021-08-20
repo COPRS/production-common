@@ -29,6 +29,10 @@ services:
             dockerfile: "./Dockerfile.standalone"
             labels:
                 de.werum.eo.group: reference-system
+        environment:
+            HTTP_PROXY: http://proxy.net.werum:8080/
+            HTTPS_PROXY: http://proxy.net.werum:8080/
+            NO_PROXY: localhost,127.0.0.1,*.werum.net,*.net.werum,.net.werum,.werum.net,172.0.0.0/8
         networks:
             - "rs-api-net"
         ports:

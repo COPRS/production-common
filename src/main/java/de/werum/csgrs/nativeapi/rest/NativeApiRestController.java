@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -184,6 +185,13 @@ public class NativeApiRestController {
 			@PathVariable final String productType) {
 		LOGGER.debug("request received: /missions/{}/productTypes/{}/attributes", missionName, productType);
 		return new GetAttributesResponse(this.nativeApiService.getAttributes(missionName, productType));
+	}
+
+	@RequestMapping(method = RequestMethod.GET, path = "/prip", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> prip() {
+		// temporary method, checking for working prip connection
+		LOGGER.debug("Received request to test prip connection");
+		return ResponseEntity.ok("{ \"pripCount\": " + this.nativeApiService.pripCount() + " }");
 	}
 
 }
