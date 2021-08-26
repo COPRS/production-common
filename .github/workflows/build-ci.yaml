@@ -24,7 +24,7 @@ jobs:
 
       - name: Build jar   
         run: |        
-          mvn clean install
+          mvn clean install -DskipTests=true
           mkdir ~/.staging
           cp target/*.jar ~/.staging
           
