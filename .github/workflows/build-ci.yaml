@@ -26,7 +26,8 @@ jobs:
         run: |        
           mvn clean install -DskipTests=true
           mkdir ~/.staging
-          cp target/*.jar ~/.staging
+          echo "Fetching jars..."
+          find . -iname "*.jar" -exec cp {} ~/.staging \;
           
 
       - name: Upload artifact
