@@ -70,13 +70,11 @@ final class PollingRun {
 		// determine the entries that have been deleted from inbox to remove them from persistence
 		final LocalDateTime threshold = LocalDateTime.now(ZoneOffset.UTC)
 				.minusDays(0 <= stationRetentionTime ? stationRetentionTime : 0);
-		
-		// DEBUG, TODO: Remove this output!
-		System.out.println(threshold.toString());
 
 		// I. make sure to keep entries persisted for at least [stationRetentionTime] days
 		final Set<InboxEntry> oldElements = CollectionUtil.nullToEmpty(persistedContent).stream()
-				.filter(entry -> null == entry.getKnownSince() || threshold.isAfter(entry.getKnownSince()))
+				.filter(entry -> null == entry.getKnownSince() || threshold.isAfter(entry.getKnownSince())
+						|| threshold.isEqual(entry.getKnownSince()))
 				.collect(Collectors.toSet());
 		// II. then, if they aren't on the pickup anymore, consider them finished (= delete them)
 		final Set<InboxEntry> finishedElements = new HashSet<>(

@@ -114,9 +114,6 @@ public class TestPollingRun {
 
 		final InboxEntry inboxEntryWithoutProductFamily = createInboxEntryWithoutProductFamily();
 
-		// DEBUG, TODO: Remove this output!
-		System.out.println(inboxEntryWithoutProductFamily.getKnownSince().toString());
-
 		final PollingRun pollingRunExpectFinished = PollingRun.newInstanceWithoutProductFamily(
 				Collections.singleton(inboxEntryWithoutProductFamily), Collections.emptyList(),
 				STATION_RETENTION_TIME_DEFAULT);
