@@ -18,7 +18,7 @@ public class TestPollingRun {
 	private static final Date LAST_MODIFIED_1 = new Date(2021, 2, 1, 10, 22, 22);
 	@SuppressWarnings("deprecation")
 	private static final Date LAST_MODIFIED_2 = new Date(2021, 2, 2, 11, 33, 33);
-	private static final LocalDateTime KNOWN_SINCE_1 = LocalDateTime.now(ZoneId.of("UTC"));
+	private static final LocalDateTime KNOWN_SINCE_1 = LocalDateTime.now(ZoneOffset.UTC);
 	private static final String FILE_PATH_1 = "S1B/DCS_04_S1B_20210208090050025513_dat/ch_1/DCS_04_S1B_20210208090050025513_ch1_DSDB_00020.raw";
 	private static final String PICKUP_URL_1 = "https://esa-copernicus.ksat.no/SVL/SENTINEL1/NOMINAL";
 	private static final String PROCESSING_POD_1 = "s1pro-ingestion-xbip-cgs02-trigger-0";
