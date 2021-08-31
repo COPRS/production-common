@@ -24,7 +24,7 @@ jobs:
 
       - name: Build jar   
         run: |        
-          mvn clean install -DskipTests=true
+          mvn clean install -DskipTests=false
           mkdir ~/.staging
           echo "Fetching jars..."
           find . -iname "*.jar" -exec cp {} ~/.staging \;
