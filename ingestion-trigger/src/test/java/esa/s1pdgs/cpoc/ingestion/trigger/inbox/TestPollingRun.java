@@ -121,9 +121,10 @@ public class TestPollingRun {
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished.newElements()),
 				"expected new elements to be empty!");
 		assertTrue(CollectionUtil.isNotEmpty(pollingRunExpectFinished.finishedElements())
-				&& pollingRunExpectFinished.finishedElements().size() == 1
-				&& inboxEntryWithoutProductFamily.equals(pollingRunExpectFinished.finishedElements().iterator().next()),
+				&& pollingRunExpectFinished.finishedElements().size() == 1,
 				"expected finished elements return 1 inbox entry!");
+		assertTrue(inboxEntryWithoutProductFamily.equals(pollingRunExpectFinished.finishedElements().iterator().next()),
+				"expected finished element to equal persisted element");
 
 		final InboxEntry inboxEntry = createInboxEntry();
 
@@ -133,9 +134,10 @@ public class TestPollingRun {
 		assertTrue(CollectionUtil.isEmpty(pollingRunExpectFinished2.newElements()),
 				"expected new elements to be empty!");
 		assertTrue(CollectionUtil.isNotEmpty(pollingRunExpectFinished2.finishedElements())
-				&& pollingRunExpectFinished2.finishedElements().size() == 1
-				&& inboxEntry.equals(pollingRunExpectFinished2.finishedElements().iterator().next()),
+				&& pollingRunExpectFinished2.finishedElements().size() == 1,
 				"expected finished elements return 1 inbox entry!");
+		assertTrue(inboxEntry.equals(pollingRunExpectFinished2.finishedElements().iterator().next()),
+				"expected finished element to equal persisted element");
 	}
 
 	@Test
