@@ -36,37 +36,34 @@ jobs:
           name: jars
           path: ~/.staging      
       
-#  docker:
-#    runs-on: ubuntu-latest
-#    needs: build    
-#    
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#    
-#      - name: Download artifact
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: rs-native-api.jar
-#          path: .staging
-#
-#      - name: Login to DockerHub
-#        uses: docker/login-action@v1
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-#                    
-#      - name: Extract Docker metadata
-#        id: meta
-#        uses: docker/metadata-action@v3
-#        with:
-#          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-#              
-#      - name: Build image
-#        uses: docker/build-push-action@v2
-#        with:
-#          push: true
-#          context: .
-#          tags: ${{ steps.meta.outputs.tags }}
-#          labels: ${{ steps.meta.outputs.labels }}      
+  docker:
+    runs-on: ubuntu-latest
+    needs: build    
+    
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: jars
+          path: .staging
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+                    
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+              
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}      
