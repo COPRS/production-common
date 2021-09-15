@@ -43,11 +43,11 @@ jobs:
       - name: Checkout Dockerfile
         uses: actions/checkout@v2
 
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: jars
-          path: .staging
+      #- name: Download artifact
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: jars
+      #    path: .staging
 
       - name: Login to Github Registry
         uses: docker/login-action@v1
