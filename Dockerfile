@@ -1,7 +1,7 @@
 ####
 #The image that is used to deploy the build environment and compile all source code.
 #### 
-FROM registry.tools.s1pdgs.eu/anonymous/maven:3.5.3-jdk-8 as buildenv
+FROM maven:3.5.3-jdk-8 as buildenv
 
 WORKDIR /app
 COPY . /app/
@@ -14,7 +14,7 @@ RUN mvn ${MAVEN_ARGS} -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xm
 ####
 
 # scratch seems not to work for some reason, we go for alpine...
-FROM registry.tools.s1pdgs.eu/anonymous/alpine as final
+FROM alpine as final
 ARG COMMIT_ID
 ARG BRANCH_TEXT
 
