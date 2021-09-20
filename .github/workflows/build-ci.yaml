@@ -64,7 +64,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/s1pro-core-applicative-catalog
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-applicative-catalog
 
       - name: Build image
         uses: docker/build-push-action@v2
