@@ -1,8 +1,8 @@
 ARG BRANCH
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-core:${BRANCH} as build
+FROM ghcr.io/coprs/s1pro-core:${BRANCH} as build
 WORKDIR /app
 
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-alpine_base:${BRANCH}
+FROM openjdk:8-jre-alpine3.8
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
