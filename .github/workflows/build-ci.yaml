@@ -35,9 +35,32 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
-          push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}     
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: true
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
 
   applicative-catalog:
     runs-on: ubuntu-latest
