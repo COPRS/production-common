@@ -8,7 +8,6 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   VERSION: 3.32.1
-  BRANCH: ${{ GITHUB_REF#refs/heads/ }}
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
@@ -16,12 +15,6 @@ jobs:
     runs-on: ubuntu-latest    
     
     steps:
-      - name: Print environment
-        shell: bash
-        run: |
-          echo "BRANCH: $BRANCH"
-          echo "env.BRANCH: ${env.BRANCH}"
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -113,6 +106,11 @@ jobs:
     needs: build
 
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -143,8 +141,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=${{ env.BRANCH }}
-            BRANCH_TEXT=${{ env.BRANCH }}
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
 
@@ -213,6 +211,11 @@ jobs:
     needs: build
 
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -243,8 +246,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=${{ env.BRANCH }}
-            BRANCH_TEXT=${{ env.BRANCH }}
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
 
@@ -313,6 +316,11 @@ jobs:
     needs: build
 
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -343,8 +351,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=${{ env.BRANCH }}
-            BRANCH_TEXT=${{ env.BRANCH }}
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
 
@@ -413,6 +421,11 @@ jobs:
     needs: build
 
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -443,8 +456,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=${{ env.BRANCH }}
-            BRANCH_TEXT=${{ env.BRANCH }}
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
 
@@ -513,6 +526,11 @@ jobs:
     needs: build
 
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -543,8 +561,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=${{ env.BRANCH }}
-            BRANCH_TEXT=${{ env.BRANCH }}
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
 
@@ -613,6 +631,11 @@ jobs:
     needs: build
 
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -643,8 +666,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=${{ env.BRANCH }}
-            BRANCH_TEXT=${{ env.BRANCH }}
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
 
@@ -713,6 +736,11 @@ jobs:
     needs: build
 
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -743,8 +771,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=${{ env.BRANCH }}
-            BRANCH_TEXT=${{ env.BRANCH }}
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
 
