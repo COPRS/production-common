@@ -8,7 +8,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   VERSION: 3.32.1
-  BRANCH: ${{ github.head_ref }}
+  BRANCH: ${GITHUB_REF#refs/heads/}
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
