@@ -35,6 +35,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -128,6 +129,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          load: true
           context: ./applicative-catalog
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -224,6 +226,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          load: true
           context: ./archives
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -320,6 +323,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          load: true
           context: ./disseminator
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -416,6 +420,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          load: true
           context: ./request-repository
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -512,6 +517,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          load: true
           context: ./ingestion-trigger
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -608,6 +614,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          load: true
           context: ./ingestion-worker
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -704,6 +711,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v2
         with:
+          load: true
           context: ./production-trigger
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
