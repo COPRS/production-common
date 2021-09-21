@@ -7,6 +7,9 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  VERSION: 3.32.1
+  BRANCH: ${{ github.head_ref }}
+  COMMIT_ID: ${{ github.sha }}
 
 jobs:
   build:
@@ -134,7 +137,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=master
+            BRANCH=${{ env.BRANCH }}
+            BRANCH_TEXT=${{ env.BRANCH }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
@@ -231,7 +237,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=master
+            BRANCH=${{ env.BRANCH }}
+            BRANCH_TEXT=${{ env.BRANCH }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
@@ -328,7 +337,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=master
+            BRANCH=${{ env.BRANCH }}
+            BRANCH_TEXT=${{ env.BRANCH }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
@@ -425,7 +437,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=master
+            BRANCH=${{ env.BRANCH }}
+            BRANCH_TEXT=${{ env.BRANCH }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
@@ -522,7 +537,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=master
+            BRANCH=${{ env.BRANCH }}
+            BRANCH_TEXT=${{ env.BRANCH }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
@@ -619,7 +637,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=master
+            BRANCH=${{ env.BRANCH }}
+            BRANCH_TEXT=${{ env.BRANCH }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
@@ -716,7 +737,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BRANCH=master
+            BRANCH=${{ env.BRANCH }}
+            BRANCH_TEXT=${{ env.BRANCH }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
