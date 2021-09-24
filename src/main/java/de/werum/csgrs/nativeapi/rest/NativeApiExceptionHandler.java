@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -18,6 +19,15 @@ public class NativeApiExceptionHandler {
 		NativeApiRestController.LOGGER.error(ex);
 
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@ExceptionHandler(NativeApiRestControllerException.class)
+	@ResponseBody
+	ResponseEntity<?> handleControllerException(final HttpServletRequest request, final Throwable e) {
+		final NativeApiRestControllerException ex = (NativeApiRestControllerException) e;
+		NativeApiRestController.LOGGER.error(ex.getMessage());
+
+		return new ResponseEntity<>(ex.getStatus());
 	}
 
 }

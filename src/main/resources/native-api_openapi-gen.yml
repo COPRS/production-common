@@ -23,36 +23,12 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the API service is running and reachable
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PingResponse'
-  /api/v1/missions:
-    get:
-      tags:
-      - Metadata
-      summary: retrieve the names of the missions supported by the API
-      description: To search for satellite product data the data can be filtered by
-        attributes which depend on the product type which in turn depend on the satellite
-        mission. This endpoint returns all names of the missions supported by the
-        API.
-      operationId: GetMissions
-      responses:
-        "500":
-          description: Internal Server Error - the API service encountered an unexpected
-            condition that prevented it from fulfilling the request
-          content: {}
-        "200":
-          description: OK - the supperted mission names were returned with this response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Missions'
         "400":
           description: "Bad Request - the API service rejects to process the request\
             \ because of client side errors, for example a malformed request syntax"
@@ -85,6 +61,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductTypes'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
+  /api/v1/products:
+    get:
+      tags:
+      - Products
+      summary: find product metadata for a given mission and product type using a
+        filter
+      description: To search for satellite product metadata the data can be filtered
+        by attributes which depend on the product type which in turn depend on the
+        satellite mission. This endpoint allows to retrieve filtered product metadata
+        for the given mission and product type.
+      operationId: FindProducts
+      parameters:
+      - name: missionName
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: productType
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "500":
+          description: Internal Server Error - the API service encountered an unexpected
+            condition that prevented it from fulfilling the request
+          content: {}
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
+        "200":
+          description: "OK - the product metadata for the given mission, product type\
+            \ and filter was returned with this response"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductMetadata'
+  /api/v1/missions:
+    get:
+      tags:
+      - Metadata
+      summary: retrieve the names of the missions supported by the API
+      description: To search for satellite product data the data can be filtered by
+        attributes which depend on the product type which in turn depend on the satellite
+        mission. This endpoint returns all names of the missions supported by the
+        API.
+      operationId: GetMissions
+      responses:
+        "500":
+          description: Internal Server Error - the API service encountered an unexpected
+            condition that prevented it from fulfilling the request
+          content: {}
+        "200":
+          description: OK - the supperted mission names were returned with this response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Missions'
         "400":
           description: "Bad Request - the API service rejects to process the request\
             \ because of client side errors, for example a malformed request syntax"
@@ -134,20 +176,6 @@ components:
           type: string
           description: the version of the API
           example: "1.0"
-    Missions:
-      type: object
-      properties:
-        missions:
-          type: array
-          description: the names of the missions supported by the API
-          example:
-          - s1
-          - s2
-          - s3
-          items:
-            type: string
-            description: the names of the missions supported by the API
-            example: "[\"s1\",\"s2\",\"s3\"]"
     ProductTypes:
       type: object
       properties:
@@ -162,6 +190,123 @@ components:
             type: string
             description: the names of the product types for a particular mission
             example: "[\"l1\",\"l2\",\"aux-safe\"]"
+    Checksum:
+      type: object
+      properties:
+        Algorithm:
+          type: string
+          description: the hash function used for the calculation of the checksum
+            value
+          example: MD5
+        Value:
+          type: string
+          description: the checksum value for the product file
+          example: 71f920fa275127a7b60fa4d4d41432a3
+        ChecksumDate:
+          type: string
+          description: the date the checksum was calculated in the format YYYY-MM-DDThh:mm:ss.sssZ
+          example: 2021-09-09T18:00:00.000Z
+      description: checksum object containing the checksum value for the product file
+    ContentDate:
+      type: object
+      properties:
+        Start:
+          type: string
+          description: the start date of the product in the format YYYY-MM-DDThh:mm:ss.sssZ
+          example: 2021-09-09T18:00:00.000Z
+        End:
+          type: string
+          description: the end date of the product in the format YYYY-MM-DDThh:mm:ss.sssZ
+          example: 2021-09-09T18:00:00.000Z
+      description: object containing the start and end dates of the product
+    Crs:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - name
+          - link
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+    GeoJsonObject:
+      required:
+      - type
+      type: object
+      properties:
+        crs:
+          $ref: '#/components/schemas/Crs'
+        bbox:
+          type: array
+          items:
+            type: number
+            format: double
+        type:
+          type: string
+      description: Geographic footprint of the product
+      discriminator:
+        propertyName: type
+    ProductMetadata:
+      type: object
+      properties:
+        Id:
+          type: string
+          description: "A universally unique identifier (UUID) as technical identifier\
+            \ for the product instance within PRIP, assigned by the production system"
+          example: c02e4932-1631-4ca1-a497-6a7b4775b2a9
+        Name:
+          type: string
+          description: The name of the product file
+          example: S1A_IW_GRDH_1SSH_20190504T020120_20190504T020145_027071_030CC0_AE1B.SAFE
+        ContentType:
+          type: string
+          description: The Mime type of the product
+          example: application/zip
+        ContentLength:
+          type: integer
+          description: The actual size of the product file in bytes (B)
+          format: int64
+          example: 4737286945
+        PublicationDate:
+          type: string
+          description: "The date and time (UTC, format YYYY-MM-DDThh:mm:ss.sssZ) of\
+            \ the product file at which it becomes visible to the user"
+          example: 2021-09-09T14:46:03.788Z
+        EvictionDate:
+          type: string
+          description: "The date and time (UTC, format YYYY-MM-DDThh:mm:ss.sssZ) from\
+            \ which the product file is foreseen for removal from the storage"
+          example: 2021-09-16T14:46:03.788Z
+        ProductionType:
+          type: string
+          description: Describes how the product file was produced
+          example: systematic_production
+        Checksum:
+          type: array
+          description: "Represents the known checksums for the product file, providing\
+            \ a value for supporting download integrity checks"
+          items:
+            $ref: '#/components/schemas/Checksum'
+        ContentDate:
+          $ref: '#/components/schemas/ContentDate'
+        Footprint:
+          $ref: '#/components/schemas/GeoJsonObject'
+    Missions:
+      type: object
+      properties:
+        missions:
+          type: array
+          description: the names of the missions supported by the API
+          example:
+          - s1
+          - s2
+          - s3
+          items:
+            type: string
+            description: the names of the missions supported by the API
+            example: "[\"s1\",\"s2\",\"s3\"]"
     Attributes:
       type: object
       properties:
