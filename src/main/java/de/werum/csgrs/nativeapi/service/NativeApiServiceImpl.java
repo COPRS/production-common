@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,7 +16,14 @@ import org.springframework.stereotype.Service;
 import de.werum.csgrs.nativeapi.config.NativeApiProperties;
 import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfMission;
 import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfProductType;
+import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
+import de.werum.csgrs.nativeapi.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
+import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
+import esa.s1pdgs.cpoc.prip.model.PripSortTerm.PripSortOrder;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 @Service
 public class NativeApiServiceImpl implements NativeApiService {
@@ -99,7 +107,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 	public List<String> getProductTypes(final String missionName) {
 		if (null != missionName && !missionName.isEmpty() && this.missionToTypeToAttributes.containsKey(missionName)) {
 			final Map<String, Map<String, String>> productTypesToAttributes = this.missionToTypeToAttributes.get(missionName);
-			
+
 			if (null != productTypesToAttributes && !productTypesToAttributes.isEmpty()) {
 				return new ArrayList<>(productTypesToAttributes.keySet());
 			}
@@ -127,9 +135,19 @@ public class NativeApiServiceImpl implements NativeApiService {
 	}
 
 	@Override
-	public Long pripCount() {
-		// temporary method, checking for working prip connection
-		return Long.valueOf(this.pripRepo.countAll());
+	public List<PripMetadataResponse> findAll(final String missionName, final String productType) {
+		if ("S1".equalsIgnoreCase(missionName) && null != productType && !productType.isEmpty()) {
+			final PripQueryFilterList filters = PripQueryFilterList.matchAll( //
+					new PripTextFilter(PripMetadata.FIELD_NAMES.PRODUCT_FAMILY.fieldName(), PripTextFilter.Function.EQUALS, productType));
+
+			final PripSortTerm pripSortTerm = new PripSortTerm(PripMetadata.FIELD_NAMES.ID, PripSortOrder.ASCENDING);
+			final List<PripMetadata> result = this.pripRepo.findWithFilter(filters, Optional.empty(), Optional.empty(),
+					Collections.singletonList(pripSortTerm));
+
+			return MappingUtil.pripMetadataToResponse(result);
+		}
+
+		return Collections.emptyList();
 	}
 
 }

@@ -70,6 +70,11 @@
 			<artifactId>jackson-dataformat-yaml</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>de.grundid.opendatalab</groupId>
+			<artifactId>geojson-jackson</artifactId>
+			<version>1.14</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -113,12 +118,13 @@
 
 		<dependency>
 			<!-- Import dependency management from Spring Boot -->
-			<!-- overriding particular (spring induced) dependency versions before this block -->
+			<!-- overriding particular (spring induced) dependency versions before 
+				this block -->
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-dependencies</artifactId>
 			<version>${spring.boot.version}</version>
 			<type>pom</type>
-			<!--scope>import</scope-->
+			<!--scope>import</scope -->
 			<scope>compile</scope>
 		</dependency>
 

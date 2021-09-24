@@ -2,6 +2,8 @@ package de.werum.csgrs.nativeapi.service;
 
 import java.util.List;
 
+import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
+
 public interface NativeApiService {
 
 	String getNativeApiVersion();
@@ -12,6 +14,6 @@ public interface NativeApiService {
 
 	List<String> getAttributes(final String missionName, final String productType);
 
-	Long pripCount();
+	List<PripMetadataResponse> findAll(final String missionName, final String productType);
 
 }
