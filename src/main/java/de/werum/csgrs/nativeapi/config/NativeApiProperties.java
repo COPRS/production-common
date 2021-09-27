@@ -22,6 +22,7 @@ public class NativeApiProperties {
 
 	public static class AttributesOfMission {
 		private String missionName;
+		private List<String> baseAttributes = new LinkedList<>();
 		private List<AttributesOfProductType> attributesOfProductType = new LinkedList<>();
 
 		public String getMissionName() {
@@ -38,6 +39,14 @@ public class NativeApiProperties {
 
 		public void setAttributesOfProductType(List<AttributesOfProductType> attributesOfProductType) {
 			this.attributesOfProductType = attributesOfProductType;
+		}
+
+		public List<String> getBaseAttributes() {
+			return this.baseAttributes;
+		}
+
+		public void setBaseAttributes(List<String> baseAttributes) {
+			this.baseAttributes = baseAttributes;
 		}
 	}
 
