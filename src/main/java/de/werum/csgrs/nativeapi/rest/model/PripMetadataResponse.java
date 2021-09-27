@@ -3,7 +3,6 @@ package de.werum.csgrs.nativeapi.rest.model;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.geojson.GeoJsonObject;
@@ -53,7 +52,8 @@ public class PripMetadataResponse {
 	@Schema(name = "Footprint", type = "object", description = "Geographic footprint of the product")
 	private GeoJsonObject footprint;
 
-	@JsonIgnore
+	@JsonProperty("Attributes")
+	@Schema(name = "Attributes", type = "object", description = "Additional attributes")
 	private Map<String, Object> attributes;
 
 	public String getId() {

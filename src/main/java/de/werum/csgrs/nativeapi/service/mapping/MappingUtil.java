@@ -47,7 +47,7 @@ public class MappingUtil {
 		pripMetadataResponse.setContentDate(mapContentDate(pripMetadata));
 		pripMetadataResponse.setFootprint(mapFootprint(pripMetadata));
 
-		// TODO @werum-msc: map attributes collection
+		pripMetadataResponse.setAttributes(pripMetadata.getAttributes());
 
 		return pripMetadataResponse;
 	}
