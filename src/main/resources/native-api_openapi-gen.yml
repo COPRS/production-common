@@ -9,29 +9,6 @@ servers:
 tags:
 - name: Metadata
 paths:
-  /api/v1/ping:
-    get:
-      tags:
-      - Metadata
-      summary: check whether the API service is reachable and running and retrieve
-        the API version number
-      description: A HTTP 200 answer is to be expected when the API service is running
-        and reachable. Additionally the current API version number will be retrieved.
-      operationId: PingApi
-      responses:
-        "500":
-          description: Internal Server Error - the API service encountered an unexpected
-            condition that prevented it from fulfilling the request
-          content: {}
-        "200":
-          description: OK - the API service is running and reachable
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PingResponse'
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
   /api/v1/missions/{missionName}/productTypes:
     get:
       tags:
@@ -121,12 +98,35 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the supperted mission names were returned with this response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Missions'
+  /api/v1/ping:
+    get:
+      tags:
+      - Metadata
+      summary: check whether the API service is reachable and running and retrieve
+        the API version number
+      description: A HTTP 200 answer is to be expected when the API service is running
+        and reachable. Additionally the current API version number will be retrieved.
+      operationId: PingApi
+      responses:
+        "500":
+          description: Internal Server Error - the API service encountered an unexpected
+            condition that prevented it from fulfilling the request
+          content: {}
+        "200":
+          description: OK - the API service is running and reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
         "400":
           description: "Bad Request - the API service rejects to process the request\
             \ because of client side errors, for example a malformed request syntax"
@@ -157,9 +157,6 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the attribute names for the given mission and product
             type were returned with this response
@@ -167,15 +164,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attributes'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
 components:
   schemas:
-    PingResponse:
-      type: object
-      properties:
-        apiVersion:
-          type: string
-          description: the version of the API
-          example: "1.0"
     ProductTypes:
       type: object
       properties:
@@ -203,20 +196,23 @@ components:
           description: the checksum value for the product file
           example: 71f920fa275127a7b60fa4d4d41432a3
         ChecksumDate:
+          pattern: YYYY-MM-DDThh:mm:ss.sssZ
           type: string
-          description: the date the checksum was calculated in the format YYYY-MM-DDThh:mm:ss.sssZ
+          description: the date and time the checksum was calculated
           example: 2021-09-09T18:00:00.000Z
       description: checksum object containing the checksum value for the product file
     ContentDate:
       type: object
       properties:
         Start:
+          pattern: YYYY-MM-DDThh:mm:ss.sssZ
           type: string
-          description: the start date of the product in the format YYYY-MM-DDThh:mm:ss.sssZ
+          description: the start date and time of the product
           example: 2021-09-09T18:00:00.000Z
         End:
+          pattern: YYYY-MM-DDThh:mm:ss.sssZ
           type: string
-          description: the end date of the product in the format YYYY-MM-DDThh:mm:ss.sssZ
+          description: the end date and time of the product
           example: 2021-09-09T18:00:00.000Z
       description: object containing the start and end dates of the product
     Crs:
@@ -270,14 +266,16 @@ components:
           format: int64
           example: 4737286945
         PublicationDate:
+          pattern: YYYY-MM-DDThh:mm:ss.sssZ
           type: string
-          description: "The date and time (UTC, format YYYY-MM-DDThh:mm:ss.sssZ) of\
-            \ the product file at which it becomes visible to the user"
+          description: The date and time (UTC) of the product file at which it becomes
+            visible to the user
           example: 2021-09-09T14:46:03.788Z
         EvictionDate:
+          pattern: YYYY-MM-DDThh:mm:ss.sssZ
           type: string
-          description: "The date and time (UTC, format YYYY-MM-DDThh:mm:ss.sssZ) from\
-            \ which the product file is foreseen for removal from the storage"
+          description: The date and time (UTC) from which the product file is foreseen
+            for removal from the storage
           example: 2021-09-16T14:46:03.788Z
         ProductionType:
           type: string
@@ -307,6 +305,13 @@ components:
             type: string
             description: the names of the missions supported by the API
             example: "[\"s1\",\"s2\",\"s3\"]"
+    PingResponse:
+      type: object
+      properties:
+        apiVersion:
+          type: string
+          description: the version of the API
+          example: "1.0"
     Attributes:
       type: object
       properties:
