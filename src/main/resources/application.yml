@@ -53,9 +53,20 @@ native-api:
   version: 1.0
   # Time in seconds until a download URL expires
   download-url-expiration-time-in-seconds: 600
-
+  
   attributes-of-mission:
   - mission-name: s1
+    base-attributes:
+    - id
+    - name
+    - contentType
+    - contentLength
+    - publicationDate
+    - evictionDate
+    - productionType
+    - checksum
+    - contentDate
+    - footprint
     attributes-of-product-type:
     - product-type: l0-std
       attributes:
@@ -305,6 +316,17 @@ native-api:
         attr_processorVersion_string: processorVersion
         attr_processingDate_date: creationTime
   - mission-name: s2
+    base-attributes:
+    - id
+    - name
+    - contentType
+    - contentLength
+    - publicationDate
+    - evictionDate
+    - productionType
+    - checksum
+    - contentDate
+    - footprint
     attributes-of-product-type:
     - product-type: type1
       attributes:
@@ -319,6 +341,17 @@ native-api:
         attr_testattr7_long: testattr7
         attr_testattr8_boolean: testattr8
   - mission-name: s3
+    base-attributes:
+    - id
+    - name
+    - contentType
+    - contentLength
+    - publicationDate
+    - evictionDate
+    - productionType
+    - checksum
+    - contentDate
+    - footprint
     attributes-of-product-type:
     - product-type: type3
       attributes:

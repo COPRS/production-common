@@ -3,10 +3,10 @@ package de.werum.csgrs.nativeapi.rest.model;
 import java.util.List;
 import java.util.Map;
 
-import org.geojson.GeoJsonObject;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.geojson.GeoJsonObject;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -30,11 +30,11 @@ public class PripMetadataResponse {
 	private long contentLength;
 
 	@JsonProperty("PublicationDate")
-	@Schema(name = "PublicationDate", example = "2021-09-09T14:46:03.788Z", description = "The date and time (UTC, format YYYY-MM-DDThh:mm:ss.sssZ) of the product file at which it becomes visible to the user")
+	@Schema(name = "PublicationDate", example = "2021-09-09T14:46:03.788Z", description = "The date and time (UTC) of the product file at which it becomes visible to the user", pattern = "YYYY-MM-DDThh:mm:ss.sssZ")
 	private String publicationDate;
 
 	@JsonProperty("EvictionDate")
-	@Schema(name = "EvictionDate", example = "2021-09-16T14:46:03.788Z", description = "The date and time (UTC, format YYYY-MM-DDThh:mm:ss.sssZ) from which the product file is foreseen for removal from the storage")
+	@Schema(name = "EvictionDate", example = "2021-09-16T14:46:03.788Z", description = "The date and time (UTC) from which the product file is foreseen for removal from the storage", pattern = "YYYY-MM-DDThh:mm:ss.sssZ")
 	private String evictionDate;
 
 	@JsonProperty("ProductionType")

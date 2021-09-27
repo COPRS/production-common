@@ -8,11 +8,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ContentDate {
 
 	@JsonProperty("Start")
-	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the start date of the product in the format YYYY-MM-DDThh:mm:ss.sssZ")
+	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the start date and time of the product", pattern = "YYYY-MM-DDThh:mm:ss.sssZ")
 	private String start;
 
 	@JsonProperty("End")
-	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the end date of the product in the format YYYY-MM-DDThh:mm:ss.sssZ")
+	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the end date and time of the product", pattern = "YYYY-MM-DDThh:mm:ss.sssZ")
 	private String end;
 
 	@Override

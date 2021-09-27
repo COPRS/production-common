@@ -3,6 +3,7 @@ package de.werum.csgrs.nativeapi.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +19,7 @@ import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfMission;
 import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfProductType;
 import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
 import de.werum.csgrs.nativeapi.service.mapping.MappingUtil;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
@@ -32,6 +34,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 
 	private final NativeApiProperties apiProperties;
 
+	private final Map<String, List<String>> missionToBaseAttributes = new HashMap<>();
 	private final Map<String, Map<String, Map<String, String>>> missionToTypeToAttributes = new HashMap<>();
 
 	private final PripMetadataRepository pripRepo;
@@ -56,8 +59,16 @@ public class NativeApiServiceImpl implements NativeApiService {
 				continue;
 			}
 
+			if (!this.missionToBaseAttributes.containsKey(missionName)) {
+				this.missionToBaseAttributes.put(missionName, new LinkedList<>());
+			}
 			if (!this.missionToTypeToAttributes.containsKey(missionName)) {
 				this.missionToTypeToAttributes.put(missionName, new HashMap<>());
+			}
+
+			final List<String> baseAttributesOfMission = attributesOfMission.getBaseAttributes();
+			if (null != baseAttributesOfMission) {
+				this.missionToBaseAttributes.get(missionName).addAll(baseAttributesOfMission);
 			}
 
 			final Map<String, Map<String, String>> attributesOfMissionMap = this.missionToTypeToAttributes.get(missionName);
@@ -118,20 +129,27 @@ public class NativeApiServiceImpl implements NativeApiService {
 
 	@Override
 	public List<String> getAttributes(final String missionName, final String productType) {
-		if (null != missionName && !missionName.isEmpty() && null != productType && !productType.isEmpty()
-				&& this.missionToTypeToAttributes.containsKey(missionName)) {
-			final Map<String, Map<String, String>> productTypesToAttributes = this.missionToTypeToAttributes.get(missionName);
+		final List<String> attributeNames = new LinkedList<>();
 
-			if (null != productTypesToAttributes && !productTypesToAttributes.isEmpty()	&& productTypesToAttributes.containsKey(productType)) {
-				final Map<String, String> attributes = productTypesToAttributes.get(productType);
+		if (StringUtil.isNotBlank(missionName)) {
+			if (this.missionToBaseAttributes.containsKey(missionName)) {
+				attributeNames.addAll(this.missionToBaseAttributes.get(missionName));
+			}
 
-				if (null != attributes && !attributes.isEmpty()) {
-					return new ArrayList<>(attributes.keySet());
+			if (StringUtil.isNotBlank(productType) && this.missionToTypeToAttributes.containsKey(missionName)) {
+				final Map<String, Map<String, String>> productTypesToAttributes = this.missionToTypeToAttributes.get(missionName);
+
+				if (null != productTypesToAttributes && !productTypesToAttributes.isEmpty()	&& productTypesToAttributes.containsKey(productType)) {
+					final Map<String, String> attributes = productTypesToAttributes.get(productType);
+
+					if (null != attributes && !attributes.isEmpty()) {
+						attributeNames.addAll(attributes.keySet());
+					}
 				}
 			}
 		}
 
-		return Collections.emptyList();
+		return attributeNames;
 	}
 
 	@Override

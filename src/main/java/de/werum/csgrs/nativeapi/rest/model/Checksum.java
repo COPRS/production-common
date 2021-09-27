@@ -16,7 +16,7 @@ public class Checksum {
 	private String value;
 
 	@JsonProperty("ChecksumDate")
-	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the date the checksum was calculated in the format YYYY-MM-DDThh:mm:ss.sssZ")
+	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the date and time the checksum was calculated", pattern = "YYYY-MM-DDThh:mm:ss.sssZ")
 	private String date;
 
 	@Override
