@@ -14,6 +14,6 @@ public interface NativeApiService {
 
 	List<String> getAttributes(final String missionName, final String productType);
 
-	List<PripMetadataResponse> findAll(final String missionName, final String productType);
+	List<PripMetadataResponse> findWithFilters(final String missionName, final String productType, final String filterStr);
 
 }
