@@ -7,6 +7,7 @@ logging:
   level:
     root: ERROR
     de.werum.csgrs: DEBUG
+    esa.s1pdgs.cpoc.prip: DEBUG
     org.springframework: INFO
     org.apache: INFO
 
@@ -57,16 +58,13 @@ native-api:
   attributes-of-mission:
   - mission-name: s1
     base-attributes:
-    - id
     - name
-    - contentType
+    - productionType
     - contentLength
     - publicationDate
     - evictionDate
-    - productionType
-    - checksum
-    - contentDate
-    - footprint
+    - contentDate.start
+    - contentDate.end
     attributes-of-product-type:
     - product-type: l0-std
       attributes:
@@ -317,16 +315,13 @@ native-api:
         attr_processingDate_date: creationTime
   - mission-name: s2
     base-attributes:
-    - id
     - name
-    - contentType
+    - productionType
     - contentLength
     - publicationDate
     - evictionDate
-    - productionType
-    - checksum
-    - contentDate
-    - footprint
+    - contentDate.start
+    - contentDate.end
     attributes-of-product-type:
     - product-type: type1
       attributes:
@@ -342,16 +337,13 @@ native-api:
         attr_testattr8_boolean: testattr8
   - mission-name: s3
     base-attributes:
-    - id
     - name
-    - contentType
+    - productionType
     - contentLength
     - publicationDate
     - evictionDate
-    - productionType
-    - checksum
-    - contentDate
-    - footprint
+    - contentDate.start
+    - contentDate.end
     attributes-of-product-type:
     - product-type: type3
       attributes:

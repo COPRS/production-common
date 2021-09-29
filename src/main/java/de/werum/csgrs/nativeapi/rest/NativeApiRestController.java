@@ -195,29 +195,29 @@ public class NativeApiRestController {
 
 	// TODO @werum-msc: error handling
 	@Operation(
-			operationId = "FindProducts", tags = "Products",
-			summary = "find product metadata for a given mission and product type using a filter",
-			description = "To search for satellite product metadata the data can be filtered by attributes which depend on the product type which in turn depend on the satellite mission. This endpoint allows to retrieve filtered product metadata for the given mission and product type."
-			)
+		operationId = "FindProducts", tags = "Products",
+		summary = "find product metadata for a given mission and product type using a filter",
+		description = "To search for satellite product metadata the data can be filtered by attributes which depend on the product type which in turn depend on the satellite mission. This endpoint allows to retrieve filtered product metadata for the given mission and product type."
+	)
 	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "OK - the product metadata for the given mission, product type and filter was returned with this response",
+			content = {@Content(
+				mediaType = MediaType.APPLICATION_JSON_VALUE,
+				schema = @Schema(implementation = PripMetadataResponse.class)
+				)}
+			),
 			@ApiResponse(
-					responseCode = "200",
-					description = "OK - the product metadata for the given mission, product type and filter was returned with this response",
-					content = {@Content(
-							mediaType = MediaType.APPLICATION_JSON_VALUE,
-							schema = @Schema(implementation = PripMetadataResponse.class)
-							)}
-					),
+				responseCode = "400",
+				description = "Bad Request - the API service rejects to process the request because of client side errors, for example a malformed request syntax",
+				content = @Content
+			),
 			@ApiResponse(
-					responseCode = "400",
-					description = "Bad Request - the API service rejects to process the request because of client side errors, for example a malformed request syntax",
-					content = @Content
-					),
-			@ApiResponse(
-					responseCode = "500",
-					description = "Internal Server Error - the API service encountered an unexpected condition that prevented it from fulfilling the request",
-					content = @Content
-					)
+				responseCode = "500",
+				description = "Internal Server Error - the API service encountered an unexpected condition that prevented it from fulfilling the request",
+				content = @Content
+			)
 	})
 	@RequestMapping(method = RequestMethod.GET, path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<PripMetadataResponse> findProducts(
@@ -225,14 +225,15 @@ public class NativeApiRestController {
 			@RequestParam(value = "productType", required = true) final String productType,
 			@RequestParam(value = "filter", required = false) final String filter) {
 		LOGGER.debug("Received product search request for mission '{}' and product family '{}' with filter: {}", missionName, productType, filter);
-
 		final List<PripMetadataResponse> result;
+
 		try {
-			result = this.nativeApiService.findAll(missionName, productType);
+			result = this.nativeApiService.findWithFilters(missionName, productType, filter);
 		} catch (final Exception e) {
 			LOGGER.error("internal server error", e);
 			throw new NativeApiRestControllerException(String.format("Internal server error: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+
 		return result;
 	}
 

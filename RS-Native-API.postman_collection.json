@@ -124,6 +124,72 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "find products for type and mission with filter",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/{{major_version}}/products?missionName=s1&productType=L0_SEGMENT_ZIP&filter=name contains '0010' AND contentLength GT 4000000",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"{{major_version}}",
+						"products"
+					],
+					"query": [
+						{
+							"key": "missionName",
+							"value": "s1"
+						},
+						{
+							"key": "productType",
+							"value": "L0_SEGMENT_ZIP"
+						},
+						{
+							"key": "filter",
+							"value": "name contains '0010' AND contentLength GT 4000000"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "find products for type and mission with filter 2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/{{major_version}}/products?missionName=s1&productType=L0_SEGMENT_ZIP&filter=publicationDate GE 2021-06-06T11:00:01.654Z",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"{{major_version}}",
+						"products"
+					],
+					"query": [
+						{
+							"key": "missionName",
+							"value": "s1"
+						},
+						{
+							"key": "productType",
+							"value": "L0_SEGMENT_ZIP"
+						},
+						{
+							"key": "filter",
+							"value": "publicationDate GE 2021-06-06T11:00:01.654Z"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
