@@ -56,6 +56,10 @@ public class PripMetadataResponse {
 	@Schema(name = "Attributes", type = "object", description = "Additional attributes")
 	private Map<String, Object> attributes;
 
+	@JsonProperty("Links")
+	@Schema(name = "Links", type = "object", description = "Links representing possible actions on the data")
+	private Map<String, String> links;
+
 	public String getId() {
 		return this.id;
 	}
@@ -142,6 +146,14 @@ public class PripMetadataResponse {
 
 	public void setAttributes(Map<String, Object> attributes) {
 		this.attributes = attributes;
+	}
+
+	public Map<String, String> getLinks() {
+		return this.links;
+	}
+
+	public void setLinks(Map<String, String> links) {
+		this.links = links;
 	}
 
 }
