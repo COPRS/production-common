@@ -1,5 +1,9 @@
 package de.werum.csgrs.nativeapi.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +19,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import de.werum.csgrs.nativeapi.config.NativeApiProperties;
@@ -22,6 +27,7 @@ import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfMission;
 import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfProductType;
 import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
 import de.werum.csgrs.nativeapi.service.exception.NativeApiBadRequestException;
+import de.werum.csgrs.nativeapi.service.exception.NativeApiException;
 import de.werum.csgrs.nativeapi.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
@@ -189,7 +195,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 			final List<PripMetadata> result = this.pripRepo.findWithFilter(filters, Optional.empty(), Optional.empty(),
 					Collections.singletonList(pripSortTerm));
 
-			return MappingUtil.pripMetadataToResponse(result);
+			return MappingUtil.pripMetadataToResponse(result, missionName);
 		}
 
 		return Collections.emptyList();
@@ -391,6 +397,36 @@ public class NativeApiServiceImpl implements NativeApiService {
 		}
 
 		return new PripBooleanFilter(attrName, op, bool);
+	}
+
+	@Override
+	public byte[] downloadProduct(final String missionName, final String productId) {
+		if ("s1".equalsIgnoreCase(missionName)) {
+			final PripMetadata productMetadata = this.pripRepo.findById(productId);
+			if (null == productMetadata) {
+				throw new NativeApiException(String.format("product with ID '%s' not found for mission %s: ", productId, missionName), HttpStatus.NOT_FOUND);
+			}
+
+			if (StringUtil.isNotBlank(this.apiProperties.getDummyDownloadFile())) {
+				final Path productDummyFile = Paths.get(this.apiProperties.getDummyDownloadFile());
+				
+				if (!Files.isReadable(productDummyFile)||!Files.isRegularFile(productDummyFile)) {
+					throw new NativeApiException(String.format("the product file %s does not exists, cannot be read or isn't a file.", productDummyFile),
+							HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+
+				try {
+					return Files.readAllBytes(productDummyFile);
+				} catch (final IOException ioe) {
+					throw new NativeApiException(String.format("error reading the product file %s: %s", productDummyFile, ioe.getMessage()), ioe,
+							HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+			} else {
+				throw new NativeApiException("the product file download from OBS storage is not yet implemented.", HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} else {
+			throw new NativeApiException(String.format("mission not supported (yet): %s", missionName), HttpStatus.NOT_FOUND);
+		}
 	}
 
 }

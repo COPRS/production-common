@@ -1,7 +1,9 @@
 package de.werum.csgrs.nativeapi.service.mapping;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +28,7 @@ public class MappingUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(MappingUtil.class);
 
-	public static PripMetadataResponse pripMetadataToResponse(final PripMetadata pripMetadata) {
+	public static PripMetadataResponse pripMetadataToResponse(final PripMetadata pripMetadata, final String missionName) {
 		if (null == pripMetadata) {
 			return null;
 		}
@@ -49,11 +51,15 @@ public class MappingUtil {
 
 		pripMetadataResponse.setAttributes(pripMetadata.getAttributes());
 
+		pripMetadataResponse.setLinks(createLinks(missionName, pripMetadata));
+
 		return pripMetadataResponse;
 	}
 
-	public static List<PripMetadataResponse> pripMetadataToResponse(final List<PripMetadata> pripMetadataList) {
-		return CollectionUtil.nullToEmpty(pripMetadataList).stream().map(product -> pripMetadataToResponse(product)).collect(Collectors.toList());
+	public static List<PripMetadataResponse> pripMetadataToResponse(final List<PripMetadata> pripMetadataList, final String missionName) {
+		return CollectionUtil.nullToEmpty(pripMetadataList).stream()
+				.map(product -> pripMetadataToResponse(product, missionName))
+				.collect(Collectors.toList());
 	}
 
 	private static List<Checksum> mapChecksums(final PripMetadata pripMetadata) {
@@ -114,6 +120,17 @@ public class MappingUtil {
 		return CollectionUtil.nullToEmpty(coordinates).stream()
 				.map(coordinate -> new LngLatAlt(coordinate.getLongitude(), coordinate.getLatitude()))
 				.toArray(LngLatAlt[]::new);
+	}
+
+	/* creating HATEOAS-style links for actions on the data */
+	private static Map<String, String> createLinks(final String missionName, PripMetadata pripMetadata) {
+		final Map<String, String> links = new HashMap<>();
+
+		if (null != pripMetadata && null != pripMetadata.getId()) {
+			links.put("download", String.format("/missions/%s/products/%s/download", missionName, pripMetadata.getId().toString()));
+		}
+
+		return links;
 	}
 
 }

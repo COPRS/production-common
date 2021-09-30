@@ -18,7 +18,7 @@ public class NativeApiExceptionHandler {
 		final RuntimeException ex = (RuntimeException) e;
 		NativeApiRestController.LOGGER.error(ex);
 
-		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
 
 	@ExceptionHandler(NativeApiRestControllerException.class)
@@ -27,7 +27,7 @@ public class NativeApiExceptionHandler {
 		final NativeApiRestControllerException ex = (NativeApiRestControllerException) e;
 		NativeApiRestController.LOGGER.error(ex.getMessage());
 
-		return new ResponseEntity<>(ex.getStatus());
+		return ResponseEntity.status(ex.getStatus()).body(ex.getMessage());
 	}
 
 }

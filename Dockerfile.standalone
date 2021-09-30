@@ -10,6 +10,9 @@ COPY /src/main/resources/application.yml /app/config/application.yml
 RUN mkdir openapi
 COPY /src/main/resources/native-api_openapi-gen.yml /app/openapi/native-api_openapi.yml
 
+RUN mkdir download
+COPY /src/test/resources/dummy-file.zip /app/download/dummy-file.zip
+
 EXPOSE 8080
 
 ENTRYPOINT "/app/start.sh"

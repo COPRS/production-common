@@ -2,6 +2,8 @@ package de.werum.csgrs.nativeapi.rest;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -235,6 +237,52 @@ public class NativeApiRestController {
 		}
 
 		return result;
+	}
+
+	@Operation(
+		operationId = "DownloadProduct", tags = "Products",
+		summary = "download the zipped product file",
+		description = "This endpoint enables the download of the zipped product file which is denoted by the given ID."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "OK - the actual link to download the zipped product file was returned with this response",
+			content = {@Content(
+				mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+				schema = @Schema(type = "string", format = "binary")
+			)}
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Bad Request - the API service rejects to process the request because of client side errors, for example a malformed request syntax",
+			content = @Content
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Not Found - the product with the given ID wasn't found",
+			content = @Content
+		),
+		@ApiResponse(
+			responseCode = "500",
+			description = "Internal Server Error - the API service encountered an unexpected condition that prevented it from fulfilling the request",
+			content = @Content
+		)
+	})
+	@RequestMapping(method = RequestMethod.GET, path = "/missions/{missionName}/products/{productId}/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public byte[] downloadProduct(
+			@PathVariable final String missionName,
+			@PathVariable final String productId,
+			final HttpServletResponse response) {
+		LOGGER.debug("download request received: /missions/{}/products/{}/download", missionName, productId);
+
+		try {
+			response.setHeader("Content-Disposition", "attachment; filename=\"dummy-file.zip\"");
+			return this.nativeApiService.downloadProduct(missionName, productId);
+		} catch (final Exception e) {
+			throw new NativeApiRestControllerException(String.format("error downloading product file with ID %s: %s", productId, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }
