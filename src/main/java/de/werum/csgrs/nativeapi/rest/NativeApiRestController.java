@@ -129,6 +129,37 @@ public class NativeApiRestController {
 		LOGGER.debug("request received: /missions");
 		return new GetMissionsResponse(this.nativeApiService.getMissions());
 	}
+	
+	@Operation(
+		operationId = "GetAttributes", tags = "Metadata",
+		summary = "retrieve the names of the base attributes supported for a particular mission",
+		description = "To search for satellite product data the data can be filtered by base attributes which depend on the satellite mission. This endpoint returns all base attribute names supported for the given mission."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "OK - the base attribute names for the given mission were returned with this response",
+			content = {@Content(
+				mediaType = MediaType.APPLICATION_JSON_VALUE,
+				schema = @Schema(implementation = GetAttributesResponse.class)
+			)}
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Bad Request - the API service rejects to process the request because of client side errors, for example a malformed request syntax",
+			content = @Content
+		),
+		@ApiResponse(
+			responseCode = "500",
+			description = "Internal Server Error - the API service encountered an unexpected condition that prevented it from fulfilling the request",
+			content = @Content
+		)
+	})
+	@RequestMapping(method = RequestMethod.GET, path = "/missions/{missionName}/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
+	public GetAttributesResponse getAttributes(@PathVariable final String missionName) {
+		LOGGER.debug("request received: /missions/{}/attributes", missionName);
+		return new GetAttributesResponse(this.nativeApiService.getAttributes(missionName));
+	}
 
 	@Operation(
 		operationId = "GetProductTypes", tags = "Metadata",
@@ -194,12 +225,52 @@ public class NativeApiRestController {
 		LOGGER.debug("request received: /missions/{}/productTypes/{}/attributes", missionName, productType);
 		return new GetAttributesResponse(this.nativeApiService.getAttributes(missionName, productType));
 	}
+	
+	@Operation(
+		operationId = "FindProducts", tags = "Products",
+		summary = "find product metadata for a given mission using a filter",
+		description = "To search for satellite product metadata the data can be filtered by attributes which depend on the satellite mission. This endpoint allows to retrieve filtered product metadata for the given mission."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "OK - the product metadata for the given mission and filter was returned with this response",
+			content = {@Content(
+				mediaType = MediaType.APPLICATION_JSON_VALUE,
+				schema = @Schema(implementation = PripMetadataResponse.class)
+				)}
+			),
+			@ApiResponse(
+				responseCode = "400",
+				description = "Bad Request - the API service rejects to process the request because of client side errors, for example a malformed request syntax",
+				content = @Content
+			),
+			@ApiResponse(
+				responseCode = "500",
+				description = "Internal Server Error - the API service encountered an unexpected condition that prevented it from fulfilling the request",
+				content = @Content
+			)
+	})
+	@RequestMapping(method = RequestMethod.GET, path = "/missions/{missionName}/products", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<PripMetadataResponse> findProducts(
+			@PathVariable final String missionName,
+			@RequestParam(value = "filter", required = false) final String filter) {
+		LOGGER.debug("Received product search request: /missions/{}/products?filter={}", missionName, filter);
+		final List<PripMetadataResponse> result;
 
-	// TODO @werum-msc: error handling
+		try {
+			result = this.nativeApiService.findWithFilters(missionName, filter);
+		} catch (final Exception e) {
+			throw new NativeApiRestControllerException(String.format("Internal server error: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return result;
+	}
+	
 	@Operation(
 		operationId = "FindProducts", tags = "Products",
 		summary = "find product metadata for a given mission and product type using a filter",
-		description = "To search for satellite product metadata the data can be filtered by attributes which depend on the product type which in turn depend on the satellite mission. This endpoint allows to retrieve filtered product metadata for the given mission and product type."
+		description = "To search for satellite product metadata the data can be filtered by attributes which depend on product type which in turn depend on the satellite mission. This endpoint allows to retrieve filtered product metadata for the given mission and product type."
 	)
 	@ApiResponses(value = {
 		@ApiResponse(
@@ -221,24 +292,23 @@ public class NativeApiRestController {
 				content = @Content
 			)
 	})
-	@RequestMapping(method = RequestMethod.GET, path = "/products", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, path = "/missions/{missionName}/productTypes/{productType}/products", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<PripMetadataResponse> findProducts(
-			@RequestParam(value = "missionName", required = true) final String missionName,
-			@RequestParam(value = "productType", required = true) final String productType,
+			@PathVariable final String missionName,
+			@PathVariable final String productType,
 			@RequestParam(value = "filter", required = false) final String filter) {
-		LOGGER.debug("Received product search request for mission '{}' and product family '{}' with filter: {}", missionName, productType, filter);
+		LOGGER.debug("Received product search request: /missions/{}/productTypes/{}/products?filter={}", missionName, productType, filter);
 		final List<PripMetadataResponse> result;
 
 		try {
 			result = this.nativeApiService.findWithFilters(missionName, productType, filter);
 		} catch (final Exception e) {
-			LOGGER.error("internal server error", e);
 			throw new NativeApiRestControllerException(String.format("Internal server error: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 		return result;
 	}
-
+	
 	@Operation(
 		operationId = "DownloadProduct", tags = "Products",
 		summary = "download the zipped product file",
