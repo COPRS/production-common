@@ -126,7 +126,7 @@
 			"response": []
 		},
 		{
-			"name": "find products for type and mission with filter",
+			"name": "find products with filter (string & long)",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -159,7 +159,7 @@
 			"response": []
 		},
 		{
-			"name": "find products for type and mission with filter 2",
+			"name": "find products with filter (date)",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -186,6 +186,29 @@
 							"key": "filter",
 							"value": "publicationDate GE 2021-06-06T11:00:01.654Z"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "download product",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/products/00000000-0000-0000-0000-000000000001/download",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"{{major_version}}",
+						"missions",
+						"s1",
+						"products",
+						"00000000-0000-0000-0000-000000000001",
+						"download"
 					]
 				}
 			},
