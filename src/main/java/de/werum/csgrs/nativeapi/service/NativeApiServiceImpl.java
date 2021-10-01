@@ -183,10 +183,12 @@ public class NativeApiServiceImpl implements NativeApiService {
 
 	@Override
 	public List<PripMetadataResponse> findWithFilters(final String missionName, final String productType, final String filterStr) {
-		if ("S1".equalsIgnoreCase(missionName) && null != productType && !productType.isEmpty()) {
+		if ("S1".equalsIgnoreCase(missionName)) {
 			final List<PripQueryFilter> filterTerms = new LinkedList<>();
 
-			filterTerms.add(new PripTextFilter(PripMetadata.FIELD_NAMES.PRODUCT_FAMILY.fieldName(), PripTextFilter.Function.EQUALS, productType));
+			if (StringUtil.isNotBlank(productType)) {
+				filterTerms.add(new PripTextFilter(PripMetadata.FIELD_NAMES.PRODUCT_FAMILY.fieldName(), PripTextFilter.Function.EQUALS, productType));
+			}
 			filterTerms.addAll(this.parseFilters(missionName, productType, filterStr));
 
 			final PripQueryFilterList filters = PripQueryFilterList.matchAll(filterTerms);
@@ -409,7 +411,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 
 			if (StringUtil.isNotBlank(this.apiProperties.getDummyDownloadFile())) {
 				final Path productDummyFile = Paths.get(this.apiProperties.getDummyDownloadFile());
-				
+
 				if (!Files.isReadable(productDummyFile)||!Files.isRegularFile(productDummyFile)) {
 					throw new NativeApiException(String.format("the product file %s does not exists, cannot be read or isn't a file.", productDummyFile),
 							HttpStatus.INTERNAL_SERVER_ERROR);

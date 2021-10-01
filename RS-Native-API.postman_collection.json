@@ -103,12 +103,33 @@
 			"response": []
 		},
 		{
+			"name": "get base attributes for mission",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/attributes",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"{{major_version}}",
+						"missions",
+						"s1",
+						"attributes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "get attributes for type and mission",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/productTypes/l1/attributes",
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/productTypes/L0_SEGMENT_ZIP/attributes",
 					"host": [
 						"{{base_url}}"
 					],
@@ -118,7 +139,7 @@
 						"missions",
 						"s1",
 						"productTypes",
-						"l1",
+						"L0_SEGMENT_ZIP",
 						"attributes"
 					]
 				}
@@ -126,32 +147,26 @@
 			"response": []
 		},
 		{
-			"name": "find products with filter (string & long)",
+			"name": "find products of mission with filter (date & string)",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/{{major_version}}/products?missionName=s1&productType=L0_SEGMENT_ZIP&filter=name contains '0010' AND contentLength GT 4000000",
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/products?filter=publicationDate GE 2021-06-06T11:00:01.654Z AND name contains '0010'",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"api",
 						"{{major_version}}",
+						"missions",
+						"s1",
 						"products"
 					],
 					"query": [
 						{
-							"key": "missionName",
-							"value": "s1"
-						},
-						{
-							"key": "productType",
-							"value": "L0_SEGMENT_ZIP"
-						},
-						{
 							"key": "filter",
-							"value": "name contains '0010' AND contentLength GT 4000000"
+							"value": "publicationDate GE 2021-06-06T11:00:01.654Z AND name contains '0010'"
 						}
 					]
 				}
@@ -159,32 +174,28 @@
 			"response": []
 		},
 		{
-			"name": "find products with filter (date)",
+			"name": "find products of product type with filter (string & long)",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/{{major_version}}/products?missionName=s1&productType=L0_SEGMENT_ZIP&filter=publicationDate GE 2021-06-06T11:00:01.654Z",
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/productTypes/L0_SEGMENT_ZIP/products?filter=publicationDate GE 2021-06-06T11:00:01.654Z AND name contains '0010'",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"api",
 						"{{major_version}}",
+						"missions",
+						"s1",
+						"productTypes",
+						"L0_SEGMENT_ZIP",
 						"products"
 					],
 					"query": [
 						{
-							"key": "missionName",
-							"value": "s1"
-						},
-						{
-							"key": "productType",
-							"value": "L0_SEGMENT_ZIP"
-						},
-						{
 							"key": "filter",
-							"value": "publicationDate GE 2021-06-06T11:00:01.654Z"
+							"value": "publicationDate GE 2021-06-06T11:00:01.654Z AND name contains '0010'"
 						}
 					]
 				}

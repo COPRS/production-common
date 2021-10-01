@@ -11,7 +11,15 @@ public interface NativeApiService {
 
 	List<String> getProductTypes(final String missionName);
 
+	default List<String> getAttributes(final String missionName) {
+		return this.getAttributes(missionName, null);
+	}
+
 	List<String> getAttributes(final String missionName, final String productType);
+
+	default List<PripMetadataResponse> findWithFilters(final String missionName, final String filterStr) {
+		return this.findWithFilters(missionName, null, filterStr);
+	}
 
 	List<PripMetadataResponse> findWithFilters(final String missionName, final String productType, final String filterStr);
 
