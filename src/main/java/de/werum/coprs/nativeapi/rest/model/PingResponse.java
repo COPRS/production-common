@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.rest.model;
+package de.werum.coprs.nativeapi.rest.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

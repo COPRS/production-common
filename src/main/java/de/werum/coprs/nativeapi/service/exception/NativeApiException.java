@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.service.exception;
+package de.werum.coprs.nativeapi.service.exception;
 
 import org.springframework.http.HttpStatus;
 

@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.rest.model;
+package de.werum.coprs.nativeapi.rest.model;
 
 import java.util.List;
 import java.util.Map;

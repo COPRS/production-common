@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.rest;
+package de.werum.coprs.nativeapi.rest;
 
 import java.util.regex.Pattern;
 
@@ -18,7 +18,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import de.werum.csgrs.nativeapi.config.OpenApiRequestValidatorConfiguration;
+import de.werum.coprs.nativeapi.config.OpenApiRequestValidatorConfiguration;
 
 @Component
 public class OpenApiRequestValidationInterceptor implements HandlerInterceptor, WebMvcConfigurer {

@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.service.mapping;
+package de.werum.coprs.nativeapi.service.mapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +13,9 @@ import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Polygon;
 
-import de.werum.csgrs.nativeapi.rest.model.Checksum;
-import de.werum.csgrs.nativeapi.rest.model.ContentDate;
-import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
+import de.werum.coprs.nativeapi.rest.model.Checksum;
+import de.werum.coprs.nativeapi.rest.model.ContentDate;
+import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;

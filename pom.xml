@@ -2,8 +2,8 @@
 	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.werum.csgrs</groupId>
-	<artifactId>csgrs-native-api</artifactId>
+	<groupId>de.werum.coprs</groupId>
+	<artifactId>coprs-native-api-sim</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>native-api</name>
@@ -22,9 +22,9 @@
 		<openapi4j.version>1.0.5</openapi4j.version>
 		<jackson.version>2.11.1</jackson.version>
 
-		<project.build.finalName>csgrs-native-api</project.build.finalName>
-		<project.artifactId>csgrs-native-api</project.artifactId>
-		<start-class>de.werum.csgrs.nativeapi.Application</start-class>
+		<project.build.finalName>coprs-native-api-sim</project.build.finalName>
+		<project.artifactId>coprs-native-api-sim</project.artifactId>
+		<start-class>de.werum.coprs.nativeapi.Application</start-class>
 	</properties>
 
 	<repositories>

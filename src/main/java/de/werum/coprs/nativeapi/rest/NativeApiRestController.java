@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.rest;
+package de.werum.coprs.nativeapi.rest;
 
 import java.util.List;
 
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.werum.csgrs.nativeapi.rest.model.GetAttributesResponse;
-import de.werum.csgrs.nativeapi.rest.model.GetMissionsResponse;
-import de.werum.csgrs.nativeapi.rest.model.GetProductTypesResponse;
-import de.werum.csgrs.nativeapi.rest.model.PingResponse;
-import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
-import de.werum.csgrs.nativeapi.service.NativeApiService;
+import de.werum.coprs.nativeapi.rest.model.GetAttributesResponse;
+import de.werum.coprs.nativeapi.rest.model.GetMissionsResponse;
+import de.werum.coprs.nativeapi.rest.model.GetProductTypesResponse;
+import de.werum.coprs.nativeapi.rest.model.PingResponse;
+import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
+import de.werum.coprs.nativeapi.service.NativeApiService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -224,6 +224,43 @@ public class NativeApiRestController {
 			@PathVariable final String productType) {
 		LOGGER.debug("request received: /missions/{}/productTypes/{}/attributes", missionName, productType);
 		return new GetAttributesResponse(this.nativeApiService.getAttributes(missionName, productType));
+	}
+	
+	@Operation(
+		operationId = "FindProduct", tags = "Products",
+		summary = "find product metadata of a single product for a given product ID",
+		description = "This endpoint allows to retrieve the metadata of a single product by its mission and ID."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "OK - the product metadata for the given mission and product ID was returned with this response",
+			content = {@Content(
+				mediaType = MediaType.APPLICATION_JSON_VALUE,
+				schema = @Schema(implementation = PripMetadataResponse.class)
+				)}
+			),
+			@ApiResponse(
+				responseCode = "400",
+				description = "Bad Request - the API service rejects to process the request because of client side errors, for example a malformed request syntax",
+				content = @Content
+			),
+			@ApiResponse(
+				responseCode = "500",
+				description = "Internal Server Error - the API service encountered an unexpected condition that prevented it from fulfilling the request",
+				content = @Content
+			)
+	})
+	@RequestMapping(method = RequestMethod.GET, path = "/missions/{missionName}/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public PripMetadataResponse findProduct(
+			@PathVariable final String missionName,
+			@PathVariable final String productId) {
+		LOGGER.debug("Received single product metadata request: /missions/{}/products/{}", missionName, productId);
+		try {
+			return this.nativeApiService.findProduct(missionName, productId);
+		} catch (final Exception e) {
+			throw new NativeApiRestControllerException(String.format("Internal server error: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@Operation(

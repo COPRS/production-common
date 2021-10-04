@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.service;
+package de.werum.coprs.nativeapi.service;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,13 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import de.werum.csgrs.nativeapi.config.NativeApiProperties;
-import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfMission;
-import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfProductType;
-import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
-import de.werum.csgrs.nativeapi.service.exception.NativeApiBadRequestException;
-import de.werum.csgrs.nativeapi.service.exception.NativeApiException;
-import de.werum.csgrs.nativeapi.service.mapping.MappingUtil;
+import de.werum.coprs.nativeapi.config.NativeApiProperties;
+import de.werum.coprs.nativeapi.config.NativeApiProperties.AttributesOfMission;
+import de.werum.coprs.nativeapi.config.NativeApiProperties.AttributesOfProductType;
+import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
+import de.werum.coprs.nativeapi.service.exception.NativeApiBadRequestException;
+import de.werum.coprs.nativeapi.service.exception.NativeApiException;
+import de.werum.coprs.nativeapi.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
@@ -182,6 +182,19 @@ public class NativeApiServiceImpl implements NativeApiService {
 	}
 
 	@Override
+	public PripMetadataResponse findProduct(final String missionName, final String productId) {
+		if ("S1".equalsIgnoreCase(missionName)) {
+			final PripMetadata productMetadata = this.pripRepo.findById(productId);
+			if (null == productMetadata) {
+				throw new NativeApiException(String.format("product with ID '%s' not found for mission %s: ", productId, missionName), HttpStatus.NOT_FOUND);
+			}
+			return MappingUtil.pripMetadataToResponse(productMetadata, missionName);
+		} else {
+			throw new NativeApiException(String.format("mission not supported (yet): %s", missionName), HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@Override
 	public List<PripMetadataResponse> findWithFilters(final String missionName, final String productType, final String filterStr) {
 		if ("S1".equalsIgnoreCase(missionName)) {
 			final List<PripQueryFilter> filterTerms = new LinkedList<>();
@@ -198,9 +211,9 @@ public class NativeApiServiceImpl implements NativeApiService {
 					Collections.singletonList(pripSortTerm));
 
 			return MappingUtil.pripMetadataToResponse(result, missionName);
+		} else {
+			throw new NativeApiException(String.format("mission not supported (yet): %s", missionName), HttpStatus.NOT_FOUND);
 		}
-
-		return Collections.emptyList();
 	}
 
 	private List<PripQueryFilter> parseFilters(final String missionName, final String productType, final String filterStr) {
