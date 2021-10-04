@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.service;
+package de.werum.coprs.nativeapi.service;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,13 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import de.werum.csgrs.nativeapi.config.NativeApiProperties;
-import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfMission;
-import de.werum.csgrs.nativeapi.config.NativeApiProperties.AttributesOfProductType;
-import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
-import de.werum.csgrs.nativeapi.service.exception.NativeApiBadRequestException;
-import de.werum.csgrs.nativeapi.service.exception.NativeApiException;
-import de.werum.csgrs.nativeapi.service.mapping.MappingUtil;
+import de.werum.coprs.nativeapi.config.NativeApiProperties;
+import de.werum.coprs.nativeapi.config.NativeApiProperties.AttributesOfMission;
+import de.werum.coprs.nativeapi.config.NativeApiProperties.AttributesOfProductType;
+import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
+import de.werum.coprs.nativeapi.service.exception.NativeApiBadRequestException;
+import de.werum.coprs.nativeapi.service.exception.NativeApiException;
+import de.werum.coprs.nativeapi.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;

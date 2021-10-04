@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.rest;
+package de.werum.coprs.nativeapi.rest;
 
 import org.springframework.http.HttpStatus;
 

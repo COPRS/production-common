@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.config;
+package de.werum.coprs.nativeapi.config;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;

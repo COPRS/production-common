@@ -9,29 +9,6 @@ servers:
 tags:
 - name: Metadata
 paths:
-  /api/v1/ping:
-    get:
-      tags:
-      - Metadata
-      summary: check whether the API service is reachable and running and retrieve
-        the API version number
-      description: A HTTP 200 answer is to be expected when the API service is running
-        and reachable. Additionally the current API version number will be retrieved.
-      operationId: PingApi
-      responses:
-        "500":
-          description: Internal Server Error - the API service encountered an unexpected
-            condition that prevented it from fulfilling the request
-          content: {}
-        "200":
-          description: OK - the API service is running and reachable
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PingResponse'
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
   /api/v1/missions:
     get:
       tags:
@@ -78,9 +55,6 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the product type names for the given mission were returned
             with this response
@@ -88,6 +62,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductTypes'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
+  /api/v1/ping:
+    get:
+      tags:
+      - Metadata
+      summary: check whether the API service is reachable and running and retrieve
+        the API version number
+      description: A HTTP 200 answer is to be expected when the API service is running
+        and reachable. Additionally the current API version number will be retrieved.
+      operationId: PingApi
+      responses:
+        "500":
+          description: Internal Server Error - the API service encountered an unexpected
+            condition that prevented it from fulfilling the request
+          content: {}
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
+        "200":
+          description: OK - the API service is running and reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
   /api/v1/missions/{missionName}/products/{productId}:
     get:
       tags:
@@ -154,9 +154,6 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: "OK - the product metadata for the given mission, product type\
             \ and filter was returned with this response"
@@ -164,6 +161,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductMetadata'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
   /api/v1/missions/{missionName}/products:
     get:
       tags:
@@ -189,9 +189,6 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the product metadata for the given mission and filter
             was returned with this response
@@ -199,6 +196,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductMetadata'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
   /api/v1/missions/{missionName}/products/{productId}/download:
     get:
       tags:
@@ -223,11 +223,6 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "404":
-          description: Not Found - the product with the given ID wasn't found
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the actual link to download the zipped product file was
             returned with this response
@@ -236,6 +231,11 @@ paths:
               schema:
                 type: string
                 format: binary
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
+        "404":
+          description: Not Found - the product with the given ID wasn't found
   /api/v1/missions/{missionName}/attributes:
     get:
       tags:
@@ -257,9 +257,6 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the base attribute names for the given mission were returned
             with this response
@@ -267,6 +264,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attributes'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
   /api/v1/missions/{missionName}/productTypes/{productType}/attributes:
     get:
       tags:
@@ -306,13 +306,6 @@ paths:
                 $ref: '#/components/schemas/Attributes'
 components:
   schemas:
-    PingResponse:
-      type: object
-      properties:
-        apiVersion:
-          type: string
-          description: the version of the API
-          example: "1.0"
     Missions:
       type: object
       properties:
@@ -341,6 +334,13 @@ components:
             type: string
             description: the names of the product types for a particular mission
             example: "[\"l1\",\"l2\",\"aux-safe\"]"
+    PingResponse:
+      type: object
+      properties:
+        apiVersion:
+          type: string
+          description: the version of the API
+          example: "1.0"
     Checksum:
       type: object
       properties:

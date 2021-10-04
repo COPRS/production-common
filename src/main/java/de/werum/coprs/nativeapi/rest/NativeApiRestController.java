@@ -1,4 +1,4 @@
-package de.werum.csgrs.nativeapi.rest;
+package de.werum.coprs.nativeapi.rest;
 
 import java.util.List;
 
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.werum.csgrs.nativeapi.rest.model.GetAttributesResponse;
-import de.werum.csgrs.nativeapi.rest.model.GetMissionsResponse;
-import de.werum.csgrs.nativeapi.rest.model.GetProductTypesResponse;
-import de.werum.csgrs.nativeapi.rest.model.PingResponse;
-import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
-import de.werum.csgrs.nativeapi.service.NativeApiService;
+import de.werum.coprs.nativeapi.rest.model.GetAttributesResponse;
+import de.werum.coprs.nativeapi.rest.model.GetMissionsResponse;
+import de.werum.coprs.nativeapi.rest.model.GetProductTypesResponse;
+import de.werum.coprs.nativeapi.rest.model.PingResponse;
+import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
+import de.werum.coprs.nativeapi.service.NativeApiService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;

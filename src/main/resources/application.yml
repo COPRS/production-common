@@ -1,12 +1,12 @@
 spring:
   application:
-    name: csgrs-native-api
+    name: coprs-native-api
 
 # Logging
 logging:
   level:
     root: ERROR
-    de.werum.csgrs: DEBUG
+    de.werum.coprs: DEBUG
     esa.s1pdgs.cpoc.prip: DEBUG
     org.springframework: INFO
     org.apache: INFO

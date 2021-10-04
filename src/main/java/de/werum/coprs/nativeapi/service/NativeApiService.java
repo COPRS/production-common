@@ -1,7 +1,8 @@
-package de.werum.csgrs.nativeapi.service;
+package de.werum.coprs.nativeapi.service;
 
 import java.util.List;
-import de.werum.csgrs.nativeapi.rest.model.PripMetadataResponse;
+
+import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
 
 public interface NativeApiService {
 
