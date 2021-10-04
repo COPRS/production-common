@@ -182,6 +182,19 @@ public class NativeApiServiceImpl implements NativeApiService {
 	}
 
 	@Override
+	public PripMetadataResponse findProduct(final String missionName, final String productId) {
+		if ("S1".equalsIgnoreCase(missionName)) {
+			final PripMetadata productMetadata = this.pripRepo.findById(productId);
+			if (null == productMetadata) {
+				throw new NativeApiException(String.format("product with ID '%s' not found for mission %s: ", productId, missionName), HttpStatus.NOT_FOUND);
+			}
+			return MappingUtil.pripMetadataToResponse(productMetadata, missionName);
+		} else {
+			throw new NativeApiException(String.format("mission not supported (yet): %s", missionName), HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@Override
 	public List<PripMetadataResponse> findWithFilters(final String missionName, final String productType, final String filterStr) {
 		if ("S1".equalsIgnoreCase(missionName)) {
 			final List<PripQueryFilter> filterTerms = new LinkedList<>();
@@ -198,9 +211,9 @@ public class NativeApiServiceImpl implements NativeApiService {
 					Collections.singletonList(pripSortTerm));
 
 			return MappingUtil.pripMetadataToResponse(result, missionName);
+		} else {
+			throw new NativeApiException(String.format("mission not supported (yet): %s", missionName), HttpStatus.NOT_FOUND);
 		}
-
-		return Collections.emptyList();
 	}
 
 	private List<PripQueryFilter> parseFilters(final String missionName, final String productType, final String filterStr) {

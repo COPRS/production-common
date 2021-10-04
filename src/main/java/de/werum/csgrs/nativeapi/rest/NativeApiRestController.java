@@ -227,6 +227,43 @@ public class NativeApiRestController {
 	}
 	
 	@Operation(
+		operationId = "FindProduct", tags = "Products",
+		summary = "find product metadata of a single product for a given product ID",
+		description = "This endpoint allows to retrieve the metadata of a single product by its mission and ID."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "OK - the product metadata for the given mission and product ID was returned with this response",
+			content = {@Content(
+				mediaType = MediaType.APPLICATION_JSON_VALUE,
+				schema = @Schema(implementation = PripMetadataResponse.class)
+				)}
+			),
+			@ApiResponse(
+				responseCode = "400",
+				description = "Bad Request - the API service rejects to process the request because of client side errors, for example a malformed request syntax",
+				content = @Content
+			),
+			@ApiResponse(
+				responseCode = "500",
+				description = "Internal Server Error - the API service encountered an unexpected condition that prevented it from fulfilling the request",
+				content = @Content
+			)
+	})
+	@RequestMapping(method = RequestMethod.GET, path = "/missions/{missionName}/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public PripMetadataResponse findProduct(
+			@PathVariable final String missionName,
+			@PathVariable final String productId) {
+		LOGGER.debug("Received single product metadata request: /missions/{}/products/{}", missionName, productId);
+		try {
+			return this.nativeApiService.findProduct(missionName, productId);
+		} catch (final Exception e) {
+			throw new NativeApiRestControllerException(String.format("Internal server error: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@Operation(
 		operationId = "FindProducts", tags = "Products",
 		summary = "find product metadata for a given mission using a filter",
 		description = "To search for satellite product metadata the data can be filtered by attributes which depend on the satellite mission. This endpoint allows to retrieve filtered product metadata for the given mission."
