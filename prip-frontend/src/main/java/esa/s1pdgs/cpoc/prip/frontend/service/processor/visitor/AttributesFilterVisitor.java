@@ -214,6 +214,12 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 		throw new UnsupportedOperationException();
 	}
 	
+	@Override
+	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, List<Object> right)
+			throws ExpressionVisitException, ODataApplicationException {
+		throw new UnsupportedOperationException();
+	}
+	
 	// --------------------------------------------------------------------------
 
 	public PripQueryFilter getFilter() throws ExpressionVisitException, ODataApplicationException {

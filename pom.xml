@@ -36,7 +36,7 @@
 		<spatial4j.version>0.7</spatial4j.version>
 		<jts.version>1.15.0</jts.version>
 		<pmd.failOnViolation>false</pmd.failOnViolation>
-		<odata.version>4.6.0</odata.version>
+		<odata.version>4.8.0</odata.version>
 	</properties>
 
 	<!-- TODO: check if this is still required -->

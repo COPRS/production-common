@@ -348,6 +348,12 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	public Object visitLambdaReference(String variableName) throws ExpressionVisitException, ODataApplicationException {
 		throw new UnsupportedOperationException();
 	}
+	
+	@Override
+	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, List<Object> right)
+			throws ExpressionVisitException, ODataApplicationException {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public Object visitEnum(EdmEnumType type, List<String> enumValues)
