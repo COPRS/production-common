@@ -2,7 +2,7 @@ ARG BRANCH
 FROM ghcr.io/coprs/s1pro-core:${BRANCH} as build
 WORKDIR /app
 
-FROM openjdk:8-jre-alpine3.13
+FROM openjdk:8-jre-alpine3.9
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
