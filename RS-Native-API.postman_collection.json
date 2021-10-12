@@ -147,12 +147,61 @@
 			"response": []
 		},
 		{
+			"name": "find product metadata by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/products/96992625-0572-419d-8b0b-65d646a8d753",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"{{major_version}}",
+						"missions",
+						"s1",
+						"products",
+						"96992625-0572-419d-8b0b-65d646a8d753"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "find all products of a mission",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/products?",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"{{major_version}}",
+						"missions",
+						"s1",
+						"products"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "find products of mission with filter (date & string)",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/products?filter=publicationDate GE 2021-06-06T11:00:01.654Z AND name contains '0010'",
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/products?filter=publicationDate GE 2021-10-12T07:00:00.000Z AND name startsWith 'S1B'",
 					"host": [
 						"{{base_url}}"
 					],
@@ -166,7 +215,7 @@
 					"query": [
 						{
 							"key": "filter",
-							"value": "publicationDate GE 2021-06-06T11:00:01.654Z AND name contains '0010'"
+							"value": "publicationDate GE 2021-10-12T07:00:00.000Z AND name startsWith 'S1B'"
 						}
 					]
 				}
@@ -179,7 +228,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/productTypes/L0_SEGMENT_ZIP/products?filter=publicationDate GE 2021-06-06T11:00:01.654Z AND name contains '0010'",
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/productTypes/L0_SLICE_ZIP/products?filter=publicationDate GE 2021-10-11T10:00:00.000Z AND name contains 'IW_RAW'",
 					"host": [
 						"{{base_url}}"
 					],
@@ -189,13 +238,13 @@
 						"missions",
 						"s1",
 						"productTypes",
-						"L0_SEGMENT_ZIP",
+						"L0_SLICE_ZIP",
 						"products"
 					],
 					"query": [
 						{
 							"key": "filter",
-							"value": "publicationDate GE 2021-06-06T11:00:01.654Z AND name contains '0010'"
+							"value": "publicationDate GE 2021-10-11T10:00:00.000Z AND name contains 'IW_RAW'"
 						}
 					]
 				}
@@ -208,7 +257,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/products/00000000-0000-0000-0000-000000000001/download",
+					"raw": "{{base_url}}/api/{{major_version}}/missions/s1/products/96992625-0572-419d-8b0b-65d646a8d753/download",
 					"host": [
 						"{{base_url}}"
 					],
@@ -218,7 +267,7 @@
 						"missions",
 						"s1",
 						"products",
-						"00000000-0000-0000-0000-000000000001",
+						"96992625-0572-419d-8b0b-65d646a8d753",
 						"download"
 					]
 				}
