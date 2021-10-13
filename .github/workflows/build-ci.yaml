@@ -1,7 +1,6 @@
 name: Java Maven CI
 
-on: 
-  push
+on: [push]
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -103,241 +102,2833 @@ jobs:
 # Applicative Catalog
 ################################################################################
   applicative-catalog:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: applicative-catalog
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-applicative-catalog
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./applicative-catalog
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-applicative-catalog
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-applicative-catalog:
+    needs: applicative-catalog
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-applicative-catalog
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-applicative-catalog
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Archives
 ################################################################################
   archives:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: archives
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-archives
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./archives
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-archives
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-archives:
+    needs: archives
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-archives
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-archives
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Disseminator
 ################################################################################
   disseminator:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: disseminator
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-disseminator
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./disseminator
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-disseminator
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-disseminator:
+    needs: disseminator
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-disseminator
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-disseminator
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Request-Repository
 ################################################################################
   request-repository:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: request-repository
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-request-repository
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./request-repository
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-request-repository
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-request-repository:
+    needs: request-repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-request-repository
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-request-repository
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Ingestion Trigger
 ################################################################################
   ingestion-trigger:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: ingestion-trigger
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-ingestion-trigger
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./ingestion-trigger
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-ingestion-trigger
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-ingestion-trigger:
+    needs: ingestion-trigger
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-ingestion-trigger
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-ingestion-trigger
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Ingestion Worker
 ################################################################################
   ingestion-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: ingestion-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-ingestion-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./ingestion-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-ingestion-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-ingestion-worker:
+    needs: ingestion-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-ingestion-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-ingestion-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Production Trigger
 ################################################################################
   production-trigger:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: production-trigger
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-production-trigger
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./production-trigger
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-production-trigger
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-production-trigger:
+    needs: production-trigger
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-production-trigger
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-production-trigger
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # IPF Preparation Worker
 ################################################################################
   ipf-preparation-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: ipf-preparation-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-ipf-preparation-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./ipf-preparation-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-ipf-preparation-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-ipf-preparation-worker:
+    needs: ipf-preparation-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-ipf-preparation-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-ipf-preparation-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # IPF Execution Worker
 ################################################################################
   ipf-execution-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: ipf-execution-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-ipf-execution-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./ipf-execution-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-ipf-execution-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-ipf-execution-worker:
+    needs: ipf-execution-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-ipf-execution-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-ipf-execution-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # On Demand Interface Provider
 ################################################################################
   on-demand-interface-provider:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: on-demand-interface-provider
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-on-demand-interface-provider
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./on-demand-interface-provider
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-on-demand-interface-provider
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-on-demand-interface-provider:
+    needs: on-demand-interface-provider
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-on-demand-interface-provider
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-on-demand-interface-provider
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Metadata Catalog Timer
 ################################################################################
   metadata-catalog-timer:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: metadata-catalog-timer
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-metadata-catalog-timer
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./metadata-catalog-timer
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-metadata-catalog-timer
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-metadata-catalog-timer:
+    needs: metadata-catalog-timer
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-metadata-catalog-timer
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-metadata-catalog-timer
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Metadata Catalog Trigger
 ################################################################################
   metadata-catalog-trigger:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: metadata-catalog-trigger
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-metadata-catalog-trigger
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./metadata-catalog-trigger
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-metadata-catalog-trigger
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-metadata-catalog-trigger:
+    needs: metadata-catalog-trigger
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-metadata-catalog-trigger
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-metadata-catalog-trigger
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Metadata Catalog Worker
 ################################################################################
   metadata-catalog-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: metadata-catalog-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-metadata-catalog-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./metadata-catalog-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-metadata-catalog-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-metadata-catalog-worker:
+    needs: metadata-catalog-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-metadata-catalog-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-metadata-catalog-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # MQI Server
 ################################################################################
   mqi-server:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: mqi-server
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-mqi-server
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./mqi-server
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-mqi-server
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-mqi-server:
+    needs: mqi-server
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-mqi-server
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-mqi-server
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Queue Watcher
 ################################################################################
   queue-watcher:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: queue-watcher
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-queue-watcher
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./queue-watcher
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-queue-watcher
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-queue-watcher:
+    needs: queue-watcher
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-queue-watcher
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-queue-watcher
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Validation
 ################################################################################
   validation:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: validation
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-validation
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./validation
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-validation
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-validation:
+    needs: validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-validation
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-validation
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Compression Trigger
 ################################################################################
   compression-trigger:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: compression-trigger
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-compression-trigger
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./compression-trigger
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-compression-trigger
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-compression-trigger:
+    needs: compression-trigger
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-compression-trigger
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-compression-trigger
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Compression Worker
 ################################################################################
   compression-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: compression-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-compression-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./compression-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-compression-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-compression-worker:
+    needs: compression-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-compression-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-compression-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # PRIP Trigger
 ################################################################################
   prip-trigger:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: prip-trigger
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-prip-trigger
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./prip-trigger
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-prip-trigger
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-prip-trigger:
+    needs: prip-trigger
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-prip-trigger
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-prip-trigger
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # PRIP Worker
 ################################################################################
   prip-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: prip-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-prip-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./prip-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-prip-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-prip-worker:
+    needs: prip-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-prip-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-prip-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # PRIP Frontend
 ################################################################################
   prip-frontend:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: prip-frontend
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-prip-frontend
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./prip-frontend
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-prip-frontend
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-prip-frontend:
+    needs: prip-frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-prip-frontend
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-prip-frontend
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Data Lifecycle Trigger
 ################################################################################
   data-lifecycle-trigger:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: data-lifecycle-trigger
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-data-lifecycle-trigger
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./data-lifecycle-trigger
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-data-lifecycle-trigger
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-data-lifecycle-trigger:
+    needs: data-lifecycle-trigger
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-data-lifecycle-trigger
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-data-lifecycle-trigger
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Data Request Worker
 ################################################################################
   data-request-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: data-request-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-data-request-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./data-request-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-data-request-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-data-request-worker:
+    needs: data-request-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-data-request-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-data-request-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
-# Eviction Management Worker
+# Evistion Management Worker
 ################################################################################
   eviction-management-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: eviction-management-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-eviction-management-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./eviction-management-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-eviction-management-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-eviction-management-worker:
+    needs: eviction-management-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-eviction-management-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-eviction-management-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Dissemination Trigger
 ################################################################################
   dissemination-trigger:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: dissemination-trigger
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-dissemination-trigger
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./dissemination-trigger
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-dissemination-trigger
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-dissemination-trigger:
+    needs: dissemination-trigger
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-dissemination-trigger
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-dissemination-trigger
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Dissemination Worker
 ################################################################################
   dissemination-worker:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: dissemination-worker
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-dissemination-worker
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./dissemination-worker
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-dissemination-worker
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-dissemination-worker:
+    needs: dissemination-worker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-dissemination-worker
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-dissemination-worker
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
 
 ################################################################################
 # Directory Cleaner
 ################################################################################
   directory-cleaner:
+    runs-on: ubuntu-latest
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: directory-cleaner
+
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to Github Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/coprs/s1pro-core-directory-cleaner
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./directory-cleaner
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
+
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan SARIF report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-directory-cleaner
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }}; 
+
+  generate-reports-directory-cleaner:
+    needs: directory-cleaner
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-directory-cleaner
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-directory-cleaner
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf
