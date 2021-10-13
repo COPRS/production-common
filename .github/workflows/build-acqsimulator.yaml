@@ -1,6 +1,10 @@
-name: Build images
+name: Build ACQ-Simulator
 
-on: [push]
+on: 
+  push:
+    paths:
+      - 'docker_acqsimulator/**'
+  workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -62,7 +66,7 @@ jobs:
         run: |
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
   generate-reports-acqsimulator:
-    needs: build 
+    needs: build-acq-simulator 
     runs-on: ubuntu-latest
     permissions:
       contents: read
