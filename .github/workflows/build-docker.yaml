@@ -1,7 +1,7 @@
-name: Java Maven CI
+name: Build docker image and generate reports
 
-on: 
-  push
+on:
+  workflow_call:
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -12,15 +12,25 @@ env:
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest    
-    
+  build-docker:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner]
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Login to Github Registry
         uses: docker/login-action@v1
@@ -28,20 +38,25 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-                    
+
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-              
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.component }}
+
       - name: Build image
         uses: docker/build-push-action@v2
         with:
           load: true
+          context: ./${{ matrix.component }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
       - name: Scan image
         uses: anchore/scan-action@v2
         id: scan
@@ -51,23 +66,21 @@ jobs:
           fail-build: false
           severity-cutoff: critical
 
-      - name: Upload Anchore scan SARIF report
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
-
       - name: Upload Anchore scan json report
         uses: actions/upload-artifact@master
         with:
-          name: vulnerabilities-build
+          name: vulnerabilities-${{ matrix.component }}
           path: ${{ steps.scan.outputs.vulnerabilities }}
 
       - name: Push image
         run: |
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
   generate-reports:
-    needs: build 
+    needs: build-docker
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner]
     permissions:
       contents: read
 
@@ -75,7 +88,7 @@ jobs:
       - name: Download json report from build jobs
         uses: actions/download-artifact@v2
         with:
-          name: vulnerabilities-build
+          name: vulnerabilities-${{ matrix.component }}
 
       - name: Generate CSV and intermediate HTML report
         run: |
@@ -92,13 +105,7 @@ jobs:
       - name: Upload Anchore scan reports
         uses: actions/upload-artifact@master
         with:
-          name: vulnerabilities-build
+          name: vulnerabilities-${{ matrix.component }}
           path: |
             vulnerabilities.csv
             vulnerabilities.pdf
-
-  docker-images:
-    needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with:
-      component: ${{ matrix.component }}
