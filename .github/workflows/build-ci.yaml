@@ -96,3 +96,7 @@ jobs:
           path: |
             vulnerabilities.csv
             vulnerabilities.pdf
+
+  docker-images:
+    needs: build
+    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
