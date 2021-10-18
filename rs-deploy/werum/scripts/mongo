@@ -1,0 +1,57 @@
+#!/bin/sh
+
+if [ -z $LOCATION ]
+then
+    echo "Please source environment"
+    exit 1
+fi
+
+COLLECTION_LIST="$LOCATION/werum/configuration/collections.txt"
+
+source $LOCATION/werum/scripts/lib/functions
+
+if [ $# -lt 1 ]
+then
+    echo "Please provide a collection:"
+    cat $COLLECTION_LIST | grep -v "#" | cut -d $'\t' -f1 | cat -n
+    echo
+    echo "Usage: $(basename $0) <collection> [command, default is find().pretty()]"
+    exit 1
+fi
+
+COLLECTION=$1
+
+if [[ $COLLECTION =~ ^-?[0-9]+$ ]]
+then
+    # Collection is an id
+    KCOLLECTION=`cat $COLLECTION_LIST | grep -v "#" | cut -d $'\t' -f1 | sed -n "$COLLECTION p"`
+    echo "Selected MongoDB Collection '$KCOLLECTION' by id $COLLECTION"
+else
+    KCOLLECTION=$COLLECTION
+    echo "Selected MongoDB Collection '$KCOLLECTION' by name"
+fi
+
+COMMAND="find().pretty();"
+
+if [ ! -z "$2" ]
+then
+  COMMAND="$2"
+fi
+
+MONGO_ROOT_USERNAME=$(kubectl -n ${S1PRO_NAMESPACE} get secret ${MONGODB_SECRET_NAME} -o jsonpath='{.data.ROOT_USERNAME}' | base64 --decode)
+MONGO_ROOT_PASSWORD=$(kubectl -n ${S1PRO_NAMESPACE} get secret ${MONGODB_SECRET_NAME} -o jsonpath='{.data.ROOT_PASSWORD}' | base64 --decode)
+MONGO_ROOT_CONNECTION_STRING="mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@localhost:${MONGO_PORT}"
+
+MONGO_USERNAME=$(kubectl -n ${S1PRO_NAMESPACE} get secret ${MONGODB_SECRET_NAME} -o jsonpath='{.data.USERNAME}' | base64 --decode)
+MONGO_PASSWORD=$(kubectl -n ${S1PRO_NAMESPACE} get secret ${MONGODB_SECRET_NAME} -o jsonpath='{.data.PASSWORD}' | base64 --decode)
+MONGO_CONNECTION_STRING="mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:${MONGO_PORT}"
+
+MONGO_POD=$(kubectl -n ${MONGO_NAMESPACE} get pod | grep ${MONGO_POD_PREFIX} | grep Running | head -1 | awk '{print $1}');
+#MONGO_PRIMARY=$(kubectl -n ${MONGO_NAMESPACE} exec -ti ${MONGO_POD} -- mongo "${MONGO_ROOT_CONNECTION_STRING}" --eval 'rs.status();' | grep PRIMARY -B 4 | grep name | awk -F ':' '{print $2}' | awk -F '"' '{print $2}' | awk -F '.' '{print $1}');
+MONGO_PRIMARY=$(kubectl -n ${MONGO_NAMESPACE} exec -ti ${MONGO_POD} -- mongo --eval 'rs.status();' | grep PRIMARY -B 4 | grep name | awk -F ':' '{print $2}' | awk -F '"' '{print $2}' | awk -F '.' '{print $1}');
+echo $MONGO_PRIMARY
+
+#kubectl -n ${MONGO_NAMESPACE} exec -ti ${MONGO_PRIMARY} -c mongodb-primary -- mongo ${MONGO_CONNECTION_STRING}/${MONGO_DB} --eval "db.${KCOLLECTION}.${COMMAND}"
+kubectl -n ${MONGO_NAMESPACE} exec -ti ${MONGO_PRIMARY} -- mongo ${MONGO_DB} --eval "db.${KCOLLECTION}.${COMMAND}"
+
+echo "done."

@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ -z "$LOCATION" ]
+then
+    echo "Please source environment"
+    exit 1
+fi
+
+{
+  source "$LOCATION/werum/scripts/lib/functions"
+
+  clean_inbox_polling
+  clean_webdav_mock
+  clean_edip_nominal.sh
+
+  echo "Cleaning environment..."
+  WERUM_SKIP_KAFKA_CLEAN=true PROTECT_S3="^(.*auxiliary-files|.*-session-files)$" PROTECT_ES="^(raw|session)$|^(aux.*|mpl.*|msk_.*|.*mask)$" "$LOCATION/wrapper.sh" "$ENV_DIR/wrapper/configuration.sh" "clean"
+  WERUM_FAST_KAFKA_INIT=true init_cluster
+  safe_es_clean
+  deploy il
+  echo "done."
+} 2>&1 | tee "/tmp/clean_$(date +%Y-%m-%d_%H-%M-%S).log"

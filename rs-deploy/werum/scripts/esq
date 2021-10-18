@@ -1,0 +1,78 @@
+#!/bin/bash
+
+if [ -z "$LOCATION" ]
+then
+    echo "Please source environment"
+    exit 1
+fi
+
+if [ "$1" == "indices" ]
+then
+    PRODUCT_TYPE=""
+    ACTION="indices"
+else
+    PRODUCT_TYPE="/$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+    ACTION=$2
+fi
+
+
+if [ "$ACTION" == "" ]
+then
+    echo "usage $0 <product_type> <action>"
+    echo "  <product_type> e.g. aux_pp1 or aux*"
+    echo "  <action> search, count, query, between, indices, mapping"
+    exit 1
+fi
+
+FILTER="43RS7DQV7Q0OHXY01TGK9B2E8VP40AIE14VGVRTC" # random string = disable filter
+
+if [ "$ACTION" == "search" ]
+then
+    echo "Performing search..."
+    COMMAND="/_search?size=10000\&pretty"
+elif [ "$ACTION" == "count" ]
+then
+    COMMAND="/_count?pretty"
+elif [ "$ACTION" == "between" ]
+then
+    COMMAND="/_search?size=10000\&pretty"
+    ARG="-d '{\"query\":{\"query_string\":{\"query\":\"validityStartTime:[$3 TO $4]\"}}}'"
+elif [ "$ACTION" == "indices" ]
+then
+        COMMAND="/_cat/indices"
+        FILTER="processing_trace|kibana"
+elif [ "$ACTION" == "mapping" ]
+then
+    COMMAND="/_mapping?pretty"
+else
+    echo "unknown action"
+    exit 1
+fi
+
+## FIXME: Originally there was the content type as well, but it doesn't work for some reason correctly with kubectl -n $S1PRO_NAMESPACE. Not required anyways...
+ES_CMD="curl -H 'Content-Type: application/json' -XGET http://${ELASTICSEARCH_URL}${PRODUCT_TYPE}${COMMAND} $ARG"
+
+echo "$ES_CMD"
+
+OUTPUT=esq-result-$(for i in {1..3}; do printf '%04x' $RANDOM; done)-$(date +'%H%M%S%N').es
+
+RETRY_NUM=0
+MAX_TRIES=250
+EXIT_STATUS=1
+while [ $EXIT_STATUS -ne 0 ] && [ $RETRY_NUM -lt $MAX_TRIES ]; do
+  if [ $RETRY_NUM -gt 0 ]; then
+    echo Retry ${RETRY_NUM}...
+    sleep 0.5
+  fi
+  kubectl -n "$ELASTICSEARCH_NAMESPACE" exec -ti "$ELASTICSEARCH_POD" -- bash -c "$ES_CMD" >/tmp/$OUTPUT
+  EXIT_STATUS=$?
+  RETRY_NUM=$((RETRY_NUM+1))
+done
+
+if [ $EXIT_STATUS -eq 0 ]; then
+  cat /tmp/$OUTPUT | grep -v -E "$FILTER"
+fi
+
+rm -f /tmp/$OUTPUT
+
+echo "done."
