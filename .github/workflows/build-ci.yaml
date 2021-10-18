@@ -4,11 +4,6 @@ on:
   push
 
 env:
-  REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT: werum-docker
-  USERNAME: ${{ secrets.ARTIFACTORY_USER }}
-  PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
@@ -106,5 +101,5 @@ jobs:
     needs: build
     uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
     with: 
-      username: ${{ env.USERNAME }}
-      password: ${{ env.PASSWORD }}
+      username: ${{ secrets.ARTIFACTORY_USER }}
+      password: ${{ secrets.ARTIFACTORY_PASSWORD }}
