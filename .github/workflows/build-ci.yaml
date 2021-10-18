@@ -100,6 +100,6 @@ jobs:
   docker-images:
     needs: build
     uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
-    with: 
+    secrets: 
       username: ${{ secrets.ARTIFACTORY_USER }}
       password: ${{ secrets.ARTIFACTORY_PASSWORD }}
