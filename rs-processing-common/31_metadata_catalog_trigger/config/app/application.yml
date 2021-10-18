@@ -1,0 +1,112 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  main:
+    # Disable spring boot banner
+    banner-mode: "off"
+  application:
+    # Application name
+    name: s1pdgs-core-metadata-catalog-trigger
+    
+# Logging
+logging:
+  # Log configuration file
+  config: ${log4j_config:log/log4j2.yml}
+
+process:
+  # Application server host name
+  hostname: ${HOSTNAME}                   
+
+# Kafka
+kafka:
+  # Server (host:port) to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: ${kafka_bootstrap-servers} 
+  # Hostname                                       
+  hostname: ${HOSTNAME}                
+  # Topic name for the errors                                                 
+  error-topic: ${kafka_topic_errors}
+  # Message producer                                                   
+  producer:
+    # Maximum number of retries on errors
+    max-retries: 10
+
+# Message queue interface
+mqi:
+  # The host and port for polling MQI server 
+  host-uri: http://localhost:8081
+  # The maximal number of consecutive retries following a MQI request error                                
+  max-retries: 45
+  # The time to sleep between MQI polling attempts                                               
+  tempo-retry-ms: 2000  
+  # Configurable message filters (regular expressions) per product family
+  message-filter:
+  - productFamily: AUXILIARY_FILE_ZIP
+    disallowRegex: ".*"  
+  - productFamily: PLAN_AND_REPORT_ZIP
+    disallowRegex: ".*"
+  - productFamily: L0_SEGMENT_ZIP
+    disallowRegex: ".*"
+  - productFamily: L0_SLICE_ZIP
+    disallowRegex: ".*"
+  - productFamily: L0_ACN_ZIP
+    disallowRegex: ".*"
+  - productFamily: L1_SLICE_ZIP
+    disallowRegex: ".*"
+  - productFamily: L1_ACN_ZIP
+    disallowRegex: ".*"
+  - productFamily: L2_SLICE_ZIP
+    disallowRegex: ".*"
+  - productFamily: L2_ACN_ZIP
+    disallowRegex: ".*"
+  - productFamily: SESSION_RETRANSFER
+    disallowRegex: ".*"
+  - productFamily: SPP_OBS_ZIP
+    disallowRegex: ".*"
+
+# Metadata catalog trigger
+trigger:
+  product-categories:
+    ingestion-event:
+      # Period in milliseconds between 2 polls of next message
+      fixed-delay-ms: 500   
+      # Initial delay in milliseconds before starting consuming message                                      
+      init-delay-poll-ms: 2000                                    
+    production-event:
+      # Period in milliseconds between 2 polls of next message
+      fixed-delay-ms: 500   
+      # Initial delay in milliseconds before starting consuming message                                      
+      init-delay-poll-ms: 2000                                    
+    compressed-products:
+      # Period in milliseconds between 2 polls of next message
+      fixed-delay-ms: 500                                         
+      # Initial delay in milliseconds before starting consuming message
+      init-delay-poll-ms: 2000                                    
+    
+# REST controller
+server:
+  # Port to be used for publishing REST API
+  port: 8080                                                      
+  
+# Metadata Extractor
+mdextractor:
+  # !!!! Overlap per acquisition
+  type-overlap:                                             
+    EW: 8.2F
+    IW: 7.4F
+    SM: 7.7F
+    WV: 0.0F
+  # !!!!! Slice length per acquisition
+  type-slice-length:                                        
+    EW: 60.0F
+    IW: 25.0F
+    SM: 25.0F
+    WV: 0.0F
+  # Directory where the XSLT are located (Must end with '/')
+  xslt-directory: xslt/                                        
+
+# Status  
+status:
+  # The number of consecutive processing errors leading to the state FATALERROR
+  max-error-counter-processing: 3          
+  # The number of consecutive MQI errors leading to the state FATALERROR                       
+  max-error-counter-mqi: 30                                       
+  

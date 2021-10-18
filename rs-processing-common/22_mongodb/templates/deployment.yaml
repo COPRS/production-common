@@ -1,0 +1,81 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.processing.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  serviceName: {{ .Release.Name }}-svc
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount }}
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        role: {{ .Release.Name }}
+        type: {{ .Values.processing.namespace }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: wrapperconfig
+                operator: DoesNotExist
+      containers:
+      - name: {{ .Release.Name }}
+        image: registry.tools.s1pdgs.eu/werum/processing/s1pro-container-mongodb:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+        command:
+            - "numactl"
+            - "--interleave=all"
+            - "mongod"
+            - "--bind_ip"
+            - "0.0.0.0"
+            - "--replSet"
+            - "MainRepSet"
+        ports:
+        - name: db
+          protocol: TCP
+          containerPort: 27017
+        volumeMounts:
+        - name: mongodbstorage
+          mountPath: /data/db
+        readinessProbe:
+          exec:
+            command:
+              - mongo
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+              - mongo
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+      imagePullSecrets:
+      - name: harbor-tools
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 10
+  revisionHistoryLimit: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodbstorage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi

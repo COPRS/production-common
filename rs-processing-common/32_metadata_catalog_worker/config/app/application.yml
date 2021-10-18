@@ -1,0 +1,322 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  main:
+    # Disable spring boot banner
+    banner-mode: "off"
+  application:
+    # Application name
+    name: s1pdgs-core-metadata-catalog-worker
+    
+# Logging
+logging:
+  # Log configuration file
+  config: ${log4j_config:log/log4j2.yml}
+    
+# Elastic Search
+elasticsearch:
+  # Host of Elasticsearch cluster
+  host: ${elastic_host}           
+  # Port of Elasticsearch cluster                                
+  port: ${elastic_port}   
+  # Timeout in milliseconds of connection to the cluster                                        
+  connect-timeout-ms: 2000                
+  # Timeout in milliseconds of the socket to the cluster                        
+  socket-timeout-ms: 10000                                        
+
+# Kafka
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers}                 
+  # Hostname                        
+  hostname: ${HOSTNAME}      
+  # Topic name for the errors                                                            
+  error-topic: ${kafka_topic_errors}     
+  # Message producer                                                 
+  producer:
+    # Maximum number of retries on errors
+    max-retries: 10
+
+# Process
+process:
+  # Extension of the SAFE files
+  file-with-manifest-ext: .safe    
+  # Name of the manifest (with extension)                               
+  manifest-filename: manifest.safe  
+  # Hostname                               
+  hostname: ${HOSTNAME}                   
+
+# Message queue interface
+mqi:
+  # The host and port for querying MQI server 
+  host-uri: http://localhost:8081 
+  # Maximum number of consecutive retries following a MQI request error                              
+  max-retries: 45  
+  # The time to sleep between MQI polling attempts                                                 
+  tempo-retry-ms: 2000                                           
+
+# Metadata catalog worker - Trigger
+trigger:
+  product-categories:
+    catalog-jobs:
+      # Period in milliseconds between two polls of next message
+      fixed-delay-ms: 500       
+      # Initial delay in milliseconds before starting consuming message                                  
+      init-delay-poll-ms: 2000                                    
+
+# Metadata catalog worker   
+worker:
+  product-categories:
+    auxiliary-files:
+      # Regex pattern to identify relevant metadata (files)
+      pattern-config: ^([0-9a-z][0-9a-z])([0-9a-z_])(_(OPER|TEST))?_(AMH_ERRMAT|AMV_ERRMAT|AM__ERRMAT|AUX_CAL|AUX_ICE|AUX_INS|AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_POEORB|AUX_PREORB|AUX_RESORB|AUX_SCS|AUX_WAV|AUX_WND|MPL_ORBPRE|MPL_ORBRES|MPL_ORBSCT|MSK_EW_SLC|MSK__LAND_|MSK_OCEAN_|MSK_OVRPAS)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
+      # Local directory (must ende with '/') 
+      local-directory: /data/local-catalog/auxiliary_files/      
+    edrs-sessions:
+      # Regex pattern to identify relevant metadata (files) 
+      pattern-config: ^([0-9a-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml))$
+      # Local directory (must ende with '/') 
+      local-directory: /data/local-catalog/edrs_sessions/ 
+      # Regex pattern to match metadata
+      path-pattern: ^([a-z_]{4}/)?([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml))$
+      # Metadata key to group
+      path-metadata-elements:
+        missionId: 2
+        satelliteId: 3
+        sessionId: 7
+        channelId: 8
+    plans-and-reports:
+      # Regex pattern to identify relevant metadata (files) 
+      pattern-config: ^(S1[ABCD_]_OPER_REP_MP_MP__PDMC_|S1[AB_]OPER_REP_MP_MPPDMC|S1[ABCD]_OPER_MPL_SP.{4}_PDMC_|S1[ABCD_]_OPER_MPL_FS.{4}_PDMC_|S1[ABCD]_OPER_REP_PASS_[1-9]_.{4}_|S[12]__OPER_SRA_EDRS_[AC]_PDMC_|EDR_OPER_MPL_RQ[1-9]_O[AC]_|EDR_OPER_MPL_[LM]AS_O[AC]_|EDR_OPER_MPL_CR[1-9]_O[AC]_|EDR_OPER_MPL_SS[1-9]_O[AC]_|EDR_OPER_MPL_ER[1-9]_O[AC]_|EDR_OPER_SER_SR[1-9]_O[AC]_|S1[ABCD]_OPER_MPL_ORBOEM_|EDR_OPER_MPL_GOB_P[AC]_|EDR_OPER_MPL_GOB_R[AC]_|S1[ABCD]_OPER_REP__SUP___|S1[ABCD]_OPER_REP_STNACQ_.{4}_|S1[ABCD_]_OPER_REP_STNUNV_.{4}_|S[123][ABCD_]_OPER_SRA_BANSEG_PDMC_|S1[ABCD]_OPER_TLM__REQ_[A-O]_|S1[ABCD]_OPER_REP__SMPR__|S1[ABCD]_OPER_MPL__SSC___|S1[ABCD]_OPER_TLM__PSCAT_|S1[ABCD]_OPER_MPL_OCMSAR_|S1[ABCD]_OPER_REP__MACP__|S1[ABCD]_OPER_REP__MCSF__|S1[ABCD]_OPER_MPL__NPPF__|S1[ABCD]_OPER_MPL__NPIF__|S1[ABCD]_OPER_REP_NPIFCC_|S[123][ABCD_]_OPER_SRA_GSUNAV_PDMC_|S1[ABCD]_OPER_OBS_MIMG___|S1[ABCD]_OPER_AUX_RDB____MPC__|S1[ABCD]_OPER_MPL_SESDB[ABCD]_|S1[ABCD]_OPER_REP__CHF___|S1[AB]_OPER_REP__FCHF__|S1[AB]_OPER_AM[VH_]_FAILUR_MPC__|S1[AB]_OPER_AUX_QCSTDB_|S1[AB_]_OPER_REP_QC...._MPC__|S1[AB]OPER_REPSUP__|S1[AB]OPER_REPMACP_).*(\.xml|\.XML|\.EOF|\.TGZ|\.zip|\.ZIP)?$
+      # Local directory (must ende with '/') 
+      local-directory: /data/local-catalog/plans_and_reports/
+    level-segments:
+       # Regex pattern to identify relevant metadata (files) 
+      pattern-config: ^(S1|AS)(A|B)_(S[1-6]|RF|GP|HK|IW|EW|WV|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0)(A|C|N|S|_)(SH|__|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\w{1,}\.(SAFE)(/.*)?$
+      # Local directory (must ende with '/') 
+      local-directory: /data/local-catalog/level_segments/ 
+    level-products:
+      # Regex pattern to identify relevant metadata (files) 
+      pattern-config: ^(S1|AS)(A|B)_(S[1-6]|RF|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\w{1,}\.(SAFE)(/.*)?$
+      # Local directory (must ende with '/') 
+      local-directory: /data/local-catalog/level_products/ 
+    spp-products:
+      # Regex pattern to identify relevant metadata (files)
+      pattern-config: ^(S1|AS)(A|B)_(__)_(OBS)(_)_(S)(S)(__)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_(\w{1,})$
+      # Local directory (must ende with '/') 
+      local-directory: /data/local-catalog/spp_products/ 
+    spp-mbu-products:
+      # Regex pattern to identify relevant metadata (files)
+      pattern-config: ^(s1)(a|b)-([0-9a-z]{2})([0-9a-z]{1})-(mbu)-()()(vv|hh)-([0-9a-z]{15})-([0-9a-z]{15})-([0-9]{6})-([a-z0-9]{6})-([0-9]{3})_([A-Z0-9]{4})\.(bufr)$
+      # Local directory (must ende with '/') 
+      local-directory: /data/local-catalog/spp_mbu_products/   # Configuration of product insertion
+  product-insertion:
+    # The maximal number of consecutive retries following an error  
+    max-retries: 3
+    # Temporisation in ms between two retries     
+    tempo-retry-ms: 1000
+
+# Extraction of metadata from RFI annotation files
+rfi:
+  # Enables RFI extraction  (default = false)
+  enabled: true
+  # Name of the RFI directory (default = "rfi")
+  rfi-directory-name: rfi
+  # Name of the annotation directory (default = "annotation")
+  annotation-directory-name: annotation
+  # Filename pattern of H-polarisation RFI files (default = "rfi-s1.*-[hv]h-.*\.xml")
+  h-polarisation-rfi-file-pattern: rfi-s1.*-[hv]h-.*\.xml
+  # Filename pattern of V-polarisation RFI files (default = "rfi-s1.*-[hv]v-.*\.xml")
+  v-polarisation-rfi-file-pattern: rfi-s1.*-[hv]v-.*\.xml
+  # Filename pattern of annotation files, for extraction of "rfiMitigationPerformed" value (default = "s1.*-[hv][hv]-.*\.xml")
+  annotation-file-pattern: s1.*-[hv][hv]-.*\.xml
+
+# REST controller
+server:
+  # Port used for publishing REST API
+  port: 8080                                                      
+  
+# Metadata Extractor
+mdextractor:
+  # !!!! Overlap per acquisition
+  type-overlap:                                             
+    EW: 8.2F
+    IW: 7.4F
+    SM: 7.7F
+    WV: 0.0F
+  # !!!!! Slice length per acquisition
+  type-slice-length:                                        
+    EW: 60.0F
+    IW: 25.0F
+    SM: 25.0F
+    WV: 0.0F
+  # Directory where the XSLT are located (must end with '/')
+  xslt-directory: xslt/
+  # Field Types
+  fieldTypes:
+    absoluteStartOrbit: long
+    coordinates: string
+    creationTime: date
+    cycleNumber: long
+    instrumentConfigurationId: string
+    instrumentShortName: string
+    missionDataTakeId: long
+    operationalMode: string
+    pass: string
+    platformSerialIdentifier: string
+    platformShortName: string
+    processingDate: date
+    processorName: string
+    processorVersion: string
+    productClass: string
+    productComposition: string
+    productConsolidation: string
+    productType: string
+    qualityDataObjectID: string
+    qualityNumOfCorruptedElements: long
+    qualityNumOfElement: long
+    qualityNumOfMissingElements: long
+    qualityNumOfRSCorrectedElements: long
+    qualityNumOfRSCorrectedSymbols: long
+    qualityNumOfRSIncorrigibleElements: long
+    relativeStartOrbit: long
+    safeTimeliness: string
+    segmentStartTime: date
+    site: string
+    sliceNumber: long
+    sliceProductFlag: boolean
+    startTimeANX: double
+    startTime: date
+    stopTimeANX: double
+    stopTime: date
+    swathIdentifier: string
+    totalNumberOfSlice: long
+    validityStartTime: date
+    validityStopTime: date
+  # Packet store types
+  packet-store-types:
+    S1A-0: Emergency
+    S1A-1: Emergency
+    S1A-2: RFC
+    S1A-3: RFC
+    S1A-4: RFC
+    S1A-5: RFC
+    S1A-6: NRT
+    S1A-7: NRT
+    S1A-8: NRT
+    S1A-9: NRT
+    S1A-10: NRT
+    S1A-11: NRT
+    S1A-12: NRT
+    S1A-13: NRT
+    S1A-14: NRT
+    S1A-15: NRT
+    S1A-16: NRT
+    S1A-17: NRT
+    S1A-18: NRT
+    S1A-19: WV
+    S1A-20: WV
+    S1A-21: Standard
+    S1A-22: Standard
+    S1A-23: Standard
+    S1A-24: Standard
+    S1A-25: Standard
+    S1A-26: Standard
+    S1A-27: Standard
+    S1A-28: Standard
+    S1A-29: Standard
+    S1A-30: Standard
+    S1A-31: Standard
+    S1A-32: Standard
+    S1A-33: Standard
+    S1A-34: Standard
+    S1A-35: Standard
+    S1A-36: Standard
+    S1A-37: PassThrough
+    S1A-38: PassThrough
+    S1A-39: PassThrough
+    S1A-40: PassThrough
+    S1A-41: PassThrough
+    S1A-42: PassThrough
+    S1A-43: PassThrough
+    S1A-44: PassThrough
+    S1A-45: HKTM
+    S1A-46: HKTM
+    S1A-47: HKTM
+    S1A-48: HKTM
+    S1A-49: GPS
+    S1A-50: Filler
+    S1B-0: Emergency
+    S1B-1: Emergency
+    S1B-2: RFC
+    S1B-3: RFC
+    S1B-4: RFC
+    S1B-5: RFC
+    S1B-6: NRT
+    S1B-7: NRT
+    S1B-8: NRT
+    S1B-9: NRT
+    S1B-10: NRT
+    S1B-11: NRT
+    S1B-12: NRT
+    S1B-13: NRT
+    S1B-14: NRT
+    S1B-15: NRT
+    S1B-16: NRT
+    S1B-17: NRT
+    S1B-18: NRT
+    S1B-19: WV
+    S1B-20: WV
+    S1B-21: Standard
+    S1B-22: Standard
+    S1B-23: Standard
+    S1B-24: Standard
+    S1B-25: Standard
+    S1B-26: Standard
+    S1B-27: Standard
+    S1B-28: Standard
+    S1B-29: Standard
+    S1B-30: Standard
+    S1B-31: Standard
+    S1B-32: Standard
+    S1B-33: Standard
+    S1B-34: Standard
+    S1B-35: Standard
+    S1B-36: Standard
+    S1B-37: PassThrough
+    S1B-38: PassThrough
+    S1B-39: PassThrough
+    S1B-40: PassThrough
+    S1B-41: PassThrough
+    S1B-42: PassThrough
+    S1B-43: PassThrough
+    S1B-44: PassThrough
+    S1B-45: HKTM
+    S1B-46: HKTM
+    S1B-47: HKTM
+    S1B-48: HKTM
+    S1B-49: GPS
+    S1B-50: Filler
+  # Timeliness per packet store type
+  packetstore-type-timelinesses:
+    Emergency: PT
+    HKTM: NRT
+    NRT: NRT
+    GPS: NRT
+    PassThrough: PT
+    Standard: FAST24
+    RFC: FAST24
+    WV: FAST24
+    Filler: FAST24
+    Spare: FAST24
+  # Priority of timliness values from high to low
+  timeliness-priority-from-high-to-low:
+    - PT
+    - NRT
+    - FAST24
+
+# Status
+status:
+  # The number of consecutive processing errors leading to the state FATALERROR
+  max-error-counter-processing: 3           
+  # The number of consecutive MQI errors leading to the state FATALERROR                     
+  max-error-counter-mqi: 30                                      
+  

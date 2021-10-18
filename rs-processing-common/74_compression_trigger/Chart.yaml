@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "develop"
+description: S1PRO Compression Trigger Service
+name: s1pro-compression-trigger
+version: 3.33.0-SNAPSHOT
+maintainers:
+  - name: Werum Software & Systems

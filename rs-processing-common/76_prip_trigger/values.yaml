@@ -1,0 +1,45 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+service:
+  port: 8080
+  
+mqiService:
+  port: 8081
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #  requests:
+  #    storage: 10Gi
+  #   memory: 128Mi
+
+image:
+  name: s1pro-core-prip-trigger
+
+prip_trigger:
+  cpu:
+    request: "100m"
+    limit: "500m"
+  ram:
+    request: "239Mi"
+    limit: "956Mi"
+  javaOpts:
+#   xms: "256m"
+    xmx: "256m"
+
+prip_trigger_mqi:
+  cpu:
+    request: "100m"
+    limit: "500m"
+  ram:
+    request: "600Mi"
+    limit: "2400Mi"
+  javaOpts:
+#   xms: "256m"
+    xmx: "512m"

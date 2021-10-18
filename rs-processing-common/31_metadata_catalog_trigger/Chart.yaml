@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "develop"
+description: S1PRO Metadata Catalog Trigger
+name: s1pro-metadata-catalog-trigger
+version: 3.33.0-SNAPSHOT
+maintainers:
+  - name: Werum Software & Systems

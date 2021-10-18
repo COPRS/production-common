@@ -1,0 +1,141 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s1pdgs-env
+  namespace: {{ .Values.processing.namespace }}
+ 
+data:
+  # -------------------------------------------------------------------------------
+  # Openstack general configuration
+  # -------------------------------------------------------------------------------
+  # Connection
+  os_endpoint: "{{ .Values.os.endpoint }}"
+  os_domain-id: "{{ .Values.os.domainid }}"
+  os_project-id: "{{ .Values.os.projectid }}"
+  os_credential-username: "{{ .Values.os.username }}"
+  os_credential-password: "{{ .Values.os.password }}"
+  os_availability_zone: "{{ .Values.os.az }}"
+  os-networks: "{{ .Values.os.network }}"
+  os-security-groups: "{{ .Values.os.security_group }}"
+  os-floating-network: "{{ .Values.os.floating_network }}"
+ 
+  # -------------------------------------------------------------------------------
+  # Kubernetes general configuration
+  # -------------------------------------------------------------------------------
+  # Connection
+  k8s_master-url: "{{ .Values.k8s.master_url }}"
+  k8s_namespace: "{{ .Values.k8s.namespace }}"
+  k8s_username: "{{ .Values.k8s.username }}"
+  k8s_client-key: "{{ .Values.k8s.client_key }}"
+  k8s_client-cert-data: "{{ .Values.k8s.client_cert_data }}"
+ 
+  # -------------------------------------------------------------------------------
+  # OBS general configuration
+  # -------------------------------------------------------------------------------
+  # Connection
+  storage_endpoint: "{{ .Values.s3.endpoint }}"
+  storage_region: "{{ .Values.s3.region }}"
+  storage_disable_chunked_encoding: "{{ .Values.s3.disable_chunked_encoding }}"
+
+  # Buckets
+  storage_buckets_auxiliary-files: "{{ .Values.s3.bucket_aux }}"
+  storage_buckets_session-files: "{{ .Values.s3.bucket_sessions }}"
+  storage_buckets_l0-segments: "{{ .Values.s3.bucket_l0_segments }}"
+  storage_buckets_l0-slices: "{{ .Values.s3.bucket_l0_slices }}"
+  storage_buckets_l0-acns: "{{ .Values.s3.bucket_l0_acns }}"
+  storage_buckets_l1-slices: "{{ .Values.s3.bucket_l1_slices }}"
+  storage_buckets_l1-acns: "{{ .Values.s3.bucket_l1_acns }}"
+  storage_buckets_l2-slices: "{{ .Values.s3.bucket_l2_slices }}"
+  storage_buckets_l2-acns: "{{ .Values.s3.bucket_l2_acns }}"
+  storage_buckets_l0-blanks: "{{ .Values.s3.bucket_l0_blanks }}"
+  storage_buckets_spp: "{{ .Values.s3.bucket_spp }}"
+  storage_buckets_spp-mbu: "{{ .Values.s3.bucket_spp_mbu }}"
+  storage_buckets_invalid: "{{ .Values.s3.bucket_invalid }}"
+  storage_buckets_ghost: "{{ .Values.s3.bucket_ghost }}"
+  storage_buckets_debug: "{{ .Values.s3.bucket_debug }}"
+  storage_buckets_failed-workdir: "{{ .Values.s3.bucket_failed_workdir }}"
+  storage_buckets_session-retransfer: "{{ .Values.s3.bucket_session_retransfer }}"
+  storage_buckets_plans-and-reports: "{{ .Values.s3.bucket_plans_and_reports }}"
+   
+  # Buckets for compressed products
+  storage_buckets_auxiliary-files-zip: "{{ .Values.s3.bucket_zip_aux }}"
+  storage_buckets_l0-segments-zip: "{{ .Values.s3.bucket_zip_l0_segments }}"
+  storage_buckets_l0-slices-zip: "{{ .Values.s3.bucket_zip_l0_slices }}"
+  storage_buckets_l0-acns-zip: "{{ .Values.s3.bucket_zip_l0_acns }}"
+  storage_buckets_l1-slices-zip: "{{ .Values.s3.bucket_zip_l1_slices }}"
+  storage_buckets_l1-acns-zip: "{{ .Values.s3.bucket_zip_l1_acns }}"
+  storage_buckets_l2-slices-zip: "{{ .Values.s3.bucket_zip_l2_slices }}"
+  storage_buckets_l2-acns-zip: "{{ .Values.s3.bucket_zip_l2_acns }}"
+  storage_buckets_l0-blanks-zip: "{{ .Values.s3.bucket_zip_l0_blanks }}"
+  storage_buckets_spp-zip: "{{ .Values.s3.bucket_zip_spp }}"
+  storage_buckets_plans-and-reports-zip: "{{ .Values.s3.bucket_zip_plans_and_reports }}"
+ 
+  # -------------------------------------------------------------------------------
+  # Scaler configuration
+  # -------------------------------------------------------------------------------
+  # For L1 scaler
+  # !!!! Number of who will created or delete at each pools
+  scaler-l1-nb-pooling-pods: "3"
+  # !!!! Number of pods which could be executed simultaneously on the same VM
+  scaler-l1-nb-pods-per-server: "3"
+  # !!!! Minimal number of servers L1
+  scaler-l1-nb-min-servers: "1"
+  # !!!! Maximal number of servers L1
+  scaler-l1-nb-max-servers: "5"
+  # The image in orange cloud referencing l1 images
+  scaler-l1-os-image-ref: "6111681a-8597-4e5e-b1be-5a0e29a4c73f"
+  # !!!! Flavor Id (type of machine openstack) to create the Virtual Machine
+  scaler-l1-os-flavor: "s3.2xlarge.4"
+  # !!!! Boolean to activate the creation of floating ip
+  scaler-l1-os-float-activation: "false"
+  # !!!! Key security to connect to new virtual machine
+  scaler-l1-os-key-security: "KeyPair-Ivv-Tpl"
+  # !!!! Size of the system disk of the virtual machine
+  scaler-l1-os-volume-wrapper-size: "128"
+  # !!!! Only if bootable-on-volume is true: Type of the created volume
+  scaler-l1-os-volume-wrapper-volume-type: "SSD"
+   
+  # For L2 scaler
+  # !!!! Number of who will created or delete at each pools
+  scaler-l2-nb-pooling-pods: "3"
+  # !!!! Number of pods which could be executed simultaneously on the same VM
+  scaler-l2-nb-pods-per-server: "3"
+  # !!!! Minimal number of servers L2
+  scaler-l2-nb-min-servers: "1"
+  # !!!! Maximal number of servers L2
+  scaler-l2-nb-max-servers: "5"
+  # The image in orange cloud referencing l2 images
+  scaler-l2-os-image-ref: "6111681a-8597-4e5e-b1be-5a0e29a4c73f"
+  # !!!! Flavor Id (type of machine openstack) to create the Virtual Machine
+  scaler-l2-os-flavor: "s3.2xlarge.4"
+  # !!!! Boolean to activate the creation of floating ip
+  scaler-l2-os-float-activation: "false"
+  # !!!! Key security to connect to new virtual machine
+  scaler-l2-os-key-security: "KeyPair-Ivv-Tpl"
+  # !!!! Size of the system disk of the virtual machine
+  scaler-l2-os-volume-wrapper-size: "128"
+  # !!!! Only if bootable-on-volume is true: Type of the created volume
+  scaler-l2-os-volume-wrapper-volume-type: "SSD"
+ 
+  # -------------------------------------------------------------------------------
+  # Application General
+  # -------------------------------------------------------------------------------
+  log4j_config: "{{ .Values.log4j_config }}"
+ 
+  # -------------------------------------------------------------------------------
+  # Metadata database (Elasticsearch) configuration
+  # -------------------------------------------------------------------------------
+  # Connection to cluster Elasticsearch
+  elastic_host: "{{ .Values.es.svc }}"
+  elastic_port: "{{ .Values.es.port }}"
+  elastic_clustername: "{{ .Values.es.cluster_name }}"
+
+  # -------------------------------------------------------------------------------
+  # KAFKA general configuration
+  # -------------------------------------------------------------------------------
+  # Connection
+  kafka_bootstrap-servers: "{{ .Values.kafka.url }}"
+  kafka_topic_errors: "{{ .Values.kafka.topic_errors }}"
+
+#  JVM flags e.g. "-verbose:gc"
+  jvm_flags_global: ""

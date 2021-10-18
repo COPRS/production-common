@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "develop"
+description: S1PRO Request Repository
+name: s1pro-request-repository
+version: 3.33.0-SNAPSHOT
+maintainers:
+  - name: Werum Software & Systems

@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routing description="routing for COMPRESSION JOBS">
+
+	<route description="route for nrt">
+		<input_key>t-pdgs-l0asp-l0-acn-production-events-nrt</input_key>
+		<output_key>L0_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for fast">
+		<input_key>t-pdgs-l0asp-l0-acn-production-events-fast</input_key>
+		<output_key>L0_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for late">
+		<input_key>t-pdgs-l0asp-l0-acn-production-events-late</input_key>
+		<output_key>L0_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-late</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for pt">
+		<input_key>t-pdgs-l0asp-l0-acn-production-events-pt</input_key>
+		<output_key>L0_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for operator-demand">
+		<input_key>t-pdgs-l0asp-l0-acn-production-events-operator-demand</input_key>
+		<output_key>L0_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-operator-demand</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for nrt">
+		<input_key>t-pdgs-l1-acn-production-events-nrt</input_key>
+		<output_key>L1_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for fast">
+		<input_key>t-pdgs-l1-acn-production-events-fast</input_key>
+		<output_key>L1_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	<route description="route for late">
+		<input_key>t-pdgs-l1-acn-production-events-late</input_key>
+		<output_key>L1_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-late</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for pt">
+		<input_key>t-pdgs-l1-acn-production-events-pt</input_key>
+		<output_key>L1_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for operator-demand">
+		<input_key>t-pdgs-l1-acn-production-events-operator-demand</input_key>
+		<output_key>L1_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-operator-demand</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for nrt">
+		<input_key>t-pdgs-l2-acn-production-events-nrt</input_key>
+		<output_key>L2_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for fast">
+		<input_key>t-pdgs-l2-acn-production-events-fast</input_key>
+		<output_key>L2_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for late">
+		<input_key>t-pdgs-l2-acn-production-events-late</input_key>
+		<output_key>L2_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-late</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for pt">
+		<input_key>t-pdgs-l2-acn-production-events-pt</input_key>
+		<output_key>L2_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for operator-demand">
+		<input_key>t-pdgs-l2-acn-production-events-operator-demand</input_key>
+		<output_key>L2_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-operator-demand</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for nrt">
+		<input_key>t-pdgs-l0asp-l0-slice-production-events-nrt</input_key>
+		<output_key>L0_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for fast">
+		<input_key>t-pdgs-l0asp-l0-slice-production-events-fast</input_key>
+		<output_key>L0_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for late">
+		<input_key>t-pdgs-l0asp-l0-slice-production-events-late</input_key>
+		<output_key>L0_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-late</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for pt">
+		<input_key>t-pdgs-l0asp-l0-slice-production-events-pt</input_key>
+		<output_key>L0_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for operator-demand">
+		<input_key>t-pdgs-l0asp-l0-slice-production-events-operator-demand</input_key>
+		<output_key>L0_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-operator-demand</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for nrt">
+		<input_key>t-pdgs-l1-slices-production-events-nrt</input_key>
+		<output_key>L1_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+
+	<route description="route for fast">
+		<input_key>t-pdgs-l1-slices-production-events-fast</input_key>
+		<output_key>L1_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for late">
+		<input_key>t-pdgs-l1-slices-production-events-late</input_key>
+		<output_key>L1_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-late</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for pt">
+		<input_key>t-pdgs-l1-slices-production-events-pt</input_key>
+		<output_key>L1_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for operator-demand">
+		<input_key>t-pdgs-l1-slices-production-events-operator-demand</input_key>
+		<output_key>L1_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-operator-demand</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for nrt">
+		<input_key>t-pdgs-l2-slices-production-events-nrt</input_key>
+		<output_key>L2_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for fast">
+		<input_key>t-pdgs-l2-slices-production-events-fast</input_key>
+		<output_key>L2_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for late">
+		<input_key>t-pdgs-l2-slices-production-events-late</input_key>
+		<output_key>L2_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-late</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for pt">
+		<input_key>t-pdgs-l2-slices-production-events-pt</input_key>
+		<output_key>L2_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for operator-demand">
+		<input_key>t-pdgs-l2-slices-production-events-operator-demand</input_key>
+		<output_key>L2_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-operator-demand</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for fast">
+		<input_key>t-pdgs-aio-l0-segment-production-events</input_key>
+		<output_key>L0_SEGMENT_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for AUXILIARY_FILE compression">
+		<input_key>t-pdgs-aux-ingestion-events</input_key>
+		<output_key>AUXILIARY_FILE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor AUXILIARY_FILE_ZIP uncompression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>AUXILIARY_FILE</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor PLAN_AND_REPORT_ZIP uncompression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>PLAN_AND_REPORT</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>L0_SEGMENT_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>L0_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>L0_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>L1_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>L1_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>L2_SLICE_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for backdoor compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>L2_ACN_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for AUXIP AUXILIARY_FILE_ZIP uncompression">
+		<input_key>t-pdgs-auxip-aux-ingestion-events</input_key>
+		<output_key>AUXILIARY_FILE</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for AUXIP PLAN_AND_REPORT_ZIP uncompression">
+		<input_key>t-pdgs-auxip-plan-and-report-ingestion-events</input_key>
+		<output_key>PLAN_AND_REPORT</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for QCSS PLAN_AND_REPORT_ZIP uncompression">
+		<input_key>t-pdgs-plan-and-report-ingestion-events</input_key>
+		<output_key>PLAN_AND_REPORT</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs</topic>
+		</route_to>
+	</route>
+
+	<route description="route for QCSS PLAN_AND_REPORT compression">
+    	<input_key>t-pdgs-plan-and-report-ingestion-events</input_key>
+		<output_key>PLAN_AND_REPORT_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-fast</topic>
+		</route_to>
+	</route>
+
+	<route description="route for SPP compression">
+		<input_key>t-pdgs-obs-production-events</input_key>
+		<output_key>SPP_OBS_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>AUXILIARY_FILE</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>L0_SEGMENT</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>L0_SLICE</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>L0_ACN</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>L0_BLANK</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>L1_SLICE</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>L1_ACN</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>L2_SLICE</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>L2_ACN</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for data request uncompression">
+		<input_key>t-pdgs-data-request-events</input_key>
+		<output_key>SPP_OBS</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-data-request</topic>
+		</route_to>
+	</route>
+
+</routing>

@@ -1,0 +1,19 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: kong-oidc-plugin-prip
+  labels:
+    global: "false"
+config:
+  client_id: {{ .Values.kongplugin.clientId }}
+  client_secret: {{ .Values.kongplugin.clientSecret }}
+  discovery: {{ .Values.kongplugin.discovery }}
+  introspection_endpoint: {{ .Values.kongplugin.introspection_endpoint }}
+  session_secret: {{ .Values.kongplugin.sessionSecret }}
+  groups_authorized_paths:
+  {{- range $gap := .Values.kongplugin.groupsAuthorizedPaths.group }}
+  - group_authorized_paths:
+    - {{ $gap.path }} 
+    group_name: {{ $gap.name }}
+  {{- end }}
+plugin: oidc

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routing description="routing for Ingestion and Production Events">
+	
+	<default_route description="default route for EDRS_SESSIONS">
+		<family>EDRS_SESSION</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for AUXILIARY_FILE">
+		<family>AUXILIARY_FILE</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for PLAN_AND_REPORT">
+		<family>PLAN_AND_REPORT</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for L0_SEGMENT">
+		<family>L0_SEGMENT</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for L0_ACN">
+		<family>L0_ACN</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for L0_SLICE">
+		<family>L0_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for L1_ACN">
+		<family>L1_ACN</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for L1_SLICE">
+		<family>L1_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for L2_ACN">
+		<family>L2_ACN</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for L2_SLICE">
+		<family>L2_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route for SPP_MBU">
+		<family>SPP_MBU</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route for SPP_OBS">
+		<family>SPP_OBS</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+
+</routing>

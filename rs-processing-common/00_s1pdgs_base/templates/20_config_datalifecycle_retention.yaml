@@ -1,0 +1,327 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s1pdgs-datalifecycle
+  namespace: {{ .Values.processing.namespace }}
+
+# Configuration of retention times for all product families
+# Data will ne evicted from OBS after retention time
+data:
+  # Family to identify the bucket
+  retention_productfamily_1: "AUXILIARY_FILE_ZIP"
+  # Regexp to identify products in this bucket
+  retention_filepattern_1: "S1[ABCD_]_(OPER|AUX)_.*\\.zip"
+  # Retention time for these products
+  retention_time_days_1: "7"
+  
+  retention_productfamily_2: "L0_ACN_ZIP"
+  retention_filepattern_2: "S1[ABCD]_(S[1-6]|IW|EW|WV|EN)_RAW__0[ACN][SD].*\\.zip"
+  retention_time_days_2: "7"
+  
+  retention_productfamily_3: "L0_BLANK_ZIP"
+  retention_filepattern_3: "S1[ABCD]_(N[1-6]|Z([1-6]|I|E|W))_RAW__0[S_].*\\.zip"
+  retention_time_days_3: "-1"
+  
+  retention_productfamily_4: "L0_SEGMENT_ZIP"
+  retention_filepattern_4: "S1[ABCD]_(S[1-6]|IW|EW|WV|EN)_RAW__0S[SHV].*\\.zip"
+  retention_time_days_4: "7"
+  
+  retention_productfamily_5: "L0_SLICE_ZIP"
+  retention_filepattern_5: "S1[ABCD]_(S[1-6]|IW|EW|WV|EN)_RAW__0S[SD].*\\.zip"
+  retention_time_days_5: "7"
+  
+  retention_productfamily_6: "L1_ACN_ZIP"
+  retention_filepattern_6: "S1[ABCD]_(S[1-6]|IW|EW|WV)_...._1A[SD].*\\.zip"
+  retention_time_days_6: "7"
+  
+  retention_productfamily_7: "L1_SLICE_ZIP"
+  retention_filepattern_7: "S1[ABCD]_(S[1-6]|IW|EW|WV)_...._1S[SD].*\\.zip"
+  retention_time_days_7: "7"
+  
+  retention_productfamily_8: "L2_ACN_ZIP"
+  retention_filepattern_8: "S1[ABCD]_(S[1-6]|IW|EW|WV)_OCN__2A[SD].*\\.zip"
+  retention_time_days_8: "7"
+  
+  retention_productfamily_9: "L2_SLICE_ZIP"
+  retention_filepattern_9: "S1[ABCD]_(S[1-6]|IW|EW|WV)_OCN__2S[SD].*\\.zip"
+  retention_time_days_9: "7"
+  
+  retention_productfamily_10: "EDRS_SESSION"
+  retention_filepattern_10: "DCS_[0-9][0-9]_[a-zA-Z0-9_]+_ch[0-9]_DSDB_[0-9]{5}\\.raw"
+  retention_time_days_10: "30"
+  
+  retention_productfamily_11: "EDRS_SESSION"
+  retention_filepattern_11: "DCS_[0-9][0-9]_[a-zA-Z0-9_]+_ch[0-9]_DSIB\\.xml"
+  retention_time_days_11: "30"
+  
+  retention_productfamily_12: "AUXILIARY_FILE"
+  retention_filepattern_12: "S1[ABCD]_OPER_AUX_OBMEMC_PDMC_"
+  retention_time_days_12: "-1"
+  
+  retention_productfamily_13: "AUXILIARY_FILE"
+  retention_filepattern_13: "S1[ABCD]_OPER_MPL_ORBSCT_"
+  retention_time_days_13: "-1"
+  
+  retention_productfamily_14: "AUXILIARY_FILE"
+  retention_filepattern_14: "S1[ABCD]_OPER_MPL_ORBPRE_"
+  retention_time_days_14: "-1"
+  
+  retention_productfamily_15: "AUXILIARY_FILE"
+  retention_filepattern_15: "S1[ABCD]_OPER_MPL_ORBRES_"
+  retention_time_days_15: "-1"
+  
+  retention_productfamily_16: "AUXILIARY_FILE"
+  retention_filepattern_16: "S1[ABCD]_AUX_PP1"
+  retention_time_days_16: "-1"
+  
+  retention_productfamily_17: "AUXILIARY_FILE"
+  retention_filepattern_17: "S1[ABCD]_AUX_PP2"
+  retention_time_days_17: "-1"
+  
+  retention_productfamily_18: "AUXILIARY_FILE"
+  retention_filepattern_18: "S1[ABCD]_AUX_CAL"
+  retention_time_days_18: "-1"
+  
+  retention_productfamily_19: "AUXILIARY_FILE"
+  retention_filepattern_19: "S1[ABCD]_AUX_INS"
+  retention_time_days_19: "-1"
+  
+  retention_productfamily_20: "AUXILIARY_FILE"
+  retention_filepattern_20: "S1[ABCD]_OPER_AUX_POEORB_OPOD_"
+  retention_time_days_20: "-1"
+  
+  retention_productfamily_21: "AUXILIARY_FILE"
+  retention_filepattern_21: "S1[ABCD]_OPER_AUX_PREORB_OPOD_"
+  retention_time_days_21: "-1"
+  
+  retention_productfamily_22: "AUXILIARY_FILE"
+  retention_filepattern_22: "S1[ABCD]_OPER_AUX_RESORB_OPOD_"
+  retention_time_days_22: "-1"
+  
+  retention_productfamily_23: "AUXILIARY_FILE"
+  retention_filepattern_23: "S1[ABCD]_OPER_AUX_RESATT_OPOD_"
+  retention_time_days_23: "-1"
+  
+  retention_productfamily_24: "AUXILIARY_FILE"
+  retention_filepattern_24: "S1__AUX_WND"
+  retention_time_days_24: "-1"
+  
+  retention_productfamily_25: "AUXILIARY_FILE"
+  retention_filepattern_25: "S1__AUX_ICE"
+  retention_time_days_25: "-1"
+  
+  retention_productfamily_26: "AUXILIARY_FILE"
+  retention_filepattern_26: "S1__AUX_WAV"
+  retention_time_days_26: "-1"
+  
+  retention_productfamily_27: "AUXILIARY_FILE"
+  retention_filepattern_27: "S1[ABCD]_OPER_AM[VH_]_ERRMAT_MPC__"
+  retention_time_days_27: "-1"
+  
+  retention_productfamily_28: "AUXILIARY_FILE"
+  retention_filepattern_28: "S1__AUX_SCS"
+  retention_time_days_28: "-1"
+  
+  retention_productfamily_29: "AUXILIARY_FILE"
+  retention_filepattern_29: "S1__OPER_MSK__LAND__"
+  retention_time_days_29: "-1"
+  
+  retention_productfamily_30: "L0_SEGMENT"
+  retention_filepattern_30: "S1[ABCD]_S[1-6]_RAW__0S[SHV].*\\.SAFE"
+  retention_time_days_30: "30"
+  
+  retention_productfamily_31: "L0_SEGMENT"
+  retention_filepattern_31: "S1[ABCD]_IW_RAW__0S[SHV].*\\.SAFE"
+  retention_time_days_31: "30"
+  
+  retention_productfamily_32: "L0_SEGMENT"
+  retention_filepattern_32: "S1[ABCD]_EW_RAW__0S[SHV].*\\.SAFE"
+  retention_time_days_32: "30"
+  
+  retention_productfamily_33: "L0_SEGMENT"
+  retention_filepattern_33: "S1[ABCD]_WV_RAW__0S[SHV].*\\.SAFE"
+  retention_time_days_33: "30"
+  
+  retention_productfamily_34: "L0_SEGMENT"
+  retention_filepattern_34: "S1[ABCD]_EN_RAW__0S[SHV].*\\.SAFE"
+  retention_time_days_34: "30"
+  
+  retention_productfamily_35: "L0_SLICE"
+  retention_filepattern_35: "S1[ABCD]_S[1-6]_RAW__0S[SD].*\\.SAFE"
+  retention_time_days_35: "30"
+  
+  retention_productfamily_36: "L0_SLICE"
+  retention_filepattern_36: "S1[ABCD]_IW_RAW__0S[SD].*\\.SAFE"
+  retention_time_days_36: "30"
+  
+  retention_productfamily_37: "L0_SLICE"
+  retention_filepattern_37: "S1[ABCD]_EW_RAW__0S[SD].*\\.SAFE"
+  retention_time_days_37: "30"
+  
+  retention_productfamily_38: "L0_SLICE"
+  retention_filepattern_38: "S1[ABCD]_WV_RAW__0S[SD].*\\.SAFE"
+  retention_time_days_38: "30"
+  
+  retention_productfamily_39: "L0_SLICE"
+  retention_filepattern_39: "S1[ABCD]_EN_RAW__0S[SD].*\\.SAFE"
+  retention_time_days_39: "30"
+    
+  retention_productfamily_40: "L0_ACN"
+  retention_filepattern_40: "S1[ABCD]_S[1-6]_RAW__0C[SD].*\\.SAFE"
+  retention_time_days_40: "30"
+  
+  retention_productfamily_41: "L0_ACN"
+  retention_filepattern_41: "S1[ABCD]_S[1-6]_RAW__0N[SD].*\\.SAFE"
+  retention_time_days_41: "30"
+  
+  retention_productfamily_42: "L0_ACN"
+  retention_filepattern_42: "S1[ABCD]_S[1-6]_RAW__0A[SD].*\\.SAFE"
+  retention_time_days_42: "30"
+  
+  retention_productfamily_43: "L0_ACN"
+  retention_filepattern_43: "S1[ABCD]_IW_RAW__0C[SD].*\\.SAFE"
+  retention_time_days_43: "30"
+  
+  retention_productfamily_44: "L0_ACN"
+  retention_filepattern_44: "S1[ABCD]_IW_RAW__0N[SD].*\\.SAFE"
+  retention_time_days_44: "30"
+  
+  retention_productfamily_45: "L0_ACN"
+  retention_filepattern_45: "S1[ABCD]_IW_RAW__0A[SD].*\\.SAFE"
+  retention_time_days_45: "30"
+  
+  retention_productfamily_46: "L0_ACN"
+  retention_filepattern_46: "S1[ABCD]_EW_RAW__0C[SD].*\\.SAFE"
+  retention_time_days_46: "30"
+  
+  retention_productfamily_47: "L0_ACN"
+  retention_filepattern_47: "S1[ABCD]_EW_RAW__0N[SD].*\\.SAFE"
+  retention_time_days_47: "30"
+  
+  retention_productfamily_48: "L0_ACN"
+  retention_filepattern_48: "S1[ABCD]_EW_RAW__0A[SD].*\\.SAFE"
+  retention_time_days_48: "30"
+  
+  retention_productfamily_49: "L0_ACN"
+  retention_filepattern_49: "S1[ABCD]_WV_RAW__0C[SD].*\\.SAFE"
+  retention_time_days_49: "30"
+  
+  retention_productfamily_50: "L0_ACN"
+  retention_filepattern_50: "S1[ABCD]_WV_RAW__0N[SD].*\\.SAFE"
+  retention_time_days_50: "30"
+  
+  retention_productfamily_51: "L0_ACN"
+  retention_filepattern_51: "S1[ABCD]_WV_RAW__0A[SD].*\\.SAFE"
+  retention_time_days_51: "30"
+   
+  retention_productfamily_52: "L0_ACN"
+  retention_filepattern_52: "S1[ABCD]_EN_RAW__0C[SD].*\\.SAFE"
+  retention_time_days_52: "30"
+  
+  retention_productfamily_53: "L0_ACN"
+  retention_filepattern_53: "S1[ABCD]_EN_RAW__0N[SD].*\\.SAFE"
+  retention_time_days_53: "30"
+  
+  retention_productfamily_54: "L0_ACN"
+  retention_filepattern_54: "S1[ABCD]_EN_RAW__0A[SD].*\\.SAFE"
+  retention_time_days_54: "30"
+
+  retention_productfamily_55: "L0_SEGMENT"
+  retention_filepattern_55: "S1[ABCD]_GP_RAW__0_.*\\.SAFE"
+  retention_time_days_55: "30"
+  
+  retention_productfamily_56: "L0_SEGMENT"
+  retention_filepattern_56: "S1[ABCD]_HK_RAW__0_.*\\.SAFE"
+  retention_time_days_56: "30"
+
+  retention_productfamily_57: "L0_SEGMENT"
+  retention_filepattern_57: "S1[ABCD]_RF_RAW__0S.*\\.SAFE"
+  retention_time_days_57: "30"
+  
+  retention_productfamily_58: "L0_SLICE"
+  retention_filepattern_58: "S1[ABCD]_RF_RAW__0S.*\\.SAFE"
+  retention_time_days_58: "30"
+  
+  retention_productfamily_59: "L0_BLANK"
+  retention_filepattern_59: "S1[ABCD]_N[1-6]_RAW__0S.*\\.SAFE"
+  retention_time_days_59: "-1"
+  
+  retention_productfamily_60: "L0_BLANK"
+  retention_filepattern_60: "S1[ABCD]_Z[1-6]_RAW__0S.*\\.SAFE"
+  retention_time_days_60: "-1"
+  
+  retention_productfamily_61: "L0_BLANK"
+  retention_filepattern_61: "S1[ABCD]_ZE_RAW__0S.*\\.SAFE"
+  retention_time_days_61: "-1"
+  
+  retention_productfamily_62: "L0_BLANK"
+  retention_filepattern_62: "S1[ABCD]_ZI_RAW__0S.*\\.SAFE"
+  retention_time_days_62: "-1"
+  
+  retention_productfamily_63: "L0_BLANK"
+  retention_filepattern_63: "S1[ABCD]_ZW_RAW__0S.*\\.SAFE"
+  retention_time_days_63: "-1"
+  
+  retention_productfamily_64: "L1_SLICE"
+  retention_filepattern_64: "S1[ABCD]_(S[1-6]|IW|EW|WV)_...._1S[SD].*\\.SAFE"
+  retention_time_days_64: "7"
+  
+  retention_productfamily_65: "L1_ACN"
+  retention_filepattern_65: "S1[ABCD]_(S[1-6]|IW|EW|WV)_...._1A[SD].*\\.SAFE"
+  retention_time_days_65: "7"
+  
+  retention_productfamily_66: "L2_SLICE"
+  retention_filepattern_66: "S1[ABCD]_(S[1-6]|IW|EW|WV)_OCN__2S[SD].*\\.SAFE"
+  retention_time_days_66: "7"
+  
+  retention_productfamily_67: "L2_ACN"
+  retention_filepattern_67: "S1[ABCD]_(S[1-6]|IW|EW|WV)_OCN__2A[SD].*\\.SAFE"
+  retention_time_days_67: "7"
+  
+  retention_productfamily_68: "PLAN_AND_REPORT"
+  retention_filepattern_68: "^S1.*(_OPER_REP_MP_MP__PDMC_|_OPER_REP__SUP___|_OPER_MPL_SP.{4}_PDMC_|_OPER_REP_STNACQ_.{4}_|_OPER_REP_STNUNV_.{4}_|_OPER_AM[VH_]_FAILUR_MPC__|_OPER_REP__MACP__).*$"
+  retention_time_days_68: "-1"
+  
+  retention_productfamily_69: "PLAN_AND_REPORT_ZIP"
+  retention_filepattern_69: "^S1.*(_OPER_REP_MP_MP__PDMC_|_OPER_REP__SUP___|_OPER_MPL_SP.{4}_PDMC_|_OPER_REP_STNACQ_.{4}_|_OPER_REP_STNUNV_.{4}_|_OPER_AM[VH_]_FAILUR_MPC__|_OPER_REP__MACP__).*\\.(zip|ZIP)$"
+  retention_time_days_69: "-1"
+  
+  retention_productfamily_70: "SPP_OBS"
+  retention_filepattern_70: "^S1[ABCD]____OBS__SS.*$"
+  retention_time_days_70: "7"
+  
+  retention_productfamily_71: "SPP_OBS_ZIP"
+  retention_filepattern_71: "^S1[ABCD]____OBS__SS.*\\.(zip|ZIP)$"
+  retention_time_days_71: "7"
+  
+  retention_productfamily_72: "SPP_MBU"
+  retention_filepattern_72: "^(s1)(a|b)-([0-9a-z]{2})([0-9a-z]{1})-(mbu)-()()(vv|hh)-([0-9a-z]{15})-([0-9a-z]{15})-([0-9]{6})-([a-z0-9]{6})-([0-9]{3})_([A-Z0-9]{4})\\.(bufr)$"
+  retention_time_days_72: "7"
+  
+  retention_productfamily_73: "L0_SEGMENT_ZIP"
+  retention_filepattern_73: "S1[ABCD]_GP_RAW__0_.*\\.zip"
+  retention_time_days_73: "7"
+
+  retention_productfamily_74: "L0_SEGMENT_ZIP"
+  retention_filepattern_74: "S1[ABCD]_HK_RAW__0_.*\\.zip"
+  retention_time_days_74: "7"
+  
+  retention_productfamily_75: "L0_SEGMENT_ZIP"
+  retention_filepattern_75: "S1[ABCD]_RF_RAW__0S.*\\.zip"
+  retention_time_days_75: "7"
+  
+  retention_productfamily_76: "L0_SLICE_ZIP"
+  retention_filepattern_76: "S1[ABCD]_RF_RAW__0S.*\\.zip"
+  retention_time_days_76: "7"
+  
+  retention_productfamily_77: "AUXILIARY_FILE"
+  retention_filepattern_77: "S1__OPER_MSK_EW_SLC_"
+  retention_time_days_77: "-1"
+  
+  retention_productfamily_78: "AUXILIARY_FILE"
+  retention_filepattern_78: "S1__OPER_MSK_OCEAN__"
+  retention_time_days_78: "-1"
+  
+  retention_productfamily_79: "AUXILIARY_FILE"
+  retention_filepattern_79: "S1__OPER_MSK_OVRPAS_"
+  retention_time_days_79: "-1"

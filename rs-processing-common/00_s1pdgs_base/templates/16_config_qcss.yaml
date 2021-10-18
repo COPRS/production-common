@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s1pdgs-qcss
+  namespace: {{ .Values.processing.namespace }}
+  
+data:
+  # EDIP Host
+  edip.host: "{{ .Values.qcss.ingestion.host }}"
+  # EDIP Port
+  edip.port: "{{ .Values.qcss.ingestion.port }}"
+  # Base Path where to find the products
+  edip.path: "{{ .Values.qcss.ingestion.path }}"
+  # Enable ftp passive mode
+  edip.enablePasv: "{{ .Values.qcss.ingestion.enablePasv }}"
+  # Use explicit FTPS instead of implicit FTPS
+  edip.explicitFtps: "{{ .Values.qcss.ingestion.explicitFtps }}"
+  # Disable certificate validation
+  edip.disableCertificateCheck: "{{ .Values.qcss.ingestion.disableCertificateCheck }}"
+  # Enable hostname verification
+  edip.enableHostnameVerification: "{{ .Values.qcss.ingestion.enableHostnameVerification }}"
+  # Encrypt FTP data channel
+  edip.enableDataChannelEncryption: "{{ .Values.qcss.ingestion.enableDataChannelEncryption }}"
+  # SSL Protocol version
+  edip.sslProtocol: "{{ .Values.qcss.ingestion.sslProtocol }}"
+  # Connection timeout
+  edip.connectTimeoutSec: "{{ .Values.qcss.ingestion.connectTimeoutSec }}"

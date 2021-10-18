@@ -1,0 +1,98 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.processing.namespace }}
+  generation: 1
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount.app_catalog }}
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+      labels:
+        app: {{ .Release.Name }}
+        type: {{ .Values.processing.namespace }}
+    spec:
+      terminationGracePeriodSeconds: 30
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.worker.label.key }}
+                operator: In
+                values:
+                - {{ .Values.worker.label.value }}
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: {{ .Values.s1pro_app_catalog.ram.request }}
+            cpu: {{ .Values.s1pro_app_catalog.cpu.request }}
+          limits:
+            memory: {{ .Values.s1pro_app_catalog.ram.limit }}
+            cpu: {{ .Values.s1pro_app_catalog.cpu.limit }}
+        volumeMounts:
+        - name: service-logging-config-volume
+          mountPath: /app/log
+        - name: service-config-volume
+          mountPath: /app/config
+        ports:
+        - name: web
+          protocol: TCP
+          containerPort: {{ .Values.service.port }}
+        securityContext:
+          privileged: false
+        env:
+        - name: JAVA_XMS
+          value: {{ .Values.s1pro_app_catalog.javaOpts.xms }}
+        - name: JAVA_XMX
+          value: {{ .Values.s1pro_app_catalog.javaOpts.xmx }}
+        - name: mongodb.username
+          valueFrom:
+            secretKeyRef:
+              name: mongodb
+              key: USERNAME
+        - name: mongodb.password
+          valueFrom:
+            secretKeyRef:
+              name: mongodb
+              key: PASSWORD
+        envFrom:
+        - configMapRef:
+            name: s1pdgs-config
+        - configMapRef:
+            name: s1pdgs-logging-config
+        - configMapRef:
+            name: s1pdgs-env
+        livenessProbe:
+          httpGet:
+            path: /app/status
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+      imagePullSecrets:
+      - name: {{ .Values.image.imagePullSecrets }}
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+      subdomain: {{ .Release.Name }}-svc
+      volumes:
+        - name: service-logging-config-volume
+          configMap:
+            name: s1pdgs-logging-config
+        - name: service-config-volume
+          configMap:
+            name: {{ .Release.Name }}-service-config
+  serviceName: {{ .Release.Name }}-svc
+  revisionHistoryLimit: 10
