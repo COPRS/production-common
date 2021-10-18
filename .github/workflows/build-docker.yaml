@@ -2,12 +2,19 @@ name: Build docker image and generate reports
 
 on:
   workflow_call:
+    inputs:
+      username:
+        description: 'Username to log into Artifactory'
+        required: true
+        type: string
+      password:
+        description: 'Password to log into Artifactory'
+        required: true
+        type: string
 
 env:
   REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
   ARTIFACTORY_PROJECT: werum-docker
-  USERNAME: ${{ secrets.ARTIFACTORY_USER }}
-  PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
   
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
@@ -39,8 +46,8 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}
-          username: ${{ env.USERNAME }}
-          password: ${{ env.PASSWORD }}
+          username: ${{ inputs.username }}
+          password: ${{ inputs.password }}
 
       - name: Extract Docker metadata
         id: meta
