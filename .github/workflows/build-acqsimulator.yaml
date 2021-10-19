@@ -3,12 +3,14 @@ name: Build ACQ-Simulator
 on: 
   push:
     paths:
-      - 'docker_acqsimulator/**'
+      - 'rs-container/docker_acqsimulator/**'
   workflow_dispatch:
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
+  REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT: werum-docker
+  USERNAME: ${{ secrets.ARTIFACTORY_USER }}
+  PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   build-acq-simulator:
@@ -27,21 +29,21 @@ jobs:
       - name: Login to Github Registry
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}
+          username: ${{ env.USERNAME }}
+          password: ${{ env.PASSWORD }}
                     
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/coprs/acqsimulator
+          images:  ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-core-acqsimulator
               
       - name: Build image
         uses: docker/build-push-action@v2
         with:
           load: true
-          context: ./docker_acqsimulator
+          context: ./rs-container/docker_acqsimulator
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
