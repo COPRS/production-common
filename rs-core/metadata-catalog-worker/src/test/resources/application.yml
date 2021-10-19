@@ -1,0 +1,250 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-metadata-catalog
+    
+# Logging     
+logging:
+  config: classpath:log4j2-test.yml
+  
+# Elastic Search
+elasticsearch:
+  host: es-svc
+  port: 25000
+  connect-timeout-ms: 2000
+  socket-timeout-ms: 10000
+  
+process:
+  hostname: "hostname"
+  num-obs-download-retries: 99
+  sleep-between-obs-retries-millis: 3000
+
+# KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors
+  producer:
+    max-retries: 10
+
+mqi:
+  host-uri: http://localhost:8081
+  max-retries: 3
+  tempo-retry-ms: 1000
+
+trigger:
+  product-categories:
+    catalog-jobs:
+      fixed-delay-ms: 500                                         # (fixed delay) Period in milliseconds between 2 polls of next message
+      init-delay-poll-ms: 2000                                    # Initial delay in milliseconds before starting consuming message
+    
+worker:
+  product-categories:
+    auxiliary-files:
+      pattern-config: ^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AMH_ERRMAT|AMV_ERRMAT|AUX_CAL|AUX_ICE|AUX_INS|AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_POEORB|AUX_PREORB|AUX_RESORB|AUX_SCS|AUX_WAV|AUX_WND|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$
+      local-directory: /data/local-catalog/auxiliary_files/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    edrs-sessions:
+      pattern-config: ^(\w+)(/|\\)(ch)(0[1-2])(/|\\)((\w*)(\w{4})\.(xml|RAW))$
+      local-directory: /data/local-catalog/edrs_sessions/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+      path-pattern: ^([a-z_]{4})/([0-9a-z_]{3})/([0-9a-z_]+)/ch0?([1-2])/.+
+      path-metadata-elements:
+        stationCode: 1
+        satelliteId: 2
+        sessionId: 3
+        channelId: 4   
+    level-segments:
+      pattern-config: ^(S1|AS)(A|B)_(S[1-6]|RF|GP|HK|IW|EW|WV|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0)(A|C|N|S|_)(SH|__|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\w{1,}\.(SAFE)(/.*)?$
+      local-directory: /data/local-catalog/level_segments/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+    level-products:
+      pattern-config: ^(S1|AS)(A|B)_(S[1-6]|IW|EW|WV|GP|HK|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0|1|2)(A|C|N|S|_)(SH|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\w{1,}\.(SAFE)(/.*)?$
+      local-directory: /data/local-catalog/level_products/ # Must contains the last /
+      fixed-delay-ms: 500
+      init-delay-poll-ms: 2000
+  product-insertion:
+    max-retries: 3
+    tempo-retry-ms: 1000
+    
+# Metadata Extractor
+mdextractor:
+  type-overlap: 
+    EW: 8.2F
+    IW: 7.4F
+    SM: 7.7F
+    WV: 0.0F
+  type-slice-length:
+    EW: 60.0F
+    IW: 25.0F
+    SM: 25.0F
+    WV: 0.0F
+  xslt-directory: config/xsltDir/ # Must contains the last / 
+  # Field Types
+  fieldTypes:
+    absoluteStartOrbit: long
+    coordinates: string
+    creationTime: date
+    cycleNumber: long
+    instrumentConfigurationId: string
+    instrumentShortName: string
+    missionDataTakeId: long
+    operationalMode: string
+    pass: string
+    platformSerialIdentifier: string
+    platformShortName: string
+    processingDate: date
+    processorName: string
+    processorVersion: string
+    productClass: string
+    productComposition: string
+    productConsolidation: string
+    productType: string
+    qualityDataObjectID: string
+    qualityNumOfCorruptedElements: long
+    qualityNumOfElement: long
+    qualityNumOfMissingElements: long
+    qualityNumOfRSCorrectedElements: long
+    qualityNumOfRSCorrectedSymbols: long
+    qualityNumOfRSIncorrigibleElements: long
+    relativeStartOrbit: long
+    safeTimeliness: string
+    segmentStartTime: date
+    site: string
+    sliceNumber: long
+    sliceProductFlag: boolean
+    startTimeANX: double
+    startTime: date
+    stopTimeANX: double
+    stopTime: date
+    swathIdentifier: string
+    totalNumberOfSlice: long
+    validityStartTime: date
+    validityStopTime: date
+  packet-store-types:
+    S1A-0: Emergency
+    S1A-1: Emergency
+    S1A-2: RFC
+    S1A-3: RFC
+    S1A-4: RFC
+    S1A-5: RFC
+    S1A-6: NRT
+    S1A-7: NRT
+    S1A-8: NRT
+    S1A-9: NRT
+    S1A-10: NRT
+    S1A-11: NRT
+    S1A-12: NRT
+    S1A-13: NRT
+    S1A-14: NRT
+    S1A-15: NRT
+    S1A-16: NRT
+    S1A-17: NRT
+    S1A-18: NRT
+    S1A-19: WV
+    S1A-20: WV
+    S1A-21: Standard
+    S1A-22: Standard
+    S1A-23: Standard
+    S1A-24: Standard
+    S1A-25: Standard
+    S1A-26: Standard
+    S1A-27: Standard
+    S1A-28: Standard
+    S1A-29: Standard
+    S1A-30: Standard
+    S1A-31: Standard
+    S1A-32: Standard
+    S1A-33: Standard
+    S1A-34: Standard
+    S1A-35: Standard
+    S1A-36: Standard
+    S1A-37: PassThrough
+    S1A-38: PassThrough
+    S1A-39: PassThrough
+    S1A-40: PassThrough
+    S1A-41: PassThrough
+    S1A-42: PassThrough
+    S1A-43: PassThrough
+    S1A-44: PassThrough
+    S1A-45: HKTM
+    S1A-46: HKTM
+    S1A-47: HKTM
+    S1A-48: HKTM
+    S1A-49: GPS
+    S1A-50: Filler
+    S1B-0: Emergency
+    S1B-1: Emergency
+    S1B-2: RFC
+    S1B-3: RFC
+    S1B-4: RFC
+    S1B-5: RFC
+    S1B-6: NRT
+    S1B-7: NRT
+    S1B-8: NRT
+    S1B-9: NRT
+    S1B-10: NRT
+    S1B-11: NRT
+    S1B-12: NRT
+    S1B-13: NRT
+    S1B-14: NRT
+    S1B-15: NRT
+    S1B-16: NRT
+    S1B-17: NRT
+    S1B-18: NRT
+    S1B-19: WV
+    S1B-20: WV
+    S1B-21: Standard
+    S1B-22: Standard
+    S1B-23: Standard
+    S1B-24: Standard
+    S1B-25: Standard
+    S1B-26: Standard
+    S1B-27: Standard
+    S1B-28: Standard
+    S1B-29: Standard
+    S1B-30: Standard
+    S1B-31: Standard
+    S1B-32: Standard
+    S1B-33: Standard
+    S1B-34: Standard
+    S1B-35: Standard
+    S1B-36: Standard
+    S1B-37: PassThrough
+    S1B-38: PassThrough
+    S1B-39: PassThrough
+    S1B-40: PassThrough
+    S1B-41: PassThrough
+    S1B-42: PassThrough
+    S1B-43: PassThrough
+    S1B-44: PassThrough
+    S1B-45: HKTM
+    S1B-46: HKTM
+    S1B-47: HKTM
+    S1B-48: HKTM
+    S1B-49: GPS
+    S1B-50: Filler
+  packetstore-type-timelinesses:
+    Emergency: PT
+    HKTM: NRT
+    NRT: NRT
+    GPS: NRT
+    PassThrough: PT
+    Standard: FAST24
+    RFC: FAST24
+    WV: FAST24
+    Filler: FAST24
+    Spare: FAST24
+  timeliness-priority-from-high-to-low:
+    - PT
+    - NRT
+    - FAST24
+
+status:
+  max-error-counter-processing: 3
+  max-error-counter-mqi: 30
+  block-system-exit: true

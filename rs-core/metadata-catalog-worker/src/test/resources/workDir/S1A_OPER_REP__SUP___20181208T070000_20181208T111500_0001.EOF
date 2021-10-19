@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Earth_Explorer_File xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Earth_Explorer_Header>
+<Fixed_Header>
+<File_Name>S1A_OPER_REP__SUP___20181208T070000_20181208T111500_0001</File_Name>
+<File_Description>FOS and Spacecraft Unavailability Report</File_Description>
+<Notes />
+<Mission>Sentinel-1A</Mission>
+<File_Class>OPER</File_Class>
+<File_Type>REP__SUP__</File_Type>
+<Validity_Period><Validity_Start>UTC=2018-12-08T07:00:00</Validity_Start>
+<Validity_Stop>UTC=2018-12-08T11:15:00</Validity_Stop>
+</Validity_Period>
+<File_Version>0001</File_Version>
+<Source>
+<System>FOS</System>
+<Creator>MCS</Creator>
+<Creator_Version>1.0</Creator_Version>
+<Creation_Date>UTC=2018-12-07T00:00:00</Creation_Date>
+</Source>
+</Fixed_Header>
+<Variable_Header />
+</Earth_Explorer_Header>
+<Data_Block Type="xml">
+<Unavailability_Reference>S1A-UNA-2018/0039</Unavailability_Reference>
+<Unavailability_Type>Planned Unavailability</Unavailability_Type>
+<Comment>OCP planned unavailability due to execution of a CAM (2 Manouveurs to be executed tomorrow). 
+Due to the execution of the CAM, 1 OCP Link will be lost on 08-12-208 with T0 at 09:25:00 UTC.The affected subsystems are detailed in this file.</Comment>
+<List_Of_Subsystem_Unavailabilities count="1">
+<Subsystem_Unavailability>
+<Subsystem>OCP</Subsystem>
+<StartTime>UTC=2018-12-08T07:00:00</StartTime>
+<StartDOY>342</StartDOY>
+<StartOrbit>24930</StartOrbit>
+<StartAnxOffset>5680</StartAnxOffset>
+<EndTime>UTC=2018-12-08T11:15:00</EndTime>
+<EndDOY>342</EndDOY>
+<EndOrbit>24933</EndOrbit>
+<EndAnxOffset>3207</EndAnxOffset>
+<Type>PLANNED</Type>
+<Comment>OCP planned unavailability due to execution of a CAM (2 Manouveurs to be executed tomorrow). 
+Due to the execution of the CAM, 1 OCP Link will be lost on 08-12-208 with T0 at 09:25:00 UTC.</Comment>
+</Subsystem_Unavailability>
+</List_Of_Subsystem_Unavailabilities>
+</Data_Block>
+</Earth_Explorer_File>

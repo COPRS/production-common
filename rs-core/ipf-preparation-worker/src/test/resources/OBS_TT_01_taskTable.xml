@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Ipf_Task_Table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TaskTableGMES.xsd">
+    <Processor_Name>OBS_PRC_01</Processor_Name>
+    <Version>1.11.0</Version>
+    <Test>No</Test>
+    <Min_Disk_Space units="MB">1024</Min_Disk_Space>
+    <Max_Time units="sec">0</Max_Time>
+    <List_of_Cfg_Files>
+        <Cfg_Files>
+            <Version>1.11.0</Version>
+            <File_Name>/usr/local/conf/SPP_OBS_CFG/s1-obs-conffile.xml</File_Name>
+        </Cfg_Files>
+    </List_of_Cfg_Files>
+    <List_of_Dyn_ProcParam count="1">
+        <Dyn_ProcParam>
+            <Param_Name>selectedOrbitFirstAzimuthTime</Param_Name>
+            <Param_Type>datenumber</Param_Type>
+        </Dyn_ProcParam>
+    </List_of_Dyn_ProcParam>
+    <Sensing_Time_flag>false</Sensing_Time_flag>
+    <List_of_Pools count="1">
+        <Pool>
+            <Detached>false</Detached>
+            <Killing_Signal>9</Killing_Signal>
+            <List_of_Tasks count="1">
+                <Task>
+                    <Name>OBS_TSK</Name>
+                    <Version>1.11.0</Version>
+                    <Critical>true</Critical>
+                    <Criticality_Level>1</Criticality_Level>
+                    <File_Name>/usr/local/components/SPP_OBS/run_OBS_TSK.sh</File_Name>
+                    <List_of_Inputs count="3">
+                        <Input id="AUX_ORB">
+                            <Mode>ALWAYS</Mode>
+                            <Mandatory>Yes</Mandatory>
+                            <List_of_Alternatives count="3">
+                                <Alternative>
+                                    <Order>1</Order>
+                                    <Origin>DB</Origin>
+                                    <Retrieval_Mode>LatestValCover</Retrieval_Mode>
+                                    <T0>0</T0>
+                                    <T1>0</T1>
+                                    <File_Type>AUX_POE</File_Type>
+                                    <File_Name_Type>Physical</File_Name_Type>
+                                </Alternative>
+                                <Alternative>
+                                    <Order>2</Order>
+                                    <Origin>DB</Origin>
+                                    <Retrieval_Mode>LatestValCover</Retrieval_Mode>
+                                    <T0>0</T0>
+                                    <T1>0</T1>
+                                    <File_Type>AUX_RES</File_Type>
+                                    <File_Name_Type>Physical</File_Name_Type>
+                                </Alternative>
+                                <Alternative>
+                                    <Order>3</Order>
+                                    <Origin>DB</Origin>
+                                    <Retrieval_Mode>LatestValCover</Retrieval_Mode>
+                                    <T0>0</T0>
+                                    <T1>0</T1>
+                                    <File_Type>MPL_ORBPRE</File_Type>
+                                    <File_Name_Type>Physical</File_Name_Type>
+                                </Alternative>
+                            </List_of_Alternatives>
+                        </Input>
+                        <Input id="IW_RAW__0A">
+                            <Mode>ALWAYS</Mode>
+                            <Mandatory>No</Mandatory>
+                            <List_of_Alternatives count="1">
+                                <Alternative>
+                                    <Order>1</Order>
+                                    <Origin>DB</Origin>
+                                    <Retrieval_Mode>ValIntersect</Retrieval_Mode>
+                                    <T0>0</T0>
+                                    <T1>0</T1>
+                                    <File_Type>IW_RAW__0A</File_Type>
+                                    <File_Name_Type>Physical</File_Name_Type>
+                                </Alternative>
+                            </List_of_Alternatives>
+                        </Input>
+                        <Input id="EW_RAW__0A">
+                            <Mode>ALWAYS</Mode>
+                            <Mandatory>No</Mandatory>
+                            <List_of_Alternatives count="1">
+                                <Alternative>
+                                    <Order>1</Order>
+                                    <Origin>DB</Origin>
+                                    <Retrieval_Mode>ValIntersect</Retrieval_Mode>
+                                    <T0>0</T0>
+                                    <T1>0</T1>
+                                    <File_Type>EW_RAW__0A</File_Type>
+                                    <File_Name_Type>Physical</File_Name_Type>
+                                </Alternative>
+                            </List_of_Alternatives>
+                        </Input>
+                    </List_of_Inputs>
+                    <List_of_Outputs count="1">
+                        <Output>
+                            <Destination>DB</Destination>
+                            <Mandatory>Yes</Mandatory>
+                            <Type>___OBS__SS</Type>
+                            <File_Name_Type>Directory</File_Name_Type>
+                        </Output>
+                    </List_of_Outputs>
+                    <List_of_Breakpoints count="0" />
+                    <Number_of_CPUs>1</Number_of_CPUs>
+                </Task>
+            </List_of_Tasks>
+        </Pool>
+    </List_of_Pools>
+</Ipf_Task_Table>
