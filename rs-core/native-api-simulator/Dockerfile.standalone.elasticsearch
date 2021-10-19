@@ -1,0 +1,7 @@
+FROM elasticsearch:7.14.0
+
+COPY src/test/resources/prip-testdata.json prip-testdata.json
+
+EXPOSE 9200 9300
+
+CMD ["eswrapper"]

@@ -1,0 +1,43 @@
+version: "3"
+services:
+    elastic4api:
+        #image: elasticsearch-img
+        container_name: elastic4api
+        hostname: elastic4api
+        build:
+            context: "."
+            dockerfile: ./Dockerfile.standalone.elasticsearch
+            labels:
+                de.werum.eo.group: reference-system
+        environment:
+            discovery.type: single-node
+            HTTP_PROXY: http://proxy.net.werum:8080/
+            HTTPS_PROXY: http://proxy.net.werum:8080/
+            NO_PROXY: localhost,127.0.0.1,*.werum.net,*.net.werum,.net.werum,.werum.net,172.0.0.0/8
+        networks:
+            - rs-api-net
+        ports:
+            - 9222:9200
+            - 9333:9300
+
+    rs_native_api:
+        #image: rs-native-api-img
+        container_name: "rs-native-api"
+        hostname: "rs-native-api"
+        build:
+            context: "."
+            dockerfile: "./Dockerfile.standalone"
+            labels:
+                de.werum.eo.group: reference-system
+        environment:
+            HTTP_PROXY: http://proxy.net.werum:8080/
+            HTTPS_PROXY: http://proxy.net.werum:8080/
+            NO_PROXY: localhost,127.0.0.1,*.werum.net,*.net.werum,.net.werum,.werum.net,172.0.0.0/8
+        networks:
+            - "rs-api-net"
+        ports:
+            - "8888:8080"
+
+networks:
+    rs-api-net:
+        driver: bridge
