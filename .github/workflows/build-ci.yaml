@@ -1,13 +1,16 @@
 name: Java Maven CI
 
 on: 
-  push
+  push:
+    paths:
+      - 'rs-core/**'
+  workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: coprs/s1pro-core
   VERSION: 3.32.1
   COMMIT_ID: ${{ github.sha }}
 
@@ -99,7 +102,7 @@ jobs:
 
   docker-images:
     needs: build
-    uses: coprs/s1pro-core/.github/workflows/build-docker.yaml@master
+    uses: coprs/production-common/.github/workflows/build-docker.yaml@develop
     secrets: 
       username: ${{ secrets.ARTIFACTORY_USER }}
       password: ${{ secrets.ARTIFACTORY_PASSWORD }}
