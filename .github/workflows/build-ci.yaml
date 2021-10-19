@@ -42,6 +42,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           load: true
+          context: ./rs-core
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
