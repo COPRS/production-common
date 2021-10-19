@@ -1,4 +1,4 @@
-name: Java Maven CI
+name: Build RS-Core
 
 on: 
   push:
