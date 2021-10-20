@@ -50,7 +50,7 @@ In order to use the script, it needs to be ensured that the script is
 installed within the target cluster. This can be down e.g. by downloading
 it using the following curl command
 ```
-curl -s https://raw.githubusercontent.com/COPRS/production-common/develop/rs-init/rs-init.sh --output rs_init && chmod 770 ./rs_init
+curl -s https://raw.githubusercontent.com/COPRS/production-common/develop/rs-init/rs_init --output rs_init && chmod 770 ./rs_init
 ```
 It is recommended to place this script in the home directory top level. 
 
