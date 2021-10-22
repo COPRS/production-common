@@ -108,5 +108,5 @@ jobs:
     needs: build
     uses: coprs/production-common/.github/workflows/build-docker.yaml@develop
     secrets: 
-      username: ${{ secrets.ARTIFACTORY_USER }}
-      password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      username: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}

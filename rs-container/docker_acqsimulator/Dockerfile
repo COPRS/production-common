@@ -1,25 +1,17 @@
+FROM ghcr.io/coprs/s1pro-core-ipf-execution-worker:master as build
+
 FROM centos:6.6
 
 USER root
 
-RUN yum -y install boost boost-thread boost-devel libxslt tar which python3; yum clean all
-
-# create user
-ARG USER=ops3pdgs
-ARG UID=1000
-ARG GID=1000
-# default password for user
-ARG PW=Ops3Pdgs-1
-# Using unencrypted password/ specifying password
-RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
-      chpasswd
+RUN yum -y install boost boost-thread boost-devel libxslt tar which python3 java-1.8.0-openjdk; yum clean all
 
 COPY files/* /opt/
 
+COPY --from=build /app/s1pdgs-ipf-execution-worker.jar /app/s1pdgs-ipf-execution-worker.jar
+ADD files/start.sh /app/start.sh
+
 #create local WD
-RUN mkdir -p /data/localWD && chown ops3pdgs:ops3pdgs /data/localWD
+RUN mkdir -p /data/localWD
 
-WORKDIR /data/localWD
-
-USER ops3pdgs
- 
+CMD ["/app/start.sh"]
