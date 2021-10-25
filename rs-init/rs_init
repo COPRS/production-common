@@ -101,7 +101,7 @@ rs_init() {
   if [[ ! -z $REPO_INFRA ]]
   then
     echo "Checking out infrastructure repository"
-    git clone -b $BRANCH $REPO_INFRA $> /dev/null
+    git clone -b $BRANCH $REPO_INFRA &> /dev/null
   fi
 
   cd ..
@@ -115,15 +115,29 @@ rs_init() {
   ln -s $CWD/repos/processing-sentinel-1 env/helm
   ln -s $CWD/repos/processing-sentinel-3 env/helm
   ln -s $CWD/repos/rs-processing-common/rs-processing-common env/helm/processing-common
-  ln -s $CWD/repos/config env/config
+  ln -s $CWD/repos/config env/confighttps://github.com/w-fsi/rs-infrastructure.git
   if [[ ! -z $REPO_INFRA ]]
   then
     ln -s $CWD/repos/infrastructure env/helm
+  fi
+  
+  echo "Adding entry to bashrc ..."
+  if grep -Fxq "source ~/env/config/env/s1pro-env-init.sh" "~/.bashrc"
+  then
+    echo "Environment is already sourced"
+  else
+    echo "Adding source entry to ~/.bashrc"
+    echo "source ~/env/config/env/s1pro-env-init.sh" >> ~/.bashrc
+    source ~/.bashrc
   fi
 }
 
 # Performs a clean/purge operation. This will remove the repo and env directory completely
 rs_clean() {
+  echo "Removing source entry from ~/.bashrc"
+  sed -i 's,source ~/env/config/env/s1pro-env-init.sh,,g ~/.bashrc
+  
+  source ~/.bashrc
   echo "Cleaning environment ..."
   rm -f "$CWD/env"
   rm -fr "$CWD/repos"
