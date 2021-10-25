@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM ghcr.io/coprs/s1pro-core:${BRANCH} as build
+FROM ghcr.io/coprs/rs-core:${BRANCH} as build
 WORKDIR /app
 
 FROM openjdk:8-jre-alpine3.8

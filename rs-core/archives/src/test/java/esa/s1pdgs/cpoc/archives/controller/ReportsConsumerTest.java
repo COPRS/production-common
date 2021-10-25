@@ -37,8 +37,8 @@ public class ReportsConsumerTest {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		resultExists = new File("test/data/reports/l0_report/productName");
-		resultNotExists = new File("test/data/reports/l0_reports/productName");
+		resultExists = new File("test/data/report/l0_report/productName");
+		resultNotExists = new File("test/data/report/l0_reports/productName");
 	}
 	
 	@After
@@ -53,7 +53,7 @@ public class ReportsConsumerTest {
 	
 	@Test
 	public void testReceive() {
-		ReportsConsumer consumer = new ReportsConsumer("test/data/reports",appStatus);
+		ReportsConsumer consumer = new ReportsConsumer("test/data/report",appStatus);
 		doNothing().when(ack).acknowledge();
 		consumer.receive(new LevelReportDto("productName", "content", ProductFamily.L0_REPORT), ack, "topic");
 		assertTrue("File exist", resultExists.exists());
@@ -63,14 +63,14 @@ public class ReportsConsumerTest {
 	
 	@Test
 	public void testReceiveNoDirectory() {
-		ReportsConsumer consumer = new ReportsConsumer("test/data/reports",appStatus);
+		ReportsConsumer consumer = new ReportsConsumer("test/data/report",appStatus);
 		consumer.receive(new LevelReportDto("productName",  "content", ProductFamily.BLANK), ack, "topic");
 		assertFalse("File exist", resultNotExists.exists());
 	}
 	
 	@Test
 	public void testReceiveAckException() {
-		ReportsConsumer consumer = new ReportsConsumer("test/data/reports",appStatus);
+		ReportsConsumer consumer = new ReportsConsumer("test/data/report",appStatus);
 		doThrow(new IllegalArgumentException("error message")).when(ack)
         .acknowledge();
 		consumer.receive(new LevelReportDto("productName", "content", ProductFamily.L0_REPORT), ack, "topic");
