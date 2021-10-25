@@ -33,7 +33,7 @@ CMD=$1
 export ADDON=$2
 
 # Check that the addon is known
-if [[ ! $ADDON =~ ^(s1|s3|common)$ ]]
+if [[ ! $ADDON =~ ^(s1|s3|infra|common)$ ]]
 then
   echo "Unknown addon: $ADDON"
   usage
