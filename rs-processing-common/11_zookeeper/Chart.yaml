@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "s3-develop"
-description: Zookeeper
-name: s3-zookeeper
-version: 0.1-SNAPSHOT

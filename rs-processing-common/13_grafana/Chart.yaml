@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "s3-develop"
-description: Grafana
-name: s3-grafana
-version: 0.1-SNAPSHOT

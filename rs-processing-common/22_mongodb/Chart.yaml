@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "s3-develop"
-description: MongoDB
-name: s3-mongodb
-version: 0.1-SNAPSHOT

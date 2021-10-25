@@ -1,9 +1,0 @@
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
-metadata:
-  name: grafana-pdb
-spec:
-  selector:
-    matchLabels:
-      app: grafana
-  minAvailable: 2
