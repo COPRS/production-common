@@ -40,11 +40,13 @@ then
 fi
 
 rs_install() {
-  echo "install"
+  echo "Installing addon $ADDON"
+  deploy il $ADDON
 }
 
 rs_uninstall() {
-  echo "uninstall"
+  echo "Uninstalling addon $ADDON"
+  deploy UNINSTALL $ADDON
 }
 
 
