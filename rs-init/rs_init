@@ -96,7 +96,7 @@ rs_init() {
   echo "Checking out processing-sentinel-3"
   git clone -b $BRANCH $REPO_S3 &> /dev/null
   echo "Checking out configuration"
-  git clone -b master $REPO_CONF config &> /dev/null
+  git clone -b $BRANCH $REPO_CONF config &> /dev/null
   
   if [[ ! -z $REPO_INFRA ]]
   then
@@ -115,20 +115,10 @@ rs_init() {
   ln -s $CWD/repos/processing-sentinel-1 env/helm
   ln -s $CWD/repos/processing-sentinel-3 env/helm
   ln -s $CWD/repos/rs-processing-common/rs-processing-common env/helm/processing-common
-  ln -s $CWD/repos/config env/confighttps://github.com/w-fsi/rs-infrastructure.git
+  ln -s $CWD/repos/config env/config
   if [[ ! -z $REPO_INFRA ]]
   then
-    ln -s $CWD/repos/infrastructure env/helm
-  fi
-  
-  echo "Adding entry to bashrc ..."
-  if grep -Fxq "source ~/env/config/env/s1pro-env-init.sh" "~/.bashrc"
-  then
-    echo "Environment is already sourced"
-  else
-    echo "Adding source entry to ~/.bashrc"
-    echo "source ~/env/config/env/s1pro-env-init.sh" >> ~/.bashrc
-    source ~/.bashrc
+    ln -s $CWD/repos/rs-infrastructure env/helm/infrastructure
   fi
 }
 
@@ -137,10 +127,11 @@ rs_clean() {
   echo "Removing source entry from ~/.bashrc"
   sed -i 's,source ~/env/config/env/s1pro-env-init.sh,,g' ~/.bashrc
   
-  source ~/.bashrc
   echo "Cleaning environment ..."
   rm -f "$CWD/env"
   rm -fr "$CWD/repos"
+  
+  echo "Please logout in order to refresh the shell to ensure all environmentals are set correctly"
 }
 
 # Perform an update on all RS repositories to pull in the current state
@@ -151,7 +142,7 @@ rs_update() {
   cd $CWD/repos/config && git pull
   if [[ ! -z $REPO_INFRA ]]
   then
-    cd $CWD/repos/infrastructure && git pull
+    cd $CWD/repos/rs-infrastructure && git pull
   fi
 }
 
