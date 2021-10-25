@@ -30,7 +30,7 @@ then
 fi
 
 CMD=$1
-expor ADDON=$2
+export ADDON=$2
 
 # Check that the addon is known
 if [[ ! $ADDON =~ ^(s1|s3|common)$ ]]
