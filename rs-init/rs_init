@@ -135,7 +135,7 @@ rs_init() {
 # Performs a clean/purge operation. This will remove the repo and env directory completely
 rs_clean() {
   echo "Removing source entry from ~/.bashrc"
-  sed -i 's,source ~/env/config/env/s1pro-env-init.sh,,g ~/.bashrc
+  sed -i 's,source ~/env/config/env/s1pro-env-init.sh,,g' ~/.bashrc
   
   source ~/.bashrc
   echo "Cleaning environment ..."
