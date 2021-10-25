@@ -30,6 +30,7 @@ then
   echo 'REPO_COMMON="https://github.com/COPRS/production-common.git"' >> $INIT_FILE
   echo 'REPO_S1="https://github.com/COPRS/processing-sentinel-1.git"' >> $INIT_FILE
   echo 'REPO_S3="https://github.com/COPRS/processing-sentinel-3.git"' >> $INIT_FILE
+  echo 'REPO_INFRA="" # can be left empty if no additional infrastructure is used"' >> $INIT_FILE
   echo 'REPO_CONF=""' >> $INIT_FILE
   echo 'BRANCH=""' >> $INIT_FILE
 fi
@@ -96,6 +97,12 @@ rs_init() {
   git clone -b $BRANCH $REPO_S3 &> /dev/null
   echo "Checking out configuration"
   git clone -b master $REPO_CONF config &> /dev/null
+  
+  if [[ ! -z $REPO_INFRA ]]
+  then
+    echo "Checking out infrastructure repository"
+    git clone -b $BRANCH $REPO_INFRA $> /dev/null
+  fi
 
   cd ..
 
@@ -109,6 +116,10 @@ rs_init() {
   ln -s $CWD/repos/processing-sentinel-3 env/helm
   ln -s $CWD/repos/rs-processing-common/rs-processing-common env/helm/processing-common
   ln -s $CWD/repos/config env/config
+  if [[ ! -z $REPO_INFRA ]]
+  then
+    ln -s $CWD/repos/infrastructure env/helm
+  fi
 }
 
 # Performs a clean/purge operation. This will remove the repo and env directory completely
@@ -124,6 +135,10 @@ rs_update() {
   cd $CWD/repos/processing-sentinel-3 && git pull
   cd $CWD/repos/rs-processing-common/ && git pull https://github.com/COPRS/production-common.git $BRANCH
   cd $CWD/repos/config && git pull
+  if [[ ! -z $REPO_INFRA ]]
+  then
+    cd $CWD/repos/infrastructure && git pull
+  fi
 }
 
 case "$CMD" in
