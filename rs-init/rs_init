@@ -120,6 +120,14 @@ rs_init() {
   then
     ln -s $CWD/repos/rs-infrastructure env/helm/infrastructure
   fi
+  
+  if grep -Fxq "source ~/env/config/env/s1pro-env-init.sh" ~/.bashrc
+  then
+    echo "Found source in bashrc"
+  else
+    echo "Adding source in bashrc"
+    echo "source ~/env/config/env/s1pro-env-init.sh" >> ~/.bashrc
+  fi
 }
 
 # Performs a clean/purge operation. This will remove the repo and env directory completely
