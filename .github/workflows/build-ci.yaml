@@ -10,7 +10,7 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: coprs/s1pro-core
+  IMAGE_NAME: coprs/rs-core
   VERSION: 3.32.1
   COMMIT_ID: ${{ github.sha }}
 
