@@ -127,6 +127,7 @@ rs_init() {
   else
     echo "Adding source in bashrc"
     echo "source ~/env/config/env/s1pro-env-init.sh" >> ~/.bashrc
+    source ~/.bashrc
   fi
 }
 
