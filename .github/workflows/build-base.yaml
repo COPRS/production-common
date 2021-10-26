@@ -1,4 +1,4 @@
-name: Build ACQ-Simulator
+name: Build Base Image
 
 on: 
   push:
