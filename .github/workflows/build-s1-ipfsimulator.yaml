@@ -51,7 +51,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images:  ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-core-base
+          images:  ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-container-s1-ipf-simulator
               
       - name: Build image
         uses: docker/build-push-action@v2
