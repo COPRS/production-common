@@ -5,7 +5,7 @@ service:
   port: 8080
 
 image:
-  name: s1pro-core-applicative-catalog
+  name: rs-core-applicative-catalog
   
 s1pro_app_catalog:
   cpu:

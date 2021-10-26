@@ -20,7 +20,7 @@ resources:
   #   memory: 128Mi
 
 image:
-  name: s1pro-core-compression-worker
+  name: rs-core-compression-worker
 
 compression_worker:
   javaOpts:

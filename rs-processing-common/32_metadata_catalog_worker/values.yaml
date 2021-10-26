@@ -8,7 +8,7 @@ mqiService:
   port: 8081
 
 image:
-  name: s1pro-core-metadata-catalog-worker
+  name: rs-core-metadata-catalog-worker
 
 s1pro_metadata_catalog_worker:
   cpu:

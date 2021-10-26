@@ -20,7 +20,7 @@ resources:
   #   memory: 128Mi
 
 image:
-  name: s1pro-core-prip-worker
+  name: rs-core-prip-worker
 
 prip_worker:
   cpu:

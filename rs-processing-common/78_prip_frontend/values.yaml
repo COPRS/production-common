@@ -20,7 +20,7 @@ resources:
   #   memory: 128Mi
 
 image:
-  name: s1pro-core-prip-frontend
+  name: rs-core-prip-frontend
 
 prip_frontend:
   cpu:

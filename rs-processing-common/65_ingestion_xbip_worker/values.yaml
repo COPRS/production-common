@@ -8,7 +8,7 @@ mqiService:
   port: 8081
 
 image:
-  name: s1pro-core-ingestion-worker
+  name: rs-core-ingestion-worker
 
 ingestion_xbip_worker:
   cpu:

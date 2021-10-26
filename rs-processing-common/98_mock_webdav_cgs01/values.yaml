@@ -5,5 +5,5 @@ service:
   port: 8080
 
 image:
-  name: s1pro-container-mock-webdav
+  name: rs-container-mock-webdav
   

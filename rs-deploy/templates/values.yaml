@@ -8,14 +8,14 @@ simulator:
   
 image:
   imagePullSecrets: harbor-tools
-  registry: registry.tools.s1pdgs.eu
-  repository: werum/processing
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
   tag: develop
 
 mqiImage:
-  registry: registry.tools.s1pdgs.eu
-  repository: werum/processing
-  name: s1pro-core-mqi-server
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  name: rs-core-mqi-server
   tag: develop
 
 mqi:

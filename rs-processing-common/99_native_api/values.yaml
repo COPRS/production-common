@@ -17,7 +17,7 @@ resources:
   #   memory: 128Mi
 
 image:
-  name: coprs-native-api
+  name: rs-core-native-api
 
 native_api:
   cpu:

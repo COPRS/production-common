@@ -23,10 +23,10 @@ resources:
   #   memory: 128Mi
 
 ingestionTriggerImage:
-  name: s1pro-core-ingestion-trigger
+  name: rs-core-ingestion-trigger
   
 ingestionWorkerImage:
-  name: s1pro-core-ingestion-worker
+  name: rs-core-ingestion-worker
   
 ingestion_trigger:
   cpu:

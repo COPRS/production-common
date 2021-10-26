@@ -20,7 +20,7 @@ resources:
   #   memory: 128Mi
 
 image:
-  name: s1pro-core-prip-trigger
+  name: rs-core-prip-trigger
 
 prip_trigger:
   cpu:

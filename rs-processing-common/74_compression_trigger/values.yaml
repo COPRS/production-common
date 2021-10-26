@@ -8,7 +8,7 @@ mqiService:
   port: 8081
 
 image:
-  name: s1pro-core-compression-trigger
+  name: rs-core-compression-trigger
 
 compression_trigger:
   cpu:

@@ -17,7 +17,7 @@ resources:
   #   memory: 128Mi
 
 image:
-  name: s1pro-core-ingestion-trigger
+  name: rs-core-ingestion-trigger
   
 s1pro_ingestion_xbip_cgs01_trigger:
   cpu:
