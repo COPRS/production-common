@@ -59,7 +59,6 @@ public class NativeApiServiceDummyImpl implements NativeApiService {
 		dummy.setFootprint(new Polygon(coordinates));
 
 		final Map<String, Object> attributes = new HashMap<>();
-		attributes.put("download", "/missions/s1/products/96992625-0572-419d-8b0b-65d646a8d753/download");
 		attributes.put("attr_orbitNumber_long", 19903);
 		attributes.put("attr_productClass_string", "S");
 		attributes.put("attr_relativeOrbitNumber_long", 102);
