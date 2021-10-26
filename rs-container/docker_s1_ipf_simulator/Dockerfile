@@ -2,7 +2,7 @@ ARG BRANCH
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
 RUN apk add libxslt rpm wget
 
-RUN mkdir /rpms && mkdir /data && mkdir /data/localWD
+RUN mkdir -p /rpms && mkdir -p /data/localWD
 COPY S1PD-DYN-IPF-SIM-*.rpm /rpms/
 RUN rpm --nodeps -ivh /rpms/S1PD-DYN-IPF-SIM-*.rpm
 RUN rm -rf /rpms/
