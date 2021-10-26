@@ -9,7 +9,7 @@ RUN yum -y install boost boost-thread boost-devel libxslt tar which python3 java
 
 COPY files/* /opt/
 
-COPY --from=build /app/s1pdgs-ipf-execution-worker.jar /app/s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar /app/s1pdgs-ipf-execution-worker.jar
 COPY config/start.sh /app/start.sh
 
 #create local WD
