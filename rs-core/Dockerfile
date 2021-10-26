@@ -46,6 +46,7 @@ COPY --from=buildenv /app/compression-worker/target /app/compression-worker/targ
 COPY --from=buildenv /app/prip-trigger/target /app/prip-trigger/target
 COPY --from=buildenv /app/prip-worker/target /app/prip-worker/target
 COPY --from=buildenv /app/prip-frontend/target /app/prip-frontend/target
+COPY --from=buildenv /app/native-api/target /app/native-api/target
 COPY --from=buildenv /app/data-lifecycle-trigger/target /app/data-lifecycle-trigger/target
 COPY --from=buildenv /app/data-request-worker/target /app/data-request-worker/target
 COPY --from=buildenv /app/eviction-management-worker/target /app/eviction-management-worker/target

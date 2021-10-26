@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner]
+        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api]
     steps:
       - name: Extract branch name
         shell: bash
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner]
+        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api]
     permissions:
       contents: read
 
