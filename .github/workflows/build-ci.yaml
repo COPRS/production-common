@@ -137,3 +137,12 @@ jobs:
       password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
     with:
       exec-worker: ${{ needs.build.outputs.exec-worker }}
+
+  # If the execution-worker-jar is updated also update the ACQ simulator docker image
+  build-acq-simulator:
+    needs: build
+    if: ${{ inputs.exec-worker }}
+    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}

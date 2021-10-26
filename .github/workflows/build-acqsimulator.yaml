@@ -25,6 +25,11 @@ jobs:
     runs-on: ubuntu-latest    
     
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -54,6 +59,8 @@ jobs:
           context: ./rs-container/docker_acqsimulator
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
 
       - name: Scan image
         uses: anchore/scan-action@v2

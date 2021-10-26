@@ -1,4 +1,5 @@
-FROM ghcr.io/coprs/s1pro-core-ipf-execution-worker:master as build
+ARG BRANCH
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH} as build
 
 FROM centos:6.6
 

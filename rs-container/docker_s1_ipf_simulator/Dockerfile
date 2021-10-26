@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM registry.tools.s1pdgs.eu/werum/processing/s1pro-container-alpine_base:${BRANCH}
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
 RUN apk add libxslt rpm wget
 
 RUN mkdir /rpms && mkdir /data && mkdir /data/localWD
