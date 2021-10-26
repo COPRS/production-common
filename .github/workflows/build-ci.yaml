@@ -16,7 +16,9 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
+    outputs:
+      exec-worker: ${{ steps.filter.outputs.exec-worker }}    
     
     steps:
       - name: Extract branch name
@@ -81,6 +83,20 @@ jobs:
       - name: Push image
         run: |
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
+
+      - name: Determine if exec worker docker images need to be build
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            exec-worker:
+              - 'rs-core/ipf-execution-worker/**'
+              - 'rs-core/obs-sdk/**'
+              - 'rs-core/lib-commons/**'
+              - 'rs-core/app-status/**'
+              - 'rs-core/mqi-client/**'
+              - 'rs-core/metadata-client/**'
+
   generate-reports:
     needs: build 
     runs-on: ubuntu-latest
@@ -119,3 +135,5 @@ jobs:
     secrets: 
       username: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+    with:
+      exec-worker: ${{ needs.build.outputs.exec-worker }}

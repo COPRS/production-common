@@ -9,6 +9,11 @@ on:
       password:
         description: 'Password to log into Artifactory'
         required: true
+    inputs:
+      exec-worker:
+        description: 'Flag if changes were made in the execution worker'
+        type: boolean
+        required: true
 
 env:
   REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
@@ -82,6 +87,14 @@ jobs:
       - name: Push image
         run: |
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
+
+  build-exec-worker-images:
+    needs: build-docker
+    if: ${{ inputs.exec-worker }}
+    uses: coprs/production-common/.github/workflows/build-execworker.yaml@develop
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.username }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.password }}
           
   generate-reports:
     needs: build-docker

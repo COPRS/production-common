@@ -1,0 +1,27 @@
+name: Build Execution Worker Images
+
+on: 
+  workflow_call:
+    secrets:
+      WERUM_ARTIFACTORY_USER:
+        description: 'Username to log into Artifactory'
+        required: true
+      WERUM_ARTIFACTORY_PASSWORD:
+        description: 'Password to log into Artifactory'
+        required: true
+  workflow_dispatch:
+
+jobs:
+  acqsimulator:
+    needs: build
+    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop
+    secrets: 
+      username: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+
+  s1-ipfsimulator:
+    needs: build
+    uses: coprs/production-common/.github/workflows/build-s1-ipfsimulator.yaml@develop
+    secrets: 
+      username: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}

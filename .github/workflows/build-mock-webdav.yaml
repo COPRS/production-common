@@ -71,7 +71,7 @@ jobs:
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
 
   generate-reports-mock-webdav:
-    needs: build-base 
+    needs: build-mock-webdav 
     runs-on: ubuntu-latest
     permissions:
       contents: read

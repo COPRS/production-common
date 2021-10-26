@@ -4,6 +4,14 @@ on:
   push:
     paths:
       - 'rs-container/docker_acqsimulator/**'
+  workflow_call:
+    secrets:
+      WERUM_ARTIFACTORY_USER:
+        description: 'Username to log into Artifactory'
+        required: true
+      WERUM_ARTIFACTORY_PASSWORD:
+        description: 'Password to log into Artifactory'
+        required: true
   workflow_dispatch:
 
 env:
