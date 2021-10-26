@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH} as build
+FROM ghcr.io/coprs/rs-core:${BRANCH} as build
 
 FROM centos:6.6
 
