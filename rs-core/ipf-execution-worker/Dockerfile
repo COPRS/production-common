@@ -2,7 +2,7 @@ ARG BRANCH
 FROM ghcr.io/coprs/rs-core:${BRANCH} as build
 WORKDIR /app
 
-FROM openjdk:8-jre-alpine3.8
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT

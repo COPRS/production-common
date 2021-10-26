@@ -19,6 +19,11 @@ jobs:
     runs-on: ubuntu-latest    
     
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -48,6 +53,10 @@ jobs:
           context: ./rs-core
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
