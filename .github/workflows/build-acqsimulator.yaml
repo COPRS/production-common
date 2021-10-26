@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'rs-container/docker_acqsimulator/**'
+      - '.github/workflows/build-acqsimulator.yaml'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:

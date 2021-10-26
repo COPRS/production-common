@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'rs-core/**'
+      - '.github/workflows/build-ci.yaml'
+      - '.github/workflows/build-docker.yaml'
   workflow_dispatch:
 
 env:

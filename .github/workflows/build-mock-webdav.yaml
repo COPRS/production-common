@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'rs-container/docker_mock_webdav/**'
+      - '.github/workflows/build-mock-webdav.yaml'
   workflow_dispatch:
 
 env:
