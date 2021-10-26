@@ -73,3 +73,4 @@ replicaCount:
   qcss_online_ingestion_trigger: 1
   qcss_online_ingestion_worker: 1
   qcss_webserver_disseminator: 1
+  native_api: 1
