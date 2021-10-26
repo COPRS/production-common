@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'rs-container/docker_s1_ipf_simulator/**'
-      - '.github/workflows/build-s1-ipfsimulator.yaml'
+      - '.github/workflows/build-s1-ipf-simulator.yaml'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:
@@ -20,6 +20,8 @@ env:
   ARTIFACTORY_PROJECT: werum-docker
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+  VERSION: 3.32.1
+  COMMIT_ID: ${{ github.sha }}
 
 jobs:
   build-s1-ipfsimulator:
@@ -51,7 +53,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images:  ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-container-s1-ipf-simulator
+          images: ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-core-s1-ipf-simulator
               
       - name: Build image
         uses: docker/build-push-action@v2
@@ -62,6 +64,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ env.VERSION }}
+            COMMIT_ID=${{ env.COMMIT_ID }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
