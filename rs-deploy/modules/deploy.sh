@@ -47,8 +47,7 @@ function deploy_init () {
 #################################${NC}";
 
   # update_helm_repo # No helm chart used in V1 scenario. Detection for il is not trivial. So it is deactivated.
-
-  echo "Using ${HELM_REPO_NAME} (at ${HELM_REPO_URL}) to deploy services ..."
+  # echo "Using ${HELM_REPO_NAME} (at ${HELM_REPO_URL}) to deploy services ..."
 
   # Parse all the COMPONENTS to deploy
   for application in $(echo "${HELM_LIST}" | awk '{print $1":"$2":"$3":"$4":"$5}' | grep "YES" | sort | egrep "${FILTER}");
