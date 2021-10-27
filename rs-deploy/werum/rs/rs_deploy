@@ -51,8 +51,8 @@ rs_uninstall() {
 
 rs_restart() {
   echo "Performing restart of addon $ADDON"
-  rs_uninstall()
-  rs_install()
+  rs_uninstall
+  rs_install
 }
 
 
