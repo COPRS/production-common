@@ -1,7 +1,8 @@
 openapi: 3.0.1
 info:
   title: RS Native API
-  description: The API of the Reference System that can be used to query product data.
+  description: The Native API of the Copernicus Reference System (COPRS) that can
+    be used to query and download product data.
   version: "1.0"
 servers:
 - url: http://localhost:8888
@@ -9,62 +10,6 @@ servers:
 tags:
 - name: Metadata
 paths:
-  /api/v1/missions:
-    get:
-      tags:
-      - Metadata
-      summary: retrieve the names of the missions supported by the API
-      description: To search for satellite product data the data can be filtered by
-        attributes which depend on the product type which in turn depend on the satellite
-        mission. This endpoint returns all names of the missions supported by the
-        API.
-      operationId: GetMissions
-      responses:
-        "500":
-          description: Internal Server Error - the API service encountered an unexpected
-            condition that prevented it from fulfilling the request
-          content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
-        "200":
-          description: OK - the supperted mission names were returned with this response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Missions'
-  /api/v1/missions/{missionName}/productTypes:
-    get:
-      tags:
-      - Metadata
-      summary: retrieve the names of the product types supported for a particular
-        mission
-      description: To search for satellite product data the data can be filtered by
-        attributes which depend on the product type which in turn depend on the satellite
-        mission. This endpoint returns all names of the product types supported for
-        the given mission.
-      operationId: GetProductTypes
-      parameters:
-      - name: missionName
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "500":
-          description: Internal Server Error - the API service encountered an unexpected
-            condition that prevented it from fulfilling the request
-          content: {}
-        "200":
-          description: OK - the product type names for the given mission were returned
-            with this response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProductTypes'
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
   /api/v1/ping:
     get:
       tags:
@@ -79,15 +24,15 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the API service is running and reachable
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PingResponse'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
   /api/v1/missions/{missionName}/products/{productId}:
     get:
       tags:
@@ -112,9 +57,6 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the product metadata for the given mission and product
             ID was returned with this response
@@ -122,6 +64,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductMetadata'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
   /api/v1/missions/{missionName}/productTypes/{productType}/products:
     get:
       tags:
@@ -189,6 +134,9 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the product metadata for the given mission and filter
             was returned with this response
@@ -196,9 +144,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductMetadata'
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
   /api/v1/missions/{missionName}/products/{productId}/download:
     get:
       tags:
@@ -223,6 +168,9 @@ paths:
           description: Internal Server Error - the API service encountered an unexpected
             condition that prevented it from fulfilling the request
           content: {}
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
         "200":
           description: OK - the actual link to download the zipped product file was
             returned with this response
@@ -231,11 +179,64 @@ paths:
               schema:
                 type: string
                 format: binary
+        "404":
+          description: Not Found - the product with the given ID wasn't found
+  /api/v1/missions:
+    get:
+      tags:
+      - Metadata
+      summary: retrieve the names of the missions supported by the API
+      description: To search for satellite product data the data can be filtered by
+        attributes which depend on the product type which in turn depend on the satellite
+        mission. This endpoint returns all names of the missions supported by the
+        API.
+      operationId: GetMissions
+      responses:
+        "500":
+          description: Internal Server Error - the API service encountered an unexpected
+            condition that prevented it from fulfilling the request
+          content: {}
+        "200":
+          description: OK - the supperted mission names were returned with this response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Missions'
         "400":
           description: "Bad Request - the API service rejects to process the request\
             \ because of client side errors, for example a malformed request syntax"
-        "404":
-          description: Not Found - the product with the given ID wasn't found
+  /api/v1/missions/{missionName}/productTypes:
+    get:
+      tags:
+      - Metadata
+      summary: retrieve the names of the product types supported for a particular
+        mission
+      description: To search for satellite product data the data can be filtered by
+        attributes which depend on the product type which in turn depend on the satellite
+        mission. This endpoint returns all names of the product types supported for
+        the given mission.
+      operationId: GetProductTypes
+      parameters:
+      - name: missionName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "500":
+          description: Internal Server Error - the API service encountered an unexpected
+            condition that prevented it from fulfilling the request
+          content: {}
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
+        "200":
+          description: OK - the product type names for the given mission were returned
+            with this response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductTypes'
   /api/v1/missions/{missionName}/attributes:
     get:
       tags:
@@ -306,34 +307,6 @@ paths:
                 $ref: '#/components/schemas/Attributes'
 components:
   schemas:
-    Missions:
-      type: object
-      properties:
-        missions:
-          type: array
-          description: the names of the missions supported by the API
-          example:
-          - s1
-          - s2
-          - s3
-          items:
-            type: string
-            description: the names of the missions supported by the API
-            example: "[\"s1\",\"s2\",\"s3\"]"
-    ProductTypes:
-      type: object
-      properties:
-        productTypes:
-          type: array
-          description: the names of the product types for a particular mission
-          example:
-          - l1
-          - l2
-          - aux-safe
-          items:
-            type: string
-            description: the names of the product types for a particular mission
-            example: "[\"l1\",\"l2\",\"aux-safe\"]"
     PingResponse:
       type: object
       properties:
@@ -461,6 +434,34 @@ components:
             type: string
             description: Links representing possible actions on the data
           description: Links representing possible actions on the data
+    Missions:
+      type: object
+      properties:
+        missions:
+          type: array
+          description: the names of the missions supported by the API
+          example:
+          - s1
+          - s2
+          - s3
+          items:
+            type: string
+            description: the names of the missions supported by the API
+            example: "[\"s1\",\"s2\",\"s3\"]"
+    ProductTypes:
+      type: object
+      properties:
+        productTypes:
+          type: array
+          description: the names of the product types for a particular mission
+          example:
+          - l1
+          - l2
+          - aux-safe
+          items:
+            type: string
+            description: the names of the product types for a particular mission
+            example: "[\"l1\",\"l2\",\"aux-safe\"]"
     Attributes:
       type: object
       properties:
