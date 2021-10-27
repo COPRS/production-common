@@ -46,7 +46,7 @@ function deploy_init () {
 #  HELM PROCESSING INIT / UPGRADE ...
 #################################${NC}";
 
-  update_helm_repo
+  # update_helm_repo # No helm chart used in V1 scenario. Detection for il is not trivial. So it is deactivated.
 
   echo "Using ${HELM_REPO_NAME} (at ${HELM_REPO_URL}) to deploy services ..."
 
