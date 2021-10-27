@@ -69,9 +69,13 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
             BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
+            SONARQUBE_HOST=${{ secrets.SONARQUBE_HOST }}
+            SONARQUBE_TOKEN=${{ secrets.WERUM_SONARQUBE_TOKEN }}
+            PROJECT_KEY=${{ github.repository }}
 
       - name: Scan image
         uses: anchore/scan-action@v2

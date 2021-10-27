@@ -6,6 +6,12 @@ FROM maven:3.5.3-jdk-8 as buildenv
 WORKDIR /app
 COPY . /app/
 
+ARG PROJECT_KEY
+ARG SONARQUBE_HOST
+ARG SONARQUBE_TOKEN
+ARG BRANCH
+RUN mvn sonar:sonar -Dsonar.projectKey=${PROJECT_KEY} -Dsonar.host.url=${SONARQUBE_HOST} -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${BRANCH}
+
 ARG MAVEN_ARGS
 RUN mvn ${MAVEN_ARGS} -f /app/pom.xml -s /usr/share/maven/ref/settings-docker.xml install 
 
