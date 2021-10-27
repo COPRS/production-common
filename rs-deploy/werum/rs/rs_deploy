@@ -12,7 +12,7 @@
 # Give some hints on how to use the script
 usage() {
   echo "Usage $0: <CMD> <ADDON> <SERVICE>"
-  echo -e "\t  CMD \t\t install|uninstall"
+  echo -e "\t  CMD \t\t install|uninstall|restart"
   echo -e "\t  ADDON \t common|infra|s1|s3"
   #echo -e "\t  SERVICE \t Name of a specific service that shall be handled. Can be left empty for all."
   echo 
@@ -49,9 +49,16 @@ rs_uninstall() {
   deploy UNINSTALL $ADDON
 }
 
+rs_restart() {
+  echo "Performing restart of addon $ADDON"
+  rs_uninstall()
+  rs_install()
+}
+
 
 case "$CMD" in
   "install") rs_install ;;
   "uninstall") rs_uninstall ;;
+  "restart") rs_restart ;;
   *) echo "Unknown command" ; usage ;;
 esac
