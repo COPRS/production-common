@@ -78,8 +78,8 @@ public class TestDisseminationTriggerListener {
 		};		
 		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, null, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", OutboxClient.NULL);		
-		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
-		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
+		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "S1my/key", ProductFamily.BLANK);
+		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "S1myKey", fakeProduct); 
 		uut.handleTransferTo(fakeMessage, "foo");
 	}
 	
@@ -99,8 +99,8 @@ public class TestDisseminationTriggerListener {
 		
 		final DisseminationTriggerListener<ProductionEvent> uut = new DisseminationTriggerListener<>(fakeObsClient, null, new DisseminationProperties(), ErrorRepoAppender.NULL);
 		uut.put("foo", failOuboxClient);		
-		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "my/key", ProductFamily.BLANK);
-		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "myKey", fakeProduct); 
+		final ProductionEvent fakeProduct = new ProductionEvent("fakeProduct", "S3my/key", ProductFamily.BLANK);
+		final GenericMessageDto<ProductionEvent> fakeMessage = new GenericMessageDto<ProductionEvent>(123, "S3smyKey", fakeProduct); 
 		try {
 			uut.handleTransferTo(fakeMessage, "foo");
 		} catch (final Exception e) {

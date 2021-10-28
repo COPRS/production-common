@@ -57,6 +57,7 @@ public class CatalogEventListenerTest {
 		Map<String, Object> metadata = new HashMap<>();
 		metadata.put("startTime", "2017-12-13T14:59:48.123456Z");
 		metadata.put("stopTime", "2017-12-13T15:17:25.142536Z");
+		metadata.put("missionId", "S1");
 		catalogEvent.setMetadata(metadata);
 		mqiMessage.setBody(catalogEvent);
 

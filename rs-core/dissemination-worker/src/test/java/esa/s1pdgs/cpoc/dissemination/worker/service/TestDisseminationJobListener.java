@@ -85,7 +85,7 @@ public class TestDisseminationJobListener {
 		
 		final GenericMessageDto<DisseminationJob> mqiMessage = new GenericMessageDto<DisseminationJob>();
 		DisseminationJob job = new DisseminationJob();
-		job.setKeyObjectStorage("test");
+		job.setKeyObjectStorage("S3test");
 		mqiMessage.setBody(job);
 		
 		try {

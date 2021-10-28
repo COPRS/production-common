@@ -44,7 +44,7 @@ public class MetadataTriggerListenerTest {
 
 		uut = new MetadataTriggerListener(mapper, errorAppender, processConfig);
 
-		IngestionEvent event = new IngestionEvent(ProductFamily.AUXILIARY_FILE, "key", "path", 0, "station", null,
+		IngestionEvent event = new IngestionEvent(ProductFamily.AUXILIARY_FILE, "S1key", "path", 0, "station", null,
 				"NRT");
 		GenericMessageDto<IngestionEvent> message = new GenericMessageDto<>();
 		message.setBody(event);
