@@ -15,7 +15,7 @@ public class AuxMetadataSerializer extends JsonSerializer<AuxMetadata> {
         jsonGenerator.writeStringField("keyObjectStorage", auxMetadata.keyObjectStorage);
         jsonGenerator.writeStringField("validityStart", auxMetadata.validityStart);
         jsonGenerator.writeStringField("validityStop", auxMetadata.validityStop);
-        jsonGenerator.writeStringField("missionId", auxMetadata.missionId);
+        jsonGenerator.writeStringField(MissionId.FIELD_NAME, auxMetadata.missionId);
         jsonGenerator.writeStringField("satelliteId", auxMetadata.satelliteId);
         jsonGenerator.writeStringField("stationCode", auxMetadata.stationCode);
         auxMetadata.getAdditionalProperties().forEach(

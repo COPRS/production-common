@@ -37,6 +37,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -94,7 +95,7 @@ public class TestLevelProductMetadataExtractor {
     
     private final File testDir = FileUtils.createTmpDir();
     
-	final Reporting reporting = ReportingUtils.newReportingBuilder()
+	final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED)
 			.newReporting("TestMetadataExtraction");
 
 	/**

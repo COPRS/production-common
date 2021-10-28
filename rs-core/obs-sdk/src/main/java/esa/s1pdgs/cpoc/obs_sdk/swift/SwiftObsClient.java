@@ -21,6 +21,7 @@ import org.javaswift.joss.model.StoredObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.obs_sdk.AbstractObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.Md5;
@@ -308,7 +309,7 @@ public class SwiftObsClient extends AbstractObsClient {
 	public URL createTemporaryDownloadUrl(final ObsObject object, final long expirationTimeInSeconds) throws ObsException {
 		ValidArgumentAssertion.assertValidArgument(object);
 		URL url;
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ObsCreateTemporaryDownloadUrl");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.fromFamilyOrFileName(object.getFamily(), object.getKey())).newReporting("ObsCreateTemporaryDownloadUrl");
 		reporting.begin(new ReportingMessage(size(object), "Start creating temporary download URL for username '{}' for product '{}'", "anonymous", object.getKey()));
 		try {
 			url = swiftObsServices.createTemporaryDownloadUrl(getBucketFor(object.getFamily()), object.getKey(), expirationTimeInSeconds);

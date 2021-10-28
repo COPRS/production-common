@@ -68,6 +68,7 @@ import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 
@@ -1335,7 +1336,7 @@ public class EsServices {
 					final SearchMetadata local = new SearchMetadata();
 					local.setProductName(source.get("productName").toString());
 					local.setProductType(source.get("productType").toString());
-					local.setMissionId(source.get("missionId").toString());
+					local.setMissionId(source.get(MissionId.FIELD_NAME).toString());
 					local.setKeyObjectStorage(source.get("url").toString());
 					if (source.containsKey("startTime")) {
 						try {
@@ -1385,7 +1386,7 @@ public class EsServices {
 		final String keyObjectStorage = getProperty(source, "url", orThrowMalformed("url"));
 		final String validityStart = getPropertyAsDate(source, "validityStartTime", orThrowMalformed("validityStartTime"));
 		final String validityStop = getPropertyAsDate(source, "validityStopTime", orThrowMalformed("validityStopTime"));
-		final String missionId = getProperty(source, "missionId", orThrowMalformed("missionId"));
+		final String missionId = getProperty(source, MissionId.FIELD_NAME, orThrowMalformed(MissionId.FIELD_NAME));
 		final String satelliteId = getProperty(source, "satelliteId", orThrowMalformed("satelliteId"));
 
 		final Map<String, String> additionalProperties = source.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> e.getValue().toString()));
@@ -1601,7 +1602,7 @@ public class EsServices {
 		r.setStopTime(source.getOrDefault("stopTime", "NOT_FOUND").toString());
 		r.setStationCode(source.getOrDefault("stationCode", "NOT_FOUND").toString());
 		r.setSatelliteId(source.getOrDefault("satelliteId", "NOT_FOUND").toString());
-		r.setMissionId(source.getOrDefault("missionId", "NOT_FOUND").toString());
+		r.setMissionId(source.getOrDefault(MissionId.FIELD_NAME, "NOT_FOUND").toString());
 		r.setChannelId(Integer.parseInt(source.get("channelId").toString()));
 
 		@SuppressWarnings("unchecked")

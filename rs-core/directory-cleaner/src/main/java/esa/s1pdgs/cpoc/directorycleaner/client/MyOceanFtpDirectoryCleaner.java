@@ -22,6 +22,7 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.directorycleaner.DirectoryCleaner;
 import esa.s1pdgs.cpoc.directorycleaner.config.DirectoryCleanerProperties;
 import esa.s1pdgs.cpoc.directorycleaner.util.LogPrintWriter;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -46,7 +47,7 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 	@Override
 	public void cleanDirectories() {
 		this.logger.info("start cleaning directories on host: " + this.config.getHostname());
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MyOceanCleaner");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED).newReporting("MyOceanCleaner");
 		reporting.begin(new ReportingMessage("Start cleaning directories on host: %s", this.config.getHostname()));
 
 		FTPClient ftpClient = null;
@@ -184,7 +185,7 @@ public class MyOceanFtpDirectoryCleaner implements DirectoryCleaner {
 				this.logger.debug("Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
 						file.getName(), this.dateFormat.format(timestamp.getTime()), this.config.getRetentionTimeInDays(),
 						this.config);
-				final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("MyOceanCleanerFileRemoval");
+				final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED).newReporting("MyOceanCleanerFileRemoval");
 				reporting.begin(new ReportingMessage(
 						"Attempting to delete file %s because timestamp %s exceeds retention time of %s days: %s",
 						file.getName(), this.dateFormat.format(timestamp.getTime()), this.config.getRetentionTimeInDays(),

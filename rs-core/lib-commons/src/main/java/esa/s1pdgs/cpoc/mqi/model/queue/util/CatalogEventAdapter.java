@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.MessageDto;
@@ -50,7 +51,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final String missionId() {
-		return getStringValue("missionId");
+		return getStringValue(MissionId.FIELD_NAME);
 	}
 	
 	public final String datatakeId() {

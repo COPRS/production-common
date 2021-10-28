@@ -5,6 +5,7 @@ import java.util.List;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 
 public final class AppDataJobProductAdapter {
 	private final AppDataJobProduct product;
@@ -54,11 +55,11 @@ public final class AppDataJobProductAdapter {
 	}
 	
 	public final void setMissionId(final String value) {
-		setStringValue("missionId", value);		
+		setStringValue(MissionId.FIELD_NAME, value);		
 	}
 		
 	public final String getMissionId() {
-		return getStringValue("missionId");
+		return getStringValue(MissionId.FIELD_NAME);
 	}
 	
 	public final void setInsConfId(final int id) {

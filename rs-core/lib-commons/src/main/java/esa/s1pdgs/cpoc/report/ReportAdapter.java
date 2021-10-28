@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.message.BeginTask;
 import esa.s1pdgs.cpoc.report.message.EndTask;
 import esa.s1pdgs.cpoc.report.message.Header;
@@ -30,9 +31,12 @@ public final class ReportAdapter implements Reporting {
 		private UUID rootUid;
 		private UUID parentUid;
 		
-		public Builder(final ReportAppender appender) {			
+		private MissionId mission;
+		
+		public Builder(final ReportAppender appender, final MissionId mission) {			
 			this.appender = appender;
 			this.uid = UUID.randomUUID();
+			this.mission = mission;
 		}
 		
 		@Override
@@ -81,6 +85,7 @@ public final class ReportAdapter implements Reporting {
 	private final UUID rootUid;
 	private final UUID parentUid;
 	private final UUID uid;
+	private final MissionId mission;
 	
 	private long actionStart;
 	private ReportingInput input = ReportingInput.NULL;
@@ -93,6 +98,7 @@ public final class ReportAdapter implements Reporting {
 		rootUid        	= builder.rootUid;
 		parentUid      	= builder.parentUid;
 		uid            	= builder.uid;
+		mission         = builder.mission;
 		actionStart    	= 0L;	
 		input			= ReportingInput.NULL;
 	}
@@ -122,7 +128,7 @@ public final class ReportAdapter implements Reporting {
 			task.setChildOfTask(parentUid.toString());
 		}		
 		appender.report(new JacksonReportEntry(
-				new Header(Level.INFO), 
+				new Header(Level.INFO, mission), 
 				new Message(toString(reportingMessage)),
 				task
 		));	
@@ -162,7 +168,7 @@ public final class ReportAdapter implements Reporting {
 			endTask.setQuality(quality);
 		}
 		appender.report(new JacksonReportEntry(		
-				new Header(level), 
+				new Header(level, mission), 
 				new Message(toString(reportingMessage)),
 				endTask
 		));
@@ -182,7 +188,7 @@ public final class ReportAdapter implements Reporting {
 				input
 		);
 		appender.report(new JacksonReportEntry(		
-				new Header(Level.ERROR), 
+				new Header(Level.ERROR, mission), 
 				new Message(toString(reportingMessage)),
 				endTask
 		));
@@ -192,7 +198,7 @@ public final class ReportAdapter implements Reporting {
 	
 	@Override
 	public final Reporting newReporting(final String taskName) {
-		return new Builder(appender)
+		return new Builder(appender, mission)
 				.root(rootUid)
 				.parent(uid)				
 				.addTags(tags)

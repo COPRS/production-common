@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.POJONode;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.mdc.trigger.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -69,7 +70,7 @@ public class MetadataTriggerListenerTest {
 		GenericMessageDto<IngestionEvent> message = new GenericMessageDto<>();
 		message.setBody(event);
 		MqiPublishingJob<CatalogJob> outputMessage = uut.newPublicationMessage(
-				ReportingUtils.newReportingBuilder().newReporting("newPublicationMessageTest"), message);
+				ReportingUtils.newReportingBuilder(MissionId.UNDEFINED).newReporting("newPublicationMessageTest"), message);
 
 		CatalogJob job = (CatalogJob) outputMessage.getMessages().get(0).getDto();
 		assertEquals(ProductFamily.AUXILIARY_FILE, job.getProductFamily());

@@ -14,6 +14,7 @@ import esa.s1pdgs.cpoc.mdc.timer.db.CatalogEventTimerEntry;
 import esa.s1pdgs.cpoc.mdc.timer.db.CatalogEventTimerEntryRepository;
 import esa.s1pdgs.cpoc.mdc.timer.publish.Publisher;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
@@ -117,7 +118,7 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 		event.setUid(UUID.randomUUID());
 		
 		event.getMetadata().put("satelliteId", this.satelliteId);
-		event.getMetadata().put("missionId", metadata.getMissionId());
+		event.getMetadata().put(MissionId.FIELD_NAME, metadata.getMissionId());
 		event.getMetadata().put("startTime", metadata.getValidityStart());
 		event.getMetadata().put("stopTime", metadata.getValidityStop());
 		

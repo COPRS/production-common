@@ -33,6 +33,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.MetadataExtractorFactory;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.MetadataExtractionReportingOutput.EffectiveDownlink;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -99,8 +100,10 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	@Override
 	public final MqiMessageEventHandler onMessage(final GenericMessageDto<CatalogJob> message) throws Exception {
 		final CatalogJob catJob = message.getBody();
-		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(catJob.getUid())
-				.newReporting("MetadataExtraction");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(
+						MissionId.fromFamilyOrFileName(catJob.getProductFamily(), catJob.getKeyObjectStorage()))
+				.predecessor(catJob.getUid()).newReporting("MetadataExtraction");
 
 		reporting.begin(ReportingUtils.newFilenameReportingInputFor(catJob.getProductFamily(), catJob.getProductName()),
 				new ReportingMessage("Starting metadata extraction"));

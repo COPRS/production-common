@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -81,9 +82,9 @@ public class CompressionEventListener implements MqiListener<CompressionEvent> {
 			compressionEvent.convertForPublishingCompressed();
 		}
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(compressionEvent.getUid())
-				.newReporting("PripTrigger");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(MissionId.fromFileName(compressionEvent.getKeyObjectStorage()))
+				.predecessor(compressionEvent.getUid()).newReporting("PripTrigger");
 		
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage()),

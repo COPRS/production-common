@@ -11,6 +11,7 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.mdc.trigger.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
@@ -44,9 +45,9 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 		final E dto = message.getBody();
 		final String eventType = dto.getClass().getSimpleName();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(dto.getUid())
-				.newReporting("MetadataTrigger");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(MissionId.fromFamilyOrFileName(dto.getProductFamily(), dto.getKeyObjectStorage()))
+				.predecessor(dto.getUid()).newReporting("MetadataTrigger");
 		
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(dto.getProductFamily(), dto.getKeyObjectStorage()),

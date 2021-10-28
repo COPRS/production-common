@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingInput;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingOutput;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.message.MessageProducer;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingInput;
@@ -145,7 +146,8 @@ public final class Inbox {
 	}
 
 	final Optional<InboxEntry> handleEntry(final InboxEntry entry) {
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
+		final Reporting reporting = ReportingUtils.newReportingBuilder(
+				MissionId.fromFamilyOrFileName(ProductFamily.fromValue(entry.getProductFamily()), entry.getName()))
 				.newReporting("IngestionTrigger");
 
 		final String productName;

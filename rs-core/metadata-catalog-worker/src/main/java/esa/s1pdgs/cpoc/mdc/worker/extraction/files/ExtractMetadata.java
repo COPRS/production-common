@@ -44,6 +44,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.TimelinessReportingInput;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.report.TimelinessReportingOutput;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -671,7 +672,7 @@ public class ExtractMetadata {
 				metadataJSONObject.put("productType", descriptor.getProductType());
 			}
 
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
+			metadataJSONObject.put(MissionId.FIELD_NAME, descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
@@ -692,7 +693,7 @@ public class ExtractMetadata {
 			metadataJSONObject.put("productName", descriptor.getProductName());
 			metadataJSONObject.put("productType", descriptor.getEdrsSessionFileType().name());
 			metadataJSONObject.put("sessionId", descriptor.getSessionIdentifier());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
+			metadataJSONObject.put(MissionId.FIELD_NAME, descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("stationCode", descriptor.getStationCode());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
@@ -746,7 +747,7 @@ public class ExtractMetadata {
 			}
 
 			metadataJSONObject.put("resolution", descriptor.getResolution());
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
+			metadataJSONObject.put(MissionId.FIELD_NAME, descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 
 			if (!metadataJSONObject.has("swathtype") || "".equals((String) metadataJSONObject.get("swathtype"))) {
@@ -800,7 +801,7 @@ public class ExtractMetadata {
 				metadataJSONObject.put("productType", descriptor.getProductType());
 			}
 
-			metadataJSONObject.put("missionId", descriptor.getMissionId());
+			metadataJSONObject.put(MissionId.FIELD_NAME, descriptor.getMissionId());
 			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());

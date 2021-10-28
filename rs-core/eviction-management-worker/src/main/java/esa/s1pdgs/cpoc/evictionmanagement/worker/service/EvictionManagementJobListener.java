@@ -20,6 +20,7 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.evictionmanagement.worker.config.WorkerConfigurationProperties;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -80,9 +81,10 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 		LOG.debug("Starting eviction, got message: {}", inputMessage);
 		final EvictionManagementJob evictionJob = inputMessage.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(evictionJob.getUid())
-				.newReporting("EvictionManagementWorker");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(
+						MissionId.fromFamilyOrFileName(evictionJob.getProductFamily(), evictionJob.getKeyObjectStorage()))
+				.predecessor(evictionJob.getUid()).newReporting("EvictionManagementWorker");
 		
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(evictionJob.getProductFamily(), evictionJob.getKeyObjectStorage()),

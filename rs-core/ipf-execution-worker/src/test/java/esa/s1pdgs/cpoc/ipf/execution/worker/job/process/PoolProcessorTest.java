@@ -11,13 +11,14 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.test.SystemUtils;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobPoolDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobTaskDto;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class PoolProcessorTest {
-    private final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestProcessing");
+    private final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("TestProcessing");
 	  
     private File testDir = new File("./3");
 

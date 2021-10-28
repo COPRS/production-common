@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleTextFilter;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -46,7 +47,7 @@ public class ValidationServiceTest {
 
 	private ValidationService validationService;
 	
-	final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ValidationService");
+	final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED).newReporting("ValidationService");
 
 	@Mock
 	Reporting report;

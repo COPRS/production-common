@@ -31,6 +31,7 @@ import esa.s1pdgs.cpoc.dissemination.worker.outbox.FtpsOutboxClient;
 import esa.s1pdgs.cpoc.dissemination.worker.outbox.OutboxClient;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
@@ -122,7 +123,8 @@ public class DisseminationJobListener implements MqiListener<DisseminationJob> {
 		final DisseminationJob job = message.getBody();
 		final List<DisseminationSource> filesToDisseminate = job.getDisseminationSources();
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(job.getUid()).newReporting("Dissemination");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.fromFileName(job.getKeyObjectStorage()))
+				.predecessor(job.getUid()).newReporting("Dissemination");
 
 		return new MqiMessageEventHandler.Builder<DisseminationJob>(ProductCategory.DISSEMINATION_JOBS)
 				.publishMessageProducer(() -> {

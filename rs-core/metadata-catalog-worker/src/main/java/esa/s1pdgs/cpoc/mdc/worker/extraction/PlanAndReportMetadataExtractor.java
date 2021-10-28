@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -49,9 +50,9 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 		
 		Matcher matcher = MISSION_ID_PATTERN.matcher(message.getBody().getProductName());
 		if (matcher.matches()) {
-			metadata.put("missionId", matcher.group(1));			
+			metadata.put(MissionId.FIELD_NAME, matcher.group(1));			
 		} else {
-			metadata.put("missionId", esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage.NOT_DEFINED);
+			metadata.put(MissionId.FIELD_NAME, esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage.NOT_DEFINED);
 		}
 		
 		return metadata;

@@ -38,6 +38,7 @@ import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleQue
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
@@ -81,7 +82,7 @@ public class DataLifecycleSyncService {
 	 */
 	public DataLifecycleSyncStats syncDataLifecycleIndexFromOBS(final Date startDate, final Date endDate) {
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncDataLifecycleIndexFromOBS");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED).newReporting("SyncDataLifecycleIndexFromOBS");
 		final String beginSyncMsg = "Start synchronising";
 		reporting.begin(new ReportingMessage(beginSyncMsg));
 		LOG.info(beginSyncMsg);
@@ -325,7 +326,7 @@ public class DataLifecycleSyncService {
 	public void syncDataLifecycleIndexWithOBS(final LocalDateTime startDate, final LocalDateTime endDate)
 			throws DataLifecycleTriggerInternalServerErrorException {
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("SyncDataLifecycleIndexWithOBS");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED).newReporting("SyncDataLifecycleIndexWithOBS");
 		final String beginSyncMsg = "Start synchronising";
 		reporting.begin(new ReportingMessage(beginSyncMsg));
 		LOG.info(beginSyncMsg);

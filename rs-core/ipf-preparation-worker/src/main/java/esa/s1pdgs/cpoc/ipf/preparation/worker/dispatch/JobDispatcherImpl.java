@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.appcat.AppCatJobService;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.report.TaskTableLookupReportingOutput;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -60,7 +61,10 @@ public class JobDispatcherImpl implements JobDispatcher {
 	public final MqiMessageEventHandler dispatch(final GenericMessageDto<IpfPreparationJob> message) throws Exception {
     	final IpfPreparationJob prepJob = message.getBody();
         
-        final Reporting reporting = ReportingUtils.newReportingBuilder()
+		MissionId mission = MissionId
+				.valueOf((String) prepJob.getEventMessage().getBody().getMetadata().get(MissionId.FIELD_NAME));
+
+        final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
         		.predecessor(prepJob.getUid())
         		.newReporting("TaskTableLookup");
         

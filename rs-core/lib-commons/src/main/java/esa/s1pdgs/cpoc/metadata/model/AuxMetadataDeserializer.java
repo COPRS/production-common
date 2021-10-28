@@ -27,7 +27,7 @@ public class AuxMetadataDeserializer extends JsonDeserializer<AuxMetadata> {
                 "keyObjectStorage",
                 "validityStart",
                 "validityStop",
-                "missionId",
+                MissionId.FIELD_NAME,
                 "satelliteId",
                 "stationCode"
         );
@@ -38,7 +38,7 @@ public class AuxMetadataDeserializer extends JsonDeserializer<AuxMetadata> {
                 values.getOrDefault("keyObjectStorage", "UNDEFINED"),
                 values.getOrDefault("validityStart", "UNDEFINED"),
                 values.getOrDefault("validityStop", "UNDEFINED"),
-                values.getOrDefault("missionId", "UNDEFINED"),
+                values.getOrDefault(MissionId.FIELD_NAME, "UNDEFINED"),
                 values.getOrDefault("satelliteId", "UNDEFINED"),
                 values.getOrDefault("stationCode", "UNDEFINED"),
                 values.entrySet().stream()

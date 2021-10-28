@@ -32,6 +32,7 @@ import org.springframework.dao.RecoverableDataAccessException;
 
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -122,7 +123,8 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 			try {
 				final PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
 				if (null != foundPripMetadata) {		
-					final Reporting reporting = ReportingUtils.newReportingBuilder()
+					final Reporting reporting = ReportingUtils
+							.newReportingBuilder(MissionId.fromFileName(foundPripMetadata.getObsKey()))
 							.newReporting("PripTempDownloadUrl");
 					// currently used username
 					final String username = "not defined";

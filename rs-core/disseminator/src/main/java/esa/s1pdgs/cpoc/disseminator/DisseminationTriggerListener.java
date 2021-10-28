@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.disseminator.service.DisseminationService;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
@@ -143,7 +144,7 @@ public class DisseminationTriggerListener<E extends AbstractMessage> implements 
 	final void handleTransferTo(final GenericMessageDto<E> message, final String target) {		
 		final AbstractMessage body = message.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.fromFileName(body.getKeyObjectStorage()))
 				.predecessor(body.getUid())				
 				.newReporting("Dissemination");	
 		

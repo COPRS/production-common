@@ -40,6 +40,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -99,7 +100,7 @@ public class OutputProcessorTest {
      */
     private List<FileQueueMessage> reportToPublish;
 
-    private final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestOutputHandling");
+    private final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("TestOutputHandling");
     
     /**
      * Initialization

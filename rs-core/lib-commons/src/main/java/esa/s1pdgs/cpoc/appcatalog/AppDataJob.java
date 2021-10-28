@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -123,7 +124,7 @@ public class AppDataJob {
 		productDto.getMetadata().put("productName", event.getProductName());
 		productDto.getMetadata().put("productType", event.getProductType());
 		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
-		productDto.getMetadata().put("missionId", eventAdapter.missionId());
+		productDto.getMetadata().put(MissionId.FIELD_NAME, eventAdapter.missionId());
 		productDto.getMetadata().put("processMode", eventAdapter.processMode());
 		productDto.getMetadata().put("startTime", eventAdapter.productSensingStartDate());
 		productDto.getMetadata().put("stopTime", eventAdapter.productSensingStopDate());
