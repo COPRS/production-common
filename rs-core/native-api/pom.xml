@@ -36,11 +36,11 @@
 	</repositories>
 
 	<dependencies>
-		<!--dependency>
+		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-prip-client</artifactId>
 			<version>${s1pro.version}</version>
-		</dependency-->
+		</dependency>
 
 		<dependency>
 			<groupId>commons-logging</groupId>
