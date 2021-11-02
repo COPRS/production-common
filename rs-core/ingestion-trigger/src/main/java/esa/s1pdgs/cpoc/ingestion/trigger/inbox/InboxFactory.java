@@ -77,6 +77,7 @@ public class InboxFactory {
 				messageProducer,
 				config.getTopic(),
 				config.getFamily(),
+				config.getMissionId(),
 				config.getStationName(),
 				config.getStationRetentionTime(),
 				config.getMode(),

@@ -115,5 +115,9 @@ public enum ProductFamily {
 	public static boolean isCompressed(final ProductFamily productFamily) {
 		return Objects.requireNonNull(productFamily, "productFamily must not be null!").name().endsWith("_ZIP");
 	}
+	
+	public boolean isSessionFamily() {
+		return (this == EDRS_SESSION || this == SESSION_RETRANSFER);
+	}
     
 }

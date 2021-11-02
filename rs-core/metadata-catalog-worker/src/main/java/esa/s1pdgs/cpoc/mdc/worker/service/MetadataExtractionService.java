@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
@@ -100,10 +101,19 @@ public class MetadataExtractionService implements MqiListener<CatalogJob> {
 	@Override
 	public final MqiMessageEventHandler onMessage(final GenericMessageDto<CatalogJob> message) throws Exception {
 		final CatalogJob catJob = message.getBody();
-		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(
-						MissionId.fromFamilyOrFileName(catJob.getProductFamily(), catJob.getKeyObjectStorage()))
-				.predecessor(catJob.getUid()).newReporting("MetadataExtraction");
+		
+		MissionId mission = null;
+
+		if (catJob.getProductFamily().isSessionFamily()) {
+			PathMetadataExtractor mExtractor = MetadataExtractorFactory
+					.newPathMetadataExtractor(properties.getProductCategories().get(ProductCategory.EDRS_SESSIONS));
+			mission = MissionId.valueOf(mExtractor.metadataFrom(catJob.getRelativePath()).get(MissionId.FIELD_NAME));
+		} else {
+			mission = MissionId.fromFileName(catJob.getKeyObjectStorage());
+		}
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(catJob.getUid())
+				.newReporting("MetadataExtraction");
 
 		reporting.begin(ReportingUtils.newFilenameReportingInputFor(catJob.getProductFamily(), catJob.getProductName()),
 				new ReportingMessage("Starting metadata extraction"));

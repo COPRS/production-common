@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
@@ -17,6 +18,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -45,9 +47,21 @@ public final class MetadataTriggerListener<E extends AbstractMessage> implements
 		final E dto = message.getBody();
 		final String eventType = dto.getClass().getSimpleName();
 		
-		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(MissionId.fromFamilyOrFileName(dto.getProductFamily(), dto.getKeyObjectStorage()))
-				.predecessor(dto.getUid()).newReporting("MetadataTrigger");
+		MissionId mission = null;
+		
+		if (dto.getProductFamily().isSessionFamily()) {
+			if (dto instanceof IngestionEvent) {
+				mission = MissionId.valueOf(((IngestionEvent) dto).getMissionId());
+			} else {
+				LOG.warn("cannot determine missionId");
+				mission = MissionId.UNDEFINED;
+			}
+		} else {
+			mission = MissionId.fromFileName(dto.getKeyObjectStorage());
+		}
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(dto.getUid())
+				.newReporting("MetadataTrigger");
 		
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(dto.getProductFamily(), dto.getKeyObjectStorage()),

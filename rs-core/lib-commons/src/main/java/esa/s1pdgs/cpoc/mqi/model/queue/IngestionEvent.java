@@ -16,6 +16,7 @@ import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 public class IngestionEvent extends AbstractMessage {
 	private String productName = NOT_DEFINED;
 	private String relativePath = NOT_DEFINED;
+	private String missionId = NOT_DEFINED;
 	private long productSizeByte = 0L;
 	private String stationName;
 	private String mode;
@@ -32,6 +33,7 @@ public class IngestionEvent extends AbstractMessage {
 			final String productName, 
 			final String relativePath, 
 			final long productSizeByte,
+			final String missionId,
 			final String stationName,
 			final String mode,
 			final String timeliness
@@ -40,6 +42,7 @@ public class IngestionEvent extends AbstractMessage {
 		this.productName = productName;
 		this.relativePath = relativePath;
 		this.productSizeByte = productSizeByte;
+		this.missionId = missionId;
 		this.stationName = stationName;
 		this.mode = mode;
 		this.timeliness = timeliness;
@@ -62,6 +65,14 @@ public class IngestionEvent extends AbstractMessage {
 		this.relativePath = relativePath;
 	}
 	
+	public String getMissionId() {
+		return missionId;
+	}
+
+	public void setMissionId(String missionId) {
+		this.missionId = missionId;
+	}
+
 	public long getProductSizeByte() {
 		return productSizeByte;
 	}
@@ -107,7 +118,7 @@ public class IngestionEvent extends AbstractMessage {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + Objects
-				.hash(additionalMetadata, mode, productName, productSizeByte, relativePath, stationName, timeliness);
+				.hash(additionalMetadata, mode, productName, productSizeByte, relativePath, missionId, stationName, timeliness);
 		return result;
 	}
 
@@ -122,15 +133,15 @@ public class IngestionEvent extends AbstractMessage {
 		final IngestionEvent other = (IngestionEvent) obj;
 		return Objects.equals(additionalMetadata, other.additionalMetadata) && Objects.equals(mode, other.mode)
 				&& Objects.equals(productName, other.productName) && productSizeByte == other.productSizeByte
-				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(stationName, other.stationName)
-				&& Objects.equals(timeliness, other.timeliness);
+				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(missionId, other.missionId)
+				&& Objects.equals(stationName, other.stationName) && Objects.equals(timeliness, other.timeliness);
 	}
 
 	@Override
 	public String toString() {
 		return "IngestionEvent [productName=" + productName + ", productFamily=" + productFamily + ", keyObjectStorage=" 
 				+ keyObjectStorage + ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + 
-				relativePath + ", mode=" + mode +", uid=" + uid +", productSizeByte=" + productSizeByte +
+				relativePath + ", missionId=" + missionId + ", mode=" + mode +", uid=" + uid +", productSizeByte=" + productSizeByte +
 				", stationName=" + stationName +", timeliness=" + timeliness + ", additionalMetadata=" + additionalMetadata 
 				+ "]";
 	}

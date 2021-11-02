@@ -34,6 +34,8 @@ ingestion-trigger:
       family: EDRS_SESSION
       # Name of the station for EDRS sessions (4-letter code)
       stationName: MTI_
+      # Mission-ID in upper case (S1,S2,S3..)
+      missionId: S1
       # how many days to keep persisted data about inbox files at a minimum ( >= 0)
       station-retention-time: {{ .Values.xbip.stationRetentionTime.cgs01 }}
       # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
@@ -51,6 +53,8 @@ ingestion-trigger:
       family: SESSION_RETRANSFER
       # Name of the station for EDRS sessions (4-letter code)
       stationName: MTI_
+      # Mission-ID in upper case (S1,S2,S3..)
+      missionId: S1
       # how many days to keep persisted data about inbox files at a minimum ( >= 0)
       station-retention-time: {{ .Values.xbip.stationRetentionTime.cgs01 }}
       # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")

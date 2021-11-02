@@ -81,9 +81,8 @@ public class EvictionManagementJobListener implements MqiListener<EvictionManage
 		LOG.debug("Starting eviction, got message: {}", inputMessage);
 		final EvictionManagementJob evictionJob = inputMessage.getBody();
 		
-		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(
-						MissionId.fromFamilyOrFileName(evictionJob.getProductFamily(), evictionJob.getKeyObjectStorage()))
+		//FIXME: Extract the mission identifier of CADU sessions #115 
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED)
 				.predecessor(evictionJob.getUid()).newReporting("EvictionManagementWorker");
 		
 		reporting.begin(

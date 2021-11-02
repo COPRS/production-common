@@ -104,8 +104,8 @@ public class DataLifecycleTriggerListenerTest {
 		final AbstractMessage no[] = { //
 				new CompressionEvent(ProductFamily.L1_SLICE, null, null), //
 				new CompressionEvent(ProductFamily.L1_ACN, null, null), //
-				new IngestionEvent(ProductFamily.L1_SLICE, null, null, 0, null, null, null), //
-				new IngestionEvent(ProductFamily.L1_SLICE_ZIP, null, null, 0, null, null, null), //
+				new IngestionEvent(ProductFamily.L1_SLICE, null, null, 0, null, null, null, null), //
+				new IngestionEvent(ProductFamily.L1_SLICE_ZIP, null, null, 0, null, null, null, null), //
 				new ProductionEvent(null, null, ProductFamily.L1_ACN), //
 				new ProductionEvent(null, null, ProductFamily.L1_ACN_ZIP), //
 				evictionEvent1, evictionEvent2, //

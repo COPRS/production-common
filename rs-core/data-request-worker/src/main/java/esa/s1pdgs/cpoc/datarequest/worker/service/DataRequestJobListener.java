@@ -83,9 +83,8 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 		LOG.debug("Starting data request, got message: {}", inputMessage);
 		final DataRequestJob dataRequestJob = inputMessage.getBody();
 		
-		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(MissionId.fromFamilyOrFileName(dataRequestJob.getProductFamily(),
-						dataRequestJob.getKeyObjectStorage()))
+		//FIXME: Extract the mission identifier of CADU sessions #115 
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED)
 				.predecessor(dataRequestJob.getUid()).newReporting("DataRequestWorker");
 		
 		reporting.begin(

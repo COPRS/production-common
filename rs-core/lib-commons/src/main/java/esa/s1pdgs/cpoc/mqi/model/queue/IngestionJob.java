@@ -33,6 +33,8 @@ public class IngestionJob extends AbstractMessage {
 	
 	private long productSizeByte = 0L;
 	
+	private String missionId;
+	
 	private String stationName;
 	
 	private String mode;
@@ -53,6 +55,7 @@ public class IngestionJob extends AbstractMessage {
 			final String relativePath, 	
 			final long productSizeByte,
 			final UUID uuid,
+			final String missionId,
 			final String stationName,
 			final String mode,
 			final String timeliness,
@@ -65,6 +68,7 @@ public class IngestionJob extends AbstractMessage {
 		this.productName 		= productName;
 		this.productSizeByte 	= productSizeByte;
 		this.uid				= uuid;
+		this.missionId          = missionId;
 		this.stationName		= stationName;
 		this.mode               = mode;
 		this.timeliness         = timeliness;
@@ -105,6 +109,14 @@ public class IngestionJob extends AbstractMessage {
 		this.productSizeByte = productSizeByte;
 	}
 	
+	public String getMissionId() {
+		return missionId;
+	}
+	
+	public void setMissionId(String missionId) {
+		this.missionId = missionId;
+	}
+	
 	public String getStationName() {
 		return stationName;
 	}
@@ -112,7 +124,7 @@ public class IngestionJob extends AbstractMessage {
 	public void setStationName(final String stationName) {
 		this.stationName = stationName;
 	}
-	
+
 	public String getMode() {
 		return mode;
 	}
@@ -157,6 +169,7 @@ public class IngestionJob extends AbstractMessage {
 				productName,
 				productSizeByte,
 				relativePath,
+				missionId,
 				stationName,
 				timeliness
 	    );
@@ -180,6 +193,7 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(productName, other.productName)
 				&& productSizeByte == other.productSizeByte 
 				&& Objects.equals(relativePath, other.relativePath)
+				&& Objects.equals(missionId, other.missionId)
 				&& Objects.equals(stationName, other.stationName) 
 				&& Objects.equals(timeliness, other.timeliness);
 	}
@@ -189,7 +203,7 @@ public class IngestionJob extends AbstractMessage {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
 				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +
-				", productSizeByte=" + productSizeByte + ", stationName=" + stationName + ", mode=" + mode +
+				", productSizeByte=" + productSizeByte + ", missionId=" + missionId + ", stationName=" + stationName + ", mode=" + mode +
 				", timeliness=" + timeliness + ", inboxType=" + inboxType + ", additionalMetadata=" + 
 				additionalMetadata + "]";
 	}

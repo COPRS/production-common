@@ -166,7 +166,7 @@ public class MetadataExtractorFactory {
 		);
 	}
 
-	private final PathMetadataExtractor newPathMetadataExtractor(final CategoryConfig config) {
+	public static final PathMetadataExtractor newPathMetadataExtractor(final CategoryConfig config) {
 		if (config.getPathPattern() == null) {
 			return PathMetadataExtractor.NULL;
 		}

@@ -92,11 +92,11 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 		} else {
 			productName = ingestion.getProductName();
 		}
-
-		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(
-						MissionId.fromFamilyOrFileName(ingestion.getProductFamily(), ingestion.getKeyObjectStorage()))
-				.predecessor(ingestion.getUid()).newReporting("IngestionWorker");
+		
+		MissionId mission = MissionId.valueOf(ingestion.getMissionId());
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(ingestion.getUid())
+				.newReporting("IngestionWorker");
 
 		LOG.debug("received Ingestion: {}", productName);
 		final URI productUri = IngestionJobs.toUri(ingestion);

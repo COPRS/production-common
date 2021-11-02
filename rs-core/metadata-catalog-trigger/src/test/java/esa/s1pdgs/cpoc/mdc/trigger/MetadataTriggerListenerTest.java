@@ -44,7 +44,7 @@ public class MetadataTriggerListenerTest {
 
 		uut = new MetadataTriggerListener(mapper, errorAppender, processConfig);
 
-		IngestionEvent event = new IngestionEvent(ProductFamily.AUXILIARY_FILE, "S1key", "path", 0, "station", null,
+		IngestionEvent event = new IngestionEvent(ProductFamily.AUXILIARY_FILE, "S1key", "path", 0, "S1", "station", null,
 				"NRT");
 		GenericMessageDto<IngestionEvent> message = new GenericMessageDto<>();
 		message.setBody(event);
@@ -65,7 +65,7 @@ public class MetadataTriggerListenerTest {
 			return job;
 		};
 		uut = new MetadataTriggerListener(mapper, errorAppender, processConfig);
-		IngestionEvent event = new IngestionEvent(ProductFamily.AUXILIARY_FILE, "key", "path", 0, "station", null,
+		IngestionEvent event = new IngestionEvent(ProductFamily.AUXILIARY_FILE, "S1key", "path", 0, "S1", "station", null,
 				"NRT");
 		GenericMessageDto<IngestionEvent> message = new GenericMessageDto<>();
 		message.setBody(event);
@@ -74,7 +74,8 @@ public class MetadataTriggerListenerTest {
 
 		CatalogJob job = (CatalogJob) outputMessage.getMessages().get(0).getDto();
 		assertEquals(ProductFamily.AUXILIARY_FILE, job.getProductFamily());
-		assertEquals("key", event.getKeyObjectStorage());
+		assertEquals("S1key", event.getKeyObjectStorage());
+		assertEquals("S1", event.getMissionId());
 		assertEquals("station", event.getStationName());
 
 	}

@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.metadata.model;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
-
 public enum MissionId {
 	S1,
 	S2,
@@ -9,18 +7,6 @@ public enum MissionId {
 	UNDEFINED;
 	
 	public static final String FIELD_NAME = "missionId";
-	
-	public static MissionId fromFamilyOrFileName(ProductFamily productFamily, String filename) {
-		
-		if (productFamily == null) {
-			throw new IllegalArgumentException("productFamily is null");
-		}
-		if (productFamily == ProductFamily.EDRS_SESSION) {
-			return S1;
-		} else {
-			return fromFileName(filename);
-		}
-	}
 	
 	public static MissionId fromFileName(String fileName) {
 

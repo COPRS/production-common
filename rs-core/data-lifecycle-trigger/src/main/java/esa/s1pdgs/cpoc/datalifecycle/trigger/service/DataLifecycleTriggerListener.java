@@ -36,6 +36,7 @@ import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -115,11 +116,22 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 	public MqiMessageEventHandler onMessage(final GenericMessageDto<E> inputMessage) throws Exception {
 		LOG.debug("Starting data lifecycle management, got message: {}", inputMessage);
 		final E inputEvent = inputMessage.getBody();
+		
+		MissionId mission = null;
+		
+		if (inputEvent.getProductFamily().isSessionFamily()) {
+			if (inputEvent instanceof IngestionEvent) {
+				mission = MissionId.valueOf(((IngestionEvent) inputEvent).getMissionId());
+			} else {
+				LOG.warn("cannot determine missionId");
+				mission = MissionId.UNDEFINED;
+			}
+		} else {
+			mission = MissionId.fromFileName(inputEvent.getKeyObjectStorage());
+		}
 
-		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(
-						MissionId.fromFamilyOrFileName(inputEvent.getProductFamily(), inputEvent.getKeyObjectStorage()))
-				.predecessor(inputEvent.getUid()).newReporting("DataLifecycleTrigger");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(inputEvent.getUid())
+				.newReporting("DataLifecycleTrigger");
 
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(inputEvent.getProductFamily(), inputEvent.getKeyObjectStorage()),

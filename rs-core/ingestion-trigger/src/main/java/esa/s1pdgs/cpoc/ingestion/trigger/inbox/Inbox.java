@@ -41,6 +41,7 @@ public final class Inbox {
 	private final MessageProducer<IngestionJob> messageProducer;
 	private final String topic;
 	private final ProductFamily family;
+	private final String missionId;
 	private final String stationName;
 	private final String mode;
 	private final String timeliness;
@@ -57,6 +58,7 @@ public final class Inbox {
 			final MessageProducer<IngestionJob> messageProducer,
 			final String topic,
 			final ProductFamily family,
+			final String missionId,
 			final String stationName,
 			final int stationRetentionTime,
 			final String mode,
@@ -72,6 +74,7 @@ public final class Inbox {
 		this.messageProducer = messageProducer;
 		this.topic = topic;
 		this.family = family;
+		this.missionId = missionId;
 		this.stationName = stationName;
 		this.stationRetentionTime = stationRetentionTime;
 		this.mode = mode;
@@ -146,8 +149,15 @@ public final class Inbox {
 	}
 
 	final Optional<InboxEntry> handleEntry(final InboxEntry entry) {
-		final Reporting reporting = ReportingUtils.newReportingBuilder(
-				MissionId.fromFamilyOrFileName(ProductFamily.fromValue(entry.getProductFamily()), entry.getName()))
+		MissionId mission = null;
+		
+		if (this.missionId == null) {
+			mission = MissionId.fromFileName(entry.getName());
+		} else {
+			mission = MissionId.valueOf(this.missionId.toUpperCase());
+		}
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
 				.newReporting("IngestionTrigger");
 
 		final String productName;
@@ -190,6 +200,7 @@ public final class Inbox {
 						entry.getRelativePath(), 
 						entry.getSize(),
 						reporting.getUid(),
+						mission.name(),
 						stationName,
 						mode,
 						timeliness,
