@@ -207,7 +207,7 @@ public class TestProductEntityProcessor {
 		final PripMetadata pripMetadata = new PripMetadata();
 		pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
 		pripMetadata.setProductFamily(ProductFamily.BLANK);
-		pripMetadata.setObsKey("foo/bar");
+		pripMetadata.setObsKey("S1foo/bar");
 		
 		doReturn(pripMetadata).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
 

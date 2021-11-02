@@ -16,7 +16,7 @@ env:
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
-  build-s1-ipfsimulator:
+  build-container:
     runs-on: ubuntu-latest    
     
     steps:
@@ -33,6 +33,17 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # fetch all history so multiple commits can be scanned
+
+      - name: GitGuardian scan
+        uses: GitGuardian/gg-shield-action@master
+        env:
+          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
       - name: Login to Github Registry
         uses: docker/login-action@v1
@@ -84,7 +95,7 @@ jobs:
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
 
   generate-reports-s1-ipfsimulator:
-    needs: build-s1-ipfsimulator 
+    needs: build-container 
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -114,3 +125,12 @@ jobs:
           path: |
             vulnerabilities.csv
             vulnerabilities.pdf
+
+  # If the execution-worker-jar is updated also update the S1 IPF Simulator image
+  build-s1-ipf-simulator:
+    needs: build-container
+    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}

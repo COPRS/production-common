@@ -9,6 +9,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -57,7 +58,9 @@ abstract class AbstractMqiListener<E> implements MqiListener<E> {
         final CatalogEvent event = mqiMessage.getBody();
         final String productName = event.getProductName();
         
-        final Reporting reporting = ReportingUtils.newReportingBuilder()
+		MissionId mission = MissionId.valueOf((String) event.getMetadata().get(MissionId.FIELD_NAME));
+
+        final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
         		.predecessor(event.getUid())
         		.newReporting("ProductionTrigger");
                 

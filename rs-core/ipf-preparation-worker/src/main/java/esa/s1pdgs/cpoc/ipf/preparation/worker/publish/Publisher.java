@@ -27,6 +27,7 @@ import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.generator.DiscardedException;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.type.ProductTypeAdapter;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -66,7 +67,10 @@ public class Publisher {
 	}
 
 	public void send(final AppDataJob job) throws DiscardedException {
-		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(job.getReportingId())
+		
+		MissionId mission = MissionId.valueOf((String) job.getProduct().getMetadata().get(MissionId.FIELD_NAME));
+
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(job.getReportingId())
 				.newReporting("JobGenerator");
 
 		reporting.begin(new ReportingMessage("Start job generation"));

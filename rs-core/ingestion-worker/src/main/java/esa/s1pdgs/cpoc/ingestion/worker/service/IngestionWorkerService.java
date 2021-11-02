@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.IngestionJobs;
 import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.ingestion.worker.product.report.IngestionWorkerReportingOutput;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -92,8 +93,10 @@ public class IngestionWorkerService implements MqiListener<IngestionJob> {
 			productName = ingestion.getProductName();
 		}
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(ingestion.getUid())
-				.newReporting("IngestionWorker");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(
+						MissionId.fromFamilyOrFileName(ingestion.getProductFamily(), ingestion.getKeyObjectStorage()))
+				.predecessor(ingestion.getUid()).newReporting("IngestionWorker");
 
 		LOG.debug("received Ingestion: {}", productName);
 		final URI productUri = IngestionJobs.toUri(ingestion);

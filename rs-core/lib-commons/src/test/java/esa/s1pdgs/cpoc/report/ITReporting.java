@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
 
 public final class ITReporting {
@@ -15,7 +16,7 @@ public final class ITReporting {
 	
 	@Test
 	public final void testReportingVsLogging() {
-		Reporting uut = ReportingUtils.newReportingBuilder().newReporting("test");
+		Reporting uut = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("test");
 		
 		uut.begin(new ReportingMessage("Foo"));		
 		uut.end(new ReportingMessage(42000L, "baz"));	
@@ -24,7 +25,7 @@ public final class ITReporting {
 		uut.begin(new ReportingMessage("Foo"));		
 		uut.end(new JobOrderReportingOutput(UUID.randomUUID().toString(), Collections.singletonMap("foo_string", "bar")), new ReportingMessage(42000L, "baz"));
 		
-		uut = ReportingUtils.newReportingBuilder().newReporting("test2");
+		uut = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("test2");
 		uut.begin(new ReportingMessage("Foo"));
 
 		
@@ -86,7 +87,7 @@ public final class ITReporting {
 	
 	@Test
 	public final void testRfiReporting() {
-		final Reporting uut = ReportingUtils.newReportingBuilder().newReporting("RfiMitigation");
+		final Reporting uut = ReportingUtils.newReportingBuilder(MissionId.S3).newReporting("RfiMitigation");
 		uut.begin( 
 				new ReportingMessage("Start extraction of RFI metadata from product <PRODUCT_NAME>")
 		);		
@@ -106,7 +107,7 @@ public final class ITReporting {
 	
 	@Test
 	public final void testNoRfiReporting() {
-		final Reporting uut = ReportingUtils.newReportingBuilder().newReporting("RfiMitigation");
+		final Reporting uut = ReportingUtils.newReportingBuilder(MissionId.S3).newReporting("RfiMitigation");
 		uut.begin( 
 				new ReportingMessage("Start extraction of RFI metadata from product <PRODUCT_NAME>")
 		);		

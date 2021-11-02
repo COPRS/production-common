@@ -40,7 +40,7 @@ public class IngestionEventListenerTest {
 	@Test
 	public final void onMessage() {
 		
-		IngestionEvent event = new IngestionEvent(ProductFamily.L2_SLICE, "key", "path", 10, "stationName", "mode", "PT");
+		IngestionEvent event = new IngestionEvent(ProductFamily.L2_SLICE, "S1key", "path", 10, "stationName", "mode", "PT");
 		GenericMessageDto<IngestionEvent> inputMessage = new GenericMessageDto<>();
 		inputMessage.setBody(event);
 		

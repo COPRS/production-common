@@ -38,6 +38,7 @@ import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
@@ -136,9 +137,9 @@ public class PripPublishingJobListener implements MqiListener<PripPublishingJob>
 
 		final PripPublishingJob publishingJob = message.getBody();
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(publishingJob.getUid())
-				.newReporting("PripWorker");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(MissionId.fromFileName(publishingJob.getKeyObjectStorage()))
+				.predecessor(publishingJob.getUid()).newReporting("PripWorker");
 
 		final String name = removeZipSuffix(publishingJob.getKeyObjectStorage());
 

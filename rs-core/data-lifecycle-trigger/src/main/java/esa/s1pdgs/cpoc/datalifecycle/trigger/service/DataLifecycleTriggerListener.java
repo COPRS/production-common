@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalSe
 import esa.s1pdgs.cpoc.datalifecycle.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
@@ -115,9 +116,10 @@ public class DataLifecycleTriggerListener<E extends AbstractMessage> implements 
 		LOG.debug("Starting data lifecycle management, got message: {}", inputMessage);
 		final E inputEvent = inputMessage.getBody();
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(inputEvent.getUid())
-				.newReporting("DataLifecycleTrigger");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(
+						MissionId.fromFamilyOrFileName(inputEvent.getProductFamily(), inputEvent.getKeyObjectStorage()))
+				.predecessor(inputEvent.getUid()).newReporting("DataLifecycleTrigger");
 
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(inputEvent.getProductFamily(), inputEvent.getKeyObjectStorage()),

@@ -42,7 +42,7 @@ public class CompressionEventListenerTest {
 	@Test
 	public final void onMessage_Compress() {
 		
-		CompressionEvent event = new CompressionEvent(ProductFamily.L1_ACN_ZIP, "key.zip", CompressionDirection.COMPRESS);
+		CompressionEvent event = new CompressionEvent(ProductFamily.L1_ACN_ZIP, "S1key.zip", CompressionDirection.COMPRESS);
 		GenericMessageDto<CompressionEvent> inputMessage = new GenericMessageDto<>();
 		inputMessage.setBody(event);
 		
@@ -57,7 +57,7 @@ public class CompressionEventListenerTest {
 	@Test
 	public final void onMessage_Uncompress() {
 		
-		CompressionEvent event = new CompressionEvent(ProductFamily.L1_ACN, "key", CompressionDirection.UNCOMPRESS);
+		CompressionEvent event = new CompressionEvent(ProductFamily.L1_ACN, "S3key", CompressionDirection.UNCOMPRESS);
 		GenericMessageDto<CompressionEvent> inputMessage = new GenericMessageDto<>();
 		inputMessage.setBody(event);
 		

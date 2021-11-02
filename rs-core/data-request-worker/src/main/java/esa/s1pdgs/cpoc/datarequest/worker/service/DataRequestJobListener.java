@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.datarequest.worker.config.WorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.datarequest.worker.report.DataRequestReportingOutput;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -82,9 +83,10 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 		LOG.debug("Starting data request, got message: {}", inputMessage);
 		final DataRequestJob dataRequestJob = inputMessage.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(dataRequestJob.getUid())
-				.newReporting("DataRequestWorker");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(MissionId.fromFamilyOrFileName(dataRequestJob.getProductFamily(),
+						dataRequestJob.getKeyObjectStorage()))
+				.predecessor(dataRequestJob.getUid()).newReporting("DataRequestWorker");
 		
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(dataRequestJob.getProductFamily(), dataRequestJob.getKeyObjectStorage()),

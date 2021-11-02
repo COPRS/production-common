@@ -58,6 +58,7 @@ public class OnDemandEventListenerTest {
 		metadata.put("startTime", "2017-12-13T14:59:48.123456Z");
 		metadata.put("stopTime", "2017-12-13T15:17:25.142536Z");
 		metadata.put("productType", "type");
+		metadata.put("missionId", "S3");
 		event.setMetadata(metadata);
 		mqiMessage.setBody(event);
 

@@ -6,6 +6,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(Include.NON_NULL)
@@ -14,6 +17,7 @@ public class Header {
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'000Z'", timezone="UTC")
 	private Date timestamp = new Date();
 	private Level level;
+	private MissionId mission;
 	private String workflow = "NOMINAL";
 	@JsonProperty("debug_mode")
 	private Boolean debug;
@@ -24,8 +28,9 @@ public class Header {
 
 	}
 	
-	public Header(final Level level) {
+	public Header(final Level level, final MissionId mission) {
 		this.level = level;
+		this.mission = mission;
 	}
 
 	public String getType() {
@@ -48,6 +53,14 @@ public class Header {
 		this.level = level;
 	}
 	
+	public MissionId getMission() {
+		return mission;
+	}
+
+	public void setMission(MissionId mission) {
+		this.mission = mission;
+	}
+
 	public String getWorkflow() {
 		return workflow;
 	}

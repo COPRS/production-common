@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.archives.DevProperties;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -66,7 +67,7 @@ public class SegmentsConsumer {
   	
     	//this.appStatus.setProcessing("SLICES"); // Commented out because AppStatusImpl can currently only track one thing and is used by the ReportsConsumer
 
-    	Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Archives");
+    	Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.fromFileName(dto.getKeyObjectStorage())).newReporting("Archives");
     	reporting.begin(new ReportingMessage("Start archiving"));
     	
         try {

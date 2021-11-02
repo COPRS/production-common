@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -45,7 +46,7 @@ public class PreparationJobPublishMessageProducerTest {
 	@Test
 	public final void createPublishingJob() {
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Test");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("Test");
 		final GenericMessageDto<CatalogEvent> mqiMessage = new GenericMessageDto<CatalogEvent>();
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
@@ -75,7 +76,7 @@ public class PreparationJobPublishMessageProducerTest {
 	@Test
 	public final void createPublishingJob_oversea_true() throws MetadataQueryException {
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Test");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("Test");
 		final GenericMessageDto<CatalogEvent> mqiMessage = new GenericMessageDto<CatalogEvent>();
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
@@ -107,7 +108,7 @@ public class PreparationJobPublishMessageProducerTest {
 	@Test
 	public final void createPublishingJob_oversea_false() throws MetadataQueryException {
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Test");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED).newReporting("Test");
 		final GenericMessageDto<CatalogEvent> mqiMessage = new GenericMessageDto<CatalogEvent>();
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
@@ -139,7 +140,7 @@ public class PreparationJobPublishMessageProducerTest {
 	@Test
 	public final void createPublishingJob_l0ewslc_true() throws MetadataQueryException {
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Test");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("Test");
 		final GenericMessageDto<CatalogEvent> mqiMessage = new GenericMessageDto<CatalogEvent>();
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
@@ -171,7 +172,7 @@ public class PreparationJobPublishMessageProducerTest {
 	@Test
 	public final void createPublishingJob_l0ewslc_false() throws MetadataQueryException {
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("Test");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("Test");
 		final GenericMessageDto<CatalogEvent> mqiMessage = new GenericMessageDto<CatalogEvent>();
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);

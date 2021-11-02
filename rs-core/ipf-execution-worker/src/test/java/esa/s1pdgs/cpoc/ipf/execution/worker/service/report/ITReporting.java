@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.service.report;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
@@ -13,7 +14,7 @@ public final class ITReporting {
 	
 	@Test
 	public final void testReportingVsLogging() {
-		final Reporting uut = ReportingUtils.newReportingBuilder().newReporting("test");
+		final Reporting uut = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("test");
 		
 		uut.begin(new ReportingMessage("test message"));	
 		uut.end(new IpfFilenameReportingOutput(

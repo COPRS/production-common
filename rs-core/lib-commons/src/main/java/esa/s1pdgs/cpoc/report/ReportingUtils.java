@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
@@ -24,8 +25,8 @@ public final class ReportingUtils {
 		ReportingUtils.segmentBlacklistPattern = segmentBlacklistPattern;
 	}
 	
-	public static final Reporting.Builder newReportingBuilder() {
-		return new ReportAdapter.Builder(new LoggerReportingAppender());
+	public static final Reporting.Builder newReportingBuilder(MissionId mission) {
+		return new ReportAdapter.Builder(new LoggerReportingAppender(), mission);
 	}
 	
 	public static final ReportingInput newFilenameReportingInputFor(final ProductFamily family, final String name) {

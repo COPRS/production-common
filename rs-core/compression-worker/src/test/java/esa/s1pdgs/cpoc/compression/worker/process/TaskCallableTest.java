@@ -15,11 +15,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.compression.worker.test.SystemUtils;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TaskCallableTest {
-	final Reporting report = ReportingUtils.newReportingBuilder().newReporting("TestProcessing");
+	final Reporting report = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("TestProcessing");
 	  
 	private File testDir;
 	private File script;

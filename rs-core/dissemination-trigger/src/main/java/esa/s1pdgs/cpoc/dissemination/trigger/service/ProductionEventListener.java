@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -84,8 +85,9 @@ public class ProductionEventListener implements MqiListener<ProductionEvent> {
 		LOGGER.debug("starting conversion of ProductionEvent to DisseminationJob, got message: {}", inputMessage);
 		final ProductionEvent productionEvent = inputMessage.getBody();
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder().predecessor(productionEvent.getUid())
-				.newReporting("DisseminationTrigger");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(MissionId.fromFileName(productionEvent.getKeyObjectStorage()))
+				.predecessor(productionEvent.getUid()).newReporting("DisseminationTrigger");
 
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(productionEvent.getProductFamily(),

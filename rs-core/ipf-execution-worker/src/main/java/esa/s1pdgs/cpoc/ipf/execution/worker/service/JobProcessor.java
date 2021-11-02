@@ -59,6 +59,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.IpfFilenameReportingOutput;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiClient;
@@ -202,7 +203,10 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		// ------------------------------------------------------
 		final IpfExecutionJob job = message.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
+		MissionId mission = MissionId.valueOf((String) job.getIpfPreparationJobMessage().getBody().getEventMessage()
+				.getBody().getMetadata().get(MissionId.FIELD_NAME));
+
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
 				.predecessor(job.getUid())
 				.newReporting("JobProcessing");		
 		

@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.model.S3FileDescriptor;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
 /**
@@ -161,7 +162,7 @@ public class FileDescriptorBuilder {
 			descriptor.setExtension(ext); // FIXME: is this really required and WHY...
 			descriptor.setEdrsSessionFileType(EdrsSessionFileType.ofFilename(file.getName()));
 
-			descriptor.setMissionId(metadataFromPath.get("missionId"));
+			descriptor.setMissionId(metadataFromPath.get(MissionId.FIELD_NAME));
 			descriptor.setSatelliteId(metadataFromPath.get("satelliteId"));
 			descriptor.setSessionIdentifier(metadataFromPath.get("sessionId"));
 			// descriptor.setProductName(descriptor.getSessionIdentifier());

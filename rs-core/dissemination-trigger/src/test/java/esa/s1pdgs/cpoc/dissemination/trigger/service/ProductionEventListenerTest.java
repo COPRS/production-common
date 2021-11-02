@@ -48,7 +48,7 @@ public class ProductionEventListenerTest {
 		
 		ProductionEvent event = new ProductionEvent();
 		event.setProductFamily(ProductFamily.L0_SEGMENT);
-		event.setKeyObjectStorage("key");
+		event.setKeyObjectStorage("S1key");
 		GenericMessageDto<ProductionEvent> inputMessage = new GenericMessageDto<>();
 		inputMessage.setBody(event);
 		

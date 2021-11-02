@@ -38,7 +38,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @OpenAPIDefinition(
 	info = @Info(
 		title = "RS Native API",
-		description = "The API of the Reference System that can be used to query product data.",
+		description = "The Native API of the Copernicus Reference System (COPRS) that can be used to query and download product data.",
 		version = "${native-api.version}"
 	),
 	/*servers = {

@@ -11,6 +11,7 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.compression.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
 import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
@@ -43,7 +44,7 @@ public class CompressionTriggerListener<E extends AbstractMessage> implements Mq
 	public final MqiMessageEventHandler onMessage(final GenericMessageDto<E> message) throws Exception {
 		final E event = message.getBody();
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.fromFileName(event.getKeyObjectStorage()))
 				.predecessor(event.getUid())
 				.newReporting("CompressionTrigger");
 

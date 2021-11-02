@@ -13,6 +13,7 @@ import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -46,7 +47,7 @@ public class SppMbuProductMetadataExtractor extends AbstractMetadataExtractor {
 		if (m.matches()) {
 			metadataJSON.put("productFamily", ProductFamily.SPP_MBU.name());
 			metadataJSON.put("productName", productName);
-			metadataJSON.put("missionId", m.group(1).toUpperCase());
+			metadataJSON.put(MissionId.FIELD_NAME, m.group(1).toUpperCase());
 			metadataJSON.put("satelliteId", m.group(2).toUpperCase());
 			metadataJSON.put("mode", m.group(3).toUpperCase());
 			metadataJSON.put("columnId", m.group(4).toUpperCase());

@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -217,7 +218,7 @@ public class TestAuxMetadataExtractor {
 			final String productType) throws AbstractCodedException {
 		final List<File> files = Arrays.asList(new File(testDir,metadataFile));
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestMetadataExtraction");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.valueOf(missionId)).newReporting("TestMetadataExtraction");
 
 		doReturn(files).when(obsClient).download(Mockito.anyList(), Mockito.any());
 

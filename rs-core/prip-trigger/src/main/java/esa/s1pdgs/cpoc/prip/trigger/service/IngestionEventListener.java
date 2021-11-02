@@ -17,6 +17,7 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -76,9 +77,9 @@ public class IngestionEventListener implements MqiListener<IngestionEvent> {
 		LOGGER.debug("starting conversion of IngestionEvent to PublishingJob, got message: {}", inputMessage);		
 		final IngestionEvent ingestionEvent = inputMessage.getBody();
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder()
-				.predecessor(ingestionEvent.getUid())
-				.newReporting("PripTrigger");
+		final Reporting reporting = ReportingUtils
+				.newReportingBuilder(MissionId.fromFileName(ingestionEvent.getKeyObjectStorage()))
+				.predecessor(ingestionEvent.getUid()).newReporting("PripTrigger");
 		
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(ingestionEvent.getProductFamily(), ingestionEvent.getKeyObjectStorage()),

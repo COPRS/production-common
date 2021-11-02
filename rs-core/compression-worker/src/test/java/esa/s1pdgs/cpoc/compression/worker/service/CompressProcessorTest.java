@@ -52,8 +52,8 @@ public class CompressProcessorTest {
 		CompressionJob job = new CompressionJob();
 		job.setProductFamily(ProductFamily.L1_SLICE);
 		job.setUid(UUID.randomUUID());
-		job.setKeyObjectStorage("l1");
-		job.setOutputKeyObjectStorage("l1.zip");
+		job.setKeyObjectStorage("S3l1");
+		job.setOutputKeyObjectStorage("S3l1.zip");
 		job.setOutputProductFamily(ProductFamily.L0_SLICE_ZIP);
 		job.setCompressionDirection(CompressionDirection.COMPRESS);
 		GenericMessageDto<CompressionJob> inputMessage = new GenericMessageDto<>();
@@ -72,8 +72,8 @@ public class CompressProcessorTest {
 		CompressionJob job = new CompressionJob();
 		job.setProductFamily(ProductFamily.L1_SLICE_ZIP);
 		job.setUid(UUID.randomUUID());
-		job.setKeyObjectStorage("l1.zip");
-		job.setOutputKeyObjectStorage("l1");
+		job.setKeyObjectStorage("S1l1.zip");
+		job.setOutputKeyObjectStorage("S1l1");
 		job.setOutputProductFamily(ProductFamily.L0_SLICE);
 		job.setCompressionDirection(CompressionDirection.UNCOMPRESS);
 		GenericMessageDto<CompressionJob> inputMessage = new GenericMessageDto<>();

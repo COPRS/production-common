@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.compression.worker.mqi.OutputProducerFactory;
 import esa.s1pdgs.cpoc.compression.worker.process.CompressExecutorCallable;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
 import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
@@ -114,7 +115,7 @@ public class CompressProcessor implements MqiListener<CompressionJob> {
 		final String workDir = properties.getWorkingDirectory();
 		final CompressionJob job = message.getBody();
 		
-		final Reporting report = ReportingUtils.newReportingBuilder()
+		final Reporting report = ReportingUtils.newReportingBuilder(MissionId.fromFileName(job.getKeyObjectStorage()))
 				.predecessor(job.getUid())				
 				.newReporting("CompressionProcessing");
 		

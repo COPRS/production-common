@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.filter.DataLifecycleTex
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -87,7 +88,7 @@ public class ValidationService {
 				appStatus.setProcessing(esa.s1pdgs.cpoc.appstatus.Status.PROCESSING_MSG_ID_UNDEFINED);
 			}
 		}
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("ValidationService");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.UNDEFINED).newReporting("ValidationService");
 		reporting.begin(new ReportingMessage("Starting validation"));
 		try {
 			int totalDiscrepancies = 0;

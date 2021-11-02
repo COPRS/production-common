@@ -39,6 +39,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.test.MockPropertiesTest;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -107,7 +108,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     
-    private final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestOutputHandling");
+    private final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("TestOutputHandling");
 	
     private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 

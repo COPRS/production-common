@@ -34,6 +34,7 @@ import esa.s1pdgs.cpoc.mdc.worker.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
 import esa.s1pdgs.cpoc.mdc.worker.status.AppStatusImpl;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -163,7 +164,7 @@ public class TestEdrsMetadataExtractor {
         expectedDescriptor.setKeyObjectStorage("WILE/S1A/123/ch01/D_123_ch01_DSDB.RAW");
         expectedDescriptor.setProductFamily(ProductFamily.EDRS_SESSION);
         
-		final Reporting reporting = ReportingUtils.newReportingBuilder().newReporting("TestMetadataExtraction");
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("TestMetadataExtraction");
 		
         final JSONObject expected = extractor.mdBuilder.buildEdrsSessionFileRaw(expectedDescriptor);
         final JSONObject result = extractor.extract(reporting, inputMessage);
