@@ -1,5 +1,6 @@
 package de.werum.coprs.nativeapi.service;
 
+import java.net.URL;
 import java.util.List;
 
 import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
@@ -26,6 +27,6 @@ public interface NativeApiService {
 
 	List<PripMetadataResponse> findWithFilters(final String missionName, final String productType, final String filterStr);
 
-	byte[] downloadProduct(final String missionName, final String productId);
+	URL provideTemporaryProductDonwload(final String missionName, final String productId);
 
 }

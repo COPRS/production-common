@@ -54,8 +54,6 @@ native-api:
   version: 1.0
   # Time in seconds until a download URL expires
   download-url-expiration-time-in-seconds: 600
-  # When configured the API will answer download requests with this dummy file
-  dummy-download-file: /app/download/dummy-file.zip
   
   attributes-of-mission:
   - mission-name: s1

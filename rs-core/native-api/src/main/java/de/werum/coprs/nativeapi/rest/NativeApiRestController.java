@@ -1,5 +1,6 @@
 package de.werum.coprs.nativeapi.rest;
 
+import java.net.URL;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -7,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -346,6 +348,7 @@ public class NativeApiRestController {
 		return result;
 	}
 	
+
 	@Operation(
 		operationId = "DownloadProduct", tags = "Products",
 		summary = "download the zipped product file",
@@ -353,8 +356,8 @@ public class NativeApiRestController {
 	)
 	@ApiResponses(value = {
 		@ApiResponse(
-			responseCode = "200",
-			description = "OK - the actual link to download the zipped product file was returned with this response",
+			responseCode = "307",
+			description = "Temporary Redirect - the actual link (as temporary redirect) to download the zipped product file was returned with this response",
 			content = {@Content(
 				mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
 				schema = @Schema(type = "string", format = "binary")
@@ -377,15 +380,23 @@ public class NativeApiRestController {
 		)
 	})
 	@RequestMapping(method = RequestMethod.GET, path = "/missions/{missionName}/products/{productId}/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	public byte[] downloadProduct(
+	public void downloadProduct(
 			@PathVariable final String missionName,
 			@PathVariable final String productId,
 			final HttpServletResponse response) {
 		LOGGER.debug("download request received: /missions/{}/products/{}/download", missionName, productId);
 
 		try {
-			response.setHeader("Content-Disposition", "attachment; filename=\"dummy-file.zip\"");
-			return this.nativeApiService.downloadProduct(missionName, productId);
+			final URL temporaryProductDonwloadUrl = this.nativeApiService.provideTemporaryProductDonwload(missionName, productId);
+
+			if (null == temporaryProductDonwloadUrl) {
+				throw new NativeApiRestControllerException(String.format("no download URL returned from OBS", productId), HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+
+			response.setStatus(HttpStatus.TEMPORARY_REDIRECT.value());
+			response.setHeader(HttpHeaders.LOCATION, temporaryProductDonwloadUrl.toString());
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + productId + "\""); // TODO: use product name instead of ID
+
 		} catch (final Exception e) {
 			throw new NativeApiRestControllerException(String.format("error downloading product file with ID %s: %s", productId, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);

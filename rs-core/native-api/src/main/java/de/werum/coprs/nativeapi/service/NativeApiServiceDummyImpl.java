@@ -1,5 +1,6 @@
 package de.werum.coprs.nativeapi.service;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -221,8 +222,8 @@ public class NativeApiServiceDummyImpl implements NativeApiService {
 	}
 
 	@Override
-	public byte[] downloadProduct(final String missionName, final String productId) {
-		return EMPTY_ZIP;
+	public URL provideTemporaryProductDonwload(String missionName, String productId) {
+		return null;
 	}
 
 }

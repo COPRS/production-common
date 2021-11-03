@@ -17,7 +17,6 @@ public class NativeApiProperties {
 	private String majorVersion;
 	private String version;
 	private Long downloadUrlExpirationTimeInSeconds;
-	private String dummyDownloadFile;
 
 	private List<AttributesOfMission> attributesOfMission = new LinkedList<>();
 
@@ -101,14 +100,6 @@ public class NativeApiProperties {
 
 	public void setDownloadUrlExpirationTimeInSeconds(final Long downloadUrlExpirationTimeInSeconds) {
 		this.downloadUrlExpirationTimeInSeconds = downloadUrlExpirationTimeInSeconds;
-	}
-
-	public String getDummyDownloadFile() {
-		return this.dummyDownloadFile;
-	}
-
-	public void setDummyDownloadFile(final String dummyDownloadFile) {
-		this.dummyDownloadFile = dummyDownloadFile;
 	}
 
 }

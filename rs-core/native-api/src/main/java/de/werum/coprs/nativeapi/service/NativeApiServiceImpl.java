@@ -1,9 +1,6 @@
 package de.werum.coprs.nativeapi.service;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,8 +27,12 @@ import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
 import de.werum.coprs.nativeapi.service.exception.NativeApiBadRequestException;
 import de.werum.coprs.nativeapi.service.exception.NativeApiException;
 import de.werum.coprs.nativeapi.service.mapping.MappingUtil;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripSortTerm;
@@ -69,11 +70,13 @@ public class NativeApiServiceImpl implements NativeApiService {
 	private final Map<String, Map<String, Map<String, String>>> missionToTypeToAttributes = new HashMap<>();
 
 	private final PripMetadataRepository pripRepo;
+	private final ObsClient obsClient;
 
 	@Autowired
-	public NativeApiServiceImpl(final NativeApiProperties apiProperties, final PripMetadataRepository pripMetadataRepository) {
+	public NativeApiServiceImpl(final NativeApiProperties apiProperties, final PripMetadataRepository pripMetadataRepository, final ObsClient obsClient) {
 
 		this.pripRepo = pripMetadataRepository;
+		this.obsClient = obsClient;
 		this.apiProperties = apiProperties;
 
 		if (apiProperties.getAttributesOfMission() != null) {
@@ -417,30 +420,25 @@ public class NativeApiServiceImpl implements NativeApiService {
 	}
 
 	@Override
-	public byte[] downloadProduct(final String missionName, final String productId) {
+	public URL provideTemporaryProductDonwload(final String missionName, final String productId) {
 		if ("s1".equalsIgnoreCase(missionName)) {
 			final PripMetadata productMetadata = this.pripRepo.findById(productId);
 			if (null == productMetadata) {
 				throw new NativeApiException(String.format("product with ID '%s' not found for mission %s: ", productId, missionName), HttpStatus.NOT_FOUND);
 			}
 
-			if (StringUtil.isNotBlank(this.apiProperties.getDummyDownloadFile())) {
-				final Path productDummyFile = Paths.get(this.apiProperties.getDummyDownloadFile());
-
-				if (!Files.isReadable(productDummyFile)||!Files.isRegularFile(productDummyFile)) {
-					throw new NativeApiException(String.format("the product file %s does not exists, cannot be read or isn't a file.", productDummyFile),
-							HttpStatus.INTERNAL_SERVER_ERROR);
-				}
-
-				try {
-					return Files.readAllBytes(productDummyFile);
-				} catch (final IOException ioe) {
-					throw new NativeApiException(String.format("error reading the product file %s: %s", productDummyFile, ioe.getMessage()), ioe,
-							HttpStatus.INTERNAL_SERVER_ERROR);
-				}
-			} else {
-				throw new NativeApiException("the product file download from OBS storage is not yet implemented.", HttpStatus.INTERNAL_SERVER_ERROR);
+			final URL url;
+			try {
+				LOG.debug("providing temporary download URL for obsKey: {}", productMetadata.getObsKey());
+				url = this.obsClient.createTemporaryDownloadUrl( //
+						new ObsObject(productMetadata.getProductFamily(), productMetadata.getObsKey()), //
+						this.apiProperties.getDownloadUrlExpirationTimeInSeconds());
+				return url;
+			} catch (ObsException | ObsServiceException e) {
+				throw new NativeApiException(String.format("error creating temporary download URL for product with id '{}'", productMetadata.getId()), e,
+						HttpStatus.INTERNAL_SERVER_ERROR);
 			}
+
 		} else {
 			throw new NativeApiException(String.format("mission not supported (yet): %s", missionName), HttpStatus.NOT_FOUND);
 		}
