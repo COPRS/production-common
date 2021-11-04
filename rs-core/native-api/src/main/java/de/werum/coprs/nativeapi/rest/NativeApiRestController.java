@@ -24,6 +24,7 @@ import de.werum.coprs.nativeapi.rest.model.GetProductTypesResponse;
 import de.werum.coprs.nativeapi.rest.model.PingResponse;
 import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
 import de.werum.coprs.nativeapi.service.NativeApiService;
+import de.werum.coprs.nativeapi.service.helper.DownloadUrl;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -387,15 +388,15 @@ public class NativeApiRestController {
 		LOGGER.debug("download request received: /missions/{}/products/{}/download", missionName, productId);
 
 		try {
-			final URL temporaryProductDonwloadUrl = this.nativeApiService.provideTemporaryProductDonwload(missionName, productId);
+			final DownloadUrl temporaryProductDownloadUrl = this.nativeApiService.provideTemporaryProductDonwload(missionName, productId);
 
-			if (null == temporaryProductDonwloadUrl) {
+			if (null == temporaryProductDownloadUrl || null == temporaryProductDownloadUrl.getUrl()) {
 				throw new NativeApiRestControllerException(String.format("no download URL returned from OBS", productId), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
 			response.setStatus(HttpStatus.TEMPORARY_REDIRECT.value());
-			response.setHeader(HttpHeaders.LOCATION, temporaryProductDonwloadUrl.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + productId + "\""); // TODO: use product name instead of ID
+			response.setHeader(HttpHeaders.LOCATION, temporaryProductDownloadUrl.getUrl().toString());
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + temporaryProductDownloadUrl.getName() + "\"");
 
 		} catch (final Exception e) {
 			throw new NativeApiRestControllerException(String.format("error downloading product file with ID %s: %s", productId, e.getMessage()),

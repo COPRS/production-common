@@ -16,7 +16,7 @@ public class NativeApiProperties {
 
 	private String majorVersion;
 	private String version;
-	private Long downloadUrlExpirationTimeInSeconds;
+	private Long downloadUrlExpirationTimeInSeconds = 600L;
 
 	private List<AttributesOfMission> attributesOfMission = new LinkedList<>();
 

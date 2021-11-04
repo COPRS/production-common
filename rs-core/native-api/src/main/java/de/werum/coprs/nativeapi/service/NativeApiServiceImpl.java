@@ -26,6 +26,7 @@ import de.werum.coprs.nativeapi.config.NativeApiProperties.AttributesOfProductTy
 import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
 import de.werum.coprs.nativeapi.service.exception.NativeApiBadRequestException;
 import de.werum.coprs.nativeapi.service.exception.NativeApiException;
+import de.werum.coprs.nativeapi.service.helper.DownloadUrl;
 import de.werum.coprs.nativeapi.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -420,7 +421,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 	}
 
 	@Override
-	public URL provideTemporaryProductDonwload(final String missionName, final String productId) {
+	public DownloadUrl provideTemporaryProductDonwload(final String missionName, final String productId) {
 		if ("s1".equalsIgnoreCase(missionName)) {
 			final PripMetadata productMetadata = this.pripRepo.findById(productId);
 			if (null == productMetadata) {
@@ -433,7 +434,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 						new ObsObject(productMetadata.getProductFamily(), productMetadata.getObsKey()), //
 						this.apiProperties.getDownloadUrlExpirationTimeInSeconds());
 				LOG.debug("providing temporary download URL for '{}': {}", productMetadata.getObsKey(), url);
-				return url;
+				return new DownloadUrl(productMetadata.getName(), url);
 			} catch (ObsException | ObsServiceException e) {
 				throw new NativeApiException(String.format("error creating temporary download URL for product with id '{}'", productMetadata.getId()), e,
 						HttpStatus.INTERNAL_SERVER_ERROR);
