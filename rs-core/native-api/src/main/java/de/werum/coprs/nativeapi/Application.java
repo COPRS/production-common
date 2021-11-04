@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableAsync
 @EnableConfigurationProperties
-@ComponentScan({ "de.werum.coprs.nativeapi", "esa.s1pdgs.cpoc.prip" })
+@ComponentScan({ "de.werum.coprs.nativeapi", "esa.s1pdgs.cpoc.prip", "esa.s1pdgs.cpoc.obs_sdk" })
 public class Application {
 
 	public static void main(String[] args) {
