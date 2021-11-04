@@ -429,10 +429,10 @@ public class NativeApiServiceImpl implements NativeApiService {
 
 			final URL url;
 			try {
-				LOG.debug("providing temporary download URL for obsKey: {}", productMetadata.getObsKey());
 				url = this.obsClient.createTemporaryDownloadUrl( //
 						new ObsObject(productMetadata.getProductFamily(), productMetadata.getObsKey()), //
 						this.apiProperties.getDownloadUrlExpirationTimeInSeconds());
+				LOG.debug("providing temporary download URL for '{}': {}", productMetadata.getObsKey(), url);
 				return url;
 			} catch (ObsException | ObsServiceException e) {
 				throw new NativeApiException(String.format("error creating temporary download URL for product with id '{}'", productMetadata.getId()), e,
