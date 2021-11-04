@@ -1,6 +1,5 @@
 package de.werum.coprs.nativeapi.service;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +20,7 @@ import de.werum.coprs.nativeapi.config.NativeApiProperties.AttributesOfProductTy
 import de.werum.coprs.nativeapi.rest.model.Checksum;
 import de.werum.coprs.nativeapi.rest.model.ContentDate;
 import de.werum.coprs.nativeapi.rest.model.PripMetadataResponse;
+import de.werum.coprs.nativeapi.service.helper.DownloadUrl;
 
 @Service
 public class NativeApiServiceDummyImpl implements NativeApiService {
@@ -222,7 +222,7 @@ public class NativeApiServiceDummyImpl implements NativeApiService {
 	}
 
 	@Override
-	public URL provideTemporaryProductDonwload(String missionName, String productId) {
+	public DownloadUrl provideTemporaryProductDonwload(String missionName, String productId) {
 		return null;
 	}
 
