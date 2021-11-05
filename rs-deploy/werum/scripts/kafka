@@ -6,7 +6,7 @@ then
     exit 1
 fi
 
-LIST_QUEUES_SCRIPT=$ENV_DIR/config/kafka.sh
+LIST_QUEUES_SCRIPT=$ENV_DIR/wrapper/kafka.sh
 
 if [ $# -lt 1 ]
 then
