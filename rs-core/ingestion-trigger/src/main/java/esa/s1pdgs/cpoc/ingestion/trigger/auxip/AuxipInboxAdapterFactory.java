@@ -43,6 +43,7 @@ public class AuxipInboxAdapterFactory implements InboxAdapterFactory {
                 clientFactory.newAuxipClient(inbox),
                 inbox,
                 inboxConfig.getStationName(),
+                inboxConfig.getMissionId(),
                 inboxConfig.getFamily(),
                 repository);
     }

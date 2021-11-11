@@ -49,9 +49,10 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter implements SupportsP
                              final AuxipClient auxipClient,
                              final URI inboxURL,
                              final String stationName,
+                             final String missionId,
                              final ProductFamily productFamily,
                              final AuxipStateRepository repository) {
-        super(inboxEntryFactory, inboxURL, stationName, productFamily);
+        super(inboxEntryFactory, inboxURL, stationName, missionId, productFamily);
         this.configuration = configuration;
         this.repository = repository;
         this.processConfiguration = processConfiguration;
@@ -111,7 +112,8 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter implements SupportsP
                 processConfiguration.getHostname(),
                 "auxip",
                 productFamily.name(),
-                stationName);
+                stationName,
+                missionId);
     }
 
     @Override

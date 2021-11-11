@@ -90,6 +90,7 @@ public class AuxipInboxAdapterTest {
                 auxipClient,
                 URI.create("https://auxip"),
                 "WILE",
+                null,
                 productFamily,
                 auxipRepository);
 
@@ -133,6 +134,7 @@ public class AuxipInboxAdapterTest {
                 auxipClient,
                 URI.create("https://auxip"),
                 "WILE",
+                null,
                 productFamily,
                 auxipRepository);
 
@@ -164,6 +166,7 @@ public class AuxipInboxAdapterTest {
                 auxipClient,
                 URI.create("https://auxip"),
                 "WILE",
+                null,
                 productFamily,
                 auxipRepository);
 
@@ -248,6 +251,7 @@ public class AuxipInboxAdapterTest {
                 auxipClient,
                 URI.create("https://auxip"),
                 "WILE",
+                "null",
                 productFamily,
                 auxipRepository);
 

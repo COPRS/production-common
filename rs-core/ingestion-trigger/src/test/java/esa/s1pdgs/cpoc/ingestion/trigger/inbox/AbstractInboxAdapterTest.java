@@ -34,7 +34,7 @@ public class AbstractInboxAdapterTest {
     public void initMocks() {
         final InboxEntryFactory entryFactory = new InboxEntryFactoryImpl(config);
 
-        uut = new AbstractInboxAdapter(entryFactory, URI.create("https://example.com/WILE"), "WILE", ProductFamily.AUXILIARY_FILE) {
+        uut = new AbstractInboxAdapter(entryFactory, URI.create("https://example.com/WILE"), "WILE", null, ProductFamily.AUXILIARY_FILE) {
             @Override
             protected Stream<EntrySupplier> list() {
                 return Stream.of(

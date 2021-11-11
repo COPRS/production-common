@@ -40,17 +40,20 @@ public abstract class AbstractInboxAdapter implements InboxAdapter {
 	protected final InboxEntryFactory inboxEntryFactory;
 	protected final URI inboxURL;
 	protected final String stationName;
+	protected final String missionId;
 	protected final ProductFamily productFamily;
 	
 	public AbstractInboxAdapter(
 			final InboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 
 			final String stationName,
+			final String missionId,
 			final ProductFamily productFamily
 	) {
 		this.inboxEntryFactory = inboxEntryFactory;
 		this.inboxURL = inboxURL;
 		this.stationName = stationName;
+		this.missionId = missionId;
 		this.productFamily = productFamily;
 	}
 	

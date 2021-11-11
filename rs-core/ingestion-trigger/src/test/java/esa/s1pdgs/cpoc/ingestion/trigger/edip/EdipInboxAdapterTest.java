@@ -57,7 +57,7 @@ public class EdipInboxAdapterTest {
 		final String stationName = null;
 		final URI inboxURL = URI.create("ftp://pedc:21/NOMINAL");
 
-		final EdipInboxAdapter uut = new EdipInboxAdapter(inboxURL, edipClient, inboxEntryFactory, stationName, ProductFamily.EDRS_SESSION);
+		final EdipInboxAdapter uut = new EdipInboxAdapter(inboxURL, edipClient, inboxEntryFactory, stationName, "S1", ProductFamily.EDRS_SESSION);
 
 		Assert.assertEquals(Paths
 				.get("/NOMINAL/S1A/S1A_20200120185900030888/ch_1/DCS_01_S1A_20200120185900030888_ch1_DSDB_00033.raw"),

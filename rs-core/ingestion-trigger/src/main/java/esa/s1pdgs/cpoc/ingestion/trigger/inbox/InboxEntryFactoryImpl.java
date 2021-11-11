@@ -33,6 +33,7 @@ public class InboxEntryFactoryImpl implements InboxEntryFactory {
 			final Date lastModified, 
 			final long size, 
 			final String stationName,
+			final String missionId,
 			final String inboxType,
 			final ProductFamily productFamily
 	) {
@@ -45,6 +46,7 @@ public class InboxEntryFactoryImpl implements InboxEntryFactory {
 		inboxEntry.setLastModified(lastModified);
 		inboxEntry.setSize(size);
 		inboxEntry.setStationName(stationName);
+		inboxEntry.setMissionId(missionId);
 		inboxEntry.setProcessingPod(processConfiguration.getHostname());
 		inboxEntry.setInboxType(inboxType);
 		inboxEntry.setProductFamily(productFamily.name());

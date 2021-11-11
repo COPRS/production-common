@@ -71,6 +71,7 @@ public class TestApplication {
 				new Date(),
 				0,
 				"WILE",
+				"S1",
 				null,
 				ProductFamily.EDRS_SESSION
 		);
@@ -80,6 +81,7 @@ public class TestApplication {
 				inboxPath.resolve("AUX/S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"),
 				new Date(),
 				0,
+				null,
 				null,
 				null,
 				ProductFamily.AUXILIARY_FILE

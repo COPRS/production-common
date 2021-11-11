@@ -34,7 +34,7 @@ public class TestFilesystemInboxAdapter {
 		final ProcessConfiguration processConfiguration = new ProcessConfiguration();
 		processConfiguration.setHostname("ingestor-01");
 		factory  = new InboxEntryFactoryImpl(processConfiguration);
-    	uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null, ProductFamily.AUXILIARY_FILE);
+    	uut = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null, null, ProductFamily.AUXILIARY_FILE);
 	}
 
 	@After
@@ -75,6 +75,7 @@ public class TestFilesystemInboxAdapter {
 				factory,
 				testDir.toPath().toUri(),
 				null,
+				"S1",
 				ProductFamily.EDRS_SESSION
 		);
 		final Collection<InboxEntry> actualEdrs = uutEdrs.read(edrsFilter);
@@ -84,7 +85,7 @@ public class TestFilesystemInboxAdapter {
 				new BlacklistRegexRelativePathInboxFilter(Pattern.compile("(^\\..*|.*\\.tmp$|db.*|^lost\\+found$)")),
 				new WhitelistRegexRelativePathInboxFilter(Pattern.compile("AUX/[0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z_]_((OPER|TEST|REPR)_)?(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_ICE|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND)_.*\\.(xml|XML|EOF|SAFE)"))
 		);
-		final FilesystemInboxAdapter uutAux = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null, ProductFamily.AUXILIARY_FILE);
+		final FilesystemInboxAdapter uutAux = new FilesystemInboxAdapter(factory, testDir.toPath().toUri(), null, null, ProductFamily.AUXILIARY_FILE);
 		final Collection<InboxEntry> actualAux = uutAux.read(auxFilter);
 		assertEquals(1, actualAux.size());
 	}

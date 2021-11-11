@@ -32,18 +32,18 @@ public class IngestionTriggerServiceTransactional {
 		this.processConfiguration = processConfiguration;
 	}
 
-	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName, final ProductFamily productFamily) {
-		final List<InboxEntry> result = this.repository.findByProcessingPodAndPickupURLAndStationNameAndProductFamily(
-				this.processConfiguration.getHostname(), pickupURL, stationName, productFamily.name());
-		LOG.debug("listing persisted inbox entries for inbox " + pickupURL + ", station " + stationName
+	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName, final String missionId, final ProductFamily productFamily) {
+		final List<InboxEntry> result = this.repository.findByProcessingPodAndPickupURLAndStationNameAndMissionIdAndProductFamily(
+				this.processConfiguration.getHostname(), pickupURL, stationName, missionId, productFamily.name());
+		LOG.debug("listing persisted inbox entries for inbox " + pickupURL + ", station " + stationName + ", missionId " + missionId
 				+ " and product family " + productFamily + ": " + result);
 		return new HashSet<>(result);
 	}
 
-	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName) {
-		final List<InboxEntry> result = this.repository.findByProcessingPodAndPickupURLAndStationName(
-				this.processConfiguration.getHostname(), pickupURL, stationName);
-		LOG.debug("listing persisted inbox entries for inbox " + pickupURL + ", station " + stationName + ": " + result);
+	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName, final String missionId) {
+		final List<InboxEntry> result = this.repository.findByProcessingPodAndPickupURLAndStationNameAndMissionId(
+				this.processConfiguration.getHostname(), pickupURL, stationName, missionId);
+		LOG.debug("listing persisted inbox entries for inbox " + pickupURL + ", station " + stationName + " and missionId " + missionId +": " + result);
 		return new HashSet<>(result);
 	}
 

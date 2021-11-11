@@ -29,9 +29,10 @@ public class EdipInboxAdapter extends AbstractInboxAdapter implements SupportsPr
 			final EdipClient edipClient,
 			final InboxEntryFactory inboxEntryFactory,
 			final String stationName,
+			final String missionId,
 			final ProductFamily productFamily
 	) {
-		super(inboxEntryFactory, inboxURL, stationName, productFamily);
+		super(inboxEntryFactory, inboxURL, stationName, missionId, productFamily);
 		this.edipClient = edipClient;
 	}
 
@@ -49,6 +50,7 @@ public class EdipInboxAdapter extends AbstractInboxAdapter implements SupportsPr
 				edipEntry.getLastModified(),
 				edipEntry.getSize(),
 				stationName,
+				missionId,
 				INBOX_TYPE,
 				productFamily
 				);

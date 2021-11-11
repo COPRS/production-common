@@ -35,6 +35,7 @@ public class XbipInboxAdapterFactory implements InboxAdapterFactory {
 				xbipClientFactory.newXbipClient(inboxUri), 
 				inboxEntryFactory,
 				inboxConfig.getStationName(),
+				inboxConfig.getMissionId(),
 				inboxConfig.getFamily()
 		);
 	}

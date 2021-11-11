@@ -25,6 +25,7 @@ public class TestPollingRun {
 	private static final String INBOX_TYPE_1 = "xbip";
 	private static final String PRODUCT_FAMILY_1 = "EDRS_SESSION";
 	private static final String STATION_NAME_1 = "SGS_";
+	private static final String MISSION_ID = "S1";
 	private static final int STATION_RETENTION_TIME_DEFAULT = 0;
 	private static final long SIZE_1 = 667788;
 
@@ -360,7 +361,7 @@ public class TestPollingRun {
 
 	private static InboxEntry createInboxEntry() {
 		final InboxEntry inboxEntry = new InboxEntry(FILE_PATH_1, FILE_PATH_1, PICKUP_URL_1, LAST_MODIFIED_1, SIZE_1,
-				PROCESSING_POD_1, INBOX_TYPE_1, PRODUCT_FAMILY_1, STATION_NAME_1);
+				PROCESSING_POD_1, INBOX_TYPE_1, PRODUCT_FAMILY_1, STATION_NAME_1, MISSION_ID);
 		inboxEntry.setKnownSince(KNOWN_SINCE_1);
 
 		return inboxEntry;
@@ -368,7 +369,7 @@ public class TestPollingRun {
 
 	private static InboxEntry createInboxEntry(final Date lastModified) {
 		final InboxEntry inboxEntry = new InboxEntry(FILE_PATH_1, FILE_PATH_1, PICKUP_URL_1, lastModified, SIZE_1,
-				PROCESSING_POD_1, INBOX_TYPE_1, PRODUCT_FAMILY_1, STATION_NAME_1);
+				PROCESSING_POD_1, INBOX_TYPE_1, PRODUCT_FAMILY_1, STATION_NAME_1, MISSION_ID);
 		inboxEntry.setKnownSince(KNOWN_SINCE_1);
 
 		return inboxEntry;
@@ -376,7 +377,7 @@ public class TestPollingRun {
 
 	private static InboxEntry createInboxEntryWithoutProductFamily() {
 		final InboxEntry inboxEntry = new InboxEntry(FILE_PATH_1, FILE_PATH_1, PICKUP_URL_1, LAST_MODIFIED_1, SIZE_1,
-				PROCESSING_POD_1, INBOX_TYPE_1, null, STATION_NAME_1);
+				PROCESSING_POD_1, INBOX_TYPE_1, null, STATION_NAME_1, MISSION_ID);
 		inboxEntry.setKnownSince(KNOWN_SINCE_1);
 
 		return inboxEntry;

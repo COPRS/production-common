@@ -76,6 +76,7 @@ public class TestInboxEntry {
 				0,
 				null,
 				null,
+				null,
 				ProductFamily.EDRS_SESSION
 		);
 	}

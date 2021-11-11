@@ -41,6 +41,7 @@ public class TestEdipInboxAdapter {
 				null, 
 				factory, 
 				"WILE", 
+				null,
 				ProductFamily.AUXILIARY_FILE
 		);		
 		final InboxEntry actual = uut.newInboxEntryFor(e1);

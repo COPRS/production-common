@@ -28,17 +28,17 @@ public class InboxEntryRepositoryTest {
     @Test
     public void findByPickupURL() {
     	final ProductFamily productFamily = ProductFamily.EDRS_SESSION;
-        InboxEntry entry = new InboxEntry("tehName", "tehPath", "tehPickUrl", new Date(), 100, null, "file", productFamily.name(), null);
+        InboxEntry entry = new InboxEntry("tehName", "tehPath", "tehPickUrl", new Date(), 100, null, "file", productFamily.name(), null, null);
         entry.setProcessingPod("ingestor-01");
         repository.save(entry);
 
-        assertThat(repository.findByProcessingPodAndPickupURLAndStationNameAndProductFamily(
-        		"ingestor-01", "tehPickUrl", null, productFamily.name()), is(not(empty())));
-        assertThat(repository.findByProcessingPodAndPickupURLAndStationNameAndProductFamily(
-        		"ingestor-01", "tehPickUrl33", null, productFamily.name()), is(empty()));
+        assertThat(repository.findByProcessingPodAndPickupURLAndStationNameAndMissionIdAndProductFamily(
+        		"ingestor-01", "tehPickUrl", null, null, productFamily.name()), is(not(empty())));
+        assertThat(repository.findByProcessingPodAndPickupURLAndStationNameAndMissionIdAndProductFamily(
+        		"ingestor-01", "tehPickUrl33", null, null, productFamily.name()), is(empty()));
 
-        final InboxEntry fetchedEntry = repository.findByProcessingPodAndPickupURLAndStationNameAndProductFamily(
-                "ingestor-01", "tehPickUrl", null, productFamily.name()).get(0);
+        final InboxEntry fetchedEntry = repository.findByProcessingPodAndPickupURLAndStationNameAndMissionIdAndProductFamily(
+                "ingestor-01", "tehPickUrl", null, null, productFamily.name()).get(0);
         assertThat(fetchedEntry.getPickupURL(), is(equalTo("tehPickUrl")));
     }
 

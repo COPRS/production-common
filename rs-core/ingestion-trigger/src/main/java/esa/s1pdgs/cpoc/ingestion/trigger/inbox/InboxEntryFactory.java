@@ -15,6 +15,7 @@ public interface InboxEntryFactory {
 			Date lastModified, 
 			long size, 
 			String stationName,
+			String missionId,
 			String inboxType,
 			ProductFamily productFamily
 	);

@@ -28,6 +28,7 @@ public class InboxEntry {
 	private LocalDateTime knownSince;
 	private long size;
 	private String stationName;
+	private String missionId;
 	private String processingPod;
 	private String inboxType;
 	private String productFamily;
@@ -39,7 +40,7 @@ public class InboxEntry {
 
 	public InboxEntry(final String name, final String relativePath, final String pickupURL, final Date lastModified,
 			final long size, final String processingPod, final String inboxType, final String productFamily,
-			final String stationName) {
+			final String stationName, final String missionId) {
 		this.name = name;
 		this.relativePath = relativePath;
 		this.pickupURL = pickupURL;
@@ -49,6 +50,7 @@ public class InboxEntry {
 		this.inboxType = inboxType;
 		this.productFamily = productFamily;
 		this.stationName = stationName;
+		this.missionId = missionId;
 	}
 
 	// --------------------------------------------------------------------------
@@ -73,6 +75,7 @@ public class InboxEntry {
 		return Objects.equals(this.name, other.name) && Objects.equals(this.pickupURL, other.pickupURL)
 				&& Objects.equals(this.relativePath, other.relativePath)
 				&& Objects.equals(this.stationName, other.stationName)
+				&& Objects.equals(this.missionId, other.missionId)
 				&& Objects.equals(this.processingPod, other.processingPod)
 				&& Objects.equals(this.productFamily, other.productFamily)
 				&& Objects.equals(this.inboxType, other.inboxType);
@@ -97,6 +100,7 @@ public class InboxEntry {
 		return Objects.equals(this.name, other.name) && Objects.equals(this.pickupURL, other.pickupURL)
 				&& Objects.equals(this.relativePath, other.relativePath)
 				&& Objects.equals(this.stationName, other.stationName)
+				&& Objects.equals(this.missionId, other.missionId)
 				&& Objects.equals(this.processingPod, other.processingPod)
 				// omitting product family comparison S1PRO-2395
 				&& Objects.equals(this.inboxType, other.inboxType);
@@ -104,16 +108,16 @@ public class InboxEntry {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.name, this.pickupURL, this.relativePath, this.stationName, this.processingPod,
+		return Objects.hash(this.name, this.pickupURL, this.relativePath, this.stationName, this.missionId, this.processingPod,
 				this.inboxType, this.productFamily);
 	}
 
 	@Override
 	public String toString() {
 		return format(
-				"InboxEntry [name=%s, relativePath=%s, pickupURL=%s, productFamily=%s, lastModified=%s, knownSince=%s, size=%s, stationName=%s, processingPod=%s, inboxType=%s]",
+				"InboxEntry [name=%s, relativePath=%s, pickupURL=%s, productFamily=%s, lastModified=%s, knownSince=%s, size=%s, stationName=%s, missionId=%s, processingPod=%s, inboxType=%s]",
 				this.name, this.relativePath, this.pickupURL, this.productFamily, this.lastModified, this.knownSince,
-				this.size, this.stationName, this.processingPod, this.inboxType);
+				this.size, this.stationName, this.missionId, this.processingPod, this.inboxType);
 	}
 
 	// --------------------------------------------------------------------------
@@ -164,6 +168,14 @@ public class InboxEntry {
 
 	public void setStationName(final String stationName) {
 		this.stationName = stationName;
+	}
+
+	public String getMissionId() {
+		return missionId;
+	}
+
+	public void setMissionId(String missionId) {
+		this.missionId = missionId;
 	}
 
 	public String getProcessingPod() { return this.processingPod; }

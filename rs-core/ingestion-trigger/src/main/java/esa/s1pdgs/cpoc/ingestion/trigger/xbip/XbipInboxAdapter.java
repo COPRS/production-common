@@ -23,9 +23,10 @@ public class XbipInboxAdapter extends AbstractInboxAdapter {
 			final XbipClient xbipClient, 
 			final InboxEntryFactory inboxEntryFactory,
 			final String stationName,
+			final String missionId,
 			final ProductFamily productFamily
 	) {
-		super(inboxEntryFactory, inboxURL, stationName, productFamily);
+		super(inboxEntryFactory, inboxURL, stationName, missionId, productFamily);
 		this.xbipClient = xbipClient;
 	}
 	
@@ -42,6 +43,7 @@ public class XbipInboxAdapter extends AbstractInboxAdapter {
 				xbipEntry.getLastModified(), 
 				xbipEntry.getSize(),
 				stationName,
+				missionId,
 				INBOX_TYPE,
 				productFamily
 		);

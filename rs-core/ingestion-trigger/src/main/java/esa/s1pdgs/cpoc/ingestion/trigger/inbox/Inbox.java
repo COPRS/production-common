@@ -94,12 +94,12 @@ public final class Inbox {
 			final PollingRun pollingRun;
 			if(inboxAdapter instanceof SupportsProductFamily) {
 				pollingRun = PollingRun.newInstance(
-						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, family),
+						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, missionId, family),
 						inboxAdapter.read(new PositiveFileSizeFilter()), stationRetentionTime
 				);
 			} else {
 				pollingRun = PollingRun.newInstanceWithoutProductFamily( // omitting product family comparison S1PRO-2395
-						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName),
+						ingestionTriggerServiceTransactional.getAllForPath(inboxAdapter.inboxURL(), stationName, missionId),
 						inboxAdapter.read(new PositiveFileSizeFilter()), stationRetentionTime
 				);
 			}

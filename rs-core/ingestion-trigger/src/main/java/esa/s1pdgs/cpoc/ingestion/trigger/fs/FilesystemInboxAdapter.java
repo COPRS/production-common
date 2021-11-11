@@ -23,9 +23,10 @@ public class FilesystemInboxAdapter extends AbstractInboxAdapter implements Supp
 			final InboxEntryFactory inboxEntryFactory, 
 			final URI inboxURL, 	
 			final String stationName,
+			final String missionId,
 			final ProductFamily productFamily
 	) {
-		super(inboxEntryFactory, inboxURL, stationName, productFamily);
+		super(inboxEntryFactory, inboxURL, stationName, missionId, productFamily);
 	}
 	
 	@Override
@@ -44,6 +45,7 @@ public class FilesystemInboxAdapter extends AbstractInboxAdapter implements Supp
 				lastModified, 
 				size,
 				stationName,
+				missionId,
 				"file",
 				productFamily
 		);
