@@ -11,12 +11,15 @@ replicaCount:
   l0_aio_ipf_preparation_worker: 1
   l0_asp_production_trigger: 1
   l0_asp_ipf_preparation_worker: 1
+  acq_production_trigger: 1
+  acq_ipf_preparation_worker: 1
   l1_production_trigger: 1
   l1_ipf_preparation_worker: 1
   l2_production_trigger: 1
   l2_ipf_preparation_worker: 1
   l0_aio_ipf_execution_worker: 3
   l0_asp_ipf_execution_worker: 3
+  acq_ipf_execution_worker: 3
   l1_ipf_execution_worker: 25
   l2_ipf_execution_worker: 20
   obs_production_trigger: 1

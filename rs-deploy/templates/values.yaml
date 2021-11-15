@@ -4,7 +4,10 @@ simulator:
   simulateL0AspIpf: false
   simulateL1Ipf: false
   simulateL2Ipf: false
-  simulateMbuIpf: false
+  simulateMbuIpf: false  
+  simulateS3ACQIpf: false
+  simulateS3L0Ipf: false
+
   
 image:
   imagePullSecrets: harbor-tools
@@ -93,6 +96,7 @@ processor:
       l1: l1
       l2: l2
       zip: zip
+      s3acq: s3acq
 
 kongplugin:
   clientId: "s1pdgs_client"
