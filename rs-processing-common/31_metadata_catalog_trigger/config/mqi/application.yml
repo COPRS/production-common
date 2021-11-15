@@ -55,6 +55,7 @@ application:
         topics-with-priority:
           t-pdgs-aux-ingestion-events: 1
           t-pdgs-session-file-ingestion-events: 1
+          t-pdgs-s3-session-file-ingestion-events: 1
           t-pdgs-plan-and-report-ingestion-events: 1
           t-pdgs-contingency-ingestion-events: 1
       publication:

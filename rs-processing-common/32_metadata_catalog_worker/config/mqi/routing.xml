@@ -297,4 +297,13 @@
 			<topic>t-pdgs-other-catalog-events</topic>
 		</route_to>
 	</route>
+
+	<!-- S3 Routing -->
+	<route description="route for S3 EDRS_SESSIONS">
+		<input_key>t-pdgs-s3-metadata-extraction-jobs</input_key>
+		<output_key>EDRS_SESSION</output_key>
+		<route_to>
+			<topic>t-pdgs-s3-session-file-catalog-events</topic>
+		</route_to>
+	</route>
 </routing>

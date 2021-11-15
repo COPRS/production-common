@@ -54,6 +54,7 @@ application:
         # List of topics with priority
         topics-with-priority:
           t-pdgs-metadata-extraction-jobs: 1
+          t-pdgs-s3-metadata-extraction-jobs: 1
       publication:
         # Dis/Enabled publication for this category
         enable: false

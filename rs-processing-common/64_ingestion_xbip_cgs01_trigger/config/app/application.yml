@@ -60,7 +60,7 @@ ingestion-trigger:
       # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
       ignore-files-before-date: {{ .Values.xbip.ignoreFilesBeforeDate.cgs01 }}
 
-    # Handling of EDRS sessions NOMINAL
+    # Handling of S3 EDRS sessions NOMINAL
       # Pickup path
     - directory: https://${cgs1.host}${cgs1.path}NOMINAL/
       # Filename regex for matching files
@@ -68,7 +68,7 @@ ingestion-trigger:
       # Filename regex for ignoring files
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       # Kafka topic to put the ingestion jobs for the worker
-      topic: t-pdgs-ingestion-jobs-xbip-nominal
+      topic: t-pdgs-ingestion-jobs-s3-xbip-nominal
       # Product family accociated with the file to be ingested
       family: EDRS_SESSION
       # Name of the station for EDRS sessions (4-letter code)
@@ -84,7 +84,7 @@ ingestion-trigger:
       # group number containing the session name
       session-name-group-index: 5
 
-    # Handling of EDRS sessions RETRANSFER
+    # Handling of S3 EDRS sessions RETRANSFER
       # Pickup path
     - directory: https://${cgs1.host}${cgs1.path}RETRANSFER/
       # Filename regex for matching files
@@ -92,7 +92,7 @@ ingestion-trigger:
       # Filename regex for ignoring files
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       # Kafka topic to put the ingestion jobs for the worker
-      topic: t-pdgs-ingestion-jobs-xbip-retransfer
+      topic: t-pdgs-ingestion-jobs-s3-xbip-retransfer
       # Product family accociated with the file to be ingested
       family: SESSION_RETRANSFER
       # Name of the station for EDRS sessions (4-letter code)

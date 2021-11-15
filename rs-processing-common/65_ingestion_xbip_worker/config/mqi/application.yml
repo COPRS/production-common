@@ -54,6 +54,8 @@ application:
         topics-with-priority:
           t-pdgs-ingestion-jobs-xbip-nominal: 1
           t-pdgs-ingestion-jobs-xbip-retransfer: 1
+          t-pdgs-ingestion-jobs-s3-xbip-nominal: 1
+          t-pdgs-ingestion-jobs-s3-xbip-retransfer: 1
       publication:
         # Dis/Enabled publication for this category
         enable: false

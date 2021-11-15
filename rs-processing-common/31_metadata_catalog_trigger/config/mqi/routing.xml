@@ -2,6 +2,14 @@
 
 <routing description="routing for Ingestion and Production Events">
 	
+	<route description="route for S3 EDRS_SESSION products">
+		<input_key>t-pdgs-s3-session-file-ingestion-events</input_key>
+		<output_key>EDRS_SESSION</output_key>
+		<route_to>
+			<topic>t-pdgs-s3-metadata-extraction-jobs</topic>
+		</route_to>
+	</route>
+
 	<default_route description="default route for EDRS_SESSIONS">
 		<family>EDRS_SESSION</family>
 		<route_to>
@@ -40,7 +48,7 @@
 	<default_route description="default route for L0_SLICE">
 		<family>L0_SLICE</family>
 		<route_to>
-			<topic>t-pdgs-metadata-extraction-jobs</topic>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>getTopic
 		</route_to>
 	</default_route>
 	
