@@ -1,16 +1,23 @@
 ARG BRANCH
 FROM ghcr.io/coprs/rs-core:${BRANCH} as build
 
-FROM centos:6.6
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
+ARG VERSION
+ARG COMMIT_ID
+ARG BRANCH_TEXT
 
-USER root
+WORKDIR /app
 
-RUN yum -y install boost boost-thread boost-devel libxslt tar which python3 java-1.8.0-openjdk; yum clean all
+RUN echo "${VERSION}" >> VERSION
+RUN echo "${BRANCH_TEXT}" >> VERSION
+RUN echo "${COMMIT_ID}" >> VERSION
+
+RUN apk update && apk add python3
 
 COPY files/* /opt/
 
-COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar /app/s1pdgs-ipf-execution-worker.jar
-COPY config/start.sh /app/start.sh
+COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
+COPY /config/start.sh start.sh
 
 #create local WD
 RUN mkdir -p /data/localWD
