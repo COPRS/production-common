@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ipf.preparation.worker.type.edrs;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -174,6 +176,10 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
                     dto.addInput(newInputFor(raws2.get(i), dto.getWorkDirectory(), "ch02"));
                 }
             }
+            
+            // Add DSIB as Input (at least necessary for S3 SESSIONs)
+            dto.addInput(newInputForDSIB(product.getDsibForChannel(1), dto.getWorkDirectory(), "ch01"));
+            dto.addInput(newInputForDSIB(product.getDsibForChannel(2), dto.getWorkDirectory(), "ch02"));
         }		
 	}
 
@@ -188,5 +194,16 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 				new File(channelFolder, file.getFilename()).getPath(), 
 				file.getKeyObs()
 		);
+	}
+	
+	private final LevelJobInputDto newInputForDSIB(
+			final String obsKey, 
+			final String directory,
+			final String channelSubdir
+	) {
+		final Path path = Paths.get(obsKey);
+		final File channelFolder = new File(directory, channelSubdir);
+		return new LevelJobInputDto(ProductFamily.EDRS_SESSION.name(),
+				new File(channelFolder, path.getFileName().toString()).getPath(), obsKey);
 	}
 }
