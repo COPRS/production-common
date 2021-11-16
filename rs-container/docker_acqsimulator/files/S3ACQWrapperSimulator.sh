@@ -33,20 +33,17 @@ function read_dom() {
 }
 
 ################################################################################
-# Extract the input file names from the job order and save them in the variable
-# INPUT_FILES.
+# Extract the session_name from local working directory
 ################################################################################
-function read_joborder() {
-        log "Read provided JobOrder $JOBORDER"
+function prepare_inputs() { 
+        # create list of input files (the output list should be empty   
+        local workingdir=$(dirname $JOBORDER)
 
-        # create list of input files (the output list should be empty
         files=()
-        while read_dom; do
-                if [[ $ENTITY = "File_Name" ]]
-                then
-                        files+=($CONTENT)
-                fi
-        done < $JOBORDER
+        for i in $workingdir/*/*_dat
+        do
+                files+=("$(basename $i)")
+        done
 
         # Remove duplicates
         INPUT_FILES=()
@@ -56,11 +53,11 @@ function read_joborder() {
         done < <(printf "%s\0" "${files[@]}" | sort -uz)
 
         # Debug Output to verify all files were found correctly
-	log "Extracted input files from JobOrder:"
-        for i in ${INPUT_FILES[@]}
-        do
-                echo "   $i"
-        done
+        #log "Found session file names"
+        #for i in ${INPUT_FILES[@]}
+        #do
+        #       echo "   $i"
+        #done
 }
 
 ################################################################################
@@ -112,14 +109,14 @@ function create_productlist() {
 ################################################################################
 JOBORDER=$1
 
-# if less than two arguments supplied, display usage
+# if less than two arguments supplied, display usage 
 if [  $# -le 0 ]
 then
         display_usage
         exit 254
 fi
 
-# check whether user had supplied -h or --help . If yes display usage
+# check whether user had supplied -h or --help . If yes display usage 
 if [[ ( $# == "--help") ||  $# == "-h" ]]
 then
         display_usage
@@ -134,7 +131,7 @@ then
         exit 255
 fi
 
-read_joborder
+prepare_inputs
 
 for i in ${INPUT_FILES[@]}
 do
