@@ -12,7 +12,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-RUN apk update && apk add python3
+RUN apk update && apk add python2
 
 COPY files/* /opt/
 
