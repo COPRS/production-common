@@ -1,17 +1,20 @@
 export ES_NAMESPACE="monitoring";
-export ES_SVC="elasticsearch-trace-elasticsearch-coordinating-only.${ES_NAMESPACE}.svc.cluster.local";
+#export ES_SVC="elasticsearch-trace-elasticsearch-coordinating-only.${ES_NAMESPACE}.svc.cluster.local";
+# TODO WARNING: The name migh change each deployment!
+export ES_SVC="elasticsearch-coordinating-only-6b88699c-6896n.${ES_NAMESPACE}.svc.cluster.local"
+
 export ES_PORT="9200";
-export ES_POD="elasticsearch-trace-elasticsearch-master-0";
+export ES_POD="elasticsearch-master-0";
 export ES_CLUSTER_NAME="elasticsearch-trace";
 
-# Set ES_EXCEPTION if you want to select a subset of indices (regex) to be NOT handled by the cluster configuration script (eg. modules/es.sh configuration/configuration.sh init)
-# Set to "nothing" if no exception required (empty string will fail)
-# Example: export ES_EXCEPTION="session|raw|aux|mpl|msk|landmask"
-export ES_EXCEPTION="nothing"
-
-# Set ES_FILTER if you want to select only a subset of indices (regex) to be handled by the cluster configuration script (eg. modules/es.sh configuration/configuration.sh init)
-# Example: export ES_FILTER="session|raw|aux|mpl|msk|mask|prip|lifecycle|plan_and_report|spp|l0|l1|l2"
-export ES_FILTER=""
+# In order to not modify the existing behavior, we are adding a new env...
+if [ -z $PROTECT_ES ]
+then
+export ES_EXCEPTION="nothing"; # Example: "session|raw|aux|mpl|msk|landmask". Set to "nothing" if no exception required (empty string will fail)
+else
+  export ES_EXCEPTION="$PROTECT_ES"; # Example: "^(werum2-l0-blanks-zip|werum2-l0-slices)$" This format is required to avoid that e.g. subset like zip buckets are found
+fi
+#export ES_FILTER="session|raw|aux|mpl|msk|landmask|plan|spp"; # Example: "session|raw|aux|mpl|msk|landmask". Set to "nothing" if no exception required (empty string will fail)
 
 TMP_ES_INDICES_INPUT="
 mpl_orbpre
@@ -39,6 +42,7 @@ aux_scs
 plan_and_report
 spp_mbu
 spp_obs
+s3_aux
 ";
 
 TMP_ES_INDICES_TMP="
@@ -56,6 +60,10 @@ l1_slice
 l1_acn
 l2_slice
 l2_acn
+s3_granules
+s3_l0
+s3_cal
+s3_pug
 ";
 
 TMP_ES_INDICES_EWSLCMASK="
@@ -74,6 +82,7 @@ TMP_ES_INDICES_OVERPASSMASK="
 overpassmask
 ";
 
+# TODO: create a mechanism to delete partially the index "prip"
 TMP_ES_INDICES_PRIP="
 prip
 ";
