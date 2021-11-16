@@ -201,9 +201,13 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 			final String directory,
 			final String channelSubdir
 	) {
-		final Path path = Paths.get(obsKey);
+		final Path path = Paths.get(obsKey).getFileName();
 		final File channelFolder = new File(directory, channelSubdir);
+		if (path != null) {
+			return new LevelJobInputDto(ProductFamily.EDRS_SESSION.name(),
+					new File(channelFolder, path.toString()).getPath(), obsKey);
+		}
 		return new LevelJobInputDto(ProductFamily.EDRS_SESSION.name(),
-				new File(channelFolder, path.getFileName().toString()).getPath(), obsKey);
+				new File(channelFolder, obsKey).getPath(), obsKey);
 	}
 }
