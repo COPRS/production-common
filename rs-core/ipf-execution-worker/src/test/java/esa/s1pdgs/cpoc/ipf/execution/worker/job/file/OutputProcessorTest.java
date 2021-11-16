@@ -176,6 +176,8 @@ public class OutputProcessorTest {
         reportToPublish.add(new FileQueueMessage(ProductFamily.L0_REPORT, "p3",
                 new File("p3")));
 
+        doReturn(true).when(properties).isChangeIsipToSafe();
+        
         processor =
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
