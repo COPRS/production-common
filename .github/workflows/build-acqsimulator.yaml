@@ -101,7 +101,7 @@ jobs:
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
 
   generate-reports-acqsimulator:
-    needs: build-acq-simulator 
+    needs: build-acq-simulator
     runs-on: ubuntu-latest
     permissions:
       contents: read
