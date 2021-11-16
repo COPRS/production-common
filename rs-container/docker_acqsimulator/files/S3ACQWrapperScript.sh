@@ -89,19 +89,19 @@ function create_outputs() {
 # Create product list file for execution worker
 ################################################################################
 function create_productlist() {
-        log "Create AIOProc.LIST file"
+        log "Create product.LIST file"
 
         # This only works, if the JobOrder was provided with an absolut path
         local workingdir=$(dirname $JOBORDER)
-        local listfile=${workingdir}/AIOProc.LIST
+        local listfile=${workingdir}/product.LIST
 
-        # Write AIOProc.LIST file with all outputs from
+        # Write product.LIST file with all outputs from
         for entry in $workingdir/*ISIP;
         do
                 echo "$(basename $entry)" >> $listfile
         done
 
-        log "AIOProc.LIST files created"
+        log "product.LIST files created"
 }
 
 ################################################################################
