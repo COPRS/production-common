@@ -56,6 +56,11 @@ data:
   storage_buckets_failed-workdir: "{{ .Values.s3.bucket_failed_workdir }}"
   storage_buckets_session-retransfer: "{{ .Values.s3.bucket_session_retransfer }}"
   storage_buckets_plans-and-reports: "{{ .Values.s3.bucket_plans_and_reports }}"
+  storage_buckets_s3_granule: "{{ .Values.s3.bucket_s3_granule }}"
+  storage_buckets_s3_aux: "{{ .Values.s3.bucket_s3_aux }}"
+  storage_buckets_s3_l0: "{{ .Values.s3.bucket_s3_l0 }}"
+  storage_buckets_s3_cal: "{{ .Values.s3.bucket_s3_cal }}"
+  storage_buckets_s3_pug: "{{ .Values.s3.bucket_s3_pug }}"
    
   # Buckets for compressed products
   storage_buckets_auxiliary-files-zip: "{{ .Values.s3.bucket_zip_aux }}"
@@ -69,6 +74,11 @@ data:
   storage_buckets_l0-blanks-zip: "{{ .Values.s3.bucket_zip_l0_blanks }}"
   storage_buckets_spp-zip: "{{ .Values.s3.bucket_zip_spp }}"
   storage_buckets_plans-and-reports-zip: "{{ .Values.s3.bucket_zip_plans_and_reports }}"
+  storage_buckets_s3_granule-zip: "{{ .Values.s3.bucket_s3_granule_zip }}"
+  storage_buckets_s3_aux-zip: "{{ .Values.s3.bucket_s3_aux_zip }}"
+  storage_buckets_s3_l0-zip: "{{ .Values.s3.bucket_s3_l0_zip }}"
+  storage_buckets_s3_cal-zip: "{{ .Values.s3.bucket_s3_cal_zip }}"
+  storage_buckets_s3_pug-zip: "{{ .Values.s3.bucket_s3_pug_zip }}"
  
   # -------------------------------------------------------------------------------
   # Scaler configuration

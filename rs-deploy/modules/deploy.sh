@@ -133,6 +133,11 @@ function deploy_init () {
 --set s3.bucket_failed_workdir="${S3_BUCKET_FAILED_WORKDIR}" \
 --set s3.bucket_session_retransfer="${S3_BUCKET_SESSION_RETRANSFER}" \
 --set s3.bucket_plans_and_reports="${S3_BUCKET_PLANS_AND_REPORTS}" \
+--set s3.bucket_s3_granule="${S3_BUCKET_S3_GRANULE}" \
+--set s3.bucket_s3_aux="${S3_BUCKET_S3_AUX}" \
+--set s3.bucket_s3_l0="${S3_BUCKET_S3_L0}" \
+--set s3.bucket_s3_cal="${S3_BUCKET_S3_CAL}" \
+--set s3.bucket_s3_pug="${S3_BUCKET_S3_PUG}" \
 --set s3.bucket_zip_aux="${S3_BUCKET_ZIP_AUX}" \
 --set s3.bucket_zip_l0_segments="${S3_BUCKET_ZIP_L0_SEGMENTS}" \
 --set s3.bucket_zip_l0_slices="${S3_BUCKET_ZIP_L0_SLICES}" \
@@ -144,6 +149,11 @@ function deploy_init () {
 --set s3.bucket_zip_l0_blanks="${S3_BUCKET_ZIP_L0_BLANKS}" \
 --set s3.bucket_zip_spp="${S3_BUCKET_ZIP_SPP}" \
 --set s3.bucket_zip_plans_and_reports="${S3_BUCKET_ZIP_PLANS_AND_REPORTS}" \
+--set s3.bucket_s3_granule_zip="${S3_BUCKET_S3_GRANULE_ZIP}" \
+--set s3.bucket_s3_aux_zip="${S3_BUCKET_S3_AUX_ZIP}" \
+--set s3.bucket_s3_l0_zip="${S3_BUCKET_S3_L0_ZIP}" \
+--set s3.bucket_s3_cal_zip="${S3_BUCKET_S3_CAL_ZIP}" \
+--set s3.bucket_s3_pug_zip="${S3_BUCKET_S3_PUG_ZIP}" \
 --set es.svc="${ES_SVC}" \
 --set es.port="${ES_PORT}" \
 --set es.cluster_name="${ES_CLUSTER_NAME}" \

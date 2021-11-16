@@ -129,6 +129,7 @@ public enum ProductCategory {
 			case L2A_ZIP:
 			// S3 zip families
 			case S3_AUX_ZIP:
+			case S3_GRANULES_ZIP:
 			case S3_L0_ZIP:
 			case S3_L1_NRT_ZIP:
 			case S3_L1_STC_ZIP:

@@ -75,6 +75,7 @@ public enum ProductFamily {
     S3_JOB,
     // S3 compressed types
     S3_AUX_ZIP,
+    S3_GRANULES_ZIP,
     S3_L0_ZIP,
     S3_L1_NRT_ZIP,
     S3_L1_STC_ZIP,
