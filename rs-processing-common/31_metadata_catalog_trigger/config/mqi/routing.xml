@@ -48,7 +48,7 @@
 	<default_route description="default route for L0_SLICE">
 		<family>L0_SLICE</family>
 		<route_to>
-			<topic>t-pdgs-metadata-extraction-jobs</topic>getTopic
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
 		</route_to>
 	</default_route>
 	
