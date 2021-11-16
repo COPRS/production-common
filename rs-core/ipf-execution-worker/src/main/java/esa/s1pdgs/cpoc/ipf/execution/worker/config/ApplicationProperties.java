@@ -86,6 +86,11 @@ public class ApplicationProperties {
 	private List<String> plaintextTaskPatterns = new ArrayList<>();
 
 	private String pathJobOrderXslt = "";
+	
+	/**
+	 * Turn off workaround for S1 regarding ISIPs
+	 */
+	private boolean changeIsipToSafe = true;
 
 	/**
      * Default constructor
@@ -323,5 +328,13 @@ public class ApplicationProperties {
 
 	public void setPathJobOrderXslt(String pathJobOrderXslt) {
 		this.pathJobOrderXslt = pathJobOrderXslt;
+	}
+	
+	public boolean isChangeIsipToSafe() {
+		return changeIsipToSafe;
+	}
+
+	public void setChangeIsipToSafe(boolean changeIsipToSafe) {
+		this.changeIsipToSafe = changeIsipToSafe;
 	}
 }

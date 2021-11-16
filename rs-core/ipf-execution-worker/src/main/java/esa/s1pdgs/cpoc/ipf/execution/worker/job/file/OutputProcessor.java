@@ -500,7 +500,7 @@ public class OutputProcessor {
 			productName = line.substring(index + 1);
 		}
 		// Second: if file ISIP, retrieve only .SAFE
-		if (productName.toUpperCase().endsWith(EXT_ISIP)) {
+		if (properties.isChangeIsipToSafe() && productName.toUpperCase().endsWith(EXT_ISIP)) {
 			productName = productName.substring(0, productName.length() - EXT_ISIP.length()) + EXT_SAFE;
 		}
 		return productName;
@@ -515,7 +515,7 @@ public class OutputProcessor {
 	private String getFilePath(final String line, final String productName) {
 		String filePath = workDirectory + line;
 		// Second: if file ISIP, retrieve only .SAFE
-		if (line.toUpperCase().endsWith("ISIP")) {
+		if (properties.isChangeIsipToSafe() && line.toUpperCase().endsWith("ISIP")) {
 			filePath = filePath + File.separator + productName;
 		}
 		return filePath;
