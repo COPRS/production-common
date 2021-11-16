@@ -23,7 +23,7 @@ env:
   ARTIFACTORY_PROJECT: werum-docker
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-
+  
 jobs:
   build-acq-simulator:
     runs-on: ubuntu-latest
