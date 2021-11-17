@@ -1,0 +1,195 @@
+# Shall helm deploy the simulator images?
+simulator:
+  simulateL0AioIpf: true
+  simulateL0AspIpf: true
+  simulateL1Ipf: true
+  simulateL2Ipf: true
+  simulateMbuIpf: true
+  simulateS3L0Ipf: true
+  
+image:
+  imagePullSecrets: harbor-tools
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  tag: 0.1.0-rc1
+
+mqiImage:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  name: rs-core-mqi-server
+  tag: 0.1.0-rc1
+
+mqi:
+  persistence:
+    messagePersistenceStrategy: AppCatalogMessagePersistence # InMemoryMessagePersistence | AppCatalogMessagePersistence
+
+gateway:
+  toleration:
+    key: node-role.kubernetes.io/gateway
+    effect: NoSchedule
+  label:
+    key: node-role.kubernetes.io/gateway
+    value:
+      net: infra
+      std: std
+      edrs:
+        pedc: std
+        bedc: std
+
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
+
+processor:
+  toleration:
+    key: node-role.kubernetes.io/processor
+    effect: NoSchedule
+  label:
+    key: node-role.kubernetes.io/processor
+    value:
+      aio: aio
+      asp: asp
+      l1: l1
+      l2: l2
+      zip: zip
+
+kongplugin:
+  clientId: "s1pdgs_client"
+  clientSecret: ""
+  discovery: "https://c1.ops.s1pdgs.eu/auth/realms/s1pdgs/.well-known/openid-configuration"
+  sessionSecret: ""
+  introspection_endpoint: "https://c1.ops.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token/introspect"
+  groupsAuthorizedPaths:
+    group:
+    - name: "operations"
+      path: "/odata"
+    - name: "centreexpert"
+      path: "/odata"
+    - name: "op_manager"
+      path: "/odata"
+    - name: "sysadmin"
+      path: "/odata"
+    - name: "customer"
+      path: "/odata"
+    - name: "b2b"
+      path: "/odata"
+
+metadataCatalog:
+  restApiNbRetry: 3
+  restApiTempoRetryMs: 1000
+
+xbip:
+  bufferInputs: false
+  ignoreFilesBeforeDate:
+    cgs01:  "2020-11-24T08:00:00.000Z"
+    cgs02:  "2020-11-24T08:00:00.000Z"
+    cgs03:  "2020-11-24T08:00:00.000Z"
+    cgs04:  "2020-11-24T08:00:00.000Z"
+    cgs05:  "2020-11-24T08:00:00.000Z"
+    cgs10:  "2020-11-24T08:00:00.000Z"
+  stationRetentionTime:
+    cgs01: 7
+    cgs02: 7
+    cgs03: 7
+    cgs04: 7
+    cgs05: 7
+    cgs10: 7
+
+dataLifecycle:
+  retentionTimeUpdate:
+    offsetInHoursL1: 6
+
+preparator:
+  aio:
+    minimalWaitingTimeSec: 360000
+    timeoutSec:
+      cgs1: 7200
+      cgs2: 7200
+      cgs3: 7200
+      cgs4: 7200
+      cgs5: 7200
+      edrs: 7200
+    descramble:
+      cgs1: "yes"
+      cgs2: "yes"
+      cgs3: "yes"
+      cgs4: "no"
+      cgs5: "yes"
+      edrs: "yes"
+    rsEncode:
+      cgs1: "yes"
+      cgs2: "yes"
+      cgs3: "yes"
+      cgs4: "yes"
+      cgs5: "yes"
+      edrs: "yes"
+  asp:
+    lateTopicActive: true # disabled for regression testing   
+    fast:
+      minimal: 1 # 3
+      nominal: 36 # 20
+      lateAfterMilliseconds: 38344235000 
+    nrt:
+      minimal: 1 # 1
+      nominal: 36 # 2
+      lateAfterMilliseconds: 38344235000 
+    pt:
+      lateAfterMilliseconds: 38344235000
+  l1:
+    lateTopicActive: true # disabled for regression testing    
+    fast:
+      lateAfterMilliseconds: 38344235000 
+    nrt:
+      lateAfterMilliseconds: 38344235000 
+    pt:
+      lateAfterMilliseconds: 38344235000
+  l2:
+    lateTopicActive: true # disabled for regression testing    
+    fast:
+      lateAfterMilliseconds: 38344235000 
+    nrt:
+      lateAfterMilliseconds: 38344235000 
+    pt:
+      lateAfterMilliseconds: 38344235000
+            
+appCatalog:
+  mqi:
+    cleaningOld: "604800000"
+  jobs:
+    cleaningJobsTerminatedFixedRateMs: "604800000" # 7 days
+    cleaningJobsInvalidFixedRateMs: "604800000"    # 7 days
+    edrsSessions:
+      maxAgeJobMs:
+        waiting: "604800000"      # 7 days
+        dispatching: "604800000"
+        generating: "604800000"
+        terminated: "604800000"
+    levelSegments:
+      maxAgeJobMs:
+        waiting: "604800000"
+        dispatching: "604800000"
+        generating: "604800000"
+        terminated: "604800000"
+    levelProducts:
+      maxAgeJobMs:
+        waiting: "604800000"
+        dispatching: "604800000"
+        generating: "604800000"
+        terminated: "604800000"
+
+prometheusAdapter:
+  prometheusUrl: http://prometheus-operator-prometheus.monitoring.svc.cluster.local:9090
+  securePort: 6443
+  metricsRelistInterval: 1m
+  targets:
+    xbip_worker:
+      minReplicas: 2
+      maxReplicas: 4
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        selectPolicy: Max
+      scaleUp:
+        stabilizationWindowSeconds: 10
+        selectPolicy: Max
+
