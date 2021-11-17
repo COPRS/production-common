@@ -306,4 +306,44 @@
 			<topic>t-pdgs-s3-session-file-catalog-events</topic>
 		</route_to>
 	</route>
+
+	<route description="route for AUX">
+		<input_key>t-pdgs-metadata-extraction-jobs</input_key>
+		<output_key>S3_AUX</output_key>
+		<route_to>
+			<topic>t-pdgs-other-catalog-events</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for L0 products (granules)">
+		<input_key>t-pdgs-metadata-extraction-jobs</input_key>
+		<output_key>S3_GRANULES</output_key>
+		<route_to>
+			<topic>t-pdgs-granules-catalog-events</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for L0 products">
+		<input_key>t-pdgs-metadata-extraction-jobs</input_key>
+		<output_key>S3_L0</output_key>
+		<route_to>
+			<topic>t-pdgs-l0-catalog-events</topic>
+		</route_to>
+	</route>
+
+	<route description="route for CAL products">
+		<input_key>t-pdgs-metadata-extraction-jobs</input_key>
+		<output_key>S3_CAL</output_key>
+		<route_to>
+			<topic>t-pdgs-cal-catalog-events</topic>
+		</route_to>
+	</route>
+	
+	<route description="route for PUG products">
+		<input_key>t-pdgs-metadata-extraction-jobs</input_key>
+		<output_key>S3_PUG</output_key>
+		<route_to>
+			<topic>t-pdgs-pug-catalog-events</topic>
+		</route_to>
+	</route>
 </routing>

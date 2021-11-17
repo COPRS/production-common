@@ -99,6 +99,8 @@ application:
           t-pdgs-l2-slices-production-events-fast: 5
           t-pdgs-l2-slices-production-events-operator-demand: 9
           t-pdgs-l2-slices-production-events-late: 1
+          t-pdgs-s3-acq-production-events: 5
+          t-pdgs-l0-production-events: 5
           t-pdgs-mbu-production-events: 5
           t-pdgs-obs-production-events: 5
       # Dis/Enabled publication for this category

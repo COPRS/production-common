@@ -94,4 +94,34 @@
 		</route_to>
 	</default_route>
 
+	<default_route description="route for GRANULES">
+		<family>S3_GRANULES</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	<default_route description="route for AUXILIARY_PRODUCTS">
+		<family>S3_AUX</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	<default_route description="route for L0 PRODUCTS">
+		<family>S3_L0</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	<default_route description="route for CAL PRODUCTS">
+		<family>S3_CAL</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
+	<default_route description="route for PDU PRODUCTS">
+		<family>S3_PUG</family>
+		<route_to>
+			<topic>t-pdgs-metadata-extraction-jobs</topic>
+		</route_to>
+	</default_route>
 </routing>
