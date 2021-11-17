@@ -37,10 +37,10 @@ kafka:
 
 # Process
 process:
-  # Extension of the SAFE files
-  file-with-manifest-ext: .safe    
-  # Name of the manifest (with extension)                               
-  manifest-filename: manifest.safe  
+  manifest-filenames:                                            # filenames for manifest files by product extension
+    sen3: xfdumanifest.xml
+    isip: "<PRODUCTNAME>_iif.xml"
+    safe: manifest.safe
   # Hostname                               
   hostname: ${HOSTNAME}                   
 
@@ -108,6 +108,12 @@ worker:
       pattern-config: ^(s1)(a|b)-([0-9a-z]{2})([0-9a-z]{1})-(mbu)-()()(vv|hh)-([0-9a-z]{15})-([0-9a-z]{15})-([0-9]{6})-([a-z0-9]{6})-([0-9]{3})_([A-Z0-9]{4})\.(bufr)$
       # Local directory (must ende with '/') 
       local-directory: /data/local-catalog/spp_mbu_products/   # Configuration of product insertion
+    s3-aux:
+      pattern-config: ^([a-zA-Z0-9][a-zA-Z0-9])(\w{1})_((OL|SL|SR|DO|MW|GN|SY|TM|AX)_(0|1|2|_)_\w{4}AX)_(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{8}T\d{6})_(_{17})_(\w{3})_(\w{8})\.(SEN3)\/?(.+)?$
+      local-directory: /data/local-catalog/s3_aux/
+    s3-products:
+      pattern-config: ^([a-zA-Z0-9][a-zA-Z0-9])(\w{1})_((OL|SL|SR|DO|MW|GN|SY|TM|AX)_(0|1|2|_)_\w{4}(?!AX)\w{2})_(\d{8}T\d{6})_(\d{8}T\d{6})_(\d{8}T\d{6})_(\w{17})_(\w{3})_(\w{8})\.(SEN3|ISIP)\/?(.+)?$
+      local-directory: /data/local-catalog/s3_products/
   product-insertion:
     # The maximal number of consecutive retries following an error  
     max-retries: 3
