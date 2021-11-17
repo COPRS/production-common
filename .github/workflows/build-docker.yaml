@@ -24,9 +24,9 @@ jobs:
       matrix:
         component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api]
     steps:
-      - name: Extract branch name
+      - name: Extract image tag name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
         id: extract_branch
 
       - name: Set up QEMU
