@@ -228,6 +228,20 @@ ingestion-trigger:
       topic: t-pdgs-contingency-ingestion-jobs
       # Product family accociated with the file to be ingested
       family: PLAN_AND_REPORT_ZIP
+    # Handling of Granules      
+    - directory: file:///data/inbox/s3_granules/
+      # e.g. S3A_OL_0_EFR__G_20040703T005217_20040703T005417_20150424T160529___________________WER_D_______.ISIP
+      matchRegex: ^S3[AB_]_([0-9a-zA-Z_]{11})_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_((([0-9a-zA-Z_]{4})_([0-9]{3})_([0-9]{3})_(([0-9]{4})|(_{4})))|([0-9a-zA-Z_]{17}))_([0-9a-zA-Z_]{3})_(((O|F|R|D|_)_(NR|NT|ST|AL|__)_([a-zA-Z0-9_]{3}))|_{8})\.ISIP$
+      ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
+      topic: t-pdgs-contingency-ingestion-jobs
+      family: S3_GRANULES
+    # Handling of AUX files
+    - directory: file:///data/inbox/s3_aux/
+      # e.g. S3A_AX___OSF_AX_20040702T203000_20040704T042158_20171130T082119___________________WER_D_AL____.SEN3
+      matchRegex: ^S3[AB_]_([0-9a-zA-Z_]{9})AX_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_(_{17})_([0-9a-zA-Z_]{3})_(((O|F|R|D|_)_(NR|NT|ST|SN|NS|NN|AL|__)_([a-zA-Z0-9_]{3}))|_{8})\.SEN3$
+      ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
+      topic: t-pdgs-contingency-ingestion-jobs
+      family: S3_AUX
 
 # Kafka config
 kafka:
