@@ -69,13 +69,13 @@ export AUXIP_OAUTHCLIENTSECRET="XXXXX"
 export AUXIP_AUTH_METHOD="disable" 		# allowed values: basic oauth2 disable
 export AUXIP_OAUTH_AUTH_URL="XXXXX"
 
-export EDIP_PEDC_SECRET_NAME="edip";
+export EDIP_PEDC_SECRET_NAME="edip-pedc";
 # (*) User that shall be used to login to EDIP PEDC
 export EDIP_PEDC_USER="xxx";
 # (*) Password for the user that shall be used to login to EDIP PEDC
 export EDIP_PEDC_PASS="xxx";
 
-export EDIP_BEDC_SECRET_NAME="edip";
+export EDIP_BEDC_SECRET_NAME="edip-bedc";
 # (*) User that shall be used to login to EDIP BEDC
 export EDIP_BEDC_USER="xxx";
 # (*) Password for the user that shall be used to login to EDIP BEDC
