@@ -35,7 +35,7 @@ replicaCount:
   prip_frontend: 1
   ingestion_edip_pedc_trigger: 1
   ingestion_edip_pedc_worker: 1
-  ingestion_edip_bedc_trigger: 0 
-  ingestion_edip_bedc_worker: 0
+  ingestion_edip_bedc_trigger: 1 
+  ingestion_edip_bedc_worker: 1
   request_repository: 1
   queue_watcher: 1
