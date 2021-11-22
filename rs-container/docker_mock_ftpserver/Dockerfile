@@ -1,4 +1,4 @@
-FROM registry.tools.s1pdgs.eu/anonymous/ubuntu:latest
+FROM ubuntu:latest
 
 COPY s3cmd*.zip /tmp
 RUN apt-get update && \
