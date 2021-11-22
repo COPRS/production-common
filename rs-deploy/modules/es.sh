@@ -66,7 +66,7 @@ done;
 
 for item in ${ES_INDICES_PRODUCTS[@]};
 do
-    R=$(curl -XPUT "http://${ES_SVC}:${ES_PORT}/${item}" -H 'Content-Type: application/json' -d '{"mappings":{"properties":{"creationTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape","tree":"geohash"},"oqcFlag":{"type":"text"}}}}' 2>&1);
+    R=$(curl -XPUT "http://${ES_SVC}:${ES_PORT}/${item}" -H 'Content-Type: application/json' -d '{"mappings":{"properties":{"creationTime":{"type":"date"},"startTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape","tree":"geohash"},"oqcFlag":{"type":"text"}}}}' 2>&1);
     D=$(es_print_result "${item}" "${R}" "CREATION");
     RESULT="${RESULT}
 ${D}";
