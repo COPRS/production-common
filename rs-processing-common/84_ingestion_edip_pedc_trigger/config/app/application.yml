@@ -1,0 +1,71 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: s1pdgs-ingestion-edip-pedc-trigger
+
+# Logging
+logging:
+  config: ${log4j_config:log/log4j2.yml}
+
+process:
+  # hostname of the container (derived by 'hostname' command)
+  hostname: ${HOSTNAME}
+
+# Ingestion Trigger config
+ingestion-trigger:
+  # Maximum number of consecutive retries for publishing of ingestion jobs (defaults to 10)
+  publish-max-retries: {{if .Values.edip }}{{.Values.edip.publishMaxRetries | default "10" }}{{else}} 10 {{end}}
+  # Time between retries after unsuccessful publishing of ingestion jobs in millis (defaults to 10000)
+  publish-tempo-retry-ms: {{if .Values.edip }}{{.Values.edip.publishTempoRetryMs | default "10000" }}{{else}} 10000 {{end}}
+  # Pickup point polling interval in millis
+  polling-interval-ms: 10000
+  # Polling config
+  polling:
+    # Handling of EDRS sessions NOMINAL
+      # Pickup path
+    - directory: {{ .Values.edip.pedc.directory }}
+      # Filename regex for matching files
+      matchRegex: {{ .Values.edip.pedc.matchRegex }}
+      # Filename regex for ignoring files
+      ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
+      # Kafka topic to put the ingestion jobs for the worker
+      topic: {{ .Values.edip.pedc.topic }}
+      # Product family accociated with the file to be ingested
+      family: {{ .Values.edip.pedc.family }}
+      # Ingestion type to select (possible values "edip", "prip")
+      type: edip
+      stationName: WILE
+      # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
+      ignore-files-before-date: {{ .Values.edip.pedc.ignoreFilesBeforeDate }}
+      station-retention-time: {{ .Values.edip.pedc.stationRetentionTime }}
+      
+# Kafka config
+kafka:
+  # host:port to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: ${kafka_bootstrap-servers}
+  # Hostname
+  hostname: ${HOSTNAME}
+  # Topic name for the errors
+  error-topic: ${kafka_topic_errors}
+  # Kafka Producer config
+  producer:
+    # When greater than zero, enables retrying of failed sends
+    max-retries: 10
+
+# MongoDB config
+mongodb:
+  host: ${mongo_db_host:localhost}
+  port: ${mongo_db_port:27017}
+  database: ${mongo_db_database:s1pdgs}
+
+# Application status configuration
+status:
+  # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not, default is 3000
+  delete-fixed-delay-ms: 3000
+  # The number of consecutive processing errors leading to the state FATALERROR, default is 100
+  max-error-counter-processing: 3
+  # The number of consecutive MQI errors leading to the state FATALERROR, default is 100
+  max-error-counter-mqi: 30
+  # Timeout after no polling attempt in seconds --> AppStatus -> FAIL
+  fail-after-inactivity-for-seconds: 3600

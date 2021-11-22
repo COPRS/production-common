@@ -1,0 +1,92 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: s1pdgs-mqi-ingestion-edip-pedc
+    
+logging:
+  config: ${log4j_config:log/log4j2.yml}
+  
+# Kafka
+kafka:
+  # host:port to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: ${kafka_bootstrap-servers}
+  # Hostname
+  hostname: ${HOSTNAME}
+  # ID to pass to the server when making
+  client-id: ingestion-edip-worker-mqi
+  # Topic name for the errors
+  error-topic: ${kafka_topic_errors}
+  consumer:
+    # Unique string that identifies the consumer group to which this consumer belongs
+    group-id: ingestion-edip
+    # Maximum number of records returned in a single call to poll().
+    max-poll-records: 1
+    # Delay between two polls
+    max-poll-interval-ms: 3600000
+    # Expected time between heartbeats to the consumer coordinator.
+    heartbeat-intv-ms: 3000
+    session-timeout-ms: 10000
+    # What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server (e.g. because that data has been deleted): earliest: automatically reset the offset to the earliest offset, latest: automatically reset the offset to the latest offset, none: throw exception to the consumer if no previous offset is found for the consumer's group,anything else: throw exception to the consumer.
+    auto-offset-reset: latest
+    # Default offset seek mode when rebalance: -2: let the consumer, -1: start to the beginning offset, -0: start to the end offset
+    offset-dft-mode: -3
+  listener:
+    # Timeout to use when polling the consumer.
+    poll-timeout-ms: 500
+  producer:
+    # When greater than zero, enables retrying of failed sends.
+    max-retries: 10
+    
+# Configuration per categories of products
+application:
+  # Hostname
+  hostname: ${HOSTNAME}
+  max-error-counter: 3 
+  stop-fixed-delay-ms: 3000
+  wait-next-ms: 1000
+  product-categories:
+    ingestion:
+      consumption:
+        # Dis/Enabled consumption for this category
+        enable: true
+        # List of topics with priority
+        topics-with-priority:
+          t-pdgs-ingestion-jobs-edip-pedc-nominal: 1
+          t-pdgs-ingestion-jobs-edip-pedc-retransfer: 1
+      publication:
+        # Dis/Enabled publication for this category
+        enable: false
+        routing-file:
+    ingestion-event:
+      consumption:
+        # Dis/Enabled consumption for this category
+        enable: false
+        # List of topics with priority
+        topics-with-priority:
+          unknown: 0
+      publication:
+        # Dis/Enabled publication for this category
+        enable: true
+        # Path to routing file for publishing
+        routing-file: config/outputs.xml
+    
+# REST controller
+server:
+  port: 8081
+  
+# App catalog
+persistence:
+  # MQI Persistence strategy (InMemoryMessagePersistence | AppCatalogMessagePersistence)
+  message-persistence-strategy: {{ .Values.mqi.persistence.messagePersistenceStrategy }}
+  # Url to app catalog for mqi persistence
+  host-uri-catalog: http://s1pro-app-catalog-svc:8080
+  # Port of other app
+  port-uri-other-app: 8080
+  # Max retries for rest calls to app catalog
+  max-retries: 100
+  # Delay between retries
+  tempo-retry-ms: 1000
+  # Connection to other app
+  other-app:
+    suffix-uri: .s1pro-ingestion-edip-pedc-svc

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routing description="routing for publishing ingested product">
+	<route description="route for EDRS_SESSION products">
+		<input_key>t-pdgs-ingestion-jobs-edip-pedc-nominal</input_key>
+		<output_key>EDRS_SESSION</output_key>
+		<route_to>
+			<topic>t-pdgs-session-file-ingestion-events</topic>
+		</route_to>
+	</route>
+        <route description="route for EDRS_SESSION products">
+                <input_key>t-pdgs-ingestion-jobs-edip-pedc-retransfer</input_key>
+                <output_key>SESSION_RETRANSFER</output_key>
+                <route_to>
+                        <topic>t-pdgs-session-file-ingestion-events</topic>
+                </route_to>
+        </route>
+</routing>

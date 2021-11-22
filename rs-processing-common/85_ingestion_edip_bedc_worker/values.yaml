@@ -1,0 +1,51 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+service:
+  port: 8080
+  
+mqiService:
+  port: 8081
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#  limits:
+  #  cpu: 100m
+#    memory: 3Gi
+#  requests:
+  #  storage: 30Gi
+#    memory: 256Mi
+
+image:
+  name: rs-core-ingestion-worker
+
+# Please ensure that the sum of javaOpts.xmx and uploadCache.size does not exceed ram.request|limit
+ingestion_edip_bedc_worker:
+  cpu:
+    request: "300m"
+    limit: "1300m"
+  ram:
+    request: "3500Mi"
+    limit: "4000Mi"
+  javaOpts:
+    #xms: "256m"
+    xmx: "2048m"
+  uploadCache:
+    location: "/opt/s3/uploadCache"
+    medium: "Memory"
+    size: "1500Mi"
+
+ingestion_edip_bedc_worker_mqi:
+  cpu:
+    request: "100m"
+    limit: "500m"
+  ram:
+    request: "600Mi"
+    limit: "2400Mi"
+  javaOpts:
+    #xms: "256m"
+    xmx: "512m"
