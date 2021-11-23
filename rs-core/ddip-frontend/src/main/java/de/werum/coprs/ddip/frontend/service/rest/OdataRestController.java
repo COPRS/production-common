@@ -55,7 +55,7 @@ public class OdataRestController {
 		final String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
 		LOGGER.info("Received HTTP request for URL: {}{}", request.getRequestURL().toString(), queryParams);
 
-		final String queryUrl = String.format("%s%s", this.dispatchPripUrl, queryParams);
+		final String queryUrl = String.format("%s/%s%s", this.dispatchPripUrl, request.getRequestURI(), queryParams);
 		LOGGER.info("Redirecting HTTP request to URL: {}", queryUrl);
 		response.setHeader(HttpHeaders.LOCATION, queryUrl);
 		response.setStatus(HttpStatus.FOUND.value());
