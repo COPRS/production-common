@@ -36,5 +36,7 @@ else
 	echo "pasv_max_port=${ftp_pasv_max_port}" >> /etc/vsftpd/vsftpd.conf
 fi
 
+echo "pasv_promiscuous=YES" >> /etc/vsftpd/vsftpd.conf
+
 # Run vsftpd:
 vsftpd /etc/vsftpd/vsftpd.conf
