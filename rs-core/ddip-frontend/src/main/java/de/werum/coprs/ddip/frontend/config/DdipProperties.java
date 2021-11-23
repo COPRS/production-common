@@ -1,7 +1,5 @@
 package de.werum.coprs.ddip.frontend.config;
 
-import java.net.URL;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,7 +9,10 @@ public class DdipProperties {
 
 	private String majorVersion;
 	private String version;
-	private URL dispatchPripUrl;
+
+	private String dispatchPripProtocol;
+	private String dispatchPripHost;
+	private Integer dispatchPripPort;
 
 	public String getMajorVersion() {
 		return this.majorVersion;
@@ -29,12 +30,28 @@ public class DdipProperties {
 		this.version = version;
 	}
 
-	public URL getDispatchPripUrl() {
-		return this.dispatchPripUrl;
+	public String getDispatchPripProtocol() {
+		return this.dispatchPripProtocol;
 	}
 
-	public void setDispatchPripUrl(URL dispatchPripUrl) {
-		this.dispatchPripUrl = dispatchPripUrl;
+	public void setDispatchPripProtocol(String dispatchPripProtocol) {
+		this.dispatchPripProtocol = dispatchPripProtocol;
+	}
+
+	public String getDispatchPripHost() {
+		return this.dispatchPripHost;
+	}
+
+	public void setDispatchPripHost(String dispatchPripHost) {
+		this.dispatchPripHost = dispatchPripHost;
+	}
+
+	public Integer getDispatchPripPort() {
+		return this.dispatchPripPort;
+	}
+
+	public void setDispatchPripPort(Integer dispatchPripPort) {
+		this.dispatchPripPort = dispatchPripPort;
 	}
 
 }
