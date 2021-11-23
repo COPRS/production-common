@@ -14,6 +14,6 @@ RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY --from=build /app/ddip-frontend/target/coprs-ddip-frontend-*.jar coprs-ddip-frontend.jar
-COPY /config/start.sh start.sh
+COPY /start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"
