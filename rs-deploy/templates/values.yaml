@@ -79,6 +79,23 @@ metadataCatalog:
   restApiNbRetry: 3
   restApiTempoRetryMs: 1000
 
+auxip:
+  serviceRootUri: "https://aux1.s1pdgs.eu/odata/v1"
+  sslValidation: "false"
+  authType: "oauth2"
+  oauthAuthUrl: "https://aux1.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token"
+  creationDateAttributeName: "PublicationDate"
+  productNameAttrName: "Name"
+  idAttrName: "Id"
+  contentLengthAttrName: "ContentLength"
+  start: "2021-02-14T12:00:00.000000"
+  timeWindowSec: 240 #3600         # The time window to check at each request
+  timeWindowOverlapSec: 240  # the current time window will have some overlap in seconds with the predecessing time window
+                             # this is just to have the possibility to add some savety margin, making sure nothing is overseen between time windows
+  offsetFromNowSec: 240      # time window will not reach now but now minus offset-from-now-sec
+                             # this is for savety too, giving the queried system some grace period to provide new/current data
+  maxPageSize: 500            # aux metadata will be splitted into pages with this size
+
 xbip:
   bufferInputs: false
   ignoreFilesBeforeDate:
