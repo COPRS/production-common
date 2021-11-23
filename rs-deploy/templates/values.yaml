@@ -5,7 +5,9 @@ simulator:
   simulateL1Ipf: true
   simulateL2Ipf: true
   simulateMbuIpf: true
+  simulateS3ACQIpf: true
   simulateS3L0Ipf: true
+  simulateS3PUGIpf: true
   
 image:
   imagePullSecrets: harbor-tools
