@@ -244,4 +244,4 @@ ddip:
       protocol: http
       host: s1pro-prip-frontend-svc.processing.svc.cluster.local
       port: 8080
-      url: "${ddip.forward.prip.protocol}://${ddip.forward.prip.host}:${ddip.forward.prip.port}"
+      url: "${ddip.dispatch.prip.protocol}://${ddip.dispatch.prip.host}:${ddip.dispatch.prip.port}"
