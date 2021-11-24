@@ -16,7 +16,7 @@ import de.werum.coprs.ddip.frontend.service.rest.model.PingResponse;
 @RestController
 public class DdipRestController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DdipRestController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(DdipRestController.class);
 
 	public final DdipService ddipService;
 

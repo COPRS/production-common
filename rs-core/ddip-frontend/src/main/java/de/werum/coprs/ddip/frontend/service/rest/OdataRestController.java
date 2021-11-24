@@ -1,7 +1,10 @@
 package de.werum.coprs.ddip.frontend.service.rest;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,11 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.werum.coprs.ddip.frontend.config.DdipProperties;
@@ -57,8 +60,33 @@ public class OdataRestController {
 
 		final String queryUrl = String.format("%s%s%s", this.dispatchPripUrl, request.getRequestURI(), queryParams);
 		LOGGER.info("Redirecting HTTP request to URL: {}", queryUrl);
-		response.setHeader(HttpHeaders.LOCATION, queryUrl);
-		response.setStatus(HttpStatus.FOUND.value());
+
+		final RestTemplate restTemplate = new RestTemplate();
+		final ResponseEntity<String> responseEntity = restTemplate.getForEntity(queryUrl, String.class);
+		try {
+			this.convertResponse(responseEntity, response);
+		} catch (final IOException e) {
+			throw new RuntimeException(String.format("error processing PRIP response: %s", e.getMessage()), e);
+		}
+	}
+
+	private void convertResponse(final ResponseEntity<String> responseEntity, final HttpServletResponse servletResponse) throws IOException {
+		if (null != responseEntity) {
+			for (final Map.Entry<String, List<String>> headers : responseEntity.getHeaders().entrySet()) {
+				final String headerKey = headers.getKey();
+
+				for (final String headerValue : headers.getValue()) {
+					servletResponse.addHeader(headerKey, headerValue);
+				}
+			}
+
+			servletResponse.setStatus(responseEntity.getStatusCodeValue());
+
+			if (null != responseEntity.getBody()) {
+				servletResponse.getWriter().write(responseEntity.getBody());
+			}
+			servletResponse.flushBuffer();
+		}
 	}
 
 }
