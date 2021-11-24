@@ -3,8 +3,11 @@ package de.werum.coprs.ddip.frontend.service.rest;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,6 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,15 +68,29 @@ public class OdataRestController {
 		LOGGER.info("Redirecting HTTP request to URL: {}", queryUrl);
 
 		final RestTemplate restTemplate = new RestTemplate();
-		final ResponseEntity<String> responseEntity = restTemplate.getForEntity(queryUrl, String.class);
+		final HttpHeaders httpHeaders = this.getHeaders(request);
+		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
+
+		final ResponseEntity<String> responseEntity = restTemplate.exchange(queryUrl, HttpMethod.resolve(request.getMethod()), requestEntity, String.class);
+
 		try {
-			this.convertResponse(responseEntity, response);
+			this.mapResponse(responseEntity, response);
 		} catch (final IOException e) {
 			throw new RuntimeException(String.format("error processing PRIP response: %s", e.getMessage()), e);
 		}
 	}
 
-	private void convertResponse(final ResponseEntity<String> responseEntity, final HttpServletResponse servletResponse) throws IOException {
+	private HttpHeaders getHeaders(final HttpServletRequest request) {
+		return Collections.list(request.getHeaderNames()).stream() //
+				.collect(Collectors.toMap( //
+						Function.identity(), //
+						headerName -> Collections.list(request.getHeaders(headerName)), //
+						(oldVal, newVal) -> newVal, //
+						HttpHeaders::new //
+						));
+	}
+
+	private void mapResponse(final ResponseEntity<String> responseEntity, final HttpServletResponse servletResponse) throws IOException {
 		if (null != responseEntity) {
 			for (final Map.Entry<String, List<String>> headers : responseEntity.getHeaders().entrySet()) {
 				final String headerKey = headers.getKey();
