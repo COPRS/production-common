@@ -1,5 +1,6 @@
 package de.werum.coprs.ddip.frontend.service.rest;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import de.werum.coprs.ddip.frontend.config.DdipProperties;
 
@@ -25,9 +27,27 @@ public class OdataRestController {
 
 	private final DdipProperties ddipProperties;
 
+	private final URL dispatchPripUrl;
+
 	@Autowired
 	public OdataRestController(final DdipProperties ddipProperties) {
 		this.ddipProperties = ddipProperties;
+		this.dispatchPripUrl = buildDispatchPripUrl(ddipProperties);
+	}
+
+	private static URL buildDispatchPripUrl(final DdipProperties ddipProperties) {
+		try {
+			return UriComponentsBuilder
+					.fromHttpUrl(String.format("%s://%s:%d",
+							ddipProperties.getDispatchPripProtocol(),
+							ddipProperties.getDispatchPripHost(),
+							ddipProperties.getDispatchPripPort()))
+					.build().toUri().toURL();
+		} catch (final MalformedURLException e) {
+			final String msg = String.format("could not initialize PRIP URL for request disptaching; protocol (%s), host (%s) and port (%s) must be valid: %s",
+					ddipProperties.getDispatchPripProtocol(), ddipProperties.getDispatchPripHost(), ddipProperties.getDispatchPripPort(), e.getMessage());
+			throw new IllegalArgumentException(msg, e);
+		}
 	}
 
 	@RequestMapping(value = "/v1/**")
@@ -35,8 +55,7 @@ public class OdataRestController {
 		final String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
 		LOGGER.info("Received HTTP request for URL: {}{}", request.getRequestURL().toString(), queryParams);
 
-		final URL dispatchPripUrl = this.ddipProperties.getDispatchPripUrl();
-		final String queryUrl = String.format("%s%s", dispatchPripUrl, queryParams);
+		final String queryUrl = String.format("%s%s%s", this.dispatchPripUrl, request.getRequestURI(), queryParams);
 		LOGGER.info("Redirecting HTTP request to URL: {}", queryUrl);
 		response.setHeader(HttpHeaders.LOCATION, queryUrl);
 		response.setStatus(HttpStatus.FOUND.value());
