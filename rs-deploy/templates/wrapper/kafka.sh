@@ -172,6 +172,15 @@ t-pdgs-mbu-preparation-jobs                              2	259200000
 t-pdgs-mbu-execution-jobs                                2  	259200000
 t-pdgs-mbu-production-events                             2	259200000
 t-pdgs-mbu-dissemination-jobs                            2  259200000
+t-pdgs-ingestion-jobs-s3-xbip-nominal                    2      259200000
+t-pdgs-ingestion-jobs-s3-xbip-retransfer                 2      259200000
+t-pdgs-s3-session-file-ingestion-events                  2      259200000
+t-pdgs-s3-metadata-extraction-jobs                       2      259200000
+t-pdgs-s3-session-file-catalog-events                    2      259200000
+t-pdgs-s3-session-preparation-jobs                       2      259200000
+t-pdgs-s3-session-execution-jobs                         2      259200000
+t-pdgs-s3-acq-production-report-events                   2      259200000
+t-pdgs-s3-acq-production-events                          2      259200000
 ";
 
 # Delete empty lines and choose columns
