@@ -102,8 +102,10 @@ public class OdataRestController {
 
 			servletResponse.setStatus(responseEntity.getStatusCodeValue());
 
-			if (null != responseEntity.getBody()) {
-				servletResponse.getWriter().write(responseEntity.getBody());
+			final String responseBody = responseEntity.getBody();
+			if (null != responseBody) {
+				LOGGER.debug(String.format("writing response body: %s", responseBody.length() > 256 ? responseBody.substring(0, 252) + "..." : responseBody));
+				servletResponse.getWriter().write(responseBody);
 			}
 			servletResponse.flushBuffer();
 		}
