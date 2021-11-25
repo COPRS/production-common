@@ -24,6 +24,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jcraft.jsch.JSch;
@@ -36,6 +37,11 @@ import esa.s1pdgs.cpoc.disseminator.path.PathEvaluator;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
+@Ignore
+/* This test had been deactivated as it seems to be not reliable enough and fails randomly due to JSCH connection receiving a bad signature. Issue cannot be produced
+ * easily as often working the next time being executed. This might be some race condition. As the reference system does not use SFTP dissemination targets, it is
+ * deactivated for the moment.
+ */
 public class TestSftpOutboxClient {
 	static final class SimplePasswordAuthenticator implements PasswordAuthenticator {
 		private final String user;
