@@ -100,6 +100,9 @@ application:
           t-pdgs-l2-slices-production-events-pt: 20
           t-pdgs-l2-slices-production-events-operator-demand: 9
           t-pdgs-l2-slices-production-events-late: 1
+          t-pdgs-s3-acq-production-events: 10
+          t-pdgs-l0-production-events: 10
+          t-pdgs-pug-production-events: 10
       publication:
         # Dis/Enabled publication for this category
         enable: false
