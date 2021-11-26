@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,21 +35,24 @@ public class OdataRestController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OdataRestController.class);
 
+	private final RestTemplate restTemplate;
+
 	private final DdipProperties ddipProperties;
 
 	private final URL dispatchPripUrl;
 
 	@Autowired
-	public OdataRestController(final DdipProperties ddipProperties) {
+	public OdataRestController(final DdipProperties ddipProperties, final RestTemplate restTemplate) {
 		this.ddipProperties = ddipProperties;
 		this.dispatchPripUrl = buildDispatchPripUrl(ddipProperties);
+		this.restTemplate = restTemplate;
 	}
 
-	private static URL buildDispatchPripUrl(final DdipProperties ddipProperties) {
+	static URL buildDispatchPripUrl(final DdipProperties ddipProperties) {
 		try {
 			return UriComponentsBuilder
 					.fromHttpUrl(String.format("%s://%s:%d",
-							ddipProperties.getDispatchPripProtocol(),
+							Objects.requireNonNull(ddipProperties).getDispatchPripProtocol(),
 							ddipProperties.getDispatchPripHost(),
 							ddipProperties.getDispatchPripPort()))
 					.build().toUri().toURL();
@@ -59,28 +63,7 @@ public class OdataRestController {
 		}
 	}
 
-	@RequestMapping(value = "/v1/**")
-	public void processOdataRequest(HttpServletRequest request, HttpServletResponse response) {
-		final String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
-		LOGGER.info("Received HTTP request for URL: {}{}", request.getRequestURL().toString(), queryParams);
-
-		final String queryUrl = String.format("%s%s%s", this.dispatchPripUrl, request.getRequestURI(), queryParams);
-		LOGGER.info("Redirecting HTTP request to URL: {}", queryUrl);
-
-		final RestTemplate restTemplate = new RestTemplate();
-		final HttpHeaders httpHeaders = this.getHeaders(request);
-		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
-
-		final ResponseEntity<String> responseEntity = restTemplate.exchange(queryUrl, HttpMethod.resolve(request.getMethod()), requestEntity, String.class);
-
-		try {
-			this.mapResponse(responseEntity, response);
-		} catch (final IOException e) {
-			throw new RuntimeException(String.format("error processing PRIP response: %s", e.getMessage()), e);
-		}
-	}
-
-	private HttpHeaders getHeaders(final HttpServletRequest request) {
+	static HttpHeaders getHeaders(final HttpServletRequest request) {
 		return Collections.list(request.getHeaderNames()).stream() //
 				.collect(Collectors.toMap( //
 						Function.identity(), //
@@ -90,7 +73,7 @@ public class OdataRestController {
 						));
 	}
 
-	private void mapResponse(final ResponseEntity<String> responseEntity, final HttpServletResponse servletResponse) throws IOException {
+	static void mapResponse(final ResponseEntity<String> responseEntity, final HttpServletResponse servletResponse) throws IOException {
 		if (null != responseEntity) {
 			for (final Map.Entry<String, List<String>> headers : responseEntity.getHeaders().entrySet()) {
 				final String headerKey = headers.getKey();
@@ -108,6 +91,26 @@ public class OdataRestController {
 				servletResponse.getWriter().write(responseBody);
 			}
 			servletResponse.flushBuffer();
+		}
+	}
+
+	@RequestMapping(value = "/v1/**")
+	public void handleOdataRequest(HttpServletRequest request, HttpServletResponse response) {
+		final String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
+		LOGGER.info("Received HTTP request for URL: {}{}", request.getRequestURL().toString(), queryParams);
+
+		final String queryUrl = String.format("%s%s%s", this.dispatchPripUrl, request.getRequestURI(), queryParams);
+		LOGGER.info("Redirecting HTTP request to URL: {}", queryUrl);
+
+		final HttpHeaders httpHeaders = OdataRestController.getHeaders(request);
+		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
+
+		final ResponseEntity<String> responseEntity = this.restTemplate.exchange(queryUrl, HttpMethod.resolve(request.getMethod()), requestEntity, String.class);
+
+		try {
+			OdataRestController.mapResponse(responseEntity, response);
+		} catch (final IOException e) {
+			throw new RuntimeException(String.format("error processing PRIP response: %s", e.getMessage()), e);
 		}
 	}
 
