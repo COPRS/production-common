@@ -51,7 +51,7 @@ $SCRIPT_PATH/modules/s3.sh      "${lcl_CONF}" init;
 $SCRIPT_PATH/modules/es.sh      "${lcl_CONF}" init;
 $SCRIPT_PATH/modules/kafka.sh   "${lcl_CONF}" init;
 $SCRIPT_PATH/modules/mongo.sh   "${lcl_CONF}" init;
-$SCRIPT_PATH/modules/deploy.sh  "${lcl_CONF}" init;
+#$SCRIPT_PATH/modules/deploy.sh  "${lcl_CONF}" init;
 }
  
 ##########################
@@ -63,7 +63,7 @@ load_conf;
 local lcl_CONF="${1}";
 
 # Scale down
-$SCRIPT_PATH/modules/deploy.sh "${lcl_CONF}" down;
+#$SCRIPT_PATH/modules/deploy.sh "${lcl_CONF}" down;
 
 # PVC clean
 #pvc_clean;
@@ -84,7 +84,7 @@ $SCRIPT_PATH/modules/mongo.sh "${lcl_CONF}" clean ;
 $SCRIPT_PATH/modules/mongo.sh "${lcl_CONF}" init ;
 
 # Scale up
-$SCRIPT_PATH/modules/deploy.sh "${lcl_CONF}" upgrade;
+#$SCRIPT_PATH/modules/deploy.sh "${lcl_CONF}" upgrade;
 }
 
 ##########################
@@ -95,7 +95,7 @@ load_conf;
 
 lcl_CONF="${1}";
 
-$SCRIPT_PATH/modules/deploy.sh "${lcl_CONF}" clean;
+#$SCRIPT_PATH/modules/deploy.sh "${lcl_CONF}" clean;
 
 # External parties
 $SCRIPT_PATH/modules/s3.sh      "${lcl_CONF}" clean;
@@ -127,7 +127,7 @@ $SCRIPT_PATH/modules/es.sh      "${lcl_CONF}" check;
 $SCRIPT_PATH/modules/mongo.sh   "${lcl_CONF}" check;
 $SCRIPT_PATH/modules/kafka.sh   "${lcl_CONF}" check;
 $SCRIPT_PATH/modules/secrets.sh "${lcl_CONF}" check;
-$SCRIPT_PATH/modules/deploy.sh  "${lcl_CONF}" check;
+#$SCRIPT_PATH/modules/deploy.sh  "${lcl_CONF}" check;
 }
  
 ##########################
