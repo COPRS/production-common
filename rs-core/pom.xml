@@ -346,6 +346,7 @@
 		<module>archives</module>
 		<module>disseminator</module>
 		<module>ingestion-trigger</module>
+		<module>ingestion-filter</module>
 		<module>ingestion-worker</module>
 		<module>production-trigger</module>
  		<module>ipf-preparation-worker</module> 

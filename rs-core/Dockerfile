@@ -33,6 +33,7 @@ COPY --from=buildenv /app/applicative-catalog/target /app/applicative-catalog/ta
 COPY --from=buildenv /app/archives/target /app/archives/target
 COPY --from=buildenv /app/disseminator/target /app/disseminator/target
 COPY --from=buildenv /app/ingestion-trigger/target /app/ingestion-trigger/target
+COPY --from=buildenv /app/ingestion-filter/target /app/ingestion-filter/target
 COPY --from=buildenv /app/ingestion-worker/target /app/ingestion-worker/target
 COPY --from=buildenv /app/production-trigger/target /app/production-trigger/target
 COPY --from=buildenv /app/ipf-preparation-worker/target /app/ipf-preparation-worker/target
