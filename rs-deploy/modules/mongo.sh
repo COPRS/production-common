@@ -38,6 +38,12 @@ mongo_check;
 }
 
 function mongo_init_db () {
+echo "Setting up mongo cluster..."
+# This script needs to be executed before the actual database is initialized. It is rather a hack than a real
+# clean way to setup mongo. Will be tackled in V1.
+rs_init_mongo.sh
+
+echo "Initialize mongo db..."
 MONGO_POD=$(kubectl -n ${MONGO_NAMESPACE} get pod | grep ${MONGO_POD_PREFIX} | grep Running | head -1 | awk '{print $1}');
 MONGO_PRIMARY=$(kubectl -n ${MONGO_NAMESPACE} exec -ti ${MONGO_POD} -- mongo "${MONGO_ROOT_CONNECTION_STRING}" --eval 'rs.status();' | grep PRIMARY -B 4 | grep name | awk -F ':' '{print $2}' | awk -F '"' '{print $2}' | awk -F '.' '{print $1}');
 echo "xxx:$MONGO_PRIMARY"
