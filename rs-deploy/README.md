@@ -17,7 +17,12 @@ When correctly setup the script is part of the command search path and can be di
 rs_deploy <CMD> <ADDON>
 ```
 
-The command specifies what action the script shall apply on the RS addon. The different possibilities will be described more detaillied in the following sections.
+The command specifies what action the script shall apply on the RS addon. The following commands are available:
+- install
+- uninstall
+- restart
+
+The usage of the differetn commands are described more verbosely in the following sections.
 
 The addon specifies the set of microservices that shall be handled by the execution. The following official addons are currently available:
 - common (common components used by the Reference System)
