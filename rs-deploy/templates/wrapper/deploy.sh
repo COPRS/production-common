@@ -19,10 +19,12 @@ case "$ADDON" in
   "s3") ADDON_DIR="processing-sentinel-3" ;;
   "infra") ADDON_DIR="infrastructure" ;;
   "common")  ADDON_DIR="processing-common" ;;
-  *) echo "Unknown addon $ADDON, cannot resolve chart directory; exit 1 " ;;
 esac
 
-echo "Using $ADDON_DIR as chart directory"
+if [[ ! -z $ADDON_DIR ]]
+then
+  echo "Using $ADDON_DIR as chart directory"
+fi
 
 export HELM_CONF_REPLICAS="${ENV_DIR}/replicaCount.yaml"
 export HELM_CONF_GLOBAL="${ENV_DIR}/values.yaml";
