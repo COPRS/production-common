@@ -5,4 +5,4 @@
 # verify the health status of the cluster
 #
 
-$LOCATION/wrapper.sh $ENV_DIR/configuration.sh check
+$LOCATION/wrapper.sh $ENV_DIR/wrapper/configuration.sh check
