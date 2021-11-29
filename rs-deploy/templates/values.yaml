@@ -55,6 +55,9 @@ processor:
       l1: l1
       l2: l2
       zip: zip
+      s3_acq: s3_acq
+      s3_l0p: s3_l0p
+      s3-pug: s3_pug
 
 kongplugin:
   clientId: "s1pdgs_client"
