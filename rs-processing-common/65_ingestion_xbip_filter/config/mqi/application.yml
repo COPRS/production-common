@@ -2,7 +2,7 @@ spring:
   main:
     banner-mode: "off"
   application:
-    name: s1pdgs-mqi-ingestion-xbip
+    name: s1pdgs-mqi-ingestion-xbip-filter
     
 logging:
   config: ${log4j_config:log/log4j2.yml}
@@ -14,12 +14,12 @@ kafka:
   # Hostname
   hostname: ${HOSTNAME}
   # ID to pass to the server when making
-  client-id: ingestion-xbip-worker-mqi
+  client-id: ingestion-xbip-filter-mqi
   # Topic name for the errors
   error-topic: ${kafka_topic_errors}
   consumer:
     # Unique string that identifies the consumer group to which this consumer belongs
-    group-id: ingestion-xbip
+    group-id: ingestion-xbip-filter
     # Maximum number of records returned in a single call to poll().
     max-poll-records: 1
     # Delay between two polls
@@ -52,10 +52,10 @@ application:
         enable: true
         # List of topics with priority
         topics-with-priority:
-          t-pdgs-filtered-ingestion-jobs-xbip-nominal: 1
-          t-pdgs-filtered-ingestion-jobs-xbip-retransfer: 1
-          t-pdgs-filtered-ingestion-jobs-s3-xbip-nominal: 1
-          t-pdgs-filtered-ingestion-jobs-s3-xbip-retransfer: 1
+          t-pdgs-ingestion-jobs-xbip-nominal: 1
+          t-pdgs-ingestion-jobs-xbip-retransfer: 1
+          t-pdgs-ingestion-jobs-s3-xbip-nominal: 1
+          t-pdgs-ingestion-jobs-s3-xbip-retransfer: 1
       publication:
         # Dis/Enabled publication for this category
         enable: false
@@ -91,4 +91,4 @@ persistence:
   tempo-retry-ms: 1000
   # Connection to other app
   other-app:
-    suffix-uri: .s1pro-ingestion-xbip-svc
+    suffix-uri: .s1pro-ingestion-xbip-filter-svc
