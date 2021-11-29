@@ -37,10 +37,8 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            #memory: {{ .Values.ingestion_xbip_worker.ram.request }}
             cpu: {{ .Values.ingestion_xbip_filter.cpu.request }}
           limits:
-            #memory: {{ .Values.ingestion_xbip_worker.ram.limit }}
             cpu: {{ .Values.ingestion_xbip_filter.cpu.limit }}
         volumeMounts:
         - name: service-logging-config-volume
