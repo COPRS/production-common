@@ -15,9 +15,6 @@ export S3_CLEAN_HARD="rb --force --recursive";
 export S3_CLEAN_SOFT="rm -r --force --recursive";
 export S3_CLEAN="${S3_CLEAN_HARD}";
 
-WERUM_CLUSTER_NUMBER=$(hostname | cut -d '-' -f2 | cut -d 'c' -f2)
-[[ $WERUM_CLUSTER_NUMBER =~ ^[0-9]*$ ]] || echo "**** WARNING: INVALID CLUSTER NUMBER: ${WERUM_CLUSTER_NUMBER} ****"
-
 export S3_PREFIX="rs";
 export S3_SUFFIX_ZIP="zip";
 
