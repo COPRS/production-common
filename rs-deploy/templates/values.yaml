@@ -6,7 +6,7 @@ simulator:
   simulateL2Ipf: true
   simulateMbuIpf: true
   simulateS3ACQIpf: true
-  simulateS3L0Ipf: true
+  simulateS3L0PIpf: true
   simulateS3PUGIpf: true
   
 image:
