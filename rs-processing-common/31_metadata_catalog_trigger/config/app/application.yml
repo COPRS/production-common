@@ -67,6 +67,8 @@ mqi:
     disallowRegex: ".*"
   - productFamily: S3_PUG_ZIP
     disallowRegex: ".*"
+  - productFamily: S3_AUX_ZIP
+    disallowRegex: ".*"
 
 # Metadata catalog trigger
 trigger:
