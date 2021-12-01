@@ -132,6 +132,8 @@ public class IngestionFilterService implements MqiListener<IngestionJob> {
 		if (messageShouldBeProcessed) {
 			GenericPublicationMessageDto<IngestionJob> result = new GenericPublicationMessageDto<IngestionJob>(
 					message.getId(), message.getBody().getProductFamily(), message.getBody());
+			result.setInputKey(message.getInputKey());
+			result.setOutputKey(message.getBody().getProductFamily().toString());
 			results.add(result);
 		}
 		
