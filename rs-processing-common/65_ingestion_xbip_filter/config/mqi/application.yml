@@ -58,17 +58,6 @@ application:
           t-pdgs-ingestion-jobs-s3-xbip-retransfer: 1
       publication:
         # Dis/Enabled publication for this category
-        enable: false
-        routing-file:
-    ingestion-event:
-      consumption:
-        # Dis/Enabled consumption for this category
-        enable: false
-        # List of topics with priority
-        topics-with-priority:
-          unknown: 0
-      publication:
-        # Dis/Enabled publication for this category
         enable: true
         # Path to routing file for publishing
         routing-file: config/outputs.xml
