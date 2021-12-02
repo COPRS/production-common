@@ -1,5 +1,7 @@
 package de.werum.coprs.ddip.frontend.config;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,6 +15,8 @@ public class DdipProperties {
 	private String dispatchPripProtocol;
 	private String dispatchPripHost;
 	private Integer dispatchPripPort;
+
+	private Map<String, String> collections;
 
 	public String getMajorVersion() {
 		return this.majorVersion;
@@ -52,6 +56,14 @@ public class DdipProperties {
 
 	public void setDispatchPripPort(Integer dispatchPripPort) {
 		this.dispatchPripPort = dispatchPripPort;
+	}
+
+	public Map<String, String> getCollections() {
+		return this.collections;
+	}
+
+	public void setCollections(Map<String, String> collections) {
+		this.collections = collections;
 	}
 
 }
