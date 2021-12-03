@@ -127,7 +127,6 @@ rs_init() {
   else
     echo "Adding source in bashrc"
     echo "source ~/env/config/env/s1pro-env-init.sh" >> ~/.bashrc
-    source ~/.bashrc
   fi
 }
 
@@ -145,10 +144,12 @@ rs_clean() {
 
 # Perform an update on all RS repositories to pull in the current state
 rs_update() {
-  cd $CWD/repos/processing-sentinel-1 && git pull
-  cd $CWD/repos/processing-sentinel-3 && git pull
-  cd $CWD/repos/rs-processing-common/ && git pull https://github.com/COPRS/production-common.git $BRANCH
-  cd $CWD/repos/config && git pull
+  cd $CWD/repos/processing-sentinel-1 && git pull $REPO_S1 $BRANCH
+  cd $CWD/repos/processing-sentinel-3 && git pull $REPO_S3 $BRANCH
+  cd $CWD/repos/rs-deploy && git pull $REPO_COMMON $BRANCH
+  cd $CWD/repos/rs-infrastructure && git pull $REPO_INFRA $BRANCH
+  cd $CWD/repos/rs-processing-common && git pull $REPO_COMMON $BRANCH
+  cd $CWD/repos/config && git pull $REPO_CONF $BRANCH
   if [[ ! -z $REPO_INFRA ]]
   then
     cd $CWD/repos/rs-infrastructure && git pull
