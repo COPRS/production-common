@@ -64,10 +64,11 @@ public class OdataRestController {
 	@RequestMapping(value = "/v1/**")
 	public void handleOdataRequest(HttpServletRequest request, HttpServletResponse response) {
 		final String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
-		LOGGER.info("Received HTTP request for URL: {}{}", request.getRequestURL().toString(), queryParams);
+		final String incomingUrl = String.format("%s%s", request.getRequestURL().toString(), queryParams);
+		LOGGER.info("Received HTTP request for URL: {}", incomingUrl);
 
 		final String queryUrl = String.format("%s%s%s", this.dispatchPripUrl, request.getRequestURI(), this.modifyQueryParams(queryParams));
-		LOGGER.info("Redirecting HTTP request to URL: {}", queryUrl);
+		LOGGER.info("Forwarding HTTP request: {} -> {}", incomingUrl, queryUrl);
 
 		final HttpHeaders httpHeaders = getHeaders(request);
 		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
@@ -87,6 +88,7 @@ public class OdataRestController {
 	}
 
 	private boolean isCollectionFeature(final String queryParams) {
+		LOGGER.debug("DDIP collection feature detected in: {}", queryParams);
 		return null != queryParams && queryParams.contains(ATTR_COLLECTION_NAME);
 	}
 
@@ -191,7 +193,9 @@ public class OdataRestController {
 				}
 
 				// replace collection term
-				translatedQueryParams = translatedQueryParams.replaceAll(ATTR_COLLECTION_NAME + " eq " + collectionName, "(" + collectionQueryTerm + ")");
+				final String collectionNameTerm = ATTR_COLLECTION_NAME + " eq " + collectionName;
+				LOGGER.debug("DDIP collection name query '{}' is replaced with '{}'", collectionNameTerm, "(" + collectionQueryTerm + ")");
+				translatedQueryParams = translatedQueryParams.replaceAll(collectionNameTerm, "(" + collectionQueryTerm + ")");
 			}
 		}
 
