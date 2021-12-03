@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ -z "$LOCATION" -o -z "$ENV_DIR" ]
+then
+    echo "Please set source environment"
+    exit 1
+fi
+
+LIST_QUEUES_SCRIPT=$ENV_DIR/wrapper/kafka.sh
+. $LIST_QUEUES_SCRIPT
+
+NB_PROC=6
+
+mkdir -p /tmp/kafka_count
+for (( PROC_NUM = $NB_PROC - 1; PROC_NUM >= 0; PROC_NUM-- )); do
+  echo "#!/bin/bash" >/tmp/kafka_count/script${PROC_NUM}.sh
+  chmod +x /tmp/kafka_count/script${PROC_NUM}.sh
+done
+
+PROC_NUM=0
+NB_TOPIC=$(echo "${TOPIC_LIST}" | wc -l)
+for TOPIC in ${TOPIC_LIST[@]};
+do
+    echo "kubectl -n $KAFKA_NAMESPACE exec $KAFKA_POD -c $KAFKA_CONTAINER -- sh -c \"kafka-console-consumer.sh --bootstrap-server $KAFKA_URL --from-beginning --timeout-ms 10000 --topic $TOPIC 2>&1\" | grep { | wc -l >/tmp/kafka_count/$TOPIC" >>/tmp/kafka_count/script${PROC_NUM}.sh
+    PROC_NUM=$(($PROC_NUM+1))
+    if [ $PROC_NUM -eq $NB_PROC ]; then
+      PROC_NUM=0
+    fi
+done
+
+for (( PROC_NUM = $NB_PROC - 1; PROC_NUM >= 0; PROC_NUM-- )); do
+  /tmp/kafka_count/script${PROC_NUM}.sh &
+done
+
+wait
+
+for TOPIC in ${TOPIC_LIST[@]};
+do
+  echo $(cat /tmp/kafka_count/$TOPIC) $TOPIC
+done
