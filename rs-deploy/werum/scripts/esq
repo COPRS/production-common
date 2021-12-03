@@ -6,6 +6,8 @@ then
     exit 1
 fi
 
+METHOD=GET
+
 if [ "$1" == "indices" ]
 then
     PRODUCT_TYPE=""
@@ -20,15 +22,35 @@ if [ "$ACTION" == "" ]
 then
     echo "usage $0 <product_type> <action>"
     echo "  <product_type> e.g. aux_pp1 or aux*"
-    echo "  <action> search, count, query, between, indices, mapping"
+    echo "  <action> search, count, doc, rm, query, between, indices, mapping"
     exit 1
+fi
+
+if [ "$ACTION" == "doc" ]
+then
+   if [ $# -ne 3 ]
+   then
+       echo "Synopsis: esq INDEX doc ID"
+       exit 1
+   fi
+   ID=$3
+fi
+
+if [ "$ACTION" == "rm" ]
+then
+   if [ $# -ne 3 ]
+   then
+       echo "Synopsis: esq INDEX rm ID"
+       exit 1
+   fi
+   ID=$3
 fi
 
 FILTER="43RS7DQV7Q0OHXY01TGK9B2E8VP40AIE14VGVRTC" # random string = disable filter
 
 if [ "$ACTION" == "search" ]
 then
-    echo "Performing search..."
+    >&2 echo "Performing search..."
     COMMAND="/_search?size=10000\&pretty"
 elif [ "$ACTION" == "count" ]
 then
@@ -44,15 +66,22 @@ then
 elif [ "$ACTION" == "mapping" ]
 then
     COMMAND="/_mapping?pretty"
+elif [ "$ACTION" == "doc" ]
+then
+    COMMAND="/_doc/$ID"
+elif [ "$ACTION" == "rm" ]
+then
+    COMMAND="/_doc/$ID"
+    METHOD=DELETE
 else
     echo "unknown action"
     exit 1
 fi
 
 ## FIXME: Originally there was the content type as well, but it doesn't work for some reason correctly with kubectl -n $S1PRO_NAMESPACE. Not required anyways...
-ES_CMD="curl -H 'Content-Type: application/json' -XGET http://${ELASTICSEARCH_URL}${PRODUCT_TYPE}${COMMAND} $ARG"
+ES_CMD="curl -H 'Content-Type: application/json' -X$METHOD http://${ELASTICSEARCH_URL}${PRODUCT_TYPE}${COMMAND} $ARG"
 
-echo "$ES_CMD"
+>&2 echo "$ES_CMD"
 
 OUTPUT=esq-result-$(for i in {1..3}; do printf '%04x' $RANDOM; done)-$(date +'%H%M%S%N').es
 
@@ -61,7 +90,7 @@ MAX_TRIES=250
 EXIT_STATUS=1
 while [ $EXIT_STATUS -ne 0 ] && [ $RETRY_NUM -lt $MAX_TRIES ]; do
   if [ $RETRY_NUM -gt 0 ]; then
-    echo Retry ${RETRY_NUM}...
+    >&2 echo Retry ${RETRY_NUM}...
     sleep 0.5
   fi
   kubectl -n "$ELASTICSEARCH_NAMESPACE" exec -ti "$ELASTICSEARCH_POD" -- bash -c "$ES_CMD" >/tmp/$OUTPUT
@@ -75,4 +104,4 @@ fi
 
 rm -f /tmp/$OUTPUT
 
-echo "done."
+>&2 echo "done."

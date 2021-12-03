@@ -18,30 +18,29 @@ then
 fi
 
 TOPIC=$1
-
-if [[ $TOPIC =~ ^-?[0-9]+$ ]]
-then
-    # Topic is an id
-    . $LIST_QUEUES_SCRIPT
-    KTOPIC=`echo $TOPIC_LIST | tr ' ' '\n' | sed -n "$TOPIC p"`
-    # KTOPIC=`cat $LOCATION/kafka/topic_partition.txt | grep -v "#" | tr '\t' ' ' | tr -s ' ' | cut -d " " -f1 | sed -n "$TOPIC p"`    
-    echo "Selected kafka queue '$KTOPIC' by id $TOPIC"
-else
-    KTOPIC=$TOPIC
-    echo "Selected kafka queue '$KTOPIC' by name"
-fi
-
 OPT_MAX_MESSAGES=""
 if [ $# -eq 2 ]
 then
-  if [ $2 == "nofollow" ]
-  then
+  if [ $1 = "-n" -o $1 = "nofollow" ]; then
+    TOPIC=$2
+    OPT_MAX_MESSAGES="--timeout-ms 2000"
+  elif [ $2 = "-n" -o $2 = "nofollow" ]; then
     OPT_MAX_MESSAGES="--timeout-ms 2000"
   else
     OPT_MAX_MESSAGES="--max-messages $2"
   fi
 fi
 
-kubectl -n $KAFKA_NAMESPACE exec -ti $KAFKA_POD -c $KAFKA_CONTAINER -- kafka-console-consumer.sh --bootstrap-server $KAFKA_URL --topic $KTOPIC --from-beginning $OPT_MAX_MESSAGES
+if [[ $TOPIC =~ ^-?[0-9]+$ ]]
+then
+    # Topic is an id
+    KTOPIC=`cat $LOCATION/werum/kafka/topic_partition.txt | grep -v "#" | tr '\t' ' ' | tr -s ' ' | cut -d " " -f1 | sed -n "$TOPIC p"`
+    echo "Selected kafka queue '$KTOPIC' by id $TOPIC"
+else
+    KTOPIC=$TOPIC
+    echo "Selected kafka queue '$KTOPIC' by name"
+fi
+
+kubectl -n $KAFKA_NAMESPACE exec $KAFKA_POD -c $KAFKA_CONTAINER -- kafka-console-consumer.sh --bootstrap-server $KAFKA_URL --topic $KTOPIC --from-beginning $OPT_MAX_MESSAGES
 
 echo "done."
