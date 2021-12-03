@@ -3,6 +3,8 @@ package esa.s1pdgs.cpoc.ingestion.filter.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.ParseException;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ingestion.filter.config.IngestionFilterConfigurationProperties;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
@@ -49,7 +52,7 @@ public class TestIngestionFilterService {
 				productName,
 				"pickupBase",
 				"WILE/S3A/7000/DCS_01_S3A_2021112408000009000_dat/ch_1/DCS_01_S3A_2021112408000009000_ch1_DSDB_00001.raw",
-				179, UUID.randomUUID(), "S3", "TEST", null, null, "xbip", null);
+				179, Date.from(DateUtils.parse("2021-11-24T08:00:00").toInstant(ZoneOffset.UTC)), UUID.randomUUID(), "S3", "TEST", null, null, "xbip", null);
 		GenericMessageDto<IngestionJob> message = new GenericMessageDto<IngestionJob>(0, "t-pdgs-whatevertest", job);
 		
 		MqiPublishingJob<IngestionJob> result = service.handleMessage(message, MissionId.S3, productName);
@@ -66,8 +69,8 @@ public class TestIngestionFilterService {
 		IngestionJob job = new IngestionJob(ProductFamily.EDRS_SESSION,
 				productName,
 				"pickupBase",
-				"WILE/S3A/7000/DCS_01_S3A_2021112409000009000_dat/ch_1/DCS_01_S3A_2021112409000009000_ch1_DSDB_00001.raw",
-				179, UUID.randomUUID(), "S3", "TEST", null, null, "xbip", null);
+				"WILE/S3A/7000/DCS_01_S3A_2021112408000009000_dat/ch_1/DCS_01_S3A_2021112408000009000_ch1_DSDB_00001.raw",
+				179, Date.from(DateUtils.parse("2021-11-24T09:00:00").toInstant(ZoneOffset.UTC)), UUID.randomUUID(), "S3", "TEST", null, null, "xbip", null);
 		GenericMessageDto<IngestionJob> message = new GenericMessageDto<IngestionJob>(0, "t-pdgs-whatevertest", job);
 		
 		MqiPublishingJob<IngestionJob> result = service.handleMessage(message, MissionId.S3, productName);

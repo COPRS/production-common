@@ -199,6 +199,7 @@ public final class Inbox {
 						entry.getPickupURL(), 
 						entry.getRelativePath(), 
 						entry.getSize(),
+						entry.getLastModified(),
 						reporting.getUid(),
 						mission.name(),
 						stationName,

@@ -1,15 +1,12 @@
 package esa.s1pdgs.cpoc.ingestion.filter.service;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -100,41 +97,32 @@ public class IngestionFilterService implements MqiListener<IngestionJob> {
 		final List<GenericPublicationMessageDto<? extends AbstractMessage>> results = new ArrayList<>();
 
 		FilterProperties filterProperties = properties.getConfig().get(mission);
+		
 		// When no filter for mission is defined: All messages are allowed
 		boolean messageShouldBeProcessed = true;
 
+		Date lastModifiedDate = message.getBody().getLastModified();
+		
 		if (filterProperties != null) {
-			// Check if timestamp of product name is in defined reoccuring timespans
-			Pattern pattern = Pattern.compile(filterProperties.getNameRegex());
-			
-			Pattern.matches(filterProperties.getNameRegex(), productName);
-			
-			Matcher matcher = pattern.matcher(productName);
-			if (matcher.find()) {
-				String timestampString = matcher.group(filterProperties.getGroupIdx());
-				DateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-				Date date;
-	
-				try {
-					date = format.parse(timestampString);
-				} catch (ParseException e) {
-					LOG.error("Unable to parse timestampString %s to date object.", timestampString);
-					throw e;
-				}
-	
-				messageShouldBeProcessed = filterProperties.getCronDefinition().isSatisfiedBy(date);
+			if (lastModifiedDate != null) {
+				// Check if the last modification timestamp of the the file is in defined reoccuring timespans
+				filterProperties.getCronDefinition().setTimeZone(TimeZone.getTimeZone("UTC"));
+				messageShouldBeProcessed = filterProperties.getCronDefinition().isSatisfiedBy(lastModifiedDate);
 			} else {
-				// message does not satisfy regex pattern. Ignore for now?
+				LOG.warn("message does not have last modification date {} for ", productName);
 				messageShouldBeProcessed = false;
 			}
 		}
 		
 		if (messageShouldBeProcessed) {
+			LOG.debug("message should be processed for {} with last modification date {}", productName, lastModifiedDate);
 			GenericPublicationMessageDto<IngestionJob> result = new GenericPublicationMessageDto<IngestionJob>(
 					message.getId(), message.getBody().getProductFamily(), message.getBody());
 			result.setInputKey(message.getInputKey());
 			result.setOutputKey(message.getBody().getProductFamily().toString());
 			results.add(result);
+		} else {
+			LOG.debug("message should be ignored for {} with lastmodification date {}", productName, lastModifiedDate);
 		}
 		
 		return new MqiPublishingJob<>(results);

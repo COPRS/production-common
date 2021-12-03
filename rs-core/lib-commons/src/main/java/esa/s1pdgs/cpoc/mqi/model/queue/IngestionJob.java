@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -41,6 +42,8 @@ public class IngestionJob extends AbstractMessage {
 	
 	private String timeliness;
 	
+	private Date lastModified; // ... timestamp of file on pickup
+	
 	private Map<String,String> additionalMetadata = new HashMap<>();
 		
 	public IngestionJob() {
@@ -54,6 +57,7 @@ public class IngestionJob extends AbstractMessage {
 			final String pickupBaseURL, 
 			final String relativePath, 	
 			final long productSizeByte,
+			final Date lastModified,
 			final UUID uuid,
 			final String missionId,
 			final String stationName,
@@ -67,6 +71,7 @@ public class IngestionJob extends AbstractMessage {
 		this.relativePath 		= relativePath;
 		this.productName 		= productName;
 		this.productSizeByte 	= productSizeByte;
+		this.lastModified       = lastModified;
 		this.uid				= uuid;
 		this.missionId          = missionId;
 		this.stationName		= stationName;
@@ -109,6 +114,14 @@ public class IngestionJob extends AbstractMessage {
 		this.productSizeByte = productSizeByte;
 	}
 	
+	public Date getLastModified() {
+		return lastModified;
+	}
+
+	public void setLastModified(Date lastModified) {
+		this.lastModified = lastModified;
+	}
+
 	public String getMissionId() {
 		return missionId;
 	}
@@ -168,6 +181,7 @@ public class IngestionJob extends AbstractMessage {
 				pickupBaseURL,
 				productName,
 				productSizeByte,
+				lastModified,
 				relativePath,
 				missionId,
 				stationName,
@@ -191,7 +205,8 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(mode, other.mode)
 				&& Objects.equals(pickupBaseURL, other.pickupBaseURL) 
 				&& Objects.equals(productName, other.productName)
-				&& productSizeByte == other.productSizeByte 
+				&& productSizeByte == other.productSizeByte
+				&& Objects.equals(lastModified, other.lastModified)
 				&& Objects.equals(relativePath, other.relativePath)
 				&& Objects.equals(missionId, other.missionId)
 				&& Objects.equals(stationName, other.stationName) 
@@ -202,10 +217,10 @@ public class IngestionJob extends AbstractMessage {
 	public String toString() {
 		return "IngestionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", relativePath=" + relativePath
-				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid +
-				", productSizeByte=" + productSizeByte + ", missionId=" + missionId + ", stationName=" + stationName + ", mode=" + mode +
-				", timeliness=" + timeliness + ", inboxType=" + inboxType + ", additionalMetadata=" + 
-				additionalMetadata + "]";
+				+ ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName + ", uid=" + uid 
+				+ ", productSizeByte=" + productSizeByte + ", lastModified=" + lastModified + ", missionId=" + missionId
+				+ ", stationName=" + stationName + ", mode=" + mode + ", timeliness=" + timeliness 
+				+ ", inboxType=" + inboxType + ", additionalMetadata=" + additionalMetadata + "]";
 	}
 
 }
