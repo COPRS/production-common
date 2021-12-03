@@ -3,6 +3,8 @@ package de.werum.coprs.ddip.frontend.service.rest;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
@@ -82,7 +84,7 @@ public class TestOdataRestController {
 
 	@Test
 	public void testGetFirstOccuranceOf() throws Exception {
-		final String queryParams = "filter=Collection/Name eq 'SampleCollection' and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or Collection/Name eq 'AnotherCollection' and  startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
+		final String queryParams = "filter=Collection/Name eq 'SampleCollection' and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or Collection/Name eq 'AnotherCollection' and startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
 
 		final int firstOccurance = DdipUtil.getFirstOccuranceOf(Pattern.compile(" |\\)|&|$"), queryParams);
 
@@ -91,7 +93,7 @@ public class TestOdataRestController {
 
 	@Test
 	public void testGetNextEnd() throws Exception {
-		final String queryParams = "filter=Collection/Name eq 'SampleCollection' and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or Collection/Name eq 'AnotherCollection' and  startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
+		final String queryParams = "filter=Collection/Name eq 'SampleCollection' and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or Collection/Name eq 'AnotherCollection' and startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
 
 		final int nextEnd = OdataRestController.getNextEnd(queryParams.substring(26));
 
@@ -103,15 +105,37 @@ public class TestOdataRestController {
 		assertTrue(this.ddipProperties.getCollections().containsKey("SampleCollection"));
 		assertTrue(this.ddipProperties.getCollections().containsKey("AnotherCollection"));
 
-		final String queryParams = "filter=Collection/Name eq 'SampleCollection' and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or Collection/Name eq 'AnotherCollection' and  startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
+		final String queryParams = "filter=Collection/Name eq 'SampleCollection' and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or Collection/Name eq 'AnotherCollection' and startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
 		final String expectedQueryParams = "filter=(" + this.ddipProperties.getCollections().get("SampleCollection")
 				+ ") and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or ("
 				+ this.ddipProperties.getCollections().get("AnotherCollection")
-				+ ") and  startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
+				+ ") and startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
 
 		final String transletedQueryParams = OdataRestController.translateCollectionQueryParameters(queryParams, this.ddipProperties.getCollections());
 
 		assertTrue(expectedQueryParams.equals(transletedQueryParams));
+	}
+
+	@Test
+	public void testDecodingQueryParameters() throws Exception {
+		assertTrue(this.ddipProperties.getCollections().containsKey("SampleCollection"));
+		assertTrue(this.ddipProperties.getCollections().containsKey("AnotherCollection"));
+
+		final String queryParams = "filter=Collection/Name eq 'SampleCollection' and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or Collection/Name eq 'AnotherCollection' and startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
+		final String expectedQueryParams = "filter=(" + this.ddipProperties.getCollections().get("SampleCollection")
+				+ ") and startswith(Name,'S1A_') and ContentDate/Start gt 2020-04-04T16:00:00.000000Z or ("
+				+ this.ddipProperties.getCollections().get("AnotherCollection")
+				+ ") and startswith(Name,'S1B_') and ContentDate/Start gt 2020-06-06T08:00:00.000000Z&$expand=Attributes";
+		final String plusEncodedQueryParams = URLEncoder.encode(queryParams, StandardCharsets.UTF_8.toString());
+		final String twentyEncodedQueryParams = "filter=Collection/Name%20eq%20'SampleCollection'%20and%20startswith(Name,'S1A_')%20and%20ContentDate/Start%20gt%202020-04-04T16:00:00.000000Z%20or%20Collection/Name%20eq%20'AnotherCollection'%20and%20startswith(Name,'S1B_')%20and%20ContentDate/Start%20gt%202020-06-06T08:00:00.000000Z&$expand=Attributes";
+
+		final String translatedFromPlusEncodedQueryParams = OdataRestController.translateCollectionQueryParameters(plusEncodedQueryParams,
+				this.ddipProperties.getCollections());
+		assertTrue(expectedQueryParams.equals(translatedFromPlusEncodedQueryParams));
+
+		final String translatedFromTwentyEncodedQueryParams = OdataRestController.translateCollectionQueryParameters(twentyEncodedQueryParams,
+				this.ddipProperties.getCollections());
+		assertTrue(expectedQueryParams.equals(translatedFromTwentyEncodedQueryParams));
 	}
 
 }

@@ -1,8 +1,11 @@
 package de.werum.coprs.ddip.frontend.service.rest;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -146,7 +149,13 @@ public class OdataRestController {
 			return queryParams;
 		}
 
-		String translatedQueryParams = queryParams;
+		String translatedQueryParams;
+		try {
+			translatedQueryParams = URLDecoder.decode(queryParams, StandardCharsets.UTF_8.toString());
+		} catch (final UnsupportedEncodingException e) {
+			throw new DdipRestControllerException(String.format("error decoding query parameters: %s", e.getMessage()), e, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 		final int collectionNameLength = ATTR_COLLECTION_NAME.length();
 		int startIndex = 0;
 
