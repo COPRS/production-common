@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if [ -z $LOCATION ]
+then
+    echo "Please source environment"
+    exit 1
+fi
+
+MONGO_USERNAME=$(kubectl -n ${S1PRO_NAMESPACE} get secret ${MONGODB_SECRET_NAME} -o jsonpath='{.data.USERNAME}' | base64 --decode)
+MONGO_PASSWORD=$(kubectl -n ${S1PRO_NAMESPACE} get secret ${MONGODB_SECRET_NAME} -o jsonpath='{.data.PASSWORD}' | base64 --decode)
+MONGO_POD=$(kubectl -n ${MONGO_NAMESPACE} get pod | grep ${MONGO_POD_PREFIX} | grep Running | head -1 | awk '{print $1}');
+MONGO_PRIMARY=$(kubectl -n ${MONGO_NAMESPACE} exec -ti ${MONGO_POD} -- mongo mongodb://127.0.0.1:${MONGO_PORT} --eval 'rs.isMaster().primary;' 2>&1 | tail -1 | awk -F '.' '{print $1}')
+kubectl -n ${MONGO_NAMESPACE} exec -it ${MONGO_PRIMARY} -- mongo -u ${MONGO_USERNAME} -p ${MONGO_PASSWORD} --authenticationDatabase ${MONGO_DB} "mongodb://127.0.0.1:${MONGO_PORT}/${MONGO_DB}"
