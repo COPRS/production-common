@@ -42,3 +42,12 @@ clean_webdav_mock() {
     kubectl -n $S1PRO_NAMESPACE exec $pod -- sh -c 'rm -rf /var/lib/dav/data/NOMINAL/S1A/* /var/lib/dav/data/NOMINAL/S1B/*'
   done
 }
+
+clean_edip_mock() {
+  echo "Cleaning edip..."
+  for pod in `kubectl -n $S1PRO_NAMESPACE get pods | grep -i s1pro-mock-edip | cut -d " " -f1`
+  do
+    echo "Cleaning ingestion storage for $pod"
+    kubectl -n $S1PRO_NAMESPACE exec $pod -- bash -c 'rm -rf /data/NOMINAL/S1{A,B}/*'
+  done
+}

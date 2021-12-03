@@ -11,7 +11,7 @@ fi
 
   clean_inbox_polling
   clean_webdav_mock
-  clean_edip_nominal.sh
+  clean_edip_mock
 
   echo "Cleaning environment..."
   WERUM_SKIP_KAFKA_CLEAN=true PROTECT_S3="^(.*auxiliary-files|.*-session-files)$" PROTECT_ES="^(raw|session)$|^(aux.*|mpl.*|msk_.*|.*mask)$" "$LOCATION/wrapper.sh" "$ENV_DIR/wrapper/configuration.sh" "clean"
