@@ -185,10 +185,6 @@ t-pdgs-s3-session-preparation-jobs                       2      259200000
 t-pdgs-s3-session-execution-jobs                         2      259200000
 t-pdgs-s3-acq-production-report-events                   2      259200000
 t-pdgs-s3-acq-production-events                          2      259200000
-t-pdgs-ingestion-jobs-s3-edip-pedc-nominal               2	259200000
-t-pdgs-ingestion-jobs-s3-edip-pedc-retransfer            2	259200000
-t-pdgs-ingestion-jobs-s3-edip-bedc-nominal               2	259200000
-t-pdgs-ingestion-jobs-s3-edip-bedc-retransfer            2	259200000
 ";
 
 # Delete empty lines and choose columns

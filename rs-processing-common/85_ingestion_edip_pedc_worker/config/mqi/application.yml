@@ -53,9 +53,7 @@ application:
         # List of topics with priority
         topics-with-priority:
           t-pdgs-ingestion-jobs-edip-pedc-nominal: 1
-          t-pdgs-ingestion-jobs-s3-edip-pedc-nominal: 1
           t-pdgs-ingestion-jobs-edip-pedc-retransfer: 1
-          t-pdgs-ingestion-jobs-s3-edip-pedc-retransfer: 1
       publication:
         # Dis/Enabled publication for this category
         enable: false
