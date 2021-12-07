@@ -19,16 +19,10 @@ ingestion-filter:
   # Configuration for filter mechanism
   config:
     S1:
-      name-regex: ^(\w{3})_(\d{14}).*
-      group-idx: 2
       cron-definition: "* * 0-5 ? * MON *"
     S2:
-      name-regex: ^(\w{3})_(\w{2})_(\w{3})_(\d{14})(\d{5})_.*
-      group-idx: 4
       cron-definition: "* * 0-5 ? * TUE *"
     S3:
-      name-regex: ^(\w{3})_(\w{2})_(\w{3})_(\d{14})(\d{5})_.*
-      group-idx: 4
       cron-definition: "* * 0-8 ? * WED *"
   
 # Kafka config
