@@ -1,27 +1,28 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: { { .Release.Name } }
-  labels: { { - include "rs-user-client-chart.labels" . | nindent 4 } }
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "rs-user-client-chart.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      { { - include "rs-user-client-chart.selectorLabels" . | nindent 6 } }
-  serviceName: { { .Release.Name } }
+      {{- include "rs-user-client-chart.selectorLabels" . | nindent 6 }}
+  serviceName: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        { { - include "rs-user-client-chart.selectorLabels" . | nindent 8 } }
+        {{- include "rs-user-client-chart.selectorLabels" . | nindent 8 }}
     spec:
       terminationGracePeriodSeconds: 10
       containers:
-        - name: { { .Release.Name } }
+        - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: { { .Values.image.pullPolicy } }
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: API_URL
-              value: { { .Values.env.apiUrl } }
+              value: {{ .Values.env.apiUrl }}
           ports:
             - name: http
               containerPort: 80
