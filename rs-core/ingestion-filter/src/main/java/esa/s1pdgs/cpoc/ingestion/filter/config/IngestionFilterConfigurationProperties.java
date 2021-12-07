@@ -12,31 +12,9 @@ import esa.s1pdgs.cpoc.metadata.model.MissionId;
 @ConfigurationProperties("ingestion-filter")
 public class IngestionFilterConfigurationProperties {
 
-	public static class FilterProperties {
-		// Used to define groups within the product name
-		private String nameRegex;
-		
-		// Index of group that should be evaluated as timestamp in this filter
-		private int groupIdx;
-		
+	public static class FilterProperties {		
 		// Cronjob definition for products, that should be processed
 		private CronExpression cronDefinition;
-
-		public String getNameRegex() {
-			return nameRegex;
-		}
-
-		public void setNameRegex(String nameRegex) {
-			this.nameRegex = nameRegex;
-		}
-
-		public int getGroupIdx() {
-			return groupIdx;
-		}
-
-		public void setGroupIdx(int groupIdx) {
-			this.groupIdx = groupIdx;
-		}
 
 		public CronExpression getCronDefinition() {
 			return cronDefinition;
