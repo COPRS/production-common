@@ -26,6 +26,8 @@ ddip:
     SampleCollection: contains(Name,'AMH_ERRMAT') or contains(Name,'AMV_ERRMAT')
     AnotherCollection: contains(Name,'MPL_ORBPRE') or contains(Name,'MPL_ORBSCT')
     AUX: contains(Name,'AMH_ERRMAT') or contains(Name,'AMV_ERRMAT') or contains(Name,'AUX_CAL') or contains(Name,'AUX_ICE') or contains(Name,'AUX_INS') or contains(Name,'AUX_OBMEMC') or contains(Name,'AUX_PP1') or contains(Name,'AUX_PP2') or contains(Name,'AUX_POEORB') or contains(Name,'AUX_PREORB') or contains(Name,'AUX_RESORB') or contains(Name,'AUX_SCS') or contains(Name,'AUX_WAV') or contains(Name,'AUX_WND') or contains(Name,'MPL_ORBPRE') or contains(Name,'MPL_ORBSCT') or contains(Name,'MSK__LAND_')
+    Sentinel1: startswith(Name,'S1')
+    Sentinel3: startswith(Name,'S3')
 
 # REST controller
 server:
