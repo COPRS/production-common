@@ -84,3 +84,6 @@ mqi:
   - productFamily: AUXILIARY_FILE
     # Regular expression to disallow messages
     disallowRegex: S1__OPER_MSK_EW_SLC_.*\.EOF
+  - productFamily: S3_AUX
+    # Regular expression to disallow messages
+    disallowRegex: ".*"
