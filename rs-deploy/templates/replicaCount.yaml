@@ -17,6 +17,15 @@ replicaCount:
   obs_production_trigger: 1
   obs_ipf_preparation_worker: 1
   obs_ipf_execution_worker: 1
+  acq_production_trigger: 1
+  acq_ipf_preparation_worker: 1
+  acq_ipf_execution_worker: 1
+  s3_l0_production_trigger: 1
+  s3_l0_ipf_preparation_worker: 1
+  s3_l0_execution_worker: 2  
+  s3_pug_production_trigger: 1
+  s3_pug_preparation_worker: 1
+  s3_pug_execution_worker: 1
   contingency_ingestion: 1
   ingestion: 3
   ingestion_xbip_cgs01_trigger: 1
