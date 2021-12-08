@@ -80,7 +80,7 @@ function get_metadata() {
 function create_outputs() {
         log "Create output products"
 
-        /opt/generateDummyProducts.py $TIMESTAMP $SATELLITEID $(dirname $JOBORDER)
+        ./generateDummyProducts.py $TIMESTAMP $SATELLITEID $(dirname $JOBORDER)
 
         log "Generated dummy output products"
 }
@@ -95,13 +95,25 @@ function create_productlist() {
         local workingdir=$(dirname $JOBORDER)
         local listfile=${workingdir}/product.LIST
 
-        # Write product.LIST file with all outputs from
+        # Write product.LIST file with all outputs from directory
+        local tmRegex=".*TM_0_NAT.*"
+
+        # Put the TM_0_NAT files up front, so they might get processed earlier
         for entry in $workingdir/*ISIP;
         do
-                echo "$(basename $entry)" >> $listfile
+                if [[ $(basename $entry) =~ $tmRegex ]]; then
+                        echo "$(basename $entry)" >> $listfile
+                fi
         done
 
-        log "product.LIST files created"
+        for entry in $workingdir/*ISIP;
+        do
+                if ! [[ $(basename $entry) =~ $tmRegex ]]; then
+                        echo "$(basename $entry)" >> $listfile
+                fi
+        done
+
+        log "product.LIST file created"
 }
 
 ################################################################################
