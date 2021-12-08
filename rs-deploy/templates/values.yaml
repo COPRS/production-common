@@ -9,6 +9,13 @@ simulator:
   simulateS3L0PIpf: true
   simulateS3PUGIpf: true
   
+s3:
+  processing:
+    l0p:
+      maxTimeLife: 1800
+    pug:
+      maxTimeLife: 3600
+  
 image:
   imagePullSecrets: harbor-tools
   registry: artifactory.coprs.esa-copernicus.eu
