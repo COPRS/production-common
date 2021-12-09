@@ -16,10 +16,12 @@ spec:
         {{- include "rs-user-client-chart.selectorLabels" . | nindent 8 }}
     spec:
       terminationGracePeriodSeconds: 10
+      imagePullSecrets:
+        - name: {{ .Values.image.imagePullSecrets }}
       containers:
         - name: {{ .Release.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+          imagePullPolicy: Always
           env:
             - name: API_URL
               value: {{ .Values.env.apiUrl }}

@@ -8,16 +8,13 @@ env:
 image:
   # Overrides the image tag whose default is the chart appVersion.
   # use image from COPRS repository
-  repository: artifactory.coprs.esa-copernicus.eu/werum-docker/coprs/user-web-client
-  tag: develop
-  pullPolicy: Always
+  name: coprs/user-web-client
 
   # use image from local computer
   #repository: rs-user-client
   #tag: dev # use image from local computer
   #pullPolicy: Never
 
-imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
