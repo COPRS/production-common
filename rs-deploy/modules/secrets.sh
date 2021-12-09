@@ -36,6 +36,7 @@ kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${XBIP_03_SE
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${XBIP_04_SECRET_NAME}"           --from-literal=USER="${XBIP_04_USER}"  --from-literal=PASS="${XBIP_04_PASS}";
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${XBIP_05_SECRET_NAME}"           --from-literal=USER="${XBIP_05_USER}"  --from-literal=PASS="${XBIP_05_PASS}";
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${XBIP_10_SECRET_NAME}"           --from-literal=USER="${XBIP_10_USER}"  --from-literal=PASS="${XBIP_10_PASS}";
+kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${XBIP_S3_SECRET_NAME}"           --from-literal=USER="${XBIP_S3_USER}"  --from-literal=PASS="${XBIP_S3_PASS}";
 
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${AMALFI_SECRET_NAME}"            --from-literal=AMALFI_DB_URL="${AMALFI_DB_URL}"  --from-literal=AMALFI_DB_USER="${AMALFI_DB_USER}" --from-literal=AMALFI_DB_PASS="${AMALFI_DB_PASS}";
 }

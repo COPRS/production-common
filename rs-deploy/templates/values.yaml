@@ -117,6 +117,7 @@ xbip:
     cgs04:  "2020-11-24T08:00:00.000Z"
     cgs05:  "2020-11-24T08:00:00.000Z"
     cgs10:  "2020-11-24T08:00:00.000Z"
+    s3: "2020-11-24T08:00:00.000Z" 
   stationRetentionTime:
     cgs01: 7
     cgs02: 7
@@ -124,6 +125,7 @@ xbip:
     cgs04: 7
     cgs05: 7
     cgs10: 7
+    s3: 7
 
 edip:
   bufferInputs: false

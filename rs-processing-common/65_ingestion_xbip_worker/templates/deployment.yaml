@@ -127,7 +127,17 @@ spec:
           valueFrom:
             secretKeyRef:
               name: xbip-cgs10
-              key: PASS  
+              key: PASS
+        - name: s3.user
+          valueFrom:
+            secretKeyRef:
+              name: xbip-s3
+              key: USER
+        - name: s3.pass
+          valueFrom:
+            secretKeyRef:
+              name: xbip-s3
+              key: PASS 
         envFrom:
         - configMapRef:
             name: s1pdgs-config

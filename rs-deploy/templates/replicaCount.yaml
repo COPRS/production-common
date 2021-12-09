@@ -34,6 +34,7 @@ replicaCount:
   ingestion_xbip_cgs04_trigger: 0
   ingestion_xbip_cgs05_trigger: 0
   ingestion_xbip_cgs10_trigger: 0
+  ingestion_xbip_s3_trigger: 1
   ingestion_xbip_worker: 1
   ingestion_auxip_trigger: 1
   ingestion_auxip_worker: 1

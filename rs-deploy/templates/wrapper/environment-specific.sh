@@ -98,6 +98,7 @@ export XBIP_03_SECRET_NAME="xbip-cgs03";
 export XBIP_04_SECRET_NAME="xbip-cgs04";
 export XBIP_05_SECRET_NAME="xbip-cgs05";
 export XBIP_10_SECRET_NAME="xbip-cgs10";
+export XBIP_S3_SECRET_NAME="xbip-s3";
 export XBIP_01_USER=${XBIP_USER};
 export XBIP_01_PASS=${XBIP_PASSWORD};
 export XBIP_02_USER=${XBIP_USER};
@@ -110,6 +111,8 @@ export XBIP_05_USER=${XBIP_USER};
 export XBIP_05_PASS=${XBIP_PASSWORD};
 export XBIP_10_USER=${XBIP_USER};
 export XBIP_10_PASS=${XBIP_PASSWORD};
+export XBIP_S3_USER=${XBIP_USER};
+export XBIP_S3_PASS=${XBIP_PASSWORD};
 
 #export MYOCEAN_OUTBOX_1_HOSTNAME="s1pro-mock-dissemination-svc"
 #export MYOCEAN_OUTBOX_1_PATH="public"
