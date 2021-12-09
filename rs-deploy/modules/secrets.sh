@@ -61,6 +61,7 @@ kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${XBIP_03_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${XBIP_04_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${XBIP_05_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${XBIP_10_SECRET_NAME}";
+kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${XBIP_S3_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${AMALFI_SECRET_NAME}";
 }
 
@@ -84,6 +85,7 @@ kubectl -n "${NAMESPACE_PROCESSING}" get secret "${XBIP_03_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${XBIP_04_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${XBIP_05_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${XBIP_10_SECRET_NAME}";
+kubectl -n "${NAMESPACE_PROCESSING}" get secret "${XBIP_S3_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${AMALFI_SECRET_NAME}";
 }
 
