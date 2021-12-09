@@ -48,7 +48,8 @@ public abstract class AbstractPDUGenerator {
 	 * 
 	 * @param start  start time for the intervals
 	 * @param stop   stop time for the intervals
-	 * @param length maximum length for the intervals (last one could be shorter)
+	 * @param length maximum length for the intervals
+	 * @param fill   flag to add remaining time to last interval
 	 * @return list of created intervals (may be empty if start = stop)
 	 */
 	protected List<TimeInterval> generateTimeIntervals(final String start, final String stop, final double length) {
