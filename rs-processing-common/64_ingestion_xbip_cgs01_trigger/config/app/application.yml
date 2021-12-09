@@ -58,7 +58,7 @@ ingestion-trigger:
       # how many days to keep persisted data about inbox files at a minimum ( >= 0)
       station-retention-time: {{ .Values.xbip.stationRetentionTime.cgs01 }}
       # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
-      ignore-files-before-date: {{ .Values.xbip.ignoreFilesBeforeDate.cgs01 }
+      ignore-files-before-date: {{ .Values.xbip.ignoreFilesBeforeDate.cgs01 }}
 
 # Kafka config
 kafka:
