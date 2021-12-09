@@ -122,8 +122,8 @@ def generateDODOP(startTime, satelliteId, localWorkingDir):
 
     productFolder1 = generateFolderStructure(localWorkingDir, productName1)
     productFolder2 = generateFolderStructure(localWorkingDir, productName2)
-    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
-    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
+    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "LAST", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
+    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "FIRST", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
 
 # Generate DO_0_NAV products
 def generateDONAV(startTime, satelliteId, localWorkingDir):
@@ -140,8 +140,8 @@ def generateDONAV(startTime, satelliteId, localWorkingDir):
 
     productFolder1 = generateFolderStructure(localWorkingDir, productName1)
     productFolder2 = generateFolderStructure(localWorkingDir, productName2)
-    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
-    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
+    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "LAST", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
+    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "FIRST", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
 
 # Generate GN_0_GNS products
 def generateGNGNS(startTime, satelliteId, localWorkingDir):
@@ -158,8 +158,8 @@ def generateGNGNS(startTime, satelliteId, localWorkingDir):
 
     productFolder1 = generateFolderStructure(localWorkingDir, productName1)
     productFolder2 = generateFolderStructure(localWorkingDir, productName2)
-    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
-    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
+    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "LAST", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
+    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "FIRST", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
 
 # Generate MW_0_MWR products
 def generateMWMWR(startTime, satelliteId, localWorkingDir):
@@ -176,8 +176,8 @@ def generateMWMWR(startTime, satelliteId, localWorkingDir):
 
     productFolder1 = generateFolderStructure(localWorkingDir, productName1)
     productFolder2 = generateFolderStructure(localWorkingDir, productName2)
-    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
-    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
+    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "LAST", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
+    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "FIRST", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
 
 # Generate OL_0_CR products
 def generateOLCR(timestamp, satelliteId, localWorkingDir):
@@ -232,19 +232,19 @@ def generateSLSLT(startTime, satelliteId, localWorkingDir):
     time = 0
     number = 1
     maxTime = 6155
-    position = "FIRST"
+    position = "NONE"
     length = 300
     dump1 = True
 
     while time < maxTime:
         if time + length > maxTime:
-            position = "LAST"
             length = maxTime - time
 
         stopTime = startTime + datetime.timedelta(seconds=length)
         # When we reached the new dump start -> split granule
         if stopTime > dumpStart2 and dump1:
             stopTime = dumpStart2
+            position = "LAST"
 
         productName = generateProductName(satelliteId, productType, startTime, stopTime)
         productFolder = generateFolderStructure(localWorkingDir, productName)
@@ -257,8 +257,10 @@ def generateSLSLT(startTime, satelliteId, localWorkingDir):
         # When we reached the new dump start -> use second timestamp in xml manifest
         if stopTime == dumpStart2:
             dump1 = False
-
-        position = "NONE"
+            position = "FIRST"
+        else:
+            position = "NONE"
+        
         number += 1
         startTime = stopTime
         time += length
@@ -274,19 +276,19 @@ def generateSRSRA(startTime, satelliteId, localWorkingDir):
     time = 0
     number = 1
     maxTime = 6155
-    position = "FIRST"
+    position = "NONE"
     length = 600
     dump1 = True
 
     while time < maxTime:
         if time + length > maxTime:
-            position = "LAST"
             length = maxTime - time
 
         stopTime = startTime + datetime.timedelta(seconds=length)
         # When we reached the new dump start -> split granule
         if stopTime > dumpStart2 and dump1:
             stopTime = dumpStart2
+            position = "LAST"
 
         productName = generateProductName(satelliteId, productType, startTime, stopTime)
         productFolder = generateFolderStructure(localWorkingDir, productName)
@@ -299,7 +301,10 @@ def generateSRSRA(startTime, satelliteId, localWorkingDir):
         # When we reached the new dump start -> use second timestamp in xml manifest
         if stopTime == dumpStart2:
             dump1 = False
-        position = "NONE"
+            position = "FIRST"
+        else:
+            position = "NONE"
+
         number += 1
         startTime = stopTime
         time += length
@@ -319,8 +324,8 @@ def generateTMHKM(startTime, satelliteId, localWorkingDir):
 
     productFolder1 = generateFolderStructure(localWorkingDir, productName1)
     productFolder2 = generateFolderStructure(localWorkingDir, productName2)
-    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
-    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
+    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "LAST", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
+    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "FIRST", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
 
 # Generate TM_0_HKM2 products
 def generateTMHKM2(startTime, satelliteId, localWorkingDir):
@@ -337,8 +342,8 @@ def generateTMHKM2(startTime, satelliteId, localWorkingDir):
 
     productFolder1 = generateFolderStructure(localWorkingDir, productName1)
     productFolder2 = generateFolderStructure(localWorkingDir, productName2)
-    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
-    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
+    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "LAST", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
+    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "FIRST", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
 
 # Generate TM_0_NAT products
 def generateTMNAT(startTime, satelliteId, localWorkingDir):
@@ -355,8 +360,8 @@ def generateTMNAT(startTime, satelliteId, localWorkingDir):
 
     productFolder1 = generateFolderStructure(localWorkingDir, productName1)
     productFolder2 = generateFolderStructure(localWorkingDir, productName2)
-    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
-    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "BOTH", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
+    generateIIFXML(productType, productName1, startTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "LAST", dumpStart1.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder1 + "/" + productName1 + "_iif.xml")
+    generateIIFXML(productType, productName2, dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "CGS", receiveStartTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), receiveStopTime.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "1", "FIRST", dumpStart2.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "L0PP", productFolder2 + "/" + productName2 + "_iif.xml")
 
 # Main method
 def main():
