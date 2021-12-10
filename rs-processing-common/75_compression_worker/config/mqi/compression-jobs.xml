@@ -265,6 +265,14 @@
 			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</route>
+	
+	<route description="route for AUXIP/backdoor S3_AUX_ZIP uncompression">
+		<input_key>t-pdgs-uncompression-jobs-pt</input_key>
+		<output_key>S3_AUX</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-events</topic>
+		</route_to>
+	</route>
 
     <route description="route for QCSS PLAN_AND_REPORT compression">
     	<input_key>t-pdgs-compression-jobs-fast</input_key>

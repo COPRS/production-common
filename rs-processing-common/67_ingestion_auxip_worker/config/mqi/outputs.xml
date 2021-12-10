@@ -17,9 +17,9 @@
 	</route>
 	<route description="route for S3_AUXILIARY_FILE products">
 		<input_key>t-t-pdgs-ingestion-jobs-auxip-nominal</input_key>
-		<output_key>S3_AUX</output_key>
+		<output_key>S3_AUX_ZIP</output_key>
 		<route_to>
-			<topic>t-pdgs-aux-ingestion-events</topic>
+			<topic>t-pdgs-auxip-aux-ingestion-events</topic>
 		</route_to>
 	</route>
 

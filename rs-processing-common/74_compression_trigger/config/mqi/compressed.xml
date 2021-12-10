@@ -336,6 +336,14 @@
 		</route_to>
 	</route>
 	
+	<route description="route for AUXIP S3_AUX_ZIP uncompression">
+		<input_key>t-pdgs-auxip-aux-ingestion-events</input_key>
+		<output_key>S3_AUX</output_key>
+		<route_to>
+			<topic>t-pdgs-uncompression-jobs-pt</topic>
+		</route_to>
+	</route>
+	
 	<route description="route for AUXIP PLAN_AND_REPORT_ZIP uncompression">
 		<input_key>t-pdgs-auxip-plan-and-report-ingestion-events</input_key>
 		<output_key>PLAN_AND_REPORT</output_key>

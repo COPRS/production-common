@@ -66,13 +66,13 @@ ingestion-trigger:
       # possible type values: prip
       type: prip
       # Filename regex for matching files
-      matchRegex: ^S3[AB_]_([0-9a-zA-Z_]{9})AX_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_(_{17})_([0-9a-zA-Z_]{3})_(((O|F|R|D|_)_(NR|NT|ST|SN|NS|NN|AL|__)_([a-zA-Z0-9_]{3}))|_{8})\.SEN3$
+      matchRegex: ^S3[AB_]_([0-9a-zA-Z_]{9})AX_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_(_{17})_([0-9a-zA-Z_]{3})_(((O|F|R|D|_)_(NR|NT|ST|SN|NS|NN|AL|__)_([a-zA-Z0-9_]{3}))|_{8})\.SEN3\.(zip|ZIP)$
       # Filename regex for ignoring files
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       # Kafka topic to put the ingestion jobs for the worker
       topic: t-pdgs-ingestion-jobs-auxip-nominal
       # Product family accociated with the file to be ingested
-      family: S3_AUX
+      family: S3_AUX_ZIP
       # Name of the station (4-letter code)
       stationName: PRIP
       # Mission-ID in upper case (S1,S2,S3..)
