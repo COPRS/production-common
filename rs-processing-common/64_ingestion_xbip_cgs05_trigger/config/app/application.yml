@@ -21,11 +21,11 @@ ingestion-trigger:
   # Pickup point polling interval in millis
   polling-interval-ms: 10000
   polling:
-    # Handling of EDRS sessions NOMINAL/S1A
+    # Handling of EDRS sessions NOMINAL
       # Pickup path
-    - directory: https://${cgs5.host}${cgs5.path}NOMINAL/S1A
+    - directory: https://${cgs5.host}${cgs5.path}NOMINAL/
       # Filename regex for matching files
-      matchRegex: ^([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
+      matchRegex: ^([A-Za-z_]{4}/)?([0-9A-Za-z_]{2})([0-9A-Za-z_]{1})/([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
       # Filename regex for ignoring files
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       # Kafka topic to put the ingestion jobs for the worker
@@ -40,50 +40,11 @@ ingestion-trigger:
       station-retention-time: {{ .Values.xbip.stationRetentionTime.cgs05 }}
       # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
       ignore-files-before-date: {{ .Values.xbip.ignoreFilesBeforeDate.cgs05 }}
-      # Regex pattern to match metadata
-      session-name-pattern: ^([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
-      session-name-group-index: 1            
-      path-pattern: ^/NOMINAL/(S1)(A)/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml))$
-      # Metadata key to group
-      path-metadata-elements:
-        missionId: 1
-        satelliteId: 2
-        sessionId: 6
-        channelId: 7
-    # Handling of EDRS sessions NOMINAL/S1B
+    # Handling of EDRS sessions RETRANSFER
       # Pickup path
-    - directory: https://${cgs5.host}${cgs5.path}NOMINAL/S1B
+    - directory: https://${cgs5.host}${cgs5.path}RETRANSFER/
       # Filename regex for matching files
-      matchRegex: ^([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
-      # Filename regex for ignoring files
-      ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
-      # Kafka topic to put the ingestion jobs for the worker
-      topic: t-pdgs-ingestion-jobs-xbip-nominal
-      # Product family accociated with the file to be ingested
-      family: EDRS_SESSION
-      # Name of the station for EDRS sessions (4-letter code)
-      stationName: INS_
-      # Mission-ID in upper case (S1,S2,S3..)
-      missionId: S1
-      # how many days to keep persisted data about inbox files at a minimum ( >= 0)
-      station-retention-time: {{ .Values.xbip.stationRetentionTime.cgs05 }}
-      # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
-      ignore-files-before-date: {{ .Values.xbip.ignoreFilesBeforeDate.cgs05 }}
-      # Regex pattern to match metadata
-      session-name-pattern: ^([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
-      session-name-group-index: 1          
-      path-pattern: ^/NOMINAL/(S1)(B)/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml))$
-      # Metadata key to group
-      path-metadata-elements:
-        missionId: 1
-        satelliteId: 2
-        sessionId: 6
-        channelId: 7
-    # Handling of EDRS sessions RETRANSFER/S1A
-      # Pickup path
-    - directory: https://${cgs5.host}${cgs5.path}RETRANSFER/S1A
-      # Filename regex for matching files
-      matchRegex: ^([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
+      matchRegex: ^([A-Za-z_]{4}/)?([0-9A-Za-z_]{2})([0-9A-Za-z_]{1})/([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
       # Filename regex for ignoring files
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       # Kafka topic to put the ingestion jobs for the worker
@@ -98,45 +59,7 @@ ingestion-trigger:
       station-retention-time: {{ .Values.xbip.stationRetentionTime.cgs05 }}
       # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
       ignore-files-before-date: {{ .Values.xbip.ignoreFilesBeforeDate.cgs05 }}
-      # Regex pattern to match metadata
-      session-name-pattern: ^([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
-      session-name-group-index: 1          
-      path-pattern: ^/RETRANSFER/(S1)(A)/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml))$
-      # Metadata key to group
-      path-metadata-elements:
-        missionId: 1
-        satelliteId: 2
-        sessionId: 6
-        channelId: 7
-    # Handling of EDRS sessions RETRANSFER/S1B
-      # Pickup path
-    - directory: https://${cgs5.host}${cgs5.path}RETRANSFER/S1B
-      # Filename regex for matching files
-      matchRegex: ^([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
-      # Filename regex for ignoring files
-      ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
-      # Kafka topic to put the ingestion jobs for the worker
-      topic: t-pdgs-ingestion-jobs-xbip-retransfer
-      # Product family accociated with the file to be ingested
-      family: SESSION_RETRANSFER
-      # Name of the station for EDRS sessions (4-letter code)
-      stationName: INS_
-      # Mission-ID in upper case (S1,S2,S3..)
-      missionId: S1
-      # how many days to keep persisted data about inbox files at a minimum ( >= 0)
-      station-retention-time: {{ .Values.xbip.stationRetentionTime.cgs05 }}
-      # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
-      ignore-files-before-date: {{ .Values.xbip.ignoreFilesBeforeDate.cgs05 }}
-      # Regex pattern to match metadata
-      session-name-pattern: ^([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml|RAW|AISP|XML))$
-      session-name-group-index: 1          
-      path-pattern: ^/RETRANSFER/(S1)(B)/([0-9a-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\.(raw|aisp|xml))$
-      # Metadata key to group
-      path-metadata-elements:
-        missionId: 1
-        satelliteId: 2
-        sessionId: 6
-        channelId: 7
+
 # Kafka config
 kafka:
   # host:port to use for establishing the initial connection to the Kafka cluster
