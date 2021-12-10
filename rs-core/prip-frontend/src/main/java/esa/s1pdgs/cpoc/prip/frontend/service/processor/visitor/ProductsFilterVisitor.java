@@ -67,6 +67,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductsFilterVisitor.class);
 
+	public static final Pattern ODATA_EWKT_EXTRACTION_PATTERN = Pattern.compile("(geometry|geography)'\\s*SRID\\s*=\\s*([0-9]{1,5})\\s*;\\s*(.*)'");
+
 	private static final Map<String, FIELD_NAMES> PRIP_DATETIME_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_TEXT_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_INTEGER_PROPERTY_FIELD_NAMES;
@@ -274,7 +276,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		String geoPropertyFilterString = null;
 		if (parameters != null) {
 			for (UriParameter uriParameter : parameters) {
-				if (uriParameter != null && "geo_polygon".equalsIgnoreCase(uriParameter.getName())) {
+				if (uriParameter != null && "geo_shape".equalsIgnoreCase(uriParameter.getName())) {
 					geoPropertyFilterString = parameters.get(1).getText();
 				}
 			}
@@ -311,25 +313,24 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 	}
 
-	private static Geometry asGeometry(UriParameter uriParameter) throws ParseException {
-		// geography'SRID=4326;POLYGON((-127.89734578345 45.234534534,-127.89734578345
-		// 45.234534534,-127.89734578345 45.234534534,-127.89734578345 45.234534534))'
-		Pattern pattern = Pattern.compile("(geometry|geography)'\\s*SRID\\s*=\\s*([0-9]{1,5})\\s*;\\s*(.*)'");
-		String text = uriParameter.getText();
-		Matcher matcher = pattern.matcher(text);
+	public static Geometry asGeometry(final UriParameter uriParameter) throws ParseException {
+		// geography'SRID=4326;POINT(44.8571 20.3411)'
+		// geography'SRID=4326;LINESTRING(44.8571 20.3411, 11.4484 49.9204, 2.4321 32.3625)'
+		// geography'SRID=4326;POLYGON((-127.89734578345 45.234534534,-127.89734578345 45.234534534,-127.89734578345 45.234534534,-127.89734578345 45.234534534))'
+
+		final Matcher matcher = ODATA_EWKT_EXTRACTION_PATTERN.matcher(uriParameter.getText());
 
 		if (!matcher.matches()) {
 			throw new ParseException("Invalid structered parameter");
 		}
 
-		matcher.group(1);
-		String geoSRID = matcher.group(2);
-		String geoGML = matcher.group(3);
+		matcher.group(1); // geometry or geography for flat-earth or round-earth coordinate reference systems (CRS), must match with SRID
+		final String srid = matcher.group(2);
+		final String wkt = matcher.group(3);
 
-		WKTReader wkt = new WKTReader();
-		Geometry geo;
-		geo = wkt.read(geoGML);
-		geo.setSRID(Integer.valueOf(geoSRID));
+		final WKTReader wktReader = new WKTReader();
+		final Geometry geo = wktReader.read(wkt);
+		geo.setSRID(Integer.valueOf(srid));
 
 		return geo;
 	}

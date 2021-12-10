@@ -26,6 +26,8 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.common.geo.GeoShapeType;
 import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
+import org.elasticsearch.common.geo.builders.LineStringBuilder;
+import org.elasticsearch.common.geo.builders.PointBuilder;
 import org.elasticsearch.common.geo.builders.PolygonBuilder;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -37,7 +39,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -515,20 +518,28 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 
 	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
-		// TODO Also support LineString...
 		if (input instanceof Polygon) {
-			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
 			final Polygon polygon = (Polygon) input;
-			for (final Coordinate coord : polygon.getCoordinates()) {
-				final double lon = coord.x;
-				final double lat = coord.y;
-				coordBuilder.coordinate(lon, lat);
-			}
+			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
+			CollectionUtil.toList(polygon.getCoordinates()).forEach(coordinate -> coordBuilder.coordinate(coordinate.x, coordinate.y));
+
 			return new PolygonBuilder(coordBuilder).buildGeometry();
+
+		} else if (input instanceof LineString) {
+			final LineString lineString = (LineString) input;
+			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
+			CollectionUtil.toList(lineString.getCoordinates()).forEach(coordinate -> coordBuilder.coordinate(coordinate.x, coordinate.y));
+
+			return new LineStringBuilder(coordBuilder).buildGeometry();
+
+		} else if (input instanceof Point) {
+			final Point point = (Point) input;
+
+			return new PointBuilder(point.getX(), point.getY()).buildGeometry();
+
 		} else {
 			throw new IllegalArgumentException(String.format("not supported geometry: %s", (null != input) ? input.getClass().getName() : "null"));
 		}
-
 	}
 
 	private static SortOrder sortOrderFor(String sortOrder) {

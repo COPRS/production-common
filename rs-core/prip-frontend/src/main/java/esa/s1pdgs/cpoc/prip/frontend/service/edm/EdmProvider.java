@@ -54,9 +54,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	public static final FullQualifiedName GUID_TYPE_FQN = EdmPrimitiveTypeKind.Guid.getFullQualifiedName();
 	public static final FullQualifiedName DATE_TIME_OFFSET_TYPE_FQN = EdmPrimitiveTypeKind.DateTimeOffset
 			.getFullQualifiedName();
-	public static final FullQualifiedName GEOSHAPE_POLYGON_TYPE_FQN = EdmPrimitiveTypeKind.GeographyPolygon
-			.getFullQualifiedName();
-	public static final FullQualifiedName GEOSHAPE_GEOMETRY_TYPE_FQN = EdmPrimitiveTypeKind.Geometry
+	public static final FullQualifiedName GEOSHAPE_GEOGRAPHY_TYPE_FQN = EdmPrimitiveTypeKind.Geography
 			.getFullQualifiedName();
 	
 	public static final FullQualifiedName CHECKSUM_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "Checksum");
@@ -128,18 +126,14 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			// Create parameters
 			final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
 			CsdlParameter parameter = new CsdlParameter();
-			// parameter.setName("BoundingParameter");
-			// parameter.setType(PRODUCT_TYPE_FQN);
-			// parameter.setCollection(true);
-			// parameters.add(parameter);
 			parameter = new CsdlParameter();
 			parameter.setName("geo_property");
-			parameter.setType(EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName());
+			parameter.setType(EdmPrimitiveTypeKind.Geography.getFullQualifiedName());
 			parameter.setCollection(false);
 			parameters.add(parameter);
 			parameter = new CsdlParameter();
-			parameter.setName("geo_polygon");
-			parameter.setType(EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName());
+			parameter.setName("geo_shape");
+			parameter.setType(EdmPrimitiveTypeKind.Geography.getFullQualifiedName());
 			parameter.setCollection(false);
 			parameters.add(parameter);
 
@@ -158,18 +152,14 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			// Create parameters
 			final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
 			CsdlParameter parameter = new CsdlParameter();
-			// parameter.setName("BoundingParameter");
-			// parameter.setType(PRODUCT_TYPE_FQN);
-			// parameter.setCollection(true);
-			// parameters.add(parameter);
 			parameter = new CsdlParameter();
 			parameter.setName("geo_property");
-			parameter.setType(EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName());
+			parameter.setType(EdmPrimitiveTypeKind.Geography.getFullQualifiedName());
 			parameter.setCollection(false);
 			parameters.add(parameter);
 			parameter = new CsdlParameter();
-			parameter.setName("geo_polygon");
-			parameter.setType(EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName());
+			parameter.setName("geo_shape");
+			parameter.setType(EdmPrimitiveTypeKind.Geography.getFullQualifiedName());
 			parameter.setCollection(false);
 			parameters.add(parameter);
 
@@ -188,18 +178,14 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			// Create parameters
 			final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
 			CsdlParameter parameter = new CsdlParameter();
-			// parameter.setName("BoundingParameter");
-			// parameter.setType(PRODUCT_TYPE_FQN);
-			// parameter.setCollection(true);
-			// parameters.add(parameter);
 			parameter = new CsdlParameter();
 			parameter.setName("geo_property");
-			parameter.setType(EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName());
+			parameter.setType(EdmPrimitiveTypeKind.Geography.getFullQualifiedName());
 			parameter.setCollection(false);
 			parameters.add(parameter);
 			parameter = new CsdlParameter();
-			parameter.setName("geo_polygon");
-			parameter.setType(EdmPrimitiveTypeKind.GeographyPolygon.getFullQualifiedName());
+			parameter.setName("geo_shape");
+			parameter.setType(EdmPrimitiveTypeKind.Geography.getFullQualifiedName());
 			parameter.setCollection(false);
 			parameters.add(parameter);
 
@@ -236,8 +222,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(Checksum.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
 			properties.add(new CsdlProperty().setName(ProductionType.name()).setType(PRODUCTION_TYPE_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentDate.name()).setType(TIMERANGE_TYPE_FQN));
-//			properties.add(new CsdlProperty().setName(Footprint.name()).setType(GEOSHAPE_POLYGON_TYPE_FQN));
-			properties.add(new CsdlProperty().setName(Footprint.name()).setType(GEOSHAPE_GEOMETRY_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(Footprint.name()).setType(GEOSHAPE_GEOGRAPHY_TYPE_FQN));
 
 			entityType.setName(ET_PRODUCT_NAME);
 			entityType.setKey(Collections.singletonList(propertyRef));

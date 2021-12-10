@@ -69,39 +69,28 @@ public class OdataController {
 	}
 	
 	   /**
-	    * Normalised geometric query string.
+	    * Normalize geometric query string.
 	    *
 	    * @param Raw input query string
-	    * @return Normalised query string
+	    * @return Normalized query string
 	    */
-	   protected String handleGeometricRequests(String queryString) {
-	      //$filter=intersects%28Footprint,SRID=4326;POLYGON%28%2870.99733072142419%20-20.198077715931756,%2030.396664557989194%20-20.549640215931756,%2030.035907414837293%2030.69059415906824,%2071.74130413670193%2040.62223478406824,%2070.99733072142419%20-20.198077715931756%29%29%29
-
+	   public static String handleGeometricRequests(String queryString) {
+		   // Intersects function using a polygon
+		   // incoming query string: $filter=OData.CSC.Intersects(area=geography'SRID=4326;POLYGON((44.8571 20.3411, 11.4484 49.9204, 2.4321 32.3625, 13.4321 1.3625, 44.8571 20.3411))')
+		   //  handled query string: $filter=OData.CSC.Intersects(geo_property=Footprint,geo_shape=geography'SRID=4326;POLYGON((44.8571 20.3411, 11.4484 49.9204, 2.4321 32.3625, 13.4321 1.3625, 44.8571 20.3411))')
+		   
+		   // Within function using a point
+		   // incoming query string: $filter=OData.CSC.Within(area=geography'SRID=4326;POINT(44.8571 20.3411)')
+		   //  handled query string: $filter=OData.CSC.Within(geo_property=Footprint,geo_shape=geography'SRID=4326;POINT(44.8571 20.3411)')
+		   
+		   // Disjoints function using a linestring
+		   // incoming query string: $filter=OData.CSC.Disjoints(area=geography'SRID=4326;LINESTRING(44.8571 20.3411, 11.4484 49.9204, 2.4321 32.3625)')
+		   //  handled query string: $filter=OData.CSC.Disjoints(geo_property=Footprint,geo_shape=geography'SRID=4326;LINESTRING(44.8571 20.3411, 11.4484 49.9204, 2.4321 32.3625)')
+		   
 	      if(queryString != null) {
-//	         // use FQN for function
-//	         queryString = queryString.replaceFirst("(\\$filter=.*)(intersects)(\\(|%28)", "$1OData.CSC.Intersects$3");
-//	         
-//	         // use parameterName for first argument
-//	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.Intersects(?:\\(|%28))([^=,]+),", "$1geo_property=$2,");
-//	         
-//	         // use single ' around the GML
-//	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.Intersects(?:\\(|%28)[^,]+,)(SRID.*)(\\)|%29)", "$1%27$2%27$3");
-//	         
-//	         // add geography
-//	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.Intersects(?:\\(|%28)[^,]+,)((?:'|%27)SRID.*)", "$1geography$2");
-//	         
-//	         // use parameterName for second argument
-//	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.Intersects(?:\\(|%28)[^,]+,)(geography)", "$1geo_polygon=$2");
-
-	         // ICD 1.4 intersect query with area parameter name (Requested)
-	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.Intersects(?:\\(|%28))([^,]*area=geography)", "$1geo_property=Footprint,geo_polygon=geography");
-
-	         // (Additionally already supported due to testing requirements)
-	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.Within(?:\\(|%28))([^,]*area=geography)", "$1geo_property=Footprint,geo_polygon=geography");
-	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.Disjoints(?:\\(|%28))([^,]*area=geography)", "$1geo_property=Footprint,geo_polygon=geography");
-	         
-	         // replace unsupported spaces after COMMAR
-	         queryString = queryString.replaceAll(",%20", ",");
+	         // ICD 1.4 Intersects query (required), Within and Disjoints queries (supported due to testing requirements)
+	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.(Intersects|Within|Disjoints)(?:\\(|%28))([^,]*area=geography)", "$1geo_property=Footprint,geo_shape=geography")
+	        		 				  .replaceAll(",%20", ","); // replace unsupported spaces after comma
 	      }
 	      
 	      if (LOGGER.isDebugEnabled()) {
@@ -110,4 +99,5 @@ public class OdataController {
 	      
 	      return queryString;
 	   }
+	   
 }
