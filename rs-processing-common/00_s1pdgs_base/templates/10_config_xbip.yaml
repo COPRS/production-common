@@ -46,15 +46,8 @@ data:
   cgs5.connectTimeoutSec: "60"
   cgs5.programmaticRecursion: "true"
   cgs5.enablePreemptiveAuthentication: "false"
-    
-  edrs.host: "s1pro-mock-webdav-cgs10-svc"
-  edrs.path: "/"
-  edrs.disableValiditation: "true"
-  edrs.connectTimeoutSec: "60"
-  edrs.programmaticRecursion: "false"
-  edrs.enablePreemptiveAuthentication: "false"
   
-  s3.host: "s1pro-mock-webdav-cgs01-svc"
+  s3.host: "s1pro-mock-webdav-s3-svc"
   s3.path: "/"
   s3.disableValiditation: "true"
   s3.connectTimeoutSec: "60"
@@ -95,13 +88,6 @@ data:
   cgs5.connectTimeoutSec: "60"
   cgs5.programmaticRecursion: "true"
   cgs5.enablePreemptiveAuthentication: "false"
-
-  edrs.host: "cgs10.sentinel1.eo.esa.int"
-  edrs.path: "/"
-  edrs.disableValiditation: "true"
-  edrs.connectTimeoutSec: "60"
-  edrs.programmaticRecursion: "false"
-  edrs.enablePreemptiveAuthentication: "false"
   
   s3.host: "tbd"
   s3.path: "/"
