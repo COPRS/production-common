@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0-rc1] - 
+### Added
+- RS-101: Filtering solution for S1 and S3 chunks at ingestion
+- RS-105: Integration of S3 Acquisition Workflow into S1PRO software
+- RS-106: Integration of S3 L0P workflow
+- RS-127: Management of PUG processing of S3 L0 products
+- RS-133: Integration of EDIP
+- RS-134: Integration of AUXIP
+- RS-135: Creation of DDIP Fascade
+- RS-155: Adding additional XBIP instances to Reference System
+
+### Changed
+- RS-136: User Web Client is able to communicate with DDIP
+- RS-137: Implementation of collection support within DDIP
+- RS-139: Adding support for point and line queries in PRIP
+
+### Removed
+- N/A
+
 ## [0.1.0-rc1] - 2021-11-17
 ### Added
 - RS-21: RS API allowing to perform a standard product download
