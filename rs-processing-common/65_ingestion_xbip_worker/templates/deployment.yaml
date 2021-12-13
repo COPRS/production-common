@@ -128,12 +128,12 @@ spec:
             secretKeyRef:
               name: xbip-cgs10
               key: PASS
-        - name: s3.user
+        - name: s3_xbip.user
           valueFrom:
             secretKeyRef:
               name: xbip-s3
               key: USER
-        - name: s3.pass
+        - name: s3_xbip.pass
           valueFrom:
             secretKeyRef:
               name: xbip-s3
