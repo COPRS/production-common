@@ -80,7 +80,7 @@ function get_metadata() {
 function create_outputs() {
         log "Create output products"
 
-        ./generateDummyProducts.py $TIMESTAMP $SATELLITEID $(dirname $JOBORDER)
+        /opt/generateDummyProducts.py $TIMESTAMP $SATELLITEID $(dirname $JOBORDER)
 
         log "Generated dummy output products"
 }
