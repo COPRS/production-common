@@ -36,7 +36,7 @@ then
     # Topic is an id
     . $LIST_QUEUES_SCRIPT
     KTOPIC=`echo $TOPIC_LIST | tr ' ' '\n' | sed -n "$TOPIC p"`
-    # KTOPIC=`cat $LOCATION/werum/kafka/topic_partition.txt | grep -v "#" | tr '\t' ' ' | tr -s ' ' | cut -d " " -f1 | sed -n "$TOPIC p"`
+    # KTOPIC=`cat $LOCATION/kafka/topic_partition.txt | grep -v "#" | tr '\t' ' ' | tr -s ' ' | cut -d " " -f1 | sed -n "$TOPIC p"`
     echo "Selected kafka queue '$KTOPIC' by id $TOPIC"
 else
     KTOPIC=$TOPIC
