@@ -18,7 +18,6 @@ echo "Ingesting landmask file"
 cd ~/s1pro-api/MSK__LAND_/example/
 landmask INGEST S1__OPER_MSK__LAND__V20140403T210200_G20200914T080808.EOF
 
-sleep 75  
 echo "Scaling down"
 $ENV_DIR/s1pro-env-scale.sh
 
