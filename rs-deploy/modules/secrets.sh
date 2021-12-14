@@ -29,7 +29,6 @@ kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${MONGODB_SE
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${AUXIP_SECRET_NAME}"             --from-literal=USER="${AUXIP_USER}"    --from-literal=PASS="${AUXIP_PASS}" --from-literal=OAUTHCLIENTID="${AUXIP_OAUTHCLIENTID}" --from-literal=OAUTHCLIENTSECRET="${AUXIP_OAUTHCLIENTSECRET}";
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${EDIP_PEDC_SECRET_NAME}"         --from-literal=USER="${EDIP_PEDC_USER}"  --from-literal=PASS="${EDIP_PEDC_PASS}";
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${EDIP_BEDC_SECRET_NAME}"         --from-literal=USER="${EDIP_BEDC_USER}"  --from-literal=PASS="${EDIP_BEDC_PASS}";
-kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${QCSS_SECRET_NAME}"              --from-literal=USER="${QCSS_USER}"       --from-literal=PASS="${QCSS_PASS}";
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${XBIP_01_SECRET_NAME}"           --from-literal=USER="${XBIP_01_USER}"  --from-literal=PASS="${XBIP_01_PASS}";
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${XBIP_02_SECRET_NAME}"           --from-literal=USER="${XBIP_02_USER}"  --from-literal=PASS="${XBIP_02_PASS}";
 kubectl -n "${NAMESPACE_PROCESSING}" create secret generic         "${XBIP_03_SECRET_NAME}"           --from-literal=USER="${XBIP_03_USER}"  --from-literal=PASS="${XBIP_03_PASS}";
@@ -54,7 +53,7 @@ kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${MONGODB_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${AUXIP_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${EDIP_PEDC_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${EDIP_BEDC_SECRET_NAME}";
-kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${QCSS_SECRET_NAME}";
+
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${XBIP_01_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${XBIP_02_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" delete secret "${XBIP_03_SECRET_NAME}";
@@ -78,7 +77,7 @@ kubectl -n "${NAMESPACE_PROCESSING}" get secret "${MONGODB_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${AUXIP_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${EDIP_PEDC_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${EDIP_BEDC_SECRET_NAME}";
-kubectl -n "${NAMESPACE_PROCESSING}" get secret "${QCSS_SECRET_NAME}";
+
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${XBIP_01_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${XBIP_02_SECRET_NAME}";
 kubectl -n "${NAMESPACE_PROCESSING}" get secret "${XBIP_03_SECRET_NAME}";
