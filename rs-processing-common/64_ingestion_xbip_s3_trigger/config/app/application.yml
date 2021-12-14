@@ -33,7 +33,7 @@ ingestion-trigger:
       # Product family accociated with the file to be ingested
       family: EDRS_SESSION
       # Name of the station for EDRS sessions (4-letter code)
-      stationName: MTI3
+      stationName: S3__
       # Mission-ID in upper case (S1,S2,S3..)
       missionId: S3
       # how many days to keep persisted data about inbox files at a minimum ( >= 0)
@@ -57,7 +57,7 @@ ingestion-trigger:
       # Product family accociated with the file to be ingested
       family: SESSION_RETRANSFER
       # Name of the station for EDRS sessions (4-letter code)
-      stationName: MTI4
+      stationName: S3__
       # Mission-ID in upper case (S1,S2,S3..)
       missionId: S3
       # how many days to keep persisted data about inbox files at a minimum ( >= 0)
