@@ -4,6 +4,8 @@
 
 env:
   apiUrl: http://localhost:8888/api/v1/
+  mapBackgrounds: | 
+    "[{\"name\":\"TESTING\",\"layers\":[{\"url\":\"testing_url\",\"layerName\":\"LayerName\"}]}]"
 
 image:
   # Overrides the image tag whose default is the chart appVersion.
