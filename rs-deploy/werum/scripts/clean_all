@@ -16,7 +16,7 @@ fi
   echo "Cleaning environment..."
   WERUM_SKIP_KAFKA_CLEAN=true "${LOCATION}/wrapper.sh" "${ENV_DIR}/wrapper/configuration.sh" clean
   #WERUM_FAST_KAFKA_INIT=true init_cluster
-  safe_es_clean all
+  #safe_es_clean all
   #deploy il
   echo "done."
 } 2>&1 | tee "/tmp/clean_all_$(date +%Y-%m-%d_%H-%M-%S).log"
