@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-134: Integration of AUXIP
 - RS-135: Creation of DDIP Fascade
 - RS-155: Adding additional XBIP instances to Reference System
+- RS-168: Removing Kong/Ingress config from PRIP frontend
 
 ### Changed
 - RS-136: User Web Client is able to communicate with DDIP
