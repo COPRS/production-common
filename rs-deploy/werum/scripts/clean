@@ -15,8 +15,8 @@ fi
 
   echo "Cleaning environment..."
   WERUM_SKIP_KAFKA_CLEAN=true PROTECT_S3="^(.*auxiliary-files|.*-session-files)$" PROTECT_ES="^(raw|session)$|^(aux.*|mpl.*|msk_.*|.*mask)$" "$LOCATION/wrapper.sh" "$ENV_DIR/wrapper/configuration.sh" "clean"
-  WERUM_FAST_KAFKA_INIT=true init_cluster
+  #WERUM_FAST_KAFKA_INIT=true init_cluster
   safe_es_clean
-  deploy il
+  #deploy il
   echo "done."
 } 2>&1 | tee "/tmp/clean_$(date +%Y-%m-%d_%H-%M-%S).log"
