@@ -17,7 +17,7 @@ environment.
 A typical layout for an environment will be look like:
 ```
 .
-├── env -> /home/florian_sievert/test/repos/rs-deploy/rs-deploy
+├── env -> /home/user/repos/rs-deploy/rs-deploy
 ├── repos
 │   ├── conf
 │   │   ├── env
@@ -52,7 +52,7 @@ it using the following curl command
 ```
 curl -s https://raw.githubusercontent.com/COPRS/production-common/develop/rs-init/rs_init --output rs_init && chmod 770 ./rs_init
 ```
-It is recommended to place this script in the home directory top level. 
+The scripts need to be placed in the home directory top level. 
 
 ## Init
 
