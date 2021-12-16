@@ -36,7 +36,7 @@ ingestion-trigger:
       # Ingestion type to select (possible values "edip", "prip")
       type: edip
       # Name of the station for EDRS sessions (4-letter code)
-      stationName: MTI2
+      stationName: MTI_
       # Mission-ID in upper case (S1,S2,S3..)
       missionId: S1
       # Set to ingnore files before a specific date (in format "yyyy-MM-ddTHH:mm:ss.SSSZ")
