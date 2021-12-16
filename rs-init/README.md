@@ -36,8 +36,13 @@ A typical layout for an environment will be look like:
 │   │   └── README.md
 │   ├── rs-deploy
 │   │   └── rs-deploy
-│   └── rs-processing-common
-│       └── rs-processing-common
+│   ├── rs-processing-common
+│   │   └── rs-processing-common
+│   └── rs-testing
+│       ├── 98_mock_webdav_cgs01
+│       ├── 98_mock_webdav_s3
+│       ├── 99_mock_edip_bedc
+│       └── 99_mock_edip_pedc
 ├── rs_init
 └── setup.conf
 ```

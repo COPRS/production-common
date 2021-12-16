@@ -13,7 +13,7 @@
 usage() {
   echo "Usage $0: <CMD> <ADDON> <SERVICE>"
   echo -e "\t  CMD \t\t install|uninstall|restart"
-  echo -e "\t  ADDON \t common|infra|s1|s3"
+  echo -e "\t  ADDON \t common|infra|s1|s3|testing"
   #echo -e "\t  SERVICE \t Name of a specific service that shall be handled. Can be left empty for all."
   echo 
   echo "ex. ./rs_deploy install s1"
@@ -33,7 +33,7 @@ CMD=$1
 export ADDON=$2
 
 # Check that the addon is known
-if [[ ! $ADDON =~ ^(s1|s3|infra|common)$ ]]
+if [[ ! $ADDON =~ ^(s1|s3|infra|common|testing)$ ]]
 then
   echo "Unknown addon: $ADDON"
   usage

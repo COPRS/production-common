@@ -29,10 +29,10 @@ replicaCount:
   contingency_ingestion: 1
   ingestion: 3
   ingestion_xbip_cgs01_trigger: 1
-  ingestion_xbip_cgs02_trigger: 0
-  ingestion_xbip_cgs03_trigger: 0
-  ingestion_xbip_cgs04_trigger: 0
-  ingestion_xbip_cgs05_trigger: 0
+  ingestion_xbip_cgs02_trigger: 1
+  ingestion_xbip_cgs03_trigger: 1
+  ingestion_xbip_cgs04_trigger: 1
+  ingestion_xbip_cgs05_trigger: 1
   ingestion_xbip_s3_trigger: 1
   ingestion_xbip_worker: 1
   ingestion_auxip_trigger: 1
@@ -50,3 +50,11 @@ replicaCount:
   ingestion_edip_bedc_worker: 1
   request_repository: 1
   queue_watcher: 1
+  mock_webdav_cgs01: 1
+  mock_webdav_cgs02: 1
+  mock_webdav_cgs03: 1
+  mock_webdav_cgs04: 1
+  mock_webdav_cgs05: 1
+  mock_webdav_s3: 1
+  mock_edip_bedc: 1
+  mock_edip_pedc: 1

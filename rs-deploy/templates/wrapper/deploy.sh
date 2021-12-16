@@ -19,6 +19,7 @@ case "$ADDON" in
   "s3") ADDON_DIR="processing-sentinel-3" ;;
   "infra") ADDON_DIR="infrastructure" ;;
   "common")  ADDON_DIR="processing-common" ;;
+  "testing")  ADDON_DIR="testing" ;;
 esac
 
 if [[ ! -z $ADDON_DIR ]]
