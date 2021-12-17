@@ -19,7 +19,7 @@ resources:
 image:
   name: rs-core-ddip-frontend
 
-native_api:
+ddip_frontend:
   cpu:
     request: "100m"
     limit: "500m"

@@ -44,6 +44,8 @@ replicaCount:
   prip_trigger: 1
   prip_worker: 1
   prip_frontend: 1
+  ddip_frontend: 1
+  native_api: 1
   ingestion_edip_pedc_trigger: 1
   ingestion_edip_pedc_worker: 1
   ingestion_edip_bedc_trigger: 1 
