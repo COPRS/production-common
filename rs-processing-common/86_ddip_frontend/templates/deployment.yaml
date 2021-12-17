@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}
-  replicas: {{ .Values.replicaCount.native_api }}
+  replicas: {{ .Values.replicaCount.ddip_frontend }}
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -37,11 +37,11 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            memory: {{ .Values.native_api.ram.request }}
-            cpu: {{ .Values.native_api.cpu.request }}
+            memory: {{ .Values.ddip_frontend.ram.request }}
+            cpu: {{ .Values.ddip_frontend.cpu.request }}
           limits:
-            memory: {{ .Values.native_api.ram.limit }}
-            cpu: {{ .Values.native_api.cpu.limit }}
+            memory: {{ .Values.ddip_frontend.ram.limit }}
+            cpu: {{ .Values.ddip_frontend.cpu.limit }}
         volumeMounts:
         - name: service-logging-config-volume
           mountPath: /app/log
@@ -53,9 +53,9 @@ spec:
           containerPort: {{ .Values.service.port }}
         env:
         - name: JAVA_XMS
-          value: {{ .Values.native_api.javaOpts.xms }}
+          value: {{ .Values.ddip_frontend.javaOpts.xms }}
         - name: JAVA_XMX
-          value: {{ .Values.native_api.javaOpts.xmx }}
+          value: {{ .Values.ddip_frontend.javaOpts.xmx }}
         - name: os_credential-username
           valueFrom:
             secretKeyRef:
