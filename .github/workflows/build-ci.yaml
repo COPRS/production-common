@@ -174,3 +174,12 @@ jobs:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      
+  build-s1-ipf-aio:
+    needs: build
+    if: ${{ inputs.exec-worker }}
+    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop-ipf
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}

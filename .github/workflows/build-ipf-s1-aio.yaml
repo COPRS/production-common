@@ -4,11 +4,7 @@ on:
   push:
     paths:
       - 'rs-container/docker_s1_ipf_aio/**'
-  workflow_run:
-    workflows: ["Build RS-Core"]
-    branches: [devel-ipf]
-    types: 
-      - completed
+      - '.github/workflows/build-ipf-s1-aio.yaml'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:
