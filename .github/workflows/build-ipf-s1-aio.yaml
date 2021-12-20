@@ -1,11 +1,9 @@
 name: Build IPF S1 AIO
 
 on:
-  workflow_run:
-    workflows: ["Build RS-Core"]
-    branches: [develop-ipf]
-    types:
-      - completed
+  push:
+    paths:
+      - 'rs-container/docker_s1_ipf_aio/**'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:
