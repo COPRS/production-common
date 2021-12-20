@@ -28,7 +28,7 @@ env:
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
-  build-aio:
+  build-ipf-s1-aio:
     runs-on: ubuntu-latest
     steps:
       - name: Extract branch name
