@@ -105,7 +105,7 @@ jobs:
         run: |
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
           
-  generate-reports-s1-ipfsimulator:
+  generate-reports-ipf-s1-aio:
     needs: build-ipf-s1-aio 
     runs-on: ubuntu-latest
     permissions:

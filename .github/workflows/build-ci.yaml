@@ -176,7 +176,7 @@ jobs:
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
  
   # If the execution-worker-jar is updated also update the S1 IPF AIO image    
-  build-s1-ipf-aio:
+  build-ipf-s1-aio:
     needs: build
     if: ${{ inputs.exec-worker }}
     uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop-ipf
