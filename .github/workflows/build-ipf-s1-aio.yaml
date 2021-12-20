@@ -23,6 +23,7 @@ env:
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
   VERSION: 3.32.1
+  IMAGE_NAME: "rs-ipf-aiop
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
@@ -65,7 +66,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-core-s3-ipf-simulator
+          images: ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/${{ env.IMAGE_NAME }}
               
       - name: Build image
         uses: docker/build-push-action@v2
