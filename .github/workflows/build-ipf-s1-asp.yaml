@@ -24,7 +24,7 @@ env:
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
   VERSION: 3.32.1
-  IMAGE_NAME: "rs-ipf-asp"
+  IMAGE_NAME: "rs-ipf-s1-asp"
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
