@@ -20,7 +20,7 @@ openapi:
   # Dis/Enableds openapi validation
   disable-validation: false
   # Path exclusion regexp
-  path-exclusion-regex: ^\/(app\/status|error|openapi\/v3\/doc|openapi\/v3\/doc.yaml|api\/v1\/prip)$
+  path-exclusion-regex: ^\/(app\/status|error|search|openapi\/v3\/doc|openapi\/v3\/doc.yaml|api\/v1\/prip)$
   # Path to spec file
   definition-file: /app/openapi/native-api_openapi.yml
 
