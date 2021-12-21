@@ -38,8 +38,10 @@ RUN yum install -y blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_64.rpm S3I
 ### End of Base-Image  
 WORKDIR /app
 
+RUN mkdir -p /app && chown ops3pdgs:ops3pdgs /app
+
 USER ops3pdgs:ops3pdgs
-RUN mkdir -p /app
+
 
 # Adding Version information
 RUN echo "${VERSION}" >> VERSION
