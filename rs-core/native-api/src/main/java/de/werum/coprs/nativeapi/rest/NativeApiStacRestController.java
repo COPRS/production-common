@@ -1,5 +1,7 @@
 package de.werum.coprs.nativeapi.rest;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,14 +40,17 @@ public class NativeApiStacRestController {
 			final HttpServletRequest request,
 			@RequestParam(value = "datetime", required = false) final String datetime) {
 
-		final String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
+		final String queryParams = request.getQueryString() == null ? "" : request.getQueryString();
 		LOGGER.info("Received STAC item search request: /search?{}", queryParams);
 		// TODO: issue a bad request response if other than datetime query params are used as they are not supported yet
 
 		final List<String> result;
 		// TODO: change response type using GeoJSON, see staccato-commons com.planet.staccato.model.GeoJson and com.planet.staccato.model.ItemCollection
 		try {
-			result = this.nativeApiStacService.find(datetime);
+			if (null != datetime) {
+				final String decodedDatetimeStr = URLDecoder.decode(datetime, StandardCharsets.UTF_8.toString());
+				result = this.nativeApiStacService.find(decodedDatetimeStr);
+			}
 		} catch (final NativeApiBadRequestException e) {
 			throw new NativeApiRestControllerException(String.format("Bad request: %s", e.getMessage()), HttpStatus.BAD_REQUEST);
 		} catch (final Exception e) {
