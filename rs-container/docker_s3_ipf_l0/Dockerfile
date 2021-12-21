@@ -9,7 +9,7 @@ ARG COMMIT_ID
 ARG BRANCH_TEXT
 ARG ARTIFACTORY_USER
 ARG ARTIFACTORY_PASS
-ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory/cfi/"
+ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory/cfi"
 
 
 ### Reconstruction of the base image provided by the agency
@@ -27,10 +27,10 @@ RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
 
 WORKDIR /tmp
 
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/s3-rpm/dockerfilesS3L0/S3-IPF-COTS.tgz"
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/s3-rpm/dockerfilesS3L0/S3IPF-L0_06.12.rpm"
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/s3-rpm/dockerfilesS3L0/blas-3.2.1-4.el6.x86_64.rpm"
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/s3-rpm/dockerfilesS3L0/lapack-3.2.1-4.el6.x86_64.rpm"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/S3-IPF-COTS.tgz"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/S3IPF-L0_06.12.rpm"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/blas-3.2.1-4.el6.x86_64.rpm"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/lapack-3.2.1-4.el6.x86_64.rpm"
 
 RUN tar -xf S3-IPF-COTS.tgz -C /usr/local
 RUN yum install -y blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_64.rpm S3IPF-L0_06.12.rpm; yum clean all
