@@ -10,6 +10,7 @@ ARG BRANCH_TEXT
 WORKDIR /app
 
 # Basic setup of the image
+USER root:root
 RUN yum install java-1.8.0-openjdk
 USER ops3pdgs:ops3pdgs
 RUN mkdir -p /app
