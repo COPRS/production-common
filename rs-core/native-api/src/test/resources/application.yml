@@ -55,9 +55,9 @@ native-api:
   # Time in seconds until a download URL expires
   download-url-expiration-time-in-seconds: 600
   # configuration for internal interfacing to PRIP
-  prip-protocol: {{ .Values.native-api.prip.protocol }}
-  prip-host: {{ .Values.native-api.prip.host }}
-  prip-port: {{ .Values.native-api.prip.port }}
+  prip-protocol: http
+  prip-host: s1pro-prip-frontend-svc.processing.svc.cluster.local
+  prip-port: 8080
   
   attributes-of-mission:
   - mission-name: s1

@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +49,6 @@ import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
 
 @Service
-@Primary
 public class NativeApiServiceImpl implements NativeApiService {
 
 	private static final Logger LOG = LogManager.getLogger(NativeApiServiceImpl.class);
