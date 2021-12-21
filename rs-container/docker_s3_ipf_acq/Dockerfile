@@ -67,6 +67,7 @@ WORKDIR /tmp
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/functions"
 
 # Deploy
+RUN cd /tmp/common; chmod a+x ./common.sh && ./common.sh -i
 RUN cd /tmp/s3-cgs1-ddc; chmod a+x ./s3-cgs1-ddc.sh && ./s3-cgs1-ddc.sh -i
 RUN cd /tmp/s3-cgs1-l0preproc; chmod a+x ./s3-cgs1-l0preproc.sh && ./s3-cgs1-l0preproc.sh -i
 RUN cd /tmp/s3-cgs1-l0postproc; chmod a+x ./s3-cgs1-l0postproc.sh && ./s3-cgs1-l0postproc.sh -i
