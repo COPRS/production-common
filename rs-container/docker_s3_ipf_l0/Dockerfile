@@ -33,7 +33,10 @@ RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/lapack-3.2.1-4.el6.x86_64.rpm"
 
 RUN tar -xf S3-IPF-COTS.tgz -C /usr/local
-RUN yum install -y blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_64.rpm S3IPF-L0_06.12.rpm; yum clean all
+RUN yum install -y blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_64.rpm; yum clean all
+RUN rpm -i S3IPF-L0_06.12.rpm --nodeps
+RUN rm -f S3IPF-L0_06.12.rpm blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_64.rpm
+
       
 ### End of Base-Image  
 WORKDIR /app
@@ -59,8 +62,8 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-RUN mkdir -p /data/oqcWD
-RUN chown ops3pdgs:ops3pdgs /data/oqcWD
+RUN mkdir -p /data/localWD && chown ops3pdgs:ops3pdgs /data/localWD
+RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
 
 USER ops3pdgs:ops3pdgs
 
