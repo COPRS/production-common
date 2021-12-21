@@ -28,26 +28,49 @@ RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
 WORKDIR /tmp
 
 # DDC
+RUN mkdir -p /tmp/s3-cgs1-ddc
+RUN cd /tmp/s3-cgs1-ddc
+
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/S3PD-DDC-1.0-1.0.0-0.x86_64.rpm"
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/S3PD-DDC-CFG-1.0-1.0.0-00.00.noarch.rpm"
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/functions"
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/s3-cgs1-ddc.sh"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/s3-cgs1-ddc.rls"
 
 # L0Pre
+RUN mkdir -p /tmp/s3-cgs1-l0preproc
+RUN cd /tmp/s3-cgs1-l0preproc
+
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/S3PD-L0PreProc-1.0-1.0.0-0.x86_64.rpm"
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/S3PD-L0PreProc-CFG-1.0-1.0.0-00.00.noarch.rpm"
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/s3-cgs1-l0preproc.sh"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/s3-cgs1-l0preproc.rls"
 
 # L0Post
+RUN mkdir -p /tmp/s3-cgs1-l0postproc
+RUN cd /tmp/s3-cgs1-l0postproc
+
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/S3PD-L0PostProc-1.0-1.0.0-0.x86_64.rpm"
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/S3PD-L0PostProc-CFG-1.0-1.0.0-00.00.noarch.rpm"
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/s3-cgs1-l0postproc.sh"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/s3-cgs1-l0postproc.rls"
+
+# Common
+RUN mkdir -p /tmp/common
+RUN cd /tmp/common
+
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/common/S3PD-COTS-libssh2-1.3.0-1.x86_64.rpm"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/common/S3PD-COTS-xerces-3.1.1-1.x86_64.rpm"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/common/common.rls"
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/common/common.sh"
+
+# Functions
+cd /tmp
+RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/functions"
 
 # Deploy
-RUN yum install -y S3PD-DDC-1.0-1.0.0-0.x86_64.rpm S3PD-DDC-CFG-1.0-1.0.0-00.00.noarch.rpm S3PD-L0PreProc-1.0-1.0.0-0.x86_64.rpm S3PD-L0PreProc-CFG-1.0-1.0.0-00.00.noarch.rpm S3PD-L0PostProc-1.0-1.0.0-0.x86_64.rpm S3PD-L0PostProc-CFG-1.0-1.0.0-00.00.noarch.rpm ; yum clean all
-RUN ./s3-cgs1-ddc.sh
-RUN ./s3-cgs1-l0preproc.sh
-RUN ./s3-cgs1-l0postproc.sh
+RUN ./s3-cgs1-ddc.sh -i
+RUN ./s3-cgs1-l0preproc.sh -i
+RUN ./s3-cgs1-l0postproc.sh -i
 
 #RUN rm -f S3IPF-L0_06.12.rpm blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_64.rpm
 
