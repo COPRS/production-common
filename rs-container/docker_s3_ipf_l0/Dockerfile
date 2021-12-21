@@ -10,6 +10,7 @@ ARG BRANCH_TEXT
 WORKDIR /app
 
 # Basic setup of the image
+USER root:root
 RUN groupadd -r s1pdgs --gid=1000 && useradd -r -g s1pdgs --uid=1000 s1pdgs
 USER s1pdgs:s1pdgs
 
