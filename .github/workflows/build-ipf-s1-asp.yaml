@@ -3,8 +3,8 @@ name: Build IPF S1 AIO
 on:
   push:
     paths:
-      - 'rs-container/docker_s1_ipf_aio/**'
-      - '.github/workflows/build-ipf-s1-aio.yaml'
+      - 'rs-container/docker_s1_ipf_asp/**'
+      - '.github/workflows/build-ipf-s1-asp.yaml'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:
@@ -24,11 +24,11 @@ env:
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
   VERSION: 3.32.1
-  IMAGE_NAME: "rs-ipf-aio"
+  IMAGE_NAME: "rs-ipf-asp"
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
-  build-ipf-s1-aio:
+  build-ipf-s1-asp:
     runs-on: ubuntu-latest
     steps:
       - name: Extract branch name
@@ -73,7 +73,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           load: true
-          context: ./rs-container/docker_s1_ipf_aio
+          context: ./rs-container/docker_s1_ipf_asp
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -105,8 +105,8 @@ jobs:
         run: |
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
           
-  generate-reports-ipf-s1-aio:
-    needs: build-ipf-s1-aio 
+  generate-reports-ipf-s1-asp:
+    needs: build-ipf-s1-asp
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -115,7 +115,7 @@ jobs:
       - name: Download json report from build jobs
         uses: actions/download-artifact@v2
         with:
-          name: vulnerabilities-ipf-s1-aio
+          name: vulnerabilities-ipf-s1-asp
 
       - name: Generate CSV and intermediate HTML report
         run: |
@@ -132,7 +132,7 @@ jobs:
       - name: Upload Anchore scan reports
         uses: actions/upload-artifact@master
         with:
-          name: vulnerabilities-ipf-s1-aio
+          name: vulnerabilities-ipf-s1-asp
           path: |
             vulnerabilities.csv
             vulnerabilities.pdf
