@@ -44,12 +44,11 @@ public class NativeApiStacRestController {
 		LOGGER.info("Received STAC item search request: /search?{}", queryParams);
 		// TODO: issue a bad request response if other than datetime query params are used as they are not supported yet
 
-		final List<String> result;
 		// TODO: change response type using GeoJSON, see staccato-commons com.planet.staccato.model.GeoJson and com.planet.staccato.model.ItemCollection
 		try {
 			if (null != datetime) {
 				final String decodedDatetimeStr = URLDecoder.decode(datetime, StandardCharsets.UTF_8.toString());
-				result = this.nativeApiStacService.find(decodedDatetimeStr);
+				return this.nativeApiStacService.find(decodedDatetimeStr);
 			}
 		} catch (final NativeApiBadRequestException e) {
 			throw new NativeApiRestControllerException(String.format("Bad request: %s", e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -57,7 +56,7 @@ public class NativeApiStacRestController {
 			throw new NativeApiRestControllerException(String.format("Internal server error: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return null == result ? Collections.emptyList() : result;
+		return Collections.emptyList();
 	}
 
 }

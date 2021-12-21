@@ -434,7 +434,7 @@ public class NativeApiServiceImpl implements NativeApiService {
 				LOG.debug("providing temporary download URL for '{}': {}", productMetadata.getObsKey(), url);
 				return new DownloadUrl(productMetadata.getName(), url);
 			} catch (ObsException | ObsServiceException e) {
-				throw new NativeApiException(String.format("error creating temporary download URL for product with id '{}'", productMetadata.getId()), e,
+				throw new NativeApiException(String.format("error creating temporary download URL for product with id '%s'", productMetadata.getId()), e,
 						HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
