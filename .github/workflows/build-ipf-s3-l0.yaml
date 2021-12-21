@@ -81,6 +81,8 @@ jobs:
             BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
+            ARTIFACTORY_USER=${{ secrets.WERUM_ARTIFACTORY_USER }}
+            ARTIFACTORY_PASS=${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
