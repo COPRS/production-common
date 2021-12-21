@@ -30,9 +30,9 @@ RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
 RUN mkdir -p /data/oqcWD
-RUN chown s1pdgs:s1pdgs /data/oqcWD
+RUN chown ops3pdgs:ops3pdgs /data/oqcWD
 
-USER s1pdgs:s1pdgs
+USER ops3pdgs:ops3pdgs
 
 CMD ["/app/start.sh"]
  
