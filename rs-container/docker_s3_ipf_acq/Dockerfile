@@ -68,9 +68,9 @@ RUN cd /tmp
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/functions"
 
 # Deploy
-RUN ./s3-cgs1-ddc.sh -i
-RUN ./s3-cgs1-l0preproc.sh -i
-RUN ./s3-cgs1-l0postproc.sh -i
+RUN chmod a+x ./s3-cgs1-ddc.sh && ./s3-cgs1-ddc.sh -i
+RUN chmod a+x ./s3-cgs1-l0preproc.sh && ./s3-cgs1-l0preproc.sh -i
+RUN chmod a+x ./s3-cgs1-l0postproc.sh && ./s3-cgs1-l0postproc.sh -i
 
 #RUN rm -f S3IPF-L0_06.12.rpm blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_64.rpm
 
