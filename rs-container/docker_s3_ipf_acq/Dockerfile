@@ -66,8 +66,8 @@ RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL
 WORKDIR /tmp
 RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/functions"
 # Patching the function to use force on install as the RPM are not working with Centos 7 anymore
-RUN sed -i 's;rpm -i $AT $rpms_to_install >>$RILOG 2>\&1;rpm -Fi $AT $rpms_to_install >>$RILOG 2>\&1;g' functions
-RUN sed -i 's;rpm -i $rpms_to_install $AT >>$RILOG 2>\&1;rpm -Fi $rpms_to_install $AT >>$RILOG 2>\&1;g' functions
+RUN sed -i 's;rpm -i $AT $rpms_to_install >>$RILOG 2>\&1;rpm --force -i $AT $rpms_to_install >>$RILOG 2>\&1;g' functions
+RUN sed -i 's;rpm -i $rpms_to_install $AT >>$RILOG 2>\&1;rpm --force -i $rpms_to_install $AT >>$RILOG 2>\&1;g' functions
 
 
 # Deploy
