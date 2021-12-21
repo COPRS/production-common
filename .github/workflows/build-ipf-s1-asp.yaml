@@ -1,4 +1,4 @@
-name: Build IPF S1 AIO
+name: Build IPF S1 ASP
 
 on:
   push:
@@ -98,7 +98,7 @@ jobs:
       - name: Upload Anchore scan json report
         uses: actions/upload-artifact@master
         with:
-          name: vulnerabilities-s3-ipfsimulator
+          name: vulnerabilities-ipf-s1-asp
           path: ${{ steps.scan.outputs.vulnerabilities }}
 
       - name: Push image
