@@ -98,7 +98,7 @@ jobs:
       - name: Upload Anchore scan json report
         uses: actions/upload-artifact@master
         with:
-          name: vulnerabilities-s3-ipfsimulator
+          name: vulnerabilities-ipf-s1-aio
           path: ${{ steps.scan.outputs.vulnerabilities }}
 
       - name: Push image
