@@ -9,6 +9,10 @@ ARG BRANCH_TEXT
 
 WORKDIR /app
 
+# Basic setup of the image
+RUN groupadd -r s1pdgs --gid=1000 && useradd -r -g s1pdgs --uid=1000 s1pdgs
+USER s1pdgs:s1pdgs
+
 # Adding Version information
 RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
