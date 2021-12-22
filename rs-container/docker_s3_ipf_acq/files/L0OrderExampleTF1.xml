@@ -1,0 +1,29 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+<L0P_Order>
+   <List_of_Files count="2">
+      <File>
+         <filename>/data/NRTAP/DICache//S3BTransferFrame0000009060C1</filename>
+         <validitystart>2021-08-19 10:06:22.012</validitystart>
+         <validitystop>2021-08-19 10:06:22.012</validitystop>
+         <downlinkorbitnumber>9060</downlinkorbitnumber>
+         <filetype>TF__HK1_0_</filetype>
+         <sensorid>67</sensorid>
+         <acquisitionstationid>2</acquisitionstationid>
+         <processingstationid>2</processingstationid>
+         <satelliteid>42</satelliteid>
+         <mission>1</mission>
+      </File>
+      <File>
+         <filename>/data/NRTAP/DICache//S3BTransferFrame0000009060C1_timetags</filename>
+         <validitystart>2021-08-19 10:06:22.012</validitystart>
+         <validitystop>2021-08-19 10:06:22.012</validitystop>
+         <downlinkorbitnumber>9060</downlinkorbitnumber>
+         <filetype>TF_HK1TT0_</filetype>
+         <sensorid>67</sensorid>
+         <acquisitionstationid>2</acquisitionstationid>
+         <processingstationid>2</processingstationid>
+         <satelliteid>42</satelliteid>
+         <mission>1</mission>
+      </File>
+   </List_of_Files>
+</L0P_Order>
