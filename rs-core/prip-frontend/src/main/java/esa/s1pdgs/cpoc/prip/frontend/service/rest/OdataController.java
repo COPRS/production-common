@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
+import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductActionProcessor;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductEntityCollectionProcessor;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductEntityProcessor;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
@@ -50,6 +51,7 @@ public class OdataController {
 		ODataHttpHandler handler = odata.createHandler(serviceMetadata);
 		handler.register(new ProductEntityProcessor(pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds));
 		handler.register(new ProductEntityCollectionProcessor(pripMetadataRepository));
+		handler.register(new ProductActionProcessor(pripMetadataRepository));
 
 		handler.process(new HttpServletRequestWrapper(request) {
 	         @Override

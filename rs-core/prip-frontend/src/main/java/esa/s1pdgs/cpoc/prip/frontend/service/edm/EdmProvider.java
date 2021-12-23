@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlAction;
 import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainerInfo;
@@ -108,9 +109,46 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	public static final String[] ATTRIBUTES_TYPE_NAMES = new String[] { STRING_ATTRIBUTES_SET_NAME,
 			INTEGER_ATTRIBUTES_SET_NAME, DOUBLE_ATTRIBUTES_SET_NAME, BOOLEAN_ATTRIBUTES_SET_NAME,
 			DATE_ATTRIBUTES_SET_NAME };
-
+	
+	public static final String ACTION_FILTERLIST = "FilterList";
+	public static final FullQualifiedName FILTERLIST_ACTION_FQN = new FullQualifiedName(SERVICE_NAMESPACE, ACTION_FILTERLIST);
+	public static final String PARAMETER_FILTERPRODUCTS = "FilterProducts";
+	public static final FullQualifiedName PROPERTY_TYPE_FQN = new FullQualifiedName(SERVICE_NAMESPACE, "Property");
+	 
 	// --------------------------------------------------------------------------
 
+	@Override
+	public List<CsdlAction> getActions(FullQualifiedName actionName) throws ODataException {
+		
+		List<CsdlAction> actions = new ArrayList<CsdlAction>();
+		
+		if(actionName.equals(FILTERLIST_ACTION_FQN)) {
+		       
+		       final List<CsdlParameter> parameters = new ArrayList<CsdlParameter>();
+		       CsdlParameter parameter = new CsdlParameter();
+		       parameter.setName(ES_PRODUCTS_NAME);
+		       parameter.setType(ET_PRODUCT_FQN);
+		       parameter.setCollection(true);
+		       parameters.add(parameter);
+		       parameter = new CsdlParameter();
+		       parameter.setName(PARAMETER_FILTERPRODUCTS);
+		       parameter.setType(PROPERTY_TYPE_FQN);
+		       parameter.setCollection(true);
+		       parameters.add(parameter);
+		       
+		       final CsdlAction action = new CsdlAction();
+		       action.setName(FILTERLIST_ACTION_FQN.getName());
+		       action.setBound(true);
+		       action.setParameters(parameters);
+		       action.setReturnType(new CsdlReturnType().setType(ET_PRODUCT_FQN).setCollection(true));
+		       actions.add(action);
+		       
+		       return actions;
+		    }
+		
+		return null;
+	}
+	
 	/**
 	 * @see org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider#getFunctions(org.apache.olingo.commons.api.edm.FullQualifiedName)
 	 */
@@ -343,7 +381,19 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(End.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			entityType.setProperties(properties);
 			return entityType;
-		}
+		} 
+		
+		if(complexTypeName.equals(PROPERTY_TYPE_FQN)) {
+	         List<CsdlProperty> properties = new ArrayList<>();
+	         properties.add(new CsdlProperty().setName("Name").setType(STRING_TYPE_FQN).setNullable(false));
+	         properties.add(new CsdlProperty().setName("Value").setType(STRING_TYPE_FQN).setNullable(false));
+
+	         CsdlComplexType entityType = new CsdlComplexType();
+	         entityType.setName(PROPERTY_TYPE_FQN.getName());
+	         entityType.setProperties(properties);
+	         return entityType;
+	      }
+		
 //		if (complexTypeName.equals(FUNCTION_INTERSECTS_FQN)) {
 //			CsdlComplexType entityType = new CsdlComplexType();
 //			entityType.setName(FUNCTION_INTERSECTS_FQN);
@@ -474,7 +524,8 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 		final List<CsdlComplexType> complexTypes = new ArrayList<CsdlComplexType>();
 		complexTypes.add(getComplexType(CHECKSUM_TYPE_FQN));
 		complexTypes.add(getComplexType(TIMERANGE_TYPE_FQN));
-
+		complexTypes.add(getComplexType(PROPERTY_TYPE_FQN));
+		
 		final List<CsdlEnumType> enumTypes = new ArrayList<CsdlEnumType>();
 		enumTypes.add(getEnumType(PRODUCTION_TYPE_TYPE_FQN));
 
@@ -486,6 +537,8 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 		schema.setEntityContainer(this.getEntityContainer());
 
 		schema.setFunctions(getFunctions(FUNCTION_INTERSECTS_FQN));
+		
+		schema.setActions(getActions(FILTERLIST_ACTION_FQN));
 		
 		schemas.add(schema);
 
