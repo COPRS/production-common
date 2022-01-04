@@ -24,6 +24,6 @@ RUN chmod +x /app/start.sh
 
 # Add Tini as entry point
 RUN apk add --no-cache tini
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/sbin/tini", "--"] 
 
 CMD ["/app/start.sh"]
