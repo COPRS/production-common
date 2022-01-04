@@ -71,7 +71,16 @@ public class OdataRestController {
 		LOGGER.info("Forwarding HTTP request: {} -> {}", incomingUrl, queryUrl);
 
 		final HttpHeaders httpHeaders = getHeaders(request);
-		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
+		String body = null;
+		if ("POST".equalsIgnoreCase(request.getMethod())) 
+		{
+			try {
+				body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+			} catch (IOException e) {
+				throw new RuntimeException(String.format("could not read body from HTTP request: %s", e.getMessage()), e);
+			}
+		}
+		final HttpEntity<String> requestEntity = new HttpEntity<>(body, httpHeaders);
 
 		final ResponseEntity<String> responseEntity = this.restTemplate.exchange(queryUrl, HttpMethod.resolve(request.getMethod()), requestEntity,
 				String.class);
