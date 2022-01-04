@@ -23,13 +23,15 @@ env:
   ARTIFACTORY_PROJECT: werum-docker
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-  VERSION: 3.32.1
+  VERSION: {{ github.ref }}
   IMAGE_NAME: "rs-ipf-s1-aio"
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
   build-ipf-s1-aio:
     runs-on: ubuntu-latest
+    # Just build when being a tag or explicitely asked for using #IPF
+    if: startWith(github.ref, 'ref/tags') || contains(github.event.head_commit.message, '#IPF')
     steps:
       - name: Extract branch name
         shell: bash
