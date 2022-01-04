@@ -18,6 +18,10 @@ public class NativeApiProperties {
 	private String version;
 	private Long downloadUrlExpirationTimeInSeconds = 600L;
 
+	private String pripProtocol;
+	private String pripHost;
+	private Integer pripPort;
+
 	private List<AttributesOfMission> attributesOfMission = new LinkedList<>();
 
 	public static class AttributesOfMission {
@@ -100,6 +104,30 @@ public class NativeApiProperties {
 
 	public void setDownloadUrlExpirationTimeInSeconds(final Long downloadUrlExpirationTimeInSeconds) {
 		this.downloadUrlExpirationTimeInSeconds = downloadUrlExpirationTimeInSeconds;
+	}
+
+	public String getPripProtocol() {
+		return this.pripProtocol;
+	}
+
+	public void setPripProtocol(String pripProtocol) {
+		this.pripProtocol = pripProtocol;
+	}
+
+	public String getPripHost() {
+		return this.pripHost;
+	}
+
+	public void setPripHost(String pripHost) {
+		this.pripHost = pripHost;
+	}
+
+	public Integer getPripPort() {
+		return this.pripPort;
+	}
+
+	public void setPripPort(Integer pripPort) {
+		this.pripPort = pripPort;
 	}
 
 }

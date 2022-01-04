@@ -2,9 +2,15 @@
 	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+	  <groupId>de.werum.s1pdgs</groupId>
+	  <artifactId>s1pro-core</artifactId>
+	  <version>3.32.1</version>
+	</parent>
+	
 	<groupId>de.werum.coprs</groupId>
 	<artifactId>coprs-native-api</artifactId>
-	<version>3.32.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>native-api</name>
 
@@ -12,15 +18,6 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<!-- dependency version definitions -->
-		<s1pro.version>3.32.1</s1pro.version>
-		<spring.boot.version>2.3.2.RELEASE</spring.boot.version>
-		<commons.logging.version>1.2</commons.logging.version>
-		<slf4j.version>1.7.30</slf4j.version>
-		<jacoco.version>0.7.7.201606060606</jacoco.version>
-		<openapi4j.version>1.0.5</openapi4j.version>
-		<jackson.version>2.11.1</jackson.version>
 
 		<project.build.finalName>coprs-native-api</project.build.finalName>
 		<project.artifactId>coprs-native-api</project.artifactId>
@@ -39,41 +36,36 @@
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-prip-client</artifactId>
-			<version>${s1pro.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-obs-sdk</artifactId>
-			<version>${s1pro.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<version>${commons.logging.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>1.26</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.grundid.opendatalab</groupId>
@@ -84,7 +76,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<version>${spring.boot.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -102,6 +93,17 @@
 			<artifactId>spring-boot-starter-jetty</artifactId>
 			<version>${spring.boot.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.vaadin.external.google</groupId>
+					<artifactId>android-json</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>

@@ -11,11 +11,27 @@ import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.ODataLibraryException;
+import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.queryoption.CustomQueryOption;
 
 public class OlingoUtil {
 
 	private OlingoUtil() {
 	}
+	
+	public static void validate(final UriInfo uriInfo) throws ODataApplicationException {
+	      if(uriInfo.getCustomQueryOptions() != null && uriInfo.getCustomQueryOptions().size() > 0) {
+	         
+	         StringBuffer query = new StringBuffer();
+	         for(CustomQueryOption co : uriInfo.getCustomQueryOptions()) {
+	            query.append(co.getName()).append("=").append(co.getText());
+	         }
+	         
+	         throw new ODataApplicationException("Invalid Query Options: "+query.toString(), HttpStatusCode.BAD_REQUEST.getStatusCode(),
+	               Locale.ROOT);
+	      }
+	      
+	   }
 	
 	// --------------------------------------------------------------------------
 

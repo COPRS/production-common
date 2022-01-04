@@ -391,7 +391,7 @@ public class NativeApiRestController {
 			final DownloadUrl temporaryProductDownloadUrl = this.nativeApiService.provideTemporaryProductDonwload(missionName, productId);
 
 			if (null == temporaryProductDownloadUrl || null == temporaryProductDownloadUrl.getUrl()) {
-				throw new NativeApiRestControllerException(String.format("no download URL returned from OBS", productId), HttpStatus.INTERNAL_SERVER_ERROR);
+				throw new NativeApiRestControllerException(String.format("no download URL returned from OBS: %s", productId), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
 			response.setStatus(HttpStatus.TEMPORARY_REDIRECT.value());
