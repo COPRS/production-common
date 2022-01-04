@@ -204,7 +204,7 @@ public class TestS3LevelProductMetadataExtractor {
 		final JSONObject result = extractor.extract(reporting, message);
 
 		for (final String key : expected.keySet()) {
-			if (!"timeliness".equals(key) && !"boundingPolygon".equals(key)) {
+			if (!"timeliness".equals(key) && !"sliceCoordinates".equals(key)) {
 				assertEquals(expected.get(key), result.get(key));
 			}
 		}

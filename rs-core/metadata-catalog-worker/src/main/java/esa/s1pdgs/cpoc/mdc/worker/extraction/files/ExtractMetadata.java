@@ -436,6 +436,7 @@ public class ExtractMetadata {
 
 		// Add metadata from file descriptor
 		metadataJSONObject = checkS3MetadataForLevelProducts(metadataJSONObject);
+		metadataJSONObject = processS3Coordinates(metadataJSONObject);
 		metadataJSONObject = putS3FileMetadataToJSON(metadataJSONObject, descriptor);
 
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
@@ -608,6 +609,39 @@ public class ExtractMetadata {
 			LOGGER.error("Error while extraction of config file metadata ", e);
 			throw new MetadataExtractionException(e);
 		}
+	}
+	
+	JSONObject processS3Coordinates(JSONObject metadataJSONObject) {
+
+		if (metadataJSONObject.has("sliceCoordinates")) {
+			final String rawCoords = metadataJSONObject.getString("sliceCoordinates");
+			if (!rawCoords.trim().isEmpty()) {
+				metadataJSONObject.put("sliceCoordinates", processCoordinatesAsIS(transformFromOpengis(rawCoords)));
+			} else {
+				metadataJSONObject.remove("sliceCoordinates");
+			}
+		}
+
+		return metadataJSONObject;
+	}
+
+	String transformFromOpengis(String rawCoords) {
+		
+		if (rawCoords.indexOf(',') != -1) {
+			throw new IllegalArgumentException("space separated values are expected but contains comma");
+		}
+		String[] coords = rawCoords.split(" ");
+		if ((coords.length % 2) != 0) {
+			throw new IllegalArgumentException("lat and lon values are expected");
+		}
+		StringBuilder transformed = new StringBuilder();
+		for (int i = 0; i < coords.length; i = i + 2) {
+			transformed.append(coords[i]);
+			transformed.append(",");
+			transformed.append(coords[i + 1]);
+			transformed.append(" ");
+		}
+		return transformed.toString().trim();
 	}
 
 	private JSONObject putConfigFileMetadataToJSON(final JSONObject metadataJSONObject, final AuxDescriptor descriptor)
