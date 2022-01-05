@@ -52,6 +52,9 @@ public class OdataController {
 		handler.register(new ProductEntityProcessor(pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds));
 		handler.register(new ProductEntityCollectionProcessor(pripMetadataRepository));
 		handler.register(new ProductActionProcessor(pripMetadataRepository));
+		
+	    // Enable DebugSupport of olingo. Add request parameter key: odata-debug value: json | html | download
+	    handler.register(new org.apache.olingo.server.api.debug.DefaultDebugSupport()); 
 
 		handler.process(new HttpServletRequestWrapper(request) {
 	         @Override
