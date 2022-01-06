@@ -41,7 +41,7 @@ source ./$INIT_FILE
 
 # If these settings not had been setup and are left empty, we will deny to execute the script and giving some
 # advise how to modify the init script
-if [[ -z $BRANCH && -z $REPO_CONF && -z $BRANCH_CONF ]]
+if [[ -z $BRANCH || -z $REPO_CONF || -z $BRANCH_CONF ]]
 then
   echo "Configuration not sufficient for setting up environment."
   echo "Please open the file 'rs-init.conf' with an text editor and setup:"
