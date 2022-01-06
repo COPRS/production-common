@@ -32,7 +32,8 @@ then
   echo 'REPO_S3="https://github.com/COPRS/processing-sentinel-3.git"' >> $INIT_FILE
   echo 'REPO_INFRA="" # can be left empty if no additional infrastructure is used"' >> $INIT_FILE
   echo 'REPO_CONF=""' >> $INIT_FILE
-  echo 'BRANCH=""' >> $INIT_FILE
+  echo 'BRANCH="" # Branch of the software repositories that shall be used' >> $INIT_FILE
+  echo 'BRANCH_CONF="$BRANCH" # Branch of the configuration repository that shall be used. By default the same as software branch' >> $INIT_FILE
 fi
 
 # Source init file
@@ -40,12 +41,13 @@ source ./$INIT_FILE
 
 # If these settings not had been setup and are left empty, we will deny to execute the script and giving some
 # advise how to modify the init script
-if [[ -z $BRANCH && -z $REPO_CONF ]]
+if [[ -z $BRANCH && -z $REPO_CONF && -z $BRANCH_CONF ]]
 then
   echo "Configuration not sufficient for setting up environment."
   echo "Please open the file 'rs-init.conf' with an text editor and setup:"
   echo "REPO_CONF pointing to the git repository containing the actual configuration"
   echo "BRANCH specifying the branch that shall be used for the environment, e.g. develop"
+  echo "BRANCH_CONFIG specifying the branch that shall be used for the configuration repository"
   exit 1
 fi
 
@@ -97,7 +99,7 @@ rs_init() {
   echo "Checking out processing-sentinel-3"
   git clone -b $BRANCH $REPO_S3 &> /dev/null
   echo "Checking out configuration"
-  git clone -b $BRANCH $REPO_CONF config &> /dev/null
+  git clone -b $BRANCH_CONF $REPO_CONF config &> /dev/null
   
   if [[ ! -z $REPO_INFRA ]]
   then
@@ -141,7 +143,7 @@ rs_update() {
   cd $CWD/repos/rs-infrastructure && git pull $REPO_INFRA $BRANCH
   cd $CWD/repos/rs-processing-common && git pull $REPO_COMMON $BRANCH
   cd $CWD/repos/rs-testing && git pull $REPO_COMMON $BRANCH
-  cd $CWD/repos/config && git pull $REPO_CONF $BRANCH
+  cd $CWD/repos/config && git pull $REPO_CONF $BRANCH_CONF
   if [[ ! -z $REPO_INFRA ]]
   then
     cd $CWD/repos/rs-infrastructure && git pull
