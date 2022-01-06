@@ -9,7 +9,7 @@ in order to run the Reference system.
 # Usage
 
 ## Introduction
-The script rs_init will be creating two folders. The folder 'repos' does
+The script 'rs_init' will be creating two folders. The folder 'repos' does
 contain the actual github repositories that had been checked out. Another
 folder 'env' will be created containing the expected structure for the
 environment.
@@ -75,10 +75,12 @@ REPO_S1="https://github.com/COPRS/processing-sentinel-1.git"
 REPO_S3="https://github.com/COPRS/processing-sentinel-3.git"
 REPO_CONF=""
 BRANCH=""
+BRANCH_CONF="$BRANCH"
 ```
 Use your favorized text editor to give at least the information on:
 * REPO_CONF containing the information where the environmental specific configuration is located.
-* BRANCH specifying the branch or version that shall be used.
+* BRANCH specifying the branch or version that shall be used for the software repositories
+* BRANCH_CONF specifying the branch or version that shall be used for the configuration repository
 
 The other variables can be used as is and shall be normally not modified.
 
@@ -130,4 +132,10 @@ A successful execution will have the following output:
 Cleaning environment ...
 Done.
 ```
-Please note that this will not remove the file "setup.conf".
+Please note that this will not remove the file 'setup.conf'.
+
+## Upgrade from release/0.3.0 or earlier
+
+Note that with #185 a new feature was introduced allowing to specify for the configuration repository a different branch that the one used for the software. Thus the file 'setup.conf' needs to be adjusted to reflect the change. It is recommended move that file to a different location, execute the script 'rs_init' so it will be generating a new 'setup.conf' and then migrating the settings from the old one. Note that per default it is using the content of $BRANCH as configuration as well, but you can setup any branch you want.
+
+This operation needs to be executed when migrating from release 0.3.0 or earlier versions.
