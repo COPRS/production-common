@@ -42,6 +42,9 @@ public class OdataController {
 	@Value("${prip-worker.download-url-expiration-time-in-seconds:600}")
 	private long downloadUrlExpirationTimeInSeconds;
 	
+	@Value("${prip-worker.debug-support:false}")
+	private boolean debugSupport;
+	
 	@RequestMapping(value = "/v1/**")
 	public void process(HttpServletRequest request, HttpServletResponse response) {
 		String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
@@ -54,7 +57,10 @@ public class OdataController {
 		handler.register(new ProductActionProcessor(pripMetadataRepository));
 		
 	    // Enable DebugSupport of olingo. Add request parameter key: odata-debug value: json | html | download
-	    handler.register(new org.apache.olingo.server.api.debug.DefaultDebugSupport()); 
+		if (debugSupport) {
+			LOGGER.info("Activating debug support for OLingo");
+			handler.register(new org.apache.olingo.server.api.debug.DefaultDebugSupport());
+		}
 
 		handler.process(new HttpServletRequestWrapper(request) {
 	         @Override
