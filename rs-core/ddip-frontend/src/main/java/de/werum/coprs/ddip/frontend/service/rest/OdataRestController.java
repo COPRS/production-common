@@ -3,6 +3,8 @@ package de.werum.coprs.ddip.frontend.service.rest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -67,8 +69,8 @@ public class OdataRestController {
 		final String incomingUrl = String.format("%s%s", request.getRequestURL().toString(), queryParams);
 		LOGGER.info("Received HTTP request for URL: {}", incomingUrl);
 
-		final String queryUrl = String.format("%s%s%s", this.dispatchPripUrl, request.getRequestURI(), this.modifyQueryParams(queryParams));
-		LOGGER.info("Forwarding HTTP request: {} -> {}", incomingUrl, queryUrl);
+		final String queryUrlStr = String.format("%s%s%s", this.dispatchPripUrl, request.getRequestURI(), this.modifyQueryParams(queryParams));
+		LOGGER.info("Forwarding HTTP request: {} -> {}", incomingUrl, queryUrlStr);
 
 		final HttpHeaders httpHeaders = getHeaders(request);
 		String body = null;
@@ -82,7 +84,14 @@ public class OdataRestController {
 		}
 		final HttpEntity<String> requestEntity = new HttpEntity<>(body, httpHeaders);
 
-		final ResponseEntity<String> responseEntity = this.restTemplate.exchange(queryUrl, HttpMethod.resolve(request.getMethod()), requestEntity,
+		URI queryURI = null;
+		try {
+			queryURI = new URI(queryUrlStr);
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(String.format("could not create URI from query string: %s", e.getMessage()), e);
+		}
+		
+		final ResponseEntity<String> responseEntity = this.restTemplate.exchange(queryURI, HttpMethod.resolve(request.getMethod()), requestEntity,
 				String.class);
 
 		try {
