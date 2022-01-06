@@ -84,12 +84,6 @@
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
             <scope>test</scope>
-        </dependency>		
-		
-		<dependency>
-        	<groupId>org.apache.commons</groupId>
-        	<artifactId>commons-csv</artifactId>
-        	<version>1.5</version>
         </dependency>
         
         <dependency>
