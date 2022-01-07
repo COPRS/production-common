@@ -25,10 +25,10 @@ spec:
           env:
             - name: API_URL
               value: {{ .Values.env.apiUrl }}
-            - name: ODATA_RESOURCE_NAME
-              value: {{ .Values.env.odataResourceName }}
             - name: MAP_BACKGROUNDS
               value: {{ .Values.env.mapBackgrounds }}
+            - name: BASE_HREF
+              value: {{ .Values.env.baseHref }}
           ports:
             - name: http
               containerPort: 80
