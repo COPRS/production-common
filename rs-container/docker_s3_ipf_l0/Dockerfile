@@ -15,6 +15,7 @@ ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory
 ### Reconstruction of the base image provided by the agency
 USER root
 
+# Import Artifactory credentials as secrets
 RUN --mount=type=secret,id=ARTIFACTORY_USER export ARTIFACTORY_USER=`cat /run/secrets/ARTIFACTORY_USER`
 RUN --mount=type=secret,id=ARTIFACTORY_PASS export ARTIFACTORY_PASS=`cat /run/secrets/ARTIFACTORY_PASS`
 
