@@ -179,7 +179,7 @@ jobs:
   build-ipf-s1-aio:
     needs: build
     if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop-ipf
+    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
