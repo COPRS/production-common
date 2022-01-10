@@ -15,6 +15,9 @@ ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory
 ### Reconstruction of the base image provided by the agency
 USER root
 
+RUN --mount=type=secret,id=ARTIFACTORY_USER export ARTIFACTORY_USER=`cat /run/secrets/artifactory_user`
+RUN --mount=type=secret,id=ARTIFACTORY_PASS export ARTIFACTORY_PASS=`cat /run/secrets/artifactory_pass`
+
 RUN yum install -y java-1.8.0-openjdk
 
 # create user

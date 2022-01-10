@@ -78,13 +78,14 @@ jobs:
           context: ./rs-container/docker_s3_ipf_l0
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          secrets: |
+            "ARTIFACTORY_USER=${{ secrets.WERUM_ARTIFACTORY_USER }}"
+            "ARTIFACTORY_PASS=${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"
           build-args: |
             BRANCH=${{ steps.extract_branch.outputs.branch }}
             BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
-            ARTIFACTORY_USER=${{ secrets.WERUM_ARTIFACTORY_USER }}
-            ARTIFACTORY_PASS=${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
 
       - name: Scan image
         uses: anchore/scan-action@v2
