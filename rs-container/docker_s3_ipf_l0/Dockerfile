@@ -7,17 +7,11 @@ FROM centos:7
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
-ARG ARTIFACTORY_USER
-ARG ARTIFACTORY_PASS
 ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory/cfi"
 
 
 ### Reconstruction of the base image provided by the agency
 USER root
-
-# Import Artifactory credentials as secrets
-RUN --mount=type=secret,id=ARTIFACTORY_USER export ARTIFACTORY_USER=`cat /run/secrets/ARTIFACTORY_USER`
-RUN --mount=type=secret,id=ARTIFACTORY_PASS export ARTIFACTORY_PASS=`cat /run/secrets/ARTIFACTORY_PASS`
 
 RUN yum install -y libgomp java-1.8.0-openjdk
 
@@ -31,10 +25,10 @@ RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
 
 WORKDIR /tmp
 
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/S3-IPF-COTS.tgz"
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/S3IPF-L0_06.12.rpm"
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/blas-3.2.1-4.el6.x86_64.rpm"
-RUN curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASS}" -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/lapack-3.2.1-4.el6.x86_64.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/S3-IPF-COTS.tgz"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/S3IPF-L0_06.12.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/blas-3.2.1-4.el6.x86_64.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/lapack-3.2.1-4.el6.x86_64.rpm"
 
 RUN tar -xf S3-IPF-COTS.tgz -C /usr/local
 RUN yum install -y blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_64.rpm; yum clean all
