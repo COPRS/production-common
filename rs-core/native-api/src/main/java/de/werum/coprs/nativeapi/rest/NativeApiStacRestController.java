@@ -2,7 +2,6 @@ package de.werum.coprs.nativeapi.rest;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import de.werum.coprs.nativeapi.service.NativeApiStacService;
 import de.werum.coprs.nativeapi.service.exception.NativeApiBadRequestException;
+import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 
 @CrossOrigin
 @RestController
@@ -36,7 +37,7 @@ public class NativeApiStacRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<String> handleStacItemSearch(
+	public ResponseEntity<String> handleStacItemSearch(
 			final HttpServletRequest request,
 			@RequestParam(value = "datetime", required = false) final String datetime) {
 
@@ -48,7 +49,11 @@ public class NativeApiStacRestController {
 		try {
 			if (null != datetime) {
 				final String decodedDatetimeStr = URLDecoder.decode(datetime, StandardCharsets.UTF_8.toString());
-				return this.nativeApiStacService.find(decodedDatetimeStr);
+				final List<String> result = this.nativeApiStacService.find(decodedDatetimeStr);
+
+				if(CollectionUtil.isNotEmpty(result)) {
+					return ResponseEntity.ok(result.get(0));
+				}
 			}
 		} catch (final NativeApiBadRequestException e) {
 			throw new NativeApiRestControllerException(String.format("Bad request: %s", e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -56,7 +61,7 @@ public class NativeApiStacRestController {
 			throw new NativeApiRestControllerException(String.format("Internal server error: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return Collections.emptyList();
+		return ResponseEntity.ok().build();
 	}
 
 }

@@ -56,6 +56,7 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 		// TODO: change response type using GeoJSON, see staccato-commons com.planet.staccato.model.GeoJson and com.planet.staccato.model.ItemCollection
 
 		final String odataQueryUrl = buildPripQueryUrl(this.pripUrl, datetime);
+		LOG.debug("sending PRIP request: {}", odataQueryUrl);
 		final HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
