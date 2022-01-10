@@ -3,10 +3,10 @@
 # Declare variables to be passed into your templates.
 
 env:
-  apiUrl: http://localhost:4711/odata/v1/
-  odataResourceName: Products
+  apiUrl: http://coprs.werum.de/prip/odata/v1/Products
   mapBackgrounds: | 
     "[{\"name\":\"TESTING\",\"layers\":[{\"url\":\"testing_url\",\"layerName\":\"LayerName\"}]}]"
+  baseHref: /uwc/
 
 image:
   # Overrides the image tag whose default is the chart appVersion.

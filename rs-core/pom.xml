@@ -20,7 +20,7 @@
 		<commons.logging.version>1.2</commons.logging.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
 		<commons.net.version>3.8.0</commons.net.version>
-		<commons.io.version>2.6</commons.io.version>
+		<commons.io.version>2.7</commons.io.version>
 		<httpcomponents.version>4.5.1</httpcomponents.version>
 
 		<!-- jacoco.version>0.7.5.201505241946</jacoco.version-->
@@ -31,12 +31,13 @@
 		<openapi4j.version>1.0.4</openapi4j.version>
 		<equalsverifier.version>2.4.6</equalsverifier.version>
 		<aws.version>1.11.271</aws.version>		
-		<jsch.version>0.1.53</jsch.version>
-		<elasticsearch.version>7.7.0</elasticsearch.version>
+		<jsch.version>0.1.55</jsch.version>
+		<elasticsearch.version>7.14.0</elasticsearch.version>
 		<spatial4j.version>0.7</spatial4j.version>
 		<jts.version>1.15.0</jts.version>
 		<pmd.failOnViolation>false</pmd.failOnViolation>
 		<odata.version>4.8.0</odata.version>
+		<log4j.version>2.17.1</log4j.version>
 	</properties>
 
 	<!-- TODO: check if this is still required -->
@@ -180,7 +181,18 @@
 				<artifactId>kafka-log4j-appender</artifactId>
 				<version>${kafka.version}</version>
 			</dependency>
-			
+			<!-- Begin of Exploit Mitigation for CVE-2021-45046 -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <!-- End of Exploit Mitigation for CVE-2021-45046 -->
 			<dependency>
 				<groupId>commons-logging</groupId>
 				<artifactId>commons-logging</artifactId>
