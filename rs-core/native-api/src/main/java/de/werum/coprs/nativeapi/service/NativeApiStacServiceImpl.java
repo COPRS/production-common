@@ -105,8 +105,8 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 				}
 
 				final String singleOdataDatetime = convertDatetimeToOdataFormat(singleDatetimeStr);
-				// ContentDate/Start lte 2021-12-21T12:21:12.000Z and ContentDate/End gte 2021-12-21T12:21:12.000Z
-				return String.format("%s/%s lte %s and %s/%s gte %s", ContentDate, Start, singleOdataDatetime, ContentDate, End, singleOdataDatetime);
+				// ContentDate/Start le 2021-12-21T12:21:12.000Z and ContentDate/End ge 2021-12-21T12:21:12.000Z
+				return String.format("%s/%s le %s and %s/%s ge %s", ContentDate, Start, singleOdataDatetime, ContentDate, End, singleOdataDatetime);
 
 			} else if (datetimeStrings.length == 2) {
 				final String datetimeLowerBoundaryStr = datetimeStrings[0];
@@ -121,13 +121,13 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 
 				if (openStart) {
 					final String odataDatetimeUpperBoundary = convertDatetimeToOdataFormat(datetimeUpperBoundaryStr);
-					// ContentDate/Start lte 2021-12-21T12:21:12.000Z
-					return String.format("%s/%s lte %s", ContentDate, Start, odataDatetimeUpperBoundary);
+					// ContentDate/Start le 2021-12-21T12:21:12.000Z
+					return String.format("%s/%s le %s", ContentDate, Start, odataDatetimeUpperBoundary);
 
 				} else if (openEnd) {
 					final String odataDatetimeLowerBoundary = convertDatetimeToOdataFormat(datetimeLowerBoundaryStr);
-					// ContentDate/End gte 2021-12-21T00:00:00.000Z
-					return String.format("%s/%s gte %s", ContentDate, End, odataDatetimeLowerBoundary);
+					// ContentDate/End ge 2021-12-21T00:00:00.000Z
+					return String.format("%s/%s ge %s", ContentDate, End, odataDatetimeLowerBoundary);
 
 				} else {
 					final LocalDateTime datetimeLowerBoundary = convertDatetime(datetimeLowerBoundaryStr);
@@ -141,8 +141,8 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 					final String odataDatetimeLowerBoundary = formatToOdataFormat(datetimeLowerBoundary);
 					final String odataDatetimeUpperBoundary = formatToOdataFormat(datetimeUpperBoundary);
 
-					// ContentDate/Start lte 2021-12-21T12:21:12.000Z and ContentDate/End gte 2021-12-21T00:00:00.000Z
-					return String.format("%s/%s lte %s and %s/%s gte %s", ContentDate, Start, odataDatetimeUpperBoundary, ContentDate, End,	odataDatetimeLowerBoundary);
+					// ContentDate/Start le 2021-12-21T12:21:12.000Z and ContentDate/End ge 2021-12-21T00:00:00.000Z
+					return String.format("%s/%s le %s and %s/%s ge %s", ContentDate, Start, odataDatetimeUpperBoundary, ContentDate, End, odataDatetimeLowerBoundary);
 				}
 			} else {
 				throw new NativeApiBadRequestException(String.format("invalid datetime format: %s", datetimeStr));
