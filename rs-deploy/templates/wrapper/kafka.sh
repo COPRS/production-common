@@ -138,7 +138,6 @@ t-pdgs-granules-preparation-jobs                2       259200000
 t-pdgs-l0-preparation-jobs                      2       259200000
 t-pdgs-cal-preparation-jobs                     2       259200000
 t-pdgs-pug-preparation-jobs                     2       259200000
-t-pdgs-aux-production-events                    2       259200000
 t-pdgs-l0-production-events                     2       259200000
 t-pdgs-cal-production-events                    2       259200000
 t-pdgs-pug-production-events                    2       259200000
