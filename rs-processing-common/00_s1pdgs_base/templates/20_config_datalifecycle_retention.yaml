@@ -23,7 +23,7 @@ data:
   retention_time_days_3: "-1"
   
   retention_productfamily_4: "L0_SEGMENT_ZIP"
-  retention_filepattern_4: "S1[ABCD]_(S[1-6]|IW|EW|WV|EN)_RAW__0S[SHV].*\\.zip"
+  retention_filepattern_4: "S1[ABCD]_(S[1-6]|IW|EW|WV|EN|N[1-6]|Z[1-6]|ZE|ZI|ZW)_RAW__0S[SHV].*\\.zip"
   retention_time_days_4: "7"
   
   retention_productfamily_5: "L0_SLICE_ZIP"
@@ -325,3 +325,43 @@ data:
   retention_productfamily_79: "AUXILIARY_FILE"
   retention_filepattern_79: "S1__OPER_MSK_OVRPAS_"
   retention_time_days_79: "-1"
+  
+  retention_productfamily_80: "AUXILIARY_FILE"
+  retention_filepattern_80: "S1[ABCD]_AUX_SCF"
+  retention_time_days_80: "-1"
+
+  retention_productfamily_81: "AUXILIARY_FILE"
+  retention_filepattern_81: "S1[ABCD]_AUX_ITC"
+  retention_time_days_81: "-1"
+
+  retention_productfamily_82: "AUXILIARY_FILE"
+  retention_filepattern_82: "S1[ABCD]_AUX_TEC"
+  retention_time_days_82: "-1"
+
+  retention_productfamily_83: "AUXILIARY_FILE"
+  retention_filepattern_83: "S1[ABCD]_AUX_TRO"
+  retention_time_days_83: "180"
+
+  retention_productfamily_84: "L1_ETAD"
+  retention_filepattern_84: "S1[ABCD]_EW_ETA__AXS[SHV].*\\.SAFE"
+  retention_time_days_84: "-1"
+
+  retention_productfamily_85: "L1_ETAD"
+  retention_filepattern_85: "S1[ABCD]_IW_ETA__AXS[SHV].*\\.SAFE"
+  retention_time_days_85: "-1"
+
+  retention_productfamily_86: "L1_ETAD"
+  retention_filepattern_86: "S1[ABCD]_S[1-6]_ETA__AXS[SHV].*\\.SAFE"
+  retention_time_days_86: "-1"
+
+  retention_productfamily_87: "L1_ETAD_ZIP"
+  retention_filepattern_87: "S1[ABCD]_EW_ETA__AXS[SHV].*\\.zip"
+  retention_time_days_87: "7"
+
+  retention_productfamily_88: "L1_ETAD_ZIP"
+  retention_filepattern_88: "S1[ABCD]_IW_ETA__AXS[SHV].*\\.zip"
+  retention_time_days_88: "7"
+
+  retention_productfamily_89: "L1_ETAD_ZIP"
+  retention_filepattern_89: "S1[ABCD]_S[1-6]_ETA__AXS[SHV].*\\.zip"
+  retention_time_days_89: "7"

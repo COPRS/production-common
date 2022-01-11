@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "develop"
+description: S1PRO Data Request Worker
+name: s1pro-data-request-worker
+version: 3.33.0-SNAPSHOT
+maintainers:
+  - name: Werum Software & Systems

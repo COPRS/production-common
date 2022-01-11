@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routing description="routing for data request events">
+
+	<default_route description="AUXILIARY_FILE">
+		<family>AUXILIARY_FILE</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="L0_BLANK">
+		<family>L0_BLANK</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="L0_SEGMENT">
+		<family>L0_SEGMENT</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="L0_SLICE">
+		<family>L0_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="L0_ACN">
+		<family>L0_ACN</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="L1_SLICE">
+		<family>L1_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="L1_ACN">
+		<family>L1_ACN</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="L2_SLICE">
+		<family>L2_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="L2_ACN">
+		<family>L2_ACN</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="SPP_OBS">
+		<family>SPP_OBS</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="SPP_MBU">
+		<family>SPP_MBU</family>
+		<route_to>
+			<topic>t-pdgs-data-request-events</topic>
+		</route_to>
+	</default_route>
+	
+</routing>

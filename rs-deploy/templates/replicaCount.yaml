@@ -39,6 +39,7 @@ replicaCount:
   ingestion_auxip_worker: 1
   data_request_worker: 1
   datalifecycle_trigger: 1
+  eviction_management_worker: 1
   compression_trigger: 1
   compression_worker: 1
   prip_trigger: 1
