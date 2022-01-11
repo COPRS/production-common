@@ -368,6 +368,72 @@ data-lifecycle-trigger:
     - productFamily: ${retention_productfamily_89}
       filePattern: ${retention_filepattern_89}
       retentionTimeDays: ${retention_time_days_89}
+    - productFamily: ${retention_productfamily_90}
+      filePattern: ${retention_filepattern_90}
+      retentionTimeDays: ${retention_time_days_90}
+    - productFamily: ${retention_productfamily_91}
+      filePattern: ${retention_filepattern_91}
+      retentionTimeDays: ${retention_time_days_91}
+    - productFamily: ${retention_productfamily_92}
+      filePattern: ${retention_filepattern_92}
+      retentionTimeDays: ${retention_time_days_92}
+    - productFamily: ${retention_productfamily_93}
+      filePattern: ${retention_filepattern_93}
+      retentionTimeDays: ${retention_time_days_93}
+    - productFamily: ${retention_productfamily_94}
+      filePattern: ${retention_filepattern_94}
+      retentionTimeDays: ${retention_time_days_94}
+    - productFamily: ${retention_productfamily_95}
+      filePattern: ${retention_filepattern_95}
+      retentionTimeDays: ${retention_time_days_95}
+    - productFamily: ${retention_productfamily_96}
+      filePattern: ${retention_filepattern_96}
+      retentionTimeDays: ${retention_time_days_96}
+    - productFamily: ${retention_productfamily_97}
+      filePattern: ${retention_filepattern_97}
+      retentionTimeDays: ${retention_time_days_97}
+    - productFamily: ${retention_productfamily_98}
+      filePattern: ${retention_filepattern_98}
+      retentionTimeDays: ${retention_time_days_98}
+    - productFamily: ${retention_productfamily_99}
+      filePattern: ${retention_filepattern_99}
+      retentionTimeDays: ${retention_time_days_99}
+    - productFamily: ${retention_productfamily_100}
+      filePattern: ${retention_filepattern_100}
+      retentionTimeDays: ${retention_time_days_100}
+    - productFamily: ${retention_productfamily_101}
+      filePattern: ${retention_filepattern_101}
+      retentionTimeDays: ${retention_time_days_101}
+    - productFamily: ${retention_productfamily_102}
+      filePattern: ${retention_filepattern_102}
+      retentionTimeDays: ${retention_time_days_102}
+    - productFamily: ${retention_productfamily_103}
+      filePattern: ${retention_filepattern_103}
+      retentionTimeDays: ${retention_time_days_103}
+    - productFamily: ${retention_productfamily_104}
+      filePattern: ${retention_filepattern_104}
+      retentionTimeDays: ${retention_time_days_104}
+    - productFamily: ${retention_productfamily_105}
+      filePattern: ${retention_filepattern_105}
+      retentionTimeDays: ${retention_time_days_105}
+    - productFamily: ${retention_productfamily_106}
+      filePattern: ${retention_filepattern_106}
+      retentionTimeDays: ${retention_time_days_106}
+    - productFamily: ${retention_productfamily_107}
+      filePattern: ${retention_filepattern_107}
+      retentionTimeDays: ${retention_time_days_107}
+    - productFamily: ${retention_productfamily_108}
+      filePattern: ${retention_filepattern_108}
+      retentionTimeDays: ${retention_time_days_108}
+    - productFamily: ${retention_productfamily_109}
+      filePattern: ${retention_filepattern_109}
+      retentionTimeDays: ${retention_time_days_109}
+    - productFamily: ${retention_productfamily_110}
+      filePattern: ${retention_filepattern_110}
+      retentionTimeDays: ${retention_time_days_110}
+    - productFamily: ${retention_productfamily_111}
+      filePattern: ${retention_filepattern_111}
+      retentionTimeDays: ${retention_time_days_111
 
   # on compression events of the listed product families the eviction time in uncompressed storage will be shortened
   # to the configured amount of hours (now + hours) if the already existing eviction timestamp is not already shorter

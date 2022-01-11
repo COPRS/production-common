@@ -365,3 +365,92 @@ data:
   retention_productfamily_89: "L1_ETAD_ZIP"
   retention_filepattern_89: "S1[ABCD]_S[1-6]_ETA__AXS[SHV].*\\.zip"
   retention_time_days_89: "7"
+  
+  retention_productfamily_90: "S3_AUX"
+  retention_filepattern_90: "S3.*"
+  retention_time_days_90: "-1"
+  
+  retention_productfamily_91: "S3_GRANULES"
+  retention_filepattern_91: "S3.*"
+  retention_time_days_91: "30"
+  
+  retention_productfamily_92: "S3_L0"
+  retention_filepattern_92: "S3.*"
+  retention_time_days_92: "30"
+  
+  retention_productfamily_93: "S3_L1_NRT"
+  retention_filepattern_93: "S3.*"
+  retention_time_days_93: "7"
+  
+  retention_productfamily_94: "S3_L1_STC"
+  retention_filepattern_94: "S3.*"
+  retention_time_days_94: "7"
+  
+  retention_productfamily_95: "S3_L1_NTC"
+  retention_filepattern_95: "S3.*"
+  retention_time_days_95: "7"
+  
+  retention_productfamily_96: "S3_L2_NRT"
+  retention_filepattern_96: "S3.*"
+  retention_time_days_96: "7"
+  
+  retention_productfamily_97: "S3_L2_STC"
+  retention_filepattern_97: "S3.*"
+  retention_time_days_97: "7"
+  
+  retention_productfamily_98: "S3_L2_NTC"
+  retention_filepattern_98: "S3.*"
+  retention_time_days_98: "7"
+  
+  retention_productfamily_99: "S3_CAL"
+  retention_filepattern_99: "S3.*"
+  retention_time_days_99: "30"
+  
+  retention_productfamily_100: "S3_PUG"
+  retention_filepattern_100: "S3.*"
+  retention_time_days_100: "30"
+  
+  retention_productfamily_101: "S3_AUX_ZIP"
+  retention_filepattern_101: "S3.*\\.zip"
+  retention_time_days_101: "7"
+  
+  retention_productfamily_102: "S3_GRANULES_ZIP"
+  retention_filepattern_102: "S3.*\\.zip"
+  retention_time_days_102: "7"
+  
+  retention_productfamily_103: "S3_L0_ZIP"
+  retention_filepattern_103: "S3.*\\.zip"
+  retention_time_days_103: "7"
+  
+  retention_productfamily_104: "S3_L1_NRT_ZIP"
+  retention_filepattern_104: "S3.*\\.zip"
+  retention_time_days_104: "7"
+  
+  retention_productfamily_105: "S3_L1_STC_ZIP"
+  retention_filepattern_105: "S3.*\\.zip"
+  retention_time_days_105: "7"
+  
+  retention_productfamily_106: "S3_L1_NTC_ZIP"
+  retention_filepattern_106: "S3.*\\.zip"
+  retention_time_days_106: "7"
+  
+  retention_productfamily_107: "S3_L2_NRT_ZIP"
+  retention_filepattern_107: "S3.*\\.zip"
+  retention_time_days_107: "7"
+  
+  retention_productfamily_108: "S3_L2_STC_ZIP"
+  retention_filepattern_108: "S3.*\\.zip"
+  retention_time_days_108: "7"
+  
+  retention_productfamily_109: "S3_L2_NTC_ZIP"
+  retention_filepattern_109: "S3.*\\.zip"
+  retention_time_days_109: "7"
+  
+  retention_productfamily_110: "S3_CAL_ZIP"
+  retention_filepattern_110: "S3.*\\.zip"
+  retention_time_days_110: "7"
+  
+  retention_productfamily_111: "S3_PUG_ZIP"
+  retention_filepattern_111: "S3.*\\.zip"
+  retention_time_days_111: "7"
+  
