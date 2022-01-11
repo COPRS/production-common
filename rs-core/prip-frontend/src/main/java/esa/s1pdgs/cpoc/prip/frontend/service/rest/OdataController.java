@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 @RequestMapping(value = "/odata")
 public class OdataController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(OdataController.class);
+	public static final Logger LOGGER = LoggerFactory.getLogger(OdataController.class);
 
 	@Autowired
 	private EdmProvider edmProvider;
@@ -39,10 +39,10 @@ public class OdataController {
 	@Autowired
 	private ObsClient obsClient;
 	
-	@Value("${prip-worker.download-url-expiration-time-in-seconds:600}")
+	@Value("${prip-frontend.download-url-expiration-time-in-seconds:600}")
 	private long downloadUrlExpirationTimeInSeconds;
 	
-	@Value("${prip-worker.debug-support:false}")
+	@Value("${prip-frontend.debug-support:false}")
 	private boolean debugSupport;
 	
 	@RequestMapping(value = "/v1/**")

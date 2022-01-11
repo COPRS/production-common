@@ -23,8 +23,8 @@ elasticsearch:
 prip-frontend:
   # Time in seconds until a download URL expires
   download-url-expiration-time-in-seconds: 600
-  # Expose the debug support for OLingo (Default: False)
-  debug-support: false 
+  # Expose the debug support for OLingo (Default: false)
+  debug-support: false
 
 # PRIP client config
 prip-client:
