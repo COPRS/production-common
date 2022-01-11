@@ -58,6 +58,9 @@ application:
           t-pdgs-plan-and-report-ingestion-events: 1
           t-pdgs-auxip-plan-and-report-ingestion-events: 1
           t-pdgs-contingency-ingestion-events: 1
+          t-pdgs-s3-session-file-ingestion-events: 1
+          t-pdgs-granules-ingestion-events: 1
+          t-pdgs-products-ingestion-events: 1
       publication:
         # Dis/Enabled publication for this category
         enable: false
@@ -101,6 +104,10 @@ application:
           t-pdgs-l2-slices-production-events-operator-demand: 9
           t-pdgs-mbu-production-events: 5
           t-pdgs-obs-production-events: 5
+          t-pdgs-l0-production-events: 10
+          t-pdgs-cal-production-events: 10
+          t-pdgs-pug-production-events: 10
+          t-pdgs-s3-acq-production-events: 10
       publication:
         # Dis/Enabled publication for this category
         enable: false
