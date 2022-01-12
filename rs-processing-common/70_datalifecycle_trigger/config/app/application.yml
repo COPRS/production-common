@@ -433,7 +433,7 @@ data-lifecycle-trigger:
       retentionTimeDays: ${retention_time_days_110}
     - productFamily: ${retention_productfamily_111}
       filePattern: ${retention_filepattern_111}
-      retentionTimeDays: ${retention_time_days_111
+      retentionTimeDays: ${retention_time_days_111}
 
   # on compression events of the listed product families the eviction time in uncompressed storage will be shortened
   # to the configured amount of hours (now + hours) if the already existing eviction timestamp is not already shorter
