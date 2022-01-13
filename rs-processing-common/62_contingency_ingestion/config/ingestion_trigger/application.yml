@@ -248,7 +248,7 @@ ingestion-trigger:
       matchRegex: ^S3[AB_]_.*\.SEN3$
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       topic: t-pdgs-contingency-ingestion-jobs
-      family: S3_LO
+      family: S3_L0
 
 # Kafka config
 kafka:
