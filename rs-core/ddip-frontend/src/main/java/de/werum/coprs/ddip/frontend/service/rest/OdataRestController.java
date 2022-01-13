@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -63,7 +64,7 @@ public class OdataRestController {
 		this.collections = null != ddipProperties.getCollections() ? new HashMap<>(ddipProperties.getCollections()) : new HashMap<>();
 	}
 
-	@RequestMapping(value = "/v1/**")
+	@RequestMapping(value = "/v1/**", method = { RequestMethod.GET, RequestMethod.POST })
 	public void handleOdataRequest(HttpServletRequest request, HttpServletResponse response) {
 		final String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
 		final String incomingUrl = String.format("%s%s", request.getRequestURL().toString(), queryParams);
