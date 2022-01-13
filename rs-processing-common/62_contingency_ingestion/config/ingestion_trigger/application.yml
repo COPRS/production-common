@@ -242,6 +242,13 @@ ingestion-trigger:
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       topic: t-pdgs-contingency-ingestion-jobs
       family: S3_AUX
+    # Handling of S3 LO files
+    - directory: file:///data/inbox/s3_l0/
+      # e.g. S3B_OL_0_EFR____20200121T023043_20200121T023243_20201012T161332_0119_034_317______LN1_O_NR_002.SEN3
+      matchRegex: ^S3[AB_]_.*\.SEN3$
+      ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
+      topic: t-pdgs-contingency-ingestion-jobs
+      family: S3_LO
 
 # Kafka config
 kafka:
