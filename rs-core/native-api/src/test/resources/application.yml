@@ -32,9 +32,9 @@ springdoc:
 # Elastic Search config
 elasticsearch:
   # Host of Elasticsearch cluster
-  host: ${elastic_host}
+  host: localhost
   # Port of Elasticsearch cluster                                        
-  port: ${elastic_port}
+  port: 9200
   # Timeout in milliseconds of connection to the cluster
   connect-timeout-ms: 2000
   # Timeout in milliseconds of the socket to the cluster

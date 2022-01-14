@@ -1,6 +1,5 @@
 package de.werum.coprs.nativeapi.rest;
 
-import java.net.URL;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;

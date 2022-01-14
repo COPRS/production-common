@@ -1,9 +1,9 @@
 package de.werum.coprs.nativeapi.service;
 
-import java.util.List;
+import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
 
 public interface NativeApiStacService {
 
-	List<String> find(final String datetime);
+	StacItemCollection find(final String datetime);
 
 }
