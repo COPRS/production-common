@@ -1483,16 +1483,9 @@ public class ExtractMetadataTest {
 	public void testTransformFromOpengis() {
 		final ExtractMetadata uut = new ExtractMetadata(null, null, Collections.<String, String>emptyMap(), null, null,
 				null, null, null);
-		String transformed1 = uut.transformFromOpengis(
-				"-14.937040 -75.312935 -11.387472 -75.312935 -11.387472 -14.312935 -14.387472 -14.312935 -14.937040 -75.312935");
-		assertEquals(
-				"-14.937040,-75.312935 -11.387472,-75.312935 -11.387472,-14.312935 -14.387472,-14.312935 -14.937040,-75.312935",
-				transformed1);
-		String transformed2 = uut.transformFromOpengis(
+		JSONObject transformed = uut.transformFromOpengis(
 				"-14.937040 -75.312935");
-		assertEquals(
-				"-14.937040,-75.312935",
-				transformed2);
+		assertTrue(transformed.toString().contains("[-75.312935,-14.93704]"));
 		try {
 			uut.transformFromOpengis(
 					"-14.937040 -75.312935 50");
@@ -1523,5 +1516,20 @@ public class ExtractMetadataTest {
 		System.out.println(createdJSON.toString());
 		assertTrue(createdJSON.toString().contains(
 				"[[[-75.312935,-14.93704],[-75.312935,-11.387472],[-14.312935,-11.387472],[-14.312935,-14.387472],[-75.312935,-14.93704]]]"));
+	}
+	
+	@Test
+	public void testProcessS3Coordinates2() {
+		final ExtractMetadata uut = new ExtractMetadata(null, null, Collections.<String, String>emptyMap(), null, null,
+				null, null, null);
+		JSONObject createdJSON = uut.processS3Coordinates(new JSONObject() {
+			{
+				put("sliceCoordinates",
+						"38.1771 119.085 37.5391 118.884 36.9008 118.686 36.2623 118.491 35.6235 118.297 34.9844 118.106 34.3451 117.918 38.1771 119.085");
+			}
+		});
+		System.out.println(createdJSON.toString());
+		assertTrue(createdJSON.toString().contains(
+				"[[[119.085,38.1771],[118.884,37.5391],[118.686,36.9008],[118.491,36.2623],[118.297,35.6235],[118.106,34.9844],[117.918,34.3451],[119.085,38.1771]]]"));
 	}
 }

@@ -616,7 +616,7 @@ public class ExtractMetadata {
 		if (metadataJSONObject.has("sliceCoordinates")) {
 			final String rawCoords = metadataJSONObject.getString("sliceCoordinates");
 			if (!rawCoords.trim().isEmpty()) {
-				metadataJSONObject.put("sliceCoordinates", processCoordinatesAsIS(transformFromOpengis(rawCoords)));
+				metadataJSONObject.put("sliceCoordinates", transformFromOpengis(rawCoords));
 			} else {
 				metadataJSONObject.remove("sliceCoordinates");
 			}
@@ -625,7 +625,7 @@ public class ExtractMetadata {
 		return metadataJSONObject;
 	}
 
-	String transformFromOpengis(String rawCoords) {
+	JSONObject transformFromOpengis(String rawCoords) {
 		
 		if (rawCoords.indexOf(',') != -1) {
 			throw new IllegalArgumentException("space separated values are expected but contains comma");
@@ -634,14 +634,22 @@ public class ExtractMetadata {
 		if ((coords.length % 2) != 0) {
 			throw new IllegalArgumentException("lat and lon values are expected");
 		}
-		StringBuilder transformed = new StringBuilder();
+		
+		LOGGER.debug("l0 coords: {} ", rawCoords);
+		
+		final JSONObject geoShape = new JSONObject();
+		final JSONArray geoShapeCoordinates = new JSONArray();
+		geoShape.put("type", "polygon");
+		
 		for (int i = 0; i < coords.length; i = i + 2) {
-			transformed.append(coords[i]);
-			transformed.append(",");
-			transformed.append(coords[i + 1]);
-			transformed.append(" ");
+			final String aLatitude = coords[i];
+			final String aLongitude = coords[i + 1];
+			geoShapeCoordinates.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
 		}
-		return transformed.toString().trim();
+		
+		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
+		geoShape.put("orientation", "counterclockwise");
+		return geoShape;
 	}
 
 	private JSONObject putConfigFileMetadataToJSON(final JSONObject metadataJSONObject, final AuxDescriptor descriptor)
