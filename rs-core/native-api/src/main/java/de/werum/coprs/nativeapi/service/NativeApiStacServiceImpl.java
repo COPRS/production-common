@@ -5,6 +5,8 @@ import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Start;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -13,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -43,28 +46,30 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 
 	private final NativeApiProperties apiProperties;
 	private final RestTemplate restTemplate;
-	private final URL pripUrl;
+	private final URL internalPripUrl;
+	private final URI externalPripUrl;
 
 	@Autowired
 	public NativeApiStacServiceImpl(final NativeApiProperties apiProperties, final RestTemplate restTemplate) {
 		this.apiProperties = apiProperties;
 		this.restTemplate = restTemplate;
-		this.pripUrl = buildPripUrl(apiProperties);
+		this.internalPripUrl = buildInternalPripUrl(apiProperties);
+		this.externalPripUrl = buildExternalPripUrl(apiProperties);
 	}
 
 	@Override
 	public StacItemCollection find(final String datetime) {
-		final String odataQueryUrl = buildPripQueryUrl(this.pripUrl, datetime);
+		final String odataQueryUrl = buildPripQueryUrl(this.internalPripUrl, datetime);
 		LOG.debug("sending PRIP request: {}", odataQueryUrl);
 		final HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
 		final ResponseEntity<String> responseEntity = this.restTemplate.exchange(odataQueryUrl, HttpMethod.GET, requestEntity, String.class);
 
-		return mapResponse(responseEntity);
+		return mapResponse(responseEntity, this.externalPripUrl);
 	}
 
-	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity) {
+	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity, final URI externalPripUrl) {
 		// TODO: check for status 200 and containing "value", then map, else return error
 		if (null != responseEntity) {
 
@@ -73,7 +78,11 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 				//LOG.debug(String.format("PRIP response body: %s", responseBody.length() > 256 ? responseBody.substring(0, 252) + "..." : responseBody));
 				final JSONObject jsonObject = new JSONObject(responseBody);
 				// TODO: check is odata and contains value
-				return PripToStacMapper.mapFromPripOdataJson(jsonObject);
+				try {
+					return PripToStacMapper.mapFromPripOdataJson(jsonObject, externalPripUrl);
+				} catch (JSONException | URISyntaxException e) {
+					throw new NativeApiException("error mapping PRIP response to STAC item collection", e, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
 			}
 		}
 
@@ -178,17 +187,34 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 		return formatToOdataFormat(convertDatetime(rfc3339DatetimeStr));
 	}
 
-	static URL buildPripUrl(final NativeApiProperties apiProperties) {
+	static URL buildInternalPripUrl(final NativeApiProperties apiProperties) {
+		return buildPripUrl(apiProperties.getPripProtocol(), apiProperties.getPripHost(), apiProperties.getPripPort());
+	}
+
+	static URI buildExternalPripUrl(final NativeApiProperties apiProperties) {
+		try {
+			return buildPripUrl(Objects.requireNonNull(apiProperties).getExternalPripProtocol(), apiProperties.getExternalPripHost(),
+					apiProperties.getExternalPripPort()).toURI();
+		} catch (final Exception e) {
+			final String msg = String.format(
+					"could not initialize PRIP URL for external interface, metadata/download links will not be added to responses [protocol (%s), host (%s) and port (%s)]: %s",
+					apiProperties.getExternalPripProtocol(), apiProperties.getExternalPripHost(), apiProperties.getExternalPripPort(), e.getMessage());
+			LOG.warn(msg);
+			return null;
+		}
+	}
+
+	static URL buildPripUrl(final String protocol, final String host, final int port) {
 		try {
 			return UriComponentsBuilder
 					.fromHttpUrl(String.format("%s://%s:%d",
-							Objects.requireNonNull(apiProperties).getPripProtocol(),
-							apiProperties.getPripHost(),
-							apiProperties.getPripPort()))
+							Objects.requireNonNull(protocol),
+							Objects.requireNonNull(host),
+							port))
 					.build().toUri().toURL();
 		} catch (final MalformedURLException e) {
-			final String msg = String.format("could not initialize PRIP URL for internal interface; protocol (%s), host (%s) and port (%s) must be valid: %s",
-					apiProperties.getPripProtocol(), apiProperties.getPripHost(), apiProperties.getPripPort(), e.getMessage());
+			final String msg = String.format("could not initialize PRIP URL; protocol (%s), host (%s) and port (%s) must be valid: %s",
+					protocol, host, port, e.getMessage());
 			throw new IllegalArgumentException(msg, e);
 		}
 	}

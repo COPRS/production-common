@@ -58,6 +58,10 @@ native-api:
   prip-protocol: http
   prip-host: s1pro-prip-frontend-svc.processing.svc.cluster.local
   prip-port: 8080
+  # configuration to create PRIP metadata and download links that are externaly accessible
+  external-prip-protocol: http
+  external-prip-host: coprs.werum.de/prip/
+  external-prip-port: 80
   
   attributes-of-mission:
   - mission-name: s1

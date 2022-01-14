@@ -3,16 +3,21 @@ package de.werum.coprs.nativeapi.rest.model.stac;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+/**
+ * https://github.com/radiantearth/stac-api-spec/blob/master/fragments/itemcollection/README.md
+ */
 @JsonTypeName("FeatureCollection")
+@JsonPropertyOrder({ "rel", "href", "type", "title" })
 public class StacItemCollection extends GeoJsonBase {
 
 	private static final long serialVersionUID = -6533225776071929373L;
 
 	private List<StacItem> features = new ArrayList<StacItem>();
 
-	// private List<Object> links = new ArrayList<>(); // implement as needed, see StacItem.class
+	private List<Object> links;
 
 	@Override
 	public boolean equals(final Object o) {
@@ -41,6 +46,14 @@ public class StacItemCollection extends GeoJsonBase {
 
 	public void setFeatures(List<StacItem> features) {
 		this.features = features;
+	}
+
+	public List<Object> getLinks() {
+		return this.links;
+	}
+
+	public void setLinks(List<Object> links) {
+		this.links = links;
 	}
 
 }

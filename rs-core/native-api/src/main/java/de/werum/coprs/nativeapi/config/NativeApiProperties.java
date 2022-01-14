@@ -22,6 +22,10 @@ public class NativeApiProperties {
 	private String pripHost;
 	private Integer pripPort;
 
+	private String externalPripProtocol;
+	private String externalPripHost;
+	private Integer externalPripPort;
+
 	private List<AttributesOfMission> attributesOfMission = new LinkedList<>();
 
 	public static class AttributesOfMission {
@@ -128,6 +132,30 @@ public class NativeApiProperties {
 
 	public void setPripPort(Integer pripPort) {
 		this.pripPort = pripPort;
+	}
+
+	public String getExternalPripProtocol() {
+		return this.externalPripProtocol;
+	}
+
+	public void setExternalPripProtocol(String externalPripProtocol) {
+		this.externalPripProtocol = externalPripProtocol;
+	}
+
+	public String getExternalPripHost() {
+		return this.externalPripHost;
+	}
+
+	public void setExternalPripHost(String externalPripHost) {
+		this.externalPripHost = externalPripHost;
+	}
+
+	public Integer getExternalPripPort() {
+		return this.externalPripPort;
+	}
+
+	public void setExternalPripPort(Integer externalPripPort) {
+		this.externalPripPort = externalPripPort;
 	}
 
 }

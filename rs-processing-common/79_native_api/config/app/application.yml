@@ -55,9 +55,13 @@ native-api:
   # Time in seconds until a download URL expires
   download-url-expiration-time-in-seconds: 600
   # configuration for internal interfacing to PRIP
-  prip-protocol: {{ .Values.nativeApi.prip.protocol }}
-  prip-host: {{ .Values.nativeApi.prip.host }}
-  prip-port: {{ .Values.nativeApi.prip.port }}
+  prip-protocol: {{ .Values.nativeApi.prip.internal.protocol }}
+  prip-host: {{ .Values.nativeApi.prip.internal.host }}
+  prip-port: {{ .Values.nativeApi.prip.internal.port }}
+  # configuration to create PRIP metadata and download links that are externaly accessible
+  external-prip-protocol: {{ .Values.nativeApi.prip.external.protocol }}
+  external-prip-host: {{ .Values.nativeApi.prip.external.host }}
+  external-prip-port: {{ .Values.nativeApi.prip.external.port }}
   
   attributes-of-mission:
   - mission-name: s1

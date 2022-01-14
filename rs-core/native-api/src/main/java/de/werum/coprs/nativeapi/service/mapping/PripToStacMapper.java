@@ -3,12 +3,15 @@ package de.werum.coprs.nativeapi.service.mapping;
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Footprint;
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Id;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.geojson.Crs;
@@ -19,27 +22,35 @@ import org.geojson.Point;
 import org.geojson.Polygon;
 import org.geojson.jackson.CrsType;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.http.MediaType;
 
 import de.werum.coprs.nativeapi.rest.model.Checksum;
 import de.werum.coprs.nativeapi.rest.model.ContentDate;
 import de.werum.coprs.nativeapi.rest.model.stac.GeoJsonBase.GeoJsonType;
+import de.werum.coprs.nativeapi.rest.model.stac.StacAsset;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItem;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
+import de.werum.coprs.nativeapi.rest.model.stac.StacLink;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
+import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
 /**
- * Mapping to STAC
+ * Mapping to STAC item/collection (extended GeoJSON feature/collection)
+ *
+ * https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/item-spec/item-spec.md
+ *
  */
 public class PripToStacMapper {
 
-	public static StacItemCollection mapFromPripOdataJson(final JSONObject pripOdataJson) {
+	public static StacItemCollection mapFromPripOdataJson(final JSONObject pripOdataJson, final URI externalPripUrl) throws JSONException, URISyntaxException {
 		if (null != pripOdataJson) {
 			final JSONArray pripOdataJsonProducts = pripOdataJson.getJSONArray("value");
 
 			final List<StacItem> items = new ArrayList<>();
 			for (int i = 0; i < pripOdataJsonProducts.length(); i++) {
-				items.add(mapFromPripOdataJsonProduct(pripOdataJsonProducts.getJSONObject(i)));
+				items.add(mapFromPripOdataJsonProduct(pripOdataJsonProducts.getJSONObject(i), externalPripUrl));
 			}
 
 			final StacItemCollection itemCollection = new StacItemCollection();
@@ -51,12 +62,11 @@ public class PripToStacMapper {
 		return null;
 	}
 
-	public static StacItem mapFromPripOdataJsonProduct(final JSONObject pripOdataJsonProduct) {
+	public static StacItem mapFromPripOdataJsonProduct(final JSONObject pripOdataJsonProduct, final URI externalPripUrl) throws URISyntaxException {
 		final StacItem stacItem = new StacItem();
 
 		// ID
 		final String productId = pripOdataJsonProduct.getString(Id.name());
-		stacItem.setProperty(Id.name(), productId);
 		stacItem.setId(productId);
 
 		// geometry and bbox
@@ -77,9 +87,7 @@ public class PripToStacMapper {
 		final String contentDateEndStr = contentDateJson.getString(PripOdataEntityProperties.End.name());
 		stacItem.setProperty("end_datetime", contentDateEndStr);
 
-		final List<String> dontInclude = Arrays.asList(Id.name(), Footprint.name()
-				/*, PripOdataEntityProperties.Checksum.name(),
-				    PripOdataEntityProperties.ContentDate.name() */);
+		final List<String> dontInclude = Arrays.asList(Id.name(), Footprint.name());
 		for (final String propertyKey : pripOdataJsonProduct.keySet()) {
 			if (!propertyKey.startsWith("@odata") && !dontInclude.contains(propertyKey)) {
 				// handle complex attribute: Footprint
@@ -132,10 +140,51 @@ public class PripToStacMapper {
 				stacItem.setProperty(propertyKey, pripOdataJsonProduct.get(propertyKey));
 			}
 		}
-		// TODO: links
-		// TODO: assets
+
+		final String filename = pripOdataJsonProduct.optString(PripOdataEntityProperties.Name.name(), null);
+		// links (product metadata link) and assets (product download link)
+		if (null != externalPripUrl) {
+			stacItem.setLinks(Collections.singletonList(createSelfLink(externalPripUrl, productId, filename)));
+			stacItem.setAssets(Collections.singletonMap("product", createDownloadAsset(externalPripUrl, productId, filename)));
+		}
 
 		return stacItem;
+	}
+
+	private static StacLink createSelfLink(final URI externalPripUrl, final String productId, final String filename) throws URISyntaxException {
+		final StacLink link = new StacLink();
+
+		final URI pripProductMetadataUrl = Objects.requireNonNull(externalPripUrl, "cannot create metadata link without external PRIP URL")
+				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create metadata link") + ")");
+		link.setHref(pripProductMetadataUrl.toString());
+		link.setType(MediaType.APPLICATION_JSON_VALUE);
+		link.setRel("self");
+
+		if (StringUtil.isNotBlank(filename)) {
+			link.setTitle("metadata for product " + filename);
+		} else {
+			link.setTitle("product metadata");
+		}
+
+		return link;
+	}
+
+	private static StacAsset createDownloadAsset(final URI externalPripUrl, final String productId, final String filename) throws URISyntaxException {
+		final StacAsset asset = new StacAsset();
+
+		final URI pripDownloadUrl = Objects.requireNonNull(externalPripUrl, "cannot create download asset without external PRIP URL")
+				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create download link") + ")/$value");
+		asset.setHref(pripDownloadUrl.toString());
+		asset.setTitle(filename);
+
+		if (null != filename && filename.toUpperCase().endsWith(".ZIP")) {
+			asset.setType("application/zip");
+		}
+
+		asset.setDescription("download link for product data");
+		asset.setRoles(Collections.singletonList("data"));
+
+		return asset;
 	}
 
 	private static GeoJsonObject asGeoJson(final JSONObject pripOdataJsonFootprint) {

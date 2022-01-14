@@ -13,6 +13,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+/**
+ * https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/item-spec/item-spec.md
+ */
 @JsonTypeName("Feature")
 @JsonPropertyOrder({ "type", "stac_version", "stac_extensions", "id", "geometry", "bbox", "properties", "links", "assets", "collection" })
 public class StacItem extends Feature {
@@ -25,9 +28,9 @@ public class StacItem extends Feature {
 	@JsonProperty("stac_extensions")
 	private Set<String> stacExtensions = new HashSet<>();
 
-	private List<Object> links = new ArrayList<>(); // TODO: create and use 'Links' object type: https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/item-spec/item-spec.md#link-object
+	private List<StacLink> links = new ArrayList<>();
 
-	private Map<String, Object> assets = new HashMap<>(); // implement 'Asset' object type as needed: https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/item-spec/item-spec.md#asset-object
+	private Map<String, StacAsset> assets = new HashMap<>();
 
 	private String collection;
 
@@ -47,19 +50,19 @@ public class StacItem extends Feature {
 		this.stacExtensions = stacExtensions;
 	}
 
-	public List<Object> getLinks() {
+	public List<StacLink> getLinks() {
 		return this.links;
 	}
 
-	public void setLinks(final List<Object> links) {
+	public void setLinks(final List<StacLink> links) {
 		this.links = links;
 	}
 
-	public Map<String, Object> getAssets() {
+	public Map<String, StacAsset> getAssets() {
 		return this.assets;
 	}
 
-	public void setAssets(final Map<String, Object> assets) {
+	public void setAssets(final Map<String, StacAsset> assets) {
 		this.assets = assets;
 	}
 

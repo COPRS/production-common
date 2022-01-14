@@ -275,6 +275,11 @@ ddip:
 
 nativeApi:
   prip:
-    protocol: http
-    host: s1pro-prip-frontend-svc.processing.svc.cluster.local
-    port: 8080
+    internal:
+      protocol: http
+      host: s1pro-prip-frontend-svc.processing.svc.cluster.local
+      port: 8080
+    external:
+      protocol: http
+      host: coprs.werum.de/prip/
+      port: 80
