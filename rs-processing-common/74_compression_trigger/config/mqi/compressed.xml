@@ -400,6 +400,30 @@
 		</route_to>
 	</route>
 	
+	<route description="route for S3_GRANULES compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>S3_GRANULES_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+
+	<route description="route for S3_L0 compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>S3_L0_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+
+	<route description="route for S3_PUG compression">
+		<input_key>t-pdgs-contingency-ingestion-events</input_key>
+		<output_key>S3_PUG_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-jobs-nrt</topic>
+		</route_to>
+	</route>
+	
 	<route description="route for data request uncompression">
 		<input_key>t-pdgs-data-request-events</input_key>
 		<output_key>AUXILIARY_FILE</output_key>
