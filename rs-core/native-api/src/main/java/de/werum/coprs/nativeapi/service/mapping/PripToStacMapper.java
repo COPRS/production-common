@@ -1,5 +1,8 @@
 package de.werum.coprs.nativeapi.service.mapping;
 
+import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Footprint;
+import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Id;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +21,8 @@ import org.geojson.jackson.CrsType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import de.werum.coprs.nativeapi.rest.model.Checksum;
+import de.werum.coprs.nativeapi.rest.model.ContentDate;
 import de.werum.coprs.nativeapi.rest.model.stac.GeoJsonBase.GeoJsonType;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItem;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
@@ -50,12 +55,12 @@ public class PripToStacMapper {
 		final StacItem stacItem = new StacItem();
 
 		// ID
-		final String productId = pripOdataJsonProduct.getString(PripOdataEntityProperties.Id.name());
-		stacItem.setProperty(PripOdataEntityProperties.Id.name(), productId);
+		final String productId = pripOdataJsonProduct.getString(Id.name());
+		stacItem.setProperty(Id.name(), productId);
 		stacItem.setId(productId);
 
 		// geometry and bbox
-		final JSONObject footprint = pripOdataJsonProduct.optJSONObject(PripOdataEntityProperties.Footprint.name());
+		final JSONObject footprint = pripOdataJsonProduct.optJSONObject(Footprint.name());
 		stacItem.setGeometry(asGeoJson(footprint));
 
 		// if this item has a geometry a bbox is required
@@ -65,22 +70,68 @@ public class PripToStacMapper {
 
 		// properties
 		// at least 'datetime' or, if a single point in time is not appropriate, 'start_datetime' and 'end_datetime' required
-		final JSONObject contentDate = pripOdataJsonProduct.getJSONObject(PripOdataEntityProperties.ContentDate.name());
+		final JSONObject contentDateJson = pripOdataJsonProduct.getJSONObject(PripOdataEntityProperties.ContentDate.name());
 		stacItem.setProperty("datetime", null);
-		stacItem.setProperty("start_datetime", contentDate.getString(PripOdataEntityProperties.Start.name()));
-		stacItem.setProperty("end_datetime", contentDate.getString(PripOdataEntityProperties.End.name()));
+		final String contentDateStartStr = contentDateJson.getString(PripOdataEntityProperties.Start.name());
+		stacItem.setProperty("start_datetime", contentDateStartStr);
+		final String contentDateEndStr = contentDateJson.getString(PripOdataEntityProperties.End.name());
+		stacItem.setProperty("end_datetime", contentDateEndStr);
 
-		final List<String> dontInclude = Arrays.asList(PripOdataEntityProperties.Id.name(), PripOdataEntityProperties.Footprint.name(),
-				PripOdataEntityProperties.Checksum.name(), PripOdataEntityProperties.ContentDate.name());
+		final List<String> dontInclude = Arrays.asList(Id.name(), Footprint.name()
+				/*, PripOdataEntityProperties.Checksum.name(),
+				    PripOdataEntityProperties.ContentDate.name() */);
 		for (final String propertyKey : pripOdataJsonProduct.keySet()) {
 			if (!propertyKey.startsWith("@odata") && !dontInclude.contains(propertyKey)) {
-				// TODO: Checksum JSON Array nach properties mappen
-				// TODO: ContentDate  JSON object nach properties mappen
-				// TODO: Footprint JSON object nach properties mappen
+				// handle complex attribute: Footprint
+				if (Footprint.name().equals(propertyKey)) {
+					final JSONObject footprintOdataJson = pripOdataJsonProduct.optJSONObject(propertyKey);
+
+					if (!JSONObject.NULL.equals(footprintOdataJson)) {
+						stacItem.setProperty(propertyKey, asGeoJson(footprint));
+					} else {
+						stacItem.setProperty(propertyKey, null);
+					}
+					continue;
+				}
+				// handle complex attribute: ContentDate
+				if (PripOdataEntityProperties.ContentDate.name().equals(propertyKey)) {
+					if (!JSONObject.NULL.equals(contentDateJson)) {
+						final ContentDate contentDate = new ContentDate();
+						contentDate.setStart(contentDateStartStr);
+						contentDate.setEnd(contentDateEndStr);
+						stacItem.setProperty(propertyKey, contentDate);
+					} else {
+						stacItem.setProperty(propertyKey, null);
+					}
+					continue;
+				}
+				// handle complex attribute: Checksum[]
+				if (PripOdataEntityProperties.Checksum.name().equals(propertyKey)) {
+					final JSONArray checksumOdataJsonArray = pripOdataJsonProduct.optJSONArray(propertyKey);
+
+					if (null != checksumOdataJsonArray && checksumOdataJsonArray.length() > 0) {
+						final List<Checksum> checksums = new ArrayList<>();
+
+						for (int i = 0; i < checksumOdataJsonArray.length(); i++) {
+							final JSONObject checksumJson = checksumOdataJsonArray.getJSONObject(i);
+
+							final Checksum checksum = new Checksum();
+							checksum.setAlgorithm(checksumJson.getString(PripOdataEntityProperties.Algorithm.name()));
+							checksum.setValue(checksumJson.getString(PripOdataEntityProperties.Value.name()));
+							checksum.setDate(checksumJson.getString(PripOdataEntityProperties.ChecksumDate.name()));
+
+							checksums.add(checksum);
+						}
+
+						stacItem.setProperty(propertyKey, checksums.stream().toArray(Checksum[]::new));
+					}
+					continue;
+				}
+
+				// all other cases are (expected) to be simple attributes
 				stacItem.setProperty(propertyKey, pripOdataJsonProduct.get(propertyKey));
 			}
 		}
-
 		// TODO: links
 		// TODO: assets
 

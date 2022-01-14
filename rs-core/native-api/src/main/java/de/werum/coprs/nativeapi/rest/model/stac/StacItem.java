@@ -27,7 +27,7 @@ public class StacItem extends Feature {
 
 	private List<Object> links = new ArrayList<>(); // TODO: create and use 'Links' object type: https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/item-spec/item-spec.md#link-object
 
-	private Map<String, Object> assets = new HashMap<>(); // implement 'Asset' object type if needed: https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/item-spec/item-spec.md#asset-object
+	private Map<String, Object> assets = new HashMap<>(); // implement 'Asset' object type as needed: https://github.com/radiantearth/stac-api-spec/blob/master/stac-spec/item-spec/item-spec.md#asset-object
 
 	private String collection;
 
