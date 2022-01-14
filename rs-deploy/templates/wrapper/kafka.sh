@@ -46,8 +46,6 @@ t-pdgs-plan-and-report-ingestion-events                  2	259200000
 t-pdgs-plan-and-report-zip-ingestion-events              2	259200000
 t-pdgs-auxip-aux-ingestion-events                        2	259200000
 t-pdgs-auxip-plan-and-report-ingestion-events            2	259200000
-t-pdgs-granules-ingestion-events                         2       259200000
-t-pdgs-products-ingestion-events                         2       259200000
 t-pdgs-metadata-extraction-jobs                          5	259200000
 t-pdgs-session-file-catalog-events                       2	259200000
 t-pdgs-l0-segment-catalog-events-fast                    2	259200000

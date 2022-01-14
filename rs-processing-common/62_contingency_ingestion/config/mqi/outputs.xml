@@ -103,21 +103,21 @@
 		<input_key>t-pdgs-contingency-ingestion-jobs</input_key>
 		<output_key>S3_GRANULES</output_key>
 		<route_to>
-			<topic>t-pdgs-granules-ingestion-events</topic>
+			<topic>t-pdgs-contingency-ingestion-events</topic>
 		</route_to>
 	</route>
 	<route description="route for S3 level Products">
 		<input_key>t-pdgs-contingency-ingestion-jobs</input_key>
 		<output_key>S3_L0</output_key>
 		<route_to>
-			<topic>t-pdgs-products-ingestion-events</topic>
+			<topic>t-pdgs-contingency-ingestion-events</topic>
 		</route_to>
 	</route>
 	<route description="backdoor route for S3 PUG products">
 		<input_key>t-pdgs-contingency-ingestion-jobs</input_key>
 		<output_key>S3_PUG</output_key>
 		<route_to>
-			<topic>t-pdgs-products-ingestion-events</topic>
+			<topic>t-pdgs-contingency-ingestion-events</topic>
 		</route_to>
 	</route>
 </routing>

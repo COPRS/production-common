@@ -59,8 +59,6 @@ application:
           t-pdgs-auxip-plan-and-report-ingestion-events: 1
           t-pdgs-contingency-ingestion-events: 1
           t-pdgs-s3-session-file-ingestion-events: 1
-          t-pdgs-granules-ingestion-events: 1
-          t-pdgs-products-ingestion-events: 1
       publication:
         # Dis/Enabled publication for this category
         enable: false
