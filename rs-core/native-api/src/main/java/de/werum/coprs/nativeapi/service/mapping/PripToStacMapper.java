@@ -94,7 +94,7 @@ public class PripToStacMapper {
 				if (Footprint.name().equals(propertyKey)) {
 					final JSONObject footprintOdataJson = pripOdataJsonProduct.optJSONObject(propertyKey);
 
-					if (!JSONObject.NULL.equals(footprintOdataJson)) {
+					if (null != footprintOdataJson) {
 						stacItem.setProperty(propertyKey, asGeoJson(footprint));
 					} else {
 						stacItem.setProperty(propertyKey, null);
@@ -103,7 +103,7 @@ public class PripToStacMapper {
 				}
 				// handle complex attribute: ContentDate
 				if (PripOdataEntityProperties.ContentDate.name().equals(propertyKey)) {
-					if (!JSONObject.NULL.equals(contentDateJson)) {
+					if (null != contentDateStartStr || null != contentDateEndStr) {
 						final ContentDate contentDate = new ContentDate();
 						contentDate.setStart(contentDateStartStr);
 						contentDate.setEnd(contentDateEndStr);
