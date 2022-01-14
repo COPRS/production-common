@@ -16,7 +16,7 @@ USER root:root
 
 RUN mkdir -p /usr/local/conf
 COPY IPFSimulator.tar.gz /usr/local/conf
-RUN tar -xvzf /usr/local/conf/IPFSimulator.tar -C /usr/local/conf
+RUN tar -xvzf /usr/local/conf/IPFSimulator.tar.gz -C /usr/local/conf
 
 RUN ln -s /usr/local/conf/IPFSimulator/bin/Processor_wrapper.sh S3IPF.sh
 
