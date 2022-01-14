@@ -7,14 +7,13 @@ import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,8 +26,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import de.werum.coprs.nativeapi.config.NativeApiProperties;
+import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
 import de.werum.coprs.nativeapi.service.exception.NativeApiBadRequestException;
 import de.werum.coprs.nativeapi.service.exception.NativeApiException;
+import de.werum.coprs.nativeapi.service.mapping.PripToStacMapper;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
@@ -52,9 +53,7 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 	}
 
 	@Override
-	public List<String> find(final String datetime) {
-		// TODO: change response type using GeoJSON, see staccato-commons com.planet.staccato.model.GeoJson and com.planet.staccato.model.ItemCollection
-
+	public StacItemCollection find(final String datetime) {
 		final String odataQueryUrl = buildPripQueryUrl(this.pripUrl, datetime);
 		LOG.debug("sending PRIP request: {}", odataQueryUrl);
 		final HttpHeaders httpHeaders = new HttpHeaders();
@@ -65,18 +64,20 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 		return mapResponse(responseEntity);
 	}
 
-	static List<String> mapResponse(final ResponseEntity<String> responseEntity) {
-		// TODO: check for status 200 and map, else return error
+	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity) {
+		// TODO: check for status 200 and containing "value", then map, else return error
 		if (null != responseEntity) {
 
 			final String responseBody = responseEntity.getBody();
 			if (null != responseBody) {
-				LOG.debug(String.format("PRIP response body: %s", responseBody.length() > 256 ? responseBody.substring(0, 252) + "..." : responseBody));
-				return Collections.singletonList(responseBody); // TODO: map result to GeoJson and return it
+				//LOG.debug(String.format("PRIP response body: %s", responseBody.length() > 256 ? responseBody.substring(0, 252) + "..." : responseBody));
+				final JSONObject jsonObject = new JSONObject(responseBody);
+				// TODO: check is odata and contains value
+				return PripToStacMapper.mapFromPripOdataJson(jsonObject);
 			}
 		}
 
-		return Collections.singletonList("{}");
+		return null;
 	}
 
 	static String buildPripQueryUrl(final URL pripUrl, final String datetime) {

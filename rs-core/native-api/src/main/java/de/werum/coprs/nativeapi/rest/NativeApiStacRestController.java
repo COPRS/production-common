@@ -2,8 +2,6 @@ package de.werum.coprs.nativeapi.rest;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
 import de.werum.coprs.nativeapi.service.NativeApiStacService;
 import de.werum.coprs.nativeapi.service.exception.NativeApiBadRequestException;
-import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 
 @CrossOrigin
 @RestController
@@ -37,7 +35,7 @@ public class NativeApiStacRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> handleStacItemSearch(
+	public ResponseEntity<StacItemCollection> handleStacItemSearch(
 			final HttpServletRequest request,
 			@RequestParam(value = "datetime", required = false) final String datetime) {
 
@@ -45,14 +43,13 @@ public class NativeApiStacRestController {
 		LOGGER.info("Received STAC item search request: /search?{}", queryParams);
 		// TODO: issue a bad request response if other than datetime query params are used as they are not supported yet
 
-		// TODO: change response type using GeoJSON, see staccato-commons com.planet.staccato.model.GeoJson and com.planet.staccato.model.ItemCollection
 		try {
 			if (null != datetime) {
 				final String decodedDatetimeStr = URLDecoder.decode(datetime, StandardCharsets.UTF_8.toString());
-				final List<String> result = this.nativeApiStacService.find(decodedDatetimeStr);
+				final StacItemCollection result = this.nativeApiStacService.find(decodedDatetimeStr);
 
-				if(CollectionUtil.isNotEmpty(result)) {
-					return ResponseEntity.ok(result.get(0));
+				if (null != result) {
+					return ResponseEntity.ok(result);
 				}
 			}
 		} catch (final NativeApiBadRequestException e) {
