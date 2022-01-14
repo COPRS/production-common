@@ -62,7 +62,7 @@ spec:
           privileged: false
       initContainers:
       - name: init-dav
-        image: registry.tools.s1pdgs.eu/anonymous/busybox:1.28
+        image: busybox:1.35
         command: ['sh', '-c', "mkdir -p /var/lib/dav/data/NOMINAL/NSG_/S1A /var/lib/dav/data/NOMINAL/NSG_/S1B /var/lib/dav/data/RETRANSFER/NSG_/S1A /var/lib/dav/data/RETRANSFER/NSG_/S1B && touch /var/lib/dav/DavLock && chown -R www-data:www-data /var/lib/dav" ]
         volumeMounts: 
         - name: webdavdatadir
