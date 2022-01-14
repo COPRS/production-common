@@ -70,9 +70,13 @@ public class PripToStacMapper {
 		stacItem.setProperty("start_datetime", contentDate.getString(PripOdataEntityProperties.Start.name()));
 		stacItem.setProperty("end_datetime", contentDate.getString(PripOdataEntityProperties.End.name()));
 
-		final List<String> dontInclude = Arrays.asList(PripOdataEntityProperties.Id.name() /* , PripOdataEntityProperties.Footprint.name() */);
+		final List<String> dontInclude = Arrays.asList(PripOdataEntityProperties.Id.name(), PripOdataEntityProperties.Footprint.name(),
+				PripOdataEntityProperties.Checksum.name(), PripOdataEntityProperties.ContentDate.name());
 		for (final String propertyKey : pripOdataJsonProduct.keySet()) {
 			if (!propertyKey.startsWith("@odata") && !dontInclude.contains(propertyKey)) {
+				// TODO: Checksum JSON Array nach properties mappen
+				// TODO: ContentDate  JSON object nach properties mappen
+				// TODO: Footprint JSON object nach properties mappen
 				stacItem.setProperty(propertyKey, pripOdataJsonProduct.get(propertyKey));
 			}
 		}
