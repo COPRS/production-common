@@ -59,17 +59,17 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 
 	@Override
 	public StacItemCollection find(final String datetime) {
-		final String odataQueryUrl = buildPripQueryUrl(this.internalPripUrl, datetime);
+		final String odataQueryUrl = buildPripQueryUrl(this.internalPripUrl, datetime, this.apiProperties.getIncludeAdditionalAttributes());
 		LOG.debug("sending PRIP request: {}", odataQueryUrl);
 		final HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
 		final ResponseEntity<String> responseEntity = this.restTemplate.exchange(odataQueryUrl, HttpMethod.GET, requestEntity, String.class);
 
-		return mapResponse(responseEntity, this.externalPripUrl);
+		return mapResponse(responseEntity, this.externalPripUrl, this.apiProperties.getIncludeAdditionalAttributes());
 	}
 
-	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity, final URI externalPripUrl) {
+	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity, final URI externalPripUrl, final boolean includeAdditionalAttributes) {
 		// TODO: check for status 200 and containing "value", then map, else return error
 		if (null != responseEntity) {
 
@@ -79,7 +79,7 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 				final JSONObject jsonObject = new JSONObject(responseBody);
 				// TODO: check is odata and contains value
 				try {
-					return PripToStacMapper.mapFromPripOdataJson(jsonObject, externalPripUrl);
+					return PripToStacMapper.mapFromPripOdataJson(jsonObject, externalPripUrl, includeAdditionalAttributes);
 				} catch (JSONException | URISyntaxException e) {
 					throw new NativeApiException("error mapping PRIP response to STAC item collection", e, HttpStatus.INTERNAL_SERVER_ERROR);
 				}
@@ -89,8 +89,14 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 		return null;
 	}
 
-	static String buildPripQueryUrl(final URL pripUrl, final String datetime) {
-		return String.format("%s%s%s", pripUrl, "/odata/v1/Products?", createPripFilterTerm(datetime));
+	static String buildPripQueryUrl(final URL pripUrl, final String datetime, final boolean includeAdditionalAttributes) {
+		String pripFilterUrl = String.format("%s%s%s", pripUrl, "/odata/v1/Products?", createPripFilterTerm(datetime));
+
+		if (includeAdditionalAttributes) {
+			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? "$expand=Attributes" : "&$expand=Attributes");
+		}
+
+		return pripFilterUrl;
 	}
 
 	static String createPripFilterTerm(final String datetime) {

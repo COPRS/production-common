@@ -26,6 +26,8 @@ public class NativeApiProperties {
 	private String externalPripHost;
 	private Integer externalPripPort;
 
+	private boolean includeAdditionalAttributes = true;
+
 	private List<AttributesOfMission> attributesOfMission = new LinkedList<>();
 
 	public static class AttributesOfMission {
@@ -156,6 +158,14 @@ public class NativeApiProperties {
 
 	public void setExternalPripPort(Integer externalPripPort) {
 		this.externalPripPort = externalPripPort;
+	}
+
+	public boolean getIncludeAdditionalAttributes() {
+		return this.includeAdditionalAttributes;
+	}
+
+	public void setIncludeAdditionalAttributes(boolean includeAdditionalAttributes) {
+		this.includeAdditionalAttributes = includeAdditionalAttributes;
 	}
 
 }

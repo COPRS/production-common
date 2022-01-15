@@ -283,3 +283,5 @@ nativeApi:
       protocol: http
       host: coprs.werum.de/prip/
       port: 80
+  stac:
+    includeAdditionalAttributes: true

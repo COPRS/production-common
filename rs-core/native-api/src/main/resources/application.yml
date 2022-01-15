@@ -62,6 +62,8 @@ native-api:
   external-prip-protocol: http
   external-prip-host: coprs.werum.de/prip/
   external-prip-port: 80
+  # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
+  include-additional-attributes: true
   
   attributes-of-mission:
   - mission-name: s1

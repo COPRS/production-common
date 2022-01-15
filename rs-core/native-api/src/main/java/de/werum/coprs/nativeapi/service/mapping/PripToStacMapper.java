@@ -1,14 +1,15 @@
 package de.werum.coprs.nativeapi.service.mapping;
 
+import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Attributes;
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Footprint;
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Id;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +30,7 @@ import org.springframework.http.MediaType;
 import de.werum.coprs.nativeapi.rest.model.Checksum;
 import de.werum.coprs.nativeapi.rest.model.ContentDate;
 import de.werum.coprs.nativeapi.rest.model.stac.GeoJsonBase.GeoJsonType;
+import de.werum.coprs.nativeapi.rest.model.stac.AdditionalAttributes;
 import de.werum.coprs.nativeapi.rest.model.stac.StacAsset;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItem;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
@@ -44,13 +46,17 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
  */
 public class PripToStacMapper {
 
-	public static StacItemCollection mapFromPripOdataJson(final JSONObject pripOdataJson, final URI externalPripUrl) throws JSONException, URISyntaxException {
+	static final List<String> ATTRIBUTES_COLLECTIONS = PripOdataEntityProperties.getAttributesCollectionProperties().stream()
+			.map(PripOdataEntityProperties::name).collect(Collectors.toList());
+
+	public static StacItemCollection mapFromPripOdataJson(final JSONObject pripOdataJson, final URI externalPripUrl,
+			final boolean includeAdditionalAttributes) throws JSONException, URISyntaxException {
 		if (null != pripOdataJson) {
 			final JSONArray pripOdataJsonProducts = pripOdataJson.getJSONArray("value");
 
 			final List<StacItem> items = new ArrayList<>();
 			for (int i = 0; i < pripOdataJsonProducts.length(); i++) {
-				items.add(mapFromPripOdataJsonProduct(pripOdataJsonProducts.getJSONObject(i), externalPripUrl));
+				items.add(mapFromPripOdataJsonProduct(pripOdataJsonProducts.getJSONObject(i), externalPripUrl, includeAdditionalAttributes));
 			}
 
 			final StacItemCollection itemCollection = new StacItemCollection();
@@ -62,7 +68,8 @@ public class PripToStacMapper {
 		return null;
 	}
 
-	public static StacItem mapFromPripOdataJsonProduct(final JSONObject pripOdataJsonProduct, final URI externalPripUrl) throws URISyntaxException {
+	public static StacItem mapFromPripOdataJsonProduct(final JSONObject pripOdataJsonProduct, final URI externalPripUrl,
+			final boolean includeAdditionalAttributes) throws URISyntaxException {
 		final StacItem stacItem = new StacItem();
 
 		// ID
@@ -87,57 +94,53 @@ public class PripToStacMapper {
 		final String contentDateEndStr = contentDateJson.getString(PripOdataEntityProperties.End.name());
 		stacItem.setProperty("end_datetime", contentDateEndStr);
 
-		final List<String> dontInclude = Arrays.asList(Id.name(), Footprint.name());
+		final List<String> dontInclude = new LinkedList<>();
+		dontInclude.addAll(Arrays.asList(Id.name(), Footprint.name())); // already included one level above as 'id' and 'geometry'
+		if (!includeAdditionalAttributes) {
+			dontInclude.addAll(ATTRIBUTES_COLLECTIONS);
+		}
+
 		for (final String propertyKey : pripOdataJsonProduct.keySet()) {
 			if (!propertyKey.startsWith("@odata") && !dontInclude.contains(propertyKey)) {
-				// handle complex attribute: Footprint
-				if (Footprint.name().equals(propertyKey)) {
-					final JSONObject footprintOdataJson = pripOdataJsonProduct.optJSONObject(propertyKey);
 
-					if (null != footprintOdataJson) {
-						stacItem.setProperty(propertyKey, asGeoJson(footprint));
-					} else {
-						stacItem.setProperty(propertyKey, null);
-					}
-					continue;
-				}
-				// handle complex attribute: ContentDate
-				if (PripOdataEntityProperties.ContentDate.name().equals(propertyKey)) {
-					if (null != contentDateStartStr || null != contentDateEndStr) {
-						final ContentDate contentDate = new ContentDate();
-						contentDate.setStart(contentDateStartStr);
-						contentDate.setEnd(contentDateEndStr);
-						stacItem.setProperty(propertyKey, contentDate);
-					} else {
-						stacItem.setProperty(propertyKey, null);
-					}
-					continue;
-				}
-				// handle complex attribute: Checksum[]
-				if (PripOdataEntityProperties.Checksum.name().equals(propertyKey)) {
-					final JSONArray checksumOdataJsonArray = pripOdataJsonProduct.optJSONArray(propertyKey);
-
-					if (null != checksumOdataJsonArray && checksumOdataJsonArray.length() > 0) {
-						final List<Checksum> checksums = new ArrayList<>();
-
-						for (int i = 0; i < checksumOdataJsonArray.length(); i++) {
-							final JSONObject checksumJson = checksumOdataJsonArray.getJSONObject(i);
-
-							final Checksum checksum = new Checksum();
-							checksum.setAlgorithm(checksumJson.getString(PripOdataEntityProperties.Algorithm.name()));
-							checksum.setValue(checksumJson.getString(PripOdataEntityProperties.Value.name()));
-							checksum.setDate(checksumJson.getString(PripOdataEntityProperties.ChecksumDate.name()));
-
-							checksums.add(checksum);
-						}
-
-						stacItem.setProperty(propertyKey, checksums.stream().toArray(Checksum[]::new));
-					}
-					continue;
+				final PripOdataEntityProperties attribute;
+				try {
+					attribute = PripOdataEntityProperties.valueOf(propertyKey);
+				} catch (final Exception e) {
+					continue; // ignore unknown attributes
 				}
 
-				// all other cases are (expected) to be simple attributes
-				stacItem.setProperty(propertyKey, pripOdataJsonProduct.get(propertyKey));
+				switch (attribute) {
+				case Id:
+				case Name:
+				case ContentType:
+				case ContentLength:
+				case PublicationDate:
+				case EvictionDate:
+				case ProductionType:
+					stacItem.setProperty(attribute.name(), pripOdataJsonProduct.get(propertyKey));
+					continue;
+				case Attributes:
+					continue; // it's an empty array
+				case StringAttributes:
+				case IntegerAttributes:
+				case DoubleAttributes:
+				case DateTimeOffsetAttributes:
+				case BooleanAttributes:
+					addAdditionalAttributes(stacItem, attribute, pripOdataJsonProduct.optJSONArray(propertyKey));
+					continue;
+				case Footprint:
+					setFootprint(stacItem, footprint);
+					continue;
+				case ContentDate:
+					setContentDate(stacItem, contentDateStartStr, contentDateEndStr);
+					continue;
+				case Checksum:
+					setChecksum(stacItem, pripOdataJsonProduct.optJSONArray(propertyKey));
+					continue;
+				default:
+					continue;
+				}
 			}
 		}
 
@@ -149,6 +152,81 @@ public class PripToStacMapper {
 		}
 
 		return stacItem;
+	}
+
+	private static void setFootprint(final StacItem item, final JSONObject footprintOdataJson) {
+		if (null != footprintOdataJson) {
+			item.setProperty(PripOdataEntityProperties.Footprint.name(), asGeoJson(footprintOdataJson));
+		} else {
+			item.setProperty(PripOdataEntityProperties.Footprint.name(), null);
+		}
+	}
+
+	private static void setContentDate(final StacItem item, final String contentDateStartStr, final String contentDateEndStr) {
+		if (null != contentDateStartStr || null != contentDateEndStr) {
+			final ContentDate contentDate = new ContentDate();
+			contentDate.setStart(contentDateStartStr);
+			contentDate.setEnd(contentDateEndStr);
+			item.setProperty(PripOdataEntityProperties.ContentDate.name(), contentDate);
+		} else {
+			item.setProperty(PripOdataEntityProperties.ContentDate.name(), null);
+		}
+	}
+
+	private static void setChecksum(final StacItem item, final JSONArray checksumOdataJsonArray) {
+		if (null != checksumOdataJsonArray && checksumOdataJsonArray.length() > 0) {
+			final List<Checksum> checksums = new ArrayList<>();
+
+			for (int i = 0; i < checksumOdataJsonArray.length(); i++) {
+				final JSONObject checksumJson = checksumOdataJsonArray.getJSONObject(i);
+
+				final Checksum checksum = new Checksum();
+				checksum.setAlgorithm(checksumJson.getString(PripOdataEntityProperties.Algorithm.name()));
+				checksum.setValue(checksumJson.getString(PripOdataEntityProperties.Value.name()));
+				checksum.setDate(checksumJson.getString(PripOdataEntityProperties.ChecksumDate.name()));
+
+				checksums.add(checksum);
+			}
+
+			item.setProperty(PripOdataEntityProperties.Checksum.name(), checksums.stream().toArray(Checksum[]::new));
+		}
+	}
+
+	private static void addAdditionalAttributes(final StacItem item, final PripOdataEntityProperties attribute,
+			final JSONArray attributesOdataJsonArray) {
+		if (Attributes != attribute && null != attributesOdataJsonArray
+				&& attributesOdataJsonArray.length() > 0) {
+
+			AdditionalAttributes additionalAttributes = item.getProperty(AdditionalAttributes.class.getSimpleName());
+			if (null == additionalAttributes) {
+				additionalAttributes = new AdditionalAttributes();
+				item.setProperty(AdditionalAttributes.class.getSimpleName(), additionalAttributes);
+			}
+
+			for (int i = 0; i < attributesOdataJsonArray.length(); i++) {
+				final JSONObject attributeJson = attributesOdataJsonArray.getJSONObject(i);
+
+				switch (attribute) {
+				case StringAttributes:
+					additionalAttributes.addStringAttribute(attributeJson.getString("Name"), attributeJson.getString("Value"));
+					continue;
+				case IntegerAttributes:
+					additionalAttributes.addIntegerAttribute(attributeJson.getString("Name"), attributeJson.getLong("Value"));
+					continue;
+				case DoubleAttributes:
+					additionalAttributes.addDoubleAttribute(attributeJson.getString("Name"), attributeJson.getDouble("Value"));
+					continue;
+				case DateTimeOffsetAttributes:
+					additionalAttributes.addDateAttribute(attributeJson.getString("Name"), attributeJson.getString("Value"));
+					continue;
+				case BooleanAttributes:
+					additionalAttributes.addBooleanAttribute(attributeJson.getString("Name"), attributeJson.getBoolean("Value"));
+					continue;
+				default:
+					continue;
+				}
+			}
+		}
 	}
 
 	private static StacLink createSelfLink(final URI externalPripUrl, final String productId, final String filename) throws URISyntaxException {
