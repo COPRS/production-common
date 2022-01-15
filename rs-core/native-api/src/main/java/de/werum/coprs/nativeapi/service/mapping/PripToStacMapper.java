@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.geojson.Crs;
@@ -35,6 +36,7 @@ import de.werum.coprs.nativeapi.rest.model.stac.StacAsset;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItem;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
 import de.werum.coprs.nativeapi.rest.model.stac.StacLink;
+import esa.s1pdgs.cpoc.common.utils.ArrayUtil;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
@@ -271,43 +273,42 @@ public class PripToStacMapper {
 
 			if (GeoJsonType.Polygon.name().equalsIgnoreCase(type)) {
 				final JSONArray coordinates = pripOdataJsonFootprint.getJSONArray("coordinates");
-				final List<LngLatAlt> polygonCoordinates = new ArrayList<>();
-
-				for (int i = 0; i < coordinates.length(); i++) {
-					final JSONArray polygonArray = coordinates.getJSONArray(i);
-
-					for (int j = 0; j < polygonArray.length(); j++) {
-						final JSONArray polygonPoints = polygonArray.getJSONArray(j);
-
-						final double longitude = polygonPoints.getDouble(0);
-						final double latitude = polygonPoints.getDouble(1);
-
-						polygonCoordinates.add(new LngLatAlt(longitude, latitude));
-					}
-				}
+				final List<LngLatAlt> polygonCoordinates = getCoordinatesFromArrayOfArrays(coordinates);
 
 				if (!polygonCoordinates.isEmpty()) {
 					final Polygon polygon = new Polygon(polygonCoordinates);
 
-					final JSONObject crsObject = pripOdataJsonFootprint.optJSONObject("crs");
-					if (null != crsObject) {
-						final Crs crs = new Crs();
-						crs.setType(CrsType.valueOf(crsObject.getString("type")));
-
-						final JSONObject CrsProperties = crsObject.getJSONObject("properties");
-						final Map<String,Object> crsPropertiesMap = new HashMap<>();
-
-						CollectionUtil.nullToEmpty(CrsProperties.keySet())
-						.forEach(crsPropKey -> crsPropertiesMap.put(crsPropKey, CrsProperties.get(crsPropKey)));
-
-						if (!crsPropertiesMap.isEmpty()) {
-							crs.setProperties(crsPropertiesMap);
-						}
-
-						polygon.setCrs(crs);
+					final Optional<Crs> oCrs = extractCrs(pripOdataJsonFootprint);
+					if (oCrs.isPresent()) {
+						polygon.setCrs(oCrs.get());
 					}
-
 					return polygon;
+				}
+			} else if (GeoJsonType.LineString.name().equalsIgnoreCase(type)) {
+				final JSONArray coordinates = pripOdataJsonFootprint.getJSONArray("coordinates");
+				final LngLatAlt[] coordinatesArray = getCoordinatesFromArray(coordinates).stream().toArray(LngLatAlt[]::new);
+
+				if (ArrayUtil.isNotEmpty(coordinatesArray)) {
+					final LineString lineString = new LineString(coordinatesArray);
+
+					final Optional<Crs> oCrs = extractCrs(pripOdataJsonFootprint);
+					if (oCrs.isPresent()) {
+						lineString.setCrs(oCrs.get());
+					}
+					return lineString;
+				}
+			} else if (GeoJsonType.Point.name().equalsIgnoreCase(type)) {
+				final JSONArray pointArray = pripOdataJsonFootprint.getJSONArray("coordinates");
+				final LngLatAlt pointCoordinates = createCoordinate(pointArray);
+
+				if (null != pointCoordinates) {
+					final Point point = new Point(pointCoordinates);
+
+					final Optional<Crs> oCrs = extractCrs(pripOdataJsonFootprint);
+					if (oCrs.isPresent()) {
+						point.setCrs(oCrs.get());
+					}
+					return point;
 				}
 			} else {
 				throw new IllegalArgumentException(String.format("GeoJSON mapping not implemented for type: %s", type));
@@ -315,6 +316,62 @@ public class PripToStacMapper {
 		}
 
 		return null;
+	}
+
+	private static Optional<Crs> extractCrs(final JSONObject pripOdataJsonFootprint) {
+		final JSONObject crsObject = pripOdataJsonFootprint.optJSONObject("crs");
+
+		if (null != crsObject) {
+			final Crs crs = new Crs();
+			crs.setType(CrsType.valueOf(crsObject.getString("type")));
+
+			final JSONObject CrsProperties = crsObject.getJSONObject("properties");
+			final Map<String, Object> crsPropertiesMap = new HashMap<>();
+
+			CollectionUtil.nullToEmpty(CrsProperties.keySet()).forEach(crsPropKey -> crsPropertiesMap.put(crsPropKey, CrsProperties.get(crsPropKey)));
+
+			if (!crsPropertiesMap.isEmpty()) {
+				crs.setProperties(crsPropertiesMap);
+			}
+
+			return Optional.of(crs);
+		}
+
+		return Optional.empty();
+	}
+
+	private static List<LngLatAlt> getCoordinatesFromArrayOfArrays(final JSONArray coordinatesArrayOfArray) {
+		final List<LngLatAlt> coordinates = new ArrayList<>();
+
+		if (null != coordinatesArrayOfArray && coordinatesArrayOfArray.length() > 0) {
+			for (int i = 0; i < coordinatesArrayOfArray.length(); i++) {
+				final JSONArray coordinatesArray = coordinatesArrayOfArray.getJSONArray(i);
+
+				coordinates.addAll(getCoordinatesFromArray(coordinatesArray));
+			}
+		}
+
+		return coordinates;
+	}
+
+	private static List<LngLatAlt> getCoordinatesFromArray(final JSONArray coordinatesArray) {
+		final List<LngLatAlt> coordinates = new ArrayList<>();
+
+		if (null != coordinatesArray && coordinatesArray.length() > 0) {
+			for (int j = 0; j < coordinatesArray.length(); j++) {
+				final JSONArray point = coordinatesArray.getJSONArray(j);
+				coordinates.add(createCoordinate(point));
+			}
+		}
+
+		return coordinates;
+	}
+
+	private static LngLatAlt createCoordinate(final JSONArray point) {
+		final double longitude = point.getDouble(0);
+		final double latitude = point.getDouble(1);
+
+		return new LngLatAlt(longitude, latitude);
 	}
 
 	private static double[] getBoundingBox(final GeoJsonObject geometry) {
