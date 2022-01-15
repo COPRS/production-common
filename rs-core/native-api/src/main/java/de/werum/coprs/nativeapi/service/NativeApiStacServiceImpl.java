@@ -69,15 +69,21 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 		return mapResponse(responseEntity, this.externalPripUrl, this.apiProperties.getIncludeAdditionalAttributes());
 	}
 
-	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity, final URI externalPripUrl, final boolean includeAdditionalAttributes) {
-		// TODO: check for status 200 and containing "value", then map, else return error
+	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity, final URI externalPripUrl,
+			final boolean includeAdditionalAttributes) {
 		if (null != responseEntity) {
+			if (HttpStatus.OK != responseEntity.getStatusCode()) {
+				throw new NativeApiException(String.format("PRIP could not successfully be queried: %s", responseEntity.getBody()),
+						responseEntity.getStatusCode());
+			}
 
 			final String responseBody = responseEntity.getBody();
 			if (null != responseBody) {
-				//LOG.debug(String.format("PRIP response body: %s", responseBody.length() > 256 ? responseBody.substring(0, 252) + "..." : responseBody));
 				final JSONObject jsonObject = new JSONObject(responseBody);
-				// TODO: check is odata and contains value
+
+				if (null != jsonObject && !jsonObject.has("value")) {
+					throw new NativeApiException("missing 'value' property in PRIP response ", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
 				try {
 					return PripToStacMapper.mapFromPripOdataJson(jsonObject, externalPripUrl, includeAdditionalAttributes);
 				} catch (JSONException | URISyntaxException e) {
