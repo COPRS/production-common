@@ -5,6 +5,8 @@ import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Start;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -13,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -43,45 +46,63 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 
 	private final NativeApiProperties apiProperties;
 	private final RestTemplate restTemplate;
-	private final URL pripUrl;
+	private final URL internalPripUrl;
+	private final URI externalPripUrl;
 
 	@Autowired
 	public NativeApiStacServiceImpl(final NativeApiProperties apiProperties, final RestTemplate restTemplate) {
 		this.apiProperties = apiProperties;
 		this.restTemplate = restTemplate;
-		this.pripUrl = buildPripUrl(apiProperties);
+		this.internalPripUrl = buildInternalPripUrl(apiProperties);
+		this.externalPripUrl = buildExternalPripUrl(apiProperties);
 	}
 
 	@Override
 	public StacItemCollection find(final String datetime) {
-		final String odataQueryUrl = buildPripQueryUrl(this.pripUrl, datetime);
+		final String odataQueryUrl = buildPripQueryUrl(this.internalPripUrl, datetime, this.apiProperties.getIncludeAdditionalAttributes());
 		LOG.debug("sending PRIP request: {}", odataQueryUrl);
 		final HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 		final HttpEntity<String> requestEntity = new HttpEntity<>(null, httpHeaders);
 		final ResponseEntity<String> responseEntity = this.restTemplate.exchange(odataQueryUrl, HttpMethod.GET, requestEntity, String.class);
 
-		return mapResponse(responseEntity);
+		return mapResponse(responseEntity, this.externalPripUrl, this.apiProperties.getIncludeAdditionalAttributes());
 	}
 
-	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity) {
-		// TODO: check for status 200 and containing "value", then map, else return error
+	static StacItemCollection mapResponse(final ResponseEntity<String> responseEntity, final URI externalPripUrl,
+			final boolean includeAdditionalAttributes) {
 		if (null != responseEntity) {
+			if (HttpStatus.OK != responseEntity.getStatusCode()) {
+				throw new NativeApiException(String.format("PRIP could not successfully be queried: %s", responseEntity.getBody()),
+						responseEntity.getStatusCode());
+			}
 
 			final String responseBody = responseEntity.getBody();
 			if (null != responseBody) {
-				//LOG.debug(String.format("PRIP response body: %s", responseBody.length() > 256 ? responseBody.substring(0, 252) + "..." : responseBody));
 				final JSONObject jsonObject = new JSONObject(responseBody);
-				// TODO: check is odata and contains value
-				return PripToStacMapper.mapFromPripOdataJson(jsonObject);
+
+				if (null != jsonObject && !jsonObject.has("value")) {
+					throw new NativeApiException("missing 'value' property in PRIP response ", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				try {
+					return PripToStacMapper.mapFromPripOdataJson(jsonObject, externalPripUrl, includeAdditionalAttributes);
+				} catch (JSONException | URISyntaxException e) {
+					throw new NativeApiException("error mapping PRIP response to STAC item collection", e, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
 			}
 		}
 
 		return null;
 	}
 
-	static String buildPripQueryUrl(final URL pripUrl, final String datetime) {
-		return String.format("%s%s%s", pripUrl, "/odata/v1/Products?", createPripFilterTerm(datetime));
+	static String buildPripQueryUrl(final URL pripUrl, final String datetime, final boolean includeAdditionalAttributes) {
+		String pripFilterUrl = String.format("%s%s%s", pripUrl, "/odata/v1/Products?", createPripFilterTerm(datetime));
+
+		if (includeAdditionalAttributes) {
+			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? "$expand=Attributes" : "&$expand=Attributes");
+		}
+
+		return pripFilterUrl;
 	}
 
 	static String createPripFilterTerm(final String datetime) {
@@ -96,7 +117,7 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 
 	static String createDatetimeOdataFilterTerm(final String datetimeStr) {
 		if (StringUtil.isNotBlank(datetimeStr)) {
-			final String[] datetimeStrings = datetimeStr.toUpperCase().split("/");
+			String[] datetimeStrings = datetimeStr.toUpperCase().split("/");
 
 			if (datetimeStrings.length == 1) {
 				final String singleDatetimeStr = datetimeStrings[0];
@@ -105,11 +126,13 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 					throw new NativeApiBadRequestException(String.format("invalid datetime format, single value must be a datetime value: %s", datetimeStr));
 				}
 
-				final String singleOdataDatetime = convertDatetimeToOdataFormat(singleDatetimeStr);
-				// ContentDate/Start le 2021-12-21T12:21:12.000Z and ContentDate/End ge 2021-12-21T12:21:12.000Z
-				return String.format("%s/%s le %s and %s/%s ge %s", ContentDate, Start, singleOdataDatetime, ContentDate, End, singleOdataDatetime);
-
-			} else if (datetimeStrings.length == 2) {
+				if (datetimeStr.endsWith("/")) {
+					datetimeStrings = new String[] { singleDatetimeStr, ".." };
+				} else if (datetimeStr.startsWith("/")) {
+					datetimeStrings = new String[] { "..", singleDatetimeStr };
+				}
+			}
+			if (datetimeStrings.length == 2) {
 				final String datetimeLowerBoundaryStr = datetimeStrings[0];
 				final String datetimeUpperBoundaryStr = datetimeStrings[1];
 				final boolean openStart = "".equals(datetimeLowerBoundaryStr) || "..".equals(datetimeLowerBoundaryStr);
@@ -178,17 +201,34 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 		return formatToOdataFormat(convertDatetime(rfc3339DatetimeStr));
 	}
 
-	static URL buildPripUrl(final NativeApiProperties apiProperties) {
+	static URL buildInternalPripUrl(final NativeApiProperties apiProperties) {
+		return buildPripUrl(apiProperties.getPripProtocol(), apiProperties.getPripHost(), apiProperties.getPripPort());
+	}
+
+	static URI buildExternalPripUrl(final NativeApiProperties apiProperties) {
+		try {
+			return buildPripUrl(Objects.requireNonNull(apiProperties).getExternalPripProtocol(), apiProperties.getExternalPripHost(),
+					apiProperties.getExternalPripPort()).toURI();
+		} catch (final Exception e) {
+			final String msg = String.format(
+					"could not initialize PRIP URL for external interface, metadata/download links will not be added to responses [protocol (%s), host (%s) and port (%s)]: %s",
+					apiProperties.getExternalPripProtocol(), apiProperties.getExternalPripHost(), apiProperties.getExternalPripPort(), e.getMessage());
+			LOG.warn(msg);
+			return null;
+		}
+	}
+
+	static URL buildPripUrl(final String protocol, final String host, final int port) {
 		try {
 			return UriComponentsBuilder
 					.fromHttpUrl(String.format("%s://%s:%d",
-							Objects.requireNonNull(apiProperties).getPripProtocol(),
-							apiProperties.getPripHost(),
-							apiProperties.getPripPort()))
+							Objects.requireNonNull(protocol),
+							Objects.requireNonNull(host),
+							port))
 					.build().toUri().toURL();
 		} catch (final MalformedURLException e) {
-			final String msg = String.format("could not initialize PRIP URL for internal interface; protocol (%s), host (%s) and port (%s) must be valid: %s",
-					apiProperties.getPripProtocol(), apiProperties.getPripHost(), apiProperties.getPripPort(), e.getMessage());
+			final String msg = String.format("could not initialize PRIP URL; protocol (%s), host (%s) and port (%s) must be valid: %s",
+					protocol, host, port, e.getMessage());
 			throw new IllegalArgumentException(msg, e);
 		}
 	}

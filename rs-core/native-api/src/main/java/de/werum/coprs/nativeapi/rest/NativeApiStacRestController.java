@@ -2,6 +2,7 @@ package de.werum.coprs.nativeapi.rest;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +42,15 @@ public class NativeApiStacRestController {
 
 		final String queryParams = request.getQueryString() == null ? "" : request.getQueryString();
 		LOGGER.info("Received STAC item search request: /search?{}", queryParams);
-		// TODO: issue a bad request response if other than datetime query params are used as they are not supported yet
+
+		final Enumeration<String> parameterNames = request.getParameterNames();
+		while (parameterNames.hasMoreElements()) {
+			final String paramName = parameterNames.nextElement();
+
+			if (!"datetime".equalsIgnoreCase(paramName)) {
+				throw new NativeApiBadRequestException(String.format("no other parameters as 'datetime' supported, but was '%s'", paramName));
+			}
+		}
 
 		try {
 			if (null != datetime) {
