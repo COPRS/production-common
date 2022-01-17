@@ -88,5 +88,7 @@
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-validation</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-xbip-client</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-xml-tools</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.coprs</groupId><artifactId>coprs-native-api</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.coprs</groupId><artifactId>coprs-ddip-frontend</artifactId><version>${project.version}</version></dependency>
 	</dependencies>
 </project>
