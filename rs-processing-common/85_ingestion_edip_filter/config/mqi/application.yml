@@ -2,7 +2,7 @@ spring:
   main:
     banner-mode: "off"
   application:
-    name: s1pdgs-mqi-ingestion-edip-pedc
+    name: s1pdgs-mqi-ingestion-edip-filter
     
 logging:
   config: ${log4j_config:log/log4j2.yml}
@@ -14,12 +14,12 @@ kafka:
   # Hostname
   hostname: ${HOSTNAME}
   # ID to pass to the server when making
-  client-id: ingestion-edip-worker-mqi
+  client-id: ingestion-edip-filter-mqi
   # Topic name for the errors
   error-topic: ${kafka_topic_errors}
   consumer:
     # Unique string that identifies the consumer group to which this consumer belongs
-    group-id: ingestion-edip
+    group-id: ingestion-edip-filter
     # Maximum number of records returned in a single call to poll().
     max-poll-records: 1
     # Delay between two polls
@@ -52,18 +52,8 @@ application:
         enable: true
         # List of topics with priority
         topics-with-priority:
-          t-pdgs-filtered-ingestion-jobs-edip-pedc-nominal: 1
-      publication:
-        # Dis/Enabled publication for this category
-        enable: false
-        routing-file:
-    ingestion-event:
-      consumption:
-        # Dis/Enabled consumption for this category
-        enable: false
-        # List of topics with priority
-        topics-with-priority:
-          unknown: 0
+          t-pdgs-ingestion-jobs-edip-pedc-nominal: 1
+          t-pdgs-ingestion-jobs-edip-bedc-retransfer: 1
       publication:
         # Dis/Enabled publication for this category
         enable: true
@@ -88,4 +78,4 @@ persistence:
   tempo-retry-ms: 1000
   # Connection to other app
   other-app:
-    suffix-uri: .s1pro-ingestion-edip-pedc-svc
+    suffix-uri: .s1pro-ingestion-edip-filter-svc

@@ -52,8 +52,7 @@ application:
         enable: true
         # List of topics with priority
         topics-with-priority:
-          t-pdgs-ingestion-jobs-edip-bedc-nominal: 1
-          t-pdgs-ingestion-jobs-edip-bedc-retransfer: 1
+          t-pdgs-filtered-ingestion-jobs-edip-bedc-retransfer: 1
       publication:
         # Dis/Enabled publication for this category
         enable: false

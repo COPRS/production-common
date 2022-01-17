@@ -31,10 +31,10 @@ t-pdgs-ingestion-jobs-xbip-retransfer                    5	259200000
 t-pdgs-filtered-ingestion-jobs-xbip-nominal              5	259200000
 t-pdgs-filtered-ingestion-jobs-xbip-retransfer           5	259200000
 t-pdgs-ingestion-jobs-auxip-nominal                      5	259200000
-t-pdgs-ingestion-jobs-edip-pedc-nominal                  6	259200000
-t-pdgs-ingestion-jobs-edip-pedc-retransfer               6	259200000
-t-pdgs-ingestion-jobs-edip-bedc-nominal                  6	259200000
-t-pdgs-ingestion-jobs-edip-bedc-retransfer               6	259200000
+t-pdgs-ingestion-jobs-edip-pedc-nominal                  2  259200000
+t-pdgs-ingestion-jobs-edip-bedc-retransfer               2  259200000
+t-pdgs-filtered-ingestion-jobs-edip-pedc-nominal         2  259200000
+t-pdgs-filtered-ingestion-jobs-edip-bedc-retransfer      2  259200000
 t-pdgs-contingency-ingestion-jobs                        2      259200000
 t-pdgs-plan-and-report-ingestion-jobs                    2	259200000
 t-pdgs-qcss-ingestion-jobs                               2      259200000
