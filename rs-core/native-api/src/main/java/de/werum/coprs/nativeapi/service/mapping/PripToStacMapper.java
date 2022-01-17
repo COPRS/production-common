@@ -28,10 +28,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.MediaType;
 
-import de.werum.coprs.nativeapi.rest.model.Checksum;
-import de.werum.coprs.nativeapi.rest.model.ContentDate;
 import de.werum.coprs.nativeapi.rest.model.stac.GeoJsonBase.GeoJsonType;
 import de.werum.coprs.nativeapi.rest.model.stac.AdditionalAttributes;
+import de.werum.coprs.nativeapi.rest.model.stac.Checksum;
+import de.werum.coprs.nativeapi.rest.model.stac.ContentDate;
 import de.werum.coprs.nativeapi.rest.model.stac.StacAsset;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItem;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
