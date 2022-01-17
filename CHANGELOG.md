@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-183, RS-170: Allowing to specify a configuration branch different to the software branch for rs_init
 - RS-152: Mock for XBIP and EDIP had been pushed to repository under rs-testing
 - RS-159: Documentation updated on where to use rs_init
+- RS-182: Modifying native api service to allow datetime queries using STAC API
 
 ### Changed
 - N/A
