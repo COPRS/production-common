@@ -1,10 +1,5 @@
 package de.werum.coprs.nativeapi.config;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +11,6 @@ public class NativeApiProperties {
 
 	private String majorVersion;
 	private String version;
-	private Long downloadUrlExpirationTimeInSeconds = 600L;
 
 	private String pripProtocol;
 	private String pripHost;
@@ -27,58 +21,6 @@ public class NativeApiProperties {
 	private Integer externalPripPort;
 
 	private boolean includeAdditionalAttributes = true;
-
-	private List<AttributesOfMission> attributesOfMission = new LinkedList<>();
-
-	public static class AttributesOfMission {
-		private String missionName;
-		private List<String> baseAttributes = new LinkedList<>();
-		private List<AttributesOfProductType> attributesOfProductType = new LinkedList<>();
-
-		public String getMissionName() {
-			return this.missionName;
-		}
-
-		public void setMissionName(String missionName) {
-			this.missionName = missionName;
-		}
-
-		public List<AttributesOfProductType> getAttributesOfProductType() {
-			return this.attributesOfProductType;
-		}
-
-		public void setAttributesOfProductType(List<AttributesOfProductType> attributesOfProductType) {
-			this.attributesOfProductType = attributesOfProductType;
-		}
-
-		public List<String> getBaseAttributes() {
-			return this.baseAttributes;
-		}
-
-		public void setBaseAttributes(List<String> baseAttributes) {
-			this.baseAttributes = baseAttributes;
-		}
-	}
-
-	public static class AttributesOfProductType {
-		private String productType;
-		private Map<String, String> attributes = new LinkedHashMap<>();
-
-		public String getProductType() {
-			return this.productType;
-		}
-		public void setProductType(String productType) {
-			this.productType = productType;
-		}
-
-		public Map<String, String> getAttributes() {
-			return this.attributes;
-		}
-
-		public void setAttributes(Map<String, String> attributes) {
-			this.attributes = attributes;
-		}
-	}
 
 	public String getMajorVersion() {
 		return this.majorVersion;
@@ -94,22 +36,6 @@ public class NativeApiProperties {
 
 	public void setVersion(final String version) {
 		this.version = version;
-	}
-
-	public List<AttributesOfMission> getAttributesOfMission() {
-		return this.attributesOfMission;
-	}
-
-	public void setAttributesOfMission(final List<AttributesOfMission> attributesOfMission) {
-		this.attributesOfMission = attributesOfMission;
-	}
-
-	public Long getDownloadUrlExpirationTimeInSeconds() {
-		return this.downloadUrlExpirationTimeInSeconds;
-	}
-
-	public void setDownloadUrlExpirationTimeInSeconds(final Long downloadUrlExpirationTimeInSeconds) {
-		this.downloadUrlExpirationTimeInSeconds = downloadUrlExpirationTimeInSeconds;
 	}
 
 	public String getPripProtocol() {

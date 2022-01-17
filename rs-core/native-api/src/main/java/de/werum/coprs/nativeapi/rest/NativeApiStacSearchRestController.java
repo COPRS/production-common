@@ -23,15 +23,15 @@ import de.werum.coprs.nativeapi.service.exception.NativeApiBadRequestException;
 
 @CrossOrigin
 @RestController
-@RequestMapping("search")
-public class NativeApiStacRestController {
+@RequestMapping("stac/search")
+public class NativeApiStacSearchRestController {
 
-	public static final Logger LOGGER = LogManager.getLogger(NativeApiStacRestController.class);
+	public static final Logger LOGGER = LogManager.getLogger(NativeApiStacSearchRestController.class);
 
 	public final NativeApiStacService nativeApiStacService;
 
 	@Autowired
-	public NativeApiStacRestController(final NativeApiStacService nativeApiStacService) {
+	public NativeApiStacSearchRestController(final NativeApiStacService nativeApiStacService) {
 		this.nativeApiStacService = nativeApiStacService;
 	}
 

@@ -1,18 +1,13 @@
-package de.werum.coprs.nativeapi.rest.model;
+package de.werum.coprs.nativeapi.rest.model.stac;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
-@Schema(name = "ContentDate", type = "object", description = "object containing the start and end dates of the product")
 public class ContentDate {
 
 	@JsonProperty("Start")
-	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the start date and time of the product", pattern = "YYYY-MM-DDThh:mm:ss.sssZ")
 	private String start;
 
 	@JsonProperty("End")
-	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the end date and time of the product", pattern = "YYYY-MM-DDThh:mm:ss.sssZ")
 	private String end;
 
 	@Override

@@ -1,22 +1,16 @@
-package de.werum.coprs.nativeapi.rest.model;
+package de.werum.coprs.nativeapi.rest.model.stac;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
-@Schema(name = "Checksum", type = "object", description = "checksum object containing the checksum value for the product file")
 public class Checksum {
 
 	@JsonProperty("Algorithm")
-	@Schema(example = "MD5", description = "the hash function used for the calculation of the checksum value")
 	private String algorithm;
 
 	@JsonProperty("Value")
-	@Schema(example = "71f920fa275127a7b60fa4d4d41432a3", description = "the checksum value for the product file")
 	private String value;
 
 	@JsonProperty("ChecksumDate")
-	@Schema(example = "2021-09-09T18:00:00.000Z", description = "the date and time the checksum was calculated", pattern = "YYYY-MM-DDThh:mm:ss.sssZ")
 	private String date;
 
 	@Override
