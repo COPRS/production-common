@@ -68,6 +68,12 @@
 		</route_to>
 	</default_route>
 	<default_route description="default route">
+		<family>S3_AUX_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-publishing-jobs</topic>
+		</route_to>
+	</default_route>
+	<default_route description="default route">
 		<family>S3_GRANULES_ZIP</family>
 		<route_to>
 			<topic>t-pdgs-publishing-jobs</topic>

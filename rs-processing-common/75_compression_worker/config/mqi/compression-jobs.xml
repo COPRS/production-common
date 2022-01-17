@@ -305,6 +305,14 @@
 			<topic>t-pdgs-compression-events</topic>
 		</route_to>
 	</route>
+	
+    <route description="route for S3_AUXILIARY_FILE compression">
+		<input_key>t-pdgs-compression-jobs-nrt</input_key>
+		<output_key>S3_AUX_ZIP</output_key>
+		<route_to>
+			<topic>t-pdgs-compression-events</topic>
+		</route_to>
+	</route>
 
 	<route description="route for S3_GRANULES compression">
 		<input_key>t-pdgs-compression-jobs-nrt</input_key>
