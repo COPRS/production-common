@@ -281,7 +281,7 @@ nativeApi:
       port: 8080
     external:
       protocol: http
-      host: coprs.werum.de/prip/
+      host: coprs.werum.de/prip/odata/v1
       port: 80
   stac:
     includeAdditionalAttributes: true
