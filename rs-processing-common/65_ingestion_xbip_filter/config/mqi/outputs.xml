@@ -12,21 +12,7 @@
 		<input_key>t-pdgs-ingestion-jobs-xbip-retransfer</input_key>
 		<output_key>SESSION_RETRANSFER</output_key>
 		<route_to>
-			<topic>t-pdgs-filtered-ingestion-jobs-xbip-nominal</topic>
-		</route_to>
-	</route>
-    <route description="route for EDRS_SESSION products">
-		<input_key>t-pdgs-ingestion-jobs-xbip-nominal</input_key>
-		<output_key>INVALID</output_key>
-		<route_to>
-			<topic>t-pdgs-filtered-ingestion-jobs-xbip-nominal</topic>
-		</route_to>
-	</route>
-	<route description="route for EDRS_SESSION products">
-		<input_key>t-pdgs-ingestion-jobs-xbip-retransfer</input_key>
-		<output_key>INVALID</output_key>
-		<route_to>
-			<topic>t-pdgs-filtered-ingestion-jobs-xbip-nominal</topic>
+			<topic>t-pdgs-filtered-ingestion-jobs-xbip-retransfer</topic>
 		</route_to>
 	</route>
 	<!-- S3 routing -->
@@ -41,21 +27,7 @@
 		<input_key>t-pdgs-ingestion-jobs-s3-xbip-retransfer</input_key>
 		<output_key>SESSION_RETRANSFER</output_key>
 		<route_to>
-			<topic>t-pdgs-filtered-ingestion-jobs-s3-xbip-nominal</topic>
-		</route_to>
-	</route>
-    <route description="route for EDRS_SESSION products">
-		<input_key>t-pdgs-ingestion-jobs-s3-xbip-nominal</input_key>
-		<output_key>INVALID</output_key>
-		<route_to>
-			<topic>t-pdgs-filtered-ingestion-jobs-s3-xbip-nominal</topic>
-		</route_to>
-	</route>
-	<route description="route for EDRS_SESSION products">
-		<input_key>t-pdgs-ingestion-jobs-s3-xbip-retransfer</input_key>
-		<output_key>INVALID</output_key>
-		<route_to>
-			<topic>t-pdgs-filtered-ingestion-jobs-s3-xbip-nominal</topic>
+			<topic>t-pdgs-filtered-ingestion-jobs-s3-xbip-retransfer</topic>
 		</route_to>
 	</route>
 </routing>

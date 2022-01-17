@@ -2,7 +2,7 @@ spring:
   main:
     banner-mode: "off"
   application:
-    name: s1pdgs-ingestion-xbip-worker
+    name: s1pdgs-ingestion-xbip-filter
 
 # Logging config
 logging:
