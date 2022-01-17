@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-182: Modifying native api service to allow datetime queries using STAC API
 
 ### Changed
-- N/A
+- RS-XX: Removed s1pro-env-scale.sh as it is not used anymore. Use replicaCount.yaml from template folder to setup the amount of replicas instead
 
 ### Removed
 - N/A
