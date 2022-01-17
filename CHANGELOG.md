@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-rc1] - 2022-01-18
+### Added
+- RS-150: S1 L0 AIOP/ASP containers with real IPFs are build
+- RS-151: S3 ACQ containers with real IPFs are build
+- RS-156: S3 L0 containers with real IPFs are build
+- RS-205: Data Lifecycle Manager had been migrated from S1PRO
+- RS-108: Amount of detected security incidents was decreased
+- RS-200: S3 footprints are now extracted correctly and propagated to the PRIP
+- RS-144: Adding interface query list support in DDIP
+- RS-183, RS-170: Allowing to specify a configuration branch different to the software branch for rs_init
+- RS-152: Mock for XBIP and EDIP had been pushed to repository under rs-testing
+- RS-159: Documentation updated on where to use rs_init
+
+### Changed
+- N/A
+
+### Removed
+- N/A
+
+
 ## [0.2.0-rc1] - 2021-12-15
 ### Added
 - RS-101: Filtering solution for S1 and S3 chunks at ingestion
