@@ -235,7 +235,7 @@ public class PripToStacMapper {
 		final StacLink link = new StacLink();
 
 		final URI pripProductMetadataUrl = Objects.requireNonNull(externalPripUrl, "cannot create metadata link without external PRIP URL")
-				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create metadata link") + ")");
+				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create metadata link") + ")?$format=JSON");
 		link.setHref(pripProductMetadataUrl.toString());
 		link.setType(MediaType.APPLICATION_JSON_VALUE);
 		link.setRel("self");
