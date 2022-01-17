@@ -60,7 +60,7 @@ native-api:
   prip-port: 8080
   # configuration to create PRIP metadata and download links that are externaly accessible
   external-prip-protocol: http
-  external-prip-host: coprs.werum.de/prip/odata/v1
+  external-prip-host: coprs.werum.de/prip/odata/v1/
   external-prip-port: 80
   # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
   include-additional-attributes: true

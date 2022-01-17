@@ -117,7 +117,7 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 
 	static String createDatetimeOdataFilterTerm(final String datetimeStr) {
 		if (StringUtil.isNotBlank(datetimeStr)) {
-			final String[] datetimeStrings = datetimeStr.toUpperCase().split("/");
+			String[] datetimeStrings = datetimeStr.toUpperCase().split("/");
 
 			if (datetimeStrings.length == 1) {
 				final String singleDatetimeStr = datetimeStrings[0];
@@ -126,11 +126,13 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 					throw new NativeApiBadRequestException(String.format("invalid datetime format, single value must be a datetime value: %s", datetimeStr));
 				}
 
-				final String singleOdataDatetime = convertDatetimeToOdataFormat(singleDatetimeStr);
-				// ContentDate/Start le 2021-12-21T12:21:12.000Z and ContentDate/End ge 2021-12-21T12:21:12.000Z
-				return String.format("%s/%s le %s and %s/%s ge %s", ContentDate, Start, singleOdataDatetime, ContentDate, End, singleOdataDatetime);
-
-			} else if (datetimeStrings.length == 2) {
+				if (datetimeStr.endsWith("/")) {
+					datetimeStrings = new String[] { singleDatetimeStr, ".." };
+				} else if (datetimeStr.startsWith("/")) {
+					datetimeStrings = new String[] { "..", singleDatetimeStr };
+				}
+			}
+			if (datetimeStrings.length == 2) {
 				final String datetimeLowerBoundaryStr = datetimeStrings[0];
 				final String datetimeUpperBoundaryStr = datetimeStrings[1];
 				final boolean openStart = "".equals(datetimeLowerBoundaryStr) || "..".equals(datetimeLowerBoundaryStr);
