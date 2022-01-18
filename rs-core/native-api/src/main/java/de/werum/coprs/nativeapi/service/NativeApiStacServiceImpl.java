@@ -130,6 +130,8 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 					datetimeStrings = new String[] { singleDatetimeStr, ".." };
 				} else if (datetimeStr.startsWith("/")) {
 					datetimeStrings = new String[] { "..", singleDatetimeStr };
+				} else {
+					datetimeStrings = new String[] { singleDatetimeStr, singleDatetimeStr };
 				}
 			}
 			if (datetimeStrings.length == 2) {
