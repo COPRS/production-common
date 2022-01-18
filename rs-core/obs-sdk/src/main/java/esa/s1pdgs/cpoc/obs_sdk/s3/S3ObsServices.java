@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -604,7 +605,7 @@ public class S3ObsServices {
 		public void perform() {
 			try {
 				Retries.performWithRetries(
-						() -> Files.copy(inputStream, destination),
+						() -> Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING),
 						"download to " + destination,
 						s3ObsServices.numRetries, s3ObsServices.retryDelay);
 			} catch (InterruptedException e) {
