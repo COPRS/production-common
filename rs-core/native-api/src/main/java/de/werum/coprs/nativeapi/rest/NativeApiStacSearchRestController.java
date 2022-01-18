@@ -53,13 +53,15 @@ public class NativeApiStacSearchRestController {
 		}
 
 		try {
+			String decodedDatetimeStr = null;
 			if (null != datetime) {
-				final String decodedDatetimeStr = URLDecoder.decode(datetime, StandardCharsets.UTF_8.toString());
-				final StacItemCollection result = this.nativeApiStacService.find(decodedDatetimeStr);
+				decodedDatetimeStr = URLDecoder.decode(datetime, StandardCharsets.UTF_8.toString());
+			}
 
-				if (null != result) {
-					return ResponseEntity.ok(result);
-				}
+			final StacItemCollection result = this.nativeApiStacService.find(decodedDatetimeStr);
+
+			if (null != result) {
+				return ResponseEntity.ok(result);
 			}
 		} catch (final NativeApiBadRequestException e) {
 			throw new NativeApiRestControllerException(String.format("Bad request: %s", e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -67,7 +69,7 @@ public class NativeApiStacSearchRestController {
 			throw new NativeApiRestControllerException(String.format("Internal server error: %s", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return ResponseEntity.ok().build();
+		return ResponseEntity.notFound().build();
 	}
 
 }
