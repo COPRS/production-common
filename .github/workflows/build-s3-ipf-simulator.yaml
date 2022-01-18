@@ -134,5 +134,5 @@ jobs:
         with:
           name: vulnerabilities-s1-ipfsimulator
           path: |
-            vulnerabilities.csv
+            vulnerabilities.csv 
             vulnerabilities.pdf
