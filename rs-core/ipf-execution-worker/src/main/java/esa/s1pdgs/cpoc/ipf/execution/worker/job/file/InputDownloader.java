@@ -239,7 +239,21 @@ public class InputDownloader {
                     LOGGER.info("Input {}-{} will be stored in {}",
                             input.getFamily(), input.getContentRef(),
                             input.getLocalPath());
-                    downloadToBatch.add(toObsDlObject(input));
+                    ObsDownloadObject downloadObj = toObsDlObject(input);
+                    
+                    /*
+                     *  Adding a detection if a job order contains multiple times the same input
+                     *  This is a valid scenario for S3 productions, but might result in ObsParallelExceptions.
+                     *  As the product is already downloaded the IPF shall work fine.
+                     *  
+                     */
+                    
+                    if (downloadToBatch.contains(downloadObj)) {
+                    	LOGGER.warn("Detected duplicate input {} and prevent downloading it.", input.getLocalPath());
+                    } else {
+                    	downloadToBatch.add(downloadObj);	
+                    }
+                    
                     break;
                 case "BLANK":
                     LOGGER.info("Input {} will be ignored", input.getContentRef());
