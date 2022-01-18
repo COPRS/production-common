@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-152: Mock for XBIP and EDIP had been pushed to repository under rs-testing
 - RS-159: Documentation updated on where to use rs_init
 - RS-182: Modifying native api service to allow datetime queries using STAC API
+- RS-XX:  Added ingestion filter for EDIP
 
 ### Changed
 - RS-XX: Removed s1pro-env-scale.sh as it is not used anymore. Use replicaCount.yaml from template folder to setup the amount of replicas instead
