@@ -31,7 +31,7 @@ jobs:
   build-ipf-s3-l0:
     runs-on: ubuntu-latest
     # Just build when being a tag or explicitely asked for using #IPF 
-    if: startsWith(github.ref, 'ref/tags') || contains(github.event.head_commit.message, '#IPF')
+    if: startsWith(github.ref, 'refs/tags') || contains(github.event.head_commit.message, '#IPF')
     steps:
       - name: Extract branch name
         shell: bash
