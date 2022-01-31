@@ -44,7 +44,14 @@ public final class AuxipAuthenticationUtil {
 
 	public static final Header oauthHeaderFor(final AuxipHostConfiguration hostConfig) {
 		final String accessToken = retrieveOauthAccessToken(hostConfig);
-		return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
+		
+		/*
+		 * Old AUXIP server from S1PRO was expecting to have the OAUTH2-ACCESS-TOKEN to be send.
+		 * New server however follows standard specification and expecting the bearer token.
+		 */
+		
+		//return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
+		return new BasicHeader("Bearer", accessToken);
 	}
 
 	public static final String retrieveOauthAccessToken(final AuxipHostConfiguration hostConfig) {
