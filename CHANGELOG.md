@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-rc2] - 2022-01-31
+### Added
+- N/A
+
+### Changed
+- RS-250: Old servers expecting a bearer token named "OAUTH2-ACCESS-TOKEN". New server is following the specification. Behaviour was changed according to specification.
+
+### Removed
+- N/A
+
 ## [0.3.0-rc1] - 2022-01-18
 ### Added
 - RS-150: S1 L0 AIOP/ASP containers with real IPFs are build
