@@ -51,7 +51,7 @@ public final class AuxipAuthenticationUtil {
 		 */
 		
 		//return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
-		return new BasicHeader("Bearer", accessToken);
+		return new BasicHeader("Authorization", "Bearer "+accessToken);
 	}
 
 	public static final String retrieveOauthAccessToken(final AuxipHostConfiguration hostConfig) {
