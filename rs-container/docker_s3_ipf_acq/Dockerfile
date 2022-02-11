@@ -13,7 +13,10 @@ ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory
 ### Reconstruction of the base image provided by the agency
 USER root
 
-RUN yum install -y java-1.8.0-openjdk boost-date-time
+RUN yum install -y java-1.8.0-openjdk boost-date-time boost-thread boost-devel
+
+# Creating symbolic link to match expectation from IPF
+RUN ln -s /usr/lib64/libboost_date_time.so.1.53.0 /usr/lib64/libboost_date_time.so.5
 
 # create user
 ARG USER=ops3pdgs
