@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.werum.s1pdgs</groupId>
-	<artifactId>s1pro-core</artifactId>
+	<artifactId>s1pro-libs</artifactId>
 	<version>3.32.1</version>
 	<packaging>pom</packaging>
 
@@ -348,35 +348,20 @@
 	</dependencyManagement>
 
 	<modules>
-		<module>applicative-catalog</module>
-		<module>archives</module>
-		<module>disseminator</module>
-		<module>ingestion-trigger</module>
-		<module>ingestion-filter</module>
-		<module>ingestion-worker</module>
-		<module>production-trigger</module>
- 		<module>ipf-preparation-worker</module> 
-		<module>ipf-execution-worker</module>
-		<module>request-repository</module>
-		<module>queue-watcher</module>
-		<module>on-demand-interface-provider</module>
-		<module>metadata-catalog-timer</module>
-		<module>metadata-catalog-trigger</module>
-		<module>metadata-catalog-worker</module>
-		<module>mqi-server</module>
-		<module>prip-trigger</module>
-		<module>prip-worker</module>
- 		<module>prip-frontend</module>
-		<module>ddip-frontend</module>
-    	<module>native-api</module>
-		<module>data-lifecycle-trigger</module>
-		<module>data-request-worker</module>
-		<module>eviction-management-worker</module>
-		<module>validation</module>
-		<module>compression-trigger</module>
-		<module>compression-worker</module>
-		<module>dissemination-trigger</module>
-    	<module>dissemination-worker</module>
-    	<module>directory-cleaner</module>
+		<module>app-catalog-client</module>
+		<module>xbip-client</module>
+		<module>auxip-client</module>
+		<module>edip-client</module>
+		<module>error-repo-client</module>
+		<module>app-status</module> 
+		<module>lib-commons</module>
+		<module>message-adapter</module>
+		<module>metadata-client</module>
+		<module>mqi-client</module>
+		<module>obs-sdk</module>
+		<module>prip-client</module>
+		<module>data-lifecycle-client</module>
+		<module>xml-tools</module>
+    	<module>jacoco-report</module>
 	</modules>
 </project>

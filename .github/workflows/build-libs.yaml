@@ -1,0 +1,63 @@
+name: Build RS-Libs
+
+on: 
+  push:
+    paths:
+      - 'rs-libs/**'
+      - '.github/workflows/build-libs.yaml'
+  workflow_dispatch:
+  
+env:
+  REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT: "rs-maven"
+  USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+  PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Set environment variables
+        run: |
+          # Short name for current branch. For PRs, use target branch (base ref)
+          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+          echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+          
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # fetch all history so multiple commits can be scanned
+
+      - name: GitGuardian scan
+        uses: GitGuardian/gg-shield-action@master
+        env:
+          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+          
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          
+      - name: sonarqube scan 
+        run: mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
+          
+      - name: Build jar 
+        run: mvn clean install
+          
+      - name: Setup Maven settings.xml
+        uses: whelk-io/maven-settings-xml-action@v11
+        with:
+          servers: '[{"id": "artifactory","username": "${{ env.USERNAME }}", "password": "${{ env.PASSWORD }}"}]'
+        
+      - name: Push to Artifactory
+        run: mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.ARTIFACTORY_BASE_URL }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}
+ 
+  build-core:
+    needs: build
+    uses: coprs/production-common/.github/workflows/build-ci.yaml@develop-build

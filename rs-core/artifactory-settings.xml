@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings
+	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"
+	xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<localRepository>/usr/share/maven/ref/repository</localRepository>
+	<interactiveMode>false</interactiveMode>
+	<servers>
+		<server>
+			<id>central</id>
+			<username>admin</username>
+			<password>password</password>
+		</server>
+	</servers>
+	<profiles>
+		<profile>
+			<repositories>
+				<repository>
+					<id>central</id>
+					<name>libs-release</name>
+					<url>http://artifactory.coprs.esa-copernicus.eu/artifactory/rs-maven</url>
+				</repository>
+			</repositories>
+			<id>artifactory</id>
+		</profile>
+	</profiles>
+	<activeProfiles>
+		<activeProfile>artifactory</activeProfile>
+	</activeProfiles>
+</settings>
