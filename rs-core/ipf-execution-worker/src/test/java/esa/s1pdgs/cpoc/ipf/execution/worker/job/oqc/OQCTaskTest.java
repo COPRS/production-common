@@ -44,7 +44,7 @@ public class OQCTaskTest {
 		defaultProperties.setOqcWorkingDir("/tmp");
 	}
 
-	@Test(timeout = 3000)
+	@Test(timeout = 8000)
 	public void testTimeout() throws Exception {
 		final File ipf = new File(getClass().getClassLoader().getResource("ipf-oqc-block.sh").getFile());
 		ipf.setExecutable(true);
