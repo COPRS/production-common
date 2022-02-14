@@ -71,6 +71,9 @@ jobs:
           context: ./rs-core
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          secrets: |
+            "ARTIFACTORY_USER=${{ secrets.WERUM_ARTIFACTORY_USER }}"
+            "ARTIFACTORY_PASS=${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"
           build-args: |
             BRANCH=${{ steps.extract_branch.outputs.branch }}
             BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}

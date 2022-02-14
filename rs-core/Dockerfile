@@ -7,13 +7,13 @@ WORKDIR /app
 COPY . /app/
 
 ARG MAVEN_ARGS
-RUN mvn ${MAVEN_ARGS} -f /app/pom.xml -s /app/artifactory-settings.xml install 
+RUN mvn ${MAVEN_ARGS} -f /app/pom.xml -Dafact.user=${ARTIFACTORY_USER} -Dafact.pw=${ARTIFACTORY_PASS} -s /app/artifactory-settings.xml install 
 
 ARG PROJECT_KEY
 ARG SONARQUBE_HOST
 ARG SONARQUBE_TOKEN
 ARG BRANCH
-RUN mvn sonar:sonar -f /app/pom.xml -s /app/artifactorx-settings.xml -Dsonar.projectKey=${PROJECT_KEY} -Dsonar.host.url=${SONARQUBE_HOST} -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${BRANCH} 
+RUN mvn sonar:sonar -f /app/pom.xml -s -Dafact.user=${ARTIFACTORY_USER} -Dafact.pw=${ARTIFACTORY_PASS} /app/artifactorx-settings.xml -Dsonar.projectKey=${PROJECT_KEY} -Dsonar.host.url=${SONARQUBE_HOST} -Dsonar.login=${SONARQUBE_TOKEN} -Dsonar.branch.name=${BRANCH} 
 
 ####
 # An empty image that will be just used to gather all build artifacts into a small image

@@ -8,8 +8,8 @@
 	<servers>
 		<server>
 			<id>central</id>
-			<username>admin</username>
-			<password>password</password>
+			<username>${afact.user}</username>
+			<password>${afact.pw}</password>
 		</server>
 	</servers>
 	<profiles>
