@@ -56,7 +56,7 @@ jobs:
           servers: '[{"id": "artifactory","username": "${{ env.USERNAME }}", "password": "${{ env.PASSWORD }}"}]'
         
       - name: Push to Artifactory
-        run: mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.ARTIFACTORY_BASE_URL }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}
+        run: mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.REGISTRY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}
  
   build-core:
     needs: build
