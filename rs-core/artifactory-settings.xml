@@ -7,7 +7,7 @@
 	<interactiveMode>false</interactiveMode>
 	<servers>
 		<server>
-			<id>central</id>
+			<id>artifactory</id>
 			<username>${afact.user}</username>
 			<password>${afact.pw}</password>
 		</server>
@@ -16,7 +16,7 @@
 		<profile>
 			<repositories>
 				<repository>
-					<id>central</id>
+					<id>artifactory</id>
 					<name>libs-release</name>
 					<url>http://artifactory.coprs.esa-copernicus.eu/artifactory/rs-maven</url>
 				</repository>
