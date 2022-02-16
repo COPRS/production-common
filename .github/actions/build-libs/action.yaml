@@ -24,7 +24,6 @@
          # Short name for current branch. For PRs, use target branch (base ref)
          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
          echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
-         cd rs-libs
        shell: bash
 
      - name: GitGuardian scan
@@ -43,7 +42,11 @@
          distribution: 'adopt'
           
      - name: sonarqube scan 
-       run: mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.secrets-sonarqube-host }} -Dsonar.login=${{ inputs.secrets-sonarqube-token }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
+       run: |
+         pwd
+         ls
+         cd rs-libs
+         mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.secrets-sonarqube-host }} -Dsonar.login=${{ inputs.secrets-sonarqube-token }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
        shell: bash
        
      - name: Build jar 
