@@ -53,7 +53,7 @@ jobs:
           secrets-sonarqube-token: ${{ secrets.SONARQUBE_TOKEN }}
           secrets-artifactory-user: ${{ secrets.WERUM_ARTIFACTORY_USER }}
           secrets-artifactory-password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-          artifactory-base: ${{ env.ARTIFACTORY_BASE }
+          artifactory-base: ${{ env.ARTIFACTORY_BASE }}
           artifactory-project: ${{ env.ARTIFACTORY_PROJECT }}
       - uses: ./.github/actions/build-core
         with:
