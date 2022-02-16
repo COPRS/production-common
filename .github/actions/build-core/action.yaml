@@ -1,9 +1,31 @@
 name: 'Build Core'
 description: 'Builds core'
+inputs:
+ secrets-gitguardian-api-key:
+   required: true
+ secrets-github-token:
+   required: true
+ secrets-sonarqube-host:
+   required: true
+ secrets-sonarqube-token:
+   required: true
+ secrets-artifactory-user:
+   required: true
+ secrets-artifactory-password:
+   required: true
+ registry:
+   required: true
+ image-name:
+   required: true
+ version:
+   required: true
+ commit-id:
+   required: true
+     
 outputs:
   exec-worker:
-  description: "if exec worker docker images need to be build" 
-  value: ${{ steps.filter.outputs.exec-worker }}
+    description: "if exec worker docker images need to be build" 
+    value: ${{ steps.filter.outputs.exec-worker }}
 runs:
   using: "composite"
   steps:
@@ -29,20 +51,20 @@ runs:
         GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
         GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+        GITGUARDIAN_API_KEY: ${{ inputs.secrets-gitguardian-api-key }}
 
     - name: Login to Github Registry
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.secrets-github-token }}
                     
     - name: Extract Docker metadata
       id: meta
       uses: docker/metadata-action@v3
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ inputs.registry }}/${{ inputs.image-name }}
               
     - name: Build image
       uses: docker/build-push-action@v2
@@ -52,15 +74,15 @@ runs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         secrets: |
-          "ARTIFACTORY_USER=${{ secrets.WERUM_ARTIFACTORY_USER }}"
-          "ARTIFACTORY_PASS=${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"
+          "ARTIFACTORY_USER=${{ inputs.secrets-artifactory-user }}"
+          "ARTIFACTORY_PASS=${{ inputs.secrets-artifactory-password }}"
         build-args: |
           BRANCH=${{ steps.extract_branch.outputs.branch }}
           BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
-          VERSION=${{ env.VERSION }}
-          COMMIT_ID=${{ env.COMMIT_ID }}
-          SONARQUBE_HOST=${{ secrets.SONARQUBE_HOST }}
-          SONARQUBE_TOKEN=${{ secrets.WERUM_SONARQUBE_TOKEN }}
+          VERSION=${{ inputs.version }}
+          COMMIT_ID=${{ inputs.commit-id }}
+          SONARQUBE_HOST=${{ inputs.secrets-sonarqube-host }}
+          SONARQUBE_TOKEN=${{ inputs.secrets-sonarqube-token }}
           PROJECT_KEY=${{ github.repository }}
 
     - name: Scan image

@@ -47,7 +47,26 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/build-libs
+        with:
+          secrets-gitguardian-api-key: ${{ secrets.GITGUARDIAN_API_KEY }}
+          secrets-sonarqube-host: ${{ secrets.SONARQUBE_HOST }}
+          secrets-sonarqube-token: ${{ secrets.SONARQUBE_TOKEN }}
+          secrets-artifactory-user: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          secrets-artifactory-password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+          artifactory-base: ${{ env.ARTIFACTORY_BASE }
+          artifactory-project: ${{ env.ARTIFACTORY_PROJECT }}
       - uses: ./.github/actions/build-core
+        with:
+          secrets-gitguardian-api-key: ${{ secrets.GITGUARDIAN_API_KEY }}
+          secrets-github-token: ${{ secrets.GITHUB_TOKEN }}
+          secrets-sonarqube-host: ${{ secrets.SONARQUBE_HOST }}
+          secrets-sonarqube-token: ${{ secrets.SONARQUBE_TOKEN }}
+          secrets-artifactory-user:  ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          secrets-artifactory-password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+          registry: ${{ env.REGISTRY }}
+          image-name: ${{ env.IMAGE_NAME }}
+          version: ${{ env.VERSION }}
+          commit-id: ${{ env.COMMIT_ID }}
       
   build-core:
     needs: changes
@@ -58,6 +77,17 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/build-core
+        with:
+          secrets-gitguardian-api-key: ${{ secrets.GITGUARDIAN_API_KEY }}
+          secrets-github-token: ${{ secrets.GITHUB_TOKEN }}
+          secrets-sonarqube-host: ${{ secrets.SONARQUBE_HOST }}
+          secrets-sonarqube-token: ${{ secrets.SONARQUBE_TOKEN }}
+          secrets-artifactory-user:  ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          secrets-artifactory-password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+          registry: ${{ env.REGISTRY }}
+          image-name: ${{ env.IMAGE_NAME }}
+          version: ${{ env.VERSION }}
+          commit-id: ${{ env.COMMIT_ID }}
 
   generate-reports:
     needs: build-core 
