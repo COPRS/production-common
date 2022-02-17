@@ -72,7 +72,7 @@ function link_inputs() {
     echo "Preparing products in working directory $workingdir"
     
     # We attempt to detect the satellite id from the DSIB of the first channel
-    DSIB_FILE=$(file $workingdir/ch01 -iname "*.xml")
+    DSIB_FILE=$(find $workingdir/ch01 -iname "*.xml")
     if [[ $DSIB_FILE == *"S3A"* ]]
     then
       SATID="S3A"
@@ -87,9 +87,9 @@ function link_inputs() {
     
     # Hard link the channels from working directory to DDC input directory
     echo "Preparing channel 1"
-    ln -v $workingdir/ch01 $TARGET_DIR/ch_1
+    ln -v $workingdir/ch01/* $TARGET_DIR/ch_1
     echo "Preparing channel 2"
-    ln -v $workingdir/ch01 $TARGET_DIR/ch_2
+    ln -v $workingdir/ch02/* $TARGET_DIR/ch_2
     
     # Just for debugging purposes
     echo "Listing target directory $TARGET_DIR"
