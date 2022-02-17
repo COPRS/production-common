@@ -42,7 +42,7 @@ jobs:
       id: filter
       with:
         filters: |
-          lib-commons: rs-libs/lib-commons
+          lib-commons: 'rs-libs/lib-commons/**'
           app-status: rs-libs/app-status
           error-repo-client: rs-libs/error-repo-client
           xml-tools: rs-libs/xml-tools
@@ -68,7 +68,7 @@ jobs:
       id: filter
       with:
         filters: |
-          applicative-catalog: rs-core/applicative-catalog
+          applicative-catalog: 'rs-core/applicative-catalog/**'
           archives: rs-core/archives
           compression-trigger: rs-core/compression-trigger
           compression-worker: rs-core/compression-worker
