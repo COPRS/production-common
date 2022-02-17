@@ -36,18 +36,18 @@ jobs:
       with:
         java-version: '8'
         distribution: 'adopt'
-       
-    - name: sonarqube scan 
-      shell: bash
-      run: |
-        cd rs-core/${{ inputs.COMPONENT }}
-        mvn sonar:sonar -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.SONARQUBE_HOST }} -Dsonar.login=${{ inputs.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ steps.extract_branch.outputs.branch }} -s ../artifactory-settings.xml
      
     - name: Build jar 
       shell: bash
       run: |
         cd rs-core/${{ inputs.COMPONENT }}
         mvn clean install -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -s ../artifactory-settings.xml
+        
+    - name: sonarqube scan 
+      shell: bash
+      run: |
+        cd rs-core/${{ inputs.COMPONENT }}
+        mvn sonar:sonar -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.SONARQUBE_HOST }} -Dsonar.login=${{ inputs.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ steps.extract_branch.outputs.branch }} -s ../artifactory-settings.xml
 
     - name: Login to Artifcactory
       uses: docker/login-action@v1

@@ -138,18 +138,18 @@ jobs:
       with:
         java-version: '8'
         distribution: 'adopt'
-        
-    - name: sonarqube scan 
-      shell: bash
-      run: |
-        cd rs-libs/${{matrix.component}}
-        mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.WERUM_SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
      
     - name: Build jar 
       shell: bash
       run: |
         cd rs-libs/${{matrix.component}}
         mvn clean install
+        
+    - name: sonarqube scan 
+      shell: bash
+      run: |
+        cd rs-libs/${{matrix.component}}
+        mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.WERUM_SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
         
     - name: Setup Maven settings.xml
       uses: whelk-io/maven-settings-xml-action@v11
