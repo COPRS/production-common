@@ -108,8 +108,8 @@ function link_inputs() {
 		then
 			log "Create symbolic link for $i to /data2/NRTAP/CADU/S3A/$filename"
 			mkdir -p /data/NRTAP/CADU/S3A/$filename
-			ln -s $workingdir/ch01 /data/NRTAP/CADU/S3A/$i/ch_1
-			ln -s $workingdir/ch02 /data/NRTAP/CADU/S3A/$i/ch_2
+			ln -s $workingdir/ch01 /data/NRTAP/CADU/S3A/$filename/ch_1
+			ln -s $workingdir/ch02 /data/NRTAP/CADU/S3A/$filename/ch_2
 		fi	
 
 		if [[ $filename == *"S3B"* ]];
