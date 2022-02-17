@@ -81,7 +81,7 @@ function link_inputs() {
     fi
     echo "Detected SAT id $SATID"
 
-    # Extract session name from DSIB file
+    # Extract session name from DSIB file 
     DSIB_FILE=$(basename $DSIB_FILE)
 	SESSION_NAME=$(echo $DSIB_FILE | cut -d '_' -f 1-4)
     
