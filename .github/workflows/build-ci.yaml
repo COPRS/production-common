@@ -127,41 +127,15 @@ jobs:
       with:
         fetch-depth: 0
         
-    - name: Set environment variables
-      shell: bash
-      run: |
-        # Short name for current branch. For PRs, use target branch (base ref)
-        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
-        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
-        
-    - name: Set up JDK 8
-      uses: actions/setup-java@v2
+    - uses: ./.github/actions/build-libs
       with:
-        java-version: '8'
-        distribution: 'adopt'
-     
-    - name: Build jar 
-      shell: bash
-      run: |
-        cd rs-libs/${{matrix.component}}
-        mvn clean install
-        
-    - name: sonarqube scan 
-      shell: bash
-      run: |
-        cd rs-libs/${{matrix.component}}
-        mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.WERUM_SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
-        
-    - name: Setup Maven settings.xml
-      uses: whelk-io/maven-settings-xml-action@v11
-      with:
-        servers: '[{"id": "artifactory","username": "${{ secrets.WERUM_ARTIFACTORY_USER }}", "password": "${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"}]'
-      
-    - name: Push to Artifactory
-      shell: bash
-      run: |
-        cd rs-libs/${{matrix.component}}
-        mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT_MAVEN }}
+        COMPONENT: ${{ matrix.component }}
+        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
      
   build-all-core:
     needs: [changes, build-libs]
