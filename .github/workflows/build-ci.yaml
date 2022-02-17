@@ -37,6 +37,7 @@ jobs:
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
     steps:
+    - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -62,6 +63,7 @@ jobs:
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
     steps:
+    - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
       id: filter
       with:
@@ -100,19 +102,19 @@ jobs:
   gg-scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: GitGuardian scan
-        uses: GitGuardian/gg-shield-action@master
-        env:
-          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
-          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
-            
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: GitGuardian scan
+      uses: GitGuardian/gg-shield-action@master
+      env:
+        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
+          
   build-libs:
     needs: [lib-changes, gg-scan]
     runs-on: ubuntu-latest
@@ -120,46 +122,46 @@ jobs:
       matrix:
         component: ${{ fromJSON(needs.lib-changes.outputs.packages) }}
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          
-      - name: Set environment variables
-        shell: bash
-        run: |
-          # Short name for current branch. For PRs, use target branch (base ref)
-          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
-          echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
-          
-      - name: Set up JDK 8
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'adopt'
-          
-      - name: sonarqube scan 
-        shell: bash
-        run: |
-          cd rs-libs/${{matrix.component}}
-          mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
-       
-      - name: Build jar 
-        shell: bash
-        run: |
-          cd rs-libs/${{matrix.component}}
-          mvn clean install
-          
-      - name: Setup Maven settings.xml
-        uses: whelk-io/maven-settings-xml-action@v11
-        with:
-          servers: '[{"id": "artifactory","username": "${{ secrets.WERUM_ARTIFACTORY_USER }}", "password": "${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"}]'
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
         
-      - name: Push to Artifactory
-        shell: bash
-        run: |
-          cd rs-libs/${{matrix.component}}
-          mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT_MAVEN }}
-       
+    - name: Set environment variables
+      shell: bash
+      run: |
+        # Short name for current branch. For PRs, use target branch (base ref)
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+        
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+        
+    - name: sonarqube scan 
+      shell: bash
+      run: |
+        cd rs-libs/${{matrix.component}}
+        mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
+     
+    - name: Build jar 
+      shell: bash
+      run: |
+        cd rs-libs/${{matrix.component}}
+        mvn clean install
+        
+    - name: Setup Maven settings.xml
+      uses: whelk-io/maven-settings-xml-action@v11
+      with:
+        servers: '[{"id": "artifactory","username": "${{ secrets.WERUM_ARTIFACTORY_USER }}", "password": "${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"}]'
+      
+    - name: Push to Artifactory
+      shell: bash
+      run: |
+        cd rs-libs/${{matrix.component}}
+        mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT_MAVEN }}
+     
   build-all-core:
     needs: [changes, build-libs]
     if: ${{ needs.changes.outputs.libs == 'true' }}
@@ -168,22 +170,22 @@ jobs:
         component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api, ddip-frontend]           
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-        
-      - uses: ./.github/actions/build-docker@develop-build
-        with:
-          COMPONENT: ${{ matrix.component }}
-          ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
-          ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
-          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-          SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-          SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
-          VERSION: ${{ env.VERSION }}
-          COMMIT_ID: ${{ env.COMMIT_ID}}
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+      
+    - uses: ./.github/actions/build-docker@develop-build
+      with:
+        COMPONENT: ${{ matrix.component }}
+        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+        IMAGE_NAME: ${{ env.IMAGE_NAME }}
+        VERSION: ${{ env.VERSION }}
+        COMMIT_ID: ${{ env.COMMIT_ID}}
     
   build-core:
     needs: [changes, core-changes, gg-scan]
@@ -193,23 +195,23 @@ jobs:
         component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-        
-      - uses: ./.github/actions/build-docker@develop-build
-        with:
-          COMPONENT: ${{ matrix.component }}
-          ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
-          ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
-          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-          SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-          SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
-          VERSION: ${{ env.VERSION }}
-          COMMIT_ID: ${{ env.COMMIT_ID}}
-         
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+      
+    - uses: ./.github/actions/build-docker@develop-build
+      with:
+        COMPONENT: ${{ matrix.component }}
+        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+        IMAGE_NAME: ${{ env.IMAGE_NAME }}
+        VERSION: ${{ env.VERSION }}
+        COMMIT_ID: ${{ env.COMMIT_ID}}
+       
 
 #  # If the execution-worker-jar is updated also update the ACQ simulator docker image
 #  build-acq-simulator:
