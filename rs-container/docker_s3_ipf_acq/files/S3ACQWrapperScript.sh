@@ -63,63 +63,37 @@ function read_dom() {
 }
 
 ################################################################################
-# Extract the session_name from local working directory
-################################################################################
-function prepare_inputs() {	
-	log "Read provided JobOrder $JOBORDER"
-
-	# create list of input files (the output list should be empty	
-	local workingdir=$(dirname $JOBORDER)
-	
-	files=()
-	for i in $workingdir/*/*_dat
-	do
-		files+=( $i )
-	done
-
-	# Remove duplicates
-        INPUT_FILES=()
-        while IFS= read -r -d '' x
-        do
-                INPUT_FILES+=("$x")
-        done < <(printf "%s\0" "${files[@]}" | sort -uz)
-
-
-	# Debug Output to verify all files were found correctly
-	#log "Found session file names"
-	#for i in ${INPUT_FILES[@]}
-	#do
-	#	echo "   $i"
-	#done
-}
-
-################################################################################
 # Soft link the input files from the Exec Worker working dir to the 
 # DDC working directory
 ################################################################################
 function link_inputs() {	
-	for i in ${INPUT_FILES[@]}
-	do
-		local workingdir=$(dirname $JOBORDER)
-		local filename=$(basename $i)
-
-		# Determine which satellite id the file is for
-		if [[ $filename == *"S3A"* ]];
-		then
-			log "Create symbolic link for $i to /data2/NRTAP/CADU/S3A/$filename"
-			mkdir -p /data/NRTAP/CADU/S3A/$filename
-			ln -s $workingdir/ch01 /data/NRTAP/CADU/S3A/$filename/ch_1
-			ln -s $workingdir/ch02 /data/NRTAP/CADU/S3A/$filename/ch_2
-		fi	
-
-		if [[ $filename == *"S3B"* ]];
-                then
-			log "Create symbolic link for $i to /data2/NRTAP/CADU/S3B/$filename"
-			mkdir -p /data/NRTAP/CADU/S3B/$filename
-			ln -s $workingdir/ch01 /data/NRTAP/CADU/S3B/$filename/ch_1
-                        ln -s $workingdir/ch02 /data/NRTAP/CADU/S3B/$filename/ch_2
-                fi
-	done
+    local workingdir=$(dirname $JOBORDER)
+    
+    echo "Preparing products in working directory $workingdir"
+    
+    # We attempt to detect the satellite id from the DSIB of the first channel
+    DSIB_FILE=$(file $workingdir/ch01 -iname "*.xml")
+    if [[ $DSIB_FILE == *"S3A"* ]]
+    then
+      SATID="S3A"
+    else
+      SATID="S3B"
+    fi
+    echo "Detected SAT id $SATID"
+    
+    # Create a directories for the DDC
+    TARGET_DIR="/data/NRTAP/CADU/$SATID/SESSION.dat/"
+    mkdir -p ${TARGET_DIR}/{ch_1,ch_2}
+    
+    # Hard link the channels from working directory to DDC input directory
+    echo "Preparing channel 1"
+    ln -v $workingdir/ch01 $TARGET_DIR/ch_1
+    echo "Preparing channel 2"
+    ln -v $workingdir/ch01 $TARGET_DIR/ch_2
+    
+    # Just for debugging purposes
+    echo "Listing target directory $TARGET_DIR"
+    find $TARGET_DIR
 }
 
 ################################################################################
@@ -336,8 +310,6 @@ then
 	display_usage
 	exit 255
 fi
-
-prepare_inputs
 
 link_inputs
 
