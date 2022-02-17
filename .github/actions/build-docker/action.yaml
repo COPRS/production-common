@@ -25,8 +25,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: Checkout repository
-    uses: actions/checkout@v2
+#  - name: Checkout repository
+#    uses: actions/checkout@v2
   
   - name: Extract image tag name
     shell: bash

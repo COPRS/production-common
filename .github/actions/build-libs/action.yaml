@@ -19,8 +19,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - name: Checkout repository
-    uses: actions/checkout@v2
+#  - name: Checkout repository
+#    uses: actions/checkout@v2
     
   - name: Set environment variables
     shell: bash
@@ -38,13 +38,13 @@ runs:
   - name: Build jar 
     shell: bash
     run: |
-      cd rs-core/${{ inputs.COMPONENT }}
+      cd rs-libs/${{ inputs.COMPONENT }}
       mvn clean install -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -s ../../artifactory-settings.xml
       
   - name: Sonarqube scan 
     shell: bash
     run: |
-      cd rs-core/${{ inputs.COMPONENT }}
+      cd rs-libs/${{ inputs.COMPONENT }}
       mvn sonar:sonar -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.SONARQUBE_HOST }} -Dsonar.login=${{ inputs.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ steps.extract_branch.outputs.branch }} -s ../../artifactory-settings.xml
       
   - name: Setup Maven settings.xml
