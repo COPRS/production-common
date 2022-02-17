@@ -43,20 +43,20 @@ jobs:
       with:
         filters: |
           lib-commons: 'rs-libs/lib-commons/**'
-          app-status: rs-libs/app-status
-          error-repo-client: rs-libs/error-repo-client
-          xml-tools: rs-libs/xml-tools
-          message-adapter: rs-libs/message-adapter
-          app-catalog-client: rs-libs/app-catalog-client
-          obs-sdk: rs-libs/obs-sdk
-          mqi-client: rs-libs/mqi-client
-          metadata-client: rs-libs/metadata-client
-          prip-client: rs-libs/prip-client
-          auxip-client: rs-libs/auxip-client
-          xbip-client: rs-libs/xbip-client
-          edip-client: rs-libs/edip-client
-          data-lifecycle-client: rs-libs/data-lifecycle-client
-          jacoco-report: rs-libs/jacoco-report
+          app-status: 'rs-libs/app-status/**'
+          error-repo-client: 'rs-libs/error-repo-client/**'
+          xml-tools: 'rs-libs/xml-tools/**'
+          message-adapter: 'rs-libs/message-adapter/**'
+          app-catalog-client: 'rs-libs/app-catalog-client/**'
+          obs-sdk: 'rs-libs/obs-sdk/**'
+          mqi-client: 'rs-libs/mqi-client/**'
+          metadata-client: 'rs-libs/metadata-client/**'
+          prip-client: 'rs-libs/prip-client/**'
+          auxip-client: 'rs-libs/auxip-client/**'
+          xbip-client: 'rs-libs/xbip-client/**'
+          edip-client: 'rs-libs/edip-client/**'
+          data-lifecycle-client: 'rs-libs/data-lifecycle-client/**'
+          jacoco-report: 'rs-libs/jacoco-report/**'
           
   core-changes:
     runs-on: ubuntu-latest
@@ -69,35 +69,35 @@ jobs:
       with:
         filters: |
           applicative-catalog: 'rs-core/applicative-catalog/**'
-          archives: rs-core/archives
-          compression-trigger: rs-core/compression-trigger
-          compression-worker: rs-core/compression-worker
-          data-lifecycle-trigger: rs-core/data-lifecycle-trigger
-          data-request-worker: rs-core/data-request-worker
-          ddip-frontend: rs-core/ddip-frontend
-          directory-cleaner: rs-core/directory-cleaner
-          dissemination-trigger: rs-core/dissemination-trigger
-          dissemination-worker: rs-core/dissemination-worker
-          disseminator: rs-core/disseminator
-          eviction-management-worker: rs-core/eviction-management-worker
-          ingestion-filter: rs-core/ingestion-filter
-          ingestion-trigger: rs-core/ingestion-trigger
-          ingestion-worker: rs-core/ingestion-worker
-          ipf-execution-worker: rs-core/ipf-execution-worker
-          ipf-preparation-worker: rs-core/ipf-preparation-worker
-          metadata-catalog-timer: rs-core/metadata-catalog-timer
-          metadata-catalog-trigger: rs-core/metadata-catalog-trigger
-          metadata-catalog-worker: rs-core/metadata-catalog-worker
-          mqi-server: rs-core/mqi-server
-          native-api: rs-core/native-api
-          on-demand-interface-provider: rs-core/on-demand-interface-provider
-          prip-frontend: rs-core/prip-frontend
-          prip-trigger: rs-core/prip-trigger
-          prip-worker: rs-core/prip-worker
-          production-trigger: rs-core/production-trigger
-          queue-watcher: rs-core/queue-watcher
-          request-repository: rs-core/request-repository
-          validation: rs-core/validation
+          archives: 'rs-core/archives/**'
+          compression-trigger: 'rs-core/compression-trigger/**'
+          compression-worker: 'rs-core/compression-worker/**'
+          data-lifecycle-trigger: 'rs-core/data-lifecycle-trigger/**'
+          data-request-worker: 'rs-core/data-request-worker/**'
+          ddip-frontend: 'rs-core/ddip-frontend/**'
+          directory-cleaner: 'rs-core/directory-cleaner/**'
+          dissemination-trigger: 'rs-core/dissemination-trigger/**'
+          dissemination-worker: 'rs-core/dissemination-worker/**'
+          disseminator: 'rs-core/disseminator/**'
+          eviction-management-worker: 'rs-core/eviction-management-worker/**'
+          ingestion-filter: 'rs-core/ingestion-filter/**'
+          ingestion-trigger: 'rs-core/ingestion-trigger/**'
+          ingestion-worker: 'rs-core/ingestion-worker/**'
+          ipf-execution-worker: 'rs-core/ipf-execution-worker/**'
+          ipf-preparation-worker: 'rs-core/ipf-preparation-worker/**'
+          metadata-catalog-timer: 'rs-core/metadata-catalog-timer/**'
+          metadata-catalog-trigger: 'rs-core/metadata-catalog-trigger/**'
+          metadata-catalog-worker: 'rs-core/metadata-catalog-worker/**'
+          mqi-server: 'rs-core/mqi-server/**'
+          native-api: 'rs-core/native-api/**'
+          on-demand-interface-provider: 'rs-core/on-demand-interface-provider/**'
+          prip-frontend: 'rs-core/prip-frontend/**'
+          prip-trigger: 'rs-core/prip-trigger/**'
+          prip-worker: 'rs-core/prip-worker/**'
+          production-trigger: 'rs-core/production-trigger/**'
+          queue-watcher: 'rs-core/queue-watcher/**'
+          request-repository: 'rs-core/request-repository/**'
+          validation: 'rs-core/validation/**'
           
   gg-scan:
     runs-on: ubuntu-latest
@@ -174,7 +174,7 @@ jobs:
       with:
         fetch-depth: 0
       
-    - uses: ./.github/actions/build-docker@develop-build
+    - uses: ./.github/actions/build-docker
       with:
         COMPONENT: ${{ matrix.component }}
         ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
@@ -199,7 +199,7 @@ jobs:
       with:
         fetch-depth: 0
       
-    - uses: ./.github/actions/build-docker@develop-build
+    - uses: ./.github/actions/build-docker
       with:
         COMPONENT: ${{ matrix.component }}
         ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
