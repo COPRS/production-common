@@ -19,8 +19,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-#  - name: Checkout repository
-#    uses: actions/checkout@v2
     
   - name: Set environment variables
     shell: bash
@@ -34,24 +32,26 @@ runs:
     with:
       java-version: '8'
       distribution: 'adopt'
-   
+  
+  - name: Setup Maven settings.xml
+    uses: whelk-io/maven-settings-xml-action@v11
+    with:
+      repositories: '[{ "id": "artifactory", "url": "https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT }}" }]'
+      servers: '[{"id": "artifactory","username": "${{ inputs.WERUM_ARTIFACTORY_USER }}", "password": "${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}"}]'
+  
   - name: Build jar 
     shell: bash
     run: |
       cd rs-libs/${{ inputs.COMPONENT }}
-      mvn clean install -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -s ../../artifactory-settings.xml
+      mvn clean install 
       
   - name: Sonarqube scan 
     shell: bash
     run: |
       cd rs-libs/${{ inputs.COMPONENT }}
-      mvn sonar:sonar -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.SONARQUBE_HOST }} -Dsonar.login=${{ inputs.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ steps.extract_branch.outputs.branch }} -s ../../artifactory-settings.xml
+      mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.SONARQUBE_HOST }} -Dsonar.login=${{ inputs.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ steps.extract_branch.outputs.branch }}
       
-  - name: Setup Maven settings.xml
-    uses: whelk-io/maven-settings-xml-action@v11
-    with:
-      servers: '[{"id": "artifactory","username": "${{ inputs.WERUM_ARTIFACTORY_USER }}", "password": "${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}"}]'
-    
+
   - name: Push to Artifactory
     shell: bash
     run: |
