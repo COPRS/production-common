@@ -364,4 +364,5 @@
 		<module>xml-tools</module>
     	<module>jacoco-report</module>
 	</modules>
+	
 </project>
