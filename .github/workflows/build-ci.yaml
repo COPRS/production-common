@@ -7,7 +7,6 @@ on:
       - 'rs-libs/**'
       - '.github/workflows/build-ci.yaml'
       - '.github/workflows/build-docker.yaml'
-      - '.github/actions/**'
   workflow_dispatch:
 
 env:
@@ -18,15 +17,12 @@ env:
   VERSION: 3.32.1
   COMMIT_ID: ${{ github.sha }}
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT: "rs-maven"
 
 jobs:
-
   changes:
     runs-on: ubuntu-latest
     outputs:
       libs: ${{ steps.filter.outputs.libs }}
-      core: ${{ steps.filter.outputs.core }}
     steps:
     - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
@@ -35,126 +31,193 @@ jobs:
         filters: |
           libs:
             - 'rs-libs/**'
-          core:
-            - 'core/**'
+            
+  lib-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.filter.outputs.changes }}
+    steps:
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          lib-commons: rs-libs/lib-commons
+          app-status: rs-libs/app-status
+          error-repo-client: rs-libs/error-repo-client
+          xml-tools: rs-libs/xml-tools
+          message-adapter: rs-libs/message-adapter
+          app-catalog-client: rs-libs/app-catalog-client
+          obs-sdk: rs-libs/obs-sdk
+          mqi-client: rs-libs/mqi-client
+          metadata-client: rs-libs/metadata-client
+          prip-client: rs-libs/prip-client
+          auxip-client: rs-libs/auxip-client
+          xbip-client: rs-libs/xbip-client
+          edip-client: rs-libs/edip-client
+          data-lifecycle-client: rs-libs/data-lifecycle-client
+          jacoco-report: rs-libs/jacoco-report
+          
+  core-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.filter.outputs.changes }}
+    steps:
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          applicative-catalog: rs-core/applicative-catalog
+          archives: rs-core/archives
+          compression-trigger: rs-core/compression-trigger
+          compression-worker: rs-core/compression-worker
+          data-lifecycle-trigger: rs-core/data-lifecycle-trigger
+          data-request-worker: rs-core/data-request-worker
+          ddip-frontend: rs-core/ddip-frontend
+          directory-cleaner: rs-core/directory-cleaner
+          dissemination-trigger: rs-core/dissemination-trigger
+          dissemination-worker: rs-core/dissemination-worker
+          disseminator: rs-core/disseminator
+          eviction-management-worker: rs-core/eviction-management-worker
+          ingestion-filter: rs-core/ingestion-filter
+          ingestion-trigger: rs-core/ingestion-trigger
+          ingestion-worker: rs-core/ingestion-worker
+          ipf-execution-worker: rs-core/ipf-execution-worker
+          ipf-preparation-worker: rs-core/ipf-preparation-worker
+          metadata-catalog-timer: rs-core/metadata-catalog-timer
+          metadata-catalog-trigger: rs-core/metadata-catalog-trigger
+          metadata-catalog-worker: rs-core/metadata-catalog-worker
+          mqi-server: rs-core/mqi-server
+          native-api: rs-core/native-api
+          on-demand-interface-provider: rs-core/on-demand-interface-provider
+          prip-frontend: rs-core/prip-frontend
+          prip-trigger: rs-core/prip-trigger
+          prip-worker: rs-core/prip-worker
+          production-trigger: rs-core/production-trigger
+          queue-watcher: rs-core/queue-watcher
+          request-repository: rs-core/request-repository
+          validation: rs-core/validation
+          
+  gg-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: GitGuardian scan
+        uses: GitGuardian/gg-shield-action@master
+        env:
+          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
             
   build-libs:
-    needs: changes
-    if: ${{ needs.changes.outputs.libs == 'true' }} 
+    needs: [lib-changes, gg-scan]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: ${{ fromJSON(needs.lib-changes.outputs.packages) }}
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/build-libs
-        with:
-          secrets-gitguardian-api-key: ${{ secrets.GITGUARDIAN_API_KEY }}
-          secrets-sonarqube-host: ${{ secrets.SONARQUBE_HOST }}
-          secrets-sonarqube-token: ${{ secrets.SONARQUBE_TOKEN }}
-          secrets-artifactory-user: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-          secrets-artifactory-password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-          artifactory-base: ${{ env.ARTIFACTORY_BASE }}
-          artifactory-project: ${{ env.ARTIFACTORY_PROJECT }}
-      - uses: ./.github/actions/build-core
-        with:
-          secrets-gitguardian-api-key: ${{ secrets.GITGUARDIAN_API_KEY }}
-          secrets-github-token: ${{ secrets.GITHUB_TOKEN }}
-          secrets-sonarqube-host: ${{ secrets.SONARQUBE_HOST }}
-          secrets-sonarqube-token: ${{ secrets.SONARQUBE_TOKEN }}
-          secrets-artifactory-user:  ${{ secrets.WERUM_ARTIFACTORY_USER }}
-          secrets-artifactory-password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-          registry: ${{ env.REGISTRY }}
-          image-name: ${{ env.IMAGE_NAME }}
-          version: ${{ env.VERSION }}
-          commit-id: ${{ env.COMMIT_ID }}
-      
-  build-core:
-    needs: changes
-    if: ${{ needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - uses: ./.github/actions/build-core
-        with:
-          secrets-gitguardian-api-key: ${{ secrets.GITGUARDIAN_API_KEY }}
-          secrets-github-token: ${{ secrets.GITHUB_TOKEN }}
-          secrets-sonarqube-host: ${{ secrets.SONARQUBE_HOST }}
-          secrets-sonarqube-token: ${{ secrets.SONARQUBE_TOKEN }}
-          secrets-artifactory-user:  ${{ secrets.WERUM_ARTIFACTORY_USER }}
-          secrets-artifactory-password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-          registry: ${{ env.REGISTRY }}
-          image-name: ${{ env.IMAGE_NAME }}
-          version: ${{ env.VERSION }}
-          commit-id: ${{ env.COMMIT_ID }}
-
-  generate-reports:
-    needs: build-core 
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Download json report from build jobs
-        uses: actions/download-artifact@v2
-        with:
-          name: vulnerabilities-build
-
-      - name: Generate CSV and intermediate HTML report
+          
+      - name: Set environment variables
+        shell: bash
         run: |
-          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
-          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
-          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
-          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
-          echo -e '</tbody>\n</table>' >> vulnerabilities.html
-      - name: Convert HTLM to PDF
-        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+          # Short name for current branch. For PRs, use target branch (base ref)
+          GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+          echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+          
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
         with:
-          args: vulnerabilities.html vulnerabilities.pdf
-
-      - name: Upload Anchore scan reports
-        uses: actions/upload-artifact@master
+          java-version: '8'
+          distribution: 'adopt'
+          
+      - name: sonarqube scan 
+        shell: bash
+        run: |
+          cd rs-libs/${{matrix.component}}
+          mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
+       
+      - name: Build jar 
+        shell: bash
+        run: |
+          cd rs-libs/${{matrix.component}}
+          mvn clean install
+          
+      - name: Setup Maven settings.xml
+        uses: whelk-io/maven-settings-xml-action@v11
         with:
-          name: vulnerabilities-build
-          path: |
-            vulnerabilities.csv
-            vulnerabilities.pdf
-
-  docker-images:
-    needs: build-core
+          servers: '[{"id": "artifactory","username": "${{ secrets.WERUM_ARTIFACTORY_USER }}", "password": "${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"}]'
+        
+      - name: Push to Artifactory
+        shell: bash
+        run: |
+          cd rs-libs/${{matrix.component}}
+          mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.ARTIFACTORY_BASE }}/artifactory/rs-maven
+       
+  build-all-core:
+    needs: [changes, build-libs]
+    if: ${{ needs.changes.outputs.libs == 'true' }}
+    strategy:
+      matrix:
+        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api, ddip-frontend]           
     uses: coprs/production-common/.github/workflows/build-docker.yaml@develop-build
+    with:
+      component: ${{matrix.component}}
     secrets: 
-      username: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-
-  # If the execution-worker-jar is updated also update the ACQ simulator docker image
-  build-acq-simulator:
-    needs: build-core
-    if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop-build
-    secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
-
-  # If the execution-worker-jar is updated also update the S1 IPF Simulator image
-  build-s1-ipf-simulator:
-    needs: build-core
-    if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop-build
-    secrets:
+      SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+      SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+    
+  build-core:
+    needs: [changes, core-changes, gg-scan]
+    if: ${{ needs.changes.outputs.libs == 'false' }}
+    strategy:
+      matrix:
+        component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
+    uses: coprs/production-common/.github/workflows/build-docker.yaml@develop-build
+    with:
+      component: ${{matrix.component}}
+    secrets: 
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+      SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+         
+
+#  # If the execution-worker-jar is updated also update the ACQ simulator docker image
+#  build-acq-simulator:
+#    needs: build-core
+#    if: ${{ inputs.exec-worker }}
+#    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop-build
+#    secrets:
+#      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+#      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+#      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+#  # If the execution-worker-jar is updated also update the S1 IPF Simulator image
+#  build-s1-ipf-simulator:
+#    needs: build-core
+#    if: ${{ inputs.exec-worker }}
+#    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop-build
+#    secrets:
+#      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+#      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+#      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
  
-  # If the execution-worker-jar is updated also update the S1 IPF AIO image    
-  build-ipf-s1-aio:
-    needs: build-core
-    if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop-build
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+#  # If the execution-worker-jar is updated also update the S1 IPF AIO image    
+#  build-ipf-s1-aio:
+#    needs: build-core
+#    if: ${{ inputs.exec-worker }}
+#    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop-build
+#    secrets:
+#      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+#      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+#      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
       
