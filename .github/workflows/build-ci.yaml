@@ -119,6 +119,7 @@ jobs:
     needs: [lib-changes, gg-scan]
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 1
       matrix:
         component: ${{ fromJSON(needs.lib-changes.outputs.packages) }}
     steps:
