@@ -80,9 +80,13 @@ function link_inputs() {
       SATID="S3B"
     fi
     echo "Detected SAT id $SATID"
+
+    # Extract session name from DSIB file
+    DSIB_FILE=$(basename $DSIB_FILE)
+	SESSION_NAME=$(echo $DSIB_FILE | cut -d '_' -f 1-4)
     
     # Create a directories for the DDC
-    TARGET_DIR="/data/NRTAP/CADU/$SATID/SESSION.dat/"
+    TARGET_DIR="/data/NRTAP/CADU/$SATID/${SESSION_NAME}_dat/"
     mkdir -p ${TARGET_DIR}/{ch_1,ch_2}
     
     # Hard link the channels from working directory to DDC input directory
