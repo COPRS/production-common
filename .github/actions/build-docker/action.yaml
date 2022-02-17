@@ -1,0 +1,127 @@
+name: 'Build Core and Docker'
+description: 'Build core services and docker image and generate reports'
+inputs:
+  COMPONENT:
+    required: true
+  ARTIFACTORY_BASE:
+    required: true
+  ARTIFACTORY_PROJECT:
+    required: true
+  WERUM_ARTIFACTORY_USER:
+    required: true
+  WERUM_ARTIFACTORY_PASSWORD:
+    required: true
+  SONARQUBE_HOST:
+    required: true
+  SONARQUBE_TOKEN:
+    required: true
+  IMAGE_NAME:
+    required: true
+  VERSION:
+    required: true
+  COMMIT_ID:
+    required: true
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract image tag name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+        id: extract_branch
+          
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+         
+      - name: sonarqube scan 
+        shell: bash
+        run: |
+          cd rs-core/${{ inputs.COMPONENT }}
+          mvn sonar:sonar -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.SONARQUBE_HOST }} -Dsonar.login=${{ inputs.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ steps.extract_branch.outputs.branch }} -s ../artifactory-settings.xml
+       
+      - name: Build jar 
+        shell: bash
+        run: |
+          cd rs-core/${{ inputs.COMPONENT }}
+          mvn clean install -Dafact.user=${{ inputs.WERUM_ARTIFACTORY_USER }} -Dafact.pw=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }} -s ../artifactory-settings.xml
+
+      - name: Login to Artifcactory
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ inputs.ARTIFACTORY_BASE }}/${{ inputs.ARTIFACTORY_PROJECT }}
+          username: ${{ inputs.WERUM_ARTIFACTORY_USER }}
+          password: ${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ inputs.ARTIFACTORY_BASE }}/${{ inputs.ARTIFACTORY_PROJECT }}/${{ inputs.IMAGE_NAME }}-${{ inputs.COMPONENT }}
+
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: ./rs-core/${{ inputs.COMPONENT }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+            VERSION=${{ inputs.VERSION }}
+            COMMIT_ID=${{ inputs.COMMIT_ID }}
+            
+      - name: Scan image
+        uses: anchore/scan-action@v2
+        id: scan
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          acs-report-enable: true
+          fail-build: false
+          severity-cutoff: critical
+
+      - name: Upload Anchore scan json report
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-${{ inputs.COMPONENT }}
+          path: ${{ steps.scan.outputs.vulnerabilities }}
+
+      - name: Push image
+        run: |
+          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
+          
+  generate-reports:
+    needs: build-docker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download json report from build jobs
+        uses: actions/download-artifact@v2
+        with:
+          name: vulnerabilities-${{ inputs.COMPONENT }}
+
+      - name: Generate CSV and intermediate HTML report
+        run: |
+          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
+          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
+          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
+          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
+          echo -e '</tbody>\n</table>' >> vulnerabilities.html
+      - name: Convert HTLM to PDF
+        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
+        with:
+          args: vulnerabilities.html vulnerabilities.pdf
+
+      - name: Upload Anchore scan reports
+        uses: actions/upload-artifact@master
+        with:
+          name: vulnerabilities-${{ inputs.COMPONENT }}
+          path: |
+            vulnerabilities.csv
+            vulnerabilities.pdf

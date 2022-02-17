@@ -10,13 +10,13 @@ on:
   workflow_dispatch:
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: coprs/rs-core
+  IMAGE_NAME: rs-core
   VERSION: 3.32.1
   COMMIT_ID: ${{ github.sha }}
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_DOCKER: werum-docker
+  ARTIFACTORY_PROJECT_MAVEN: rs-maven
 
 jobs:
   changes:
@@ -158,7 +158,7 @@ jobs:
         shell: bash
         run: |
           cd rs-libs/${{matrix.component}}
-          mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.ARTIFACTORY_BASE }}/artifactory/rs-maven
+          mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT_MAVEN }}
        
   build-all-core:
     needs: [changes, build-libs]
@@ -166,14 +166,24 @@ jobs:
     strategy:
       matrix:
         component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api, ddip-frontend]           
-    uses: coprs/production-common/.github/workflows/build-docker.yaml@develop-build
-    with:
-      component: ${{matrix.component}}
-    secrets: 
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-      SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+        
+      - uses: ./.github/actions/build-docker@develop-build
+        with:
+          COMPONENT: ${{ matrix.component }}
+          ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+          ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+          SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+          SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          VERSION: ${{ env.VERSION }}
+          COMMIT_ID: ${{ env.COMMIT_ID}}
     
   build-core:
     needs: [changes, core-changes, gg-scan]
@@ -181,14 +191,24 @@ jobs:
     strategy:
       matrix:
         component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
-    uses: coprs/production-common/.github/workflows/build-docker.yaml@develop-build
-    with:
-      component: ${{matrix.component}}
-    secrets: 
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-      SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+        
+      - uses: ./.github/actions/build-docker@develop-build
+        with:
+          COMPONENT: ${{ matrix.component }}
+          ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+          ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+          SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+          SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          VERSION: ${{ env.VERSION }}
+          COMMIT_ID: ${{ env.COMMIT_ID}}
          
 
 #  # If the execution-worker-jar is updated also update the ACQ simulator docker image
