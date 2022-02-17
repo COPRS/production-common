@@ -125,9 +125,6 @@ jobs:
         component: ${{ fromJSON(needs.lib-changes.outputs.packages) }}
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-        
     - uses: ./.github/actions/build-libs
       with:
         COMPONENT: ${{ matrix.component }}
@@ -147,9 +144,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-      
     - uses: ./.github/actions/build-docker
       with:
         COMPONENT: ${{ matrix.component }}
@@ -172,9 +166,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-      
     - uses: ./.github/actions/build-docker
       with:
         COMPONENT: ${{ matrix.component }}

@@ -19,6 +19,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+  - name: Checkout repository
+    uses: actions/checkout@v2
+    
   - name: Set environment variables
     shell: bash
     run: |
