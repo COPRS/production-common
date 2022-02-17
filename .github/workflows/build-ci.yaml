@@ -143,7 +143,7 @@ jobs:
       shell: bash
       run: |
         cd rs-libs/${{matrix.component}}
-        mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
+        mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.WERUM_SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
      
     - name: Build jar 
       shell: bash
@@ -182,7 +182,7 @@ jobs:
         WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-        SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
         IMAGE_NAME: ${{ env.IMAGE_NAME }}
         VERSION: ${{ env.VERSION }}
         COMMIT_ID: ${{ env.COMMIT_ID}}
@@ -207,7 +207,7 @@ jobs:
         WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-        SONARQUBE_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
         IMAGE_NAME: ${{ env.IMAGE_NAME }}
         VERSION: ${{ env.VERSION }}
         COMMIT_ID: ${{ env.COMMIT_ID}}
