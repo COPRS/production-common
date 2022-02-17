@@ -285,7 +285,7 @@ function clean_acq_working_dirs() {
 # Kill DirectDataCaptureServer
 ################################################################################
 function kill_ddc() {
-	killall -9 DirectDataCaptureServer
+	kill -9 `pgrep DirectDataCaptureServer`
 }
 
 ################################################################################
