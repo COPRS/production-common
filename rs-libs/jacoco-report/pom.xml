@@ -59,7 +59,6 @@
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-mqi-client</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-obs-sdk</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-prip-client</artifactId><version>${project.version}</version></dependency>
-<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-prip-trigger</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-xbip-client</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-xml-tools</artifactId><version>${project.version}</version></dependency>
 	</dependencies>
