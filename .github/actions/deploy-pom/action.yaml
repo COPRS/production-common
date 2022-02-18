@@ -33,4 +33,4 @@ runs:
     shell: bash
     run: |
       cd ${{ inputs.POM }}
-      mvn deploy:deploy -Dfile=pom.xml -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT }}
+      mvn deploy:deploy-file -Dfile=pom.xml -DrepositoryId=artifactory -DpomFile=pom.xml -Durl=https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT }}
