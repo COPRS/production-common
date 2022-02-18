@@ -159,7 +159,7 @@ jobs:
     
   build-core:
     needs: [changes, core-changes, gg-scan]
-    if: ${{ needs.changes.outputs.libs == 'false' }}
+#    if: ${{ needs.changes.outputs.libs == 'false' }}
     strategy:
       matrix:
         component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
