@@ -97,6 +97,7 @@ runs:
       path: ${{ steps.scan.outputs.vulnerabilities }}
 
   - name: Push image
+    shell: bash
     run: |
       docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
           
