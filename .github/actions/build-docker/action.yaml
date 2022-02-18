@@ -5,7 +5,9 @@ inputs:
     required: true
   ARTIFACTORY_BASE:
     required: true
-  ARTIFACTORY_PROJECT:
+  ARTIFACTORY_PROJECT_DOCKER:
+    required: true
+  ARTIFACTORY_PROJECT_MAVEN:
     required: true
   WERUM_ARTIFACTORY_USER:
     required: true
@@ -40,7 +42,7 @@ runs:
   - name: Setup Maven settings.xml
     uses: whelk-io/maven-settings-xml-action@v11
     with:
-      repositories: '[{ "id": "artifactory", "url": "https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT }}" }]'
+      repositories: '[{ "id": "artifactory", "url": "https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT_MAVEN }}" }]'
       servers: '[{"id": "artifactory","username": "${{ inputs.WERUM_ARTIFACTORY_USER }}", "password": "${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}"}]'
    
   - name: Build jar 
@@ -58,7 +60,7 @@ runs:
   - name: Login to Artifcactory
     uses: docker/login-action@v1
     with:
-      registry: ${{ inputs.ARTIFACTORY_BASE }}/${{ inputs.ARTIFACTORY_PROJECT }}
+      registry: ${{ inputs.ARTIFACTORY_BASE }}/${{ inputs.ARTIFACTORY_PROJECT_DOCKER }}
       username: ${{ inputs.WERUM_ARTIFACTORY_USER }}
       password: ${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}
 
@@ -66,7 +68,7 @@ runs:
     id: meta
     uses: docker/metadata-action@v3
     with:
-      images: ${{ inputs.ARTIFACTORY_BASE }}/${{ inputs.ARTIFACTORY_PROJECT }}/${{ inputs.IMAGE_NAME }}-${{ inputs.COMPONENT }}
+      images: ${{ inputs.ARTIFACTORY_BASE }}/${{ inputs.ARTIFACTORY_PROJECT_DOCKER }}/${{ inputs.IMAGE_NAME }}-${{ inputs.COMPONENT }}
 
   - name: Build image
     uses: docker/build-push-action@v2

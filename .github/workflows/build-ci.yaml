@@ -159,7 +159,7 @@ jobs:
     
   build-core:
     needs: [changes, core-changes, gg-scan]
-#    if: ${{ needs.changes.outputs.libs == 'false' }}
+    if: ${{ needs.changes.outputs.libs == 'false' }}
     strategy:
       matrix:
         component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
@@ -170,7 +170,8 @@ jobs:
       with:
         COMPONENT: ${{ matrix.component }}
         ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
-        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
+        ARTIFACTORY_PROJECT_DOCKER: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
+        ARTIFACTORY_PROJECT_MAVEN: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
         WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
