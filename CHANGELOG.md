@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-rc7] - 2022-02-18
+### Added
+- N/A
+
+### Changed
+- RS-211: Removed configuration on not used ASP topics
+- RS-275: Modified the behaviour of the wrapper script to handle inputs
+
+### Removed
+- N/A
+
+## [0.3.0-rc6] - 2022-02-14
+### Added
+- N/A
+
+### Changed
+- N/A (rebuild)
+
+### Removed
+- N/A
+
+## [0.3.0-rc5] - 2022-02-02
+### Added
+- N/A
+
+### Changed
+- Adding boost-date-time library for S3 ACQ container
+
+### Removed
+- N/A
+
 ## [0.3.0-rc3] - 2022-02-02
 ### Added
 - N/A
