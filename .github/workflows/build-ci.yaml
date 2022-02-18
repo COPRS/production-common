@@ -126,7 +126,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: ./.github/actions/build-libs
       with:
-       COMPONENT: ${{ matrix.component }}
+        COMPONENT: ${{ matrix.component }}
         ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
         ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
         WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
