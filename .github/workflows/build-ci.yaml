@@ -116,46 +116,46 @@ jobs:
         GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
           
-  build-libs:
-    needs: [lib-changes, gg-scan]
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 1
-      matrix:
-        component: ${{ fromJSON(needs.lib-changes.outputs.packages) }}
-    steps:
-    - uses: actions/checkout@v2
-    - uses: ./.github/actions/build-libs
-      with:
-        COMPONENT: ${{ matrix.component }}
-        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
-        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
-        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+#  build-libs:
+#    needs: [lib-changes, gg-scan]
+#    runs-on: ubuntu-latest
+#    strategy:
+#      max-parallel: 1
+#      matrix:
+#        component: ${{ fromJSON(needs.lib-changes.outputs.packages) }}
+#    steps:
+#    - uses: actions/checkout@v2
+#    - uses: ./.github/actions/build-libs
+#      with:
+#        COMPONENT: ${{ matrix.component }}
+#        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+#        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
+#        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+#        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+#        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+#        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
      
-  build-all-core:
-    needs: [changes, build-libs]
-    if: ${{ needs.changes.outputs.libs == 'true' }}
-    strategy:
-      matrix:
-        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api, ddip-frontend]           
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: ./.github/actions/build-docker
-      with:
-        COMPONENT: ${{ matrix.component }}
-        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
-        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
-        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
-        IMAGE_NAME: ${{ env.IMAGE_NAME }}
-        VERSION: ${{ env.VERSION }}
-        COMMIT_ID: ${{ env.COMMIT_ID}}
+#  build-all-core:
+#    needs: [changes, build-libs]
+#    if: ${{ needs.changes.outputs.libs == 'true' }}
+#    strategy:
+#      matrix:
+#        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api, ddip-frontend]           
+#    runs-on: ubuntu-latest
+#    steps:
+#    - uses: actions/checkout@v2
+#    - uses: ./.github/actions/build-docker
+#      with:
+#        COMPONENT: ${{ matrix.component }}
+#        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+#        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
+#        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+#        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+#        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+#        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+#        IMAGE_NAME: ${{ env.IMAGE_NAME }}
+#        VERSION: ${{ env.VERSION }}
+#        COMMIT_ID: ${{ env.COMMIT_ID}}
     
   build-core:
     needs: [changes, core-changes, gg-scan]
