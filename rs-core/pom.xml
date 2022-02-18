@@ -379,5 +379,4 @@
     	<module>dissemination-worker</module>
     	<module>directory-cleaner</module>
 	</modules>
-	
 </project>
