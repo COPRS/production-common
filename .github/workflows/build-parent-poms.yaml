@@ -1,0 +1,44 @@
+name: Build Parent Poms
+
+on:
+  push:
+    paths:
+      - 'rs-core/pom.xml'
+      - 'rs-libs/pom.xml'
+  workflow_dispatch:
+  
+env:
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_MAVEN: rs-maven
+
+jobs:
+  parent-pom-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      poms: ${{ steps.filter.outputs.changes }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          rs-libs: 'rs-libs/pom.xml'
+          rs-core: 'rs-core/pom.xml'
+            
+  deploy-pom:
+    needs: parent-pom-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pom: ${{ fromJSON(needs.parent-pom-changes.outputs.poms) }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/deploy-pom
+      with:
+        POM: ${{ matrix.pom }}
+        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+    
+     
