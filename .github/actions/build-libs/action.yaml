@@ -57,3 +57,4 @@ runs:
     run: |
       cd rs-libs/${{ inputs.COMPONENT }}
       mvn jar:jar deploy:deploy -Dfile=target/*.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT }}
+      if [ "${{ inputs.COMPONENT }}" = "obs-sdk" ]; then mvn jar:test-jar deploy:deploy -Dfile=target/*-tests.jar -DrepositoryId=artifactory -DpomFile=pom.xml -DaltDeploymentRepository=artifactory::default::https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT }}; fi
