@@ -15,6 +15,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    
+  - name: Set environment variables
+    shell: bash
+    run: |
+      # Short name for current branch. For PRs, use target branch (base ref)
+      GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+      echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
       
   - name: Set up JDK 8
     uses: actions/setup-java@v2

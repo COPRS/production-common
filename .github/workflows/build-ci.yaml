@@ -24,10 +24,16 @@ jobs:
     outputs:
       libs: ${{ steps.filter.outputs.libs }}
     steps:
+    - name: Get Branch
+      shell: bash
+      run: |
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
       id: filter
       with:
+        base: 'develop'
         filters: |
           libs:
             - 'rs-libs/**'
@@ -37,10 +43,16 @@ jobs:
     outputs:
       exec-worker: ${{ steps.filter.outputs.exec-worker }}
     steps:
+    - name: Get Branch
+      shell: bash
+      run: |
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
       id: filter
       with:
+        base: 'develop'
         filters: |
           exec-worker:
             - 'rs-core/ipf-execution-worker/**'
@@ -55,10 +67,16 @@ jobs:
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
     steps:
+    - name: Get Branch
+      shell: bash
+      run: |
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
       id: filter
       with:
+        base: 'develop'
         filters: |
           lib-commons: 'rs-libs/lib-commons/**'
           app-status: 'rs-libs/app-status/**'
@@ -81,10 +99,16 @@ jobs:
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
     steps:
+    - name: Get Branch
+      shell: bash
+      run: |
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
       id: filter
       with:
+        base: 'develop'
         filters: |
           applicative-catalog: 'rs-core/applicative-catalog/**'
           archives: 'rs-core/archives/**'
