@@ -315,6 +315,11 @@ then
 	exit 255
 fi
 
+# DDC checks for the existance of an host configuration file and will log error messages
+# if not finding it. We are creating an empty file to supress this error. If it does exist,
+# nothing happens
+touch "/data/ACQ/$(hostname).xml"
+
 link_inputs
 
 # The DDC binary terminates, but the process will still be running in the background
