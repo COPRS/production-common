@@ -109,6 +109,7 @@ ENTRYPOINT ["/tini", "--"]
 
 RUN mkdir -p /data/localWD && chown ops3pdgs:ops3pdgs /data/localWD
 RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
+RUN mv /data/NRTAP /data/localWD
 
 USER ops3pdgs:ops3pdgs
 
