@@ -32,6 +32,24 @@ jobs:
           libs:
             - 'rs-libs/**'
             
+  exec-worker-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      exec-worker: ${{ steps.filter.outputs.exec-worker }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          exec-worker:
+            - 'rs-core/ipf-execution-worker/**'
+            - 'rs-libs/obs-sdk/**'
+            - 'rs-libs/lib-commons/**'
+            - 'rs-libs/app-status/**'
+            - 'rs-libs/mqi-client/**'
+            - 'rs-libs/metadata-client/**'
+            
   lib-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -102,6 +120,12 @@ jobs:
   gg-scan:
     runs-on: ubuntu-latest
     steps:
+    - name: Set environment variables
+      shell: bash
+      run: |
+        # Short name for current branch. For PRs, use target branch (base ref)
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
@@ -127,8 +151,6 @@ jobs:
     - uses: ./.github/actions/build-libs
       with:
         COMPONENT: ${{ matrix.component }}
-        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
-        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
         WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
@@ -147,16 +169,10 @@ jobs:
     - uses: ./.github/actions/build-docker
       with:
         COMPONENT: ${{ matrix.component }}
-        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
-        ARTIFACTORY_PROJECT_DOCKER: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
-        ARTIFACTORY_PROJECT_MAVEN: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
         WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
         SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
-        IMAGE_NAME: ${{ env.IMAGE_NAME }}
-        VERSION: ${{ env.VERSION }}
-        COMMIT_ID: ${{ env.COMMIT_ID}}
     
   build-core:
     needs: [changes, core-changes, gg-scan]
@@ -171,39 +187,34 @@ jobs:
     - uses: ./.github/actions/build-docker
       with:
         COMPONENT: ${{ matrix.component }}
-        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
-        ARTIFACTORY_PROJECT_DOCKER: ${{ env.ARTIFACTORY_PROJECT_DOCKER}}
-        ARTIFACTORY_PROJECT_MAVEN: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
         WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
         SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
-        IMAGE_NAME: ${{ env.IMAGE_NAME }}
-        VERSION: ${{ env.VERSION }}
-        COMMIT_ID: ${{ env.COMMIT_ID}}
+
        
 
-#  # If the execution-worker-jar is updated also update the ACQ simulator docker image
-#  build-acq-simulator:
-#    needs: build-core
-#    if: ${{ inputs.exec-worker }}
-#    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop-build
-#    secrets:
-#      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-#      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-#      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+  # If the execution-worker-jar is updated also update the ACQ simulator docker image
+  build-acq-simulator:
+    needs: [exec-worker-changes, build-core, build-all-core]
+    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' }}
+    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop-build
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
-#  # If the execution-worker-jar is updated also update the S1 IPF Simulator image
-#  build-s1-ipf-simulator:
-#    needs: build-core
-#    if: ${{ inputs.exec-worker }}
-#    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop-build
-#    secrets:
-#      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-#      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-#      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+  # If the execution-worker-jar is updated also update the S1 IPF Simulator image
+  build-s1-ipf-simulator:
+    needs: [exec-worker-changes, build-core, build-all-core]
+    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' }}
+    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop-build
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
  
-#  # If the execution-worker-jar is updated also update the S1 IPF AIO image    
+  # If the execution-worker-jar is updated also update the S3 IPF AIO image    
 #  build-ipf-s1-aio:
 #    needs: build-core
 #    if: ${{ inputs.exec-worker }}
