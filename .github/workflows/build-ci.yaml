@@ -33,7 +33,7 @@ jobs:
     - uses: dorny/paths-filter@v2
       id: filter
       with:
-        base: 'develop'
+        base: ${{ env.GIT_BRANCH }}
         filters: |
           libs:
             - 'rs-libs/**'
@@ -52,7 +52,7 @@ jobs:
     - uses: dorny/paths-filter@v2
       id: filter
       with:
-        base: 'develop'
+        base: ${{ env.GIT_BRANCH }}
         filters: |
           exec-worker:
             - 'rs-core/ipf-execution-worker/**'
@@ -76,7 +76,7 @@ jobs:
     - uses: dorny/paths-filter@v2
       id: filter
       with:
-        base: 'develop'
+        base: ${{ env.GIT_BRANCH }}
         filters: |
           lib-commons: 'rs-libs/lib-commons/**'
           app-status: 'rs-libs/app-status/**'
@@ -108,7 +108,7 @@ jobs:
     - uses: dorny/paths-filter@v2
       id: filter
       with:
-        base: 'develop'
+        base: ${{ env.GIT_BRANCH }}
         filters: |
           applicative-catalog: 'rs-core/applicative-catalog/**'
           archives: 'rs-core/archives/**'
@@ -197,6 +197,9 @@ jobs:
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
         SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+    - uses: ./.github/actions/generate-report
+      with:
+        COMPONENT: ${{ matrix.component }}
     
   build-core:
     needs: [changes, core-changes, gg-scan]
@@ -215,8 +218,10 @@ jobs:
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
         SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+    - uses: ./.github/actions/generate-report
+      with:
+        COMPONENT: ${{ matrix.component }}
 
-       
 
   # If the execution-worker-jar is updated also update the ACQ simulator docker image
   build-acq-simulator:
