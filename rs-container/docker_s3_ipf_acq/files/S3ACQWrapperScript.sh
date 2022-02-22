@@ -91,9 +91,9 @@ function link_inputs() {
     
     # Hard link the channels from working directory to DDC input directory
     echo "Preparing channel 1"
-    ln -v $workingdir/ch01/* $TARGET_DIR/ch_1
+    ln -s $workingdir/ch01 $TARGET_DIR/ch_1
     echo "Preparing channel 2"
-    ln -v $workingdir/ch02/* $TARGET_DIR/ch_2
+    ln -s $workingdir/ch02 $TARGET_DIR/ch_2
     
     # Just for debugging purposes
     echo "Listing target directory $TARGET_DIR"
