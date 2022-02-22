@@ -6,7 +6,6 @@ on:
       - 'rs-core/**'
       - 'rs-libs/**'
       - '.github/workflows/build-ci.yaml'
-      - '.github/workflows/build-docker.yaml'
       - '.github/actions/**'
   workflow_dispatch:
 
