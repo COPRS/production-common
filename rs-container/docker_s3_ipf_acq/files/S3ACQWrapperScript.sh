@@ -87,7 +87,7 @@ function link_inputs() {
     
     # Create a directories for the DDC
     TARGET_DIR="/data/NRTAP/CADU/$SATID/${SESSION_NAME}_dat/"
-    mkdir -p ${TARGET_DIR}/{ch_1,ch_2}
+    mkdir -p ${TARGET_DIR}
     
     # Hard link the channels from working directory to DDC input directory
     echo "Preparing channel 1"
@@ -195,7 +195,7 @@ function create_l0pp_joborders() {
 	log "Create DIWorkOrders for L0Pre and L0Post processor in working directories"
 	# Create JobOrder for L0Pre and L0Post processors
 	/opt/convertL0OrderISP.py ${isp_files[0]} $WORKINGDIR_PATH/1/JobOrder.xml
-        /opt/convertL0OrderTF.py ${tf_files[0]} $WORKINGDIR_PATH/2/JobOrder.xml
+    /opt/convertL0OrderTF.py ${tf_files[0]} $WORKINGDIR_PATH/2/JobOrder.xml
 
 	log "Finished preparing working directories for L0Pre processor"
 }
@@ -318,7 +318,12 @@ fi
 # DDC checks for the existance of an host configuration file and will log error messages
 # if not finding it. We are creating an empty file to supress this error. If it does exist,
 # nothing happens
-touch "/data/ACQ/conf/$(hostname).xml"
+cat <<EOF > /data/ACQ/conf/$(hostname).xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<root>
+</root>
+EOF
+
 
 link_inputs
 
