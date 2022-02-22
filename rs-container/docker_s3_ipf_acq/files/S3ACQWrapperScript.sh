@@ -318,7 +318,7 @@ fi
 # DDC checks for the existance of an host configuration file and will log error messages
 # if not finding it. We are creating an empty file to supress this error. If it does exist,
 # nothing happens
-touch "/data/ACQ/$(hostname).xml"
+touch "/data/ACQ/conf/$(hostname).xml"
 
 link_inputs
 
