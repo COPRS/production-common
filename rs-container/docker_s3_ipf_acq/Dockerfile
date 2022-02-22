@@ -1,6 +1,6 @@
 ARG BRANCH
 FROM ghcr.io/coprs/rs-core:${BRANCH} as build
-WORKDIR /app
+WORKDIR /app 
 
 #FROM artifactory.coprs.esa-copernicus.eu/cfi/sentinel3/s3-ipf0:06.12
 FROM centos:7
@@ -109,6 +109,7 @@ ENTRYPOINT ["/tini", "--"]
 
 RUN mkdir -p /data/localWD && chown ops3pdgs:ops3pdgs /data/localWD
 RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
+RUN mv /data/NRTAP /data/localWD && ln -s /data/localWD/NRTAP /data/NRTAP
 
 USER ops3pdgs:ops3pdgs
 
