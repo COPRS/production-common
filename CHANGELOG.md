@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-rc10] - TBD
+### Added
+- N/A
+
+### Changed
+- RS-283: Fixing typo in AUXIP configuration causing restarts
+
+### Removed
+- N/A
+
 ## [0.3.0-rc9] - 2022-02-22
 ### Added
 - N/A
