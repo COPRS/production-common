@@ -67,6 +67,7 @@ public class OutputProcessorTest {
      * Processor to test
      */
     private OutputProcessor processor;
+    private OutputProcessor processorWithWildcardList;
 
     /**
      * OBS service
@@ -182,6 +183,10 @@ public class OutputProcessorTest {
                 new OutputProcessor(obsClient, procuderFactory, inputMessage,
                         PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
 
+        processorWithWildcardList =
+                new OutputProcessor(obsClient, procuderFactory, inputMessage,
+                        "*.list", 2, "MONITOR", ApplicationLevel.S3_L0, properties);
+        
         // Mocks
         doNothing().when(obsClient).upload(Mockito.any(), Mockito.any());
         doReturn(null).when(procuderFactory)
@@ -218,6 +223,37 @@ public class OutputProcessorTest {
         method.setAccessible(true);
 
         final List<String> result = (List) method.invoke(processor);
+        assertEquals(9, result.size());
+        assertEquals(
+                "NRT/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP",
+                result.get(0));
+        assertEquals(
+                "NRT/S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.ISIP",
+                result.get(1));
+        assertEquals("NRT/report.xml", result.get(2));
+        assertEquals("report_1.xml", result.get(3));
+        assertEquals("report_2.xml", result.get(4));
+        assertEquals("S1A_BLANK_FILE.EOF", result.get(5));
+    }
+    
+    /**
+     * TEst the file name extraction from the list file, when a wildcard is provided
+     * 
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    public void testExtractFilesWithWildcard() throws NoSuchMethodException,
+            SecurityException, IllegalAccessException, IllegalArgumentException,
+            InvocationTargetException {
+        final Method method = processorWithWildcardList.getClass().getDeclaredMethod("extractFiles");
+        method.setAccessible(true);
+
+        final List<String> result = (List) method.invoke(processorWithWildcardList);
         assertEquals(9, result.size());
         assertEquals(
                 "NRT/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP",
