@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ### Changed
+- RS-282: Fixing wrong image usage for S3 L0 IPF enforcing always to use simulator
 - RS-283: Fixing typo in AUXIP configuration causing restarts
+- RS-286: Fixing issue causing S3 L0 IPF to parse wrong .LIST file
 
 ### Removed
 - N/A
