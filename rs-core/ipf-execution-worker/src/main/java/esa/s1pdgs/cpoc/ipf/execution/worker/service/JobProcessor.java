@@ -245,7 +245,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 		} else if (EnumSet
 				.of(ApplicationLevel.S3_L0, ApplicationLevel.S3_L1, ApplicationLevel.S3_L2, ApplicationLevel.S3_PDU)
 				.contains(properties.getLevel())) {
-			outputListFile = job.getWorkDirectory() + "product.LIST";
+			outputListFile = "*.LIST";
 			category = ProductCategory.S3_PRODUCTS;
 		} else if(properties.getLevel() == ApplicationLevel.SPP_MBU) {
 			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
@@ -524,6 +524,7 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 					// TODO: possible candidate to use instead, if dumping of deleted files not required: FileUtils.delete(workingDir.toString());
 	                Files.walk(workingDir, FileVisitOption.FOLLOW_LINKS)
                     .sorted(Comparator.reverseOrder()).map(Path::toFile)
+                    .filter(filename-> !filename.getName().equals("lost+found"))
                     .forEach(File::delete);
 				} catch (final IOException e) {
 					LOGGER.error("Failed to erase local working directory '{}: {}'", workingDir.toString(),

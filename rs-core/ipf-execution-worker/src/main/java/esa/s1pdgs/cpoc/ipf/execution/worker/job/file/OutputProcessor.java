@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -194,8 +197,22 @@ public class OutputProcessor {
 	private List<String> extractFiles() throws InternalErrorException {
 		LOGGER.info("{} 1 - Extracting list of outputs", prefixMonitorLogs);
 		try {
-			return Files.lines(Paths.get(listFile)).collect(Collectors.toList());
-		} catch (final IOException ioe) {
+			// Allow wildcard * for List-File, searching for *.LIST
+			if (listFile.contains("*")) {
+				File dir = new File(workDirectory);
+				FileFilter fileFilter = new WildcardFileFilter(listFile);
+				List<File> files = Arrays.asList(dir.listFiles(fileFilter));
+
+				if (files.size() != 1) {
+					throw new InternalErrorException(
+							"Found an unexpected number of LIST-files. Expected 1 found " + files.size() + ".");
+				}
+
+				return Files.lines(files.get(0).toPath()).collect(Collectors.toList());
+			} else {
+				return Files.lines(Paths.get(listFile)).collect(Collectors.toList());
+			}
+		} catch (final IOException | NullPointerException ioe) {
 			throw new InternalErrorException("Cannot parse result list file " + listFile + ": " + ioe.getMessage(),
 					ioe);
 		}
