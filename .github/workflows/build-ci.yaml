@@ -222,7 +222,7 @@ jobs:
   # If the execution-worker-jar is updated also update the ACQ simulator docker image
   build-acq-simulator:
     needs: [exec-worker-changes, build-core, build-all-core]
-    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' && (build-core.status == 'success' || build-all-core.status == 'success') }}
+    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' && (needs.build-core.status == 'success' || needs.build-all-core.status == 'success') }}
     uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop-build
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
@@ -232,7 +232,7 @@ jobs:
   # If the execution-worker-jar is updated also update the S1 IPF Simulator image
   build-s1-ipf-simulator:
     needs: [exec-worker-changes, build-core, build-all-core]
-    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' && (build-core.status == 'success' || build-all-core.status == 'success') }}
+    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' && (needs.build-core.status == 'success' || needs.build-all-core.status == 'success') }}
     uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop-build
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
