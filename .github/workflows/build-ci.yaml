@@ -18,23 +18,23 @@ env:
   ARTIFACTORY_PROJECT_MAVEN: rs-maven
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      libs: ${{ steps.filter.outputs.libs }}
-    steps:
-    - name: Extract image tag name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
-      id: extract_branch
-    - uses: actions/checkout@v2
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        base: ${{ steps.extract_branch.outputs.branch }}
-        filters: |
-          libs:
-            - 'rs-libs/**'
+#  changes:
+#    runs-on: ubuntu-latest
+#    outputs:
+#      libs: ${{ steps.filter.outputs.libs }}
+#    steps:
+#    - name: Extract image tag name
+#      shell: bash
+#      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+#      id: extract_branch
+#    - uses: actions/checkout@v2
+#    - uses: dorny/paths-filter@v2
+#      id: filter
+#      with:
+#        base: ${{ steps.extract_branch.outputs.branch }}
+#        filters: |
+#          libs:
+#            - 'rs-libs/**'
             
   exec-worker-changes:
     runs-on: ubuntu-latest
@@ -160,6 +160,7 @@ jobs:
           
   build-libs:
     needs: [lib-changes, gg-scan]
+    if: ${{ needs.lib-changes.outputs.packages_count > 0 }}
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
@@ -176,8 +177,8 @@ jobs:
         SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
      
   build-all-core:
-    needs: [changes, build-libs]
-    if: ${{ needs.changes.outputs.libs == 'true' }}
+    needs: [lib-changes, build-libs]
+    if: ${{ needs.lib-changes.outputs.packages_count > 0 }}
     strategy:
       fail-fast: false
       matrix:
@@ -197,8 +198,8 @@ jobs:
         COMPONENT: ${{ matrix.component }}
     
   build-core:
-    needs: [changes, core-changes, gg-scan]
-    if: ${{ needs.changes.outputs.libs == 'false' }}
+    needs: [core-changes, gg-scan]
+    if: ${{ needs.core-changes.outputs.packages_count > 0 }}
     strategy:
       fail-fast: false
       matrix:
@@ -221,7 +222,7 @@ jobs:
   # If the execution-worker-jar is updated also update the ACQ simulator docker image
   build-acq-simulator:
     needs: [exec-worker-changes, build-core, build-all-core]
-    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' }}
+    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' && (build-core.status == 'success' || build-all-core.status == 'success') }}
     uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop-build
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
@@ -231,7 +232,7 @@ jobs:
   # If the execution-worker-jar is updated also update the S1 IPF Simulator image
   build-s1-ipf-simulator:
     needs: [exec-worker-changes, build-core, build-all-core]
-    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' }}
+    if: ${{ needs.exec-worker-changes.outputs.exec-worker == 'true' && (build-core.status == 'success' || build-all-core.status == 'success') }}
     uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop-build
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
