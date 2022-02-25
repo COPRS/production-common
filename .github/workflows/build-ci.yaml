@@ -17,48 +17,7 @@ env:
   ARTIFACTORY_PROJECT_DOCKER: werum-docker
   ARTIFACTORY_PROJECT_MAVEN: rs-maven
 
-jobs:
-#  changes:
-#    runs-on: ubuntu-latest
-#    outputs:
-#      libs: ${{ steps.filter.outputs.libs }}
-#    steps:
-#    - name: Extract image tag name
-#      shell: bash
-#      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
-#      id: extract_branch
-#    - uses: actions/checkout@v2
-#    - uses: dorny/paths-filter@v2
-#      id: filter
-#      with:
-#        base: ${{ steps.extract_branch.outputs.branch }}
-#        filters: |
-#          libs:
-#            - 'rs-libs/**'
-            
-  exec-worker-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      exec-worker: ${{ steps.filter.outputs.exec-worker }}
-    steps:
-    - name: Extract image tag name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
-      id: extract_branch
-    - uses: actions/checkout@v2
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        base: ${{ steps.extract_branch.outputs.branch }}
-        filters: |
-          exec-worker:
-            - 'rs-core/ipf-execution-worker/**'
-            - 'rs-libs/obs-sdk/**'
-            - 'rs-libs/lib-commons/**'
-            - 'rs-libs/app-status/**'
-            - 'rs-libs/mqi-client/**'
-            - 'rs-libs/metadata-client/**'
-            
+jobs:   
   lib-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -136,6 +95,29 @@ jobs:
           request-repository: 'rs-core/request-repository/**'
           validation: 'rs-core/validation/**'
           
+  exec-worker-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      exec-worker: ${{ steps.filter.outputs.exec-worker }}
+    steps:
+    - name: Extract image tag name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+      id: extract_branch
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        base: ${{ steps.extract_branch.outputs.branch }}
+        filters: |
+          exec-worker:
+            - 'rs-core/ipf-execution-worker/**'
+            - 'rs-libs/obs-sdk/**'
+            - 'rs-libs/lib-commons/**'
+            - 'rs-libs/app-status/**'
+            - 'rs-libs/mqi-client/**'
+            - 'rs-libs/metadata-client/**'
+          
   gg-scan:
     runs-on: ubuntu-latest
     steps:
@@ -175,7 +157,28 @@ jobs:
         WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
         SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
         SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
-     
+    
+  build-core:
+    needs: [lib-changes, core-changes, gg-scan]
+    if: ${{ needs.lib-changes.outputs.packages == '[]' && needs.core-changes.outputs.packages != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-docker
+      with:
+        COMPONENT: ${{ matrix.component }}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+    - uses: ./.github/actions/generate-report
+      with:
+        COMPONENT: ${{ matrix.component }}
+
   build-all-core:
     needs: [lib-changes, build-libs]
     if: ${{ needs.lib-changes.outputs.packages != '[]' }}
@@ -196,28 +199,6 @@ jobs:
     - uses: ./.github/actions/generate-report
       with:
         COMPONENT: ${{ matrix.component }}
-    
-  build-core:
-    needs: [core-changes, gg-scan]
-    if: ${{ needs.core-changes.outputs.packages != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: ./.github/actions/build-docker
-      with:
-        COMPONENT: ${{ matrix.component }}
-        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
-    - uses: ./.github/actions/generate-report
-      with:
-        COMPONENT: ${{ matrix.component }}
-
 
   # If the execution-worker-jar is updated also update the ACQ simulator docker image
   build-acq-simulator:
