@@ -160,7 +160,7 @@ jobs:
           
   build-libs:
     needs: [lib-changes, gg-scan]
-    if: ${{ needs.lib-changes.outputs.packages_count > 0 }}
+    if: ${{ needs.lib-changes.outputs.packages != 0 }}
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
@@ -178,7 +178,7 @@ jobs:
      
   build-all-core:
     needs: [lib-changes, build-libs]
-    if: ${{ needs.lib-changes.outputs.packages_count > 0 }}
+    if: ${{ needs.lib-changes.outputs.packages != 0 }}
     strategy:
       fail-fast: false
       matrix:
@@ -199,7 +199,7 @@ jobs:
     
   build-core:
     needs: [core-changes, gg-scan]
-    if: ${{ needs.core-changes.outputs.packages_count > 0 }}
+    if: ${{ needs.core-changes.outputs.packages != 0 }}
     strategy:
       fail-fast: false
       matrix:
