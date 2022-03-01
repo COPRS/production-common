@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM ghcr.io/coprs/rs-core:${BRANCH} as build
+FROM ghcr.io/coprs/rs-core-ipf-execution-worker:${BRANCH} as build
 
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
 ARG VERSION
