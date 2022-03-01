@@ -16,7 +16,7 @@ RUN apk update && apk add python2
 
 COPY files/* /opt/
 
-COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/s1pdgs-ipf-execution-worker.jar s1pdgs-ipf-execution-worker.jar
 COPY /config/start.sh start.sh
 
 #create local WD
