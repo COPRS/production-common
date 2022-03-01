@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM ghcr.io/coprs/rs-core:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-ipf-execution-worker:${BRANCH} as build
 WORKDIR /app
 
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
@@ -27,7 +27,7 @@ RUN apk add rsync
 ADD files/linkBin.sh /app/linkBin.sh
 RUN /app/linkBin.sh
 
-COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar /app/s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/s1pdgs-ipf-execution-worker.jar s1pdgs-ipf-execution-worker.jar
 ADD files/start.sh /app/start.sh
 
 ADD files/ipf-sim-for-tc25.sh /usr/local/components/S3IPF_L0_05.02/bin/OL_0_CR_.bin
