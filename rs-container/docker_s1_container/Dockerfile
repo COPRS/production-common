@@ -40,3 +40,4 @@ RUN ln -s /usr/local/components/OQCSimulator/bin/oqcSimulator.sh /usr/local/comp
 
 WORKDIR /data/localWD/
 ENTRYPOINT ["/bin/bash"]
+

@@ -29,4 +29,3 @@ RUN chown s1pdgs:s1pdgs /data/oqcWD
 USER s1pdgs:s1pdgs
 
 CMD ["/app/start.sh"]
- 

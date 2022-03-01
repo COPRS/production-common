@@ -36,3 +36,4 @@ ADD files/ipf-sim-for-tc25.sh /usr/local/components/S3IPF_L0_05.02/bin/OL_0_CR_.
 RUN mkdir -p /data/ipf-s3
 
 CMD ["/app/start.sh"]
+ 

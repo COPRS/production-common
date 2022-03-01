@@ -113,4 +113,3 @@ RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
 USER ops3pdgs:ops3pdgs
 
 CMD ["/app/start.sh"]
- 

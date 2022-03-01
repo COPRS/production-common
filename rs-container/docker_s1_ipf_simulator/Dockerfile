@@ -27,3 +27,4 @@ RUN apk add --no-cache tini
 ENTRYPOINT ["/sbin/tini", "--"] 
 
 CMD ["/app/start.sh"]
+ 

@@ -26,4 +26,3 @@ ENTRYPOINT ["/tini", "--"]
 USER s1pdgs:s1pdgs
 
 CMD ["/app/start.sh"]
- 
