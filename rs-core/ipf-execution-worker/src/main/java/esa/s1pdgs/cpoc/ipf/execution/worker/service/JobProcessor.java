@@ -6,14 +6,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -521,16 +526,37 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 			if (Files.exists(workingDir)) {
 				try {
 					LOGGER.info("Erasing local working directory '{}'", workingDir.toString());
-					// TODO: possible candidate to use instead, if dumping of deleted files not required: FileUtils.delete(workingDir.toString());
-	                Files.walk(workingDir, FileVisitOption.FOLLOW_LINKS)
-                    .sorted(Comparator.reverseOrder()).map(Path::toFile)
-                    .filter(filename-> !filename.getName().equals("lost+found"))
-                    .forEach(File::delete);
-				} catch (final IOException e) {
+					/*
+					 *  Normal file walk will raise an AccessDeniedException, e.g. when a lost and found directory does exist.
+					 *  This we are using an own visitor that just deleted what is possible and will ignore items it is not
+					 *  able to access
+					 */
+					
+					Files.walkFileTree(workingDir,
+							new HashSet<FileVisitOption>(Arrays.asList(FileVisitOption.FOLLOW_LINKS)), Integer.MAX_VALUE,
+							new SimpleFileVisitor<Path>() {
+								@Override
+								public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+									Files.delete(file);
+									return FileVisitResult.CONTINUE;
+								}
+
+								@Override
+								public FileVisitResult visitFileFailed(Path file, IOException e) throws IOException {
+									return FileVisitResult.SKIP_SUBTREE;
+								}
+								
+								@Override
+								public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
+									Files.delete(dir);
+									return FileVisitResult.CONTINUE; 
+								}						
+							});
+				} catch (IOException e) {
 					LOGGER.error("Failed to erase local working directory '{}: {}'", workingDir.toString(),
 							e.getMessage());
 					this.appStatus.setError("PROCESSING");
-				}
+				}				
 			}
 
 		} else {
