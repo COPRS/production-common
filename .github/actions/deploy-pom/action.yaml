@@ -1,0 +1,36 @@
+name: 'Deploy Pom'
+description: 'Deploys pom.xml'
+inputs:
+  POM:
+    required: true
+  ARTIFACTORY_BASE:
+    required: true
+  ARTIFACTORY_PROJECT:
+    required: true
+  WERUM_ARTIFACTORY_USER:
+    required: true
+  WERUM_ARTIFACTORY_PASSWORD:
+    required: true
+
+    
+runs:
+  using: "composite"
+  steps:
+      
+  - name: Set up JDK 8
+    uses: actions/setup-java@v2
+    with:
+      java-version: '8'
+      distribution: 'adopt'
+  
+  - name: Setup Maven settings.xml
+    uses: whelk-io/maven-settings-xml-action@v11
+    with:
+      repositories: '[{ "id": "artifactory", "url": "https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT }}" }]'
+      servers: '[{"id": "artifactory","username": "${{ inputs.WERUM_ARTIFACTORY_USER }}", "password": "${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}"}]'
+
+  - name: Push to Artifactory
+    shell: bash
+    run: |
+      cd ${{ inputs.POM }}
+      mvn deploy:deploy-file -Dfile=pom.xml -DrepositoryId=artifactory -DpomFile=pom.xml -Durl=https://${{ inputs.ARTIFACTORY_BASE }}/artifactory/${{ inputs.ARTIFACTORY_PROJECT }}

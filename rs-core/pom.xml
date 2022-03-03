@@ -349,12 +349,6 @@
 
 	<modules>
 		<module>applicative-catalog</module>
-		<module>app-catalog-client</module>
-		<module>xbip-client</module>
-		<module>auxip-client</module>
-		<module>edip-client</module>
-		<module>error-repo-client</module>
-		<module>app-status</module>
 		<module>archives</module>
 		<module>disseminator</module>
 		<module>ingestion-trigger</module>
@@ -362,8 +356,6 @@
 		<module>ingestion-worker</module>
 		<module>production-trigger</module>
  		<module>ipf-preparation-worker</module> 
-		<module>lib-commons</module>
-		<module>message-adapter</module>
 		<module>ipf-execution-worker</module>
 		<module>request-repository</module>
 		<module>queue-watcher</module>
@@ -371,27 +363,21 @@
 		<module>metadata-catalog-timer</module>
 		<module>metadata-catalog-trigger</module>
 		<module>metadata-catalog-worker</module>
-		<module>metadata-client</module>
-		<module>mqi-client</module>
 		<module>mqi-server</module>
-		<module>obs-sdk</module>
 		<module>prip-trigger</module>
 		<module>prip-worker</module>
  		<module>prip-frontend</module>
-		<module>prip-client</module>
 		<module>ddip-frontend</module>
     	<module>native-api</module>
 		<module>data-lifecycle-trigger</module>
-		<module>data-lifecycle-client</module>
 		<module>data-request-worker</module>
 		<module>eviction-management-worker</module>
 		<module>validation</module>
 		<module>compression-trigger</module>
 		<module>compression-worker</module>
-		<module>xml-tools</module>
 		<module>dissemination-trigger</module>
     	<module>dissemination-worker</module>
     	<module>directory-cleaner</module>
-    	<module>jacoco-report</module>
 	</modules>
+	
 </project>

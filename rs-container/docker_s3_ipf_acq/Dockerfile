@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM ghcr.io/coprs/rs-core:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-ipf-execution-worker:${BRANCH} as build
 WORKDIR /app 
 
 #FROM artifactory.coprs.esa-copernicus.eu/cfi/sentinel3/s3-ipf0:06.12
@@ -94,8 +94,8 @@ RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
 # Adding execution worker
-COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
-COPY --from=build /app/ipf-execution-worker/config/start.sh /app/start.sh
+COPY --from=build /app/s1pdgs-ipf-execution-worker.jar s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/start.sh /app/start.sh
 
 # Adding ACQ wrapper scripts
 COPY files /opt
@@ -113,4 +113,3 @@ RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
 USER ops3pdgs:ops3pdgs
 
 CMD ["/app/start.sh"]
- 

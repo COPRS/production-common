@@ -4,162 +4,207 @@ on:
   push:
     paths:
       - 'rs-core/**'
+      - 'rs-libs/**'
       - '.github/workflows/build-ci.yaml'
-      - '.github/workflows/build-docker.yaml'
+      - '.github/actions/**'
   workflow_dispatch:
 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: coprs/rs-core
+  IMAGE_NAME: rs-core
   VERSION: 3.32.1
   COMMIT_ID: ${{ github.sha }}
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_DOCKER: werum-docker
+  ARTIFACTORY_PROJECT_MAVEN: rs-maven
 
-jobs:
-  build:
+jobs:   
+  lib-changes:
     runs-on: ubuntu-latest
     outputs:
-      exec-worker: ${{ steps.filter.outputs.exec-worker }}    
-    
+      packages: ${{ steps.filter.outputs.changes }}
     steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
-        id: extract_branch
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v1
-        with:
-          driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # fetch all history so multiple commits can be scanned
-
-      - name: GitGuardian scan
-        uses: GitGuardian/gg-shield-action@master
-        env:
-          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
-          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
-
-      - name: Login to Github Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-                    
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-              
-      - name: Build image
-        uses: docker/build-push-action@v2
-        with:
-          load: true
-          context: ./rs-core
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            BRANCH=${{ steps.extract_branch.outputs.branch }}
-            BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
-            VERSION=${{ env.VERSION }}
-            COMMIT_ID=${{ env.COMMIT_ID }}
-            SONARQUBE_HOST=${{ secrets.SONARQUBE_HOST }}
-            SONARQUBE_TOKEN=${{ secrets.WERUM_SONARQUBE_TOKEN }}
-            PROJECT_KEY=${{ github.repository }}
-
-      - name: Scan image
-        uses: anchore/scan-action@v2
-        id: scan
-        with:
-          image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
-          acs-report-enable: true
-          fail-build: false
-          severity-cutoff: critical
-
-      - name: Upload Anchore scan SARIF report
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: ${{ steps.scan.outputs.sarif }}
-
-      - name: Upload Anchore scan json report
-        uses: actions/upload-artifact@master
-        with:
-          name: vulnerabilities-build
-          path: ${{ steps.scan.outputs.vulnerabilities }}
-
-      - name: Push image
-        run: |
-          docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
-
-      - name: Determine if exec worker docker images need to be build
-        uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            exec-worker:
-              - 'rs-core/ipf-execution-worker/**'
-              - 'rs-core/obs-sdk/**'
-              - 'rs-core/lib-commons/**'
-              - 'rs-core/app-status/**'
-              - 'rs-core/mqi-client/**'
-              - 'rs-core/metadata-client/**'
-
-  generate-reports:
-    needs: build 
+    - name: Extract image tag name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+      id: extract_branch
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        base: ${{ steps.extract_branch.outputs.branch }}
+        filters: |
+          lib-commons: 'rs-libs/lib-commons/**'
+          app-status: 'rs-libs/app-status/**'
+          message-adapter: 'rs-libs/message-adapter/**'
+          xml-tools: 'rs-libs/xml-tools/**'
+          error-repo-client: 'rs-libs/error-repo-client/**'
+          app-catalog-client: 'rs-libs/app-catalog-client/**'
+          obs-sdk: 'rs-libs/obs-sdk/**'
+          mqi-client: 'rs-libs/mqi-client/**'
+          metadata-client: 'rs-libs/metadata-client/**'
+          prip-client: 'rs-libs/prip-client/**'
+          auxip-client: 'rs-libs/auxip-client/**'
+          xbip-client: 'rs-libs/xbip-client/**'
+          edip-client: 'rs-libs/edip-client/**'
+          data-lifecycle-client: 'rs-libs/data-lifecycle-client/**'
+          jacoco-report: 'rs-libs/jacoco-report/**'
+          
+  core-changes:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
+    outputs:
+      packages: ${{ steps.filter.outputs.changes }}
     steps:
-      - name: Download json report from build jobs
-        uses: actions/download-artifact@v2
-        with:
-          name: vulnerabilities-build
+    - name: Extract image tag name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+      id: extract_branch
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        base: ${{ steps.extract_branch.outputs.branch }}
+        filters: |
+          applicative-catalog: 'rs-core/applicative-catalog/**'
+          archives: 'rs-core/archives/**'
+          compression-trigger: 'rs-core/compression-trigger/**'
+          compression-worker: 'rs-core/compression-worker/**'
+          data-lifecycle-trigger: 'rs-core/data-lifecycle-trigger/**'
+          data-request-worker: 'rs-core/data-request-worker/**'
+          ddip-frontend: 'rs-core/ddip-frontend/**'
+          directory-cleaner: 'rs-core/directory-cleaner/**'
+          dissemination-trigger: 'rs-core/dissemination-trigger/**'
+          dissemination-worker: 'rs-core/dissemination-worker/**'
+          disseminator: 'rs-core/disseminator/**'
+          eviction-management-worker: 'rs-core/eviction-management-worker/**'
+          ingestion-filter: 'rs-core/ingestion-filter/**'
+          ingestion-trigger: 'rs-core/ingestion-trigger/**'
+          ingestion-worker: 'rs-core/ingestion-worker/**'
+          ipf-execution-worker: 'rs-core/ipf-execution-worker/**'
+          ipf-preparation-worker: 'rs-core/ipf-preparation-worker/**'
+          metadata-catalog-timer: 'rs-core/metadata-catalog-timer/**'
+          metadata-catalog-trigger: 'rs-core/metadata-catalog-trigger/**'
+          metadata-catalog-worker: 'rs-core/metadata-catalog-worker/**'
+          mqi-server: 'rs-core/mqi-server/**'
+          native-api: 'rs-core/native-api/**'
+          on-demand-interface-provider: 'rs-core/on-demand-interface-provider/**'
+          prip-frontend: 'rs-core/prip-frontend/**'
+          prip-trigger: 'rs-core/prip-trigger/**'
+          prip-worker: 'rs-core/prip-worker/**'
+          production-trigger: 'rs-core/production-trigger/**'
+          queue-watcher: 'rs-core/queue-watcher/**'
+          request-repository: 'rs-core/request-repository/**'
+          validation: 'rs-core/validation/**'
+          
+  exec-worker-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      exec-worker: ${{ steps.filter.outputs.exec-worker }}
+    steps:
+    - name: Extract image tag name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+      id: extract_branch
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        base: ${{ steps.extract_branch.outputs.branch }}
+        filters: |
+          exec-worker:
+            - 'rs-core/ipf-execution-worker/**'
+            - 'rs-libs/obs-sdk/**'
+            - 'rs-libs/lib-commons/**'
+            - 'rs-libs/app-status/**'
+            - 'rs-libs/mqi-client/**'
+            - 'rs-libs/metadata-client/**'
+          
+  gg-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set environment variables
+      shell: bash
+      run: |
+        # Short name for current branch. For PRs, use target branch (base ref)
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: GitGuardian scan
+      uses: GitGuardian/gg-shield-action@master
+      env:
+        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
+          
+  build-libs:
+    needs: [lib-changes, gg-scan]
+    if: ${{ needs.lib-changes.outputs.packages != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        component: ${{ fromJSON(needs.lib-changes.outputs.packages) }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-libs
+      with:
+        COMPONENT: ${{ matrix.component }}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+    
+  build-core:
+    needs: [lib-changes, core-changes, gg-scan]
+    if: ${{ needs.lib-changes.outputs.packages == '[]' && needs.core-changes.outputs.packages != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-docker
+      with:
+        COMPONENT: ${{ matrix.component }}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+    - uses: ./.github/actions/generate-report
+      with:
+        COMPONENT: ${{ matrix.component }}
 
-      - name: Generate CSV and intermediate HTML report
-        run: |
-          echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
-          cat vulnerabilities.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
-          echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
-          cat vulnerabilities.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
-          echo -e '</tbody>\n</table>' >> vulnerabilities.html
-      - name: Convert HTLM to PDF
-        uses: docker://ghcr.io/coprs/reference-system:dependencies_wkhtmltopdf
-        with:
-          args: vulnerabilities.html vulnerabilities.pdf
-
-      - name: Upload Anchore scan reports
-        uses: actions/upload-artifact@master
-        with:
-          name: vulnerabilities-build
-          path: |
-            vulnerabilities.csv
-            vulnerabilities.pdf
-
-  docker-images:
-    needs: build
-    uses: coprs/production-common/.github/workflows/build-docker.yaml@develop
-    secrets: 
-      username: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+  build-all-core:
+    needs: [lib-changes, build-libs]
+    if: ${{ needs.lib-changes.outputs.packages != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [applicative-catalog, archives, disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-trigger, metadata-catalog-worker, mqi-server, queue-watcher, validation, compression-trigger, compression-worker, prip-trigger, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, directory-cleaner, native-api, ddip-frontend]           
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-docker
+      with:
+        COMPONENT: ${{ matrix.component }}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+    - uses: ./.github/actions/generate-report
+      with:
+        COMPONENT: ${{ matrix.component }}
 
   # If the execution-worker-jar is updated also update the ACQ simulator docker image
   build-acq-simulator:
-    needs: build
-    if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop
+    needs: [exec-worker-changes, build-core, build-all-core]
+    if: ${{ always() && needs.exec-worker-changes.outputs.exec-worker == 'true' && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop-build
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
@@ -167,21 +212,21 @@ jobs:
 
   # If the execution-worker-jar is updated also update the S1 IPF Simulator image
   build-s1-ipf-simulator:
-    needs: build
-    if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop
+    needs: [exec-worker-changes, build-core, build-all-core]
+    if: ${{ always() && needs.exec-worker-changes.outputs.exec-worker == 'true' && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
+    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop-build
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
  
-  # If the execution-worker-jar is updated also update the S1 IPF AIO image    
-  build-ipf-s1-aio:
-    needs: build
-    if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+  # If the execution-worker-jar is updated also update the S3 IPF AIO image    
+#  build-ipf-s1-aio:
+#    needs: build-core
+#    if: ${{ inputs.exec-worker }}
+#    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop-build
+#    secrets:
+#      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+#      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+#      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
       
