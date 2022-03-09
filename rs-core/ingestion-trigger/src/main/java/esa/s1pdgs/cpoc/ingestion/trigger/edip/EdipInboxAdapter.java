@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ebip.client.EdipClient;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntry;
@@ -17,8 +14,6 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.SupportsProductFamily;
 
 public class EdipInboxAdapter extends AbstractInboxAdapter implements SupportsProductFamily {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(EdipInboxAdapter.class);
 
 	public final static String INBOX_TYPE = "edip";
 	

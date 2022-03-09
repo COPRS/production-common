@@ -31,7 +31,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 @Component
 public class InboxFactory {
-	private final MessageProducer<IngestionJob> messageProducer;
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 	private final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory;
 	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
@@ -40,13 +39,12 @@ public class InboxFactory {
 
 	@Autowired
 	public InboxFactory(
-			final MessageProducer<IngestionJob> messageProducer, final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
+			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
 			final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory,
 			final XbipInboxAdapterFactory xbipInboxAdapterFactory,
 			final AuxipInboxAdapterFactory auxipInboxAdapterFactory,
 			final EdipInboxAdapterFactory edipInboxAdapterFactory
 	) {
-		this.messageProducer = messageProducer;
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
 		this.fileSystemInboxAdapterFactory = fileSystemInboxAdapterFactory;
 		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
@@ -65,7 +63,7 @@ public class InboxFactory {
 		return ignoreFilesBeforeDate;				
 	}
 	
-	public Inbox newInbox(final InboxConfiguration config, final int publishMaxRetries, final long publishTempoRetryMs) throws URISyntaxException {
+	public Inbox newInbox(final InboxConfiguration config) throws URISyntaxException {
 		return new Inbox(
 				newInboxAdapter(config),
 				new JoinedFilter(
@@ -74,8 +72,6 @@ public class InboxFactory {
 						new MinimumModificationDateFilter(ignoreFilesBeforeDateFor(config, new Date()))
 				),
 				ingestionTriggerServiceTransactional, 
-				messageProducer,
-				config.getTopic(),
 				config.getFamily(),
 				config.getMissionId(),
 				config.getStationName(),
@@ -83,8 +79,6 @@ public class InboxFactory {
 				config.getMode(),
 				config.getTimeliness(),
 				newProductNameEvaluatorFor(config),
-				publishMaxRetries,
-				publishTempoRetryMs,
 				newPathMetadataExtractor(config)
 		);
 	}

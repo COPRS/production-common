@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 
 @Ignore // test collides with MongoConfiguration
@@ -91,7 +92,8 @@ public class TestApplication {
 		repo.save(entry2);
 		assertEquals(2, read().size());
 
-		service.pollAll();
+		List<IngestionJob> jobs = service.get();
+		assertEquals(2, jobs.size());
 
 		final List<InboxEntry> inboxEntries = read();
 		assertEquals(1, inboxEntries.size());

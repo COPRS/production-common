@@ -5,8 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +14,6 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 
 @Component
 public class InboxEntryFactoryImpl implements InboxEntryFactory {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(InboxEntryFactoryImpl.class);
 
 	private final ProcessConfiguration processConfiguration;
 

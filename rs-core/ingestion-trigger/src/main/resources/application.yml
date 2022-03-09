@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    function:
+      definition: poll
+    stream:
+      function:
+        bindings:
+          poll-out-0: output
+      bindings:
+        output:
+          destination: ingestiontrigger
+
+server:
+  port: 8080
