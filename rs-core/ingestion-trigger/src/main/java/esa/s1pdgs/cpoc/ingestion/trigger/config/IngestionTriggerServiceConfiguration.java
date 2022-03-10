@@ -47,7 +47,7 @@ public class IngestionTriggerServiceConfiguration {
 	public Supplier<List<IngestionJob>> newInboxService() {
 		final List<Inbox> inboxes = new ArrayList<>();
 
-		for (final InboxConfiguration config : properties.getPolling()) {
+		for (final InboxConfiguration config : properties.getPolling().values()) {
 			try {
 				final Inbox newInbox = inboxFactory.newInbox(
 						config

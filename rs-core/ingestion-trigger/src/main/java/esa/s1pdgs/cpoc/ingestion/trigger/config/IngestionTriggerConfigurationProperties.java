@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -10,13 +10,13 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("ingestion-trigger")
 public class IngestionTriggerConfigurationProperties {
 	
-	private List<InboxConfiguration> polling = new ArrayList<>();
+	private Map<String, InboxConfiguration> polling = new HashMap<>();
 
-	public List<InboxConfiguration> getPolling() {
+	public Map<String, InboxConfiguration> getPolling() {
 		return polling;
 	}
 
-	public void setPolling(List<InboxConfiguration> polling) {
+	public void setPolling(Map<String, InboxConfiguration> polling) {
 		this.polling = polling;
 	}
 
