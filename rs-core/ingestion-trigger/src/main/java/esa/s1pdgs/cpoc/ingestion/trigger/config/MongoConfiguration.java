@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -19,6 +19,7 @@ import com.mongodb.client.MongoClients;
  * @author Viveris Technologies
  */
 @Configuration
+@ConfigurationProperties("mongo")
 public class MongoConfiguration {
 
     /**
@@ -27,34 +28,29 @@ public class MongoConfiguration {
     private static final Logger LOGGER =
             LogManager.getLogger(MongoConfiguration.class);
 
-    @Value("${mongodb.host}")
-    private List<String> mongoDBHost;
+    private List<String> host;
 
-    @Value("${mongodb.port}")
-    private int mongoDBPort;
+    private int port;
     
-    @Value("${mongodb.database}")
-    private String mongoDBDatabase;
+    private String database;
 
-    @Value("${mongodb.username:}")
-    private String mongoUsername;
+    private String username;
 
-    @Value("${mongodb.password:}")
-    private String mongoPassword;
+    private String password;
 
     @Bean
     public MongoClient mongoClient() {
     	LOGGER.info("New constructor");
         StringJoiner stringJoinerHosts = new StringJoiner(",");       
-        mongoDBHost.forEach(host -> {
-        	stringJoinerHosts.add(host + ":" + mongoDBPort);
+        host.forEach(each -> {
+        	stringJoinerHosts.add(each + ":" + port);
         });
-        String credentials = "".equals(mongoUsername) ? "" : mongoUsername + ":" + mongoPassword + "@";
-        return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/" + mongoDBDatabase + "?uuidRepresentation=STANDARD");
+        String credentials = "".equals(username) ? "" : username + ":" + password + "@";
+        return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/" + database + "?uuidRepresentation=STANDARD");
     }
 
     @Bean
     public MongoTemplate mongoTemplate() {
-        return new MongoTemplate(mongoClient(), mongoDBDatabase);
+        return new MongoTemplate(mongoClient(), database);
     }  
 }
