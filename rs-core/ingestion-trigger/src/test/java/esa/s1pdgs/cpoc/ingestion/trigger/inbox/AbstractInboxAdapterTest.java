@@ -18,7 +18,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.PositiveFileSizeFilter;
@@ -28,15 +27,12 @@ public class AbstractInboxAdapterTest {
     @Spy
     private AbstractInboxAdapter uut;
 
-    private IngestionTriggerConfigurationProperties properties = new IngestionTriggerConfigurationProperties();
-    
     @Mock
     private final ProcessConfiguration config = new ProcessConfiguration();
 
     @Before
     public void initMocks() {
-    	properties.setProcess(config);
-        final InboxEntryFactory entryFactory = new InboxEntryFactoryImpl(properties);
+        final InboxEntryFactory entryFactory = new InboxEntryFactoryImpl(config);
 
         uut = new AbstractInboxAdapter(entryFactory, URI.create("https://example.com/WILE"), "WILE", null, ProductFamily.AUXILIARY_FILE) {
             @Override

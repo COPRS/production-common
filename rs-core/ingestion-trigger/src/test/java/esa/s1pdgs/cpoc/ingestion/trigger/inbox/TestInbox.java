@@ -28,7 +28,6 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
-import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
@@ -52,8 +51,6 @@ public class TestInbox {
     @Mock
     InboxEntryRepository fakeRepo;
 
-    IngestionTriggerConfigurationProperties configuration = new IngestionTriggerConfigurationProperties();
-    
     @Mock
     ProcessConfiguration processConfiguration;
 
@@ -61,13 +58,12 @@ public class TestInbox {
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
         fakeAdapterThatSupportsProductFamily = Mockito.mock(InboxAdapter.class, withSettings().extraInterfaces(SupportsProductFamily.class));
-        
-        configuration.setProcess(processConfiguration);
     }
 
     @Test
     public final void testPoll_OnFindingNewProducts_ShallStoreProductsAndPutInKafkaQueue() throws IOException {
     	final ProductFamily productFamily = ProductFamily.EDRS_SESSION;
+
         when(processConfiguration.getHostname()).thenReturn("ingestor-01");
         when(fakeAdapter.read(any())).thenReturn(Arrays.asList(new InboxEntry("foo1", "foo1", "/tmp", new Date(), 10, null, null, productFamily.name(), "WILE", "S1"),
                 new InboxEntry("foo2", "foo2", "/tmp", new Date(), 10, null, null, productFamily.name(), "WILE", "S1")));
@@ -77,7 +73,7 @@ public class TestInbox {
         final Inbox uut = new Inbox(
                 fakeAdapter,
                 InboxFilter.ALLOW_ALL,
-                new IngestionTriggerServiceTransactional(fakeRepo, configuration),
+                new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
                 productFamily,
                 "S1",
                 "WILE",
@@ -111,7 +107,7 @@ public class TestInbox {
         final Inbox uut = new Inbox(
         		fakeAdapterThatSupportsProductFamily,
                 InboxFilter.ALLOW_ALL,
-                new IngestionTriggerServiceTransactional(fakeRepo, configuration),
+                new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
                 productFamily,
 				"S1",
                 "WILE",
@@ -149,7 +145,7 @@ public class TestInbox {
         final Inbox uut = new Inbox(
                 fakeAdapter,
                 InboxFilter.ALLOW_ALL,
-                new IngestionTriggerServiceTransactional(fakeRepo, configuration),
+                new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
                 productFamily,
                 "S1",
 				"WILE",
@@ -176,7 +172,7 @@ public class TestInbox {
         final Inbox uut = new Inbox(
                 fakeAdapter,
                 new JoinedFilter(new MinimumModificationDateFilter(new Date(123456))),
-                new IngestionTriggerServiceTransactional(fakeRepo, configuration),
+                new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
                 productFamily,
                 "S1",
 				"WILE",
@@ -209,7 +205,7 @@ public class TestInbox {
         final Inbox uut = new Inbox(
                 fakeAdapter,
                 new JoinedFilter(new MinimumModificationDateFilter(new Date(123456))),
-                new IngestionTriggerServiceTransactional(fakeRepo, configuration),
+                new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
                 ProductFamily.EDRS_SESSION,
                 "S1",
 				"WILE",

@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
@@ -25,11 +24,7 @@ public class TestInboxEntry {
 	public void setup() {
 		final ProcessConfiguration processConfiguration = new ProcessConfiguration();
 		processConfiguration.setHostname("ingestor-01");
-		
-		final IngestionTriggerConfigurationProperties properties = new IngestionTriggerConfigurationProperties();
-		properties.setProcess(processConfiguration);
-		
-		factory = new InboxEntryFactoryImpl(properties);
+		factory = new InboxEntryFactoryImpl(processConfiguration);
 	}
 
 	@Test

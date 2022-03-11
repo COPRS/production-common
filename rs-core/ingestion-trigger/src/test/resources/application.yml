@@ -8,12 +8,13 @@ logging:
 process:
   hostname: test                                          # Hostname
 
-polling:
-  - directory: file:///tmp/test123
-    matchRegex: (WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))
-    ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
-    family: EDRS_SESSION
-    ignore-files-before-date: 2001-09-11T08:46:00.000Z
+ingestion-trigger:
+  polling:
+    - directory: file:///tmp/test123
+      matchRegex: (WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))
+      ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
+      family: EDRS_SESSION
+      ignore-files-before-date: 2001-09-11T08:46:00.000Z
 
   # MongoDB
 mongodb:
