@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 
@@ -18,8 +19,8 @@ public class InboxEntryFactoryImpl implements InboxEntryFactory {
 	private final ProcessConfiguration processConfiguration;
 
 	@Autowired
-	public InboxEntryFactoryImpl(ProcessConfiguration processConfiguration) {
-		this.processConfiguration = processConfiguration;
+	public InboxEntryFactoryImpl(IngestionTriggerConfigurationProperties configuration) {
+		this.processConfiguration = configuration.getProcess();
 	}
 
 	@Override

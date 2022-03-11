@@ -18,8 +18,6 @@ import com.mongodb.client.MongoClients;
  * 
  * @author Viveris Technologies
  */
-@Configuration
-@ConfigurationProperties("mongo")
 public class MongoConfiguration {
 
     /**

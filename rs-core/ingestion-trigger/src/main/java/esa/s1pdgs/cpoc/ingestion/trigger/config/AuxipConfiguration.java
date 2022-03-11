@@ -3,8 +3,6 @@ package esa.s1pdgs.cpoc.ingestion.trigger.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@ConfigurationProperties(prefix = "auxip")
 public class AuxipConfiguration {
 
     private String start;

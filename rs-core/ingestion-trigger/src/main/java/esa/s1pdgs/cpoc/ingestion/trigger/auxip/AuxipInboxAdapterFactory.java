@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.auxip.client.AuxipClientFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.AuxipConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
@@ -23,14 +24,13 @@ public class AuxipInboxAdapterFactory implements InboxAdapterFactory {
     private final AuxipClientFactory clientFactory;
 
     @Autowired
-    public AuxipInboxAdapterFactory(final AuxipConfiguration configuration,
-                                    final ProcessConfiguration processConfiguration,
+    public AuxipInboxAdapterFactory(final IngestionTriggerConfigurationProperties configuration,
                                     final InboxEntryFactory inboxEntryFactory,
                                     final AuxipStateRepository repository, AuxipClientFactory clientFactory) {
-        this.configuration = configuration;
+        this.configuration = configuration.getAuxip();
         this.inboxEntryFactory = inboxEntryFactory;
         this.repository = repository;
-        this.processConfiguration = processConfiguration;
+        this.processConfiguration = configuration.getProcess();
         this.clientFactory = clientFactory;
     }
     
