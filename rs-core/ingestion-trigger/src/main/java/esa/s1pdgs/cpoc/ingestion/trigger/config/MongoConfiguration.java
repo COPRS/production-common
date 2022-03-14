@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
+import java.util.List;
 import java.util.StringJoiner;
 
 import org.slf4j.Logger;
@@ -24,9 +25,12 @@ public class MongoConfiguration {
 	public MongoClient mongoClient() {
 		LOG.info("Create new mongo client");
 		StringJoiner stringJoinerHosts = new StringJoiner(",");
-		mongoProperties.getHost().forEach(each -> {
+		String[] hosts = mongoProperties.getHost().split(","); 
+		
+		for (String each : hosts) {
 			stringJoinerHosts.add(each + ":" + mongoProperties.getPort());
-		});
+		}
+			
 		String credentials = "".equals(mongoProperties.getUsername()) ? ""
 				: mongoProperties.getUsername() + ":" + mongoProperties.getPassword() + "@";
 		return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/"

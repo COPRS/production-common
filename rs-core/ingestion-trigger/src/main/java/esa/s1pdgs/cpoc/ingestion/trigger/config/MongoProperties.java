@@ -25,7 +25,7 @@ import com.mongodb.client.MongoClients;
 @ConfigurationProperties(prefix = "mongo")
 public class MongoProperties {
 
-    private List<String> host;
+    private String host;
 
     private int port;
     
@@ -35,11 +35,11 @@ public class MongoProperties {
 
     private String password;
     
-    public List<String> getHost() {
+    public String getHost() {
 		return host;
 	}
 
-	public void setHost(List<String> host) {
+	public void setHost(String host) {
 		this.host = host;
 	}
 
