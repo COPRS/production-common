@@ -19,10 +19,12 @@ public class MongoConfiguration {
 	private static final Logger LOG = LoggerFactory.getLogger(MongoConfiguration.class);
 
 	@Autowired
-	private MongoProperties mongoProperties;
+	private IngestionTriggerConfigurationProperties properties;
 
 	@Bean
 	public MongoClient mongoClient() {
+		MongoProperties mongoProperties = properties.getMongo();
+		
 		LOG.info("Create new mongo client");
 		StringJoiner stringJoinerHosts = new StringJoiner(",");
 		String[] hosts = mongoProperties.getHost().split(","); 

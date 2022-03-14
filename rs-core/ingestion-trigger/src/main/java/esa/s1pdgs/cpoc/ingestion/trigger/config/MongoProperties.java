@@ -20,9 +20,6 @@ import com.mongodb.client.MongoClients;
  * 
  * @author Viveris Technologies
  */
-@Component
-@Validated
-@ConfigurationProperties(prefix = "mongo")
 public class MongoProperties {
 
     private String host;

@@ -13,6 +13,8 @@ import org.springframework.validation.annotation.Validated;
 public class IngestionTriggerConfigurationProperties {
 	
 	private Map<String, InboxConfiguration> polling = new HashMap<>();
+	
+	private MongoProperties mongo;
 
 	public Map<String, InboxConfiguration> getPolling() {
 		return polling;
@@ -20,6 +22,14 @@ public class IngestionTriggerConfigurationProperties {
 
 	public void setPolling(Map<String, InboxConfiguration> polling) {
 		this.polling = polling;
+	}
+
+	public MongoProperties getMongo() {
+		return mongo;
+	}
+
+	public void setMongo(MongoProperties mongo) {
+		this.mongo = mongo;
 	}
 
 	@Override
