@@ -3,13 +3,19 @@ package esa.s1pdgs.cpoc.ingestion.trigger.config;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.function.context.PollableBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.core.MongoTemplate;
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox;
@@ -21,24 +27,17 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 public class IngestionTriggerServiceConfiguration {
 	private static final Logger LOG = LoggerFactory.getLogger(IngestionTriggerServiceConfiguration.class);
 
-	private final IngestionTriggerConfigurationProperties properties;
-	private final InboxFactory inboxFactory;
-	private final AppStatus status;
+	@Autowired
+	private IngestionTriggerConfigurationProperties properties;
+	
+	@Autowired
+	private InboxFactory inboxFactory;
+	
+	@Autowired
+	private AppStatus status;
 
 	@Autowired
-	public IngestionTriggerServiceConfiguration(
-			final IngestionTriggerConfigurationProperties properties,
-			final InboxFactory inboxFactory,
-			final AppStatus status
-	) {
-		this.properties = properties;
-		// InboxFactory is autowired here without a qualifier because there is only one
-		// implementation of it in the classpath. This needs to be changed in the future
-		// when there are other types of inboxes available
-		this.inboxFactory = inboxFactory;
-		this.status = status;
-	}
-
+	private MongoConfiguration mongoConfiguration;
 	
 	/*
 	 * Entry point for Spring Cloud Stream
@@ -60,4 +59,20 @@ public class IngestionTriggerServiceConfiguration {
 		}
 		return new IngestionTriggerService(inboxes, status);
 	}
+	
+	@Bean
+    public MongoClient mongoClient() {
+    	LOG.info("Create new mongo client");
+        StringJoiner stringJoinerHosts = new StringJoiner(",");       
+        mongoConfiguration.getHost().forEach(each -> {
+        	stringJoinerHosts.add(each + ":" + mongoConfiguration.getPort());
+        });
+        String credentials = "".equals(mongoConfiguration.getUsername()) ? "" : mongoConfiguration.getUsername() + ":" + mongoConfiguration.getPassword() + "@";
+        return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/" + mongoConfiguration.getDatabase() + "?uuidRepresentation=STANDARD");
+    }
+
+    @Bean
+    public MongoTemplate mongoTemplate() {
+        return new MongoTemplate(mongoClient(), mongoConfiguration.getDatabase());
+    } 
 }

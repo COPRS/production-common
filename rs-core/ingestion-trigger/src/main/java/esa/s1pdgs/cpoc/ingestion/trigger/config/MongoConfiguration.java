@@ -80,20 +80,4 @@ public class MongoConfiguration {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	@Bean
-    public MongoClient mongoClient() {
-    	LOGGER.info("New constructor");
-        StringJoiner stringJoinerHosts = new StringJoiner(",");       
-        host.forEach(each -> {
-        	stringJoinerHosts.add(each + ":" + port);
-        });
-        String credentials = "".equals(username) ? "" : username + ":" + password + "@";
-        return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/" + database + "?uuidRepresentation=STANDARD");
-    }
-
-    @Bean
-    public MongoTemplate mongoTemplate() {
-        return new MongoTemplate(mongoClient(), database);
-    } 
 }
