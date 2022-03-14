@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +21,8 @@ import com.mongodb.client.MongoClients;
  * @author Viveris Technologies
  */
 @Component
-@ConfigurationProperties("mongo")
+@Configuration
+@ConfigurationProperties(prefix = "mongo")
 @Validated
 public class MongoConfiguration {
 
