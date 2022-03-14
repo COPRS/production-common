@@ -21,9 +21,8 @@ import com.mongodb.client.MongoClients;
  * @author Viveris Technologies
  */
 @Component
-@Configuration
-@ConfigurationProperties(prefix = "mongo")
 @Validated
+@ConfigurationProperties(prefix = "mongo")
 public class MongoConfiguration {
 
     /**
@@ -41,8 +40,48 @@ public class MongoConfiguration {
     private String username;
 
     private String password;
+    
+    public List<String> getHost() {
+		return host;
+	}
 
-    @Bean
+	public void setHost(List<String> host) {
+		this.host = host;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Bean
     public MongoClient mongoClient() {
     	LOGGER.info("New constructor");
         StringJoiner stringJoinerHosts = new StringJoiner(",");       
@@ -56,5 +95,5 @@ public class MongoConfiguration {
     @Bean
     public MongoTemplate mongoTemplate() {
         return new MongoTemplate(mongoClient(), database);
-    }  
+    } 
 }

@@ -6,7 +6,7 @@ import org.springframework.validation.annotation.Validated;
 
 @Component
 @Validated
-@ConfigurationProperties("process")
+@ConfigurationProperties(prefix = "process")
 public class ProcessConfiguration {
 	private String hostname;
 	

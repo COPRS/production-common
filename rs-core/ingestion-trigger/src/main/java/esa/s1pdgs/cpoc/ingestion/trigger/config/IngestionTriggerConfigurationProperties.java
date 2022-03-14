@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 
 @Component
 @Validated
-@ConfigurationProperties("ingestion-trigger")
+@ConfigurationProperties(prefix = "ingestion-trigger")
 public class IngestionTriggerConfigurationProperties {
 	
 	private Map<String, InboxConfiguration> polling = new HashMap<>();
