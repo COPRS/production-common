@@ -41,6 +41,8 @@ public class MongoConfiguration {
 
 	@Bean
 	public MongoTemplate mongoTemplate() {
+		MongoProperties mongoProperties = properties.getMongo();
+		
 		return new MongoTemplate(mongoClient(), mongoProperties.getDatabase());
 	}
 }
