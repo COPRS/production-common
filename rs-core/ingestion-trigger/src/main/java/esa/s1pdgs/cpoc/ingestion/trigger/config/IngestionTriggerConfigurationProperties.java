@@ -14,7 +14,7 @@ public class IngestionTriggerConfigurationProperties {
 	
 	private Map<String, InboxConfiguration> polling = new HashMap<>();
 	
-	private MongoProperties mongo;
+	private MongoProperties mongodb = new MongoProperties();
 
 	public Map<String, InboxConfiguration> getPolling() {
 		return polling;
@@ -25,11 +25,11 @@ public class IngestionTriggerConfigurationProperties {
 	}
 
 	public MongoProperties getMongo() {
-		return mongo;
+		return mongodb;
 	}
 
 	public void setMongo(MongoProperties mongo) {
-		this.mongo = mongo;
+		this.mongodb = mongo;
 	}
 
 	@Override
