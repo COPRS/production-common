@@ -1,25 +1,17 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
-import java.util.List;
-import java.util.StringJoiner;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
-
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 
 /**
  * Configuration for the MongoDB client
  * 
  * @author Viveris Technologies
  */
+@Component
+@Validated
+@ConfigurationProperties(prefix = "mongodb")
 public class MongoProperties {
 
     private String host;

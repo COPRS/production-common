@@ -19,12 +19,10 @@ public class MongoConfiguration {
 	private static final Logger LOG = LoggerFactory.getLogger(MongoConfiguration.class);
 
 	@Autowired
-	private IngestionTriggerConfigurationProperties properties;
+	private MongoProperties mongoProperties;
 
 	@Bean
-	public MongoClient mongoClient() {		
-		MongoProperties mongoProperties = properties.getMongodb();
-		
+	public MongoClient mongoClient() {				
 		Assert.notNull(mongoProperties.getHost(), "Host is required for mongo connection configuration");
 		Assert.notNull(mongoProperties.getPort(), "Port is required for mongo connection configuration");
 		Assert.notNull(mongoProperties.getDatabase(), "Database is required for mongo connection configuration");
@@ -45,8 +43,6 @@ public class MongoConfiguration {
 
 	@Bean
 	public MongoTemplate mongoTemplate() {
-		MongoProperties mongoProperties = properties.getMongodb();
-		
 		return new MongoTemplate(mongoClient(), mongoProperties.getDatabase());
 	}
 }
