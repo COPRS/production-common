@@ -24,11 +24,11 @@ public class IngestionTriggerConfigurationProperties {
 		this.polling = polling;
 	}
 
-	public MongoProperties getMongo() {
+	public MongoProperties getMongodb() {
 		return mongodb;
 	}
 
-	public void setMongo(MongoProperties mongo) {
+	public void setMongodb(MongoProperties mongo) {
 		this.mongodb = mongo;
 	}
 
