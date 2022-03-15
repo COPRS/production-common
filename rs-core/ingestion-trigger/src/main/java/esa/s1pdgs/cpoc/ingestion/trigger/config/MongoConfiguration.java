@@ -23,7 +23,7 @@ public class MongoConfiguration {
 
 	@Bean
 	public MongoClient mongoClient() {		
-		MongoProperties mongoProperties = properties.getMongo();
+		MongoProperties mongoProperties = properties.getMongodb();
 		
 		Assert.notNull(mongoProperties.getHost(), "Host is required for mongo connection configuration");
 		Assert.notNull(mongoProperties.getPort(), "Port is required for mongo connection configuration");
@@ -45,7 +45,7 @@ public class MongoConfiguration {
 
 	@Bean
 	public MongoTemplate mongoTemplate() {
-		MongoProperties mongoProperties = properties.getMongo();
+		MongoProperties mongoProperties = properties.getMongodb();
 		
 		return new MongoTemplate(mongoClient(), mongoProperties.getDatabase());
 	}
