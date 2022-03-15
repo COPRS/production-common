@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
-import java.util.List;
 import java.util.StringJoiner;
 
 import org.slf4j.Logger;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.util.Assert;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -22,8 +22,12 @@ public class MongoConfiguration {
 	private IngestionTriggerConfigurationProperties properties;
 
 	@Bean
-	public MongoClient mongoClient() {
+	public MongoClient mongoClient() {		
 		MongoProperties mongoProperties = properties.getMongo();
+		
+		Assert.notNull(mongoProperties.getHost(), "Host is required for mongo connection configuration");
+		Assert.notNull(mongoProperties.getPort(), "Port is required for mongo connection configuration");
+		Assert.notNull(mongoProperties.getDatabase(), "Database is required for mongo connection configuration");
 		
 		LOG.info("Create new mongo client");
 		StringJoiner stringJoinerHosts = new StringJoiner(",");
