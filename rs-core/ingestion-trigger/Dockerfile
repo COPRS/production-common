@@ -6,7 +6,6 @@ ARG COMMIT_ID
 ARG BRANCH_TEXT
 
 WORKDIR /app
-RUN chmod 666 /app
 
 RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
