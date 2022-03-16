@@ -243,7 +243,7 @@ function create_productlist() {
 	for entry in /data/NRTAP/LowPriorityOutBasket/*ISIP /data/NRTAP/HighPriorityOutBasket/*ISIP;
 	do
 		# Above list will return a *ISIP-entry when no matching products where found in folder
-		if [[ "$entry" == *"*"* ]];  then
+		if [[ "$entry" != *"*"* ]];  then
 			local newfilename=$(basename $entry)
 			mv $entry $newfilename
 			echo "$newfilename" >> $listfile
