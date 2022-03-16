@@ -1,11 +1,11 @@
 spring:
   cloud:
     function:
-      definition: poll
+      definition: newInboxService
     stream:
       function:
         bindings:
-          poll-out-0: output
+          newInboxService-out-0: output
       bindings:
         output:
           destination: ingestiontrigger
