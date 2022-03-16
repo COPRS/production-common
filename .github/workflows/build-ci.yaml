@@ -150,7 +150,7 @@ jobs:
 
   docker-images:
     needs: build
-    uses: coprs/production-common/.github/workflows/build-docker.yaml@develop
+    uses: coprs/production-common/.github/workflows/build-docker.yaml@release/0.3.0
     secrets: 
       username: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       password: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
@@ -159,7 +159,7 @@ jobs:
   build-acq-simulator:
     needs: build
     if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop
+    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@release/0.3.0
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
@@ -169,7 +169,7 @@ jobs:
   build-s1-ipf-simulator:
     needs: build
     if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop
+    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@release/0.3.0
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
@@ -179,7 +179,7 @@ jobs:
   build-ipf-s1-aio:
     needs: build
     if: ${{ inputs.exec-worker }}
-    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop
+    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@release/0.3.0
     secrets:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
