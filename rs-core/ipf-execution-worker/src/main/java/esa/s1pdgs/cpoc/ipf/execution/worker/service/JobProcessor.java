@@ -548,7 +548,10 @@ public class JobProcessor implements MqiListener<IpfExecutionJob> {
 								
 								@Override
 								public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
-									Files.delete(dir);
+									if (!dir.equals(workingDir)) {
+										Files.delete(dir);
+									}
+									
 									return FileVisitResult.CONTINUE; 
 								}						
 							});
