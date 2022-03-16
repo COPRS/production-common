@@ -1,7 +1,0 @@
-apiVersion: v1
-appVersion: "develop"
-description: S1PRO Inbox XBIP Polling Service
-name: s1pro-ingestion-xbip-cgs04-trigger
-version: 3.33.0-SNAPSHOT
-maintainers:
-  - name: Werum Software & Systems
