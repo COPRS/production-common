@@ -117,7 +117,7 @@
 		<dependency>
 			<groupId>org.springframework.integration</groupId>
 			<artifactId>spring-integration-core</artifactId>
-			<version>5.5.9</version>
+			<version>5.5.1</version>
 		</dependency>
 
 		<dependency>
