@@ -1,13 +1,11 @@
 package esa.s1pdgs.cpoc.xbip.client.config;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
-@PropertySource({"${xbipConfigFile:classpath:xbip.properties}"})
 @EnableConfigurationProperties
 @Configuration
 @ConfigurationProperties(prefix = "xbip")
@@ -89,13 +87,13 @@ public class XbipClientConfigurationProperties {
 	private String proxyHost;
 	private int proxyPort = 80;
 
-	private List<XbipHostConfiguration> hostConfigs;
+	private Map<String, XbipHostConfiguration> hostConfigs;
 
-	public List<XbipHostConfiguration> getHostConfigs() {
+	public Map<String, XbipHostConfiguration> getHostConfigs() {
 		return hostConfigs;
 	}
 
-	public void setHostConfigs(final List<XbipHostConfiguration> hostConfigs) {
+	public void setHostConfigs(final Map<String, XbipHostConfiguration> hostConfigs) {
 		this.hostConfigs = hostConfigs;
 	}
 	
