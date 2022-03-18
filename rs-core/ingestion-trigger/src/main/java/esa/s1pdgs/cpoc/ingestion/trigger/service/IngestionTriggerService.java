@@ -42,6 +42,9 @@ public final class IngestionTriggerService implements Supplier<List<IngestionJob
     	}
       	LOG.trace("Done polling all");
       	
+      	if (jobs.isEmpty()) {
+      		return null;
+      	}
       	return jobs;
 	}
 }
