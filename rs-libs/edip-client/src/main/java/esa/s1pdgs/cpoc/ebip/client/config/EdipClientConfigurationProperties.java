@@ -1,13 +1,11 @@
 package esa.s1pdgs.cpoc.ebip.client.config;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
-@PropertySource({"${ebipConfigFile:classpath:ebip.properties}"})
 @EnableConfigurationProperties
 @Configuration
 @ConfigurationProperties(prefix = "edip")
@@ -161,13 +159,13 @@ public class EdipClientConfigurationProperties {
 	private String proxyHost;
 	private int proxyPort = 80;
 
-	private List<EdipHostConfiguration> hostConfigs;
+	private Map<String, EdipHostConfiguration> hostConfigs;
 
-	public List<EdipHostConfiguration> getHostConfigs() {
+	public Map<String, EdipHostConfiguration> getHostConfigs() {
 		return hostConfigs;
 	}
 
-	public void setHostConfigs(final List<EdipHostConfiguration> hostConfigs) {
+	public void setHostConfigs(final Map<String, EdipHostConfiguration> hostConfigs) {
 		this.hostConfigs = hostConfigs;
 	}
 	

@@ -73,7 +73,7 @@ public class AuxipOdataClientFactory implements AuxipClientFactory {
 
 	private AuxipHostConfiguration hostConfigFor(final String serviceRootUri) {
 		// lookup host configuration for the given URL
-		for (final AuxipHostConfiguration hostConfig : this.config.getHostConfigs()) {
+		for (final AuxipHostConfiguration hostConfig : this.config.getHostConfigs().values()) {
 			if (this.urisEqual(serviceRootUri, hostConfig.getServiceRootUri())) {
 				LOG.trace("Found config {}", hostConfig);
 				return hostConfig;

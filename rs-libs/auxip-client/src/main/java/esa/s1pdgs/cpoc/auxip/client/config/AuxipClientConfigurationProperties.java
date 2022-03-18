@@ -1,13 +1,11 @@
 package esa.s1pdgs.cpoc.auxip.client.config;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
-@PropertySource({"${auxipConfigFile:classpath:auxip.properties}"})
 @EnableConfigurationProperties
 @Configuration
 @ConfigurationProperties(prefix = "auxip")
@@ -153,7 +151,7 @@ public class AuxipClientConfigurationProperties {
 	
 	private String proxy;
 
-	private List<AuxipHostConfiguration> hostConfigs;
+	private Map<String, AuxipHostConfiguration> hostConfigs;
 	
 	// --------------------------------------------------------------------------
 	
@@ -164,11 +162,11 @@ public class AuxipClientConfigurationProperties {
 	
 	// --------------------------------------------------------------------------
 
-	public List<AuxipHostConfiguration> getHostConfigs() {
+	public Map<String, AuxipHostConfiguration> getHostConfigs() {
 		return this.hostConfigs;
 	}
 
-	public void setHostConfigs(final List<AuxipHostConfiguration> hostConfigs) {
+	public void setHostConfigs(final Map<String, AuxipHostConfiguration> hostConfigs) {
 		this.hostConfigs = hostConfigs;
 	}
 	

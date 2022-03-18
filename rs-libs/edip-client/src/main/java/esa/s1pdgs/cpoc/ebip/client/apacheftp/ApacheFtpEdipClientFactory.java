@@ -25,7 +25,7 @@ public class ApacheFtpEdipClientFactory implements EdipClientFactory {
 	}
 	
 	private final EdipHostConfiguration configFor(final URI serverUrl) {
-		for (final EdipHostConfiguration hostConfig : config.getHostConfigs()) {
+		for (final EdipHostConfiguration hostConfig : config.getHostConfigs().values()) {
 			if (hostConfig.getServerName().equals(serverUrl.getHost())) {
 				return hostConfig;
 			}

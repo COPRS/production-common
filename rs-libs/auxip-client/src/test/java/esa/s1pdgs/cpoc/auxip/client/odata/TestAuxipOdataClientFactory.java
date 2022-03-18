@@ -1,11 +1,11 @@
 package esa.s1pdgs.cpoc.auxip.client.odata;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -27,7 +27,10 @@ public class TestAuxipOdataClientFactory {
 		hostConfig.setAuthType("basic");
 		hostConfig.setUser("user");
 		AuxipClientConfigurationProperties properties = new AuxipClientConfigurationProperties();
-		properties.setHostConfigs(Arrays.asList(hostConfig));
+		
+		Map<String, AuxipHostConfiguration> configs = new HashMap<>();
+		configs.put("host1", hostConfig);
+		properties.setHostConfigs(configs);
 		
 		AuxipOdataClientFactory factory = new AuxipOdataClientFactory(properties);
 		AuxipClient newAuxipClient = factory.newAuxipClient(new URI("http://localhost/odata/v1/"));
@@ -51,7 +54,9 @@ public class TestAuxipOdataClientFactory {
 		hostConfig.setOauthClientSecret("secret");
 		
 		AuxipClientConfigurationProperties properties = new AuxipClientConfigurationProperties();
-		properties.setHostConfigs(Arrays.asList(hostConfig));
+		Map<String, AuxipHostConfiguration> configs = new HashMap<>();
+		configs.put("host1", hostConfig);
+		properties.setHostConfigs(configs);
 		
 		AuxipOdataClientFactory factory = new AuxipOdataClientFactory(properties);
 		AuxipClient newAuxipClient = factory.newAuxipClient(new URI("http://localhost/odata/v1/"));
