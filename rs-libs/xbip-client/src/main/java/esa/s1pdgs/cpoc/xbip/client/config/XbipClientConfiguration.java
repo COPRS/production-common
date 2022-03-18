@@ -17,7 +17,7 @@ public class XbipClientConfiguration {
 	}
 
 	@Bean
-	public XbipClientFactory xbipClientFactory() {
+	public XbipClientFactory xbipClientFactory() {		
 		return new SardineXbipClientFactory(config);
 	}
 }

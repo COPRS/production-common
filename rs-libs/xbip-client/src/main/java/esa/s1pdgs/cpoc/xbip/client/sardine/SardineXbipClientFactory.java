@@ -101,7 +101,7 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 	private Sardine newSardineFor(final XbipHostConfiguration hostConfig, final URI serverUrl) {
 		Sardine sardine = null;
 		
-		LOG.info("Value for is TrustSelfSignedCertificate: " + hostConfig.isTrustSelfSignedCertificate());
+		LOG.info("XbipHostConfiguration: " + hostConfig.toString());
 		if (hostConfig.isTrustSelfSignedCertificate()) {
 			LOG.debug("Trusting SSL for server {}", hostConfig.getServerName());		
 			try {
