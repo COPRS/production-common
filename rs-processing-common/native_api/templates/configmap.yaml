@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-service-config
-  namespace: {{ .Values.processing.namespace }}
+  namespace: processing
   
 data:
   {{- $files := .Files }}
