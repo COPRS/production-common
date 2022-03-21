@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}
-  replicas: {{ .Values.replicaCount.native_api }}
+  replicas: 1
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -26,10 +26,10 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: {{ .Values.worker.label.key }}
+              - key: node-role.kubernetes.io/worker
                 operator: In
                 values:
-                - {{ .Values.worker.label.value }}
+                - infra
       containers:
       
       - name: {{ .Release.Name }}
