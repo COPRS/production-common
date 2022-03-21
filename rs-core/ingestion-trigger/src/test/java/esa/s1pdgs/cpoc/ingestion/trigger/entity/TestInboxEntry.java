@@ -9,8 +9,6 @@ import java.util.Date;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
@@ -20,11 +18,8 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactoryImpl;
 public class TestInboxEntry {
 	private InboxEntryFactory factory;
 	
-	private static final Logger LOG = LoggerFactory.getLogger(TestInboxEntry.class);
-
 	@BeforeEach
 	public void setup() {
-		LOG.info("Run setup method for test.");
 		final ProcessConfiguration processConfiguration = new ProcessConfiguration();
 		processConfiguration.setHostname("ingestor-01");
 		factory = new InboxEntryFactoryImpl(processConfiguration);
