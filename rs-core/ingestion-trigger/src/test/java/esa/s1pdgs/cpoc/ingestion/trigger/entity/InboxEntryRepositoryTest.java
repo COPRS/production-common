@@ -1,23 +1,23 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.entity;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Date;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-@Ignore // test collides with MongoConfiguration
-@RunWith(SpringRunner.class)
+@Disabled // test collides with MongoConfiguration
 @DataMongoTest
 @EnableMongoRepositories(basePackageClasses = InboxEntryRepository.class)
 public class InboxEntryRepositoryTest {

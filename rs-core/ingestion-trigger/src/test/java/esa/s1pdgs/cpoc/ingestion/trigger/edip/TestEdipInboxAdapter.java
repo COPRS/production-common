@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ebip.client.EdipEntry;

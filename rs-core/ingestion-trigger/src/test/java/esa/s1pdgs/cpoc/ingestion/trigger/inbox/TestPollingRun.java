@@ -3,13 +3,12 @@ package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
@@ -274,7 +273,7 @@ public class TestPollingRun {
 	}
 
 	@Test
-	@Ignore // FIXME This test runs non-deterministic. Disable until behaviour is fixed
+	@Disabled // FIXME This test runs non-deterministic. Disable until behaviour is fixed
 	public void test_inboxEntryComparison_withProductFamily_expectFinishedAndNew() {
 		// creating a polling run with method newInstance will take product family into account
 		// when comparing inbox entries from persistence with inbox entries from pickup

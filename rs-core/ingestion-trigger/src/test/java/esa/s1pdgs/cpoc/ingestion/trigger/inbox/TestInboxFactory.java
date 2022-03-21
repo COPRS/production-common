@@ -1,10 +1,9 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.inbox;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
@@ -25,7 +24,7 @@ public class TestInboxFactory {
 		final InboxEntry entry = new InboxEntry();
 		entry.setRelativePath("S1B/L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw");
 		entry.setProductFamily(productFamily.name());
-		assertEquals(
+		Assertions.assertEquals(
 				"L20180724144436762001030/ch02/DCS_02_L20180724144436762001030_ch2_DSDB_00025.raw",
 				eval.evaluateFrom(entry)
 				);
@@ -41,7 +40,7 @@ public class TestInboxFactory {
 		final InboxConfiguration config = new InboxConfiguration();
 		config.setIgnoreFilesBeforeDate(futureDate);
 
-		assertEquals(now, InboxFactory.ignoreFilesBeforeDateFor(config, now));
+		Assertions.assertEquals(now, InboxFactory.ignoreFilesBeforeDateFor(config, now));
 	}
 
 	@Test
@@ -54,6 +53,6 @@ public class TestInboxFactory {
 		final InboxConfiguration config = new InboxConfiguration();
 		config.setIgnoreFilesBeforeDate(pastDate);
 
-		assertEquals(pastDate, InboxFactory.ignoreFilesBeforeDateFor(config, now));
+		Assertions.assertEquals(pastDate, InboxFactory.ignoreFilesBeforeDateFor(config, now));
 	}
 }

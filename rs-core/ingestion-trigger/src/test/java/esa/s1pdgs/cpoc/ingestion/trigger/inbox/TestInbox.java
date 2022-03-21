@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,8 +16,8 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,8 +36,6 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox.InboxReturnValue;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
-import esa.s1pdgs.cpoc.message.MessageProducer;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class TestInbox {
 
@@ -54,7 +51,7 @@ public class TestInbox {
     @Mock
     ProcessConfiguration processConfiguration;
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
         fakeAdapterThatSupportsProductFamily = Mockito.mock(InboxAdapter.class, withSettings().extraInterfaces(SupportsProductFamily.class));

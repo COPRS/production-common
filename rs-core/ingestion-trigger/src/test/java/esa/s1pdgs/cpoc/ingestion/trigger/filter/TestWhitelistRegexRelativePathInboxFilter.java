@@ -3,13 +3,11 @@ package esa.s1pdgs.cpoc.ingestion.trigger.filter;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
-
-import static org.junit.Assert.*;
 
 public class TestWhitelistRegexRelativePathInboxFilter {
 
@@ -25,38 +23,38 @@ public class TestWhitelistRegexRelativePathInboxFilter {
 
 	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnFalse_forSession() {
-		assertFalse(this.filterForSessions.accept(new InboxEntry("foo.tmp", "dir1/dir2/foo.tmp",
+		Assertions.assertFalse(this.filterForSessions.accept(new InboxEntry("foo.tmp", "dir1/dir2/foo.tmp",
 				"file:///tmp/MPS_/S1A/dir1/dir2/foo.tmp", new Date(), 0, null, null, ProductFamily.EDRS_SESSION.name(),
 				null, null)));
 	}
 
 	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnTrue_forSession() {
-		assertTrue(this.filterForSessions.accept(new InboxEntry("foo.DSDB.raw", "dir1/dir2/foo.DSDB.raw",
+		Assertions.assertTrue(this.filterForSessions.accept(new InboxEntry("foo.DSDB.raw", "dir1/dir2/foo.DSDB.raw",
 				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSDB.raw", new Date(), 0, null, null,
 				ProductFamily.EDRS_SESSION.name(), null, null)));
 	}
 
 	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnTrue2_forSession() {
-		assertTrue(this.filterForSessions.accept(new InboxEntry("foo.DSDB_bar.AISP", "dir1/dir2/foo.DSDB_bar.AISP",
+		Assertions.assertTrue(this.filterForSessions.accept(new InboxEntry("foo.DSDB_bar.AISP", "dir1/dir2/foo.DSDB_bar.AISP",
 				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSDB_bar.AISP", new Date(), 0, null, null,
 				ProductFamily.EDRS_SESSION.name(), null, null)));
 	}
 
 	@Test
 	public final void testAccept_OnMatchingRegex_ShallReturnTrue3_forSession() {
-		assertTrue(this.filterForSessions.accept(new InboxEntry("foo.DSIB.xml", "dir1/dir2/foo.DSIB.xml",
+		Assertions.assertTrue(this.filterForSessions.accept(new InboxEntry("foo.DSIB.xml", "dir1/dir2/foo.DSIB.xml",
 				"file:///tmp/MPS_/S1A/dir1/dir2/foo.DSIB.xml", new Date(), 0, null, null,
 				ProductFamily.EDRS_SESSION.name(), null, null)));
 	}
 
 	@Test
 	public final void testSessionRegex() {
-		Assert.assertTrue(Pattern.matches(SESSION_REGEX, RELATIVE_PATH_1));
-		Assert.assertTrue(Pattern.matches(SESSION_REGEX, RELATIVE_PATH_2));
-		Assert.assertTrue(Pattern.matches(SESSION_REGEX, RELATIVE_PATH_3));
-		Assert.assertTrue(Pattern.matches(SESSION_REGEX, RELATIVE_PATH_4));
+		Assertions.assertTrue(Pattern.matches(SESSION_REGEX, RELATIVE_PATH_1));
+		Assertions.assertTrue(Pattern.matches(SESSION_REGEX, RELATIVE_PATH_2));
+		Assertions.assertTrue(Pattern.matches(SESSION_REGEX, RELATIVE_PATH_3));
+		Assertions.assertTrue(Pattern.matches(SESSION_REGEX, RELATIVE_PATH_4));
 	}
 
 }

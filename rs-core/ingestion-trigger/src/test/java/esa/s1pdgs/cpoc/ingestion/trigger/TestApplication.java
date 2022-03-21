@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger;
 
-import static org.junit.Assert.assertEquals;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -10,14 +8,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
@@ -29,8 +26,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 
-@Ignore // test collides with MongoConfiguration
-@RunWith(SpringRunner.class)
+@Disabled // test collides with MongoConfiguration
 @SpringBootTest
 @DirtiesContext
 @TestPropertySource(properties = "scheduling.enable=false")
@@ -90,14 +86,14 @@ public class TestApplication {
 
 		repo.save(entry1);
 		repo.save(entry2);
-		assertEquals(2, read().size());
+		Assertions.assertEquals(2, read().size());
 
 		List<IngestionJob> jobs = service.get();
-		assertEquals(2, jobs.size());
+		Assertions.assertEquals(2, jobs.size());
 
 		final List<InboxEntry> inboxEntries = read();
-		assertEquals(1, inboxEntries.size());
-		assertEquals(entry1, inboxEntries.get(0));
+		Assertions.assertEquals(1, inboxEntries.size());
+		Assertions.assertEquals(entry1, inboxEntries.get(0));
 
 	}
 

@@ -10,8 +10,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -30,7 +30,7 @@ public class AbstractInboxAdapterTest {
     @Mock
     private final ProcessConfiguration config = new ProcessConfiguration();
 
-    @Before
+    @BeforeEach
     public void initMocks() {
         final InboxEntryFactory entryFactory = new InboxEntryFactoryImpl(config);
 

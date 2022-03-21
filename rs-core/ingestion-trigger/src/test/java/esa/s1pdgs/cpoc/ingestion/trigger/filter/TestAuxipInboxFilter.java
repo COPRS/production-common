@@ -6,12 +6,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
-
-import static org.junit.Assert.*;
 
 public class TestAuxipInboxFilter {
 
@@ -66,7 +65,7 @@ public class TestAuxipInboxFilter {
 				acceptsAll = false;
 			}
 		}
-		assertTrue(acceptsAll);
+		Assertions.assertTrue(acceptsAll);
 	}
 
 	@Test
@@ -82,7 +81,7 @@ public class TestAuxipInboxFilter {
 				acceptsAll = false;
 			}
 		}
-		assertTrue(acceptsAll);
+		Assertions.assertTrue(acceptsAll);
 	}
 
 	@Test
@@ -97,7 +96,7 @@ public class TestAuxipInboxFilter {
 				matchAll = false;
 			}
 		}
-		assertTrue(matchAll);
+		Assertions.assertTrue(matchAll);
 	}
 
 	@Test
@@ -112,7 +111,7 @@ public class TestAuxipInboxFilter {
 				matchAll = false;
 			}
 		}
-		assertTrue(matchAll);
+		Assertions.assertTrue(matchAll);
 	}
 
 	//@Test
@@ -128,7 +127,7 @@ public class TestAuxipInboxFilter {
 				matchNone = false;
 			}
 		}
-		assertTrue(matchNone);
+		Assertions.assertTrue(matchNone);
 	}
 
 	@Test
@@ -144,7 +143,7 @@ public class TestAuxipInboxFilter {
 				matchNone = false;
 			}
 		}
-		assertTrue(matchNone);
+		Assertions.assertTrue(matchNone);
 	}
 
 	// --------------------------------------------------------------------------
