@@ -56,3 +56,5 @@ data:
   catalog_rest_server_port: "8080"
   # URI for accessing to the metadata catalog REST API
   catalog_rest_host: s1pro-metadata-catalog-worker-svc:8080
+
+  
