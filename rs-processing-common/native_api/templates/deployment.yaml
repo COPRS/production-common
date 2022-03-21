@@ -2,7 +2,7 @@ kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: {{ .Release.Name }}
-  namespace: {{ .Values.processing.namespace }}
+  namespace: processing
   generation: 1
   labels:
     app: {{ .Release.Name }}
@@ -18,7 +18,7 @@ spec:
       name: {{ .Release.Name }}
       labels:
         app: {{ .Release.Name }}
-        type: {{ .Values.processing.namespace }}
+        type: processing
     spec:
       terminationGracePeriodSeconds: 30
       affinity:
