@@ -116,3 +116,4 @@ spec:
             name: {{ .Release.Name }}-service-config
   serviceName: {{ .Release.Name }}-svc
   revisionHistoryLimit: 10
+  
