@@ -5,6 +5,10 @@ on:
     paths:
       - 'rs-container/docker_s3_ipf_l0/**'
       - '.github/workflows/build-ipf-s3-l0.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:

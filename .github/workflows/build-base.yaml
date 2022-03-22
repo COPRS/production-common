@@ -5,6 +5,10 @@ on:
     paths:
       - 'rs-container/docker_base/**'
       - '.github/workflows/build-base.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_dispatch:
 
 env:

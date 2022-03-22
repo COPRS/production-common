@@ -6,6 +6,10 @@ on:
       - 'rs-core/**'
       - '.github/workflows/build-ci.yaml'
       - '.github/workflows/build-docker.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_dispatch:
 
 env:
