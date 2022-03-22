@@ -36,8 +36,13 @@ jobs:
     - name: Generate file name
       shell: bash
       run: |
-        comp=${{ matrix.component }}
-        componentname="RS_CORE_${comp^^}_${{ steps.extract_branch.outputs.branch }}_$(date '+%Y-%m-%d')"
-        echo "${componentname}"        
+        corecomp=${{ matrix.component }}
+        corefilename="RS_CORE_${corecomp^^}_${{ steps.extract_branch.outputs.branch }}_$(date '+%Y-%m-%d')"
+        echo "##[set-output name=filename;]$(echo ${corefilename})"
+      id: gen_filename
       
+    - name: Build structure
+      shell: bash
+      run: |
+        echo ${{ steps.gen_filename.outputs.filename }}      
     
