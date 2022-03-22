@@ -37,7 +37,7 @@ runs:
     shell: bash
     run: |
       cd rs-core/${{ inputs.COMPONENT }}
-      mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.ARTIFACTORY_BASE }}/${{ env.ARTIFACTORY_PROJECT_DOCKER }}/${{ env.IMAGE_NAME }}-${{ inputs.COMPONENT }}:develop
+      mvn clean install
       
   - name: Sonarqube scan 
     shell: bash
@@ -57,21 +57,34 @@ runs:
     uses: docker/metadata-action@v3
     with:
       images: ${{ env.ARTIFACTORY_BASE }}/${{ env.ARTIFACTORY_PROJECT_DOCKER }}/${{ env.IMAGE_NAME }}-${{ inputs.COMPONENT }}
-        
-  # - name: Scan image
-  #   uses: anchore/scan-action@v2
-  #   id: scan
-  #   with:
-  #     image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
-  #     acs-report-enable: true
-  #     fail-build: false
-  #     severity-cutoff: critical
 
-  # - name: Upload Anchore scan json report
-  #   uses: actions/upload-artifact@master
-  #   with:
-  #     name: vulnerabilities-${{ inputs.COMPONENT }}
-  #     path: ${{ steps.scan.outputs.vulnerabilities }}
+  - name: Build image
+    uses: docker/build-push-action@v2
+    with:
+      load: true
+      context: ./rs-core/${{ inputs.COMPONENT }}
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
+      build-args: |
+        BRANCH=${{ steps.extract_branch.outputs.branch }}
+        BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
+        VERSION=${{ env.VERSION }}
+        COMMIT_ID=${{ env.COMMIT_ID }}
+        
+  - name: Scan image
+    uses: anchore/scan-action@v2
+    id: scan
+    with:
+      image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+      acs-report-enable: true
+      fail-build: false
+      severity-cutoff: critical
+
+  - name: Upload Anchore scan json report
+    uses: actions/upload-artifact@master
+    with:
+      name: vulnerabilities-${{ inputs.COMPONENT }}
+      path: ${{ steps.scan.outputs.vulnerabilities }}
 
   - name: Push image
     shell: bash
