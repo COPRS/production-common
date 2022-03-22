@@ -1,0 +1,66 @@
+os:
+  endpoint:
+  domainid:
+  projectid:
+  username:
+  password:
+  az:
+  network:
+  security_group:
+  floating_network:
+
+k8s:
+  master_url:
+  namespace:
+  username:
+  client_key:
+  client_cert_data:
+
+s3:
+  storageRetryObsMaxRetries: 10
+  endpoint:
+  region:
+  disable_chunked_encoding:
+  bucket_aux:
+  bucket_session:
+  bucket_l0_segments:
+  bucket_l0_slices:
+  bucket_l0_acns:
+  bucket_l1_slices:
+  bucket_l1_acns:
+  bucket_l2_slices:
+  bucket_l2_acns:
+  bucket_l0_blanks:
+  bucket_spp:
+  bucket_invalid:
+  bucket_ghost:
+  bucket_debug:
+  bucket_failed_workdir:
+  bucket_session_retransfer:
+  bucket_plans_and_reports:
+  
+  bucket_zip_aux:
+  bucket_zip_l0_segments:
+  bucket_zip_l0_slices:
+  bucket_zip_l0_acns:
+  bucket_zip_l1_slices:
+  bucket_zip_l1_acns:
+  bucket_zip_l2_slices:
+  bucket_zip_l2_acns:
+  bucket_zip_l0_blanks:
+  bucket_zip_spp:
+  bucket_zip_plans_and_reports:
+
+es:
+  svc:
+  port:
+  cluster_name:
+
+kafka:
+  url:
+  topic_errors:
+  
+auxip:
+  auth_type:
+  oauth_auth_url:
+

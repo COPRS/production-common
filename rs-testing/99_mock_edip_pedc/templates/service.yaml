@@ -1,0 +1,47 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-svc
+  labels:
+    app: {{ .Release.Name }}-svc
+spec:
+  selector:
+    app: {{ .Release.Name }}
+  type: ClusterIP
+  ports:
+  - name: ftp
+    protocol: TCP
+    port: 21
+  - name: ftp-data
+    protocol: TCP
+    port: 20
+  - name: ftp-data-01
+    protocol: TCP
+    port: 47400
+  - name: ftp-data-02
+    protocol: TCP
+    port: 47401
+  - name: ftp-data-03
+    protocol: TCP
+    port: 47402
+  - name: ftp-data-04
+    protocol: TCP
+    port: 47403
+  - name: ftp-data-05
+    protocol: TCP
+    port: 47404
+  - name: ftp-data-06
+    protocol: TCP
+    port: 47405
+  - name: ftp-data-07
+    protocol: TCP
+    port: 47406
+  - name: ftp-data-08
+    protocol: TCP
+    port: 47407
+  - name: ftp-data-09
+    protocol: TCP
+    port: 47408
+  - name: ftp-data-10
+    protocol: TCP
+    port: 47409

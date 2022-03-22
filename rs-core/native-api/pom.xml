@@ -1,0 +1,235 @@
+<project xmlns="https://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+	  <groupId>de.werum.s1pdgs</groupId>
+	  <artifactId>s1pro-core</artifactId>
+	  <version>3.32.1</version>
+	</parent>
+	
+	<groupId>de.werum.coprs</groupId>
+	<artifactId>coprs-native-api</artifactId>
+	<packaging>jar</packaging>
+	<name>native-api</name>
+
+	<properties>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<project.build.finalName>coprs-native-api</project.build.finalName>
+		<project.artifactId>coprs-native-api</project.artifactId>
+		<start-class>de.werum.coprs.nativeapi.Application</start-class>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>in-project</id>
+			<name>In Project Repo</name>
+			<url>file://${project.basedir}/libs</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-lib-commons</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+		</dependency>
+		
+		<dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-yaml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.grundid.opendatalab</groupId>
+			<artifactId>geojson-jackson</artifactId>
+			<version>1.14</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jetty</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.vaadin.external.google</groupId>
+					<artifactId>android-json</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>	
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jul-to-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<!-- Import dependency management from Spring Boot -->
+			<!-- overriding particular (spring induced) dependency versions before 
+				this block -->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-dependencies</artifactId>
+			<version>${spring.boot.version}</version>
+			<type>pom</type>
+			<!--scope>import</scope -->
+			<scope>compile</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+		<testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+		<outputDirectory>${basedir}/target/classes</outputDirectory>
+		<testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<configuration>
+							<mainClass>${start-class}</mainClass>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<configuration>
+					<effort>Max</effort>
+					<threshold>Low</threshold>
+					<maxRank>15</maxRank>
+					<includeTests>false</includeTests>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<configuration>
+					<rulesets>
+						<ruleset>${project.basedir}/../PmdJavaRuleset.xml</ruleset>
+					</rulesets>
+					<verbose>true</verbose>
+					<failurePriority>2</failurePriority>
+					<includeTests>false</includeTests>
+					<outputDirectory>target/html-reports</outputDirectory>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>post-unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<!-- Sets the path to the file which contains the execution data. -->
+							<dataFile>target/jacoco.exec</dataFile>
+							<!-- Sets the output directory for the code coverage report. -->
+							<outputDirectory>target/html-reports/jacoco-ut</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

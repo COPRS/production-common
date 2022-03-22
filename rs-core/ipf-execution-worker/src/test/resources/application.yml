@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: s1pdgs-wrapper-app
+    
+logging:
+  config: classpath:log4j2-test.yml
+    
+server:
+  port: ${wrapper_rest_server_port:8080}
+  
+  # KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors
+  producer:
+    max-retries: 10
+  
+process:
+  level: L0
+  hostname: "hostname"
+  workingDir: /data/localWD
+  fixed-delay-ms: 500
+  init-delay-poll-ms: 1000
+  tm-proc-one-task-s: 600
+  tm-proc-all-tasks-s: 1800
+  tm-proc-stop-s: 300
+  tm-proc-check-stop-s: 60
+  size-batch-upload:  20
+  size-batch-download: 5
+  wap-nb-max-loop: 12
+  wap-tempo-s: 10
+  threshold-ew : 2
+  threshold-iw : 2
+  threshold-sm : 2
+  threshold-wv : 30
+  
+mqi:
+  host-uri: http://localhost:8081
+  max-retries: 3
+  tempo-retry-ms: 1000
+
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-processing: 3
+  max-error-counter-mqi: 30
+  block-system-exit: true
+  
+dev:
+  steps-activation:
+    download: ${wrapper_process_dev-steps-activation_download:true}
+    upload: ${wrapper_process_dev-steps-activation_upload:true}
+    erasing: ${wrapper_process_dev-steps-activation_erasing:true}

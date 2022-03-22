@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ $# -ne 2 ]; then
+    echo "Synopsis: TOPIC MESSAGE"; exit 1
+fi
+
+TOPIC=$1
+MESSAGE=$2
+
+echo "echo '${MESSAGE}' | kafka-console-producer.sh --topic ${TOPIC} --broker-list $KAFKA_URL" >/tmp/kafka-publish.cmd
+kubectl -n $KAFKA_NAMESPACE cp /tmp/kafka-publish.cmd $KAFKA_POD:/tmp/ #-c $KAFKA_CONTAINER
+#kubectl -n $KAFKA_NAMESPACE exec $KAFKA_POD -c $KAFKA_CONTAINER -- sh /tmp/kafka-publish.cmd
+kubectl -n $KAFKA_NAMESPACE exec $KAFKA_POD -- sh /tmp/kafka-publish.cmd
+rm -f /tmp/kafka-publish.cmd

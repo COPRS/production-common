@@ -1,0 +1,67 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: s1pdgs-request-repo
+  jackson:
+    serialization:
+      indent_output: true
+    
+# Logging
+logging:
+  config: ${log4j_config:log/log4j2.yml}
+
+# REST controller
+server:
+  port: 8080      
+
+# OpenAPI validator configuration
+openapi:
+  # Dis/Enableds openapi validation
+  disable-validation: true
+  # Path exclusion regexp
+  path-exclusion-regex: ^\/(app\/status|error)$
+  # Path to spec file
+  spec-file: /app/openapi/s1pro-api_openapi.yaml
+
+# Kafka
+kafka:
+  # host:port to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: ${kafka_bootstrap-servers}
+  # Hostname
+  hostname: ${HOSTNAME}
+  # Topic name for the errors
+  error-topic: ${kafka_topic_errors}
+  consumer:
+    # Unique string that identifies the consumer group to which this consumer belongs
+    group-id: error
+    # Maximum number of records returned in a single call to poll().
+    max-poll-records: 1
+    # Delay between two polls
+    max-poll-interval-ms: 3600000
+    # Expected time between heartbeats to the consumer coordinator.
+    heartbeat-intv-ms: 3000
+    session-timeout-ms: 120000
+    # What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server (e.g. because that data has been deleted): earliest: automatically reset the offset to the earliest offset, latest: automatically reset the offset to the latest offset, none: throw exception to the consumer if no previous offset is found for the consumer's group,anything else: throw exception to the consumer.
+    auto-offset-reset: latest
+  listener:
+    # Timeout to use when polling the consumer.
+    poll-timeout-ms: 500
+  producer:
+    # When greater than zero, enables retrying of failed sends.
+    max-retries: 10
+
+
+# MongoDB
+mongodb:
+  host: ${mongo_db_host:localhost}
+  port: ${mongo_db_port:27017}
+  database: ${mongo_db_database:s1pdgs}
+  
+# Application status configuration
+status:
+  # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not, default is 3000
+  delete-fixed-delay-ms: 3000
+  # The number of consecutive errors leading to the state FATALERROR, default is 100
+  max-error-counter: 30

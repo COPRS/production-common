@@ -1,0 +1,42 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-prip-worker
+
+# Logging
+logging:
+  config: classpath:log4j2-test.yml
+
+# MQI config
+mqi:
+  host-uri: http://localhost:8081                               # the host and port for querying MQI server
+  max-retries: 100                                              # the maximal number of consecutive retries following a MQI request error 
+  tempo-retry-ms: 10000                                         # 
+  
+# Elastic Search
+elasticsearch:
+  host: localhost                                           # Host of Elasticsearch cluster
+  port:  9200                                  # Port of Elasticsearch cluster
+  connect-timeout-ms: 2000                                        # Timeout in milliseconds of connection to the cluster
+  socket-timeout-ms: 10000                                        # Timeout in milliseconds of the socket to the cluster
+  
+# PRIP Frontend config
+prip-frontend:
+  # Time in seconds until a download URL expires
+  download-url-expiration-time-in-seconds: 600
+  # Expose the debug support for OLingo (Default: false)
+  debug-support: true
+
+# PRIP Commons config
+prip-client:
+  repository:
+    max-search-hits: 100
+
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter: 30
+  block-system-exit: true
+
+# REST controller
+server:
+  port: 8080 

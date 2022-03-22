@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routing description="routing for publishing product of category LEVEL_SEGMENTS">
+	<default_route description="default route of product family LEVEL_SEGMENTS">
+		<family>L0_SEGMENT</family>
+		<route_to>
+			<topic>t-pdgs-aio-l0-segment-production-events</topic>
+		</route_to>
+	</default_route>
+</routing>

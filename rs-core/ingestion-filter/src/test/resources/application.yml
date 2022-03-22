@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: s1pdgs-ingestion-filter
+    
+logging:
+  config: classpath:log4j2-test.yml
+
+process:
+  hostname: ${HOSTNAME}                                          # Hostname
+  
+ingestion-filter:
+  config:
+    S3:
+      name-regex: ^(\w{3})_(\w{2})_(\w{3})_(\d{14})(\d{5})_.*
+      group-idx: 4
+      cron-definition: "* * 0-8 ? * WED *"
+
+# KAFKA
+kafka:
+  bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors
+  producer:
+    max-retries: 10
+
+# MQI config
+mqi:
+  host-uri: http://localhost:8081                               # the host and port for querying MQI server
+  max-retries: 3                                                # the maximal number of consecutive retries following a MQI request error 
+  tempo-retry-ms: 1000                                          # 
+
+     

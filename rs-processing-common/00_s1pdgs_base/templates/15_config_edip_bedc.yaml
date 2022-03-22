@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s1pdgs-edip-bedc
+  namespace: {{ .Values.processing.namespace }}
+  
+data:
+  # EDIP Host
+  edip.host: "{{ .Values.edip.bedc.host }}"
+  # EDIP Port
+  edip.port: "{{ .Values.edip.bedc.port }}"
+  # Base Path where to find the products
+  edip.path: "{{ .Values.edip.bedc.path }}"
+  # Enable ftp passive mode
+  edip.enablePasv: "{{ .Values.edip.bedc.enablePasv }}"
+  # Use explicit FTPS instead of implicit FTPS
+  edip.explicitFtps: "{{ .Values.edip.bedc.explicitFtps }}"
+  # Disable certificate validation
+  edip.disableCertificateCheck: "{{ .Values.edip.bedc.disableCertificateCheck }}"
+  # Enable hostname verification
+  edip.enableHostnameVerification: "{{ .Values.edip.bedc.enableHostnameVerification }}"
+  # Encrypt FTP data channel
+  edip.enableDataChannelEncryption: "{{ .Values.edip.bedc.enableDataChannelEncryption }}"
+  # SSL Protocol version
+  edip.sslProtocol: "{{ .Values.edip.bedc.sslProtocol }}"
+  # Connection timeout
+  edip.connectTimeoutSec: "{{ .Values.edip.bedc.connectTimeoutSec }}"
+  # Path to keystore inside of pod
+  {{ if .Values.edip.bedc.keystore_data }}
+  edip.keyManagerKeyStore: "/app/ssl/keystore.jks"
+  {{ else }}
+  edip.keyManagerKeyStore: ""
+  {{ end }}
+  # Keystore password (also used as key password)
+  edip.keyManagerKeyStorePassword: "{{ .Values.edip.bedc.keystore_pass }}"
+  # Path to truststore inside of pod
+  {{ if .Values.edip.bedc.truststore_data }}
+  edip.trustManagerKeyStore: "/app/ssl/truststore.jks"
+  {{ else }}
+  edip.trustManagerKeyStore: ""
+  {{ end }}
+  # Truststore password
+  edip.trustManagerKeyStorePassword: "{{ .Values.edip.bedc.truststore_pass }}"

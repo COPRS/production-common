@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: coprs-native-api
+
+# Logging
+logging:
+  level:
+    root: ERROR
+    de.werum.coprs: DEBUG
+    esa.s1pdgs.cpoc.prip: DEBUG
+    org.springframework: INFO
+    org.apache: INFO
+
+# REST controller
+server:
+  port: 8080
+
+# OpenAPI validator configuration
+openapi:
+  # Dis/Enableds openapi validation
+  disable-validation: false
+  # Path exclusion regexp
+  path-exclusion-regex: ^\/(app\/status|error|search|openapi\/v3\/doc|openapi\/v3\/doc.yaml|api\/v1\/prip)$
+  # Path to spec file
+  definition-file: /app/openapi/native-api_openapi.yml
+
+# Native API config
+native-api:
+  # major version (used as part of the API base path)
+  major-version: v1
+  # version (to communicate minor changes that are compatible with the major version)
+  version: 1.0
+  # configuration for internal interfacing to PRIP
+  prip-protocol: http
+  prip-host: s1pro-prip-frontend-svc.processing.svc.cluster.local
+  prip-port: 8080
+  # configuration to create PRIP metadata and download links that are externaly accessible
+  external-prip-protocol: http
+  external-prip-host: coprs.werum.de/prip/odata/v1/
+  external-prip-port: 80
+  # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
+  include-additional-attributes: true

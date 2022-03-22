@@ -1,0 +1,37 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+service:
+  port: 8080
+  
+mqiService:
+  port: 8081
+
+image:
+  name: rs-core-ingestion-worker
+
+ingestion_xbip_worker:
+  cpu:
+    request: "300m"
+    limit: "1300m"
+  ram:
+    request: "3500Mi"
+    limit: "4000Mi"
+  javaOpts:
+    #xms: "256m"
+    xmx: "2048m"
+  uploadCache:
+    location: "/opt/s3/uploadCache"
+    medium: "Memory"
+    size: "1500Mi"
+
+ingestion_xbip_worker_mqi:
+  cpu:
+    request: "100m"
+    limit: "500m"
+  ram:
+    request: "600Mi"
+    limit: "2400Mi"
+  javaOpts:
+#   xms: "256m"
+    xmx: "512m"

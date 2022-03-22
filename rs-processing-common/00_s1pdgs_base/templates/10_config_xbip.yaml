@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s1pdgs-xbip
+  namespace: {{ .Values.processing.namespace }}
+  
+data:
+{{ if eq .Values.mock.webdav true }}
+  # Hostname
+  cgs1.host: "s1pro-mock-webdav-cgs01-svc"
+  # Parent path where to find the products
+  cgs1.path: "/"
+  # Whether to trust self signed certificates or not
+  cgs1.disableValiditation: "true"
+  # Connection and read timeout
+  cgs1.connectTimeoutSec: "60"
+  # Whether all subdirectories shall be listed recursively
+  cgs1.programmaticRecursion: "false"
+  # Dis/Enables preemptive authentication (pass user:password in URL)
+  cgs1.enablePreemptiveAuthentication: "false"
+
+  cgs2.host: "s1pro-mock-webdav-cgs02-svc"
+  cgs2.path: "/"
+  cgs2.disableValiditation: "true"
+  cgs2.connectTimeoutSec: "60"
+  cgs2.programmaticRecursion: "false"
+  cgs2.enablePreemptiveAuthentication: "true"
+  
+  cgs3.host: "s1pro-mock-webdav-cgs03-svc"
+  cgs3.path: "/"
+  cgs3.disableValiditation: "true"
+  cgs3.connectTimeoutSec: "60"
+  cgs3.programmaticRecursion: "false"
+  cgs3.enablePreemptiveAuthentication: "false"
+  
+  cgs4.host: "s1pro-mock-webdav-cgs04-svc"
+  cgs4.path: "/"
+  cgs4.disableValiditation: "true"
+  cgs4.connectTimeoutSec: "60"
+  cgs4.programmaticRecursion: "false"
+  cgs4.enablePreemptiveAuthentication: "false"
+  
+  cgs5.host: "s1pro-mock-webdav-cgs05-svc"
+  cgs5.path: "/"
+  cgs5.disableValiditation: "true"
+  cgs5.connectTimeoutSec: "60"
+  cgs5.programmaticRecursion: "true"
+  cgs5.enablePreemptiveAuthentication: "false"
+  
+  s3_xbip.host: "s1pro-mock-webdav-s3-svc"
+  s3_xbip.path: "/"
+  s3_xbip.disableValiditation: "true"
+  s3_xbip.connectTimeoutSec: "60"
+  s3_xbip.programmaticRecursion: "false"
+  s3_xbip.enablePreemptiveAuthentication: "false"
+{{ else }}
+  cgs1.host: "51.195.56.82"
+  cgs1.path: "/remote.php/dav/files/s1pdgs/Sentinel1_data/"
+  cgs1.disableValiditation: "true"
+  cgs1.connectTimeoutSec: "60"
+  cgs1.programmaticRecursion: "false"
+  cgs1.enablePreemptiveAuthentication: "false"
+
+  cgs2.host: "esa-copernicus.ksat.no"
+  cgs2.path: "/SVL/SENTINEL1/"  
+  cgs2.disableValiditation: "true"
+  cgs2.connectTimeoutSec: "60"
+  cgs2.programmaticRecursion: "true"
+  cgs2.enablePreemptiveAuthentication: "true"
+
+  cgs3.host: "195.77.80.11"
+  cgs3.path: "/"  
+  cgs3.disableValiditation: "true"
+  cgs3.connectTimeoutSec: "60"
+  cgs3.programmaticRecursion: "false"
+  cgs3.enablePreemptiveAuthentication: "false"
+  
+  cgs4.host: "eg37235.psmanaged.com"
+  cgs4.path: "/"  
+  cgs4.disableValiditation: "true"
+  cgs4.connectTimeoutSec: "60"
+  cgs4.programmaticRecursion: "true"
+  cgs4.enablePreemptiveAuthentication: "false"
+
+  cgs5.host: "ddp1.sscspace.com"
+  cgs5.path: "/"
+  cgs5.disableValiditation: "true"
+  cgs5.connectTimeoutSec: "60"
+  cgs5.programmaticRecursion: "true"
+  cgs5.enablePreemptiveAuthentication: "false"
+  
+  s3_xbip.host: "tbd"
+  s3_xbip.path: "/"
+  s3_xbip.disableValiditation: "true"
+  s3_xbip.connectTimeoutSec: "60"
+  s3_xbip.programmaticRecursion: "false"
+  s3_xbip.enablePreemptiveAuthentication: "false"
+{{ end }}

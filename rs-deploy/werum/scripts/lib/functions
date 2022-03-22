@@ -1,0 +1,53 @@
+#!/bin/bash
+
+loop_command() {
+  RETRIES=$1
+  COMMAND=$2
+  
+  RESULT=""
+  for i in `seq $RETRIES`
+  do
+    RESULT=$(eval $COMMAND)
+    if [ ! -z $RESULT ]
+    then
+      echo $RESULT
+      return 0
+    fi
+    sleep 1s
+  done  
+  
+  echo "Timeout while executing $COMMAND"
+  exit 1
+}
+
+clean_inbox_polling() {
+  echo "Cleaning inbox polling..."
+  for pod in `kubectl -n $S1PRO_NAMESPACE get pods | egrep "s1pro-ingestion-[0-9]" | cut -d " " -f1`
+  do
+    echo "Cleaning database for $pod"
+    kubectl -n $S1PRO_NAMESPACE exec $pod -c ingestion-worker -- sh -c 'rm -rf /data/inbox/db*'
+  done
+  for pod in `kubectl -n $S1PRO_NAMESPACE get pods | grep -i s1pro-contingency-ingestion | cut -d " " -f1`
+  do
+    echo "Cleaning database for $pod"
+    kubectl -n $S1PRO_NAMESPACE exec $pod -c ingestion-worker -- sh -c 'rm -rf /data/inbox/db*'
+  done
+}
+
+clean_webdav_mock() {
+  echo "Cleaning webdav..."
+  for pod in `kubectl -n $S1PRO_NAMESPACE get pods | grep -i s1pro-mock-webdav | cut -d " " -f1`
+  do
+    echo "Cleaning ingestion storage for $pod"
+    kubectl -n $S1PRO_NAMESPACE exec $pod -- sh -c 'rm -rf /var/lib/dav/data/NOMINAL/S1A/* /var/lib/dav/data/NOMINAL/S1B/*'
+  done
+}
+
+clean_edip_mock() {
+  echo "Cleaning edip..."
+  for pod in `kubectl -n $S1PRO_NAMESPACE get pods | grep -i s1pro-mock-edip | cut -d " " -f1`
+  do
+    echo "Cleaning ingestion storage for $pod"
+    kubectl -n $S1PRO_NAMESPACE exec $pod -- bash -c 'rm -rf /data/NOMINAL/S1{A,B}/*'
+  done
+}

@@ -1,0 +1,125 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.processing.namespace }}
+  generation: 1
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount.ingestion_xbip_cgs02_trigger }}
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+      labels:
+        app: {{ .Release.Name }}
+        type: {{ .Values.processing.namespace }}
+    spec:
+      terminationGracePeriodSeconds: 30
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.gateway.label.key }}
+                operator: In
+                values:
+                - {{ .Values.gateway.label.value.std }}
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: {{ .Values.s1pro_ingestion_xbip_cgs02_trigger.ram.request }}
+            cpu: {{ .Values.s1pro_ingestion_xbip_cgs02_trigger.cpu.request }}
+          limits:
+            memory: {{ .Values.s1pro_ingestion_xbip_cgs02_trigger.ram.limit }}
+            cpu: {{ .Values.s1pro_ingestion_xbip_cgs02_trigger.cpu.limit }}
+        volumeMounts: 
+        - name: service-logging-config-volume
+          mountPath: /app/log
+        - name: datadir
+          mountPath: /data/inbox
+        - name: service-config-volume
+          mountPath: /app/config
+        env:
+        - name: JAVA_XMS
+          value: {{ .Values.s1pro_ingestion_xbip_cgs02_trigger.javaOpts.xms }}
+        - name: JAVA_XMX
+          value: {{ .Values.s1pro_ingestion_xbip_cgs02_trigger.javaOpts.xmx }}
+        - name: cgs2.user
+          valueFrom:
+            secretKeyRef:
+              name: xbip-cgs02
+              key: USER
+        - name: cgs2.pass
+          valueFrom:
+            secretKeyRef:
+              name: xbip-cgs02
+              key: PASS
+        - name: mongodb.username
+          valueFrom:
+            secretKeyRef:
+              name: mongodb
+              key: USERNAME
+        - name: mongodb.password
+          valueFrom:
+            secretKeyRef:
+              name: mongodb
+              key: PASSWORD
+        envFrom:
+        - configMapRef:
+            name: s1pdgs-config
+        - configMapRef:
+            name: s1pdgs-logging-config
+        - configMapRef:
+            name: s1pdgs-env
+        - configMapRef:
+            name: s1pdgs-xbip     
+        ports:
+        - name: web
+          protocol: TCP
+          containerPort: {{ .Values.service.port }}
+        securityContext:
+          privileged: false
+        livenessProbe:
+          httpGet:
+            path: /app/status
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+      tolerations:
+      - key: {{ .Values.gateway.toleration.key }}
+        operator: "Exists"
+        effect: {{ .Values.gateway.toleration.effect }}
+      imagePullSecrets:
+      - name: {{ .Values.image.imagePullSecrets }}
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      subdomain: {{ .Release.Name }}-svc
+      securityContext: {}
+      schedulerName: default-scheduler
+      volumes:
+        - name: service-logging-config-volume
+          configMap:
+            name: s1pdgs-logging-config
+        - name: service-config-volume
+          configMap:
+            name: {{ .Release.Name }}-service-config
+  serviceName: {{ .Release.Name }}-svc
+  revisionHistoryLimit: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        {{- toYaml .Values.resources | nindent 10 }}

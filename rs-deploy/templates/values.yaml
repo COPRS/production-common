@@ -1,0 +1,287 @@
+# Shall helm deploy the simulator images?
+simulator:
+  simulateL0AioIpf: true
+  simulateL0AspIpf: true
+  simulateL1Ipf: true
+  simulateL2Ipf: true
+  simulateMbuIpf: true
+  simulateS3ACQIpf: true
+  simulateS3L0PIpf: true
+  simulateS3PUGIpf: true
+  
+s3:
+  processing:
+    l0p:
+      maxTimeLife: 1800
+    pug:
+      maxTimeLife: 3600
+  
+image:
+  imagePullSecrets: harbor-tools
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  tag: develop
+
+mqiImage:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  name: rs-core-mqi-server
+  tag: develop
+
+mqi:
+  persistence:
+    messagePersistenceStrategy: AppCatalogMessagePersistence # InMemoryMessagePersistence | AppCatalogMessagePersistence
+
+gateway:
+  toleration:
+    key: node-role.kubernetes.io/gateway
+    effect: NoSchedule
+  label:
+    key: node-role.kubernetes.io/gateway
+    value:
+      net: infra
+      std: std
+      edrs:
+        pedc: std
+        bedc: std
+
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
+
+processor:
+  toleration:
+    key: node-role.kubernetes.io/processor
+    effect: NoSchedule
+  label:
+    key: node-role.kubernetes.io/processor
+    value:
+      aio: aio
+      asp: asp
+      l1: l1
+      l2: l2
+      zip: zip
+      s3_acq: s3_acq
+      s3_l0p: s3_l0p
+      s3-pug: s3_pug
+
+kongplugin:
+  clientId: "s1pdgs_client"
+  clientSecret: ""
+  discovery: "https://c1.ops.s1pdgs.eu/auth/realms/s1pdgs/.well-known/openid-configuration"
+  sessionSecret: ""
+  introspection_endpoint: "https://c1.ops.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token/introspect"
+  groupsAuthorizedPaths:
+    group:
+    - name: "operations"
+      path: "/odata"
+    - name: "centreexpert"
+      path: "/odata"
+    - name: "op_manager"
+      path: "/odata"
+    - name: "sysadmin"
+      path: "/odata"
+    - name: "customer"
+      path: "/odata"
+    - name: "b2b"
+      path: "/odata"
+
+metadataCatalog:
+  restApiNbRetry: 3
+  restApiTempoRetryMs: 1000
+
+auxip:
+  serviceRootUri: "https://aux1.s1pdgs.eu/odata/v1"
+  sslValidation: "false"
+  authType: "oauth2"
+  oauthAuthUrl: "https://aux1.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token"
+  creationDateAttributeName: "PublicationDate"
+  productNameAttrName: "Name"
+  idAttrName: "Id"
+  contentLengthAttrName: "ContentLength"
+  start: "2021-02-14T12:00:00.000000"
+  timeWindowSec: 240 #3600         # The time window to check at each request
+  timeWindowOverlapSec: 240  # the current time window will have some overlap in seconds with the predecessing time window
+                             # this is just to have the possibility to add some savety margin, making sure nothing is overseen between time windows
+  offsetFromNowSec: 240      # time window will not reach now but now minus offset-from-now-sec
+                             # this is for savety too, giving the queried system some grace period to provide new/current data
+  maxPageSize: 500            # aux metadata will be splitted into pages with this size
+
+xbip:
+  bufferInputs: false
+  ignoreFilesBeforeDate:
+    cgs01:  "2020-11-24T08:00:00.000Z"
+    cgs02:  "2020-11-24T08:00:00.000Z"
+    cgs03:  "2020-11-24T08:00:00.000Z"
+    cgs04:  "2020-11-24T08:00:00.000Z"
+    cgs05:  "2020-11-24T08:00:00.000Z"
+    cgs10:  "2020-11-24T08:00:00.000Z"
+    s3: "2020-11-24T08:00:00.000Z" 
+  stationRetentionTime:
+    cgs01: 7
+    cgs02: 7
+    cgs03: 7
+    cgs04: 7
+    cgs05: 7
+    cgs10: 7
+    s3: 7
+
+edip:
+  bufferInputs: false
+  pedc:
+    ignoreFilesBeforeDate: "2021-02-23T10:00:00.000Z"
+    stationRetentionTime: 7
+    host: 10.21.10.1
+    path: /
+    port: 21
+    enablePasv: true
+    explicitFtps: true
+    disableCertificateCheck: false
+    enableHostnameVerification: false
+    enableDataChannelEncryption: false
+    sslProtocol: TLSv1.2
+    connectTimeoutSec: 60
+    directory: "ftps://${edip.host}:${edip.port}${edip.path}NOMINAL/"
+    keystore_data: ""
+    keystore_pass: "changeit"
+    truststore_data: /u3+7QAAAAIAAAABAAAAAgAIbXlvY2VhbjEAAAF3RQrFWwAFWC41MDkAAAPDMIIDvzCCAqegAwIBAgIUUbIDATMWy1AeVKX9P8A/0kaI5mEwDQYJKoZIhvcNAQELBQAwbzELMAkGA1UEBhMCREUxFTATBgNVBAgMDExvd2VyIFNheG9ueTESMBAGA1UEBwwJTHVlbmVidXJnMSEwHwYDVQQKDBhXZXJ1bSBTb2Z0d2FyZSAmIFN5c3RlbXMxEjAQBgNVBAMMCXMxcGRncy5ldTAeFw0yMDEyMDQxODQwMzhaFw0yMTEyMDQxODQwMzhaMG8xCzAJBgNVBAYTAkRFMRUwEwYDVQQIDAxMb3dlciBTYXhvbnkxEjAQBgNVBAcMCUx1ZW5lYnVyZzEhMB8GA1UECgwYV2VydW0gU29mdHdhcmUgJiBTeXN0ZW1zMRIwEAYDVQQDDAlzMXBkZ3MuZXUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDZGsBDpcjrwGCY74UsujgSZkcQsRjv9TSCHimOV/dlvbDl58iIhZUg93uwub+Ae0F77pfPClN5YDjbepkT6qWWJd06AAUDlbylGELrnqNANpIiVqK2YVrOUR2qBnVDronOrrajeTD5bBAtPpjZssc5v3swhdqSLSBKTz/5LykOSvD4IpxKkdCJBu/L+y01kUGDe3eXYbbf4T1tjo11t4wJunUkv0RV2nvnPkrdu/YtTN9X7kw2LRNaHR0rHudo68F8m3PylC9HtDetK/bZ2gO23Vy5ZLriKpDi4cycqdAIUy0mBwjd3O4nQ353bh7T5l2zuPTcvysbtp9u5SbTLLLPAgMBAAGjUzBRMB0GA1UdDgQWBBRn55CvXWTHfl4RIavXecPpcM3AsDAfBgNVHSMEGDAWgBRn55CvXWTHfl4RIavXecPpcM3AsDAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQDYXwNm4CnLsBXRj995oVaRuCG87F4srET7CzCrZUEy9QJYTxreB7oQz8dsFeW9SRbb5PaWhlnDwXjTIq03GUN3TIDLRcW4uEzRL/9rWv0Nl5hzdVo6GTFJ1drUTtzjtmv5laTs4gxF36R0xxl+TeYSgo41T78Fv6NIYvcABw5zdZoydbZyt2WkbWiJx8fkX5jbn+mXK3ECprhRYb6tMPUxeMRB0ZZEDrG7A+7qyLF9fpvx6m2qF80CaXKekxf4im2R7UjzqS0+b5c02JJnBpNrUvrjAabNh0Fd3omKjEGRoB5loK6c8t3rS5sr6PCr27wPLcSNT45u0P3FnsEYGnOZ5wEFmzWTWqty+5TotBFojPkkuQQ=
+    truststore_pass: changeit
+  bedc:
+    ignoreFilesBeforeDate: "2021-02-23T10:00:00.000Z"
+    stationRetentionTime: 7
+    host: 10.22.10.1
+    path: /
+    port: 21
+    enablePasv: true
+    explicitFtps: true
+    disableCertificateCheck: false
+    enableHostnameVerification: false
+    enableDataChannelEncryption: false
+    sslProtocol: TLSv1.2
+    connectTimeoutSec: 60
+    directory: "ftps://${edip.host}:${edip.port}${edip.path}NOMINAL/"
+    keystore_data: ""
+    keystore_pass: "changeit"
+    truststore_data: /u3+7QAAAAIAAAABAAAAAgAIbXlvY2VhbjEAAAF3RQrFWwAFWC41MDkAAAPDMIIDvzCCAqegAwIBAgIUUbIDATMWy1AeVKX9P8A/0kaI5mEwDQYJKoZIhvcNAQELBQAwbzELMAkGA1UEBhMCREUxFTATBgNVBAgMDExvd2VyIFNheG9ueTESMBAGA1UEBwwJTHVlbmVidXJnMSEwHwYDVQQKDBhXZXJ1bSBTb2Z0d2FyZSAmIFN5c3RlbXMxEjAQBgNVBAMMCXMxcGRncy5ldTAeFw0yMDEyMDQxODQwMzhaFw0yMTEyMDQxODQwMzhaMG8xCzAJBgNVBAYTAkRFMRUwEwYDVQQIDAxMb3dlciBTYXhvbnkxEjAQBgNVBAcMCUx1ZW5lYnVyZzEhMB8GA1UECgwYV2VydW0gU29mdHdhcmUgJiBTeXN0ZW1zMRIwEAYDVQQDDAlzMXBkZ3MuZXUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDZGsBDpcjrwGCY74UsujgSZkcQsRjv9TSCHimOV/dlvbDl58iIhZUg93uwub+Ae0F77pfPClN5YDjbepkT6qWWJd06AAUDlbylGELrnqNANpIiVqK2YVrOUR2qBnVDronOrrajeTD5bBAtPpjZssc5v3swhdqSLSBKTz/5LykOSvD4IpxKkdCJBu/L+y01kUGDe3eXYbbf4T1tjo11t4wJunUkv0RV2nvnPkrdu/YtTN9X7kw2LRNaHR0rHudo68F8m3PylC9HtDetK/bZ2gO23Vy5ZLriKpDi4cycqdAIUy0mBwjd3O4nQ353bh7T5l2zuPTcvysbtp9u5SbTLLLPAgMBAAGjUzBRMB0GA1UdDgQWBBRn55CvXWTHfl4RIavXecPpcM3AsDAfBgNVHSMEGDAWgBRn55CvXWTHfl4RIavXecPpcM3AsDAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQDYXwNm4CnLsBXRj995oVaRuCG87F4srET7CzCrZUEy9QJYTxreB7oQz8dsFeW9SRbb5PaWhlnDwXjTIq03GUN3TIDLRcW4uEzRL/9rWv0Nl5hzdVo6GTFJ1drUTtzjtmv5laTs4gxF36R0xxl+TeYSgo41T78Fv6NIYvcABw5zdZoydbZyt2WkbWiJx8fkX5jbn+mXK3ECprhRYb6tMPUxeMRB0ZZEDrG7A+7qyLF9fpvx6m2qF80CaXKekxf4im2R7UjzqS0+b5c02JJnBpNrUvrjAabNh0Fd3omKjEGRoB5loK6c8t3rS5sr6PCr27wPLcSNT45u0P3FnsEYGnOZ5wEFmzWTWqty+5TotBFojPkkuQQ=
+    truststore_pass: changeit
+
+dataLifecycle:
+  retentionTimeUpdate:
+    offsetInHoursL1: 6
+
+preparator:
+  aio:
+    minimalWaitingTimeSec: 360000
+    timeoutSec:
+      cgs1: 7200
+      cgs2: 7200
+      cgs3: 7200
+      cgs4: 7200
+      cgs5: 7200
+      edrs: 7200
+    descramble:
+      cgs1: "yes"
+      cgs2: "yes"
+      cgs3: "yes"
+      cgs4: "no"
+      cgs5: "yes"
+      edrs: "yes"
+    rsEncode:
+      cgs1: "yes"
+      cgs2: "yes"
+      cgs3: "yes"
+      cgs4: "yes"
+      cgs5: "yes"
+      edrs: "yes"
+  asp:
+    lateTopicActive: true # disabled for regression testing   
+    fast:
+      minimal: 1 # 3
+      nominal: 36 # 20
+      lateAfterMilliseconds: 38344235000 
+    nrt:
+      minimal: 1 # 1
+      nominal: 36 # 2
+      lateAfterMilliseconds: 38344235000 
+    pt:
+      lateAfterMilliseconds: 38344235000
+  l1:
+    lateTopicActive: true # disabled for regression testing    
+    fast:
+      lateAfterMilliseconds: 38344235000 
+    nrt:
+      lateAfterMilliseconds: 38344235000 
+    pt:
+      lateAfterMilliseconds: 38344235000
+  l2:
+    lateTopicActive: true # disabled for regression testing    
+    fast:
+      lateAfterMilliseconds: 38344235000 
+    nrt:
+      lateAfterMilliseconds: 38344235000 
+    pt:
+      lateAfterMilliseconds: 38344235000
+            
+appCatalog:
+  mqi:
+    cleaningOld: "604800000"
+  jobs:
+    cleaningJobsTerminatedFixedRateMs: "604800000" # 7 days
+    cleaningJobsInvalidFixedRateMs: "604800000"    # 7 days
+    edrsSessions:
+      maxAgeJobMs:
+        waiting: "604800000"      # 7 days
+        dispatching: "604800000"
+        generating: "604800000"
+        terminated: "604800000"
+    levelSegments:
+      maxAgeJobMs:
+        waiting: "604800000"
+        dispatching: "604800000"
+        generating: "604800000"
+        terminated: "604800000"
+    levelProducts:
+      maxAgeJobMs:
+        waiting: "604800000"
+        dispatching: "604800000"
+        generating: "604800000"
+        terminated: "604800000"
+
+prometheusAdapter:
+  prometheusUrl: http://prometheus-operator-prometheus.monitoring.svc.cluster.local:9090
+  securePort: 6443
+  metricsRelistInterval: 1m
+  targets:
+    xbip_worker:
+      minReplicas: 2
+      maxReplicas: 4
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        selectPolicy: Max
+      scaleUp:
+        stabilizationWindowSeconds: 10
+        selectPolicy: Max
+
+ddip:
+  dispatch:
+    prip:
+      protocol: http
+      host: s1pro-prip-frontend-svc.processing.svc.cluster.local
+      port: 8080
+  collections:
+    Sentinel1: startswith(Name,'S1')
+    Sentinel3: startswith(Name,'S3')
+
+nativeApi:
+  prip:
+    internal:
+      protocol: http
+      host: s1pro-prip-frontend-svc.processing.svc.cluster.local
+      port: 8080
+    external:
+      protocol: http
+      host: coprs.werum.de/prip/odata/v1/
+      port: 80
+  stac:
+    includeAdditionalAttributes: true

@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: coprs-native-api
+
+# Logging
+logging:
+  level:
+    root: ERROR
+    de.werum.coprs: DEBUG
+    esa.s1pdgs.cpoc.prip: DEBUG
+    org.springframework: INFO
+    org.apache: INFO
+
+# REST controller
+server:
+  port: 8080
+
+# Native API config
+native-api:
+  # major version (used as part of the API base path)
+  major-version: v1
+  # version (to communicate minor changes that are compatible with the major version)
+  version: 1.0
+  # configuration for internal interfacing to PRIP
+  prip-protocol: {{ .Values.nativeApi.prip.internal.protocol }}
+  prip-host: {{ .Values.nativeApi.prip.internal.host }}
+  prip-port: {{ .Values.nativeApi.prip.internal.port }}
+  # configuration to create PRIP metadata and download links that are externaly accessible
+  external-prip-protocol: {{ .Values.nativeApi.prip.external.protocol }}
+  external-prip-host: {{ .Values.nativeApi.prip.external.host }}
+  external-prip-port: {{ .Values.nativeApi.prip.external.port }}
+  # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
+  include-additional-attributes: {{ default true .Values.nativeApi.stac.includeAdditionalAttributes }}

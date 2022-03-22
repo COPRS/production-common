@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: s1pro-api-svc
+  labels:
+    app: s1pro-api-svc
+spec:
+  selector:
+    app: {{ .Release.Name }}
+  ports:
+  - name: web
+    port: 80
+    targetPort: {{ .Values.service.port }}

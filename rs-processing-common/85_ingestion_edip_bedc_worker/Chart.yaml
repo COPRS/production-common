@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "develop"
+description: S1PRO Inbox EDIP BEDC Ingestion Service
+name: s1pro-ingestion-edip-bedc-worker
+version: 3.33.0-SNAPSHOT
+maintainers:
+  - name: Werum Software & Systems

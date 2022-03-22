@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<routing description="routing for Ingestion and Production Events">
+
+	<default_route description="default route">
+		<family>EDRS_SESSION</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>AUXILIARY_FILE</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>AUXILIARY_FILE_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>PLAN_AND_REPORT</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>PLAN_AND_REPORT_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L0_BLANK</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L0_BLANK_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L0_SEGMENT</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L0_SEGMENT_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L0_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L0_SLICE_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L0_ACN</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L0_ACN_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L1_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L1_SLICE_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L1_ACN</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L1_ACN_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L2_SLICE</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L2_SLICE_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L2_ACN</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>L2_ACN_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>SPP_OBS</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>SPP_OBS_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+
+	<default_route description="default route">
+		<family>SPP_MBU</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_AUX</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_GRANULES</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L0</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L1_NRT</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L1_STC</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L1_NTC</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L2_NRT</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L2_STC</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L2_NTC</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_CAL</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_PUG</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_AUX_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_GRANULES_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L0_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L1_NRT_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L1_STC_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L1_NTC_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L2_NRT_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L2_STC_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_L2_NTC_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_CAL_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+	<default_route description="default route">
+		<family>S3_PUG_ZIP</family>
+		<route_to>
+			<topic>t-pdgs-eviction-management-jobs</topic>
+		</route_to>
+	</default_route>
+	
+
+</routing>

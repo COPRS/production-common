@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "develop"
+description: S1PRO Mock EDIP BEDC
+name: s1pro-mock-edip-bedc
+version: 3.33.0-SNAPSHOT
+maintainers:
+  - name: Werum Software & Systems

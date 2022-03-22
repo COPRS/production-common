@@ -1,0 +1,823 @@
+openapi: 3.0.1
+info:
+  title: RS Native API
+  description: The Native API of the Copernicus Reference System (COPRS) that can
+    be used to query and download product data.
+  version: "1.0"
+servers:
+- url: http://localhost:8080
+  description: Test server url
+tags:
+- name: API
+- name: STAC Item Search
+paths:
+  /api/ping:
+    get:
+      tags:
+      - API
+      summary: check whether the API service is reachable and running and retrieve
+        the API version number
+      description: A HTTP 200 answer is to be expected when the API service is running
+        and reachable. Additionally the current API version number will be retrieved.
+      operationId: PingApi
+      responses:
+        "500":
+          description: Internal Server Error - the API service encountered an unexpected
+            condition that prevented it from fulfilling the request
+          content: {}
+        "200":
+          description: OK - the API service is running and reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingResponse'
+        "400":
+          description: "Bad Request - the API service rejects to process the request\
+            \ because of client side errors, for example a malformed request syntax"
+  /search:
+    get:
+      summary: Search STAC items with simple filtering.
+      operationId: getItemSearch
+      description: |-
+        Retrieve Items matching filters. Intended as a shorthand API for simple
+        queries.
+      tags:
+        - STAC Item Search
+      parameters:
+        - $ref: '#/components/parameters/datetime'
+      responses:
+        '200':
+          description: A feature collection.
+          content:
+            application/geo+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/itemCollection'
+        default:
+          $ref: '#/components/responses/Error'
+components:
+  parameters:
+    datetime:
+      name: datetime
+      in: query
+      description: >-
+        Either a date-time or an interval, open or closed. Date and time
+        expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
+
+
+        Examples:
+
+
+        * A date-time: "2018-02-12T23:20:50Z"
+
+        * A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
+
+        * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
+
+
+        Only features that have a temporal property that intersects the value of
+
+        `datetime` are selected.
+
+
+        If a feature has multiple temporal properties, it is the decision of the
+
+        server whether only a single temporal property is used to determine
+
+        the extent or all relevant temporal properties.
+      required: false
+      schema:
+        type: string
+      style: form
+      explode: false
+  responses:
+    Error:
+      description: An error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/exception'
+  schemas:
+    PingResponse:
+      type: object
+      properties:
+        apiVersion:
+          type: string
+          description: the version of the API
+          example: "1.0"
+    Checksum:
+      type: object
+      properties:
+        Algorithm:
+          type: string
+          description: the hash function used for the calculation of the checksum
+            value
+          example: MD5
+        Value:
+          type: string
+          description: the checksum value for the product file
+          example: 71f920fa275127a7b60fa4d4d41432a3
+        ChecksumDate:
+          pattern: YYYY-MM-DDThh:mm:ss.sssZ
+          type: string
+          description: the date and time the checksum was calculated
+          example: 2021-09-09T18:00:00.000Z
+      description: checksum object containing the checksum value for the product file
+    ContentDate:
+      type: object
+      properties:
+        Start:
+          pattern: YYYY-MM-DDThh:mm:ss.sssZ
+          type: string
+          description: the start date and time of the product
+          example: 2021-09-09T18:00:00.000Z
+        End:
+          pattern: YYYY-MM-DDThh:mm:ss.sssZ
+          type: string
+          description: the end date and time of the product
+          example: 2021-09-09T18:00:00.000Z
+      description: object containing the start and end dates of the product
+    AdditionalAttributes:
+      type: object
+      properties:
+        StringAttributes:
+          type: object
+          additionalProperties:
+            type: string
+          description: attributes with values of type string
+        IntegerAttributes:
+          type: object
+          additionalProperties:
+            type: integer
+          description: attributes with values of type integer
+        DoubleAttributes:
+          type: object
+          additionalProperties:
+            type: number
+          description: attributes with values of type number
+        DateTimeOffsetAttributes:
+          type: object
+          additionalProperties:
+            type: string
+          description: attributes with date+time values of type string
+        BooleanAttributes:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: attributes with values of type boolean
+      description: additional attributes/values segmented by value type
+    exception:
+      type: object
+      description: >-
+        Information about the exception: an error code plus an optional description.
+      required:
+        - code
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+    datetimeFilter:
+      description: An object representing a date+time based filter.
+      type: object
+      properties:
+        datetime:
+          $ref: '#/components/schemas/datetime_interval'
+    datetime_interval:
+      type: string
+      description: >-
+        Either a date-time or an interval, open or closed. Date and time
+        expressions
+
+        adhere to RFC 3339. Open intervals are expressed using double-dots.
+
+
+        Examples:
+
+
+        * A date-time: "2018-02-12T23:20:50Z"
+
+        * A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
+
+        * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
+
+
+        Only features that have a temporal property that intersects the value of
+
+        `datetime` are selected.
+
+
+        If a feature has multiple temporal properties, it is the decision of the
+
+        server whether only a single temporal property is used to determine
+
+        the extent or all relevant temporal properties.
+      example: 2018-02-12T00:00:00Z/2018-03-18T12:31:12Z
+    pointGeoJSON:
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - Point
+        coordinates:
+          type: array
+          minItems: 2
+          items:
+            type: number
+    multipointGeoJSON:
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiPoint
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 2
+            items:
+              type: number
+    linestringGeoJSON:
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - LineString
+        coordinates:
+          type: array
+          minItems: 2
+          items:
+            type: array
+            minItems: 2
+            items:
+              type: number
+    multilinestringGeoJSON:
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiLineString
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 2
+            items:
+              type: array
+              minItems: 2
+              items:
+                type: number
+    polygonGeoJSON:
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - Polygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 4
+            items:
+              type: array
+              minItems: 2
+              items:
+                type: number
+    multipolygonGeoJSON:
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiPolygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              minItems: 4
+              items:
+                type: array
+                minItems: 2
+                items:
+                  type: number
+    geometryGeoJSON:
+      oneOf:
+        - $ref: '#/components/schemas/pointGeoJSON'
+        - $ref: '#/components/schemas/multipointGeoJSON'
+        - $ref: '#/components/schemas/linestringGeoJSON'
+        - $ref: '#/components/schemas/multilinestringGeoJSON'
+        - $ref: '#/components/schemas/polygonGeoJSON'
+        - $ref: '#/components/schemas/multipolygonGeoJSON'
+        - $ref: '#/components/schemas/geometrycollectionGeoJSON'
+    geometrycollectionGeoJSON:
+      type: object
+      required:
+        - type
+        - geometries
+      properties:
+        type:
+          type: string
+          enum:
+            - GeometryCollection
+        geometries:
+          type: array
+          items:
+            $ref: '#/components/schemas/geometryGeoJSON'
+    geojson-bbox:
+      type: array
+      minItems: 4
+      maxItems: 4
+      items:
+        type: number
+    point:
+      title: GeoJSON Point
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - Point
+        coordinates:
+          type: array
+          minItems: 2
+          items:
+            type: number
+        bbox:
+          $ref: '#/components/schemas/geojson-bbox'
+    linestring:
+      title: GeoJSON LineString
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - LineString
+        coordinates:
+          type: array
+          minItems: 2
+          items:
+            type: array
+            minItems: 2
+            items:
+              type: number
+        bbox:
+          $ref: '#/components/schemas/geojson-bbox'
+    polygon:
+      title: GeoJSON Polygon
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - Polygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 4
+            items:
+              type: array
+              minItems: 2
+              items:
+                type: number
+        bbox:
+          $ref: '#/components/schemas/geojson-bbox'
+    multipoint:
+      title: GeoJSON MultiPoint
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiPoint
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 2
+            items:
+              type: number
+        bbox:
+          $ref: '#/components/schemas/geojson-bbox'
+    multilinestring:
+      title: GeoJSON MultiLineString
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiLineString
+        coordinates:
+          type: array
+          items:
+            type: array
+            minItems: 2
+            items:
+              type: array
+              minItems: 2
+              items:
+                type: number
+        bbox:
+          $ref: '#/components/schemas/geojson-bbox'
+    multipolygon:
+      title: GeoJSON MultiPolygon
+      type: object
+      required:
+        - type
+        - coordinates
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiPolygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              minItems: 4
+              items:
+                type: array
+                minItems: 2
+                items:
+                  type: number
+        bbox:
+          $ref: '#/components/schemas/geojson-bbox'
+    geometryLiteral:
+      oneOf:
+        - $ref: '#/components/schemas/point'
+        - $ref: '#/components/schemas/linestring'
+        - $ref: '#/components/schemas/polygon'
+        - $ref: '#/components/schemas/multipoint'
+        - $ref: '#/components/schemas/multilinestring'
+        - $ref: '#/components/schemas/multipolygon'
+    bbox:
+      type: array
+      oneOf:
+        - minItems: 4
+          maxItems: 4
+        - minItems: 6
+          maxItems: 6
+      items:
+        type: number
+    stac_version:
+      title: STAC version
+      type: string
+      example: 1.0.0
+    stac_extensions:
+      title: STAC extensions
+      type: array
+      uniqueItems: true
+      items:
+        anyOf:
+          - title: Reference to a JSON Schema
+            type: string
+            format: uri
+          - title: Reference to a core extension
+            type: string
+    itemId:
+      type: string
+      description: Provider identifier, a unique ID.
+    itemType:
+      type: string
+      description: The GeoJSON type
+      enum:
+        - Feature
+    link:
+      title: Link
+      type: object
+      required:
+        - href
+        - rel
+      properties:
+        href:
+          type: string
+          format: uri
+          description: The location of the resource
+        rel:
+          type: string
+          description: Relation type of the link
+        type:
+          type: string
+          description: The media type of the resource
+        title:
+          type: string
+          description: Title of the resource
+        method:
+          type: string
+          enum:
+            - GET
+            - POST
+          default: GET
+          description: Specifies the HTTP method that the resource expects
+        headers:
+          type: object
+          description: Object key values pairs they map to headers
+          example:
+            Accept: application/json
+        body:
+          type: object
+          description: >-
+            For POST requests, the resource can specify the HTTP body as a JSON
+            object.
+        merge:
+          type: boolean
+          default: false
+          description: |-
+            This is only valid when the server is responding to POST request.
+
+            If merge is true, the client is expected to merge the body value
+            into the current request body before following the link.
+            This avoids passing large post bodies back and forth when following
+            links, particularly for navigating pages through the `POST /search`
+            endpoint.
+
+            NOTE: To support form encoding it is expected that a client be able
+            to merge in the key value pairs specified as JSON
+            `{"next": "token"}` will become `&next=token`.
+    links:
+      type: array
+      items:
+        $ref: '#/components/schemas/link'
+    datetime:
+      type: string
+      format: date-time
+      nullable: true
+      description: >-
+        The searchable date and time of the assets, in UTC.
+
+        It is formatted according to [RFC 3339, section
+        5.6](https://tools.ietf.org/html/rfc3339#section-5.6).
+
+        `null` is allowed, but requires `start_datetime` and `end_datetime` from
+        common metadata to be set.
+      example: 2018-02-12T00:00:00Z
+    properties:
+      type: object
+      required:
+        - datetime
+      description: provides the core metadata fields plus extensions
+      properties:
+        datetime:
+          $ref: '#/components/schemas/datetime'
+        start_datetime:
+          $ref: '#/components/schemas/datetime'
+        end_datetime:
+          $ref: '#/components/schemas/datetime'
+        PublicationDate:
+          type: string
+        EvictionDate:
+          type: string
+        Checksum:
+          $ref: '#/components/schemas/Checksum'
+        ContentDate:
+          $ref: '#/components/schemas/ContentDate'
+        Name:
+          type: string
+        ContentType:
+          type: string
+        ProductionType:
+          type: string
+        ContentLength:
+          type: integer
+        AdditionalAttributes:
+          $ref: '#/components/schemas/AdditionalAttributes'
+      additionalProperties:
+        description: >-
+          Any additional properties added in via Item specification or
+          extensions.
+    assets:
+      type: object
+      additionalProperties:
+        type: object
+        required:
+          - href
+        properties:
+          href:
+            type: string
+            format: url
+            description: Link to the asset object
+            example: >-
+              http://cool-sat.com/catalog/collections/cs/items/CS3-20160503_132130_04/thumb.png
+          title:
+            type: string
+            description: Displayed title
+            example: Thumbnail
+          description:
+            type: string
+            description: >-
+              Multi-line description to explain the asset.
+
+
+              [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for
+              rich text representation.
+            example: Small 256x256px PNG thumbnail for a preview.
+          type:
+            type: string
+            description: Media type of the asset
+            example: image/png
+          roles:
+            type: array
+            items:
+              type: string
+            description: Purposes of the asset
+            example:
+              - thumbnail
+    item:
+      description: >-
+        A GeoJSON Feature augmented with foreign members that contain values
+        relevant to a STAC entity
+      type: object
+      required:
+        - stac_version
+        - id
+        - type
+        - geometry
+        - bbox
+        - links
+        - properties
+        - assets
+      properties:
+        stac_version:
+          $ref: '#/components/schemas/stac_version'
+        stac_extensions:
+          $ref: '#/components/schemas/stac_extensions'
+        id:
+          $ref: '#/components/schemas/itemId'
+        bbox:
+          $ref: '#/components/schemas/schemas-bbox'
+        geometry:
+          $ref: '#/components/schemas/geometryGeoJSON'
+        type:
+          $ref: '#/components/schemas/itemType'
+        links:
+          $ref: '#/components/schemas/links'
+        properties:
+          $ref: '#/components/schemas/properties'
+        assets:
+          $ref: '#/components/schemas/assets'
+      example:
+        stac_version: 1.0.0
+        stac_extensions: []
+        type: Feature
+        id: 808dc636-5bd6-43d9-ad52-3b2b589c2d80
+        bbox:
+          - -122.59750209
+          - 37.48803556
+          - -122.2880486
+          - 37.613537207
+        geometry:
+          type: Polygon
+          coordinates:
+            - - - -122.308150179
+                - 37.488035566
+              - - -122.597502109
+                - 37.538869539
+              - - -122.576687533
+                - 37.613537207
+              - - -122.2880486
+                - 37.562818007
+              - - -122.308150179
+                - 37.488035566
+        properties:
+          datetime: null
+          start_datetime: 2020-01-20T19:00:11.000Z
+          end_datetime: 2020-01-20T19:02:09.000Z
+          PublicationDate: 2020-01-21T13:58:58.187Z
+          Name: S1A_EW_RAW__0NDH_20200120T190011_20200120T190209_030888_038B84_FCD9.SAFE.zip
+          ProductionType: systematic_production
+          ContentLength: 3545
+          ContentDate:
+            Start: 2020-01-20T19:00:11.000Z
+            End: 2020-01-20T19:02:09.000Z
+          Checksum:
+            - Algorithm: MD5
+              Value: 5f7aaadd0275c9e0e932c39f81fd1445
+              ChecksumDate: 2020-01-20T13:58:52Z
+          AdditionalAttributes:
+            StringAttributes:
+              orbitDirection: ASCENDING
+              productType: EW_RAW__0N
+            IntegerAttributes:
+              missionDatatakeID: 232324
+              orbitNumber: 385
+            DoubleAttributes:
+              completionTimeFromAscendingNode: 7654321
+              startTimeFromAscendingNode: 1234567
+            BooleanAttributes:
+              valid: true
+              extended: false
+            DateTimeOffsetAttributes:
+              beginningDateTime: 2020-01-20T19:00:11Z
+              endingDateTime: 2020-01-20T19:02:09Z
+        links:
+          - rel: self
+            href: http://cool-sat.com/prip/odata/v1/Products(808dc636-5bd6-43d9-ad52-3b2b589c2d80)?$format=JSON
+            description: metadata for S1A_EW_RAW__0NDH_20200120T190011_20200120T190209_030888_038B84_FCD9.SAFE.zip
+            type: application/json
+        assets:
+          product:
+            href: >-
+              http://cool-sat.com/prip/odata/v1/Products(808dc636-5bd6-43d9-ad52-3b2b589c2d80)/$value
+            title: S1A_EW_RAW__0NDH_20200120T190011_20200120T190209_030888_038B84_FCD9.SAFE.zip
+            description: download link for product data
+            type: application/zip
+    itemCollection:
+      description: >-
+        A GeoJSON FeatureCollection augmented with foreign members that contain
+        values relevant to a STAC entity
+      type: object
+      required:
+        - features
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - FeatureCollection
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/item'
+    schemas-bbox:
+      description: |-
+        Only features that have a geometry that intersects the bounding box are
+        selected. The bounding box is provided as four or six numbers,
+        depending on whether the coordinate reference system includes a
+        vertical axis (elevation or depth):
+
+        * Lower left corner, coordinate axis 1
+        * Lower left corner, coordinate axis 2  
+        * Lower left corner, coordinate axis 3 (optional) 
+        * Upper right corner, coordinate axis 1 
+        * Upper right corner, coordinate axis 2 
+        * Upper right corner, coordinate axis 3 (optional)
+
+        The coordinate reference system of the values is WGS84
+        longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84).
+
+        For WGS84 longitude/latitude the values are in most cases the sequence
+        of minimum longitude, minimum latitude, maximum longitude and maximum
+        latitude. However, in cases where the box spans the antimeridian the
+        first value (west-most box edge) is larger than the third value
+        (east-most box edge).
+
+        If a feature has multiple spatial geometry properties, it is the
+        decision of the server whether only a single spatial geometry property
+        is used to determine the extent or all relevant geometries.
+
+        Example: The bounding box of the New Zealand Exclusive Economic Zone in
+        WGS 84 (from 160.6°E to 170°W and from 55.95°S to 25.89°S) would be
+        represented in JSON as `[160.6, -55.95, -170, -25.89]` and in a query as
+        `bbox=160.6,-55.95,-170,-25.89`.
+      type: array
+      minItems: 4
+      maxItems: 6
+      items:
+        type: number
+      example:
+        - -110
+        - 39.5
+        - -105
+        - 40.5

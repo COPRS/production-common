@@ -1,0 +1,48 @@
+#!/bin/sh
+
+if [ -z "$LOCATION" -o -z "$ENV_DIR" ]
+then
+    echo "Please set source environment"
+    exit 1
+fi
+
+LIST_QUEUES_SCRIPT=$ENV_DIR/wrapper/kafka.sh
+
+if [ $# -lt 1 ]
+then
+    echo "Please provide a topic:"
+    . $LIST_QUEUES_SCRIPT
+    echo $TOPIC_LIST | tr ' ' '\n' | cat -n
+    # cat $LOCATION/kafka/topic_partition.txt | grep -v "#" | tr '\t' ' ' | tr -s ' ' | cut -d " " -f1 | cat -n
+    exit 1
+fi
+
+TOPIC=$1
+OPT_MAX_MESSAGES=""
+if [ $# -eq 2 ]
+then
+  if [ $1 = "-n" -o $1 = "nofollow" ]; then
+    TOPIC=$2
+    OPT_MAX_MESSAGES="--timeout-ms 2000"
+  elif [ $2 = "-n" -o $2 = "nofollow" ]; then
+    OPT_MAX_MESSAGES="--timeout-ms 2000"
+  else
+    OPT_MAX_MESSAGES="--max-messages $2"
+  fi
+fi
+
+if [[ $TOPIC =~ ^-?[0-9]+$ ]]
+then
+    # Topic is an id
+    . $LIST_QUEUES_SCRIPT
+    KTOPIC=`echo $TOPIC_LIST | tr ' ' '\n' | sed -n "$TOPIC p"`
+    # KTOPIC=`cat $LOCATION/kafka/topic_partition.txt | grep -v "#" | tr '\t' ' ' | tr -s ' ' | cut -d " " -f1 | sed -n "$TOPIC p"`
+    echo "Selected kafka queue '$KTOPIC' by id $TOPIC"
+else
+    KTOPIC=$TOPIC
+    echo "Selected kafka queue '$KTOPIC' by name"
+fi
+
+kubectl -n $KAFKA_NAMESPACE exec $KAFKA_POD -c $KAFKA_CONTAINER -- kafka-console-consumer.sh --bootstrap-server $KAFKA_URL --topic $KTOPIC --from-beginning $OPT_MAX_MESSAGES
+
+echo "done."

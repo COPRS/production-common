@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ssl-config
+  namespace: {{ .Values.processing.namespace }}
+  
+data:
+  {{- $files := .Files }}
+  {{- range $path, $bytes := .Files.Glob "config/ssl/**" }}
+  {{- $name := base $path }}
+  {{ $name }} : |-
+{{ $files.Get $path | indent 4 }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-mockftp-config
+  namespace: {{ .Values.processing.namespace }}
+  
+data:
+  {{- $files := .Files }}
+  {{- range $path, $bytes := .Files.Glob "config/mockftp/**" }}
+  {{- $name := base $path }}
+  {{ $name }} : |-
+{{ $files.Get $path | indent 4 }}
+  {{- end }}
+---

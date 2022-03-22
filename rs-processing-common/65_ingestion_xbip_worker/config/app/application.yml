@@ -1,0 +1,63 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: s1pdgs-ingestion-xbip-worker
+
+# Logging config
+logging:
+  config: ${log4j_config:log/log4j2.yml}
+
+process:
+  # hostname of the container (derived by 'hostname' command)
+  hostname: ${HOSTNAME}
+
+# Ingestion Worker config
+ingestion-worker:
+  # Hostname of the container
+  hostname: ${HOSTNAME}
+  # Polling interval for MQI messages in millis
+  polling-interval-ms: 100
+  # Maximal number of consecutive retries for unsuccessful deletion
+  max-retries: 10
+  # Time between retries in millis
+  tempo-retry-ms: 10000
+  # Buffers files before uploading to OBS when set to true (default false)
+  buffer-inputs: {{ .Values.xbip.bufferInputs }}
+  
+# Kafka config
+kafka:
+  # host:port to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: ${kafka_bootstrap-servers}
+  # Hostname
+  hostname: ${HOSTNAME}
+  # Topic name for the errors
+  error-topic: ${kafka_topic_errors}
+  # Kafka Producer config
+  producer:
+    # When greater than zero, enables retrying of failed sends
+    max-retries: 10
+
+# MQI config
+mqi:
+  # The host and port for querying MQI server
+  host-uri: http://localhost:8081
+  # The maximal number of consecutive retries following a MQI request error, default is 3
+  max-retries: 10
+  # Time between retries in milliseconds, default is 1000
+  tempo-retry-ms: 2000
+
+# REST controller
+server:
+  # Port number
+  port: 8080
+
+# Application status configuration
+status:
+  # (fixed delay) period in milliseconds between 2 check if application shall be stopped or not, default is 3000
+  delete-fixed-delay-ms: 3000
+  # The number of consecutive processing errors leading to the state FATALERROR, default is 100
+  max-error-counter-processing: 3
+  # The number of consecutive MQI errors leading to the state FATALERROR, default is 100
+  max-error-counter-mqi: 30
+  

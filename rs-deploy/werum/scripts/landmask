@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# A simple helper script to make handling of landmask files easier
+#
+
+INGESTOR="s1pro-ingestion-0"
+
+if [ -z $LOCATION ]
+then
+    echo "Please source environment"
+    exit 1
+fi
+
+if [ $# -eq 0 ]
+then
+    echo "Please provide a action: INGEST CLEAN"
+    exit 1
+fi
+
+
+if [ $1 == "INGEST" ]
+then
+  if [ $# -ne 2 ]
+  then
+    echo "Please provide a landmask: INGEST <product>"
+    exit 1
+  fi
+  
+  FILE=$2  
+  echo "Ingesting landmask file $2 ..."  
+  kubectl -n $S1PRO_NAMESPACE exec $INGESTOR -- mkdir -p /data/inbox/AUX  
+  kubectl -n $S1PRO_NAMESPACE cp $FILE $INGESTOR:/data/inbox/AUX
+elif [ $1 == "CLEAN" ] 
+then
+  echo "Cleaning landmasks ..."
+  kubectl -n $ELASTICSEARCH_NAMESPACE exec $ELASTICSEARCH_POD -- curl -s -XDELETE "http://$ELASTICSEARCH_URL/landmask"
+  kubectl -n $ELASTICSEARCH_NAMESPACE exec $ELASTICSEARCH_POD -- curl -s -XDELETE "http://$ELASTICSEARCH_URL/msk__land_"
+    
+  kubectl -n $ELASTICSEARCH_NAMESPACE exec $ELASTICSEARCH_POD -- curl -s -XPUT "http://$ELASTICSEARCH_URL/landmask" -H 'Content-Type: application/json' -d '{"mappings":{"properties":{"geometry":{"type":"geo_shape","tree":"geohash"}}}}}'
+  kubectl -n $ELASTICSEARCH_NAMESPACE exec $ELASTICSEARCH_POD -- curl -s -XPUT "http://$ELASTICSEARCH_URL/msk__land_"
+  
+  for aux in `s3cmd ls s3:/${OBS_PREFIX}-auxiliary-files | grep "MSK__LAND_" | awk '{ print $4 }'`
+  do
+    echo "Removing landmask $aux from OBS"
+    s3cmd rm s3://${OBS_PREFIX}-auxiliary-files/$aux
+  done
+fi
+
+echo
+echo "done."

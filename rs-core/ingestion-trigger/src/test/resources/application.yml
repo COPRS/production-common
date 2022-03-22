@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: s1pdgs-ingestion-trigger
+
+scheduling:
+  enable: false
+    
+logging:
+  config: classpath:log4j2-test.yml
+
+process:
+  hostname: test                                          # Hostname
+
+ingestion-trigger:
+  polling-interval-ms: 10000
+  polling:
+    - directory: file:///tmp/test123
+      matchRegex: (WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))
+      ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
+      topic: t-pdgs-ingestion-${HOSTNAME}
+      family: EDRS_SESSION
+      ignore-files-before-date: 2001-09-11T08:46:00.000Z
+  
+# KAFKA
+kafka:
+  bootstrap-servers: localhost:9093                              # the bootstrap servers for KAFKA
+  max-retries: 10
+
+  # MongoDB
+mongodb:
+  host: localhost
+  port: 27017
+  database: s1pdgs
+
+# REST controller
+server:
+  port: 8081
+
+status:
+  block-system-exit: true

@@ -1,0 +1,66 @@
+spring:
+  main:
+    # Enable or disable spring boot banner on application startup
+    banner-mode: "off"
+  application:
+    # Application name
+    name: s1pdgs-ingestion-auxip-worker
+    
+# Logging   
+logging:
+  # Path to log configuration file
+  config: ${log4j_config:log/log4j2.yml}
+
+process:
+  # Hostname
+  hostname: ${HOSTNAME}                                          
+
+# Ingestion worker
+ingestion-worker:
+  # Host name
+  hostname: ${HOSTNAME}
+  # Polling interval in ms
+  polling-interval-ms: 10000
+  # The maximal number of consecutive retries for unsuccessful deletion
+  max-retries: 10                            
+  # Temporisation in ms between 2 retries                   
+  tempo-retry-ms: 10000  
+  # Configuration if inputs shall be buffered
+  buffer-inputs: true
+  
+# Kafka config
+kafka:
+  # host:port to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: ${kafka_bootstrap-servers}
+  # Hostname
+  hostname: ${HOSTNAME}
+  # Topic name for the errors
+  error-topic: ${kafka_topic_errors}
+  # Kafka Producer config
+  producer:
+    # When greater than zero, enables retrying of failed sends
+    max-retries: 10
+
+# MQI config
+mqi:
+  # The host and port for querying MQI server
+  host-uri: http://localhost:8081
+  # The maximal number of consecutive retries following a MQI request error, default is 3
+  max-retries: 10
+  # Time between retries in milliseconds, default is 1000
+  tempo-retry-ms: 2000
+
+# Server
+server:
+  # Port
+  port: 8080
+
+# Application status
+status:
+  # (Fixed delay) Period in milliseconds between 2 check if application shall be stopped or not
+  delete-fixed-delay-ms: 3000   
+  # The number of consecutive processing errors leading to the state FATALERROR          
+  max-error-counter-processing: 3         
+  # The number of consecutive MQI errors leading to the state FATALERROR
+  max-error-counter-mqi: 30               
+  

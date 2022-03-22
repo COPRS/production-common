@@ -1,0 +1,39 @@
+# Default values for rs-user-client-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+env:
+  apiUrl: http://coprs.werum.de/prip/odata/v1/Products
+  mapBackgrounds: | 
+    "[{\"name\":\"TESTING\",\"layers\":[{\"url\":\"testing_url\",\"layerName\":\"LayerName\"}]}]"
+  baseHref: /uwc/
+
+image:
+  # Overrides the image tag whose default is the chart appVersion.
+  # use image from COPRS repository
+  name: coprs/user-web-client
+
+  # use image from local computer
+  #repository: rs-user-client
+  #tag: dev # use image from local computer
+  #pullPolicy: Never
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: localhost
+      paths:
+        - path: /
+          pathType: ImplementationSpecific

@@ -1,0 +1,21 @@
+# Specify filepatterns you want git to ignore.
+*.project
+*.settings/
+*.vscode/
+*.idea/
+*.iml
+*.metadata/
+*.mvn/
+*target/
+*reports/
+*.project
+*.classpath
+*.jdk8
+*.springBeans
+*.log
+*.eclipse-pmd
+*.pmd
+*.pmdruleset.xml
+*.factory*
+*.attach_pid*
+*build/html-reports

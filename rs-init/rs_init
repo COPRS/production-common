@@ -1,0 +1,160 @@
+#!/bin/bash
+#
+# This is a small script that shall help to setup an environment for the reference system.
+# In order to deploy the reference system it is required to checkout a set of repository.
+# This helper shall ensure that all parts are checked out correctly into the right location.
+#
+# This script is supposed to be used for V1 and will become deprecated with V2.
+#
+
+CWD=`pwd`
+
+# The name of the file that shall be used for getting the configuration
+INIT_FILE="setup.conf"
+
+# Fetching command line arguments
+CMD=$1
+
+# Check for prerequisites that are required in order to run this script successfully
+if ! command -v "git" $> /dev/null
+then	
+  echo "ERROR: The command line tool git does not exist, please install it!"
+  echo "You might want to to use 'yum install git'"
+  exit 1
+fi
+
+# Check if a init file does exist, if not then generate it
+if [[ ! -f $INIT_FILE ]]
+then
+  echo "Configuration not found, generating file '$INIT_FILE' ..."
+  echo 'REPO_COMMON="https://github.com/COPRS/production-common.git"' >> $INIT_FILE
+  echo 'REPO_S1="https://github.com/COPRS/processing-sentinel-1.git"' >> $INIT_FILE
+  echo 'REPO_S3="https://github.com/COPRS/processing-sentinel-3.git"' >> $INIT_FILE
+  echo 'REPO_INFRA="" # can be left empty if no additional infrastructure is used"' >> $INIT_FILE
+  echo 'REPO_CONF=""' >> $INIT_FILE
+  echo 'BRANCH="" # Branch of the software repositories that shall be used' >> $INIT_FILE
+  echo 'BRANCH_CONF="$BRANCH" # Branch of the configuration repository that shall be used. By default the same as software branch' >> $INIT_FILE
+fi
+
+# Source init file
+source ./$INIT_FILE
+
+# If these settings not had been setup and are left empty, we will deny to execute the script and giving some
+# advise how to modify the init script
+if [[ -z $BRANCH || -z $REPO_CONF || -z $BRANCH_CONF ]]
+then
+  echo "Configuration not sufficient for setting up environment."
+  echo "Please open the file 'rs-init.conf' with an text editor and setup:"
+  echo "REPO_CONF pointing to the git repository containing the actual configuration"
+  echo "BRANCH specifying the branch that shall be used for the environment, e.g. develop"
+  echo "BRANCH_CONFIG specifying the branch that shall be used for the configuration repository"
+  exit 1
+fi
+
+# Prints out a usage help of this command
+usage() {
+  echo "Usage $0: <CMD>"
+  echo -e "\t  CMD \t init|clean|update"
+  exit 1
+}
+
+
+# Checks out a repository partially.
+# First parameter defines the branch that shall be used e.g. "develop"
+# Second parameter defines the URL to the git repository that shall be used
+# Last paraemter defines the name of the directory that shall be checked out
+git_partial() {
+  BRANCH=$1
+  REPO=$2
+  DIR=$3
+  echo "Checking out $REPO partially into $TARGET..."
+  mkdir -p $DIR
+  cd $DIR
+  git init
+  git remote add -f origin $REPO
+  git config core.sparsecheckout true
+  echo "$DIR" >> .git/info/sparse-checkout
+  git pull origin $BRANCH
+  cd ..
+}
+
+# Initialize the environment. This will create a new directory called "repos" that contains
+# the content of the repository. Additional a new folder env will be created and the required
+# structure build within
+rs_init() {
+  echo "Init Reference System environment ..."
+
+  # Create new folder containing all the repositories
+  echo "Fetching repositories..."
+  mkdir -p repos
+  cd repos
+
+  # Fetch all required repositories
+  git_partial $BRANCH $REPO_COMMON "rs-processing-common" &> /dev/null
+  git_partial $BRANCH $REPO_COMMON "rs-testing" &> /dev/null
+  git_partial $BRANCH $REPO_COMMON "rs-deploy" &> /dev/null
+
+  echo "Checking out processing-sentinel-1"
+  git clone -b $BRANCH $REPO_S1 &> /dev/null
+  echo "Checking out processing-sentinel-3"
+  git clone -b $BRANCH $REPO_S3 &> /dev/null
+  echo "Checking out configuration"
+  git clone -b $BRANCH_CONF $REPO_CONF config &> /dev/null
+  
+  if [[ ! -z $REPO_INFRA ]]
+  then
+    echo "Checking out infrastructure repository"
+    git clone -b $BRANCH $REPO_INFRA &> /dev/null
+  fi
+
+  cd ..
+
+  # Create a new folder env based on rs-deploy and generate the expected structure using symbolic links
+  # The new environment will be available under folder "env"
+  echo "Create structure ..."
+  ln -s $CWD/repos/rs-deploy/rs-deploy env
+
+  mkdir -p env/helm
+  ln -s $CWD/repos/processing-sentinel-1 env/helm
+  ln -s $CWD/repos/processing-sentinel-3 env/helm
+  ln -s $CWD/repos/rs-processing-common/rs-processing-common env/helm/processing-common
+  ln -s $CWD/repos/rs-testing/rs-testing env/helm/testing
+  ln -s $CWD/repos/config env/config
+  if [[ ! -z $REPO_INFRA ]]
+  then
+    ln -s $CWD/repos/rs-infrastructure env/helm/infrastructure
+  fi
+}
+
+# Performs a clean/purge operation. This will remove the repo and env directory completely
+rs_clean() {
+  echo "Cleaning environment ..."
+  rm -f "$CWD/env"
+  rm -fr "$CWD/repos"
+  
+  echo "Please logout in order to refresh the shell to ensure all environmentals are set correctly"
+}
+
+# Perform an update on all RS repositories to pull in the current state
+rs_update() {
+  cd $CWD/repos/processing-sentinel-1 && git pull $REPO_S1 $BRANCH
+  cd $CWD/repos/processing-sentinel-3 && git pull $REPO_S3 $BRANCH
+  cd $CWD/repos/rs-deploy && git pull $REPO_COMMON $BRANCH
+  cd $CWD/repos/rs-infrastructure && git pull $REPO_INFRA $BRANCH
+  cd $CWD/repos/rs-processing-common && git pull $REPO_COMMON $BRANCH
+  cd $CWD/repos/rs-testing && git pull $REPO_COMMON $BRANCH
+  cd $CWD/repos/config && git pull $REPO_CONF $BRANCH_CONF
+  if [[ ! -z $REPO_INFRA ]]
+  then
+    cd $CWD/repos/rs-infrastructure && git pull
+  fi
+}
+
+case "$CMD" in
+  "init") rs_init ;;
+  "clean") rs_clean ;;
+  "update") rs_update ;;
+  *) usage ;;
+esac
+
+echo "Done."

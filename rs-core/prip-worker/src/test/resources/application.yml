@@ -1,0 +1,308 @@
+#TODO: figure out why I need this here and in bootstrap.yml
+spring:
+  application:
+    name: s1pdgs-prip-worker
+
+# Logging
+logging:
+  config: classpath:log4j2-test.yml
+
+# MQI config
+mqi:
+  host-uri: http://localhost:8081                               # the host and port for querying MQI server
+  max-retries: 100                                              # the maximal number of consecutive retries following a MQI request error 
+  tempo-retry-ms: 10000                                         #
+  
+# KAFKA config for error queue
+kafka:
+  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
+  group-id: error                                                # the group identifier to use for KAFKA publishers  
+  max-retries: 10                                                # number of retries if kafka is not available
+  error-topic: t-pdgs-errors  
+  producer:
+    max-retries: 10
+  
+metadata:
+  host: localhost:8080
+  rest-api_nb-retry: 3
+  rest-api_tempo-retry-ms: 1000 
+  
+# Elastic Search
+elasticsearch:
+  host: localhost                                           # Host of Elasticsearch cluster
+  port:  9200                                  # Port of Elasticsearch cluster
+  connect-timeout-ms: 2000                                        # Timeout in milliseconds of connection to the cluster
+  socket-timeout-ms: 10000                                        # Timeout in milliseconds of the socket to the cluster
+  
+# PRIP Worker config
+prip-worker:
+  hostname: localhost
+  metadata-unavailable-retries-number: 10
+  metadata-unavailable-retries-interval-ms: 5000  
+  publishing-job-listener:
+    polling-interval-ms: 200
+    polling-initial-delay-ms: 5000
+  product-type-regexp:
+    l0-std: (S[1-6]|IW|EW|EN|RF|WV|N[1-6])_RAW__0S
+    l0-ann: (S[1-6]|IW|EW|WV)_RAW__0A
+    l0-cal: (S[1-6]|IW|EW|WV)_RAW__0C
+    l0-noise: (S[1-6]|IW|EW|WV)_RAW__0N
+    l0-gps: GP_RAW__0_
+    l0-hktm: HK_RAW__0_
+    l1: (S[1-6]|IW|EW|WV)_(SLC_|GRDF|GRDH|GRDM|RTC_)_1(A|S)
+    l2: (S[1-6]|IW|EW|WV)_(SLC_|GRDF|GRDH|GRDM|RTC_)_2(A|S)
+    aux-safe: AUX_(PP1|CAL|INS|PP2|SCS|WND|WAV|ICE|ECE)
+    aux-eof: AUX_(RESATT|PREORB|POEORB|RESORB)
+  metadata-mapping:
+    l0-std:
+      attr_beginningDateTime_date: startTime
+      attr_endingDateTime_date: stopTime
+      attr_startTimeFromAscendingNode_double: startTimeANX
+      attr_completionTimeFromAscendingNode_double: stopTimeANX
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_instrumentShortName_string: instrumentShortName
+      attr_operationalMode_string: operationalMode
+      attr_swathIdentifier_string: swathIdentifier
+      attr_productClass_string: productClass
+      attr_productConsolidation_string: productConsolidation
+      attr_instrumentConfigurationID_long: instrumentConfigurationId
+      attr_missionDatatakeID_long: missionDataTakeId
+      attr_sliceProductFlag_boolean: sliceProductFlag
+      attr_sliceNumber_long: sliceNumber
+      attr_totalSlices_long: totalNumberOfSlice
+      attr_polarisationChannels_string: polarisationChannels
+      attr_orbitNumber_long: absoluteStartOrbit
+      attr_relativeOrbitNumber_long: relativeStartOrbit
+      attr_cycleNumber_long: cycleNumber
+      attr_orbitDirection_string: pass
+      attr_processingDate_date: processingDate
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_coordinates_string: coordinates
+      attr_productType_string: productType
+    l0-ann:
+      attr_beginningDateTime_date: startTime
+      attr_endingDateTime_date: stopTime
+      attr_startTimeFromAscendingNode_double: startTimeANX
+      attr_completionTimeFromAscendingNode_double: stopTimeANX
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_instrumentShortName_string: instrumentShortName
+      attr_operationalMode_string: operationalMode
+      attr_swathIdentifier_string: swathIdentifier
+      attr_productClass_string: productClass
+      attr_productConsolidation_string: productConsolidation
+      attr_instrumentConfigurationID_long: instrumentConfigurationId
+      attr_missionDatatakeID_long: missionDataTakeId
+      attr_sliceProductFlag_boolean: sliceProductFlag
+      attr_sliceNumber_long: sliceNumber
+      attr_totalSlices_long: totalNumberOfSlice
+      attr_polarisationChannels_string: polarisationChannels
+      attr_orbitNumber_long: absoluteStartOrbit
+      attr_relativeOrbitNumber_long: relativeStartOrbit
+      attr_cycleNumber_long: cycleNumber
+      attr_orbitDirection_string: pass
+      attr_processingDate_date: processingDate
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_coordinates_string: coordinates
+      attr_productType_string: productType
+    l0-cal:
+      attr_beginningDateTime_date: startTime
+      attr_endingDateTime_date: stopTime
+      attr_startTimeFromAscendingNode_double: startTimeANX
+      attr_completionTimeFromAscendingNode_double: stopTimeANX
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_instrumentShortName_string: instrumentShortName
+      attr_operationalMode_string: operationalMode
+      attr_swathIdentifier_string: swathIdentifier
+      attr_productClass_string: productClass
+      attr_productConsolidation_string: productConsolidation
+      attr_instrumentConfigurationID_long: instrumentConfigurationId
+      attr_missionDatatakeID_long: missionDataTakeId
+      attr_sliceProductFlag_boolean: sliceProductFlag
+      attr_sliceNumber_long: sliceNumber
+      attr_totalSlices_long: totalNumberOfSlice
+      attr_polarisationChannels_string: polarisationChannels
+      attr_orbitNumber_long: absoluteStartOrbit
+      attr_relativeOrbitNumber_long: relativeStartOrbit
+      attr_cycleNumber_long: cycleNumber
+      attr_orbitDirection_string: pass
+      attr_processingDate_date: processingDate
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_coordinates_string: coordinates
+      attr_qualityDataObjectID_string: qualityDataObjectID
+      attr_qualityNumOfElement_long: qualityNumOfElement
+      attr_qualityNumOfMissingElements_long: qualityNumOfMissingElements
+      attr_qualityNumOfCorruptedElements_long: qualityNumOfCorruptedElements
+      attr_qualityNumOfRSIncorrigibleElements_long: qualityNumOfRSIncorrigibleElements
+      attr_qualityNumOfRSCorrectedElements_long: qualityNumOfRSCorrectedElements
+      attr_qualityNumOfRSCorrectedSymbols_long: qualityNumOfRSCorrectedSymbols     
+      attr_productType_string: productType
+    l0-noise:
+      attr_beginningDateTime_date: startTime
+      attr_endingDateTime_date: stopTime
+      attr_startTimeFromAscendingNode_double: startTimeANX
+      attr_completionTimeFromAscendingNode_double: stopTimeANX
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_instrumentShortName_string: instrumentShortName
+      attr_operationalMode_string: operationalMode
+      attr_swathIdentifier_string: swathIdentifier
+      attr_productClass_string: productClass
+      attr_productConsolidation_string: productConsolidation
+      attr_instrumentConfigurationID_long: instrumentConfigurationId
+      attr_missionDatatakeID_long: missionDataTakeId
+      attr_sliceProductFlag_boolean: sliceProductFlag
+      attr_sliceNumber_long: sliceNumber
+      attr_totalSlices_long: totalNumberOfSlice
+      attr_polarisationChannels_string: polarisationChannels
+      attr_orbitNumber_long: absoluteStartOrbit
+      attr_relativeOrbitNumber_long: relativeStartOrbit
+      attr_cycleNumber_long: cycleNumber
+      attr_orbitDirection_string: pass
+      attr_processingDate_date: processingDate
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_coordinates_string: coordinates
+      attr_qualityDataObjectID_string: qualityDataObjectID
+      attr_qualityNumOfElement_long: qualityNumOfElement
+      attr_qualityNumOfMissingElements_long: qualityNumOfMissingElements
+      attr_qualityNumOfCorruptedElements_long: qualityNumOfCorruptedElements
+      attr_qualityNumOfRSIncorrigibleElements_long: qualityNumOfRSIncorrigibleElements
+      attr_qualityNumOfRSCorrectedElements_long: qualityNumOfRSCorrectedElements
+      attr_qualityNumOfRSCorrectedSymbols_long: qualityNumOfRSCorrectedSymbols     
+      attr_productType_string: productType
+    l0-gps:
+      attr_beginningDateTime_date: startTime
+      attr_endingDateTime_date: stopTime
+      attr_startTimeFromAscendingNode_double: startTimeANX
+      attr_completionTimeFromAscendingNode_double: stopTimeANX
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_instrumentShortName_string: instrumentShortName
+      attr_orbitNumber_long: absoluteStartOrbit
+      attr_relativeOrbitNumber_long: relativeStartOrbit
+      attr_cycleNumber_long: cycleNumber
+      attr_orbitDirection_string: pass
+      attr_processingDate_date: processingDate
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_productType_string: productType
+    l0-hktm:
+      attr_beginningDateTime_date: startTime
+      attr_endingDateTime_date: stopTime
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_orbitNumber_long: absoluteStartOrbit
+      attr_relativeOrbitNumber_long: relativeStartOrbit
+      attr_cycleNumber_long: cycleNumber
+      attr_processingDate_date: processingDate
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_productType_string: productType
+    l1:
+      attr_processingDate_date: creationTime
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_beginningDateTime_date: startTime
+      attr_endingDateTime_date: stopTime
+      attr_startTimeFromAscendingNode_double: startTimeANX
+      attr_completionTimeFromAscendingNode_double: stopTimeANX
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_instrumentShortName_string: instrumentShortName
+      attr_operationalMode_string: operationalMode
+      attr_swathIdentifier_string: swathIdentifier
+      attr_orbitNumber_long: absoluteStartOrbit
+      attr_relativeOrbitNumber_long: relativeStartOrbit
+      attr_cycleNumber_long: cycleNumber
+      attr_orbitDirection_string: pass
+      attr_coordinates_string: coordinates
+      attr_instrumentConfigurationID_long: instrumentConfigurationId
+      attr_missionDatatakeID_long: missionDataTakeId
+      attr_polarisationChannels_string: polarisationChannels
+      attr_productClass_string: productClass
+      attr_productComposition_string: productComposition
+      attr_productType_string: productType
+      attr_timeliness_string:  safeTimeliness
+      attr_sliceProductFlag_boolean: sliceProductFlag
+      attr_segmentStartTime_date: segmentStartTime
+      attr_sliceNumber_long: sliceNumber
+      attr_totalSlices_long: totalNumberOfSlice
+    l2:
+      attr_processingDate_date: creationTime
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_beginningDateTime_date: startTime
+      attr_endingDateTime_date: stopTime
+      attr_startTimeFromAscendingNode_double: startTimeANX
+      attr_completionTimeFromAscendingNode_double: stopTimeANX
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_instrumentShortName_string: instrumentShortName
+      attr_operationalMode_string: operationalMode
+      attr_swathIdentifier_string: swathIdentifier
+      attr_orbitNumber_long: absoluteStartOrbit
+      attr_relativeOrbitNumber_long: relativeStartOrbit
+      attr_cycleNumber_long: cycleNumber
+      attr_orbitDirection_string: pass
+      attr_coordinates_string: coordinates
+      attr_instrumentConfigurationID_long: instrumentConfigurationId
+      attr_missionDatatakeID_long: missionDataTakeId
+      attr_polarisationChannels_string: polarisationChannels
+      attr_productClass_string: productClass
+      attr_productComposition_string: productComposition
+      attr_productType_string: productType
+      attr_timeliness_string:  safeTimeliness
+      attr_sliceProductFlag_boolean: sliceProductFlag
+      attr_segmentStartTime_date: segmentStartTime
+      attr_sliceNumber_long: sliceNumber
+      attr_totalSlices_long: totalNumberOfSlice
+    aux-safe:
+      attr_processingDate_date: creationTime
+      attr_processingCenter_string: site
+      attr_processorName_string: processorName
+      attr_processorVersion_string: processorVersion
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_instrumentShortName_string: instrumentShortName
+      attr_productType_string: productType
+      attr_beginningDateTime_date: validityStartTime
+      attr_productGeneration_string: productGeneration
+      attr_instrumentConfigurationID_string: instrumentConfigurationId
+    aux-eof:
+      attr_platformShortName_string: platformShortName
+      attr_platformSerialIdentifier_string: platformSerialIdentifier
+      attr_productType_string: productType
+      attr_beginningDateTime_date: validityStartTime
+      attr_endingDateTime_date: validityStopTime
+      attr_processingCenter_string: site
+      attr_processorVersion_string: processorVersion
+      attr_processingDate_string: creationTime
+
+# PRIP Commons config
+prip-client:
+  repository:
+    max-search-hits: 1000
+
+status:
+  delete-fixed-delay-ms: 3000
+  max-error-counter-processing: 30
+  max-error-counter-mqi: 30
+  block-system-exit: true
+
+# REST controller
+server:
+  port: 8080 

@@ -1,0 +1,72 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: s1pdgs-compression-worker
+    
+# Logging config
+logging:
+  config: ${log4j_config:log/log4j2.yml}
+  
+# Kafka config
+kafka:
+  # host:port to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: ${kafka_bootstrap-servers}
+  # Hostname
+  hostname: ${HOSTNAME}
+  # Topic name for the errors
+  error-topic: ${kafka_topic_errors}
+  # Kafka Producer config
+  producer:
+    # When greater than zero, enables retrying of failed sends
+    max-retries: 10
+
+# Application status configuration
+status:
+  # (Fixed delay) period in milliseconds between 2 check if application shall be stopped or not, default is 3000
+  delete-fixed-delay-ms: 1800000
+  # The number of consecutive processing errors leading to the state FATALERROR, default is 100
+  max-error-counter-processing: 3
+  # The number of consecutive MQI errors leading to the state FATALERROR
+  max-error-counter-mqi: 30
+
+# Compression Report config
+report:
+  # Blacklist segment files by regex pattern
+  segment-blacklist-pattern: ^S1([A-Z_]{1}).*(GP|HK|RF).*SAFE(.zip)?$
+  
+# REST controller
+server:
+  # Port used for publishing REST API
+  port: 8080
+
+# MQI config
+mqi:
+  # The host and port for querying MQI server
+  host-uri: http://localhost:8081
+  # The maximal number of consecutive retries following a MQI request error, default is 3
+  max-retries: 45
+  # Time between retries in milliseconds, default is 1000
+  tempo-retry-ms: 2000
+  
+# Compression worker
+compression-worker:
+    # Command to execute to compress a file
+    compressionCommand: /app/compression.sh
+    # Command to execute to uncompress a file
+    uncompressionCommand: /app/uncompression.sh
+    # Hostname
+    hostname: ${HOSTNAME}
+    # Compression/decompression working directory
+    workingDirectory: /tmp/compression
+    # (Fixed delay) Dealy in milliseconds between 2 next messages
+    fixed-delay-ms: 200
+    init-delay-poll-ms: 5000
+    # Timeout in second for stopping task of pool's task execution
+    tm-proc-one-task-s: 600
+    # Timeout in second for stopping task of pool execution
+    tm-proc-all-tasks-s: 4500
+    # Timeout in second for stopping task of pool execution
+    tm-proc-stop-s: 300
+    # Timeout in second for stopping the task of waiting for required inputs before starting processing
+    tm-proc-check-stop-s: 60

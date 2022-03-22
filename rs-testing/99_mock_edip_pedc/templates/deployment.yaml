@@ -1,0 +1,140 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.processing.namespace }}
+  generation: 1
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount.mock_edip_pedc }}
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+      labels:
+        app: {{ .Release.Name }}
+        type: {{ .Values.processing.namespace }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.worker.label.key }}
+                operator: In
+                values:
+                - {{ .Values.worker.label.value }}
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: {{ .Values.ftp.ram.request }}
+            cpu: {{ .Values.ftp.cpu.request }}
+          limits:
+            memory: {{ .Values.ftp.ram.limit }}
+            cpu: {{ .Values.ftp.cpu.limit }}
+        ports:
+        - name: ftp
+          protocol: TCP
+          containerPort: 21
+        - name: ftp-data
+          protocol: TCP
+          containerPort: 20
+        - name: ftp-data-01
+          protocol: TCP
+          containerPort: 47400
+        - name: ftp-data-02
+          protocol: TCP
+          containerPort: 47401
+        - name: ftp-data-03
+          protocol: TCP
+          containerPort: 47402
+        - name: ftp-data-04
+          protocol: TCP
+          containerPort: 47403
+        - name: ftp-data-05
+          protocol: TCP
+          containerPort: 47404
+        - name: ftp-data-06
+          protocol: TCP
+          containerPort: 47405
+        - name: ftp-data-07
+          protocol: TCP
+          containerPort: 47406
+        - name: ftp-data-08
+          protocol: TCP
+          containerPort: 47407
+        - name: ftp-data-09
+          protocol: TCP
+          containerPort: 47408
+        - name: ftp-data-10
+          protocol: TCP
+          containerPort: 47409
+        volumeMounts: 
+        - name: ftpdatadir
+          mountPath: /data
+        - name: ssl-config-volume
+          mountPath: /etc/ssl
+        - name: mockftp-config-volume
+          mountPath: /etc/mockftp
+        env:
+        - name: ftp_user
+          value: "s1pdgs"
+        - name: ftp_pass
+          value: "PDG5!"
+        - name: ftp_dir
+          value: "NOMINAL"
+#        - name: ftp_pasv_address
+#          value: "10.104.202.210"
+#        - name: ftp_pasv_min_port
+#          value: "47405"
+#        - name: ftp_pasv_max_port
+#          value: "47409"
+        envFrom:
+        - configMapRef:
+            name: s1pdgs-config
+        - configMapRef:
+            name: s1pdgs-logging-config
+        - configMapRef:
+            name: s1pdgs-env
+        livenessProbe:
+          tcpSocket:
+            port: 21
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        securityContext:
+          privileged: false
+      imagePullSecrets:
+      - name: {{ .Values.image.imagePullSecrets }}
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      subdomain: {{ .Release.Name }}-svc
+      securityContext: {}
+      schedulerName: default-scheduler
+      volumes:
+      - name: ssl-config-volume
+        configMap:
+          name: {{ .Release.Name }}-ssl-config
+      - name: mockftp-config-volume
+        configMap:
+          name: {{ .Release.Name }}-mockftp-config
+          defaultMode: 0777
+  serviceName: {{ .Release.Name }}-svc
+  revisionHistoryLimit: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: ftpdatadir
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ default "30Gi" (default dict (default dict .Values.mockEdip).pedc).storageSize }}

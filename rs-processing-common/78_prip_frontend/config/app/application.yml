@@ -1,0 +1,45 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: s1pdgs-prip-frontend
+
+# Logging config
+logging:
+  config: ${log4j_config:log/log4j2.yml}
+  
+# Elastic Search config
+elasticsearch:
+  # Host of Elasticsearch cluster
+  host: ${elastic_host}
+  # Port of Elasticsearch cluster                                        
+  port: ${elastic_port}
+  # Timeout in milliseconds of connection to the cluster
+  connect-timeout-ms: 2000
+  # Timeout in milliseconds of the socket to the cluster
+  socket-timeout-ms: 10000
+  
+# PRIP Frontend config
+prip-frontend:
+  # Time in seconds until a download URL expires
+  download-url-expiration-time-in-seconds: 600
+  # Expose the debug support for OLingo (Default: false)
+  debug-support: false
+
+# PRIP client config
+prip-client:
+  repository:
+    # Maximum number of search hits that can be retrieved at a time
+    max-search-hits: 1000
+
+# Application status configuration
+status:
+  # (Fixed delay) period in milliseconds between 2 check if application shall be stopped or not, default is 3000
+  delete-fixed-delay-ms: 3000
+  # The number of consecutive processing errors leading to the state FATALERROR, default is 100
+  max-error-counter: 30
+
+# REST controller
+server:
+  # Port used for publishing REST API
+  port: 8080 

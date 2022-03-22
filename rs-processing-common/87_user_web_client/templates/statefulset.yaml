@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "rs-user-client-chart.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "rs-user-client-chart.selectorLabels" . | nindent 6 }}
+  serviceName: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "rs-user-client-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 10
+      imagePullSecrets:
+        - name: {{ .Values.image.imagePullSecrets }}
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+          env:
+            - name: API_URL
+              value: {{ .Values.env.apiUrl }}
+            - name: MAP_BACKGROUNDS
+              value: {{ .Values.env.mapBackgrounds }}
+            - name: BASE_HREF
+              value: {{ .Values.env.baseHref }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
