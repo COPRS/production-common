@@ -1,0 +1,41 @@
+name: Build RS core components
+
+on:
+  push:
+    paths:
+      - 'processing-common/**'
+    workflow_dispatch:
+      
+env:
+  RS_CORE_FOLDER: processing-common
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT: rs-docker
+  ARTIFACTORY_SUB_PROJECT: rs-core
+  
+jobs:
+  
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [ingestion, catalog, data-lifecycle, compression, prip, ddip]
+    runs-on: ubuntu-latest
+    steps:
+   
+ #   - name: Extract branch or tag name
+ #     shell: bash
+ #     run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+ #     id: extract_branch
+      
+ #   - name: Checkout repository
+ #     uses: actions/checkout@v2
+ #     with:
+ #       fetch-depth: 0
+        
+    - name: Generate file name
+      shell: bash
+      run: |
+        bash --version
+        
+      
+    
