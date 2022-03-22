@@ -37,7 +37,7 @@ jobs:
       shell: bash
       run: |
         comp=${{ matrix.component }}
-        component-name="RS_CORE_${comp^^}_${{ steps.extract_branch.outputs.branch }}_$(date '+%Y-%m-%d')"
-        echo "${component-name}"        
+        componentname="RS_CORE_${comp^^}_${{ steps.extract_branch.outputs.branch }}_$(date '+%Y-%m-%d')"
+        echo "${componentname}"        
       
     
