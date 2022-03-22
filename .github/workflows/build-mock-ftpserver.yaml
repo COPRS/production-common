@@ -5,6 +5,10 @@ on:
     paths:
       - 'rs-container/docker_mock_ftpserver/**'
       - '.github/workflows/build-mock-ftpserver.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_dispatch:
 
 env:
