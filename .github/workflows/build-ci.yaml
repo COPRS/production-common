@@ -23,7 +23,7 @@ jobs:
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
     steps:
-    - name: Extract image tag name
+    - name: Extract branch or tag name
       shell: bash
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
       id: extract_branch
@@ -54,7 +54,7 @@ jobs:
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
     steps:
-    - name: Extract image tag name
+    - name: Extract branch or tag name
       shell: bash
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
       id: extract_branch
@@ -100,7 +100,7 @@ jobs:
     outputs:
       exec-worker: ${{ steps.filter.outputs.exec-worker }}
     steps:
-    - name: Extract image tag name
+    - name: Extract branch or tag name
       shell: bash
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
       id: extract_branch
@@ -121,12 +121,6 @@ jobs:
   gg-scan:
     runs-on: ubuntu-latest
     steps:
-    - name: Set environment variables
-      shell: bash
-      run: |
-        # Short name for current branch. For PRs, use target branch (base ref)
-        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF/refs/heads/}}
-        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
