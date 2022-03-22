@@ -14,4 +14,4 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY /target/s1pro-core-ingestion-filter-*.jar s1pdgs-ingestion-filter.jar
 COPY /config/start.sh start.sh
 
-ENTRYPOINT "/app/start.sh"
+ENTRYPOINT ["/app/start.sh"]
