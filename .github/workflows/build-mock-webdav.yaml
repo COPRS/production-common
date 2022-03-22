@@ -5,6 +5,10 @@ on:
     paths:
       - 'rs-container/docker_mock_webdav/**'
       - '.github/workflows/build-mock-webdav.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_dispatch:
 
 env:
