@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
    
- #   - name: Extract branch or tag name
- #     shell: bash
- #     run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
- #     id: extract_branch
+    - name: Extract branch or tag name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+      id: extract_branch
       
  #   - name: Checkout repository
  #     uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
     - name: Generate file name
       shell: bash
       run: |
-        bash --version
-        
+        component-name="RS_CORE_${{ matrix.component^^ }}_${{ steps.extract_branch.outputs.branch }}_$(date '+%Y-%m-%d')"
+        echo "${component-name}"        
       
     
