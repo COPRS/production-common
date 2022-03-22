@@ -65,6 +65,7 @@ jobs:
       run: |
         ls -l
         find ${{ steps.gen_filename.outputs.filename }}
+        unzip -l ${{ steps.gen_filename.outputs.filename }}.zip
 #      run: curl -u${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }} -T ${{ steps.gen_filename.outputs.filename }}.zip "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"   
           
     
