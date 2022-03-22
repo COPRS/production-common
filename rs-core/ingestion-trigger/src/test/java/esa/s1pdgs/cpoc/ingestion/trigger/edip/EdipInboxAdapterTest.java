@@ -1,9 +1,11 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.edip;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -11,9 +13,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -32,7 +34,7 @@ public class EdipInboxAdapterTest {
 	@Mock
 	InboxEntryFactory inboxEntryFactory;
 
-	@BeforeEach
+	@Before
 	public void initMocks() {
 		MockitoAnnotations.initMocks(this);
 	}
@@ -57,7 +59,7 @@ public class EdipInboxAdapterTest {
 
 		final EdipInboxAdapter uut = new EdipInboxAdapter(inboxURL, edipClient, inboxEntryFactory, stationName, "S1", ProductFamily.EDRS_SESSION);
 
-		Assertions.assertEquals(Paths
+		Assert.assertEquals(Paths
 				.get("/NOMINAL/S1A/S1A_20200120185900030888/ch_1/DCS_01_S1A_20200120185900030888_ch1_DSDB_00033.raw"),
 				uut.list().collect(Collectors.toList()).get(0).getPath());
 

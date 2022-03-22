@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.ingestion.trigger.filter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 
