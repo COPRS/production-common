@@ -58,7 +58,9 @@ jobs:
     
     - name: Zip
       shell: bash
-      run: zip -qq -r ${{ steps.gen_filename.outputs.filename }}.zip ${{ steps.gen_filename.outputs.filename }}/*
+      run: |
+        cd ${{ steps.gen_filename.outputs.filename }}
+        zip -qq -r ../${{ steps.gen_filename.outputs.filename }}.zip *
         
     - name: Push to Artifactory
       shell: bash
