@@ -58,20 +58,20 @@ runs:
     with:
       images: ${{ env.ARTIFACTORY_BASE }}/${{ env.ARTIFACTORY_PROJECT_DOCKER }}/${{ env.IMAGE_NAME }}-${{ inputs.COMPONENT }}
         
-  # - name: Scan image
-  #   uses: anchore/scan-action@v2
-  #   id: scan
-  #   with:
-  #     image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
-  #     acs-report-enable: true
-  #     fail-build: false
-  #     severity-cutoff: critical
+  - name: Scan image
+    uses: anchore/scan-action@v2
+    id: scan
+    with:
+      image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+      acs-report-enable: true
+      fail-build: false
+      severity-cutoff: critical
 
-  # - name: Upload Anchore scan json report
-  #   uses: actions/upload-artifact@master
-  #   with:
-  #     name: vulnerabilities-${{ inputs.COMPONENT }}
-  #     path: ${{ steps.scan.outputs.vulnerabilities }}
+  - name: Upload Anchore scan json report
+    uses: actions/upload-artifact@master
+    with:
+      name: vulnerabilities-${{ inputs.COMPONENT }}
+      path: ${{ steps.scan.outputs.vulnerabilities }}
 
   - name: Push image
     shell: bash
