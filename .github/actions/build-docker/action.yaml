@@ -37,7 +37,7 @@ runs:
     shell: bash
     run: |
       cd rs-core/${{ inputs.COMPONENT }}
-      mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.ARTIFACTORY_BASE }}/${{ env.ARTIFACTORY_PROJECT_DOCKER }}/${{ env.IMAGE_NAME }}-${{ inputs.COMPONENT }}:develop
+      mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.ARTIFACTORY_BASE }}/${{ env.ARTIFACTORY_PROJECT_DOCKER }}/${{ env.IMAGE_NAME }}-${{ inputs.COMPONENT }}:${{ steps.extract_branch.outputs.branch }}
       
   - name: Sonarqube scan 
     shell: bash
