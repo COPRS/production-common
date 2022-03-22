@@ -56,7 +56,8 @@ jobs:
     - name: Zip
       uses: montudor/action-zip@v1
       with:
-        args: zip -qq -r ${{ steps.gen_filename.outputs.filename }}.zip ${{ steps.gen_filename.outputs.filename }}/*
+        args: zip -qq -r ${{ steps.gen_filename.outputs.filename }}.zip *
+        working-directory:  ${{ steps.gen_filename.outputs.filename }}
         
     - name: Push to Artifactory
       shell: bash
