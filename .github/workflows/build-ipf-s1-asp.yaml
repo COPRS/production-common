@@ -5,6 +5,10 @@ on:
     paths:
       - 'rs-container/docker_s1_ipf_asp/**'
       - '.github/workflows/build-ipf-s1-asp.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:
