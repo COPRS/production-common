@@ -53,11 +53,12 @@ jobs:
       with:
         args: -s --resource-path="/github/workspace/${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/" --listings -H /root/.pandoc/listings-setup.tex --table-of-contents --pdf-engine=xelatex --output="${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Release_Note.pdf" --from=markdown "./${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/doc/SRN.md"
     
-    - name: Zip
+    - name: Install zip
       uses: montudor/action-zip@v1
-      with:
-        args: zip -qq -r ${{ steps.gen_filename.outputs.filename }}.zip *
-        working-directory:  ${{ steps.gen_filename.outputs.filename }}
+    
+    - name: Zip
+      shell: bash
+      run: zip -qq -r ${{ steps.gen_filename.outputs.filename }}.zip ${{ steps.gen_filename.outputs.filename }}/*
         
     - name: Push to Artifactory
       shell: bash
