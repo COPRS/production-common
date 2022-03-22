@@ -24,7 +24,7 @@ public class TestInboxEntry {
 
 	@BeforeEach
 	public void setup() {
-		LOG.info("Run setup method for test.");
+		LOG.info("Run setup method for test");
 		final ProcessConfiguration processConfiguration = new ProcessConfiguration();
 		processConfiguration.setHostname("ingestor-01");
 		factory = new InboxEntryFactoryImpl(processConfiguration);
