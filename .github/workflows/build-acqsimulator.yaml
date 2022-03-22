@@ -5,8 +5,10 @@ on:
     paths:
       - 'rs-container/docker_acqsimulator/**'
       - '.github/workflows/build-acqsimulator.yaml'
-    branches-ignore:
-      - 'main'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:
