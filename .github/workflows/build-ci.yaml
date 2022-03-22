@@ -7,6 +7,10 @@ on:
       - 'rs-libs/**'
       - '.github/workflows/build-ci.yaml'
       - '.github/actions/**'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_dispatch:
 
 env:
