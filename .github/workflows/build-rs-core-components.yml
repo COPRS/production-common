@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'processing-common/**'
+      - '.github/workflows/build-rs-core-components.yml'
     workflow_dispatch:
       
 env:
@@ -35,7 +36,8 @@ jobs:
     - name: Generate file name
       shell: bash
       run: |
-        component-name="RS_CORE_${{ matrix.component^^ }}_${{ steps.extract_branch.outputs.branch }}_$(date '+%Y-%m-%d')"
+        comp=${{ matrix.component }}
+        component-name="RS_CORE_${comp^^}_${{ steps.extract_branch.outputs.branch }}_$(date '+%Y-%m-%d')"
         echo "${component-name}"        
       
     
