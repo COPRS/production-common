@@ -4,6 +4,11 @@ on:
   push:
     paths:
       - 'rs-processing-common/**'
+      - '.github/workflows/helm-chart-ci.yml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
   workflow_dispatch:
   
 env:
@@ -76,5 +81,5 @@ jobs:
           
     - name: Push to Artifactory
       shell: bash
-      run: curl -u${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }} -T *.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/${{ env.CHART_FOLDER }}-${{ matrix.component }}.tgz"
+      run: curl -u${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }} -T *.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"
           
