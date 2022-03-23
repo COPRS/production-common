@@ -85,6 +85,7 @@ jobs:
           ingestion-worker: 'rs-core/ingestion-worker/**'
           ipf-execution-worker: 'rs-core/ipf-execution-worker/**'
           ipf-preparation-worker: 'rs-core/ipf-preparation-worker/**'
+          metadata-catalog-extraction: 'rs-core/metadata-catalog-extraction/**'
           metadata-catalog-timer: 'rs-core/metadata-catalog-timer/**'
           metadata-catalog-trigger: 'rs-core/metadata-catalog-trigger/**'
           metadata-catalog-worker: 'rs-core/metadata-catalog-worker/**'
