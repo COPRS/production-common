@@ -14,6 +14,4 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY /target/s1pro-core-ingestion-trigger-*.jar s1pdgs-ingestion-trigger.jar
 COPY /config/start.sh start.sh
 
-RUN chown -R 1001 /app
-
 ENTRYPOINT ["/app/start.sh"]
