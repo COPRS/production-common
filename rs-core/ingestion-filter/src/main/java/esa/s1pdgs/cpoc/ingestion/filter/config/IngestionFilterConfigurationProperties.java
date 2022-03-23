@@ -14,13 +14,13 @@ public class IngestionFilterConfigurationProperties {
 
 	public static class FilterProperties {		
 		// Cronjob definition for products, that should be processed
-		private CronExpression cronDefinition;
+		private String cronDefinition;
 
-		public CronExpression getCronDefinition() {
+		public String getCronDefinition() {
 			return cronDefinition;
 		}
 
-		public void setCronDefinition(CronExpression cronDefinition) {
+		public void setCronDefinition(String cronDefinition) {
 			this.cronDefinition = cronDefinition;
 		}
 	}
