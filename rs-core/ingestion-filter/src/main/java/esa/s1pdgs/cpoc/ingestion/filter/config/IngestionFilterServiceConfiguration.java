@@ -6,6 +6,7 @@ import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
 
 import esa.s1pdgs.cpoc.ingestion.filter.service.IngestionFilterService;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
@@ -17,7 +18,7 @@ public class IngestionFilterServiceConfiguration {
 	private IngestionFilterConfigurationProperties properties;
 	
 	@Bean
-	public Function<List<IngestionJob>, List<IngestionJob>> filter() {
+	public Function<List<IngestionJob>, List<Message<IngestionJob>>> filter() {
 		return new IngestionFilterService(properties);
 	}
 }
