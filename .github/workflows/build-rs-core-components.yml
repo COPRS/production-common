@@ -5,6 +5,10 @@ on:
     paths:
       - 'processing-common/**'
       - '.github/workflows/build-rs-core-components.yml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
     workflow_dispatch:
       
 env:
