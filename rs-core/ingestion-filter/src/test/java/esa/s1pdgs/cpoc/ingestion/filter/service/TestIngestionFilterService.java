@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.messaging.Message;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -42,7 +43,7 @@ public class TestIngestionFilterService {
 		List<IngestionJob> ingestionJobs = new ArrayList<>();
 		ingestionJobs.add(job);
 		
-		List<IngestionJob> filteredJobs = service.apply(ingestionJobs);
+		List<Message<IngestionJob>> filteredJobs = service.apply(ingestionJobs);
 		
 		assertEquals(1, filteredJobs.size());
 	}
@@ -61,7 +62,7 @@ public class TestIngestionFilterService {
 		List<IngestionJob> ingestionJobs = new ArrayList<>();
 		ingestionJobs.add(job);
 		
-		List<IngestionJob> filteredJobs = service.apply(ingestionJobs);
+		List<Message<IngestionJob>> filteredJobs = service.apply(ingestionJobs);
 		
 		assertEquals(0, filteredJobs.size());
 	}

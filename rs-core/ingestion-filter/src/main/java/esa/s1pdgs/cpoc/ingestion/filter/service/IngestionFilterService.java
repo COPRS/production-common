@@ -11,13 +11,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.util.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.ingestion.filter.config.IngestionFilterConfigurationProperties;
 import esa.s1pdgs.cpoc.ingestion.filter.config.IngestionFilterConfigurationProperties.FilterProperties;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
-public class IngestionFilterService implements Function<List<IngestionJob>, List<IngestionJob>> {
+public class IngestionFilterService implements Function<List<IngestionJob>, List<Message<IngestionJob>>> {
 
 	private static final Logger LOG = LogManager.getLogger(IngestionFilterService.class);
 	
@@ -29,8 +31,8 @@ public class IngestionFilterService implements Function<List<IngestionJob>, List
 	}
 
 	@Override
-	public List<IngestionJob> apply(List<IngestionJob> ingestionJobs) {
-		List<IngestionJob> filteredJobs = new ArrayList<>();
+	public List<Message<IngestionJob>> apply(List<IngestionJob> ingestionJobs) {
+		List<Message<IngestionJob>> filteredJobs = new ArrayList<>();
 		
 		for (IngestionJob ingestionJob : ingestionJobs) {
 			
@@ -71,7 +73,7 @@ public class IngestionFilterService implements Function<List<IngestionJob>, List
 			
 			if (messageShouldBeProcessed) {
 				LOG.info("IngestionJob should be processed for {} with last modification date {}", productName, lastModifiedDate);
-				filteredJobs.add(ingestionJob);
+				filteredJobs.add(MessageBuilder.withPayload(ingestionJob).build());
 			} else {
 				LOG.info("IngestionJob should be ignored for {} with lastmodification date {}", productName, lastModifiedDate);
 			}
