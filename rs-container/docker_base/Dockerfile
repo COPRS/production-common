@@ -1,3 +1,9 @@
-FROM openjdk:8-jre-alpine3.8
 
-RUN apk update && apk add wget netcat-openbsd bash curl tcpdump 
+FROM ubuntu:focal-20211006
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y install default-jre-headless && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+USER 1001
