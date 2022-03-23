@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:focal-20211006
 
 COPY s3cmd*.zip /tmp
 RUN apt-get update && \
