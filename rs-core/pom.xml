@@ -360,6 +360,7 @@
 		<module>request-repository</module>
 		<module>queue-watcher</module>
 		<module>on-demand-interface-provider</module>
+		<module>metadata-catalog-extraction</module>
 		<module>metadata-catalog-timer</module>
 		<module>metadata-catalog-trigger</module>
 		<module>metadata-catalog-worker</module>
