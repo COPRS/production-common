@@ -29,7 +29,7 @@
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
 		<openapi4j.version>1.0.4</openapi4j.version>
-		<equalsverifier.version>2.4.6</equalsverifier.version>
+		<equalsverifier.version>3.10</equalsverifier.version>
 		<aws.version>1.11.271</aws.version>		
 		<jsch.version>0.1.55</jsch.version>
 		<elasticsearch.version>7.14.0</elasticsearch.version>
