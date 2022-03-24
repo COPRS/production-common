@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.worker.extraction;
+package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import java.io.File;
 import java.util.Arrays;
@@ -10,16 +10,16 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractorImpl;
-import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
-import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
-import esa.s1pdgs.cpoc.mdc.worker.config.MetadataExtractorConfig;
-import esa.s1pdgs.cpoc.mdc.worker.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.mdc.worker.config.RfiConfiguration;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.files.ExtractMetadata;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.files.FileDescriptorBuilder;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.files.MetadataBuilder;
-import esa.s1pdgs.cpoc.mdc.worker.extraction.xml.XmlConverter;
-import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
+import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties;
+import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties.CategoryConfig;
+import esa.s1pdgs.cpoc.metadata.extraction.config.MetadataExtractorConfig;
+import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
+import esa.s1pdgs.cpoc.metadata.extraction.config.RfiConfiguration;
+import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Component
@@ -27,7 +27,7 @@ public class MetadataExtractorFactory {
 	private final EsServices esServices;
 	private final MetadataExtractorConfig extractorConfig;
 	private final XmlConverter xmlConverter;
-//	private final ObsClient obsClient;
+	private final ObsClient obsClient;
 	private final ProcessConfiguration processConfiguration;
 	private final RfiConfiguration rfiConfiguration;
 
