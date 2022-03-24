@@ -14,7 +14,6 @@
 		<!-- dependency version definitions -->
 		<spring.boot.version>2.3.12.RELEASE</spring.boot.version>
 		<kafka.version>2.5.0</kafka.version>
-
 		<commons.logging.version>1.2</commons.logging.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
 		<commons.net.version>3.8.0</commons.net.version>
