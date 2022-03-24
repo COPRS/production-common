@@ -16,6 +16,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -88,7 +90,7 @@ public class S3ObsClientTest {
      */
     private S3ObsClient client;
 
-    private final Instant expectedLastModified = Instant.now();
+    private final Instant expectedLastModified = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     /**
      * Initialization

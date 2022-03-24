@@ -293,6 +293,7 @@ public class PripMetadata {
 			return false;
 		
 		final PripMetadata other = (PripMetadata) obj;
+		
 		return Objects.equals(checksums, other.checksums) && Objects.equals(contentDateEnd, other.contentDateEnd)
 				&& Objects.equals(contentDateStart, other.contentDateStart) && contentLength == other.contentLength
 				&& Objects.equals(contentType, other.contentType) && Objects.equals(creationDate, other.creationDate)

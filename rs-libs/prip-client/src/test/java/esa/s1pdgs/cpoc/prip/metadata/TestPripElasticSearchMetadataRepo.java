@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -307,7 +308,7 @@ public class TestPripElasticSearchMetadataRepo {
 	}
 
 	private PripMetadata createPripMetadata() {
-		final LocalDateTime creationDate = LocalDateTime.now();
+		final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
 
 		final Checksum checksum1 = new Checksum();
 		checksum1.setAlgorithm(Checksum.DEFAULT_ALGORITHM);
