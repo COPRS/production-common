@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
@@ -13,6 +14,7 @@ import esa.s1pdgs.cpoc.xbip.client.XbipClientFactory;
 @RunWith(SpringRunner.class)
 @EnableConfigurationProperties
 @ComponentScan("esa.s1pdgs.cpoc.xbip")
+@PropertySource({"${xbipConfigFile:classpath:xbip.properties}"})
 public class ITXbipInboxAdapter {
 
 	@Autowired

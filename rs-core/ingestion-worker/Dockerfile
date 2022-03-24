@@ -14,4 +14,4 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY /target/s1pro-core-ingestion-worker-*.jar s1pdgs-ingestion-worker.jar
 COPY /config/start.sh start.sh
 
-ENTRYPOINT "/app/start.sh"
+ENTRYPOINT ["/app/start.sh"]

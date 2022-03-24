@@ -66,13 +66,13 @@ public class InboxAdapterManagerConfiguration {
 		final InboxAdapter file = new FilesystemInboxAdapter(properties);
 
 		//TODO replace this mechanism by adding the inbox type to IngestionJob and evaluate it here
-		xbipClientConfigurationProperties.getHostConfigs()
+		xbipClientConfigurationProperties.getHostConfigs().values()
 				.forEach(xbipHost -> inboxAdapter.put(uriRegexFor(xbipHost.getServerName()), xbip));
 
-		auxipClientConfigurationProperties.getHostConfigs()
+		auxipClientConfigurationProperties.getHostConfigs().values()
 				.forEach(auxipHost -> inboxAdapter.put(uriRegexFor(auxipHost.getServiceRootUri()), auxip));
 		
-		edipClientConfigurationProperties.getHostConfigs()
+		edipClientConfigurationProperties.getHostConfigs().values()
 			.forEach(edipHost -> inboxAdapter.put(uriRegexFor(edipHost.getServerName()), edip));
 
 		inboxAdapter.put(uriRegexForFile(), file);
