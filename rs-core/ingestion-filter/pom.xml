@@ -8,12 +8,10 @@
 		<version>3.32.1</version>
 	</parent>
 	<artifactId>s1pro-core-ingestion-filter</artifactId>
-	<packaging>jar</packaging>
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>s1pdgs-ingestion-filter</project.build.finalName>
 		<start-class>esa.s1pdgs.cpoc.ingestion.filter.Application</start-class>
-		<spring-cloud.version>2020.0.3</spring-cloud.version>
 	</properties>
 
 	<dependencies>
@@ -111,18 +109,6 @@
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<build>
 		<plugins>
