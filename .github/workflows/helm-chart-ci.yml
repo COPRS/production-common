@@ -84,5 +84,5 @@ jobs:
     - name: Push to Artifactory
       shell: bash
       run: |
-        curl -u ${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }} -T /home/runner/work/production-common/production-common/*.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"
+        curl -u ${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }} -T /home/runner/work/production-common/production-common/coprs-native-api-3.32.1-SNAPSHOT.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"
           
