@@ -12,7 +12,7 @@
 		<project.build.finalName>rs-metadata-catalog-extraction</project.build.finalName>
 		<project.artifactId>rs-metadata-catalog-extraction</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.metadata.extraction.Application</start-class>
-		<java.version>1.11</java.version>
+		<java.version>1.8</java.version>
 		<spring-cloud.version>2020.0.3</spring-cloud.version>
 	</properties>
 
@@ -105,18 +105,6 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-		</dependency>
-
-		<!-- API, java.xml.bind module -->
-		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-		</dependency>
-
-		<!-- Runtime, com.sun.xml.bind module -->
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
 		<!-- Application dependencies -->
