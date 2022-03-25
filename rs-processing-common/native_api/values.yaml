@@ -29,3 +29,4 @@ native_api:
   javaOpts:
 #   xms: "256m"
     xmx: "512m"
+    
