@@ -1,10 +1,8 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service;
 
-import java.util.List;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.integration.filter.MessageFilter;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
@@ -36,11 +34,11 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		this.properties = properties;
 		//this.extractorFactory = extractorFactory;
 	}
-	
+		
 	@Override
 	public CatalogEvent apply(CatalogJob catalogJob) {
 		MissionId mission = null;
-
+		
 		if (catalogJob.getProductFamily().isSessionFamily()) {
 			PathMetadataExtractor mExtractor = MetadataExtractorFactory
 					.newPathMetadataExtractor(properties.getProductCategories().get(ProductCategory.EDRS_SESSIONS));
