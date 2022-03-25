@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [ingestion]
+        component: [ingestion] #todo
 #        component: [ingestion, catalog, data-lifecycle, compression, prip, ddip]
     runs-on: ubuntu-latest
     steps:
@@ -68,10 +68,6 @@ jobs:
         
     - name: Push to Artifactory
       shell: bash
-      run: |
-        ls -l
-        find ${{ steps.gen_filename.outputs.filename }}
-        unzip -l ${{ steps.gen_filename.outputs.filename }}.zip
-#      run: curl -u${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }} -T ${{ steps.gen_filename.outputs.filename }}.zip "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"   
+      run: curl -u "${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}" -T ${{ steps.gen_filename.outputs.filename }}.zip "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"   
           
     
