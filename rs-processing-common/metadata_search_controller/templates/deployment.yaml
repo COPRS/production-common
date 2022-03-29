@@ -45,7 +45,7 @@ spec:
             cpu: {{ .Values.rs_metadata_catalog_searchcontroller.cpu.limit }}
 
         volumeMounts:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           mountPath: /app/log
         - name: service-config-volume
           mountPath: /app/config
@@ -95,9 +95,9 @@ spec:
       schedulerName: default-scheduler
       subdomain: {{ .Release.Name }}-svc
       volumes:
-        - name: service-logging-config-volume
+        - name: {{ .Release.Name }}-logging-config
           configMap:
-            name: s1pdgs-logging-config
+            name: logging-config-volume
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
