@@ -95,9 +95,9 @@ spec:
       schedulerName: default-scheduler
       subdomain: {{ .Release.Name }}-svc
       volumes:
-        - name: {{ .Release.Name }}-logging-config
+        - name: logging-config-volume
           configMap:
-            name: logging-config-volume
+            name: {{ .Release.Name }}-logging-config
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
