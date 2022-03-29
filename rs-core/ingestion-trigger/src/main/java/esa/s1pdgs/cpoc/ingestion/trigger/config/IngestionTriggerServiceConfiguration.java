@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.function.context.PollableBean;
 import org.springframework.context.annotation.Configuration;
 
-import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
@@ -26,9 +25,6 @@ public class IngestionTriggerServiceConfiguration {
 	
 	@Autowired
 	private InboxFactory inboxFactory;
-	
-	@Autowired
-	private AppStatus status;
 	
 	/*
 	 * Entry point for Spring Cloud Stream
@@ -48,6 +44,6 @@ public class IngestionTriggerServiceConfiguration {
 				LOG.error(e.getMessage());
 			}
 		}
-		return new IngestionTriggerService(inboxes, status);
+		return new IngestionTriggerService(inboxes);
 	}
 }
