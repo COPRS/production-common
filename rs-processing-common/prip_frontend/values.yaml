@@ -4,8 +4,25 @@
 service:
   port: 8080
   
-mqiService:
-  port: 8081
+replicaCount: 1
+logLevel: DEBUG
+
+processing:
+  namespace: processing
+  
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
+
+image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  
+  name: rs-core-prip-frontend
+  tag: develop
+  
+  imagePullSecrets: artifactory
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -18,9 +35,6 @@ resources:
 #  requests:
 #    storage: 10Gi
   #   memory: 128Mi
-
-image:
-  name: rs-core-prip-frontend
 
 prip_frontend:
   cpu:

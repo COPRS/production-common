@@ -2,7 +2,7 @@ spring:
   main:
     banner-mode: "off"
   application:
-    name: s1pdgs-prip-frontend
+    name: rs-prip-frontend
 
 # Logging config
 logging:
