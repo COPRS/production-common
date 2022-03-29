@@ -11,7 +11,8 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-RUN apk update && apk add p7zip
+#RUN apk update && apk add p7zip
+RUN apt-get update && apt-get install p7zip
 
 COPY /target/s1pro-core-compression-worker-*.jar s1pdgs-compression-worker.jar
 COPY /config/start.sh start.sh
