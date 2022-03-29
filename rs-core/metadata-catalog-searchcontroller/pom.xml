@@ -8,7 +8,7 @@
 	  <artifactId>s1pro-core</artifactId>
 	  <version>3.32.1</version>
 	</parent>
-	<artifactId>s1pro-core-metadata-catalog-worker</artifactId>
+	<artifactId>rs-metadata-catalog-searchcontroller</artifactId>
 	<packaging>jar</packaging>
 
 	<!-- <parent> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-parent</artifactId> 
