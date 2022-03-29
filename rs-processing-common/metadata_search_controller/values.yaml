@@ -23,16 +23,7 @@ image:
   tag: develop
   
   imagePullSecrets: artifactory
-
-ddip:
-  dispatch:
-    prip:
-      protocol: http
-      host: s1pro-prip-frontend-svc.processing.svc.cluster.local
-      port: 8080
-  collections:
-    Sentinel1: startswith(Name,'S1')
-    Sentinel3: startswith(Name,'S3')  
+  
 
 rs_metadata_catalog_searchcontroller:
   cpu:
