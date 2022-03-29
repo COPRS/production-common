@@ -188,17 +188,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>3.0.4</version>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Low</threshold>
-					<maxRank>15</maxRank>
-					<includeTests>false</includeTests>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
 				<version>3.8</version>
