@@ -18,8 +18,11 @@ worker:
 image:
   registry: artifactory.coprs.esa-copernicus.eu
   repository: werum-docker
+  
   name: rs-core-metadata-catalog-searchcontroller
   tag: develop
+  
+  imagePullSecrets: artifactory
   
 
 rs_metadata_catalog_searchcontroller:

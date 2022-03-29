@@ -17,7 +17,13 @@ resources:
   #   memory: 128Mi
 
 image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  
   name: rs-core-native-api
+  tag: develop
+  
+  imagePullSecrets: artifactory
 
 native_api:
   cpu:
