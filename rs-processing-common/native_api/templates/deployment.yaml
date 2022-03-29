@@ -2,7 +2,7 @@ kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: {{ .Release.Name }}
-  namespace: processing
+  namespace: {{ .Values.processing.namespace }}
   generation: 1
   labels:
     app: {{ .Release.Name }}
@@ -18,7 +18,7 @@ spec:
       name: {{ .Release.Name }}
       labels:
         app: {{ .Release.Name }}
-        type: processing
+        type: {{ .Values.processing.namespace }}
     spec:
       terminationGracePeriodSeconds: 30
       affinity:
@@ -26,10 +26,10 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: node-role.kubernetes.io/worker
+              - key: {{ .Values.worker.label.key }}
                 operator: In
                 values:
-                - infra
+                - {{ .Values.worker.label.value }}
       containers:
       
       - name: {{ .Release.Name }}
@@ -43,7 +43,7 @@ spec:
             memory: {{ .Values.native_api.ram.limit }}
             cpu: {{ .Values.native_api.cpu.limit }}
         volumeMounts:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           mountPath: /app/log
         - name: service-config-volume
           mountPath: /app/config
