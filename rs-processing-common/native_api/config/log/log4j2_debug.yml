@@ -1,0 +1,92 @@
+Configuration:
+  status: WARN
+  name: YAMLConfigTest
+  thresholdFilter:
+    level: DEBUG
+  appenders:
+    Console:
+      - name: STDOUT
+        PatternLayout:
+          Pattern: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} | %-5level | %logger{1.} [%thread]: %msg %n"
+      - name: PLAIN
+        PatternLayout:
+          Pattern: "%msg%n"
+    RollingFile:
+      - name: FILE
+        fileName: ./logfile.log
+        filePattern: "./logfile.log.%d{yyyy-MM-dd-hh-mm-ss}.%i.gz"
+        PatternLayout:
+          Pattern: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS} | %-5level | %logger{1.} [%thread]: %msg %n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 10 MB
+        DefaultRollOverStrategy:
+          max: 30
+      - name: REPORT
+        fileName: ./report.json
+        filePattern: "./report.json.%d{yyyy-MM-dd-hh-mm-ss}.%i.gz"
+        PatternLayout:
+          Pattern: "%msg%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 10 MB
+        DefaultRollOverStrategy:
+          max: 30
+  Loggers:
+    logger:
+      - name: esa.s1pdgs.cpoc.report.Reporting
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: REPORT
+      - name: esa.s1pdgs.cpoc.common.utils.LogUtils
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: PLAIN 
+      - name: esa.s1pdgs.cpoc
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: org.springframework
+        level: ERROR
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: org.springframework.data.mongodb.core
+        level: ERROR
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE          
+      - name: org.apache
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: com.amazonaws
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: org
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: com
+        level: WARN
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+    Root:
+      level: ERROR
+      AppenderRef:
+        ref: STDOUT
