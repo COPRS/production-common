@@ -16,6 +16,8 @@ image:
   
   name: rs-user-web-client
   tag: develop
+  
+  imagePullSecrets: artifactory
 
   # use image from local computer
   #repository: rs-user-client
