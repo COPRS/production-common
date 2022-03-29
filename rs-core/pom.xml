@@ -385,7 +385,7 @@
 		<!-- <module>metadata-catalog-extraction</module> -->
 		<module>metadata-catalog-timer</module>
 		<module>metadata-catalog-trigger</module>
-		<module>metadata-catalog-worker</module>
+		<module>metadata-catalog-searchcontroller</module>
 		<module>mqi-server</module>
 		<module>prip-trigger</module>
 		<module>prip-worker</module>
