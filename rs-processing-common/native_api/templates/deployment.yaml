@@ -76,7 +76,7 @@ spec:
             secretKeyRef:
               name: obs
               key: USER_SECRET
-        #envFrom:
+        #envFrom: 
         securityContext:
           privileged: false
         livenessProbe:
