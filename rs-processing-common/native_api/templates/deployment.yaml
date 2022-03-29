@@ -56,16 +56,6 @@ spec:
           value: {{ .Values.native_api.javaOpts.xms }}
         - name: JAVA_XMX
           value: {{ .Values.native_api.javaOpts.xmx }}
-        - name: os_credential-username
-          valueFrom:
-            secretKeyRef:
-              name: openstack
-              key: USER
-        - name: os_credential-password
-          valueFrom:
-            secretKeyRef:
-              name: openstack
-              key: PASS
         - name: storage_user_id
           valueFrom:
             secretKeyRef:
