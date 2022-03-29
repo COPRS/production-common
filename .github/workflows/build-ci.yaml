@@ -158,8 +158,8 @@ jobs:
           metadata-catalog-trigger: 
             - 'rs-core/metadata-catalog-trigger/**'
             - 'rs-core/pom.xml'
-          metadata-catalog-worker: 
-            - 'rs-core/metadata-catalog-worker/**'
+          metadata-catalog-searchcontroller: 
+            - 'rs-core/metadata-catalog-searchcontroller/**'
             - 'rs-core/pom.xml'
           mqi-server: 
             - 'rs-core/mqi-server/**'
