@@ -3,6 +3,8 @@
 
 service:
   port: 8080
+  
+replicaCount: 1
 
 processing:
   namespace: processing
