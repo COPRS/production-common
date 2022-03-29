@@ -11,7 +11,7 @@ class PripPublishingJobListenerTest {
         final boolean isLineString = "S1A_WV_RAW__0NSV_20200120T114913_20200120T121043_030883_038B58_E294.SAFE"
                 .matches("(RF|WV)_RAW__0(A|C|N|S)");
         System.out.println("isLineString: " + isLineString);
-        assertTrue(isLineString);
+        assertFalse(isLineString);
     }
 	
 	@Test
