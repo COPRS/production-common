@@ -34,7 +34,6 @@ jobs:
       with:
         base: ${{ steps.extract_branch.outputs.branch }}
         filters: |
-          00_s1pdgs_base: '${{ env.CHART_FOLDER }}/00_s1pdgs_base/**'
           ddip_frontend: '${{ env.CHART_FOLDER }}/ddip_frontend/**'
           metadata_search_controller: '${{ env.CHART_FOLDER }}/metadata_search_controller/**'
           native_api: '${{ env.CHART_FOLDER }}/native_api/**'
