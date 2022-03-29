@@ -4,6 +4,9 @@
 service:
   port: 8080
 
+processing:
+  namespace: processing
+
 image:
   name: rs-core-metadata-catalog-searchcontroller
 
