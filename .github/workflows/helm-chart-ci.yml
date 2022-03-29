@@ -73,13 +73,16 @@ jobs:
         
     - name: Lint helm
       shell: bash
-      run: helm lint ${{ env.CHART_FOLDER }}/${{ matrix.component }}
+      run: |
+        helm lint ${{ env.CHART_FOLDER }}/${{ matrix.component }}
       
     - name: Package helm
       shell: bash
-      run: helm package ${{ env.CHART_FOLDER }}/${{ matrix.component }}
+      run: |
+        helm package ${{ env.CHART_FOLDER }}/${{ matrix.component }}
           
     - name: Push to Artifactory
       shell: bash
-      run: curl -u${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }} -T *.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"
+      run: |
+        curl -u "${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}" -T *.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"
           
