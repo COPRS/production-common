@@ -28,17 +28,3 @@ data:
   {{- end }}
 
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-mqi-config
-  namespace: {{ .Values.processing.namespace }}
-  
-data:
-  {{- $files := .Files }}
-  {{- range $path, $bytes := .Files.Glob "config/mqi/**" }}
-  {{- $name := base $path }}
-  {{ $name }} : |-
-{{ (tpl ($.Files.Get (printf "%s" $path)) $ ) | indent 4 }}
-  {{- end }}
----

@@ -1,7 +1,7 @@
 apiVersion: v1
-appVersion: "develop"
-description: S1PRO Metadata Catalog Worker
-name: s1pro-metadata-catalog-worker
-version: 3.33.0-SNAPSHOT
+appVersion: "1.1.0"
+description: COPRS Metadata Search Controller allowing to search for products in the Metadata Catalog
+name: s1pro-metadata-catalog-searchcontroller
+version: 1.1.0
 maintainers:
   - name: Werum Software & Systems

@@ -3,14 +3,11 @@
 
 service:
   port: 8080
-  
-mqiService:
-  port: 8081
 
 image:
-  name: rs-core-metadata-catalog-worker
+  name: rs-core-metadata-catalog-searchcontroller
 
-s1pro_metadata_catalog_worker:
+rs_metadata_catalog_searchcontroller:
   cpu:
     request: "200m"
     limit: "500m"
@@ -20,15 +17,3 @@ s1pro_metadata_catalog_worker:
   javaOpts:
 #   xms: "256m"
     xmx: "1024m"
-
-s1pro_metadata_catalog_worker_mqi:
-  cpu:
-    request: "100m"
-    limit: "500m"
-  ram:
-    request: "600Mi"
-    limit: "2400Mi"
-  javaOpts:
-#   xms: "256m"
-    xmx: "512m"
-  

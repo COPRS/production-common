@@ -38,11 +38,11 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            memory: {{ .Values.s1pro_metadata_catalog_worker.ram.request }}
-            cpu: {{ .Values.s1pro_metadata_catalog_worker.cpu.request }}
+            memory: {{ .Values.rs_metadata_catalog_searchcontroller.ram.request }}
+            cpu: {{ .Values.rs_metadata_catalog_searchcontroller.cpu.request }}
           limits:
-            memory: {{ .Values.s1pro_metadata_catalog_worker.ram.limit }}
-            cpu: {{ .Values.s1pro_metadata_catalog_worker.cpu.limit }}
+            memory: {{ .Values.rs_metadata_catalog_searchcontroller.ram.limit }}
+            cpu: {{ .Values.rs_metadata_catalog_searchcontroller.cpu.limit }}
 
         volumeMounts:
         - name: service-logging-config-volume
@@ -59,9 +59,9 @@ spec:
           privileged: false
         env:
         - name: JAVA_XMS
-          value: {{ .Values.s1pro_metadata_catalog_worker.javaOpts.xms }}
+          value: {{ .Values.rs_metadata_catalog_searchcontroller.javaOpts.xms }}
         - name: JAVA_XMX
-          value: {{ .Values.s1pro_metadata_catalog_worker.javaOpts.xmx }}
+          value: {{ .Values.rs_metadata_catalog_searchcontroller.javaOpts.xmx }}
         - name: storage_user_id
           valueFrom:
             secretKeyRef:
@@ -86,46 +86,7 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 5
-          
-      - name: {{ .Release.Name }}-mqi
-        image: {{ .Values.mqiImage.registry }}/{{ .Values.mqiImage.repository }}/{{ .Values.mqiImage.name }}:{{ .Values.mqiImage.tag }}
-        imagePullPolicy: Always
-        resources:
-          requests:
-            memory: {{ .Values.s1pro_metadata_catalog_worker_mqi.ram.request }}
-            cpu: {{ .Values.s1pro_metadata_catalog_worker_mqi.cpu.request }}
-          limits:
-            memory: {{ .Values.s1pro_metadata_catalog_worker_mqi.ram.limit }}
-            cpu: {{ .Values.s1pro_metadata_catalog_worker_mqi.cpu.limit }}
-        volumeMounts:
-        - name: service-logging-config-volume
-          mountPath: /app/log
-        - name: mqi-config-volume
-          mountPath: /app/config
-        ports:
-        - name: data
-          protocol: TCP
-          containerPort: {{ .Values.mqiService.port }}
-        env:
-        - name: JAVA_XMS
-          value: {{ .Values.s1pro_metadata_catalog_worker_mqi.javaOpts.xms }}
-        - name: JAVA_XMX
-          value: {{ .Values.s1pro_metadata_catalog_worker_mqi.javaOpts.xmx }}
-        envFrom:
-        - configMapRef:
-            name: s1pdgs-config
-        - configMapRef:
-            name: s1pdgs-logging-config
-        - configMapRef:
-            name: s1pdgs-env
-        livenessProbe:
-          httpGet:
-            path: /app/status
-            port: {{ .Values.mqiService.port }}
-          initialDelaySeconds: 30
-          periodSeconds: 60
-          timeoutSeconds: 5
-          
+           
       imagePullSecrets:
       - name: {{ .Values.image.imagePullSecrets }}
       restartPolicy: Always
@@ -143,9 +104,6 @@ spec:
         - name: xslt-config-volume
           configMap:
             name: {{ .Release.Name }}-xslt-config
-        - name: mqi-config-volume
-          configMap:
-            name: {{ .Release.Name }}-mqi-config
   serviceName: {{ .Release.Name }}-svc
   revisionHistoryLimit: 10
 
