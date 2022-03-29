@@ -108,9 +108,9 @@ spec:
       securityContext: {}
       schedulerName: default-scheduler
       volumes:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           configMap:
-            name: s1pdgs-logging-config
+            name: {{ .Release.Name }}-logging-config
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
