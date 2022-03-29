@@ -1,6 +1,6 @@
 spring:
   application:
-    name: coprs-native-api
+    name: rs-native-api
 
 # Logging
 logging:

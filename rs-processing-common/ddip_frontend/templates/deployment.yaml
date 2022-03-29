@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}
-  replicas: {{ .Values.replicaCount.ddip_frontend }}
+  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -43,7 +43,7 @@ spec:
             memory: {{ .Values.ddip_frontend.ram.limit }}
             cpu: {{ .Values.ddip_frontend.cpu.limit }}
         volumeMounts:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           mountPath: /app/log
         - name: service-config-volume
           mountPath: /app/config
@@ -56,16 +56,6 @@ spec:
           value: {{ .Values.ddip_frontend.javaOpts.xms }}
         - name: JAVA_XMX
           value: {{ .Values.ddip_frontend.javaOpts.xmx }}
-        - name: os_credential-username
-          valueFrom:
-            secretKeyRef:
-              name: openstack
-              key: USER
-        - name: os_credential-password
-          valueFrom:
-            secretKeyRef:
-              name: openstack
-              key: PASS
         - name: storage_user_id
           valueFrom:
             secretKeyRef:
@@ -76,13 +66,7 @@ spec:
             secretKeyRef:
               name: obs
               key: USER_SECRET
-        envFrom:
-        - configMapRef:
-            name: s1pdgs-config
-        - configMapRef:
-            name: s1pdgs-logging-config
-        - configMapRef:
-            name: s1pdgs-env
+        #envFrom:
         securityContext:
           privileged: false
         livenessProbe:
@@ -108,9 +92,9 @@ spec:
       securityContext: {}
       schedulerName: default-scheduler
       volumes:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           configMap:
-            name: s1pdgs-logging-config
+            name: {{ .Release.Name }}-logging-config
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config

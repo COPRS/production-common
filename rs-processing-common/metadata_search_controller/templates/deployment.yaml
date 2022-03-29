@@ -72,13 +72,7 @@ spec:
             secretKeyRef:
               name: obs
               key: USER_SECRET
-        envFrom:
-        - configMapRef:
-            name: s1pdgs-config
-        - configMapRef:
-            name: s1pdgs-logging-config
-        - configMapRef:
-            name: s1pdgs-env
+#        envFrom:
         livenessProbe:
           httpGet:
             path: /app/status

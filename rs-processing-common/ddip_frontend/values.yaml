@@ -4,6 +4,36 @@
 service:
   port: 8080
   
+replicaCount: 1
+logLevel: DEBUG
+
+processing:
+  namespace: processing
+  
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
+
+image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  
+  name: rs-core-ddip-frontend
+  tag: develop
+  
+  imagePullSecrets: artifactory
+  
+ddip:
+  dispatch:
+    prip:
+      protocol: http
+      host: s1pro-prip-frontend-svc.processing.svc.cluster.local
+      port: 8080
+  collections:
+    Sentinel1: startswith(Name,'S1')
+    Sentinel3: startswith(Name,'S3')  
+  
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -15,9 +45,6 @@ resources:
 #  requests:
 #    storage: 10Gi
   #   memory: 128Mi
-
-image:
-  name: rs-core-ddip-frontend
 
 ddip_frontend:
   cpu:

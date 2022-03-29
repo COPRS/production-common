@@ -1,7 +1,7 @@
 apiVersion: v1
 appVersion: "1.1.0"
 description: COPRS Native API
-name: rs-coprs-native-api
+name: rs-native-api
 version: 1.1.0
 maintainers:
   - name: Werum Software & Systems

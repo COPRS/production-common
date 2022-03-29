@@ -17,7 +17,21 @@ resources:
   #   memory: 128Mi
 
 image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  
   name: rs-core-native-api
+  tag: develop
+  
+  imagePullSecrets: artifactory
+
+processing:
+  namespace: processing
+  
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
 
 native_api:
   cpu:
