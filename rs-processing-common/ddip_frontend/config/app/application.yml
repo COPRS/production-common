@@ -1,6 +1,6 @@
 spring:
   application:
-    name: coprs-ddip-frontend
+    name: rs-ddip-frontend
 
 # Logging
 logging:
