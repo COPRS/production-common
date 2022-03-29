@@ -8,9 +8,18 @@ replicaCount: 1
 
 processing:
   namespace: processing
+  
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
 
 image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
   name: rs-core-metadata-catalog-searchcontroller
+  tag: develop
+  
 
 rs_metadata_catalog_searchcontroller:
   cpu:
