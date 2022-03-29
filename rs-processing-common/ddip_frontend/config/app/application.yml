@@ -23,8 +23,12 @@ ddip:
   dispatch-prip-port: {{ .Values.ddip.dispatch.prip.port }}
   # defining named collections as OData expressions to narrow product metadata search
   collections:
+    {{ if .Values.ddip.collections}}
+    {{- toYaml .Values.ddip.collections | nindent 4 }}
+    {{else}}
     Sentinel1: startswith(Name,'S1')
     Sentinel3: startswith(Name,'S3')
+    {{end}}
 
 # REST controller
 server:
