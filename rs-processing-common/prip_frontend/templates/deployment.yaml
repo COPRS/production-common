@@ -71,7 +71,7 @@ spec:
           privileged: false
         livenessProbe:
           httpGet:
-            path: /app/status
+            path: /actuator/health/liveness
             port: {{ .Values.service.port }}
           initialDelaySeconds: 30
           periodSeconds: 30

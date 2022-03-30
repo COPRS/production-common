@@ -11,7 +11,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY /target/s1pro-core-prip-frontend-*.jar s1pdgs-prip-frontend.jar
+COPY /target/rs-core-prip-frontend-*.jar rs-core-prip-frontend.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"
