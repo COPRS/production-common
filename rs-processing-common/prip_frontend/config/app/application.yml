@@ -6,7 +6,7 @@ spring:
 
 # Logging config
 logging:
-  config: ${log4j_config:log/log4j2.yml}
+  config: {{ .Values.logConfig }}
   
 # Elastic Search config
 elasticsearch:
