@@ -44,7 +44,7 @@ Configuration:
         additivity: false
         AppenderRef:
           - ref: PLAIN
-      - name: esa.s1pdgs.cpoc
+      - name: de.werum.coprs
         level: DEBUG
         additivity: false
         AppenderRef:
