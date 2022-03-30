@@ -4,12 +4,7 @@ spring:
 
 # Logging
 logging:
-  level:
-    root: ERROR
-    de.werum.coprs: DEBUG
-    esa.s1pdgs.cpoc.prip: DEBUG
-    org.springframework: INFO
-    org.apache: INFO
+  config: ${log4j_config:log/log4j2.yml}
 
 # DDIP config
 ddip:
