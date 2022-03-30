@@ -5,7 +5,7 @@ service:
   port: 8080
   
 replicaCount: 1
-logLevel: DEBUG
+logLevel: ${logLevel:DEBUG}
 
 processing:
   namespace: processing
