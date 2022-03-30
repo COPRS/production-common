@@ -45,6 +45,12 @@ Configuration:
         AppenderRef:
           - ref: PLAIN
       - name: esa.s1pdgs.cpoc
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      - name: esa.s1pdgs.cpoc
         level: INFO
         additivity: false
         AppenderRef:
