@@ -14,7 +14,7 @@ server:
 # Logging
 logging:
   # Log configuration file
-  config: {{ .Values.logConfig }}
+  config: {{ .Values.logConfig:log/log4j2.yml }}
     
 # Elastic Search
 elasticsearch:

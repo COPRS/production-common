@@ -5,8 +5,8 @@ service:
   port: 8080
   
 replicaCount: 1
-logLevel: ${logLevel:DEBUG}
-logConfig: ${logConfig:log/log4j2.yml}
+logLevel: ${logLevel}
+logConfig: ${logConfig}
 
 processing:
   namespace: processing
