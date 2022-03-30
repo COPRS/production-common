@@ -4,9 +4,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1pro-core</artifactId>
-	  <version>3.32.1</version>
+		<groupId>de.werum.s1pdgs</groupId>
+		<artifactId>s1pro-core</artifactId>
+		<version>3.32.1</version>
 	</parent>
 	<artifactId>rs-metadata-catalog-searchcontroller</artifactId>
 	<packaging>jar</packaging>
@@ -20,6 +20,20 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jetty</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-error-repo-client</artifactId>
@@ -78,30 +92,7 @@
 
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-obs-sdk</artifactId>
-			<version>${project.version}</version>
-			<classifier>tests</classifier>
-      		<type>test-jar</type>
-      		<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-obs-sdk</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-lib-commons</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-app-status</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-mqi-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -115,7 +106,7 @@
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>elasticsearch-rest-client</artifactId>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>elasticsearch-rest-high-level-client</artifactId>
@@ -165,8 +156,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-		          <skipTests>false</skipTests>
-		        </configuration>
+					<skipTests>false</skipTests>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
