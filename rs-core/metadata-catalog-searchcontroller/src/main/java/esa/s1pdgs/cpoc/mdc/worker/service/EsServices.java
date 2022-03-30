@@ -59,8 +59,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
-import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
-import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties.CategoryConfig;
+import esa.s1pdgs.cpoc.mdc.worker.config.SearchControllerConfig;
 import esa.s1pdgs.cpoc.mdc.worker.es.ElasticsearchDAO;
 import esa.s1pdgs.cpoc.mdc.worker.extraction.files.AuxFilenameMetadataExtractor;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
@@ -99,12 +98,13 @@ public class EsServices {
 	 * Elasticsearch client
 	 */
 	private final ElasticsearchDAO elasticsearchDAO;
-    private final MdcWorkerConfigurationProperties properties;
+
+    private final SearchControllerConfig searchControllerConfig;
 	
 	@Autowired
-	public EsServices(final ElasticsearchDAO elasticsearchDAO, final MdcWorkerConfigurationProperties properties) {
+	public EsServices(final ElasticsearchDAO elasticsearchDAO, final SearchControllerConfig searchControllerConfig) {
 		this.elasticsearchDAO = elasticsearchDAO;
-		this.properties = properties;
+		this.searchControllerConfig = searchControllerConfig;
 	}
 
 	/**
@@ -2021,21 +2021,17 @@ public class EsServices {
 			// FIXME: idea here is to use the same config as for metadata extraction in order to 
 			// detect the correct product type.
 			// In the long run, this needs to be moved to a separate entity handling product type
-			// mapping in a generic manner	
-			final CategoryConfig config = properties.getProductCategories().get(ProductCategory.AUXILIARY_FILES);
-			if (config == null) {
-				throw new RuntimeException(
-						String.format("No %s configuration in %s", family, properties.getProductCategories())
-				);
-			}
-			final Pattern auxPattern = Pattern.compile(config.getPatternConfig(), Pattern.CASE_INSENSITIVE);			
+			// mapping in a generic manner
+			
+			String auxPatternExpression = searchControllerConfig.getAuxPatternConfig();
+			final Pattern auxPattern = Pattern.compile(auxPatternExpression, Pattern.CASE_INSENSITIVE);			
 			final AuxFilenameMetadataExtractor met = new AuxFilenameMetadataExtractor(auxPattern.matcher(productName));
 			if (!met.matches()) {
 				throw new RuntimeException(
 						String.format(
 								"Product name %s does not match configured pattern %s", 
 								productName, 
-								config.getPatternConfig()
+								auxPatternExpression
 						)
 				);
 			}	

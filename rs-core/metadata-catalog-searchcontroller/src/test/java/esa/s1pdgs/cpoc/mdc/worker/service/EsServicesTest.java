@@ -50,7 +50,7 @@ import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
-import esa.s1pdgs.cpoc.mdc.worker.config.MdcWorkerConfigurationProperties;
+import esa.s1pdgs.cpoc.mdc.worker.config.SearchControllerConfig;
 import esa.s1pdgs.cpoc.mdc.worker.es.ElasticsearchDAO;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
@@ -70,7 +70,7 @@ public class EsServicesTest{
 	@Before
 	public void init() throws IOException {
 		MockitoAnnotations.initMocks(this);
-		esServices = new EsServices(elasticsearchDAO, new MdcWorkerConfigurationProperties());
+		esServices = new EsServices(elasticsearchDAO, new SearchControllerConfig());
 		
 	}
 	
