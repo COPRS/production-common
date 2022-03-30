@@ -11,9 +11,9 @@ logging:
 # Elastic Search config
 elasticsearch:
   # Host of Elasticsearch cluster
-  host: ${elastic_host}
+  host: elasticsearch-master
   # Port of Elasticsearch cluster                                        
-  port: ${elastic_port}
+  port: 9200
   # Timeout in milliseconds of connection to the cluster
   connect-timeout-ms: 2000
   # Timeout in milliseconds of the socket to the cluster
@@ -31,13 +31,6 @@ prip-client:
   repository:
     # Maximum number of search hits that can be retrieved at a time
     max-search-hits: 1000
-
-# Application status configuration
-status:
-  # (Fixed delay) period in milliseconds between 2 check if application shall be stopped or not, default is 3000
-  delete-fixed-delay-ms: 3000
-  # The number of consecutive processing errors leading to the state FATALERROR, default is 100
-  max-error-counter: 30
 
 # REST controller
 server:
