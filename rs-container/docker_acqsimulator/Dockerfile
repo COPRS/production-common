@@ -14,7 +14,7 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 #RUN apk update && apk add python2
 USER root
-RUN apt-get update && apt-get install python2
+RUN apt-get update && apt-get install -y python2
 USER 1001
 
 COPY files/* /opt/
