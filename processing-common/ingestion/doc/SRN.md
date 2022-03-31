@@ -16,6 +16,7 @@ The Ingestion Worker application is doing the actual I/O activity and performing
 
 ### Ingestion Trigger
 #### General
+
 app.ingestion-trigger.status.delete-fixed-delay-ms=3000
 app.ingestion-trigger.status.max-error-counter-processing=3
 app.ingestion-trigger.status.max-error-counter-mqi=30
@@ -26,17 +27,21 @@ TBD: Outdated?
 The following properties can be used in order to modify the application behaviour:
 
 ***app.ingestion-filter.application.name***
+
 The name of the filter application that will be deployed. The name shall be descriptive to allow an easier identification, e.g. **coprs-ingestion-xbip-cgs01-filter** for a filter used in XBIP context.
 
 ***app.ingestion-filter.process.hostname***
+
 The hostname of the system where the application is running. This one will also used identifying the persistence database to avoid firing events twice and thus needs to be unique within the system
 ```
 ***app.ingestion-filter.ingestion-filter.polling-interval-ms***
+
 The interval in miliseconds between the 
 ```
 TBD: This configuration does seems to be used. Might be duplicate of trigger?
 
 ***app.ingestion-filter.ingestion-filter.config.\$mission_id.cron-definition=\$cron***
+
 Defines the ingestion filter criteria that will be applied on the job fired by the trigger. 
 
 ``mission_id`` must equal the mission id of the event to ensure that a specific mission filter.
