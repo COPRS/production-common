@@ -12,7 +12,10 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-RUN apk update && apk add python2
+#RUN apk update && apk add python2
+USER root
+RUN apt-get update && apt-get install python2
+USER 1001
 
 COPY files/* /opt/
 
