@@ -5,84 +5,59 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
-// allows specifying via environmental 'obsBackend' which backend is used, e.g. aws-s3, swift
-@PropertySource({"classpath:obs-${obsBackend:aws-s3}.properties"})
 @EnableConfigurationProperties
-@ConfigurationProperties
+@ConfigurationProperties(prefix = "obs")
 @Configuration
 public class ObsConfigurationProperties {	
 	public static final String UNDEFINED = "NOT_DEFINED";
 	
-	@Value("${obsBackend:aws-s3}") 
-	private String backend;
+	private String backend = "aws-s3";
 	
-	@Value("${user.id}") 
 	private String userId;
 	
-	@Value("${user.secret}")
 	private String userSecret;
 	
-	@Value("${endpoint}")
 	private String endpoint;
 	
-	@Value("${endpoint.region}")
 	private String endpointRegion;
 	
-	@Value("${tenant.id:NOT_DEFINED}")
-	private String tenantId;
+	private String tenantId = UNDEFINED;
 	
-	@Value("${tenant.name:NOT_DEFINED}")
-	private String tenantName;
+	private String tenantName = UNDEFINED;
 	
-	@Value("${endpoint.auth:KEYSTONE}")
-	private String authMethod;
+	private String authMethod = "KEYSTONE";
 	
-	@Value("${transfer.manager.multipart-upload-threshold-mb:3072}")
-	private long multipartUploadThreshold;
+	private long multipartUploadThreshold = 3072;
 	
-	@Value("${transfer.manager.minimum-upload-part-size-mb:100}")
-	private long minUploadPartSize;
+	private long minUploadPartSize = 100;
 	
-	@Value("${retry-policy.condition.max-retries:3}")
-	private int maxRetries;
+	private int maxRetries = 3;
 	
-	@Value("${storage_retry_obs_max-retries:10}")
-	private int maxObsRetries;
+	private int maxObsRetries = 10;
 	
-	@Value("${retry-policy.backoff.base-delay-ms:1000}")
-	private int backoffBaseDelay;
+	private int backoffBaseDelay = 1000;
 	
-	@Value("${retry-policy.backoff.throttled-base-delay-ms:500 }")
-	private int backoffThrottledBaseDelay;
+	private int backoffThrottledBaseDelay = 500;
 	
-	@Value("${retry-policy.backoff.max-backoff-ms:20000}")
-	private int backoffMaxDelay;
+	private int backoffMaxDelay = 20000;
 	
-	@Value("${timeout-s.shutdown:10}")
-	private int timeoutShutdown;
+	private int timeoutShutdown = 10;
 	
-	@Value("${timeout-s.down-exec:15}")
-	private int timeoutDownExec;
+	private int timeoutDownExec = 15;
 	
-	@Value("${timeout-s.up-exec:20}")
-	private int timeoutUpExec;
+	private int timeoutUpExec = 20;
 	
-	@Value("${disable-chunked-encoding:false}")
-	private boolean disableChunkedEncoding;
+	private boolean disableChunkedEncoding = false;
 
-	@Value("${max-input-stream-buffer-size-mb:1024}")
-	private int maxInputStreamBufferSizeMb;
+	private int maxInputStreamBufferSizeMb = 1024;
 
-	@Value("${upload.cache.location:/tmp}")
-	private String uploadCacheLocation;
+	private String uploadCacheLocation = "/tmp";
 
 	private Map<ProductFamily, String> bucket = new HashMap<>();
 	

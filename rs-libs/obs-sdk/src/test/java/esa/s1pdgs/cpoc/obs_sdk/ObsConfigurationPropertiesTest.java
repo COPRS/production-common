@@ -5,13 +5,15 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {ObsConfigurationProperties.class})
+@EnableConfigurationProperties(value = ObsConfigurationProperties.class)
+@PropertySource({"classpath:obs-aws-s3.properties"})
 public class ObsConfigurationPropertiesTest {
 	
 	@Autowired
