@@ -14,6 +14,4 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY /target/rs-metadata-catalog-extraction-*.jar rs-metadata-catalog-extraction.jar
 COPY /config/start.sh start.sh
 
-RUN chown -R 1001 /app
-
 ENTRYPOINT ["/app/start.sh"]
