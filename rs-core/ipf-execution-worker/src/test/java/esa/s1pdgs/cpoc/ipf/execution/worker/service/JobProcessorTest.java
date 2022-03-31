@@ -206,7 +206,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         processor.cleanJobProcessing(inputMessage.getBody(), true, procExecutorSrv);
 
         verify(properties, times(1)).getTmProcStopS();
-        assertFalse(workingDir.exists());
+        assertTrue(workingDir.exists());
     }
 
     /**
@@ -276,7 +276,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         );
        
         // Check step 5
-        assertFalse(workingDir.exists());
+        assertTrue(workingDir.exists());
         // Check step 6
         // Check properties call
         verify(properties, times(1)).getTmProcAllTasksS();
@@ -307,7 +307,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         		Mockito.any()
         );
         // Check step 5
-        assertFalse(workingDir.exists());
+        assertTrue(workingDir.exists());
         // Check step 6
         // Check properties call
         verify(properties, times(1)).getTmProcAllTasksS();
@@ -334,7 +334,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         // Check step 4
         verify(outputProcessor, times(0)).processOutput(reporting, UUID.randomUUID(), new IpfExecutionJob());
         // Check step 5
-        assertFalse(workingDir.exists());
+        assertTrue(workingDir.exists());
         // Check step 6
         // Check properties call
         verify(properties, times(1)).getTmProcAllTasksS();

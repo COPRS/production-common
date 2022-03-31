@@ -2,7 +2,7 @@ Configuration:
   status: WARN
   name: YAMLConfigTest
   thresholdFilter:
-    level: DEBUG
+    level: {{ .Values.logLevel }}
   appenders:
     Console:
       - name: STDOUT

@@ -6,6 +6,7 @@ service:
   
 replicaCount: 1
 logLevel: ${logLevel:DEBUG}
+logConfig: ${logConfig:log/log4j2.yml}
 
 processing:
   namespace: processing
