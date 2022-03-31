@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ebip.client.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -159,7 +160,7 @@ public class EdipClientConfigurationProperties {
 	private String proxyHost;
 	private int proxyPort = 80;
 
-	private Map<String, EdipHostConfiguration> hostConfigs;
+	private Map<String, EdipHostConfiguration> hostConfigs = new HashMap<>();
 
 	public Map<String, EdipHostConfiguration> getHostConfigs() {
 		return hostConfigs;

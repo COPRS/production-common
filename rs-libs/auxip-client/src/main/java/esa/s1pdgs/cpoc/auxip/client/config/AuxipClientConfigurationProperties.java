@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.auxip.client.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -151,7 +152,7 @@ public class AuxipClientConfigurationProperties {
 	
 	private String proxy;
 
-	private Map<String, AuxipHostConfiguration> hostConfigs;
+	private Map<String, AuxipHostConfiguration> hostConfigs = new HashMap<>();
 	
 	// --------------------------------------------------------------------------
 	

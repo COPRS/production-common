@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.xbip.client.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -87,7 +88,7 @@ public class XbipClientConfigurationProperties {
 	private String proxyHost;
 	private int proxyPort = 80;
 
-	private Map<String, XbipHostConfiguration> hostConfigs;
+	private Map<String, XbipHostConfiguration> hostConfigs = new HashMap<>();
 
 	public Map<String, XbipHostConfiguration> getHostConfigs() {
 		return hostConfigs;
