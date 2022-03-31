@@ -11,7 +11,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY /target/s1pro-core-metadata-catalog-extraction-*.jar rs-metadata-catalog-extraction.jar
+COPY /target/rs-metadata-catalog-extraction-*.jar rs-metadata-catalog-extraction.jar
 COPY /config/start.sh start.sh
 
 RUN chown -R 1001 /app
