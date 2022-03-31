@@ -11,8 +11,6 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-RUN apk update && apk add p7zip
-
 COPY /target/s1pro-core-compression-trigger-*.jar s1pdgs-compression-trigger.jar
 COPY /config/start.sh start.sh
 
