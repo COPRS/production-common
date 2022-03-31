@@ -28,7 +28,7 @@ The following properties can be used in order to modify the application behaviou
 
 ***app.ingestion-filter.application.name***
 
-The name of the filter application that will be deployed. The name shall be descriptive to allow an easier identification, e.g. **coprs-ingestion-xbip-cgs01-filter** for a filter used in XBIP context.
+The name of the filter application that will be deployed. The name shall be descriptive to allow an easier identification, e.g. ``rs-ingestion-xbip-cgs01-filter`` for a filter used in XBIP context.
 
 ***app.ingestion-filter.process.hostname***
 
@@ -45,6 +45,7 @@ TBD: This configuration does seems to be used. Might be duplicate of trigger?
 Defines the ingestion filter criteria that will be applied on the job fired by the trigger. 
 
 ``mission_id`` must equal the mission id of the event to ensure that a specific mission filter.
+
 ``cron`` defines the interval when the product will be accepted and continued to be processed. It is expressed as a [Spring Cron Expression](https://spring.io/blog/2020/11/10/new-in-spring-5-3-improved-cron-expressions).
 
 e.g. to define a filter for Sentinel-3 that will be accepting all products on Wednesday between 0 and 8 o'clock, the property needs to be set as:
