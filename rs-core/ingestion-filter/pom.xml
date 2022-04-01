@@ -7,10 +7,10 @@
 		<artifactId>s1pro-core</artifactId>
 		<version>3.32.1</version>
 	</parent>
-	<artifactId>s1pro-core-ingestion-filter</artifactId>
+	<artifactId>rs-ingestion-filter</artifactId>
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-ingestion-filter</project.build.finalName>
+		<project.build.finalName>rs-ingestion-filter</project.build.finalName>
 		<start-class>esa.s1pdgs.cpoc.ingestion.filter.Application</start-class>
 	</properties>
 

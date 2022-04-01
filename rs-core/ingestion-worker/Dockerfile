@@ -11,7 +11,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY /target/s1pro-core-ingestion-worker-*.jar s1pdgs-ingestion-worker.jar
+COPY /target/rs-ingestion-worker-*.jar rs-ingestion-worker.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT ["/app/start.sh"]

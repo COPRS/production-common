@@ -7,10 +7,10 @@
 		<artifactId>s1pro-core</artifactId>
 		<version>3.32.1</version>
 	</parent>
-	<artifactId>s1pro-core-ingestion-trigger</artifactId>
+	<artifactId>rs-ingestion-trigger</artifactId>
 	<properties>
-		<project.build.finalName>s1pdgs-ingestion-trigger</project.build.finalName>
-		<project.artifactId>s1pdgs-ingestion-trigger</project.artifactId>
+		<project.build.finalName>rs-ingestion-trigger</project.build.finalName>
+		<project.artifactId>rs-ingestion-trigger</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.ingestion.trigger.Application</start-class>
 		<java.version>11</java.version>
 	</properties>
