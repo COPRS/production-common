@@ -4,9 +4,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	  <groupId>de.werum.s1pdgs</groupId>
-	  <artifactId>s1pro-core</artifactId>
-	  <version>3.32.1</version>
+		<groupId>de.werum.s1pdgs</groupId>
+		<artifactId>s1pro-core</artifactId>
+		<version>3.32.1</version>
 	</parent>
 
 	<artifactId>s1pro-core-archives</artifactId>
@@ -21,7 +21,7 @@
 		<project.artifactId>s1pdgs-archives-app</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.archives.Application</start-class>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -70,7 +70,7 @@
 
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>			
+			<artifactId>spring-kafka</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
@@ -89,12 +89,17 @@
 		</dependency>
 
 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-obs-sdk</artifactId>
 			<version>${project.version}</version>
 			<classifier>tests</classifier>
-      		<type>test-jar</type>
-      		<scope>test</scope>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
