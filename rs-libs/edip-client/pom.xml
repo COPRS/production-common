@@ -33,10 +33,10 @@
         <version>${httpcomponents.version}</version>
      </dependency>
      <dependency>
-		<groupId>junit</groupId>
-		<artifactId>junit</artifactId>
+	    <groupId>org.junit.vintage</groupId>
+	    <artifactId>junit-vintage-engine</artifactId>
 		<scope>test</scope>
-	</dependency>
+	 </dependency>
      <dependency>
 		<groupId>org.apache.ftpserver</groupId>
 		<artifactId>ftpserver</artifactId>
@@ -57,11 +57,6 @@
 				<artifactId>log4j</artifactId>
 			</exclusion>
 		</exclusions>
-	</dependency>
-	<dependency>
-		<groupId>junit</groupId>
-		<artifactId>junit</artifactId>
-		<scope>test</scope>
 	</dependency>
   </dependencies>
   
