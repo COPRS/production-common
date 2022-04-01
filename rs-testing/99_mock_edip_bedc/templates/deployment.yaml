@@ -98,12 +98,6 @@ spec:
 #        - name: ftp_pasv_max_port
 #          value: "47409"
         envFrom:
-        - configMapRef:
-            name: s1pdgs-config
-        - configMapRef:
-            name: s1pdgs-logging-config
-        - configMapRef:
-            name: s1pdgs-env
         livenessProbe:
           tcpSocket:
             port: 21
