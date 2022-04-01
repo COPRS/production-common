@@ -10,7 +10,6 @@ import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.compression.worker.status.AppStatusImpl;
-import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 /**
  * Test class with properties mocked
@@ -35,12 +34,6 @@ public class MockPropertiesTest {
      */
     @Mock
     protected AppStatusImpl appStatus;
-
-    /**
-     * MQI service for stopping the MQI
-     */
-    @Mock
-    protected StatusService mqiStatusService;
 
     /**
      * Default mock of application properties
@@ -96,7 +89,6 @@ public class MockPropertiesTest {
      * @throws AbstractCodedException
      */
     protected void mockDefaultStatus() throws AbstractCodedException {
-        doNothing().when(mqiStatusService).stop();
         mockStatus((new Status(3, 30)), false);
     }
 

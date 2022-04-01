@@ -14,7 +14,8 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 
 public class CompressExecutorCallable implements Callable<Void> {
 
@@ -25,7 +26,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	
 	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
 
-	private CompressionJob job;
+	private CatalogEvent catalogEvent;
 
 	
 	/**
@@ -40,8 +41,8 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final CompressionJob job, final ApplicationProperties properties) {
-		this.job = job;
+	public CompressExecutorCallable(final CatalogEvent catalogEvent, final ApplicationProperties properties) {
+		this.catalogEvent = catalogEvent;
 		this.properties = properties;
 	}
 
@@ -52,13 +53,15 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 */
 	@Override
 	public Void call() throws AbstractCodedException {
-		
-		String command = determineCommand();
-		
-		LOGGER.debug("command={}, productName={}, workingDirectory={}", command, job.getKeyObjectStorage(), properties.getWorkingDirectory());
-		/*completionSrv.submit(new TaskCallable(properties.getCommand(), job.getProductName(),
-				properties.getWorkingDirectory(), reporting));*/
-		execute(command, job.getKeyObjectStorage(), job.getOutputKeyObjectStorage(), properties.getWorkingDirectory()+"/"+job.getOutputKeyObjectStorage());
+
+		String command = properties.getCompressionCommand();
+
+		LOGGER.debug("command={}, productName={}, workingDirectory={}", command, catalogEvent.getKeyObjectStorage(),
+				properties.getWorkingDirectory());
+
+		String outputPath = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
+		execute(command, catalogEvent.getKeyObjectStorage(), outputPath,
+				properties.getWorkingDirectory() + "/" + outputPath);
 
 		return null;
 	}
@@ -115,14 +118,4 @@ public class CompressExecutorCallable implements Callable<Void> {
         return new TaskResult(binaryPath, r);
     }
 	
-	private String determineCommand() throws InternalErrorException {
-		switch (job.getCompressionDirection()) {
-		case COMPRESS:
-			return properties.getCompressionCommand();
-		case UNCOMPRESS:
-			return properties.getUncompressionCommand();
-		default:
-			throw new InternalErrorException("CompressionDirecton not allowed: " + properties.getCompressionCommand());
-		}
-	}
 }
