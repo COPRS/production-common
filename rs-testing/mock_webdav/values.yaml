@@ -23,5 +23,6 @@ worker:
 
 mock:
   webdav_path: /var/lib/dav
-  webdav_structure: "{NOMINAL/MTI_/{S1A,S1B},RETRANSFER/MTI_/{S1A,S1B}}" 
+  webdav_mission: S1
+  webdav_station: MTI_ 
   
