@@ -2,7 +2,6 @@
 
 ## General
 
-**TODO** Add image
 ![overview](./media/overview.png "Overview")
 
 The RS Core Ingestion component is able to pull data from a source into the COPRS. Supported interfaces that can be used are AUXIP, EDIP and XBIP interfaces
