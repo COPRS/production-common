@@ -16,7 +16,7 @@ USER root
 RUN apt-get update && apt-get install p7zip
 USER 1001
 
-COPY /target/s1pro-core-compression-worker-*.jar s1pdgs-compression-worker.jar
+COPY /target/rs-compression-worker-*.jar rs-compression-worker.jar
 COPY /config/start.sh start.sh
 COPY /config/compression.sh compression.sh
 COPY /config/uncompression.sh uncompression.sh
