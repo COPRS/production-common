@@ -14,6 +14,8 @@ image:
   name: rs-core-mock-webdav
   tag: develop
   
+  imagePullSecrets: artifactory
+  
 worker:
   label:
     key: node-role.kubernetes.io/worker
