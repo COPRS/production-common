@@ -27,7 +27,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
+import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.compression.worker.file.FileDownloader;
 import esa.s1pdgs.cpoc.compression.worker.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.worker.process.CompressExecutorCallable;
@@ -47,14 +47,14 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class CompressProcessor implements Function<CatalogEvent, Message<CompressionEvent>> {
 	private static final Logger LOGGER = LogManager.getLogger(CompressProcessor.class);
 
-	private final ApplicationProperties properties;
+	private final CompressionWorkerConfigurationProperties properties;
 	private final AppStatus appStatus;
 	private final ObsClient obsClient;
 
 	@Autowired
 	public CompressProcessor(
 			final AppStatus appStatus, 
-			final ApplicationProperties properties,
+			final CompressionWorkerConfigurationProperties properties,
 			final ObsClient obsClient
 	) {
 		this.appStatus = appStatus;

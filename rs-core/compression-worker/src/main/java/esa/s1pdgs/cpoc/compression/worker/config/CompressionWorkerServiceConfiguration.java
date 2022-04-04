@@ -20,7 +20,7 @@ public class CompressionWorkerServiceConfiguration {
 	private AppStatus appStatus;
 	
 	@Autowired
-	private ApplicationProperties properties;
+	private CompressionWorkerConfigurationProperties properties;
 	
 	@Autowired
 	private ObsClient obsClient;

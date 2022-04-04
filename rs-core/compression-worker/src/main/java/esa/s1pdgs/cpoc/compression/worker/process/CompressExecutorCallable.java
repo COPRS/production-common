@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
+import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 
@@ -32,7 +32,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 	/**
 	 * Application properties
 	 */
-	private final ApplicationProperties properties;
+	private final CompressionWorkerConfigurationProperties properties;
 
 	/**
 	 * Will create one PoolProcessor per pool
@@ -41,14 +41,14 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final CatalogEvent catalogEvent, final ApplicationProperties properties) {
+	public CompressExecutorCallable(final CatalogEvent catalogEvent, final CompressionWorkerConfigurationProperties properties) {
 		this.catalogEvent = catalogEvent;
 		this.properties = properties;
 	}
 
 	/**
 	 * Process execution: <br/>
-	 * - Wait for being active (see {@link ApplicationProperties} wap fields) <br/>
+	 * - Wait for being active (see {@link CompressionWorkerConfigurationProperties} wap fields) <br/>
 	 * - For each pool, launch in parallel the tasks executions
 	 */
 	@Override

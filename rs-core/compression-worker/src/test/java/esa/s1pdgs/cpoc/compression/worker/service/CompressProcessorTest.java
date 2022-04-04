@@ -14,7 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
+import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
@@ -33,11 +33,12 @@ public class CompressProcessorTest {
 	@Before
 	public void init() throws IOException {
 		MockitoAnnotations.initMocks(this);
-		ApplicationProperties properties = new ApplicationProperties();
-		tmpWorkdir = Files.createTempDirectory("workdir");
+		CompressionWorkerConfigurationProperties properties = new CompressionWorkerConfigurationProperties();
+		tmpWorkdir = Files.createTempDirectory("compressprocessortest");
 		properties.setWorkingDirectory(tmpWorkdir.toAbsolutePath().toString());
 		properties.setSizeBatchDownload(1000);
 		properties.setTmProcAllTasksS(5);
+		properties.setCompressionCommand("echo");
 		uut = new CompressProcessor(appStatus, properties, obsClient);
 	}
 
