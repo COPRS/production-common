@@ -1,13 +1,14 @@
 package esa.s1pdgs.cpoc.compression.worker.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 @Configuration
-@EnableConfigurationProperties
+@Validated
 @ConfigurationProperties(prefix = "compression-worker")
-public class ApplicationProperties {
+public class CompressionWorkerConfigurationProperties {
 	/**
 	 * The command that is performed to invoke the compression process
 	 */

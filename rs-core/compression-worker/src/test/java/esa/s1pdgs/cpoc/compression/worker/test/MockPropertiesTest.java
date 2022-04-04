@@ -8,7 +8,7 @@ import org.mockito.Mockito;
 
 import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
+import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.compression.worker.status.AppStatusImpl;
 
 /**
@@ -27,7 +27,7 @@ public class MockPropertiesTest {
      * Application properties
      */
     @Mock
-    protected ApplicationProperties properties;
+    protected CompressionWorkerConfigurationProperties properties;
 
     /**
      * Application status
