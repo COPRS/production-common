@@ -8,12 +8,11 @@
 		<artifactId>s1pro-core</artifactId>
 		<version>3.32.1</version>
 	</parent>
-	<artifactId>s1pro-core-compression-worker</artifactId>
+	<artifactId>rs-compression-worker</artifactId>
 
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-compression-worker-app</project.build.finalName>
-		<project.artifactId>s1pdgs-compression-worker-app</project.artifactId>
+		<project.build.finalName>rs-compression-worker</project.build.finalName>
 		<start-class>esa.s1pdgs.cpoc.compression.worker.Application</start-class>
 	</properties>
 
