@@ -15,7 +15,7 @@ env:
   CHART_FOLDER: rs-testing
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
   ARTIFACTORY_PROJECT: rs-helm
-  ARTIFACTORY_SUB_PROJECT: processing
+  ARTIFACTORY_SUB_PROJECT: testing
 
 jobs:
 

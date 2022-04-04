@@ -17,7 +17,7 @@ image:
 worker:
   label:
     key: node-role.kubernetes.io/worker
-    value: infra
+    value: infra 
 
 mock:
   webdav_path: /var/lib/dav
