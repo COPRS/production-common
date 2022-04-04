@@ -1,11 +1,10 @@
 package esa.s1pdgs.cpoc.compression.worker.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-@Configuration
+@Component
 @Validated
 @ConfigurationProperties(prefix = "compression-worker")
 public class CompressionWorkerConfigurationProperties {
@@ -13,8 +12,6 @@ public class CompressionWorkerConfigurationProperties {
 	 * The command that is performed to invoke the compression process
 	 */
 	private String compressionCommand;
-	
-	private String uncompressionCommand;
 	
 	private String workingDirectory;
 	
@@ -66,14 +63,6 @@ public class CompressionWorkerConfigurationProperties {
 
 	public void setCompressionCommand(String compressionCommand) {
 		this.compressionCommand = compressionCommand;
-	}
-
-	public String getUncompressionCommand() {
-		return uncompressionCommand;
-	}
-
-	public void setUncompressionCommand(String uncompressionCommand) {
-		this.uncompressionCommand = uncompressionCommand;
 	}
 
 	public String getWorkingDirectory() {
