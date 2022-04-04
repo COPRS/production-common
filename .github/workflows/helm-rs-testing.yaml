@@ -1,0 +1,82 @@
+name: Helm RS Testing CI
+
+on: 
+  push:
+    paths:
+      - 'rs-testing/**'
+      - '.github/workflows/helm-rs-testing.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
+  workflow_dispatch:
+  
+env:
+  CHART_FOLDER: rs-testing
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT: rs-testing
+  ARTIFACTORY_SUB_PROJECT: processing
+
+jobs:
+
+  helm-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.filter.outputs.changes }}
+    steps:
+    - name: Extract image tag name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+      id: extract_branch
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        base: ${{ steps.extract_branch.outputs.branch }}
+        filters: |
+          mock_webdav: '${{ env.CHART_FOLDER }}/mock_webdav/**'
+  
+  release:
+    needs: helm-changes    
+    if: ${{ needs.helm-changes.outputs.packages != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJSON(needs.helm-changes.outputs.packages) }}    
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        
+    - name: GitGuardian scan
+      uses: GitGuardian/gg-shield-action@master
+      env:
+        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+        
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.4.0
+        
+    - name: Lint helm
+      shell: bash
+      run: |
+        helm lint ${{ env.CHART_FOLDER }}/${{ matrix.component }}
+      
+    - name: Package helm
+      shell: bash
+      run: |
+        helm package ${{ env.CHART_FOLDER }}/${{ matrix.component }}
+          
+    - name: Push to Artifactory
+      shell: bash
+      run: |
+        curl -u "${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}" -T *.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_SUB_PROJECT }}/"
+          

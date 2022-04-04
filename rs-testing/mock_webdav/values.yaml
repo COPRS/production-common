@@ -1,0 +1,25 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+service:
+  port: 8080
+  
+processing:
+  namespace: processing
+
+image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  
+  name: rs-core-mock-webdav
+  tag: develop
+  
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
+
+mock:
+  webdav_path: /var/lib/dav
+  webdav_structure: "{NOMINAL/MTI_/{S1A, S1B}, RETRANSFER/MTI_/{S1A, S1B}}" 
+  

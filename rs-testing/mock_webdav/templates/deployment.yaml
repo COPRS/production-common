@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}
-  replicas: {{ .Values.replicaCount.mock_webdav_cgs01 }}
+  replicas: 1
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -42,16 +42,22 @@ spec:
           containerPort: 443        
         volumeMounts: 
         - name: webdavdatadir
-          mountPath: /var/lib/dav     
+          mountPath: {{ .Values.mock.webdav_path }}     
         env:
         - name: AUTH_TYPE
           value: "Basic"
         - name: SSL_CERT
-          value: "selfsigned"
+          value: "selfsigned"          
         - name: USERNAME
-          value: "xbip_werum"
-        - name: PASSWORD
-          value: "bWmMeluCz-1"       
+          valueFrom:
+            secretKeyRef:
+              name: mock
+              key: USERNAME
+        - name: USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mock
+              key: PASSWORD       
         livenessProbe:
           tcpSocket:
             port: 443
@@ -63,7 +69,7 @@ spec:
       initContainers:
       - name: init-dav
         image: busybox:1.35
-        command: ['sh', '-c', "mkdir -p /var/lib/dav/data/NOMINAL/MTI_/S1A /var/lib/dav/data/NOMINAL/MTI_/S1B /var/lib/dav/data/RETRANSFER/MTI_/S1A /var/lib/dav/data/RETRANSFER/MTI_/S1B && touch /var/lib/dav/DavLock && chown -R www-data:www-data /var/lib/dav" ]
+        command: ['sh', '-c', "mkdir -p {{ .Values.mock.webdav_path}}/{{ .Values.mock.webdav_structure }} && touch /var/lib/dav/DavLock && chown -R www-data:www-data /var/lib/dav" ]
         volumeMounts: 
         - name: webdavdatadir
           mountPath: /var/lib/dav        
