@@ -53,7 +53,7 @@ spec:
             secretKeyRef:
               name: mock
               key: USERNAME
-        - name: USERNAME
+        - name: PASSWORD
           valueFrom:
             secretKeyRef:
               name: mock

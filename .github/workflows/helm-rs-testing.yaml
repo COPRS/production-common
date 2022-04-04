@@ -35,6 +35,7 @@ jobs:
         base: ${{ steps.extract_branch.outputs.branch }}
         filters: |
           mock_webdav: '${{ env.CHART_FOLDER }}/mock_webdav/**'
+          mock_ftp: '${{ env.CHART_FOLDER }}/mock_ftp/**'
   
   release:
     needs: helm-changes    

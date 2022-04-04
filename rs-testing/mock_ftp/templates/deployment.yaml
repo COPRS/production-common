@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}
-  replicas: {{ .Values.replicaCount.mock_edip_bedc }}
+  replicas: 1
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -86,9 +86,15 @@ spec:
           mountPath: /etc/mockftp
         env:
         - name: ftp_user
-          value: "s1pdgs"
+          valueFrom:
+            secretKeyRef:
+              name: mock
+              key: USERNAME
         - name: ftp_pass
-          value: "PDG5!"
+          valueFrom:
+            secretKeyRef:
+              name: mock
+              key: PASSWORD 
         - name: ftp_dir
           value: "NOMINAL"
 #        - name: ftp_pasv_address

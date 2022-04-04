@@ -3,9 +3,23 @@
 
 service:
   port: 8080
+  
+processing:
+  namespace: processing
 
 image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  
   name: rs-core-mock-ftpserver
+  tag: develop
+  
+  imagePullSecrets: artifactory
+  
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
 
 ftp:
   cpu:
