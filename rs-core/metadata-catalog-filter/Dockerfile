@@ -11,7 +11,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY /target/s1pro-core-metadata-catalog-trigger-*.jar s1pdgs-core-metadata-catalog-trigger.jar
+COPY /target/rs-metadata-catalog-filter-*.jar rs-metadata-catalog-filter.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"
