@@ -5,7 +5,7 @@
 	<groupId>de.werum.s1pdgs</groupId>
 	<artifactId>s1pro-core</artifactId>
 	<version>3.32.1</version>
-	<packaging>pom</packaging> 
+	<packaging>pom</packaging>
 
 	<properties>
 		<java.version>11</java.version>
@@ -13,7 +13,7 @@
 
 		<!-- dependency version definitions -->
 		<spring.boot.version>2.6.6</spring.boot.version>
-		<spring-cloud.version>2020.0.3</spring-cloud.version>
+		<spring-cloud.version>2021.0.1</spring-cloud.version>
 
 		<kafka.version>2.5.0</kafka.version>
 
@@ -57,7 +57,7 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.8.0</version>
 					<configuration>
-						<release>11</release> 
+						<release>11</release>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -348,6 +348,18 @@
 				<artifactId>openapi-parser</artifactId>
 				<version>${openapi4j.version}</version>
 			</dependency>
+			<!-- TODO: Remove, when Spring Cloud got updated release -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-function-context</artifactId>
+				<version>3.2.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-function-core</artifactId>
+				<version>3.2.3</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
