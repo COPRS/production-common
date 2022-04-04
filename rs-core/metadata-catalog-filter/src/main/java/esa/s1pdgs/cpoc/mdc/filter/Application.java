@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.mdc.trigger;
+package esa.s1pdgs.cpoc.mdc.filter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
