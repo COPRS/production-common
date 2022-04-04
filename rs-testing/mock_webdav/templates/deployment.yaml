@@ -69,7 +69,7 @@ spec:
       initContainers:
       - name: init-dav
         image: busybox:1.35
-        command: ['sh', '-c', "mkdir -p {{ .Values.mock.webdav_path}}/{{ .Values.mock.webdav_structure }} && touch /var/lib/dav/DavLock && chown -R www-data:www-data /var/lib/dav" ]
+        command: ['bash', '-c', "mkdir -p {{ .Values.mock.webdav_path}}/{{ .Values.mock.webdav_structure }} && touch /var/lib/dav/DavLock && chown -R www-data:www-data /var/lib/dav" ]
         volumeMounts: 
         - name: webdavdatadir
           mountPath: /var/lib/dav        
