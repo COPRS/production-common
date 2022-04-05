@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [ingestion, compression] #todo
+        component: [ingestion, compression, metadata] #todo
 #        component: [ingestion, catalog, data-lifecycle, compression, prip, ddip]
     runs-on: ubuntu-latest
     steps:
