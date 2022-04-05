@@ -6,4 +6,5 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN useradd rsuser
 USER 1001
