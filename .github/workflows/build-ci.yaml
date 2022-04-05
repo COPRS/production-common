@@ -98,9 +98,6 @@ jobs:
       with:
         base: ${{ steps.extract_branch.outputs.branch }}
         filters: |
-          applicative-catalog: 
-            - 'rs-core/applicative-catalog/**'
-            - 'rs-core/pom.xml'
           archives: 
             - 'rs-core/archives/**'
             - 'rs-core/pom.xml'
@@ -118,9 +115,6 @@ jobs:
             - 'rs-core/pom.xml'
           ddip-frontend: 
             - 'rs-core/ddip-frontend/**'
-            - 'rs-core/pom.xml'
-          directory-cleaner: 
-            - 'rs-core/directory-cleaner/**'
             - 'rs-core/pom.xml'
           dissemination-trigger: 
             - 'rs-core/dissemination-trigger/**'
@@ -161,9 +155,6 @@ jobs:
           metadata-catalog-searchcontroller: 
             - 'rs-core/metadata-catalog-searchcontroller/**'
             - 'rs-core/pom.xml'
-          mqi-server: 
-            - 'rs-core/mqi-server/**'
-            - 'rs-core/pom.xml'
           native-api: 
             - 'rs-core/native-api/**'
             - 'rs-core/pom.xml'
@@ -181,9 +172,6 @@ jobs:
             - 'rs-core/pom.xml'
           production-trigger: 
             - 'rs-core/production-trigger/**'
-            - 'rs-core/pom.xml'
-          queue-watcher: 
-            - 'rs-core/queue-watcher/**'
             - 'rs-core/pom.xml'
           request-repository: 
             - 'rs-core/request-repository/**'
