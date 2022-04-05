@@ -39,13 +39,10 @@ Defines the hostname of the compression worker. This is recommend to be set to $
 
 The local directory of the worker that shall be used as temporary working directory to perform the compression activity. This is set by default to ``/tmp/compression``
 
-**TBD**
+``app.compression-worker.compression-worker.compressionTimeout``
 
-app.compression-worker.compression-worker.fixed-delay-ms=200
-app.compression-worker.compression-worker.init-delay-poll-ms=5000
+The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging.
 
+``app.compression-worker.compression-worker.requestTimeout``
 
-app.compression-worker.compression-worker.tm-proc-one-task-s=600
-app.compression-worker.compression-worker.tm-proc-all-tasks-s=4500
-app.compression-worker.compression-worker.tm-proc-all-tasks-s=300
-app.compression-worker.compression-worker.tm-proc-check-stop-s=60
+The timeout of the overall request. If the request takes more seconds than configured, it is considered to be hanging.
