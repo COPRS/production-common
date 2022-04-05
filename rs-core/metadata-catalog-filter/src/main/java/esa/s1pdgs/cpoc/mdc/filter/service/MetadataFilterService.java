@@ -116,7 +116,8 @@ public class MetadataFilterService implements Function<AbstractMessage, CatalogJ
 					message.getClass().getSimpleName(), Arrays.asList(IngestionEvent.class.getSimpleName(),
 							ProductionEvent.class.getSimpleName(), CompressionEvent.class.getSimpleName())));
 		}
-
+		
+		LOG.info("Converted %s (%s) to CatalogJob", message.getUid(), message.getClass().getSimpleName());
 		return job;
 	}
 }
