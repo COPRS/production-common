@@ -25,7 +25,6 @@
 
 		<!-- jacoco.version>0.7.5.201505241946</jacoco.version -->
 		<jacoco.version>0.7.7.201606060606</jacoco.version>
-
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
 		<openapi4j.version>1.0.4</openapi4j.version>
