@@ -40,8 +40,6 @@ public class MockPropertiesTest {
      */
     protected void mockDefaultAppProperties() {
         mockTmAppProperties(1800, 600, 300, 60);
-        mockSizeAppProperties(20, 5);
-        mockWapAppProperties(12, 1);
     }
 
     /**
@@ -54,33 +52,8 @@ public class MockPropertiesTest {
      */
     protected void mockTmAppProperties(long tmProcAllTasksS,
             long tmProcOneTaskS, long tmProcStopS, long tmProcCheckStopS) {
-        doReturn(tmProcAllTasksS).when(properties).getTmProcAllTasksS();
-        doReturn(tmProcOneTaskS).when(properties).getTmProcOneTaskS();
-        doReturn(tmProcStopS).when(properties).getTmProcStopS();
-        doReturn(tmProcCheckStopS).when(properties).getTmProcCheckStopS();
-    }
-
-    /**
-     * Mock batch sizes of the application properties
-     * 
-     * @param sizeBatchUpload
-     * @param sizeBatchDownload
-     */
-    protected void mockSizeAppProperties(int sizeBatchUpload,
-            int sizeBatchDownload) {
-        doReturn(sizeBatchUpload).when(properties).getSizeBatchUpload();
-        doReturn(sizeBatchDownload).when(properties).getSizeBatchDownload();
-    }
-
-    /**
-     * Mock WAP of the application properties
-     * 
-     * @param wapNbMaxLoop
-     * @param wapTempoS
-     */
-    protected void mockWapAppProperties(int wapNbMaxLoop, long wapTempoS) {
-        doReturn(wapNbMaxLoop).when(properties).getWapNbMaxLoop();
-        doReturn(wapTempoS).when(properties).getWapTempoS();
+        doReturn(tmProcAllTasksS).when(properties).getCompressionTimeout();
+        doReturn(tmProcStopS).when(properties).getRequestTimeout();
     }
 
     /**

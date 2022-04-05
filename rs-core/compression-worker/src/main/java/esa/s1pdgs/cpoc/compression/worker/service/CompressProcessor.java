@@ -79,8 +79,7 @@ public class CompressProcessor implements Function<CatalogEvent, Message<Compres
 		final FileDownloader fileDownloader = new FileDownloader(
 				obsClient, 
 				workDir, 
-				catalogEvent,
-				properties.getSizeBatchDownload()
+				catalogEvent
 		);
 		final FileUploader fileUploader = new FileUploader(obsClient, workDir, catalogEvent);	
 		report.begin(
@@ -101,7 +100,7 @@ public class CompressProcessor implements Function<CatalogEvent, Message<Compres
 					"Compressing inputs for " + catalogEvent,
 					fut,
 					procCompletionSrv, 
-					properties.getTmProcAllTasksS() * 1000L);
+					properties.getCompressionTimeout() * 1000L);
 
 			checkThreadInterrupted();
 			LOGGER.info("Uploading compressed outputs for {}", catalogEvent);
@@ -180,7 +179,7 @@ public class CompressProcessor implements Function<CatalogEvent, Message<Compres
 		}
 		// timeout scenario: 
 		catch (final InterruptedException e) {
-			final String errMess = String.format("%s: Timeout after %s seconds",  message, properties.getTmProcAllTasksS());
+			final String errMess = String.format("%s: Timeout after %s seconds",  message, properties.getCompressionTimeout());
 			
 			LOGGER.debug(errMess);
 			throw new InternalErrorException(errMess, e);
@@ -190,7 +189,7 @@ public class CompressProcessor implements Function<CatalogEvent, Message<Compres
 	private final void cleanCompressionProcessing(final CatalogEvent catalogEvent, final ExecutorService procExecutorSrv) {
 		procExecutorSrv.shutdownNow();
 		try {
-			procExecutorSrv.awaitTermination(properties.getTmProcStopS(), TimeUnit.SECONDS);
+			procExecutorSrv.awaitTermination(properties.getRequestTimeout(), TimeUnit.SECONDS);
 			// TODO send kill if fails
 		} catch (final InterruptedException e) {
 			// Conserves the interruption

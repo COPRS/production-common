@@ -16,44 +16,15 @@ public class CompressionWorkerConfigurationProperties {
 	private String workingDirectory;
 	
     /**
-     * Timeout (in seconds) for waiting end of several tasks
+     * Timeout (in seconds) of the compression job
      */
-    private long tmProcAllTasksS;
+    private long compressionTimeout;
 
     /**
-     * Timeout (in seconds) for waiting end of one task
+     * Timeout (in seconds) of the overall request
      */
-    private long tmProcOneTaskS;
+    private long requestTimeout;
 
-    /**
-     * Timeout (in seconds) for waiting ending processing in case of forced stop
-     */
-    private long tmProcStopS;
-
-    /**
-     * Timeout (in seconds) for waiting stop ok
-     */
-    private long tmProcCheckStopS;
-    
-    /**
-     * Maximal number of loop when waiting for inputs downloading
-     */
-    private int wapNbMaxLoop;
-    
-    /**
-     * Batch size for upload
-     */
-    private int sizeBatchUpload;
-
-    /**
-     * Batch size for download
-     */
-    private int sizeBatchDownload;
-
-    /**
-     * Tempo between two loops when waiting for inputs downloading
-     */
-    private long wapTempoS;
     
     private String hostname;
 
@@ -73,68 +44,20 @@ public class CompressionWorkerConfigurationProperties {
 		this.workingDirectory = workingDirectory;
 	}
 
-	public long getTmProcAllTasksS() {
-		return tmProcAllTasksS;
+	public long getCompressionTimeout() {
+		return compressionTimeout;
 	}
 
-	public void setTmProcAllTasksS(long tmProcAllTasksS) {
-		this.tmProcAllTasksS = tmProcAllTasksS;
+	public void setCompressionTimeout(long compressionTimeout) {
+		this.compressionTimeout = compressionTimeout;
 	}
 
-	public long getTmProcOneTaskS() {
-		return tmProcOneTaskS;
+	public long getRequestTimeout() {
+		return requestTimeout;
 	}
 
-	public void setTmProcOneTaskS(long tmProcOneTaskS) {
-		this.tmProcOneTaskS = tmProcOneTaskS;
-	}
-
-	public long getTmProcStopS() {
-		return tmProcStopS;
-	}
-
-	public void setTmProcStopS(long tmProcStopS) {
-		this.tmProcStopS = tmProcStopS;
-	}
-
-	public long getTmProcCheckStopS() {
-		return tmProcCheckStopS;
-	}
-
-	public void setTmProcCheckStopS(long tmProcCheckStopS) {
-		this.tmProcCheckStopS = tmProcCheckStopS;
-	}
-
-	public int getWapNbMaxLoop() {
-		return wapNbMaxLoop;
-	}
-
-	public void setWapNbMaxLoop(int wapNbMaxLoop) {
-		this.wapNbMaxLoop = wapNbMaxLoop;
-	}
-
-	public long getWapTempoS() {
-		return wapTempoS;
-	}
-
-	public void setWapTempoS(long wapTempoS) {
-		this.wapTempoS = wapTempoS;
-	}
-
-	public int getSizeBatchUpload() {
-		return sizeBatchUpload;
-	}
-
-	public void setSizeBatchUpload(int sizeBatchUpload) {
-		this.sizeBatchUpload = sizeBatchUpload;
-	}
-
-	public int getSizeBatchDownload() {
-		return sizeBatchDownload;
-	}
-
-	public void setSizeBatchDownload(int sizeBatchDownload) {
-		this.sizeBatchDownload = sizeBatchDownload;
+	public void setRequestTimeout(long requestTimeout) {
+		this.requestTimeout = requestTimeout;
 	}
 	
 	public String getHostname() {

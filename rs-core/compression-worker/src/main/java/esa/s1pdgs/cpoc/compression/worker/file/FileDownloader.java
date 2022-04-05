@@ -34,8 +34,7 @@ public class FileDownloader {
 	private final CatalogEvent catalogEvent;
 
 
-	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final CatalogEvent catalogEvent,
-			final int sizeDownBatch) {
+	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final CatalogEvent catalogEvent) {
 		this.obsClient = obsClient;
 		this.localWorkingDir = localWorkingDir;
 		this.catalogEvent = catalogEvent;

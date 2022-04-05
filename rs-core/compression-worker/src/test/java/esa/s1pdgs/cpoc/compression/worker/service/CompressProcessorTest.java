@@ -36,8 +36,8 @@ public class CompressProcessorTest {
 		CompressionWorkerConfigurationProperties properties = new CompressionWorkerConfigurationProperties();
 		tmpWorkdir = Files.createTempDirectory("compressprocessortest");
 		properties.setWorkingDirectory(tmpWorkdir.toAbsolutePath().toString());
-		properties.setSizeBatchDownload(1000);
-		properties.setTmProcAllTasksS(5);
+//		properties.setSizeBatchDownload(1000);
+		properties.setCompressionTimeout(5);
 		properties.setCompressionCommand("echo");
 		uut = new CompressProcessor(appStatus, properties, obsClient);
 	}
