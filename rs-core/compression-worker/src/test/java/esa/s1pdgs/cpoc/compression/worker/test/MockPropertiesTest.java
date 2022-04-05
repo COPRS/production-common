@@ -1,15 +1,10 @@
 package esa.s1pdgs.cpoc.compression.worker.test;
 
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
-import esa.s1pdgs.cpoc.appstatus.Status;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
-import esa.s1pdgs.cpoc.compression.worker.status.AppStatusImpl;
 
 /**
  * Test class with properties mocked
@@ -28,12 +23,6 @@ public class MockPropertiesTest {
      */
     @Mock
     protected CompressionWorkerConfigurationProperties properties;
-
-    /**
-     * Application status
-     */
-    @Mock
-    protected AppStatusImpl appStatus;
 
     /**
      * Default mock of application properties
@@ -56,32 +45,4 @@ public class MockPropertiesTest {
         doReturn(tmProcStopS).when(properties).getRequestTimeout();
     }
 
-    /**
-     * Mock default status
-     * 
-     * @throws AbstractCodedException
-     */
-    protected void mockDefaultStatus() throws AbstractCodedException {
-        mockStatus((new Status(3, 30)), false);
-    }
-
-    /**
-     * Mock status
-     * 
-     * @param state
-     * @param maxErrorCounter
-     * @param shallBeStopped
-     */
-    protected void mockStatus(final Status status, final boolean shallBeStopped) {
-
-        doNothing().when(appStatus).setWaiting();
-        doNothing().when(appStatus).setProcessing(Mockito.anyLong());
-        doNothing().when(appStatus).setStopping();
-        doNothing().when(appStatus).setError(Mockito.anyString());
-        doNothing().when(appStatus).setShallBeStopped(Mockito.anyBoolean());
-        doNothing().when(appStatus).forceStopping();
-
-        doReturn(status).when(appStatus).getStatus();
-        doReturn(shallBeStopped).when(appStatus).isShallBeStopped();
-    }
 }
