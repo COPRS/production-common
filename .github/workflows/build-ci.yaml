@@ -101,9 +101,6 @@ jobs:
           archives: 
             - 'rs-core/archives/**'
             - 'rs-core/pom.xml'
-          compression-trigger: 
-            - 'rs-core/compression-trigger/**'
-            - 'rs-core/pom.xml'
           compression-worker: 
             - 'rs-core/compression-worker/**'
             - 'rs-core/pom.xml'
