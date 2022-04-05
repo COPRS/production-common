@@ -78,7 +78,7 @@ spec:
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
-            path: /app/readiness
+            path: /actuator/health/readiness
             port: {{ .Values.service.port }}
           initialDelaySeconds: 30
           periodSeconds: 30
