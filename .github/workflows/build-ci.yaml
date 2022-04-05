@@ -161,8 +161,8 @@ jobs:
           prip-frontend: 
             - 'rs-core/prip-frontend/**'
             - 'rs-core/pom.xml'
-          prip-worker: 
-            - 'rs-core/prip-worker/**'
+          distribution-worker: 
+            - 'rs-core/distribution-worker/**'
             - 'rs-core/pom.xml'
           production-trigger: 
             - 'rs-core/production-trigger/**'
@@ -258,7 +258,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [archives, disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-filter, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, prip-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]           
+        component: [archives, disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-filter, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]           
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

@@ -7,15 +7,14 @@
 	  <artifactId>s1pro-core</artifactId>
 	  <version>3.32.1</version>
 	</parent>
-	<artifactId>s1pro-core-prip-worker</artifactId>
+	<artifactId>rs-distribution-worker</artifactId>
 	<packaging>jar</packaging>
 	
 	<description>S1PDGS Cloud POC - PRoduction Interface delivery Point (PRIP)</description>
 
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-prip-worker</project.build.finalName>
-		<project.artifactId>s1pdgs-prip-worker</project.artifactId>
+		<project.build.finalName>rs-distribution-worker</project.build.finalName>
 		<start-class>esa.s1pdgs.cpoc.prip.worker.Application</start-class>
 	</properties>
 
