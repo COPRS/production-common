@@ -382,7 +382,6 @@
 	</dependencyManagement>
 
 	<modules>
-		<module>applicative-catalog</module>
 		<module>archives</module>
 		<module>disseminator</module>
 		<module>ingestion-trigger</module>
@@ -392,14 +391,11 @@
 		<module>ipf-preparation-worker</module>
 		<module>ipf-execution-worker</module>
 		<module>request-repository</module>
-		<module>queue-watcher</module>
 		<module>on-demand-interface-provider</module>
 		<module>metadata-catalog-extraction</module>
 		<module>metadata-catalog-timer</module>
 		<module>metadata-catalog-filter</module>
 		<module>metadata-catalog-searchcontroller</module>
-		<module>mqi-server</module>
-		<module>prip-trigger</module>
 		<module>prip-worker</module>
 		<module>prip-frontend</module>
 		<module>ddip-frontend</module>
@@ -408,11 +404,9 @@
 		<module>data-request-worker</module>
 		<module>eviction-management-worker</module>
 		<module>validation</module>
-		<module>compression-trigger</module>
 		<module>compression-worker</module>
 		<module>dissemination-trigger</module>
 		<module>dissemination-worker</module>
-		<module>directory-cleaner</module>
 	</modules>
 
 </project>

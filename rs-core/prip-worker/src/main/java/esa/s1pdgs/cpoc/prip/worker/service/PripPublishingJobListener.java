@@ -8,17 +8,13 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,8 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import esa.s1pdgs.cpoc.appstatus.AppStatus;
-import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
@@ -36,19 +30,10 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
-import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.client.MqiListener;
-import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
-import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.NullMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
@@ -67,144 +52,106 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 @Service
-public class PripPublishingJobListener implements MqiListener<PripPublishingJob> {
+public class PripPublishingJobListener implements Consumer<CompressionEvent> {
 
 	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
 	
 	private static final String PATTERN_STR = "^S1[AB]_OPER_AUX_QCSTDB_.*$";
 	private static final Pattern PATTERN_NO_MDC = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
 
-	private final GenericMqiClient mqiClient;
-	private final List<MessageFilter> messageFilter;
 	private final ObsClient obsClient;
 	private final MetadataClient metadataClient;
-	private final long pollingIntervalMs;
-	private final long pollingInitialDelayMs;
 	private final String footprintIsLineStringCondition;
 	private final PripMetadataRepository pripMetadataRepo;
-	private final AppStatus appStatus;
 	private final ApplicationProperties props;
-	private final ErrorRepoAppender errorAppender;
 	private final MdcToPripMapper mdcToPripMapper;
 	
 	@Autowired
 	public PripPublishingJobListener(
-			final GenericMqiClient mqiClient,
-			final List<MessageFilter> messageFilter,
 			final ObsClient obsClient,
 			final MetadataClient metadataClient,
 			final PripMetadataRepository pripMetadataRepo,
-			@Value("${prip-worker.publishing-job-listener.polling-interval-ms}") final long pollingIntervalMs,
-			@Value("${prip-worker.publishing-job-listener.polling-initial-delay-ms}") final long pollingInitialDelayMs,
 			@Value("${prip-worker.metadata-mapping.footprint-is-linestring-regexp:}") final String footprintIsLineStringCondition,
-			final AppStatus appStatus,
 			final ApplicationProperties props,
 			final ErrorRepoAppender errorAppender
 	) {
-		this.mqiClient = mqiClient;
-		this.messageFilter = messageFilter;
 		this.obsClient = obsClient;
 		this.metadataClient = metadataClient;
 		this.pripMetadataRepo = pripMetadataRepo;
-		this.pollingIntervalMs = pollingIntervalMs;
-		this.pollingInitialDelayMs = pollingInitialDelayMs;
 		this.footprintIsLineStringCondition = footprintIsLineStringCondition;
-		this.appStatus = appStatus;
 		this.props = props;
-		this.errorAppender = errorAppender;
 		mdcToPripMapper = new MdcToPripMapper(props.getProductTypeRegexp(), props.getMetadataMapping());
 	}
 	
-	@PostConstruct
-	public void initService() {
-		if (pollingIntervalMs > 0) {
-			final ExecutorService service = Executors.newFixedThreadPool(1);
-			service.execute(new MqiConsumer<>(
-					mqiClient,
-					ProductCategory.PRIP_JOBS,
-					this,
-					messageFilter,
-					pollingIntervalMs,
-					pollingInitialDelayMs,
-					appStatus
-			));
-		}
-	}
-
+	
 	@Override
-	public MqiMessageEventHandler onMessage(final GenericMessageDto<PripPublishingJob> message) {
-		LOGGER.debug("starting saving PRIP metadata, got message: {}", message);
+	public void accept(CompressionEvent compressionEvent) {
+	
+		LOGGER.debug("starting saving PRIP metadata, got message: {}", compressionEvent);
 
-		final PripPublishingJob publishingJob = message.getBody();
 
 		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(MissionId.fromFileName(publishingJob.getKeyObjectStorage()))
-				.predecessor(publishingJob.getUid()).newReporting("PripWorker");
+				.newReportingBuilder(MissionId.fromFileName(compressionEvent.getKeyObjectStorage()))
+				.predecessor(compressionEvent.getUid()).newReporting("PripWorker");
 
-		final String name = removeZipSuffix(publishingJob.getKeyObjectStorage());
+		final String name = removeZipSuffix(compressionEvent.getKeyObjectStorage());
 
-		final ReportingInput in = PripReportingInput.newInstance(name, publishingJob.getProductFamily());
+		final ReportingInput in = PripReportingInput.newInstance(name, compressionEvent.getProductFamily());
 		reporting.begin(in, new ReportingMessage("Publishing file %s in PRIP", name));
 		
-		return new MqiMessageEventHandler.Builder<NullMessage>(ProductCategory.UNDEFINED)
-				.onSuccess(res -> reporting.end(
-						PripReportingOutput.newInstance(new Date()), 
-						new ReportingMessage("Finished publishing file %s in PRIP", name)
-				))
-				.onError(e -> {
-					final String errorMessage = String.format("Error on publishing file %s in PRIP: %s", name, LogUtils.toString(e));
-					reporting.error(new ReportingMessage(errorMessage));
-					LOGGER.error(errorMessage);
-					errorAppender.send(
-							new FailedProcessingDto(props.getHostname(), new Date(), errorMessage, message));
-
-				})
-				.publishMessageProducer(() -> {
-					createAndSave(publishingJob);
-		    		return new MqiPublishingJob<NullMessage>(Collections.emptyList());
-				})
-				.newResult();
+		try {
+			createAndSave(compressionEvent);
+		} catch (MetadataQueryException | InterruptedException | PripPublishingException e) {
+			final String errorMessage = String.format("Error on publishing file %s in PRIP: %s", name,
+					LogUtils.toString(e));
+			reporting.error(new ReportingMessage(errorMessage));
+			LOGGER.error(errorMessage);
+//					errorAppender.send(
+//							new FailedProcessingDto(props.getHostname(), new Date(), errorMessage, message));
+		}
+	
+		reporting.end(PripReportingOutput.newInstance(new Date()), new ReportingMessage("Finished publishing file %s in PRIP", name));
 	}
 
-	private final void createAndSave(final PripPublishingJob publishingJob) throws MetadataQueryException, InterruptedException, PripPublishingException {
+	private final void createAndSave(final CompressionEvent compressionEvent) throws MetadataQueryException, InterruptedException, PripPublishingException {
 		
-		if (pripMetadataAlreadyExists(publishingJob.getKeyObjectStorage())) {
-			throw new PripPublishingException(String.format("PRiP metadata for file %s already exists!", removeZipSuffix(publishingJob.getKeyObjectStorage())));
+		if (pripMetadataAlreadyExists(compressionEvent.getKeyObjectStorage())) {
+			throw new PripPublishingException(String.format("PRiP metadata for file %s already exists!", removeZipSuffix(compressionEvent.getKeyObjectStorage())));
 		}
 		
 		final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
 
 		PripMetadata pripMetadata = new PripMetadata();		
 		pripMetadata.setId(UUID.randomUUID());
-		pripMetadata.setObsKey(publishingJob.getKeyObjectStorage());
-		pripMetadata.setName(publishingJob.getKeyObjectStorage());
-		pripMetadata.setProductFamily(publishingJob.getProductFamily());
+		pripMetadata.setObsKey(compressionEvent.getKeyObjectStorage());
+		pripMetadata.setName(compressionEvent.getKeyObjectStorage());
+		pripMetadata.setProductFamily(compressionEvent.getProductFamily());
 		pripMetadata.setContentType(PripMetadata.DEFAULT_CONTENTTYPE);
 		pripMetadata.setContentLength(
-				getContentLength(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+				getContentLength(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage()));
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 		pripMetadata
-				.setChecksums(getChecksums(publishingJob.getProductFamily(), publishingJob.getKeyObjectStorage()));
+				.setChecksums(getChecksums(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage()));
 		
-		if(mdcQuery(publishingJob.getKeyObjectStorage())) {
+		if(mdcQuery(compressionEvent.getKeyObjectStorage())) {
 		
 			final SearchMetadata searchMetadata = queryMetadata(
-					publishingJob.getProductFamily(),
-					publishingJob.getKeyObjectStorage()
+					compressionEvent.getProductFamily(),
+					compressionEvent.getKeyObjectStorage()
 			);
 			
 			// ValidityStart: mandatory field, only optional when plan and report
-			if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStart())) {
+			if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(compressionEvent.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStart())) {
 				pripMetadata.setContentDateStart(DateUtils.parse(searchMetadata.getValidityStart()).truncatedTo(ChronoUnit.MILLIS));
 			}
 			
 			// ValidityStop: mandatory field, only optional when plan and report
-			if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(publishingJob.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStop())) {
+			if (! ProductFamily.PLAN_AND_REPORT_ZIP.equals(compressionEvent.getProductFamily()) || Strings.isNotEmpty(searchMetadata.getValidityStop())) {
 				pripMetadata.setContentDateEnd(DateUtils.parse(searchMetadata.getValidityStop()).truncatedTo(ChronoUnit.MILLIS));
 			}
 					
-			Map<String, Object> pripAttributes = mdcToPripMapper.map(publishingJob.getKeyObjectStorage(),
+			Map<String, Object> pripAttributes = mdcToPripMapper.map(compressionEvent.getKeyObjectStorage(),
 					searchMetadata.getProductType(), searchMetadata.getAdditionalProperties());		
 			pripMetadata.setAttributes(pripAttributes);
 			

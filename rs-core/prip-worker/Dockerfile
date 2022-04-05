@@ -14,4 +14,4 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY /target/s1pro-core-prip-worker-*.jar s1pdgs-prip-worker.jar
 COPY /config/start.sh start.sh
 
-ENTRYPOINT "/app/start.sh"
+ENTRYPOINT ["/app/start.sh"]
