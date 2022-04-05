@@ -7,4 +7,4 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN useradd rsuser
-USER 1001
+USER rsuser
