@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.messaging.Message;
 
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdc.filter.CatalogJobMapper;
@@ -19,7 +20,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
-public class MetadataFilterService implements Function<AbstractMessage, CatalogJob> {	
+public class MetadataFilterService implements Function<Message<?>, CatalogJob> {	
 	private static final CatalogJobMapper<IngestionEvent> INGESTION_MAPPER = new CatalogJobMapper<IngestionEvent>() {
 		@Override
 		public final CatalogJob toCatJob(final IngestionEvent event, final UUID reportingId) {
@@ -67,7 +68,8 @@ public class MetadataFilterService implements Function<AbstractMessage, CatalogJ
 	private static final Logger LOG = LogManager.getLogger(MetadataFilterService.class);
 
 	@Override
-	public CatalogJob apply(AbstractMessage message) {
+	public CatalogJob apply(Message<?> kafkaMessage) {
+		AbstractMessage message = (AbstractMessage) kafkaMessage.getPayload();
 		final String eventType = message.getClass().getSimpleName();
 		MissionId mission = null;
 
