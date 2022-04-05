@@ -20,7 +20,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -29,7 +28,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
-import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
@@ -42,7 +40,7 @@ import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
 import esa.s1pdgs.cpoc.prip.model.PripGeoCoordinate;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties;
+import esa.s1pdgs.cpoc.prip.worker.configuration.PripWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.prip.worker.mapping.MdcToPripMapper;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingInput;
 import esa.s1pdgs.cpoc.prip.worker.report.PripReportingOutput;
@@ -52,33 +50,29 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 @Service
-public class PripPublishingJobListener implements Consumer<CompressionEvent> {
+public class PripPublishingService implements Consumer<CompressionEvent> {
 
-	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
+	private static final Logger LOGGER = LogManager.getLogger(PripPublishingService.class);
 	
 	private static final String PATTERN_STR = "^S1[AB]_OPER_AUX_QCSTDB_.*$";
 	private static final Pattern PATTERN_NO_MDC = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
 
 	private final ObsClient obsClient;
 	private final MetadataClient metadataClient;
-	private final String footprintIsLineStringCondition;
 	private final PripMetadataRepository pripMetadataRepo;
-	private final ApplicationProperties props;
+	private final PripWorkerConfigurationProperties props;
 	private final MdcToPripMapper mdcToPripMapper;
 	
 	@Autowired
-	public PripPublishingJobListener(
+	public PripPublishingService(
 			final ObsClient obsClient,
 			final MetadataClient metadataClient,
 			final PripMetadataRepository pripMetadataRepo,
-			@Value("${prip-worker.metadata-mapping.footprint-is-linestring-regexp:}") final String footprintIsLineStringCondition,
-			final ApplicationProperties props,
-			final ErrorRepoAppender errorAppender
+			final PripWorkerConfigurationProperties props
 	) {
 		this.obsClient = obsClient;
 		this.metadataClient = metadataClient;
 		this.pripMetadataRepo = pripMetadataRepo;
-		this.footprintIsLineStringCondition = footprintIsLineStringCondition;
 		this.props = props;
 		mdcToPripMapper = new MdcToPripMapper(props.getProductTypeRegexp(), props.getMetadataMapping());
 	}
@@ -164,6 +158,7 @@ public class PripPublishingJobListener implements Consumer<CompressionEvent> {
 			}
 			if (!coordinates.isEmpty()) {
 				// Differentiate polygon and linestring!
+				String footprintIsLineStringCondition = props.getMetadataMapping().getFootprintIsLineStringRegexp();
 				boolean isLineString = pripMetadata.getName().matches(footprintIsLineStringCondition);
 				LOGGER.debug("Product '{}' matching '{}': {}", pripMetadata.getName(), footprintIsLineStringCondition, isLineString);
 				if (isLineString) {

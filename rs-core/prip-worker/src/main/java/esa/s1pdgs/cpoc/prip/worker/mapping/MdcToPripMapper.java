@@ -12,13 +12,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.MetadataMapping;
-import esa.s1pdgs.cpoc.prip.worker.configuration.ApplicationProperties.ProductTypeRegexp;
-import esa.s1pdgs.cpoc.prip.worker.service.PripPublishingJobListener;
+import esa.s1pdgs.cpoc.prip.worker.configuration.PripWorkerConfigurationProperties.MetadataMapping;
+import esa.s1pdgs.cpoc.prip.worker.configuration.PripWorkerConfigurationProperties.ProductTypeRegexp;
+import esa.s1pdgs.cpoc.prip.worker.service.PripPublishingService;
 
 public class MdcToPripMapper {	
 
-	private static final Logger LOGGER = LogManager.getLogger(PripPublishingJobListener.class);
+	private static final Logger LOGGER = LogManager.getLogger(PripPublishingService.class);
 	
 	private final Map<Pattern,Map<String,PripAttribute>> mappingConfiguration;
 
