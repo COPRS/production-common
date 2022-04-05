@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties("prip-worker")
-public class ApplicationProperties {
+public class PripWorkerConfigurationProperties {
 	
 	public static class ProductTypeRegexp {
 		private String l0Std = "^$a";
@@ -116,6 +116,7 @@ public class ApplicationProperties {
 		private Map<String, String> l2 = new LinkedHashMap<>();
 		private Map<String, String> auxSafe = new LinkedHashMap<>();
 		private Map<String, String> auxEof = new LinkedHashMap<>();
+		private String footprintIsLineStringRegexp;
 	
 		public Map<String, String> getL0Std() {
 			return l0Std;
@@ -195,6 +196,14 @@ public class ApplicationProperties {
 		
 		public void setAuxEof(Map<String, String> auxEof) {
 			this.auxEof = auxEof;
+		}
+
+		public String getFootprintIsLineStringRegexp() {
+			return footprintIsLineStringRegexp;
+		}
+
+		public void setFootprintIsLineStringRegexp(String footprintIsLineStringRegexp) {
+			this.footprintIsLineStringRegexp = footprintIsLineStringRegexp;
 		}		
 	}
 	
@@ -203,6 +212,8 @@ public class ApplicationProperties {
 	private long metadataUnavailableRetriesIntervalMs = 5000;
 	private ProductTypeRegexp productTypeRegexp = new ProductTypeRegexp();
 	private MetadataMapping metadataMapping = new MetadataMapping();
+	
+	
 
 	public int getMetadataUnavailableRetriesNumber() {
 		return metadataUnavailableRetriesNumber;
