@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
@@ -23,7 +22,7 @@ public class MetadataFilterServiceTest {
 		IngestionEvent event = new IngestionEvent(ProductFamily.AUXILIARY_FILE, "S1key", "path", 0, "S1", "station", null,
 				"NRT");
 		try {
-			uut.apply(MessageBuilder.withPayload(event).build());
+			uut.apply(event);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
 		}

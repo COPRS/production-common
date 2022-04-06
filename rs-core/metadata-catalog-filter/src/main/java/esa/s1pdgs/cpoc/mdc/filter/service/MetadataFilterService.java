@@ -1,12 +1,10 @@
 package esa.s1pdgs.cpoc.mdc.filter.service;
 
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.messaging.Message;
 
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdc.filter.CatalogJobMapper;
@@ -20,7 +18,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
-public class MetadataFilterService implements Function<Message<?>, CatalogJob> {
+public class MetadataFilterService implements Function<IngestionEvent, CatalogJob> {
 	private static final CatalogJobMapper<IngestionEvent> INGESTION_MAPPER = new CatalogJobMapper<IngestionEvent>() {
 		@Override
 		public final CatalogJob toCatJob(final IngestionEvent event, final UUID reportingId) {
@@ -68,8 +66,7 @@ public class MetadataFilterService implements Function<Message<?>, CatalogJob> {
 	private static final Logger LOG = LogManager.getLogger(MetadataFilterService.class);
 
 	@Override
-	public CatalogJob apply(Message<?> kafkaMessage) {
-		AbstractMessage message = convertPayload(kafkaMessage.getPayload());
+	public CatalogJob apply(IngestionEvent message) {
 		final String eventType = message.getClass().getSimpleName();
 
 		MissionId mission = null;
@@ -107,42 +104,9 @@ public class MetadataFilterService implements Function<Message<?>, CatalogJob> {
 
 	final CatalogJob newPublicationMessage(final Reporting reporting, final AbstractMessage message) {
 
-		CatalogJob job;
-		if (message instanceof IngestionEvent) {
-			job = INGESTION_MAPPER.toCatJob((IngestionEvent) message, reporting.getUid());
-		} else if (message instanceof ProductionEvent) {
-			job = PROD_MAPPER.toCatJob((ProductionEvent) message, reporting.getUid());
-		} else if (message instanceof CompressionEvent) {
-			job = COMPRESSION_MAPPER.toCatJob((CompressionEvent) message, reporting.getUid());
-		} else {
-			throw new IllegalArgumentException(String.format("Invalid message type %s. Available are %s",
-					message.getClass().getSimpleName(), Arrays.asList(IngestionEvent.class.getSimpleName(),
-							ProductionEvent.class.getSimpleName(), CompressionEvent.class.getSimpleName())));
-		}
+		CatalogJob job = INGESTION_MAPPER.toCatJob((IngestionEvent) message, reporting.getUid());
 
 		LOG.info("Converted %s (%s) to CatalogJob", message.getUid(), message.getClass().getSimpleName());
 		return job;
-	}
-
-	private AbstractMessage convertPayload(Object payload) {
-		try {
-			return (IngestionEvent) payload;
-		} catch (Exception e) {
-			// Do nothing
-		}
-		try {
-			return (ProductionEvent) payload;
-		} catch (Exception e) {
-			// Do nothing
-		}
-		try {
-			return (CompressionEvent) payload;
-		} catch (Exception e) {
-			// Do nothing
-		}
-		throw new IllegalArgumentException(
-				String.format("Could not convert received message into available message formats. Available are %s",
-						Arrays.asList(IngestionEvent.class.getSimpleName(), ProductionEvent.class.getSimpleName(),
-								CompressionEvent.class.getSimpleName())));
 	}
 }
