@@ -98,9 +98,6 @@ jobs:
       with:
         base: ${{ steps.extract_branch.outputs.branch }}
         filters: |
-          archives: 
-            - 'rs-core/archives/**'
-            - 'rs-core/pom.xml'
           compression-worker: 
             - 'rs-core/compression-worker/**'
             - 'rs-core/pom.xml'
