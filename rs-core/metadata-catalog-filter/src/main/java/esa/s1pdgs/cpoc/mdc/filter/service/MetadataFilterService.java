@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
-public class MetadataFilterService implements Function<Message<?>, CatalogJob> {	
+public class MetadataFilterService implements Function<Message<?>, CatalogJob> {
 	private static final CatalogJobMapper<IngestionEvent> INGESTION_MAPPER = new CatalogJobMapper<IngestionEvent>() {
 		@Override
 		public final CatalogJob toCatJob(final IngestionEvent event, final UUID reportingId) {
@@ -68,22 +68,10 @@ public class MetadataFilterService implements Function<Message<?>, CatalogJob> {
 	private static final Logger LOG = LogManager.getLogger(MetadataFilterService.class);
 
 	@Override
-	public CatalogJob apply(Message<?> kafkaMessage) {		
-		Object payload = kafkaMessage.getPayload();
-		final String eventType = payload.getClass().getSimpleName();
-		AbstractMessage message;
-		if (payload instanceof IngestionEvent) {
-			message = (IngestionEvent) payload;
-		} else if (payload instanceof ProductionEvent) {
-			message = (ProductionEvent) payload;
-		} else if (payload instanceof CompressionEvent) {
-			message = (CompressionEvent) payload;
-		} else {
-			throw new IllegalArgumentException(String.format("Invalid message type %s. Available are %s",
-					payload.getClass().getSimpleName(), Arrays.asList(IngestionEvent.class.getSimpleName(),
-							ProductionEvent.class.getSimpleName(), CompressionEvent.class.getSimpleName())));
-		}
-		
+	public CatalogJob apply(Message<?> kafkaMessage) {
+		AbstractMessage message = convertPayload(kafkaMessage.getPayload());
+		final String eventType = message.getClass().getSimpleName();
+
 		MissionId mission = null;
 
 		if (message.getProductFamily().isSessionFamily()) {
@@ -131,8 +119,30 @@ public class MetadataFilterService implements Function<Message<?>, CatalogJob> {
 					message.getClass().getSimpleName(), Arrays.asList(IngestionEvent.class.getSimpleName(),
 							ProductionEvent.class.getSimpleName(), CompressionEvent.class.getSimpleName())));
 		}
-		
+
 		LOG.info("Converted %s (%s) to CatalogJob", message.getUid(), message.getClass().getSimpleName());
 		return job;
+	}
+
+	private AbstractMessage convertPayload(Object payload) {
+		try {
+			return (IngestionEvent) payload;
+		} catch (Exception e) {
+			// Do nothing
+		}
+		try {
+			return (ProductionEvent) payload;
+		} catch (Exception e) {
+			// Do nothing
+		}
+		try {
+			return (CompressionEvent) payload;
+		} catch (Exception e) {
+			// Do nothing
+		}
+		throw new IllegalArgumentException(
+				String.format("Could not convert received message into available message formats. Available are %s",
+						Arrays.asList(IngestionEvent.class.getSimpleName(), ProductionEvent.class.getSimpleName(),
+								CompressionEvent.class.getSimpleName())));
 	}
 }
