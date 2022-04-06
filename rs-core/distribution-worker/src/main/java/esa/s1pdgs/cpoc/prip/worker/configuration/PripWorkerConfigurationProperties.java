@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties
-@ConfigurationProperties("prip-worker")
+@ConfigurationProperties("distribution-worker")
 public class PripWorkerConfigurationProperties {
 	
 	public static class ProductTypeRegexp {
