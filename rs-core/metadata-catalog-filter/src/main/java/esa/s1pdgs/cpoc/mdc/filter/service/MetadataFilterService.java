@@ -68,9 +68,22 @@ public class MetadataFilterService implements Function<Message<?>, CatalogJob> {
 	private static final Logger LOG = LogManager.getLogger(MetadataFilterService.class);
 
 	@Override
-	public CatalogJob apply(Message<?> kafkaMessage) {
-		AbstractMessage message = (AbstractMessage) kafkaMessage.getPayload();
-		final String eventType = message.getClass().getSimpleName();
+	public CatalogJob apply(Message<?> kafkaMessage) {		
+		Object payload = kafkaMessage.getPayload();
+		final String eventType = payload.getClass().getSimpleName();
+		AbstractMessage message;
+		if (payload instanceof IngestionEvent) {
+			message = (IngestionEvent) payload;
+		} else if (payload instanceof ProductionEvent) {
+			message = (ProductionEvent) payload;
+		} else if (payload instanceof CompressionEvent) {
+			message = (CompressionEvent) payload;
+		} else {
+			throw new IllegalArgumentException(String.format("Invalid message type %s. Available are %s",
+					payload.getClass().getSimpleName(), Arrays.asList(IngestionEvent.class.getSimpleName(),
+							ProductionEvent.class.getSimpleName(), CompressionEvent.class.getSimpleName())));
+		}
+		
 		MissionId mission = null;
 
 		if (message.getProductFamily().isSessionFamily()) {
