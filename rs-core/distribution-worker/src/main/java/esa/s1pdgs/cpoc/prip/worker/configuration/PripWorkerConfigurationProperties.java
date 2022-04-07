@@ -210,6 +210,8 @@ public class PripWorkerConfigurationProperties {
 	private String hostname;
 	private int metadataUnavailableRetriesNumber = 10;
 	private long metadataUnavailableRetriesIntervalMs = 5000;
+	private int metadataInsertionRetriesNumber = 3;
+	private long metadataInsertionRetriesIntervalMs = 1000;
 	private ProductTypeRegexp productTypeRegexp = new ProductTypeRegexp();
 	private MetadataMapping metadataMapping = new MetadataMapping();
 	
@@ -221,6 +223,22 @@ public class PripWorkerConfigurationProperties {
 	
 	public void setMetadataUnavailableRetriesNumber(final int metadataUnavailableRetriesNumber) {
 		this.metadataUnavailableRetriesNumber = metadataUnavailableRetriesNumber;
+	}
+	
+	public int getMetadataInsertionRetriesNumber() {
+		return metadataInsertionRetriesNumber;
+	}
+
+	public void setMetadataInsertionRetriesNumber(int metadataInsertionRetriesNumber) {
+		this.metadataInsertionRetriesNumber = metadataInsertionRetriesNumber;
+	}
+
+	public long getMetadataInsertionRetriesIntervalMs() {
+		return metadataInsertionRetriesIntervalMs;
+	}
+
+	public void setMetadataInsertionRetriesIntervalMs(long metadataInsertionRetriesIntervalMs) {
+		this.metadataInsertionRetriesIntervalMs = metadataInsertionRetriesIntervalMs;
 	}
 	
 	public long getMetadataUnavailableRetriesIntervalMs() {

@@ -171,7 +171,11 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 				}
 			}		
 		}
-		pripMetadataRepo.save(pripMetadata);
+		Retries.performWithRetries(() -> {
+			pripMetadataRepo.save(pripMetadata);
+			return null;
+		}, "saving prip metadata of " + compressionEvent.getKeyObjectStorage(), props.getMetadataInsertionRetriesNumber(),
+				props.getMetadataInsertionRetriesIntervalMs());
 
 		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
 	}
