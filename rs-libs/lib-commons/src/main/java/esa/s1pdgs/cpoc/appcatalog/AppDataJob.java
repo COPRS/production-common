@@ -120,7 +120,7 @@ public class AppDataJob {
 		final CatalogEvent event = mqiMessage.getBody();
 		final AppDataJobProduct productDto = new AppDataJobProduct();
 
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);
+		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(event);
 		productDto.getMetadata().put("productName", event.getProductName());
 		productDto.getMetadata().put("productType", event.getProductType());
 		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
