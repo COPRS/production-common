@@ -7,28 +7,27 @@ import org.apache.http.client.config.RequestConfig;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@EnableConfigurationProperties
 @Configuration
+@ConfigurationProperties(prefix = "elasticsearch")
 public class EsClientConfiguration {
 
-	@Value("${elasticsearch.host}")
-	private String esHost;
+	private String host;
 
-	@Value("${elasticsearch.port}")
-	private int esPort;
+	private int port;
 	
-	@Value("${elasticsearch.connect-timeout-ms}")
     private int connectTimeoutMs;
 	
-	@Value("${elasticsearch.socket-timeout-ms}")
     private int socketTimeoutMs;
 	
 	@Bean(destroyMethod = "close")
 	RestHighLevelClient restHighLevelClient() throws UnknownHostException {
-		HttpHost host1 = new HttpHost(esHost, esPort, "http");
+		HttpHost host1 = new HttpHost(host, port, "http");
 		RestClientBuilder builder = RestClient.builder(host1)
 		        .setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
             @Override

@@ -13,7 +13,6 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescript
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -31,11 +30,10 @@ public final class LevelSegmentMetadataExtractor extends AbstractMetadataExtract
 	}
 
 	@Override
-	public final JSONObject extract(final ReportingFactory reportingFactory, final GenericMessageDto<CatalogJob> message)
-			throws AbstractCodedException {
-        final CatalogJob job = message.getBody();    
+	public final JSONObject extract(final ReportingFactory reportingFactory, final CatalogJob job)
+			throws AbstractCodedException {   
         final String productName = job.getProductName();
-        final ProductFamily family = message.getBody().getProductFamily();
+        final ProductFamily family = job.getProductFamily();
         
         logger.debug("starting to download metadatafile for for product: {}", productName);        
         final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, family, job.getKeyObjectStorage());

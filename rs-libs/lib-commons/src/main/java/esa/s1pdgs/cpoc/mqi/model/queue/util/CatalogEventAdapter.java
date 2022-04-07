@@ -8,7 +8,6 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.MessageDto;
 
 public final class CatalogEventAdapter {
 	
@@ -26,8 +25,8 @@ public final class CatalogEventAdapter {
 		return new CatalogEventAdapter(mqiMessage.getBody());
 	}
 	
-	public static final CatalogEventAdapter of(final MessageDto<CatalogEvent> mqiMessage) {
-		return new CatalogEventAdapter(mqiMessage.getDto());
+	public static final CatalogEventAdapter of(final CatalogEvent catalogEvent) {
+		return new CatalogEventAdapter(catalogEvent);
 	}
 	
 	public final String productType() {

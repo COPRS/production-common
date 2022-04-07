@@ -14,7 +14,6 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescript
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -34,21 +33,21 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, GenericMessageDto<CatalogJob> message)
+	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob message)
 			throws AbstractCodedException {
 		JSONObject metadata = new JSONObject();		
-		metadata.put("productFamily", message.getBody().getProductFamily().name());
-		metadata.put("productName", message.getBody().getProductName());
-		metadata.put("productType", message.getBody().getProductFamily().name());
+		metadata.put("productFamily", message.getProductFamily().name());
+		metadata.put("productName", message.getProductName());
+		metadata.put("productType", message.getProductFamily().name());
 		
-		if (message.getBody().getCreationDate() != null) {
+		if (message.getCreationDate() != null) {
 			String formattedCreationDate = DateUtils.formatToMetadataDateTimeFormat(
-					message.getBody().getCreationDate().toInstant().atZone(ZoneId.of("UTC")).toLocalDateTime());
+					message.getCreationDate().toInstant().atZone(ZoneId.of("UTC")).toLocalDateTime());
 			metadata.put("insertionTime", formattedCreationDate);
 		}
-		metadata.put("url", message.getBody().getKeyObjectStorage());
+		metadata.put("url", message.getKeyObjectStorage());
 		
-		Matcher matcher = MISSION_ID_PATTERN.matcher(message.getBody().getProductName());
+		Matcher matcher = MISSION_ID_PATTERN.matcher(message.getProductName());
 		if (matcher.matches()) {
 			metadata.put(MissionId.FIELD_NAME, matcher.group(1));			
 		} else {

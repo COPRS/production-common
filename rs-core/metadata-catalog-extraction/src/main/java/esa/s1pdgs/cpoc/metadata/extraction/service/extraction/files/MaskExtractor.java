@@ -36,8 +36,7 @@ public class MaskExtractor {
 
 		String json = (String) xpath.evaluate("/Earth_Explorer_File/Data_Block", xml, XPathConstants.STRING);
 
-		StringReader reader = new StringReader(json);
-		JSONTokener tokener = new JSONTokener(reader);
+		JSONTokener tokener = new JSONTokener(json);
 		JSONObject root = new JSONObject(tokener);
 
 		JSONArray jsonArray = root.getJSONArray("features");

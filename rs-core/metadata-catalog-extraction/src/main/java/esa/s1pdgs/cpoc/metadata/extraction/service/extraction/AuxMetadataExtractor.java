@@ -20,42 +20,35 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MaskExtracto
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
-public final class AuxMetadataExtractor extends AbstractMetadataExtractor {	
+public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 	private static final List<String> AUX_ECE_TYPES = Arrays.asList("AMV_ERRMAT", "AMH_ERRMAT");
-	
-	public AuxMetadataExtractor(
-			final EsServices esServices, 
-			final MetadataBuilder mdBuilder,
-			final FileDescriptorBuilder fileDescriptorBuilder, 
-			final String localDirectory,
-			final ProcessConfiguration processConfiguration, 
-			final ObsClient obsClient) {
+
+	public AuxMetadataExtractor(final EsServices esServices, final MetadataBuilder mdBuilder,
+			final FileDescriptorBuilder fileDescriptorBuilder, final String localDirectory,
+			final ProcessConfiguration processConfiguration, final ObsClient obsClient) {
 		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
 	}
 
 	@Override
-	public JSONObject extract(final ReportingFactory reportingFactory, final GenericMessageDto<CatalogJob> message) throws AbstractCodedException {
-		final CatalogJob job = message.getBody();
-		final File metadataFile = downloadMetadataFileToLocalFolder(
-				reportingFactory,
-				ProductFamily.AUXILIARY_FILE, 
-				job.getKeyObjectStorage()
-		);
-		try {			
+	public JSONObject extract(final ReportingFactory reportingFactory, final CatalogJob job)
+			throws AbstractCodedException {
+		final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, ProductFamily.AUXILIARY_FILE,
+				job.getKeyObjectStorage());
+		try {
 			final AuxDescriptor configFileDesc = fileDescriptorBuilder.buildAuxDescriptor(metadataFile);
 
 			// Build metadata from file and extracted
 			final JSONObject obj = mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile);
 
 			/*
-			 * In case we are having a land mask file, we are uploading the geo shape information
-			 * to a dedicated elastic search index
+			 * In case we are having a land mask file, we are uploading the geo shape
+			 * information to a dedicated elastic search index
 			 */
-			// TODO: Having this logic in the Auxiliary Extract might not be the best place, maybe a new one for masks would be better
+			// TODO: Having this logic in the Auxiliary Extract might not be the best place,
+			// maybe a new one for masks would be better
 
 			try {
 				// the auxiliary file might be a mask file
@@ -80,12 +73,9 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 				// the auxiliary file is not a mask file
 			}
 			return obj;
-		}
-		finally
-		{
+		} finally {
 			FileUtils.delete(metadataFile.getPath());
 		}
-		
 
 	}
 }

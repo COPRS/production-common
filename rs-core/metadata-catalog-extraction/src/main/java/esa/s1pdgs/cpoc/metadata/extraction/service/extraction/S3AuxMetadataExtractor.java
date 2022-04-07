@@ -12,7 +12,6 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescript
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -29,9 +28,8 @@ public class S3AuxMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, GenericMessageDto<CatalogJob> message)
+	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob job)
 			throws AbstractCodedException {
-		final CatalogJob job = message.getBody();
 		final File metadataFile = downloadMetadataFileToLocalFolder(
 				reportingFactory,
 				job.getProductFamily(),

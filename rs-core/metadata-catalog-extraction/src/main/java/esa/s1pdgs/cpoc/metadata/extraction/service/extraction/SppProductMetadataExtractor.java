@@ -15,7 +15,6 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescript
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
@@ -30,10 +29,7 @@ public class SppProductMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, GenericMessageDto<CatalogJob> message)
-			throws AbstractCodedException {
-
-		final CatalogJob catJob = message.getBody();
+	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob catJob) throws AbstractCodedException {
 		return putMetadataToJSON(catJob.getProductName(), fileDescriptorBuilder.getPattern());
 	}
 
@@ -41,7 +37,7 @@ public class SppProductMetadataExtractor extends AbstractMetadataExtractor {
 			throws MetadataExtractionException {
 
 		JSONObject metadataJSON = new JSONObject();
-		
+
 		Matcher m = fileNamePattern.matcher(productName);
 
 		if (m.matches()) {
