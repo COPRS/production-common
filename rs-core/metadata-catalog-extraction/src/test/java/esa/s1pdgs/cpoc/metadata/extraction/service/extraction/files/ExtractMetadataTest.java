@@ -402,8 +402,8 @@ public class ExtractMetadataTest {
 
 			assertNotNull("JSON object should not be null", result);
 			assertEquals("JSON object are not equals", expectedResult.length(), result.length());
-			assertTrue("JSON object value validityStartTime are not equals", expectedResult.get("validityStartTime")
-					.toString().equals(result.get("validityStartTime").toString()));
+			assertTrue("JSON object value missionId are not equals", expectedResult.get("missionId")
+					.toString().equals(result.get("missionId").toString()));
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}

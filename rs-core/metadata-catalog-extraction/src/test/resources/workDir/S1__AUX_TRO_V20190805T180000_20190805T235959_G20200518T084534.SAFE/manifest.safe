@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xfdu:XFDU xmlns:safe="http://www.esa.int/safe/sentinel-1.0" xmlns:xfdu="http://www.w3.org/2001/XMLSchema-instance">
+  <informationPackageMap>
+    <xfdu:contentUnit dmdID="generalProductInformation" pdiID="processing" textInfo="SETAP Auxiliary TRO Product" unitType="SAFE Archive Information Package">
+      <xfdu:contentUnit unitType="Measurement Data Unit">
+        <dataObjectPointer dataObjectID="ECMWF_OPER_ML00_06H_129_GP_N640_20190805T180000"/>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit unitType="Measurement Data Unit">
+        <dataObjectPointer dataObjectID="ECMWF_OPER_ML00_06H_130_GP_N640_20190805T180000"/>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit unitType="Measurement Data Unit">
+        <dataObjectPointer dataObjectID="ECMWF_OPER_ML00_06H_133_GP_N640_20190805T180000"/>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit unitType="Measurement Data Unit">
+        <dataObjectPointer dataObjectID="ECMWF_OPER_ML00_06H_134_GP_N640_20190805T180000"/>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit unitType="Measurement Data Unit">
+        <dataObjectPointer dataObjectID="ECMWF_OPER_ML00_06H_151_GP_N640_20190805T180000"/>
+      </xfdu:contentUnit>
+    </xfdu:contentUnit>
+  </informationPackageMap>
+  <metadataSection>
+    <metadataObject ID="generalProductInformation" category="DMD" classification="DESCRIPTION">
+      <metadataWrap mimeType="text/xml" textInfo="General Product Information" vocabularyName="SAFE">
+        <xmlData>
+          <standAloneProductInformation>
+            <origin>ECMWF</origin>
+          </standAloneProductInformation>
+        </xmlData>
+      </metadataWrap>
+    </metadataObject>
+    <metadataObject ID="processing" category="PDI" classification="PROVENANCE">
+      <metadataWrap mimeType="text/xml" textInfo="Processing" vocabularyName="SAFE">
+        <xmlData>
+          <safe:processing name="AUX_TRO Generation" start="2020-05-18-T08:45:34.000000" stop="2020-05-18-T08:45:34.000000">
+            <safe:facility country="Germany" name="MF-SAR" organisation="DLR" site="Remote Sensing Technology Institute - MF-SAR">
+              <safe:software name="Get_TRO_SAFE" version="001.00"/>
+            </safe:facility>
+          </safe:processing>
+        </xmlData>
+      </metadataWrap>
+    </metadataObject>
+  </metadataSection>
+  <dataObjectSection>
+    <dataObject ID="ECMWF_OPER_ML00_06H_129_GP_N640_20190805T180000">
+      <byteStream mimeType="text/xml" size="12968500">
+        <fileLocation href="./data/ECMWF_OPER_ML00_06H_129_GP_N640_20190805T180000" locatorType="URL"/>
+        <checksum checksumName="MD5">ccf8897ed28245fb1511b932b95fe763</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ECMWF_OPER_ML00_06H_130_GP_N640_20190805T180000">
+      <byteStream mimeType="text/xml" size="1776684500">
+        <fileLocation href="./data/ECMWF_OPER_ML00_06H_130_GP_N640_20190805T180000" locatorType="URL"/>
+        <checksum checksumName="MD5">df3225c224b07903165a2558f8bbf633</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ECMWF_OPER_ML00_06H_133_GP_N640_20190805T180000">
+      <byteStream mimeType="text/xml" size="1776684500">
+        <fileLocation href="./data/ECMWF_OPER_ML00_06H_133_GP_N640_20190805T180000" locatorType="URL"/>
+        <checksum checksumName="MD5">5513f4c13ac4c80e22b44365d8f15d01</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ECMWF_OPER_ML00_06H_134_GP_N640_20190805T180000">
+      <byteStream mimeType="text/xml" size="12967308">
+        <fileLocation href="./data/ECMWF_OPER_ML00_06H_134_GP_N640_20190805T180000" locatorType="URL"/>
+        <checksum checksumName="MD5">a4a94b0c10254c6e4080eea956c33f89</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ECMWF_OPER_ML00_06H_151_GP_N640_20190805T180000">
+      <byteStream mimeType="text/xml" size="12967308">
+        <fileLocation href="./data/ECMWF_OPER_ML00_06H_151_GP_N640_20190805T180000" locatorType="URL"/>
+        <checksum checksumName="MD5">bbfc77a0fe76e262bdbf658e4a557e56</checksum>
+      </byteStream>
+    </dataObject>
+  </dataObjectSection>
+</xfdu:XFDU>

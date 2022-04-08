@@ -1,0 +1,39 @@
+<xfdu:XFDU xmlns:safe="http://www.esa.int/safe/sentinel-1.0" xmlns:xfdu="http://www.w3.org/2001/XMLSchema-instance">
+  <informationPackageMap>
+    <xfdu:contentUnit dmdID="generalProductInformation" pdiID="processing" textInfo="SETAP Auxiliary TEC Product" unitType="SAFE Archive Information Package">
+      <xfdu:contentUnit unitType="Measurement Data Unit">
+        <dataObjectPointer dataObjectID="codg217019i"/>
+      </xfdu:contentUnit>
+    </xfdu:contentUnit>
+  </informationPackageMap>
+  <metadataSection>
+    <metadataObject ID="generalProductInformation" category="DMD" classification="DESCRIPTION">
+      <metadataWrap mimeType="text/xml" textInfo="General Product Information" vocabularyName="SAFE">
+        <xmlData>
+          <standAloneProductInformation>
+            <origin>CODE</origin>
+          </standAloneProductInformation>
+        </xmlData>
+      </metadataWrap>
+    </metadataObject>
+    <metadataObject ID="processing" category="PDI" classification="PROVENANCE">
+      <metadataWrap mimeType="text/xml" textInfo="Processing" vocabularyName="SAFE">
+        <xmlData>
+          <safe:processing name="AUX_ITC Generation" start="2020-02-10T10:26:15.000000" stop="2020-02-10T10:26:15.000000">
+            <safe:facility country="Germany" name="MF-SAR" organisation="DLR" site="Remote Sensing Technology Institute - MF-SAR">
+              <safe:software name="Get_TEC_SAFE" version="001.00"/>
+            </safe:facility>
+          </safe:processing>
+        </xmlData>
+      </metadataWrap>
+    </metadataObject>
+  </metadataSection>
+  <dataObjectSection>
+    <dataObject ID="codg217019i">
+      <byteStream mimeType="text/xml" size="278967">
+        <fileLocation href="./data/codg2170.19i.Z" locatorType="URL"/>
+        <checksum checksumName="MD5">e5dc31c50fe7e777dcc0d23d992b6a07</checksum>
+      </byteStream>
+    </dataObject>
+  </dataObjectSection>
+</xfdu:XFDU>
