@@ -77,7 +77,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 	private final String getMetadataKeyObs(final String productKeyObs) {
 		for (String manifestExt : processConfiguration.getManifestFilenames().keySet()) {
 			if (productKeyObs.toLowerCase().endsWith(manifestExt)) {
-				// Replace string "<PRODUCTNAME>" with productkey (OBS-Key without extension)
+				// Replace string "[PRODUCTNAME]" with productkey (OBS-Key without extension)
 				int lastIndexOfPoint = productKeyObs.lastIndexOf(".");
 				String productKey = productKeyObs;
 				if (lastIndexOfPoint != -1) {
@@ -85,7 +85,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 				}
 				
 				String manifestFilename = processConfiguration.getManifestFilenames().get(manifestExt)
-						.replace("<PRODUCTNAME>", productKey);
+						.replace("[PRODUCTNAME]", productKey);
 
 				return productKeyObs + "/" + manifestFilename;
 			}
