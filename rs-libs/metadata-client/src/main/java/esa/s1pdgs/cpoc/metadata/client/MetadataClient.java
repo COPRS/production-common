@@ -15,12 +15,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.time.TimeInterval;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
@@ -260,6 +262,48 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
+	
+	/**
+	 * Extract the first product (based on insertionTime) of an start or stop orbit
+	 * 
+	 * @param productFamily productFamily of the product
+	 * @param productType   productType of the product
+	 * @param satelliteId   satelliteId of the product
+	 * @param orbit         orbit number
+	 * @return Products of the orbit
+	 * @throws MetadataQueryException
+	 */
+	public List<L0AcnMetadata> getL0AcnForStartOrStopOrbit(
+			final ProductFamily productFamily, 
+			final String productType,
+			final String satelliteId, 
+			final long orbit
+	) throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_ACN.path() + "/" + productType
+				+ "/startOrStopOrbit";
+
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productFamily", productFamily.toString())
+				.queryParam("satellite", satelliteId)
+				.queryParam("orbitNumber", orbit);
+
+		final ResponseEntity<List<L0AcnMetadata>> response = query(
+				builder.build().toUri(),
+				new ParameterizedTypeReference<List<L0AcnMetadata>>() {}
+		);
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.debug("Products of Start/Stop Orbit query for product type '{}' and orbit '{}' returned no results",
+					productType, orbit);
+			throw new MetadataQueryException(String
+						.format("Products of Start/Stop Orbit query for product type '%s' and orbit '%s' returned no results",
+								productType, orbit));
+		} else {
+			LOGGER.info("Products of Start/Stop Orbit query for product type '{}' and orbit '{}' returned {}", productType,
+					orbit, response.getBody());
+			return response.getBody();
+		}
+	}
 
 	/**
 	 */
@@ -302,21 +346,31 @@ public class MetadataClient {
 	 * Queries the products inside a given time interval for the given producttype.
 	 * The time interval is applied on the insertionTime
 	 */
-	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
-			final LocalDateTime intervalStart, final LocalDateTime intervalStop, final String satelliteId)
+	public List<SearchMetadata> searchInterval(
+			final ProductFamily productFamily, 
+			final String productType,
+			final LocalDateTime intervalStart, 
+			final LocalDateTime intervalStop, 
+			final String satelliteId
+	) 
 			throws MetadataQueryException {
+		
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
 				+ productFamily.toString() + "/searchTypeInterval";
 
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 				.queryParam("productType", productType)
 				.queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
-				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER))
-				.queryParam("satelliteId", satelliteId);
+				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
+		
+		if (!StringUtils.isEmpty(satelliteId)) {
+			builder.queryParam("satelliteId", satelliteId);
+		}		
 
-		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
-				new ParameterizedTypeReference<List<SearchMetadata>>() {
-				});
+		final ResponseEntity<List<SearchMetadata>> response = query(
+				builder.build().toUri(),
+				new ParameterizedTypeReference<List<SearchMetadata>>() {}
+		);
 
 		if (response == null || response.getBody() == null) {
 			LOGGER.debug("Metadata query for family '{}' returned no results", productFamily);
@@ -326,6 +380,60 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
+	
+	public List<SearchMetadata> getL1AcnProductsForDatatake(
+			final String productType,
+			final String datatakeId
+	) 	throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L1_ACN.path() + "/" + productType + "/"
+				+ "/" + datatakeId;
+		
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri);
+		
+		final ResponseEntity<List<SearchMetadata>> response = query(
+				builder.build().toUri(),
+				new ParameterizedTypeReference<List<SearchMetadata>>() {}
+		);
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.debug("L1ACN query for productType '{}' and datatake '{}' returned no results", productType, datatakeId);
+			return Collections.emptyList();
+		} else {
+			LOGGER.info("L1ACN query for productType '{}' and datatake '{}' returned {} results", productType, datatakeId,
+					numResults(response));
+			return response.getBody();
+		}
+		
+	}
+	
+	public List<SearchMetadata> query(
+			final ProductFamily family, 
+			final String productType,
+			final TimeInterval timeInterval
+	) 
+		throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family.toString()
+			+ "/query";
+		
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
+				.queryParam("productType", productType)
+				.queryParam("intervalStart", timeInterval.getStart().format(DateUtils.METADATA_DATE_FORMATTER))
+				.queryParam("intervalStop", timeInterval.getStop().format(DateUtils.METADATA_DATE_FORMATTER));
+		
+		final ResponseEntity<List<SearchMetadata>> response = query(
+				builder.build().toUri(),
+				new ParameterizedTypeReference<List<SearchMetadata>>() {}
+		);
+
+		if (response == null || response.getBody() == null) {
+			LOGGER.debug("Metadata query for family '{}' returned no results", family);
+			return Collections.emptyList();
+		} else {
+			LOGGER.info("Metadata query for family '{}' returned {} results", family, numResults(response));
+			return response.getBody();
+		}
+	}
+		
 
 	/**
 	 */
@@ -633,7 +741,7 @@ public class MetadataClient {
 	public <T> T performWithReindexOnNull(final Callable<T> command, final String productType,
 			final ProductFamily productFamily) throws MetadataQueryException {
 		try {
-			T result = command.call();
+			final T result = command.call();
 			if (result == null) {
 				LOGGER.info("Received result \"null\" but expected a result. Refresh index and try again.");
 				this.refreshIndex(productFamily, productType);
@@ -641,10 +749,10 @@ public class MetadataClient {
 			}
 
 			return result;
-		} catch (MetadataQueryException e) {
+		} catch (final MetadataQueryException e) {
 			// Just pipe the exception through
 			throw e;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new MetadataQueryException(
 					"Exception occured while executing metadata query with reindex on null result", e);
 		}
@@ -677,7 +785,7 @@ public class MetadataClient {
 			LOGGER.debug(commandDescription);
 			final ResponseEntity<T> response = restTemplate.exchange(uri, HttpMethod.GET, null, responseType);
 			handleReturnValueErrors(uri.toString(), response);
-			LOGGER.debug("Rest api metadata call returned result. URI: {}, RESPONSE: {},", uri, response.getBody());
+			LOGGER.debug("Rest api metadata call returned result. URI: {}, RESPONSE: {}", uri, response.getBody());
 			return response;
 		});
 	}

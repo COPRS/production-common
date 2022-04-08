@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mdc.worker.rest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.time.TimeInterval;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.mdc.worker.service.EsServices;
@@ -38,6 +40,35 @@ public class SearchMetadataController {
 	public SearchMetadataController(final EsServices esServices) {
 		this.esServices = esServices;
 	}
+	
+	
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productFamily}/query")
+	public ResponseEntity<List<SearchMetadata>> query(
+			@PathVariable(name = "productFamily") final String productFamily,
+			@RequestParam(name = "productType") final String productType,
+			@RequestParam(name = "intervalStart") final String intervalStart,
+			@RequestParam(name = "intervalStop") final String intervalStop) {
+		
+		LOGGER.info("Received query for family '{}' using productType {}, startTime '{}', stopTime '{}'", productFamily,
+				productType, intervalStart, intervalStop);
+				
+		try {
+			final List<SearchMetadata> results = esServices.query(
+					ProductFamily.valueOf(productFamily), 
+					productType,
+					new TimeInterval(DateUtils.parse(intervalStart), DateUtils.parse(intervalStop))
+			);
+			if (results == null) {
+				return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+			}
+			return new ResponseEntity<>(results, HttpStatus.OK);
+		}
+		catch (final Exception ex) {
+			LOGGER.error("Query error while doing query: {}", LogUtils.toString(ex));
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
 
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productFamily}/searchInterval")
 	public ResponseEntity<List<SearchMetadata>> searchTimeInterval(
@@ -154,11 +185,11 @@ public class SearchMetadataController {
 			final AuxMetadata auxMetadata = esServices.auxiliaryQuery(productType, productName);
 			return new ResponseEntity<>(auxMetadata, HttpStatus.OK);
 
-		} catch (MetadataNotPresentException e) {
+		} catch (final MetadataNotPresentException e) {
 			LOGGER.warn("{} '{}' of type {} not available [code {}] {}", this.getClass().getSimpleName(), productName,
 					productType, e.getCode().getCode(), e.getLogMessage());
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Query error while doing product name search: {}", LogUtils.toString(e));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}

@@ -56,6 +56,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
+import esa.s1pdgs.cpoc.common.time.TimeInterval;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
@@ -685,9 +686,17 @@ public class EsServices {
 
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
+		final String fieldNameStart = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStartTime" : "startTime";
+		final String fieldNameStop = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStopTime" : "stopTime";
+		final BoolQueryBuilder queryBuilder = ProductFamily.AUXILIARY_FILE.equals(productFamily) ?
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+		:
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
@@ -709,20 +718,20 @@ public class EsServices {
 					local.setProductType(source.get("productType").toString());
 					local.setKeyObjectStorage(source.get("url").toString());
 
-					if (source.containsKey("startTime")) {
+					if (source.containsKey(fieldNameStart)) {
 						try {
 							local.setValidityStart(
-									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+									DateUtils.convertToMetadataDateTimeFormat(source.get(fieldNameStart).toString()));
 						} catch (final DateTimeParseException e) {
-							throw new MetadataMalformedException("startTime");
+							throw new MetadataMalformedException(fieldNameStart);
 						}
 					}
-					if (source.containsKey("stopTime")) {
+					if (source.containsKey(fieldNameStop)) {
 						try {
 							local.setValidityStop(
-									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+									DateUtils.convertToMetadataDateTimeFormat(source.get(fieldNameStop).toString()));
 						} catch (final DateTimeParseException e) {
-							throw new MetadataMalformedException("stopTime");
+							throw new MetadataMalformedException(fieldNameStop);
 						}
 					}
 					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
@@ -1236,6 +1245,51 @@ public class EsServices {
 
 		return null;
 	}
+	
+	/**
+	 * Queries the elastic search for products of the given start or stop orbit number
+	 * 
+	 * @return list of matching products
+	 * @throws Exception if the search throws an error
+	 */
+	public List<L0AcnMetadata> getL0AcnForStartOrStopOrbit(
+			final ProductFamily productFamily, 
+			final String productType,
+			final String satelliteId, 
+			final long orbitNumber
+	) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(satelliteId(satelliteId))
+				.must(QueryBuilders.boolQuery()
+						.should(QueryBuilders.termQuery("absoluteStartOrbit", orbitNumber))
+						.should(QueryBuilders.termQuery("absoluteStopOrbit", orbitNumber))
+				);
+
+		LOGGER.debug("query composed is {}", queryBuilder);
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.sort("insertionTime", SortOrder.ASC);
+		sourceBuilder.size(SIZE_LIMIT);
+
+		final String index = productFamily.name().toLowerCase();
+		final SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.source(sourceBuilder);
+
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final List<L0AcnMetadata> r = new ArrayList<>();
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					r.add(extractInfoForL0ACN(hit.getSourceAsMap()));
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+		return Collections.emptyList();
+	}
 
 	public List<SearchMetadata> intervalQuery(final String startTime, final String stopTime,
 			final ProductFamily productFamily, final String productType) throws Exception {
@@ -1372,6 +1426,102 @@ public class EsServices {
 
 		return null;
 	}
+	public List<SearchMetadata> query(
+			final ProductFamily family,
+			final String productType, 
+			final TimeInterval timeInterval
+	) 
+		throws MetadataMalformedException {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();		
+		final String start = DateUtils.METADATA_DATE_FORMATTER.format(timeInterval.getStart());
+		final String stop = DateUtils.METADATA_DATE_FORMATTER.format(timeInterval.getStop());
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("insertionTime").from(start, false).to(stop))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+		LOGGER.debug("query compost is {}", queryBuilder);		
+		sourceBuilder.query(queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+		sourceBuilder.sort(new FieldSortBuilder("insertionTime").order(SortOrder.ASC));
+		final String index = getIndexForProductFamily(family, productType);
+		final SearchRequest searchRequest = new SearchRequest(index);
+		searchRequest.source(sourceBuilder);
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final List<SearchMetadata> r = new ArrayList<>();
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = hit.getSourceAsMap();
+					final SearchMetadata local = new SearchMetadata();
+					local.setProductName(source.get("productName").toString());
+					local.setProductType(source.get("productType").toString());
+					local.setMissionId(source.get(MissionId.FIELD_NAME).toString());
+					local.setKeyObjectStorage(source.get("url").toString());
+					if (source.containsKey("stationCode")) {
+						local.setSatelliteId(source.get("stationCode").toString());
+					}
+					if (source.containsKey("satelliteId")) {
+						local.setSatelliteId(source.get("satelliteId").toString());
+					}
+					if (source.containsKey("startTime")) {
+						try {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
+					}
+					if (source.containsKey("stopTime")) {
+						try {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("stopTime");
+						}
+					}
+					if (source.containsKey("insertionTime")) {
+						try {
+							local.setInsertionTime(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("insertionTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("insertionTime");
+						}
+					}
+					if (source.containsKey("satelliteId")) {
+						try {
+							local.setSatelliteId(source.get("satelliteId").toString());
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("satelliteId");
+						}
+					}
+					if (source.containsKey("swathtype")) {
+						try {
+							local.setSwathtype(source.get("swathtype").toString());
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("swathtype");
+						}
+					}
+					else {
+						final String leType = source.get("productType").toString();
+						final String firstTwoCharsOfType = leType.substring(0,2);
+						local.setSwathtype(firstTwoCharsOfType);
+					}
+					if (source.containsKey("dataTakeId")) {
+						local.addAdditionalProperty("dataTakeId", source.get("dataTakeId").toString());
+					} else {
+						throw new MetadataMalformedException("dataTakeId");
+					}
+					r.add(local);
+				}
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(
+					String.format("Error on execution of %s: %s", searchRequest, e.getMessage()),
+					e
+			);
+		}
+		return null;
+	}
 
 	public AuxMetadata auxiliaryQuery(final String searchProductType, final String searchProductName) throws IOException, MetadataNotPresentException, MetadataMalformedException {
 
@@ -1425,7 +1575,10 @@ public class EsServices {
 
 		final SearchMetadata searchMetadata = new SearchMetadata();
 		
+		searchMetadata.setProductName(source.get("productName").toString());
+		searchMetadata.setKeyObjectStorage(source.get("url").toString());		
 		searchMetadata.setProductType(source.get("productType").toString());
+		searchMetadata.setInsertionTime(source.get("insertionTime").toString());
 
 		searchMetadata.setSwathtype((String) source.getOrDefault("swathtype", "UNDEFINED"));
 		
@@ -1512,6 +1665,69 @@ public class EsServices {
 		} catch (final DateTimeParseException e) {
 			throw new MetadataMalformedException(key);
 		}
+	}
+	public List<SearchMetadata> getL1AcnProductsForDatatakeId(final String productType, final String dataTakeId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.termQuery("dataTakeId.keyword", dataTakeId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));		
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("L1ACN Datatake Query: query compost is {}", queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+		final SearchRequest searchRequest = new SearchRequest(ProductFamily.L1_ACN.name().toLowerCase());
+		searchRequest.source(sourceBuilder);
+		final List<SearchMetadata> result = new ArrayList<>();
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				for (final SearchHit hit : searchResponse.getHits().getHits()) {
+					final Map<String, Object> source = hit.getSourceAsMap();
+					final SearchMetadata local = new SearchMetadata();
+					local.setProductName(source.get("productName").toString());
+					local.setProductType(source.get("productType").toString());
+					local.setMissionId(source.get(MissionId.FIELD_NAME).toString());
+					local.setKeyObjectStorage(source.get("url").toString());
+					if (source.containsKey("stationCode")) {
+						local.setSatelliteId(source.get("stationCode").toString());
+					}
+					if (source.containsKey("satelliteId")) {
+						local.setSatelliteId(source.get("satelliteId").toString());
+					}
+					if (source.containsKey("startTime")) {
+						try {
+							local.setValidityStart(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("startTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("startTime");
+						}
+					}
+					if (source.containsKey("stopTime")) {
+						try {
+							local.setValidityStop(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("stopTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("stopTime");
+						}
+					}
+					if (source.containsKey("insertionTime")) {
+						try {
+							local.setInsertionTime(
+									DateUtils.convertToMetadataDateTimeFormat(source.get("insertionTime").toString()));
+						} catch (final DateTimeParseException e) {
+							throw new MetadataMalformedException("insertionTime");
+						}
+					}
+					result.add(local);
+				}				
+			}
+			return result;
+		} 
+		catch (final IOException e) {
+			throw new RuntimeException(
+					String.format("Error on execution of %s: %s", searchRequest, e.getMessage()),
+					e
+			);
+		}		
 	}
 
 	public List<LevelSegmentMetadata> getLevelSegmentMetadataFor(final String dataTakeId) throws Exception {

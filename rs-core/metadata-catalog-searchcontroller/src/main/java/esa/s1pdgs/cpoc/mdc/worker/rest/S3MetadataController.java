@@ -94,7 +94,7 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 					orbitNumber, e.getCode().getCode(), e.getLogMessage());
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (final Exception e) {
-			LOGGER.error("Error on performing Orbit for product type {} and orbit {}: {}", productType, orbitNumber,
+			LOGGER.error("Error on performing Orbit search for product type {} and orbit {}: {}", productType, orbitNumber,
 					LogUtils.toString(e));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
