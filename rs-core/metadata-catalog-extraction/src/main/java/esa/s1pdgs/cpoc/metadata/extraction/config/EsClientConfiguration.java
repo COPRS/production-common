@@ -8,7 +8,6 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,6 +37,38 @@ public class EsClientConfiguration {
         });
 		RestHighLevelClient client = new RestHighLevelClient(builder);
 		return client;
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public int getConnectTimeoutMs() {
+		return connectTimeoutMs;
+	}
+
+	public void setConnectTimeoutMs(int connectTimeoutMs) {
+		this.connectTimeoutMs = connectTimeoutMs;
+	}
+
+	public int getSocketTimeoutMs() {
+		return socketTimeoutMs;
+	}
+
+	public void setSocketTimeoutMs(int socketTimeoutMs) {
+		this.socketTimeoutMs = socketTimeoutMs;
 	}
 
 }
