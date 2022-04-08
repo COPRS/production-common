@@ -53,12 +53,12 @@ spec:
           value: {{ .Values.s1pro_ingestion_xbip_s3_trigger.javaOpts.xms }}
         - name: JAVA_XMX
           value: {{ .Values.s1pro_ingestion_xbip_s3_trigger.javaOpts.xmx }}
-        - name: s3_xbip.user
+        - name: cgs2.user
           valueFrom:
             secretKeyRef:
               name: xbip-s3
               key: USER
-        - name: s3_xbip.pass
+        - name: cgs2.pass
           valueFrom:
             secretKeyRef:
               name: xbip-s3

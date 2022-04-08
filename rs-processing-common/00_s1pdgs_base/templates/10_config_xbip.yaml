@@ -89,10 +89,10 @@ data:
   cgs5.programmaticRecursion: "true"
   cgs5.enablePreemptiveAuthentication: "false"
   
-  s3_xbip.host: "tbd"
-  s3_xbip.path: "/"
+  s3_xbip.host: "test-esa-copernicus.ksat.no"
+  s3_xbip.path: "/sentinel/SVL/SENTINEL3/"
   s3_xbip.disableValiditation: "true"
   s3_xbip.connectTimeoutSec: "60"
-  s3_xbip.programmaticRecursion: "false"
-  s3_xbip.enablePreemptiveAuthentication: "false"
+  s3_xbip.programmaticRecursion: "true"
+  s3_xbip.enablePreemptiveAuthentication: "true"
 {{ end }}
