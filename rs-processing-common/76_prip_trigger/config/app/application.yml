@@ -22,6 +22,9 @@ mqi:
   - productFamily: AUXILIARY_FILE_ZIP
     # Regular expression to disallow messages
     disallowRegex: S1__OPER_(MSK_EW_SLC|MSK_OCEAN_)_.*\.EOF
+  - productFamily: AUXILIARY_FILE
+    # Regular expression to disallow S1 auxiliary files to be published
+    disallowRegex: .*AUX.*
 
 # PRIP Trigger config
 prip-trigger:
