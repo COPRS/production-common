@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
+import esa.s1pdgs.cpoc.common.time.TimeInterval;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 
 public class ThresholdGapHandler extends AbstractGapHandler {

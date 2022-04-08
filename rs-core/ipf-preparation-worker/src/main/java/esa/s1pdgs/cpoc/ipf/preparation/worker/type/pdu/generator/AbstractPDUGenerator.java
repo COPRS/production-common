@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.time.TimeInterval;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;

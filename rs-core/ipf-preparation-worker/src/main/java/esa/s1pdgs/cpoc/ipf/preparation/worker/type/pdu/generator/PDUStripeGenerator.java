@@ -11,10 +11,10 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
+import esa.s1pdgs.cpoc.common.time.TimeInterval;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.config.ProcessSettings;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.model.TimeInterval;
 import esa.s1pdgs.cpoc.ipf.preparation.worker.model.pdu.PDUReferencePoint;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
