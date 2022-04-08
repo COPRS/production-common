@@ -76,7 +76,7 @@ public class AppDataJob {
 	 * Inputs preselected by  main input search, which
 	 * should not be queries by AuxQuery any more
 	 */
-	private List<AppDataJobPreselectedInput> preselectedInputs;
+	private List<AppDataJobPreselectedInput> preselectedInputs = new ArrayList<>();
 
     /**
      * Generations of the job

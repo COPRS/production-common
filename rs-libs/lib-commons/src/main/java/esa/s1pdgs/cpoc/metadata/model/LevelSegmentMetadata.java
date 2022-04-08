@@ -113,36 +113,47 @@ public class LevelSegmentMetadata extends AbstractMetadata {
 				superToString, datatakeId, polarisation, consolidation, productSensingConsolidation);
 	}
 
-    /**
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), datatakeId, polarisation,
-                consolidation,productSensingConsolidation, insertionTime);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+				additionalProperties,
+				consolidation,
+				datatakeId,
+				insertionTime,
+				keyObjectStorage,
+				missionId,
+				polarisation,
+				productName,
+				productSensingConsolidation,
+				productType,
+				satelliteId,
+				stationCode,
+				swathtype,
+				validityStart,
+				validityStop);
+	}
 
-    /**
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        boolean ret;
-        if (this == obj) {
-            ret = true;
-        } else if (obj == null || getClass() != obj.getClass()) {
-            ret = false;
-        } else {
-            final LevelSegmentMetadata other = (LevelSegmentMetadata) obj;
-            ret = super.equals(obj)
-                    && Objects.equals(datatakeId, other.datatakeId)
-                    && Objects.equals(polarisation, other.polarisation)
-                    && Objects.equals(consolidation, other.consolidation)
-                    && Objects.equals(insertionTime, other.insertionTime)                    
-                    && Objects.equals(productSensingConsolidation, other.productSensingConsolidation);
-        }
-        return ret;
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final LevelSegmentMetadata other = (LevelSegmentMetadata) obj;
+		return Objects.equals(additionalProperties, other.additionalProperties)
+				&& Objects.equals(consolidation, other.consolidation) && Objects.equals(datatakeId, other.datatakeId)
+				&& Objects.equals(insertionTime, other.insertionTime)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) && Objects.equals(polarisation, other.polarisation)
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(productSensingConsolidation, other.productSensingConsolidation)
+				&& Objects.equals(productType, other.productType) && Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(stationCode, other.stationCode) && Objects.equals(swathtype, other.swathtype)
+				&& Objects.equals(validityStart, other.validityStart)
+				&& Objects.equals(validityStop, other.validityStop);
+	}
 
 	@Override
 	public String toString() {

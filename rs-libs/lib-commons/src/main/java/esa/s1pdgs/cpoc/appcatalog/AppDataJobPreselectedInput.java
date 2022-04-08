@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class AppDataJobPreselectedInput {
-
+	private String id;
     private String taskTableInputReference;
     private String fileType;
     private String fileNameType;
@@ -14,6 +14,7 @@ public class AppDataJobPreselectedInput {
     public AppDataJobPreselectedInput() {
         taskTableInputReference= "";
         files = Collections.emptyList();
+        id = null;
     }
 
     public AppDataJobPreselectedInput(final String taskTableInputReference,final String fileType,final String fileNameType,final List<AppDataJobFile> files) {
@@ -54,7 +55,15 @@ public class AppDataJobPreselectedInput {
     public void setFileNameType(final String fileNameType) {
         this.fileNameType = fileNameType;
     }
+    
+    public String getId() {
+		return id;
+	}
 
+	public void setId(final String id) {
+		this.id = id;
+	}
+	
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -63,17 +72,18 @@ public class AppDataJobPreselectedInput {
         return Objects.equals(taskTableInputReference, that.taskTableInputReference)
                 && Objects.equals(fileType, that.fileType)
                 && Objects.equals(fileNameType, that.fileNameType)
-                && Objects.equals(files, that.files);
+                && Objects.equals(files, that.files)
+                && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskTableInputReference, fileType, fileNameType, files);
+        return Objects.hash(taskTableInputReference, fileType, fileNameType, files, id);
     }
 
 	@Override
 	public String toString() {
-		return "AppDataJobPreselectedInput [taskTableInputReference=" + taskTableInputReference + ", fileType="
-				+ fileType + ", fileNameType=" + fileNameType + ", files=" + files + "]";
+		return "AppDataJobPreselectedInput [id="  + id +", taskTableInputReference=" + taskTableInputReference + 
+				", fileType=" + fileType + ", fileNameType=" + fileNameType + ", files=" + files + "]";
 	}
 }

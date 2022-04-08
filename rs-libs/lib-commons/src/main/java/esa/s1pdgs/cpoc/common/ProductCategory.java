@@ -34,6 +34,7 @@ public enum ProductCategory {
     LEVEL_PRODUCTS(ProductionEvent.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
     LEVEL_SEGMENTS(ProductionEvent.class),
+    ETAD_PRODUCTS(ProductionEvent.class),
     SPP_PRODUCTS(ProductionEvent.class),
     SPP_MBU_PRODUCTS(ProductionEvent.class),
     DEBUG(ProductionEvent.class),
@@ -86,6 +87,7 @@ public enum ProductCategory {
 	        	return ProductCategory.PLANS_AND_REPORTS;
 	        case L0_JOB:
 	        case L1_JOB:
+	        case L1_ETAD_JOB:
 	        case L2_JOB:
 	        case L0_SEGMENT_JOB:
 	            return ProductCategory.LEVEL_JOBS;
@@ -107,6 +109,8 @@ public enum ProductCategory {
 	        case L1C:
 	        case L2A:
 	        	return ProductCategory.LEVEL_INPUT;
+	        case L1_ETAD:
+	        	return ProductCategory.ETAD_PRODUCTS;
 	        case SPP_MBU:
 	        	return ProductCategory.SPP_MBU_PRODUCTS;
 	        case SPP_OBS:
@@ -123,6 +127,7 @@ public enum ProductCategory {
 			case L0_SEGMENT_ZIP:
 			case L0_SLICE_ZIP:
 			case L1_ACN_ZIP:
+			case L1_ETAD_ZIP:
 			case L1_SLICE_ZIP:
 			case L2_ACN_ZIP:
 			case L2_SLICE_ZIP:

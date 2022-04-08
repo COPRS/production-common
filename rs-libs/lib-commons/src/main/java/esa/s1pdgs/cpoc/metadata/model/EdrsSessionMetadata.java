@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
  *
  */
 public class EdrsSessionMetadata extends AbstractMetadata {
-
     protected String sessionId;
     protected String startTime;
     protected String stopTime;
@@ -117,35 +116,51 @@ public class EdrsSessionMetadata extends AbstractMetadata {
 		final String superToString = super.toAbstractString();
 		return String.format("{%s,\"sessionId\":\"%s\",\"startTime\":\"%s\",\"stopTime\":\"%s\",\"rawNames\":[%s]}", superToString, sessionId, startTime, stopTime, rawNames.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(",")));
 	}
-	
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), sessionId, startTime, stopTime, rawNames, channelId);
+		return Objects.hash(
+				additionalProperties,
+				channelId,
+				keyObjectStorage,
+				missionId,
+				productName,
+				productType,
+				rawNames,
+				satelliteId,
+				sessionId,
+				startTime,
+				stationCode,
+				stopTime,
+				swathtype,
+				validityStart,
+				validityStop);
 	}
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(final Object obj) {
-		boolean ret;
-		if (this == obj) {
-			ret = true;
-		} else if (obj == null || getClass() != obj.getClass()) {
-			ret = false;
-		} else {
-			final EdrsSessionMetadata other = (EdrsSessionMetadata) obj;
-			ret = super.equals(other) && 
-					Objects.equals(sessionId, other.sessionId) &&
-					Objects.equals(startTime, other.startTime) && 
-					Objects.equals(stopTime, other.stopTime)
-					&& Objects.equals(rawNames, other.rawNames) && 
-					channelId == other.channelId;
-		}
-		return ret;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final EdrsSessionMetadata other = (EdrsSessionMetadata) obj;
+		return Objects.equals(additionalProperties, other.additionalProperties) 
+				&& channelId == other.channelId
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) 
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(productType, other.productType) 
+				&& Objects.equals(rawNames, other.rawNames)
+				&& Objects.equals(satelliteId, other.satelliteId) 
+				&& Objects.equals(sessionId, other.sessionId)
+				&& Objects.equals(startTime, other.startTime) 
+				&& Objects.equals(stationCode, other.stationCode)
+				&& Objects.equals(stopTime, other.stopTime) 
+				&& Objects.equals(swathtype, other.swathtype)
+				&& Objects.equals(validityStart, other.validityStart)
+				&& Objects.equals(validityStop, other.validityStop);
 	}
 
 	@Override

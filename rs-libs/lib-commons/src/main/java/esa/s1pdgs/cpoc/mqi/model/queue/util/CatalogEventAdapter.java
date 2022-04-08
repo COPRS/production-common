@@ -27,6 +27,10 @@ public final class CatalogEventAdapter {
 	
 	public static final CatalogEventAdapter of(final CatalogEvent catalogEvent) {
 		return new CatalogEventAdapter(catalogEvent);
+    }
+	
+	public final String productName() {
+		return getStringValue("productName", "NOT_KNOWN");
 	}
 	
 	public final String productType() {

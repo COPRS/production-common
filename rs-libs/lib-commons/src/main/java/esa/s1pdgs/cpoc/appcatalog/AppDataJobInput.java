@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public class AppDataJobInput {
 
+	public static final String NULL_FILE_NAME_TYPE = "NULL_FILE_NAME_TYPE";
+
     private String taskTableInputReference;
     private String fileType;
     private String fileNameType;

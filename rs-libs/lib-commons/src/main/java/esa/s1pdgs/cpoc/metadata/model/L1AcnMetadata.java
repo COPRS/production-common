@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.metadata.model;
 import java.util.Objects;
 
 public class L1AcnMetadata extends AbstractMetadata {
-
+    
 	/**
 	 * Instrument configuration id
 	 */
@@ -88,36 +88,51 @@ public class L1AcnMetadata extends AbstractMetadata {
 
 
 	public String toJsonString() {
-		String superToString = super.toAbstractString();
+		final String superToString = super.toAbstractString();
 		return String.format("{%s,\"instrumentConfigurationId\":%s,\"numberOfSlices\":%s,\"datatakeId\":\"%s\"}", superToString,
 				instrumentConfigurationId, numberOfSlices, datatakeId);
 	}
 
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
-		int superHash = super.hashCode();
-		return Objects.hash(instrumentConfigurationId, numberOfSlices, datatakeId, superHash);
+		return Objects.hash(
+				additionalProperties,
+				datatakeId,
+				instrumentConfigurationId,
+				keyObjectStorage,
+				missionId,
+				numberOfSlices,
+				productName,
+				productType,
+				satelliteId,
+				stationCode,
+				swathtype,
+				validityStart,
+				validityStop);
 	}
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(final Object obj) {
-		boolean ret;
-		if (this == obj) {
-			ret = true;
-		} else if (obj == null || getClass() != obj.getClass()) {
-			ret = false;
-		} else {
-			L1AcnMetadata other = (L1AcnMetadata) obj;
-			ret = super.equals(other) && instrumentConfigurationId == other.instrumentConfigurationId
-					&& numberOfSlices == other.numberOfSlices && Objects.equals(datatakeId, other.datatakeId);
-		}
-		return ret;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final L1AcnMetadata other = (L1AcnMetadata) obj;
+		return Objects.equals(additionalProperties, other.additionalProperties)
+				&& Objects.equals(datatakeId, other.datatakeId)
+				&& instrumentConfigurationId == other.instrumentConfigurationId
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) 
+				&& numberOfSlices == other.numberOfSlices
+				&& Objects.equals(productName, other.productName) 
+				&& Objects.equals(productType, other.productType)
+				&& Objects.equals(satelliteId, other.satelliteId) 
+				&& Objects.equals(stationCode, other.stationCode)
+				&& Objects.equals(swathtype, other.swathtype) 
+				&& Objects.equals(validityStart, other.validityStart)
+				&& Objects.equals(validityStop, other.validityStop);
 	}
 
 	@Override
