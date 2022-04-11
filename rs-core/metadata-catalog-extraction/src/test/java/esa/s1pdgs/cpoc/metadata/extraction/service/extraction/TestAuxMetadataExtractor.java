@@ -198,7 +198,7 @@ public class TestAuxMetadataExtractor {
 		assertEquals("2020-05-18T08:45:34.000000Z", result.get("creationTime"));
 	}	
 
-	private void testExtractMetadata(final CatalogJob inputMessage, final String productFileName,
+	private JSONObject testExtractMetadata(final CatalogJob inputMessage, final String productFileName,
 			final String metadataFile, final FileExtension fileExtension, final String missionId,
 			final String satelliteId, final String productClass, final String productType)
 			throws AbstractCodedException, JSONException {
