@@ -177,7 +177,7 @@ public class TestAuxMetadataExtractor {
 	@Test
 	public void testExtractMetadataAuxTec() throws AbstractCodedException {
 		final String fileName = "S1__AUX_TEC_V20190805T000000_20190805T235959_G20200210T102615.SAFE";
-		final CatalogJob inputMessage = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		final CatalogJob inputMessage = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE);
 		
 		JSONObject result = testExtractMetadata(inputMessage, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_TEC");
@@ -189,7 +189,7 @@ public class TestAuxMetadataExtractor {
 	@Test
 	public void testExtractMetadataAuxTro() throws AbstractCodedException {
 		final String fileName = "S1__AUX_TRO_V20190805T180000_20190805T235959_G20200518T084534.SAFE";
-		final CatalogJob inputMessage = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE));
+		final CatalogJob inputMessage = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE);
 		
 		JSONObject result = testExtractMetadata(inputMessage, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_TRO");
