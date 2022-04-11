@@ -114,9 +114,7 @@ public class JobDispatcherImpl implements JobDispatcher {
 		final AppDataJob firstJob = jobsFromMessage.get(0);
 
 		final GenericMessageDto<CatalogEvent> firstMessage = firstJob.getMessages().get(0);
-
-		final Optional<List<AppDataJob>> jobForMess = appCat.findJobsFor(firstMessage);
-		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage);
+		final Optional<List<AppDataJob>> jobForMess = appCat.findJobsFor(firstMessage);		
 
 		// there is already a job for this message --> possible restart scenario -->
 		// just update the pod name
@@ -127,7 +125,8 @@ public class JobDispatcherImpl implements JobDispatcher {
 		} else {
 			// no job yet associated to this message --> check special cases otherwise
 			// create and persist
-			for (final AppDataJob job : jobsFromMessage) {
+			final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(firstMessage.getBody());
+			for (final AppDataJob job : jobsFromMessage) {				
 				final Optional<AppDataJob> specificJob = typeAdapter.findAssociatedJobFor(appCat, eventAdapter, job);
 
 				if (specificJob.isPresent()) {
