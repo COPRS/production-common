@@ -381,7 +381,6 @@
 	</dependencyManagement>
 
 	<modules>
-		<module>archives</module>
 		<module>disseminator</module>
 		<module>ingestion-trigger</module>
 		<module>ingestion-filter</module>
