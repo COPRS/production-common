@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.common.utils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -73,4 +76,17 @@ public class DateUtils {
     			String.format("Invalid date string '%s'. Available formats are: %s", dateString, FORMATS.values())
     	);
     }
+    
+	public static final Instant toInstant(final String dateString) {
+		return DateUtils.parse(dateString)
+				.atZone(ZoneId.systemDefault())
+				.toInstant();
+	}
+	
+	public static final Date toDate(final String dateString) {
+		if (dateString == null) {
+			return null;
+		}		
+		return Date.from(toInstant(dateString));
+	}
 }

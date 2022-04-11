@@ -9,7 +9,6 @@ import java.util.Objects;
  *
  */
 public class S3Metadata extends AbstractMetadata {
-
 	private String absoluteStartOrbit;
 	private String anxTime;
 	private String anx1Time;
@@ -40,7 +39,7 @@ public class S3Metadata extends AbstractMetadata {
 		return absoluteStartOrbit;
 	}
 
-	public void setAbsoluteStartOrbit(String absoluteStartOrbit) {
+	public void setAbsoluteStartOrbit(final String absoluteStartOrbit) {
 		this.absoluteStartOrbit = absoluteStartOrbit;
 	}
 	
@@ -48,7 +47,7 @@ public class S3Metadata extends AbstractMetadata {
 		return anxTime;
 	}
 
-	public void setAnxTime(String anxTime) {
+	public void setAnxTime(final String anxTime) {
 		this.anxTime = anxTime;
 	}
 
@@ -56,7 +55,7 @@ public class S3Metadata extends AbstractMetadata {
 		return anx1Time;
 	}
 
-	public void setAnx1Time(String anx1Time) {
+	public void setAnx1Time(final String anx1Time) {
 		this.anx1Time = anx1Time;
 	}
 	
@@ -64,7 +63,7 @@ public class S3Metadata extends AbstractMetadata {
 		return creationTime;
 	}
 
-	public void setCreationTime(String creationTime) {
+	public void setCreationTime(final String creationTime) {
 		this.creationTime = creationTime;
 	}
 
@@ -72,7 +71,7 @@ public class S3Metadata extends AbstractMetadata {
 		return dumpStart;
 	}
 
-	public void setDumpStart(String dumpStart) {
+	public void setDumpStart(final String dumpStart) {
 		this.dumpStart = dumpStart;
 	}
 
@@ -80,7 +79,7 @@ public class S3Metadata extends AbstractMetadata {
 		return granuleNumber;
 	}
 
-	public void setGranuleNumber(int granuleNumber) {
+	public void setGranuleNumber(final int granuleNumber) {
 		this.granuleNumber = granuleNumber;
 	}
 
@@ -88,7 +87,7 @@ public class S3Metadata extends AbstractMetadata {
 		return granulePosition;
 	}
 
-	public void setGranulePosition(String granulePosition) {
+	public void setGranulePosition(final String granulePosition) {
 		this.granulePosition = granulePosition;
 	}
 	
@@ -96,35 +95,60 @@ public class S3Metadata extends AbstractMetadata {
 		return insertionTime;
 	}
 
-	public void setInsertionTime(String insertionTime) {
+	public void setInsertionTime(final String insertionTime) {
 		this.insertionTime = insertionTime;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(absoluteStartOrbit, anx1Time, anxTime, creationTime, granuleNumber,
-				granulePosition, insertionTime);
-		return result;
+		return Objects.hash(
+				absoluteStartOrbit,
+				additionalProperties,
+				anx1Time,
+				anxTime,
+				creationTime,
+				dumpStart,
+				granuleNumber,
+				granulePosition,
+				insertionTime,
+				keyObjectStorage,
+				missionId,
+				productName,
+				productType,
+				satelliteId,
+				stationCode,
+				swathtype,
+				validityStart,
+				validityStop);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(final Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (!super.equals(obj)) {
+		if (obj == null)
 			return false;
-		}
-		if (!(obj instanceof S3Metadata)) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		S3Metadata other = (S3Metadata) obj;
-		return Objects.equals(absoluteStartOrbit, other.absoluteStartOrbit) && Objects.equals(anx1Time, other.anx1Time)
-				&& Objects.equals(anxTime, other.anxTime) && Objects.equals(creationTime, other.creationTime)
-				&& granuleNumber == other.granuleNumber && Objects.equals(granulePosition, other.granulePosition)
-				&& Objects.equals(insertionTime, other.insertionTime);
+		final S3Metadata other = (S3Metadata) obj;
+		return Objects.equals(absoluteStartOrbit, other.absoluteStartOrbit)
+				&& Objects.equals(additionalProperties, other.additionalProperties)
+				&& Objects.equals(anx1Time, other.anx1Time) 
+				&& Objects.equals(anxTime, other.anxTime)
+				&& Objects.equals(creationTime, other.creationTime) 
+				&& Objects.equals(dumpStart, other.dumpStart)
+				&& granuleNumber == other.granuleNumber 
+				&& Objects.equals(granulePosition, other.granulePosition)
+				&& Objects.equals(insertionTime, other.insertionTime)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) 
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(productType, other.productType) 
+				&& Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(stationCode, other.stationCode) 
+				&& Objects.equals(swathtype, other.swathtype)
+				&& Objects.equals(validityStart, other.validityStart)
+				&& Objects.equals(validityStop, other.validityStop);
 	}
 
 	@Override

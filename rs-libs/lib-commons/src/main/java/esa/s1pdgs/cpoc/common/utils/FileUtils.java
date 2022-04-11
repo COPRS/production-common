@@ -3,15 +3,21 @@ package esa.s1pdgs.cpoc.common.utils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
@@ -21,6 +27,42 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
  * @author Viveris Technologies
  */
 public class FileUtils {
+	
+	  static class LinkProduct extends SimpleFileVisitor<Path>
+	  {
+	    private Path source;
+	    private Path target;
+	    
+	    public LinkProduct(final Path source, final Path target) {
+			this.source = source;
+			this.target = target;
+		}
+
+		@Override
+	    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
+	        throws IOException
+	    {
+	      final Path targetPath = target.resolve(source.relativize(dir));
+	      if (!Files.exists(targetPath))
+	      {
+	        Files.createDirectory(targetPath);
+	      }
+	      return FileVisitResult.CONTINUE;
+	    }
+
+	    @Override
+	    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException
+	    {
+	      final Path targetPath = target.resolve(source.relativize(file));
+	      if (Files.exists(targetPath))
+	      {
+	        Files.delete(targetPath);
+	      }
+	      Files.createLink(targetPath, file);
+	      return FileVisitResult.CONTINUE;
+	    }
+	  }
+	  
     /**
      * Write the string into the file
      * 
@@ -141,5 +183,31 @@ public class FileUtils {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
+    }
+    
+    public static final void hardlink(final File src, final File dest) {
+        try {
+          Files.walkFileTree(src.toPath(), new LinkProduct(src.toPath(), dest.toPath()));
+        }
+        catch (final IOException ex)  {
+          throw new RuntimeException(
+        		  String.format(
+        				  "Error creating hardlink from %s to %s: %s", 
+        				  src,
+        				  dest,
+        				  ex.getMessage()
+        		  ),
+        		  ex
+          );
+        }
+    }
+    
+    public static final List<File> list(final File directory, final FilenameFilter filter) {
+    	// filter may be null for no filtering
+    	final File[] content = directory.listFiles(filter);
+    	if (content == null) {
+    		return Collections.emptyList();
+    	}
+    	return Arrays.asList(content);
     }
 }

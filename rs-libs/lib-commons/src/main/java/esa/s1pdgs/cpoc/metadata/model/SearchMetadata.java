@@ -43,7 +43,7 @@ public class SearchMetadata extends AbstractMetadata {
 		return footprint;
 	}
 
-	public void setFootprint(List<List<Double>> footprint) {
+	public void setFootprint(final List<List<Double>> footprint) {
 		this.footprint = footprint;
 	}
 
@@ -51,35 +51,48 @@ public class SearchMetadata extends AbstractMetadata {
 		return insertionTime;
 	}
 
-	public void setInsertionTime(String insertionTime) {
+	public void setInsertionTime(final String insertionTime) {
 		this.insertionTime = insertionTime;
 	}
 
 	public String toJsonString() {
 		return String.format("{%s}", super.toAbstractString());
 	}
-
+	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Objects.hash(footprint, insertionTime);
-		return result;
+		return Objects.hash(
+				additionalProperties,
+				footprint,
+				insertionTime,
+				keyObjectStorage,
+				missionId,
+				productName,
+				productType,
+				satelliteId,
+				stationCode,
+				swathtype,
+				validityStart,
+				validityStop);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(final Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (!super.equals(obj)) {
+		if (obj == null)
 			return false;
-		}
-		if (!(obj instanceof SearchMetadata)) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		SearchMetadata other = (SearchMetadata) obj;
-		return Objects.equals(footprint, other.footprint) && Objects.equals(insertionTime, other.insertionTime);
+		final SearchMetadata other = (SearchMetadata) obj;
+		return Objects.equals(additionalProperties, other.additionalProperties)
+				&& Objects.equals(footprint, other.footprint) && Objects.equals(insertionTime, other.insertionTime)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) && Objects.equals(productName, other.productName)
+				&& Objects.equals(productType, other.productType) && Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(stationCode, other.stationCode) && Objects.equals(swathtype, other.swathtype)
+				&& Objects.equals(validityStart, other.validityStart)
+				&& Objects.equals(validityStop, other.validityStop);
 	}
 
 	@Override
@@ -87,6 +100,9 @@ public class SearchMetadata extends AbstractMetadata {
 		return "SearchMetadata [footprint=" + footprint + ", insertionTime=" + insertionTime + ", productName="
 				+ productName + ", productType=" + productType + ", keyObjectStorage=" + keyObjectStorage
 				+ ", validityStart=" + validityStart + ", validityStop=" + validityStop + ", missionId=" + missionId
-				+ ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + ", swathtype=" + swathtype + "]";
+				+ ", satelliteId=" + satelliteId + ", stationCode=" + stationCode + ", swathtype=" + swathtype
+				+ ", additionalProperties=" + additionalProperties + "]";
 	}
+
+	
 }

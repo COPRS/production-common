@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -63,9 +65,16 @@ public class ExtractMetadata {
 	private static final String XSLT_L0_SEGMENT_MANIFEST = "XSLT_L0_SEGMENT.xslt";
 	private static final String XSLT_L1_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
+	private static final String XSLT_ETAD_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
+	
+	// S1OPS-937: Filename based extraction of Validity Start / Stop and Generation Time
+	private static final List<String> TYPES_WITH_PRODUCTNAME_BASED_VALIDITY_TIME_EXTRACTION = Arrays.asList("AUX_TEC", "AUX_TRO");
+	private static final List<String> TYPES_WITH_PRODUCTNAME_BASED_GENERATION_TIME_EXTRACTION = Arrays.asList("AUX_TEC", "AUX_TRO");
+	private static final Pattern AUX_TEC_AND_AUX_TRO_PRODUCTNAME_PATTERN =
+			Pattern.compile("^S.._..._..._V([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_G([0-9]{8}T[0-9]{6})\\.SAFE$", Pattern.CASE_INSENSITIVE);
 
 	/**
 	 * Mapping of family to XSLT file name
@@ -145,6 +154,7 @@ public class ExtractMetadata {
 		this.xsltMap.put(ProductFamily.L1_SLICE, XSLT_L1_MANIFEST);
 		this.xsltMap.put(ProductFamily.L2_ACN, XSLT_L2_MANIFEST);
 		this.xsltMap.put(ProductFamily.L2_SLICE, XSLT_L2_MANIFEST);
+		this.xsltMap.put(ProductFamily.L1_ETAD, XSLT_ETAD_MANIFEST);
 	}
 
 	/**
@@ -308,9 +318,17 @@ public class ExtractMetadata {
 
 				if (metadataJSONObject.has("segmentCoordinates")) {
 					final String coords = metadataJSONObject.getString("segmentCoordinates");
+					
 					if (!coords.trim().isEmpty()) {
-						metadataJSONObject.put("segmentCoordinates",
+						
+						//S1PRO-2732,S1OPS-673,S1OPS-1212: expected number of coordinates is 2 for ZS, ZE, ZI and ZW
+						if (productType.matches("(Z[1-6]|ZE|ZI|ZW)_RAW__0.") && coords.trim().split(" ").length != 2) {
+								metadataJSONObject.remove("segmentCoordinates");
+								LOGGER.debug("segment coordinates removed for product {}", descriptor.getFilename());
+						} else {
+							metadataJSONObject.put("segmentCoordinates",
 								processCoordinates(manifestFile, descriptor, coords));
+						}
 					}
 				}
 			}
@@ -654,9 +672,20 @@ public class ExtractMetadata {
 
 	private JSONObject putConfigFileMetadataToJSON(final JSONObject metadataJSONObject, final AuxDescriptor descriptor)
 			throws MetadataExtractionException, MetadataMalformedException {
-
 		try {
-
+			if (TYPES_WITH_PRODUCTNAME_BASED_VALIDITY_TIME_EXTRACTION.contains(descriptor.getProductType())) {
+				Matcher matcher = AUX_TEC_AND_AUX_TRO_PRODUCTNAME_PATTERN.matcher(descriptor.getProductName());
+				if (matcher.matches()) {
+					try {
+						metadataJSONObject.put("validityStartTime", DateUtils.convertToMetadataDateTimeFormat(matcher.group(1)));
+						metadataJSONObject.put("validityStopTime", DateUtils.convertToMetadataDateTimeFormat(matcher.group(2)));						
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStartTime/validityStopTime");
+					}
+				} else {
+					throw new MetadataMalformedException("validityStartTime/validityStopTime");
+				}
+			} else {
 			if (metadataJSONObject.has("validityStartTime")) {
 				try {
 					metadataJSONObject.put("validityStartTime", DateUtils
@@ -681,16 +710,30 @@ public class ExtractMetadata {
 					}
 				}
 
-			} else {
-				metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
+				} else {
+					metadataJSONObject.put("validityStopTime", "9999-12-31T23:59:59.999999Z");
+				}
 			}
 
-			if (metadataJSONObject.has("creationTime")) {
-				try {
-					metadataJSONObject.put("creationTime",
-							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
-				} catch (final DateTimeParseException e) {
+			if (TYPES_WITH_PRODUCTNAME_BASED_GENERATION_TIME_EXTRACTION.contains(descriptor.getProductType())) {
+				Matcher matcher = AUX_TEC_AND_AUX_TRO_PRODUCTNAME_PATTERN.matcher(descriptor.getProductName());
+				if (matcher.matches()) {
+					try {
+						metadataJSONObject.put("creationTime", DateUtils.convertToMetadataDateTimeFormat(matcher.group(3)));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("creationTime");
+					}
+				} else {
 					throw new MetadataMalformedException("creationTime");
+				}
+			} else {
+				if (metadataJSONObject.has("creationTime")) {
+					try {
+						metadataJSONObject.put("creationTime",
+								DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("creationTime");
+					}
 				}
 			}
 
@@ -912,7 +955,7 @@ public class ExtractMetadata {
 			// ------------ LEVEL 0 --------------------//
 			if (productType.matches(".._RAW__0.")) {
 
-				if (productType.startsWith("WV") || productType.startsWith("RF")) {
+				if (productType.matches("(WV|RF|Z[1-6]|ZE|ZI|ZW)_RAW__0.")) {
 					// Only 2 Nadir-Points in manifest -->
 					// PIC HANDLES WRONGLY
 					return processCoordinatesforWVL0(rawCoordinates);
@@ -923,7 +966,7 @@ public class ExtractMetadata {
 				}
 			}
 			// ------------ LEVEL 1 --------------------//
-			else if (productType.matches(".._(GRD|SLC)._1.")) {
+			else if (productType.matches(".._(GRD|SLC)._1.") || productType.matches(".._ETA_...")) {
 
 				if (productType.startsWith("WV")) {
 					// WV L1: derive larger footprint from multiple smaller

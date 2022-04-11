@@ -42,7 +42,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestAuxMetadataExtractor {
 
-	private static final String PATTERN = "^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_CAL|AUX_INS|AUX_RESORB|AUX_WND|AUX_ICE|AUX_SCS|AMV_ERRMAT|AMH_ERRMAT|AUX_WAV|MPL_ORBPRE|MPL_ORBSCT|MSK__LAND_)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
+	private static final String PATTERN = "^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AMH_ERRMAT|AMV_ERRMAT|AM__ERRMAT|AUX_CAL|AUX_ICE|AUX_INS|AUX_ITC|AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_POEORB|AUX_PREORB|AUX_RESORB|AUX_SCF|AUX_SCS|AUX_TEC|AUX_TRO|AUX_WAV|AUX_WND|MPL_ORBPRE|MPL_ORBRES|MPL_ORBSCT|MSK_EW_SLC|MSK__LAND_|MSK_OCEAN_|MSK_OVRPAS)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
 
 	/**
 	 * Elasticsearch services
@@ -173,8 +173,32 @@ public class TestAuxMetadataExtractor {
 				FileExtension.SAFE, "S1", "A", null, "AUX_PP2");
 
 	}
+	
+	@Test
+	public void testExtractMetadataAuxTec() throws AbstractCodedException {
+		final String fileName = "S1__AUX_TEC_V20190805T000000_20190805T235959_G20200210T102615.SAFE";
+		final CatalogJob inputMessage = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE);
+		
+		JSONObject result = testExtractMetadata(inputMessage, fileName, fileName + File.separator + "manifest.safe",
+				FileExtension.SAFE, "S1", "_", null, "AUX_TEC");
+		assertEquals("2019-08-05T00:00:00.000000Z", result.get("validityStartTime"));
+		assertEquals("2019-08-05T23:59:59.000000Z", result.get("validityStopTime"));
+		assertEquals("2020-02-10T10:26:15.000000Z", result.get("creationTime"));
+	}
+	
+	@Test
+	public void testExtractMetadataAuxTro() throws AbstractCodedException {
+		final String fileName = "S1__AUX_TRO_V20190805T180000_20190805T235959_G20200518T084534.SAFE";
+		final CatalogJob inputMessage = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE);
+		
+		JSONObject result = testExtractMetadata(inputMessage, fileName, fileName + File.separator + "manifest.safe",
+				FileExtension.SAFE, "S1", "_", null, "AUX_TRO");
+		assertEquals("2019-08-05T18:00:00.000000Z", result.get("validityStartTime"));
+		assertEquals("2019-08-05T23:59:59.000000Z", result.get("validityStopTime"));
+		assertEquals("2020-05-18T08:45:34.000000Z", result.get("creationTime"));
+	}	
 
-	private void testExtractMetadata(final CatalogJob inputMessage, final String productFileName,
+	private JSONObject testExtractMetadata(final CatalogJob inputMessage, final String productFileName,
 			final String metadataFile, final FileExtension fileExtension, final String missionId,
 			final String satelliteId, final String productClass, final String productType)
 			throws AbstractCodedException, JSONException {
@@ -210,5 +234,6 @@ public class TestAuxMetadataExtractor {
 		}
 
 		// verify(obsClient, times(1)).download(Mockito.any());
+		return result;
 	}
 }

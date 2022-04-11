@@ -619,9 +619,10 @@ public class EsServicesTest{
 				ShardSearchFailure.EMPTY_ARRAY, null);
 		
 		//Mocking the search request
-		Answer<SearchResponse> answer = new Answer<SearchResponse>() {
-	        public SearchResponse answer(InvocationOnMock invocation) throws Throwable {
-	        	List<String> indices = Arrays.asList(invocation.getArgument(0, SearchRequest.class).indices());
+		final Answer<SearchResponse> answer = new Answer<SearchResponse>() {
+	        @Override
+			public SearchResponse answer(final InvocationOnMock invocation) throws Throwable {
+	        	final List<String> indices = Arrays.asList(invocation.getArgument(0, SearchRequest.class).indices());
 	        	if (indices.contains(EdrsSessionFileType.SESSION.name().toLowerCase())) {
 	        		return response;
 	        	} else {
@@ -1358,25 +1359,28 @@ public class EsServicesTest{
     	
     	//Expected result
 		final SearchMetadata expectedResult = new SearchMetadata();
+		expectedResult.setProductName("name");
+		expectedResult.setInsertionTime("42");
+		expectedResult.setKeyObjectStorage("url");
 		expectedResult.setProductType("product_type");
 		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
 		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
 		expectedResult.setFootprint(new ArrayList<>());
 		expectedResult.setSwathtype("UNDEFINED");
-		expectedResult.setAdditionalProperties(new HashMap<String,String>() {
-			{
-			    put("startTime", "2000-01-01T00:00:00.000000Z");
-			    put("stopTime", "2001-01-01T00:00:00.000000Z");
-			    put("productName", "name");
-			    put("url", "url");
-			    put("productType", "product_type");
-			}});
-		
+//		expectedResult.setAdditionalProperties(new HashMap<String,String>() {
+//			{
+//			    put("startTime", "2000-01-01T00:00:00.000000Z");
+//			    put("stopTime", "2001-01-01T00:00:00.000000Z");
+//			    put("productName", "name");
+//			    put("url", "url");
+//			    put("productType", "product_type");
+//			}});
+//		
 		//Response 
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
 		        + ":\"url\",\"startTime\":\"2000-01-01T00:00:00.000000Z\",\"stopTime\":"
 		        + "\"2001-01-01T00:00:00.000000Z\","
-		        + "\"productType\": \"product_type\"}");
+		        + "\"productType\": \"product_type\", \"insertionTime\": \"42\"}");
 		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, source, null, null);
 		final GetResponse getResponse = new GetResponse(getResult);
 		
@@ -1384,7 +1388,10 @@ public class EsServicesTest{
 		this.mockGetRequest(getResponse);
 		
 		try {
-			SearchMetadata result = esServices.productNameQuery("L0_SEGMENT", "name");
+			final SearchMetadata result = esServices.productNameQuery("L0_SEGMENT", "name");
+			
+			// don't care about additional props
+			expectedResult.setAdditionalProperties(result.getAdditionalProperties());
 			assertEquals("Search metadata are not equals", expectedResult, result);
 		} catch (final Exception e) {
 			fail("Exception occurred: " + e.getMessage());
@@ -1446,7 +1453,7 @@ public class EsServicesTest{
 
 		try {
 			esServices.createMaskFootprintData(MaskType.EW_SLC, product, "id");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			fail("Exception occurred: " + e.getMessage());
 		}
     }

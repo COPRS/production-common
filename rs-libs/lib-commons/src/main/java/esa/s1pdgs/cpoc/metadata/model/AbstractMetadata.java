@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.metadata.model;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Class describing the metadata of a file
@@ -174,7 +173,7 @@ public abstract class AbstractMetadata {
 	/**
 	 * @param missionId the missionId to set
 	 */
-	public void setMissionId(String missionId) {
+	public void setMissionId(final String missionId) {
 		this.missionId = missionId;
 	}
 
@@ -188,7 +187,7 @@ public abstract class AbstractMetadata {
 	/**
 	 * @param satelliteId the satelliteId to set
 	 */
-	public void setSatelliteId(String satelliteId) {
+	public void setSatelliteId(final String satelliteId) {
 		this.satelliteId = satelliteId;
 	}
 
@@ -202,7 +201,7 @@ public abstract class AbstractMetadata {
 	/**
 	 * @param stationCode the stationCode to set
 	 */
-	public void setStationCode(String stationCode) {
+	public void setStationCode(final String stationCode) {
 		this.stationCode = stationCode;
 	}
 
@@ -210,7 +209,7 @@ public abstract class AbstractMetadata {
 		return swathtype;
 	}
 	
-	public void setSwathtype(String swathtype) {
+	public void setSwathtype(final String swathtype) {
 		this.swathtype = swathtype;
 	}
 
@@ -218,11 +217,11 @@ public abstract class AbstractMetadata {
         return additionalProperties;
     }
 
-    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+    public void setAdditionalProperties(final Map<String, String> additionalProperties) {
         this.additionalProperties = additionalProperties;
     }
 
-    public void addAdditionalProperty(String key, String value) {
+    public void addAdditionalProperty(final String key, final String value) {
 	    additionalProperties.put(key, value);
     }
 
@@ -231,40 +230,4 @@ public abstract class AbstractMetadata {
 				"\"productName\":\"%s\",\"productType\":\"%s\",\"keyObjectStorage\":\"%s\",\"validityStart\":\"%s\",\"validityStop\":\"%s\",\"missionId\":\"%s\",\"satelliteId\":\"%s\",\"stationCode\":\"%s\",\"swathtype\":\"%s\"",
 				productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode, swathtype);
 	}
-
-	/**
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(productName, productType, keyObjectStorage,
-                validityStart, validityStop, missionId, satelliteId, stationCode, swathtype, additionalProperties);
-    }
-
-    /**
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        boolean ret;
-        if (this == obj) {
-            ret = true;
-        } else if (obj == null || getClass() != obj.getClass()) {
-            ret = false;
-        } else {
-            AbstractMetadata other = (AbstractMetadata) obj;
-            ret = Objects.equals(productName, other.productName)
-                    && Objects.equals(productType, other.productType)
-                    && Objects.equals(keyObjectStorage, other.keyObjectStorage)
-                    && Objects.equals(validityStart, other.validityStart)
-                    && Objects.equals(validityStop, other.validityStop)
-		            && Objects.equals(missionId, other.missionId)
-		            && Objects.equals(satelliteId, other.satelliteId)
-		            && Objects.equals(stationCode, other.stationCode)
-		            && Objects.equals(swathtype, other.swathtype)
-                    && Objects.equals(additionalProperties, other.additionalProperties);
-        }
-        return ret;
-    }
-
 }

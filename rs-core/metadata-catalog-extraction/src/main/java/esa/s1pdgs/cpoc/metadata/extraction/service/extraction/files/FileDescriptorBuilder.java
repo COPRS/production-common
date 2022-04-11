@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -30,6 +33,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
  */
 public class FileDescriptorBuilder {
 
+	private static final Logger LOGGER = LogManager.getLogger(FileDescriptorBuilder.class);
 	static final List<String> AUX_ECE_TYPES = Arrays.asList("AMV_ERRMAT", "AMH_ERRMAT");
 
 	/**
@@ -149,6 +153,7 @@ public class FileDescriptorBuilder {
 		if (file.isDirectory()) {
 			throw new MetadataIgnoredFileException(file.getName());
 		}
+		LOGGER.debug("Checking match of path {} with regex pattern {}", relativePath, pattern);
 		final Matcher m = pattern.matcher(relativePath);
 		if (m.matches()) {
 			final String suffix = file.getName().substring(file.getName().lastIndexOf('.') + 1);

@@ -9,6 +9,7 @@ public enum ApplicationLevel {
 	L0(ProductFamily.L0_JOB), 
 	L0_SEGMENT(ProductFamily.L0_SEGMENT_JOB),
 	L1(ProductFamily.L1_JOB), 
+	L1_ETAD(ProductFamily.L1_ETAD_JOB), 
 	L2(ProductFamily.L2_JOB),
 	SPP_MBU(ProductFamily.SPP_MBU_JOB),
 	SPP_OBS(ProductFamily.SPP_OBS_JOB),

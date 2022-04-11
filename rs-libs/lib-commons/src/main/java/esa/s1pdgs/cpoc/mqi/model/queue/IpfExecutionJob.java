@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -34,6 +35,8 @@ public class IpfExecutionJob extends AbstractMessage {
      * Timeliness
      */
     private String timeliness;
+    
+    private String etadMode = "";
 
     /**
      * List of inputs needed to execute the job.<br/>
@@ -242,85 +245,64 @@ public class IpfExecutionJob extends AbstractMessage {
 	public void setTimedOut(final boolean timedOut) {
 		this.timedOut = timedOut;
 	}
+	
+	public String getEtadMode() {
+		return etadMode;
+	}
+
+	public void setEtadMode(final String etadMode) {
+		this.etadMode = etadMode;
+	}
+
+	@Override
+	public String toString() {
+		return "IpfExecutionJob [productProcessMode=" + productProcessMode + ", workDirectory=" + workDirectory
+				+ ", jobOrder=" + jobOrder + ", timeliness=" + timeliness + ", etadMode=" + etadMode + ", inputs="
+				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", ipfPreparationJobMessage="
+				+ ipfPreparationJobMessage + ", timedOut=" + timedOut
+				+ "productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
+				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedActions=" + allowedActions 
+				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + ", extraParameter1="
+				+ extraParameter1 + ", extraParameter2=" + extraParameter2 + ", extraParameter3=" + extraParameter3 + "]";
+	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((inputs == null) ? 0 : inputs.hashCode());
-		result = prime * result + ((ipfPreparationJobMessage == null) ? 0 : ipfPreparationJobMessage.hashCode());
-		result = prime * result + ((jobOrder == null) ? 0 : jobOrder.hashCode());
-		result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
-		result = prime * result + ((pools == null) ? 0 : pools.hashCode());
-		result = prime * result + ((productProcessMode == null) ? 0 : productProcessMode.hashCode());
-		result = prime * result + (timedOut ? 1231 : 1237);
-		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
-		result = prime * result + ((workDirectory == null) ? 0 : workDirectory.hashCode());
+		result = prime * result + Objects.hash(
+				etadMode,
+				inputs,
+				ipfPreparationJobMessage,
+				jobOrder,
+				outputs,
+				pools,
+				productProcessMode,
+				timedOut,
+				timeliness,
+				workDirectory);
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		IpfExecutionJob other = (IpfExecutionJob) obj;
-		if (inputs == null) {
-			if (other.inputs != null)
-				return false;
-		} else if (!inputs.equals(other.inputs))
-			return false;
-		if (ipfPreparationJobMessage == null) {
-			if (other.ipfPreparationJobMessage != null)
-				return false;
-		} else if (!ipfPreparationJobMessage.equals(other.ipfPreparationJobMessage))
-			return false;
-		if (jobOrder == null) {
-			if (other.jobOrder != null)
-				return false;
-		} else if (!jobOrder.equals(other.jobOrder))
-			return false;
-		if (outputs == null) {
-			if (other.outputs != null)
-				return false;
-		} else if (!outputs.equals(other.outputs))
-			return false;
-		if (pools == null) {
-			if (other.pools != null)
-				return false;
-		} else if (!pools.equals(other.pools))
-			return false;
-		if (productProcessMode == null) {
-			if (other.productProcessMode != null)
-				return false;
-		} else if (!productProcessMode.equals(other.productProcessMode))
-			return false;
-		if (timedOut != other.timedOut)
-			return false;
-		if (timeliness == null) {
-			if (other.timeliness != null)
-				return false;
-		} else if (!timeliness.equals(other.timeliness))
-			return false;
-		if (workDirectory == null) {
-			if (other.workDirectory != null)
-				return false;
-		} else if (!workDirectory.equals(other.workDirectory))
-			return false;
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "IpfExecutionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productProcessMode="
-				+ productProcessMode + ", workDirectory=" + workDirectory + ", jobOrder=" + jobOrder +
-				", timeliness=" + timeliness + ", inputs=" + inputs + ", outputs=" + outputs +
-				", pools=" + pools + ", timedOut=" + timedOut + ", uid=" + uid +
-				", ipfPreparationJobMessage=" + ipfPreparationJobMessage + "]";
+		final IpfExecutionJob other = (IpfExecutionJob) obj;
+		return Objects.equals(etadMode, other.etadMode) 
+				&& Objects.equals(inputs, other.inputs)
+				&& Objects.equals(ipfPreparationJobMessage, other.ipfPreparationJobMessage)
+				&& Objects.equals(jobOrder, other.jobOrder) 
+				&& Objects.equals(outputs, other.outputs)
+				&& Objects.equals(pools, other.pools) 
+				&& Objects.equals(productProcessMode, other.productProcessMode)
+				&& timedOut == other.timedOut 
+				&& Objects.equals(timeliness, other.timeliness)
+				&& Objects.equals(workDirectory, other.workDirectory);
 	}
 
 }

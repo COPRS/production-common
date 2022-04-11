@@ -10,35 +10,35 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(using = AuxMetadataSerializer.class)
 @JsonDeserialize(using = AuxMetadataDeserializer.class)
 public class AuxMetadata extends AbstractMetadata {
-
     private final Map<String, String> additionalProperties;
 
-    public AuxMetadata(String productName,
-                       String productType,
-                       String keyObjectStorage,
-                       String validityStart,
-                       String validityStop,
-                       String missionId,
-                       String satelliteId,
-                       String stationCode,
-                       Map<String, String> additionalProperties) {
+    public AuxMetadata(final String productName,
+                       final String productType,
+                       final String keyObjectStorage,
+                       final String validityStart,
+                       final String validityStop,
+                       final String missionId,
+                       final String satelliteId,
+                       final String stationCode,
+                       final Map<String, String> additionalProperties) {
         super(productName, productType, keyObjectStorage, validityStart, validityStop, missionId, satelliteId, stationCode);
         this.additionalProperties = additionalProperties;
     }
 
-    public  boolean has(String additionalProperty) {
+    public  boolean has(final String additionalProperty) {
         return additionalProperties.containsKey(additionalProperty);
     }
 
-    public String get(String additionalProperty) {
+    public String get(final String additionalProperty) {
         return additionalProperties.get(additionalProperty);
     }
 
-    public Map<String, String> getAdditionalProperties() {
+    @Override
+	public Map<String, String> getAdditionalProperties() {
         return additionalProperties;
     }
 
-    public void ifPresent(String additionalProperty, Consumer<String> consumer) {
+    public void ifPresent(final String additionalProperty, final Consumer<String> consumer) {
         if(has(additionalProperty)) {
             consumer.accept(get(additionalProperty));
         }
@@ -59,17 +59,39 @@ public class AuxMetadata extends AbstractMetadata {
                 ']';
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        AuxMetadata that = (AuxMetadata) o;
-        return Objects.equals(additionalProperties, that.additionalProperties);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(
+				additionalProperties,
+				keyObjectStorage,
+				missionId,
+				productName,
+				productType,
+				satelliteId,
+				stationCode,
+				swathtype,
+				validityStart,
+				validityStop);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), additionalProperties);
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final AuxMetadata other = (AuxMetadata) obj;
+		return Objects.equals(additionalProperties, other.additionalProperties)
+				&& Objects.equals(keyObjectStorage, other.keyObjectStorage)
+				&& Objects.equals(missionId, other.missionId) 
+				&& Objects.equals(productName, other.productName)
+				&& Objects.equals(productType, other.productType) 
+				&& Objects.equals(satelliteId, other.satelliteId)
+				&& Objects.equals(stationCode, other.stationCode) 
+				&& Objects.equals(swathtype, other.swathtype)
+				&& Objects.equals(validityStart, other.validityStart)
+				&& Objects.equals(validityStop, other.validityStop);
+	}    
 }
