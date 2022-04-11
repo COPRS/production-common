@@ -174,59 +174,10 @@
 				select="//*[local-name()='onlineQualityCheck']" />
 		</qualityIndicator>
 
-		<xsl:call-template name="setTimeliness">
-			<xsl:with-param name="timeliness">
-				<xsl:value-of
-					select="//*[local-name()='generalProductInformation']/*[local-name()='timeliness']" />
-			</xsl:with-param>
-		</xsl:call-template>
-	</xsl:template>
-
-	<!--=================== Getting Timeliness Fields Template =================== -->
-	<xsl:template name="setTimeliness">
-		<xsl:param name="timeliness" />
-		<xsl:variable name="NRT">
-			<xsl:choose>
-				<xsl:when
-					test="$timeliness = 'NR' or $timeliness = 'NN' or $timeliness = 'NS' or $timeliness = 'AL' or $timeliness = '__'">
-					<xsl:value-of select="'true'" />
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:value-of select="'false'" />
-				</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
-		<xsl:variable name="NTC">
-			<xsl:choose>
-				<xsl:when
-					test="$timeliness = 'NT' or $timeliness = 'SN' or $timeliness = 'NN' or $timeliness = 'AL' or $timeliness = '__'">
-					<xsl:value-of select="'true'" />
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:value-of select="'false'" />
-				</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
-		<xsl:variable name="STC">
-			<xsl:choose>
-				<xsl:when
-					test="$timeliness = 'ST' or $timeliness = 'SN' or $timeliness = 'NS' or $timeliness = 'AL' or $timeliness = '__'">
-					<xsl:value-of select="'true'" />
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:value-of select="'false'" />
-				</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
-		<NRT>
-			<xsl:value-of select="$NRT" />
-		</NRT>
-		<STC>
-			<xsl:value-of select="$STC" />
-		</STC>
-		<NTC>
-			<xsl:value-of select="$NTC" />
-		</NTC>
+		<timeliness>
+        	<xsl:value-of
+				select="//*[local-name()='generalProductInformation']/*[local-name()='timeliness']" />
+        </timeliness>
 	</xsl:template>
 
 	<!--==================== Format Date Time Template ========================= -->
