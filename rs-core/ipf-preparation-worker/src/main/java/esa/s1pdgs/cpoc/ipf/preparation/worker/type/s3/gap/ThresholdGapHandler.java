@@ -63,16 +63,14 @@ public class ThresholdGapHandler extends AbstractGapHandler {
 
 		List<TimeInterval> newIntervals = new ArrayList<>();
 		TimeInterval interval = it.next();
-		TimeInterval newInterval = new TimeInterval();
+		TimeInterval newInterval; 
 
 		if (!jobInterval.getStart().isBefore(interval.getStart())) {
 			// If the first interval has an earlier start time than the lower bound, set
 			// start time of first interval to lower bound
-			newInterval.setStart(jobInterval.getStart());
-			newInterval.setStop(interval.getStop());
+			newInterval = new TimeInterval(jobInterval.getStart(),interval.getStop());
 		} else {
-			newInterval.setStart(interval.getStart());
-			newInterval.setStop(interval.getStop());
+			newInterval = new TimeInterval(interval.getStart(),interval.getStop());
 		}
 
 		while (it.hasNext()) {
@@ -86,13 +84,13 @@ public class ThresholdGapHandler extends AbstractGapHandler {
 				newInterval = interval;
 			} else {
 				// Otherwise extend current TimeInterval
-				newInterval.setStop(interval.getStop());
+				newInterval = new TimeInterval(newInterval.getStart(),interval.getStop());
 			}
 		}
 
 		// At the end, make sure the last TimeInterval does not exceed the upper bound
 		if (newInterval.getStop().isAfter(jobInterval.getStop())) {
-			newInterval.setStop(jobInterval.getStop());
+			newInterval = new TimeInterval(newInterval.getStart(),jobInterval.getStop());
 		}
 		newIntervals.add(newInterval);
 

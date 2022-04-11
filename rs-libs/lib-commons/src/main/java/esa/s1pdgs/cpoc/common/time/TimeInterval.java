@@ -51,4 +51,8 @@ public final class TimeInterval implements Comparable<TimeInterval> {
 		}
 		return retval;
 	};
+	
+	public final boolean intersects(final TimeInterval interval) {
+		return TimeIntervals.intersects(this, interval);
+	}
 }

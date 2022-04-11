@@ -162,7 +162,7 @@ public final class PreparationJobPublishMessageProducer {
     		final String outputProductType
 	) {
         final CatalogEvent event = mqiMessage.getBody();
-        final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(mqiMessage);	
+        final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(event);	
         
         // FIXME reporting of AppDataJob doesn't make sense here any more, needs to be replaced by something
         // meaningful
