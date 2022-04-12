@@ -28,11 +28,11 @@ public class AuxipClientConfigurationProperties {
 		private String oauthClientId;
 		private String oauthClientSecret;
 
-		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP
+		private String creationDateAttributeName = "PublicationDate"; // in legacy PRIP instances 'PublicationDate', in cloud PRIP
 													// 'creationDate'
-		private String productNameAttrName; // in legacy PRIP instances 'Name', in cloud PRIP 'name'
-		private String idAttrName; // in legacy PRIP instances 'Id', in cloud PRIP 'id'
-		private String contentLengthAttrName; // in legacy PRIP instances 'ContentLength', in cloud PRIP 'contentLength'
+		private String productNameAttrName = "Name"; // in legacy PRIP instances 'Name', in cloud PRIP 'name'
+		private String idAttrName = "Id"; // in legacy PRIP instances 'Id', in cloud PRIP 'id'
+		private String contentLengthAttrName="ContentLength"; // in legacy PRIP instances 'ContentLength', in cloud PRIP 'contentLength'
 		private boolean useHttpClientDownload = true;
 
 		// - - - - - - - - - - - - - - - - - -
