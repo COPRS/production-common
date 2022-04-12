@@ -33,7 +33,8 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
 public final class AuxipAuthenticationUtil {
 
-	// private static final Logger LOG = LogManager.getLogger(AuxipAuthenticationUtil.class);
+	// private static final Logger LOG =
+	// LogManager.getLogger(AuxipAuthenticationUtil.class);
 
 	public static final Header basicAuthHeaderFor(final AuxipHostConfiguration hostConfig) {
 		final String auth = hostConfig.getUser() + ":" + hostConfig.getPass();
@@ -49,9 +50,16 @@ public final class AuxipAuthenticationUtil {
 		 * Old AUXIP server from S1PRO was expecting to have the OAUTH2-ACCESS-TOKEN to be send.
 		 * New server however follows standard specification and expecting the bearer token.
 		 */
+		switch (hostConfig.getBearerTokenType())
+		{
+			case AUTHORIZATION:
+				return new BasicHeader("Authorization", "Bearer "+accessToken);
+			case OUTH2_ACCESS_TOKEN:
+				return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
+		}
 		
-		//return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
-		return new BasicHeader("Authorization", "Bearer "+accessToken);
+		throw new IllegalArgumentException("Unknown bearer token type: "+hostConfig.getBearerTokenType());
+
 	}
 
 	public static final String retrieveOauthAccessToken(final AuxipHostConfiguration hostConfig) {
@@ -93,9 +101,9 @@ public final class AuxipAuthenticationUtil {
 					}
 				}
 
-				throw new AuxipClientOauthException("error retrieving oauth access token from " + oauthAuthUrl
-						+ ": status code " + response.getStatusLine().getStatusCode() + "\nbody: "
-						+ responseBodyString);
+				throw new AuxipClientOauthException(
+						"error retrieving oauth access token from " + oauthAuthUrl + ": status code "
+								+ response.getStatusLine().getStatusCode() + "\nbody: " + responseBodyString);
 			}
 
 			final HttpEntity responseEntity = response.getEntity();

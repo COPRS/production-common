@@ -12,37 +12,44 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "auxip")
 public class AuxipClientConfigurationProperties {
 	
+	public enum BearerTokenType {
+		AUTHORIZATION,
+		OUTH2_ACCESS_TOKEN
+	}
+
 	public static class AuxipHostConfiguration {
 		private String serviceRootUri;
 		private String user;
 		private String pass;
 		private boolean sslValidation = true;
 		private String authType; // basic|oauth2|disable
+		private BearerTokenType bearerTokenType = BearerTokenType.AUTHORIZATION;
 		private String oauthAuthUrl;
 		private String oauthClientId;
 		private String oauthClientSecret;
-		
-		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP 'creationDate'
+
+		private String creationDateAttributeName; // in legacy PRIP instances 'PublicationDate', in cloud PRIP
+													// 'creationDate'
 		private String productNameAttrName; // in legacy PRIP instances 'Name', in cloud PRIP 'name'
 		private String idAttrName; // in legacy PRIP instances 'Id', in cloud PRIP 'id'
 		private String contentLengthAttrName; // in legacy PRIP instances 'ContentLength', in cloud PRIP 'contentLength'
 		private boolean useHttpClientDownload = true;
-		
+
 		// - - - - - - - - - - - - - - - - - -
-		
+
 		@Override
 		public String toString() {
 			return "AuxipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
 					+ ", pass=****" + ", sslValidation=" + this.sslValidation + ", authType=" + this.authType
 					+ ", oauthAuthUrl=" + this.oauthAuthUrl + ", oauthClientId=" + this.oauthClientId
-					+ ", oauthClientSecret=" + this.oauthClientSecret + ", creationDateAttributeName="
-					+ this.creationDateAttributeName + ", productNameAttrName=" + this.productNameAttrName
-					+ ", contentLengthAttrName=" + this.contentLengthAttrName + ", idAttrName=" + this.idAttrName
-					+ ", useHttpClientDownload=" + useHttpClientDownload + "]";
+					+ ", bearerTokenType=" + this.bearerTokenType + ", oauthClientSecret=" + this.oauthClientSecret
+					+ ", creationDateAttributeName=" + this.creationDateAttributeName + ", productNameAttrName="
+					+ this.productNameAttrName + ", contentLengthAttrName=" + this.contentLengthAttrName
+					+ ", idAttrName=" + this.idAttrName + ", useHttpClientDownload=" + useHttpClientDownload + "]";
 		}
 
 		// - - - - - - - - - - - - - - - - - -
-		
+
 		public String getServiceRootUri() {
 			return this.serviceRootUri;
 		}
@@ -50,7 +57,7 @@ public class AuxipClientConfigurationProperties {
 		public void setServiceRootUri(final String serviceRootUri) {
 			this.serviceRootUri = serviceRootUri;
 		}
-		
+
 		public String getUser() {
 			return this.user;
 		}
@@ -66,7 +73,7 @@ public class AuxipClientConfigurationProperties {
 		public void setPass(final String pass) {
 			this.pass = pass;
 		}
-		
+
 		public String getCreationDateAttributeName() {
 			return this.creationDateAttributeName;
 		}
@@ -98,7 +105,7 @@ public class AuxipClientConfigurationProperties {
 		public void setSslValidation(final boolean sslValidation) {
 			this.sslValidation = sslValidation;
 		}
-		
+
 		public String getContentLengthAttrName() {
 			return this.contentLengthAttrName;
 		}
@@ -146,21 +153,30 @@ public class AuxipClientConfigurationProperties {
 		public void setAuthType(String authType) {
 			this.authType = authType;
 		}
+
+		public BearerTokenType getBearerTokenType() {
+			return bearerTokenType;
+		}
+
+		public void setBearerTokenType(BearerTokenType bearerTokenType) {
+			this.bearerTokenType = bearerTokenType;
+		}
+
 	}
-	
+
 	// --------------------------------------------------------------------------
-	
+
 	private String proxy;
 
 	private Map<String, AuxipHostConfiguration> hostConfigs = new HashMap<>();
-	
+
 	// --------------------------------------------------------------------------
-	
+
 	@Override
 	public String toString() {
 		return "AuxipClientConfigurationProperties [proxy=" + this.proxy + ", hostConfigs=" + this.hostConfigs + "]";
 	}
-	
+
 	// --------------------------------------------------------------------------
 
 	public Map<String, AuxipHostConfiguration> getHostConfigs() {
@@ -170,7 +186,7 @@ public class AuxipClientConfigurationProperties {
 	public void setHostConfigs(final Map<String, AuxipHostConfiguration> hostConfigs) {
 		this.hostConfigs = hostConfigs;
 	}
-	
+
 	public String getProxy() {
 		return this.proxy;
 	}
