@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'processing-common/**'
-      - '.github/workflows/build-rs-core-components.yml'
+      - '.github/workflows/build-rs-core-examples.yml'
     branches:
       - '!main'
       - 'release/**'
@@ -12,10 +12,10 @@ on:
     workflow_dispatch:
       
 env:
-  RS_CORE_FOLDER: processing-common
+  RS_CORE_FOLDER: rs-core-examples
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
   ARTIFACTORY_PROJECT: rs-docker
-  ARTIFACTORY_SUB_PROJECT: rs-core
+  ARTIFACTORY_SUB_PROJECT: rs-core-examples
   
 jobs:
   
@@ -23,8 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [ingestion, metadata, compression, distribution] #todo
-#        component: [ingestion, catalog, data-lifecycle, compression, prip, ddip]
+        component: [ingestion-auxip, ingestion-edip]
     runs-on: ubuntu-latest
     steps:
    
