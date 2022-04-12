@@ -12,6 +12,24 @@ The Ingestion Filter application will verify if the product is in the time windo
 
 The Ingestion Worker application is doing the actual I/O activity and performing the download from the configured interface. Once successfully finished, the product will be uploaded into the Object Storage and a new Ingestion Event generated to notify the COPRS that a new product had been added to the system.
 
+## Requirements
+
+This software does have the following minimal requirements:
+
+TBD
+
+
+| Resource                    | Value       |
+|-----------------------------|-------------|
+| CPU                         |             |
+| Memory                      |             |
+| Disk volume needed          |             |
+| Disk access                 |             |
+| Disk storage capacity       |             |
+| Affinity between Pod / Node |             |
+|                             |             |
+
+
 ## Configuration
 
 ### Ingestion Trigger

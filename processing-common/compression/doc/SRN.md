@@ -14,6 +14,23 @@ On each of the priority queues a Compression Worker will be listening. These wor
 
 Finally a compression event will be written mentioning the compressed products and allow other systems to react upon the compression.
 
+## Requirements
+
+This software does have the following minimal requirements:
+
+TBD
+
+
+| Resource                    | Value       |
+|-----------------------------|-------------|
+| CPU                         |             |
+| Memory                      |             |
+| Disk volume needed          |             |
+| Disk access                 |             |
+| Disk storage capacity       |             |
+| Affinity between Pod / Node |             |
+|                             |             |
+
 ## Compression Filter
 
 TBD
