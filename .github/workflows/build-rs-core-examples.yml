@@ -1,4 +1,4 @@
-name: Build RS core components
+name: Build RS core examples
 
 on:
   push:
