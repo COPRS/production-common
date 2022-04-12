@@ -50,7 +50,7 @@ jobs:
       run: |
         mkdir -p ${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Executables
         sed -i 's/<VERSION>/${{ steps.extract_branch.outputs.branch }}/' ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-application-list.properties
-        cat ${{ env.RS_CORE_FOLDER }}/obs-stream-parameters.properties >> ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-parameters.properties
+        cat processing-common/obs-stream-parameters.properties >> ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-parameters.properties
         cp -r ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/* ${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Executables
         
     - name: Create PDF
