@@ -61,8 +61,8 @@ data:
   cgs1.programmaticRecursion: "false"
   cgs1.enablePreemptiveAuthentication: "false"
 
-  cgs2.host: "esa-copernicus.ksat.no"
-  cgs2.path: "/SVL/SENTINEL1/"  
+  cgs2.host: "test-esa-copernicus.ksat.no"
+  cgs2.path: "/sentinel/SVL/SENTINEL1/"  
   cgs2.disableValiditation: "true"
   cgs2.connectTimeoutSec: "60"
   cgs2.programmaticRecursion: "true"
