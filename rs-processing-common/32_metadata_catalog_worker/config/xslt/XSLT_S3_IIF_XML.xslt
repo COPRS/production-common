@@ -95,7 +95,9 @@
 			<xsl:value-of select="//*[local-name()='quality']" />
 		</qualityIndicator>
 
+		<!-- L0 products should always use NRT -->
 		<xsl:call-template name="setTimeliness" />
+		<timeliness>NR</timeliness>
 	</xsl:template>
 
 	<!--=================== Getting Timeliness Fields Template =================== -->

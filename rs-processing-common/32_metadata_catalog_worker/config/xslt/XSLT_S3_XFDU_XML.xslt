@@ -180,6 +180,10 @@
 					select="//*[local-name()='generalProductInformation']/*[local-name()='timeliness']" />
 			</xsl:with-param>
 		</xsl:call-template>
+		<timeliness>
+        	<xsl:value-of
+				select="//*[local-name()='generalProductInformation']/*[local-name()='timeliness']" />
+        </timeliness>
 	</xsl:template>
 
 	<!--=================== Getting Timeliness Fields Template =================== -->
