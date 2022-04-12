@@ -29,6 +29,20 @@ TBD
 | Affinity between Pod / Node |             |
 |                             |             |
 
+## Additional setup
+
+In order to use this RS Core component, it is required to do some additional setup before deploying it.
+
+## AUXIP
+When using an AUXIP endpoint it will be required to provide some additional credentials in order to allow login to it. For security issues this cannot be done in the normal properties and needs to be setup as Kubernetes secret. 
+
+Using this example the secret can be setup as follow:
+``kubectl create secret generic auxip --from-literal=USERNAME=<USER_ACCOUNT> --from-literal=PASSWORD=<USER_PASSWORD> --from-literal=CLIENT_ID=<CLIENT_ID --from-literal=CLIENT_SECRET=<CLIENT_SECRET>``
+
+## EDIP
+TBD
+
+## XBIP
 
 ## Configuration
 
