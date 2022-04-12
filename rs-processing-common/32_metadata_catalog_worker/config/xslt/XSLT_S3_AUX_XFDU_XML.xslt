@@ -63,10 +63,10 @@
 					select="//*[local-name()='generalProductInformation']/*[local-name()='timeliness']" />
 			</xsl:with-param>
 		</xsl:call-template>
-		<timeliness>
+		<s3timeliness>
         	<xsl:value-of
 				select="//*[local-name()='generalProductInformation']/*[local-name()='timeliness']" />
-        </timeliness>
+        </s3timeliness>
 	</xsl:template>
 
 

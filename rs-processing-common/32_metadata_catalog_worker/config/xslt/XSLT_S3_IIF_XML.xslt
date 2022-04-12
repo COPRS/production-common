@@ -97,7 +97,7 @@
 
 		<!-- L0 products should always use NRT -->
 		<xsl:call-template name="setTimeliness" />
-		<timeliness>NR</timeliness>
+		<s3timeliness>NR</s3timeliness>
 	</xsl:template>
 
 	<!--=================== Getting Timeliness Fields Template =================== -->
