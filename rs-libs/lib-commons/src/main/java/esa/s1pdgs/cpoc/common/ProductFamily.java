@@ -57,10 +57,36 @@ public enum ProductFamily {
     // SPP compressed types
     SPP_OBS_ZIP,
     
-    // S2QT types
-    L1C,
-    L2A,
-    L2A_ZIP,
+    // S2 types
+    S2_AUX,
+    S2_L0_GR,
+    S2_L0_DS,
+    S2_L1A_GR,
+    S2_L1A_DS,
+    S2_L1B_GR,
+    S2_L1B_DS,
+    S2_L1C_TL,
+    S2_L1C_DS,
+    S2_L1C_TC,
+    S2_L2A_TL,
+    S2_L2A_DS,
+    S2_SAD,
+    S2_HKTM,
+    // S2 compressed types
+    S2_AUX_ZIP,
+    S2_L0_GR_ZIP,
+    S2_L0_DS_ZIP,
+    S2_L1A_GR_ZIP,
+    S2_L1A_DS_ZIP,
+    S2_L1B_GR_ZIP,
+    S2_L1B_DS_ZIP,
+    S2_L1C_TL_ZIP,
+    S2_L1C_DS_ZIP,
+    S2_L1C_TC_ZIP,
+    S2_L2A_TL_ZIP,
+    S2_L2A_DS_ZIP,
+    S2_SAD_ZIP,
+    S2_HKTM_ZIP,
     
     // S3 Types    
     S3_AUX,
