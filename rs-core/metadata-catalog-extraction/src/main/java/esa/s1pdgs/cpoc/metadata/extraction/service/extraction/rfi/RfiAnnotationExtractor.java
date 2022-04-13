@@ -101,7 +101,13 @@ public class RfiAnnotationExtractor {
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				} finally {
-					FileUtils.delete(annotationDirectory.toFile().getPath());
+					try {
+						if (Files.exists(annotationDirectory)) {
+							FileUtils.delete(annotationDirectory.toFile().getPath());
+						}
+					} catch (Exception e) {
+						LOG.warn("Disk cleanup failed for directory ", annotationDirectory.toFile().getPath());
+					}
 				}
 
 				if (RfiMitigationPerformed.ALWAYS == rfiMitigationPerformed
