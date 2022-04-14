@@ -39,6 +39,8 @@ public class OdataController {
 	@Autowired
 	private ObsClient obsClient;
 	
+	@Value("${prip-frontend.header-field-name-username:x-username}")
+	private String headerFieldNameUsername;
 	@Value("${prip-frontend.download-url-expiration-time-in-seconds:600}")
 	private long downloadUrlExpirationTimeInSeconds;
 	
@@ -49,10 +51,11 @@ public class OdataController {
 	public void process(HttpServletRequest request, HttpServletResponse response) {
 		String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
 		LOGGER.info("Received HTTP request for URL: {}{}", request.getRequestURL().toString(), queryParams);		
+		final String username = Objects.toString(request.getHeader(headerFieldNameUsername), "not defined");
 		OData odata = OData.newInstance();
 		ServiceMetadata serviceMetadata = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(serviceMetadata);
-		handler.register(new ProductEntityProcessor(pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds));
+		handler.register(new ProductEntityProcessor(pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds, username));
 		handler.register(new ProductEntityCollectionProcessor(pripMetadataRepository));
 		handler.register(new ProductActionProcessor(pripMetadataRepository));
 		

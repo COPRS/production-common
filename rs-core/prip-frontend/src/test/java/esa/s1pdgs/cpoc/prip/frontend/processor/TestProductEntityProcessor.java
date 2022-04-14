@@ -81,7 +81,7 @@ public class TestProductEntityProcessor {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		final int downloadUrlExpirationTimeInSeconds = 0;
-		uut = new ProductEntityProcessor(pripMetadataRepositoryMock, obsClientMock, downloadUrlExpirationTimeInSeconds);
+		uut = new ProductEntityProcessor(pripMetadataRepositoryMock, obsClientMock, downloadUrlExpirationTimeInSeconds, "username");
 		uut.init(odataMock, null);
 	}
 

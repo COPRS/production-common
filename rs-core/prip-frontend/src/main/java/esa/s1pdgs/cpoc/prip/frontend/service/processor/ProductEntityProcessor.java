@@ -53,15 +53,18 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 	
 	private OData odata;
 	private ServiceMetadata serviceMetadata;
-	private PripMetadataRepository pripMetadataRepository;
-	private ObsClient obsClient;
-	private long downloadUrlExpirationTimeInSeconds;
+	private final PripMetadataRepository pripMetadataRepository;
+	private final ObsClient obsClient;
+	private final long downloadUrlExpirationTimeInSeconds;
+	private final String username;
 
 	public ProductEntityProcessor(final PripMetadataRepository pripMetadataRepository,
-			final ObsClient obsClient, final long downloadUrlExpirationTimeInSeconds) {
+			final ObsClient obsClient, final long downloadUrlExpirationTimeInSeconds,
+			final String username) {
 		this.pripMetadataRepository = pripMetadataRepository;
 		this.obsClient = obsClient;
 		this.downloadUrlExpirationTimeInSeconds = downloadUrlExpirationTimeInSeconds;
+		this.username = username;
 	}
 	
 	@Override
@@ -126,8 +129,6 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 					final Reporting reporting = ReportingUtils
 							.newReportingBuilder(MissionId.fromFileName(foundPripMetadata.getObsKey()))
 							.newReporting("PripTempDownloadUrl");
-					// currently used username
-					final String username = "not defined";
 					
 					reporting.begin(
 							PripReportingInput.newInstance(
