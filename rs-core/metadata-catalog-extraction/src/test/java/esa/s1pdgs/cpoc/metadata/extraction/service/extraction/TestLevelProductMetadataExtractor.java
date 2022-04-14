@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -164,7 +165,18 @@ public class TestLevelProductMetadataExtractor {
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				assertEquals(expected.get(key), result.get(key));
+				if (expected.get(key) instanceof JSONArray) {
+					JSONArray a = (JSONArray) expected.get(key);
+					JSONArray b = (JSONArray) result.get(key);
+					assertEquals(a.length(), b.length());
+					for (int i=0; i< a.length(); i++)
+					{
+						assertEquals(a.get(i), b.get(i));
+					}
+						
+				} else {
+					assertEquals(expected.get(key), result.get(key));
+				}
 			}
 		}
 		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
@@ -212,7 +224,18 @@ public class TestLevelProductMetadataExtractor {
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				assertEquals(expected.get(key), result.get(key));
+				if (expected.get(key) instanceof JSONArray) {
+					JSONArray a = (JSONArray) expected.get(key);
+					JSONArray b = (JSONArray) result.get(key);
+					assertEquals(a.length(), b.length());
+					for (int i=0; i< a.length(); i++)
+					{
+						assertEquals(a.get(i), b.get(i));
+					}
+						
+				} else {
+					assertEquals(expected.get(key), result.get(key));
+				}
 			}
 		}
 		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
@@ -261,7 +284,18 @@ public class TestLevelProductMetadataExtractor {
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				assertEquals(expected.get(key), result.get(key));
+				if (expected.get(key) instanceof JSONArray) {
+					JSONArray a = (JSONArray) expected.get(key);
+					JSONArray b = (JSONArray) result.get(key);
+					assertEquals(a.length(), b.length());
+					for (int i=0; i< a.length(); i++)
+					{
+						assertEquals(a.get(i), b.get(i));
+					}
+						
+				} else {
+					assertEquals(expected.get(key), result.get(key));
+				}
 			}
 		}
 		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
@@ -309,7 +343,18 @@ public class TestLevelProductMetadataExtractor {
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				assertEquals(expected.get(key), result.get(key));
+				if (expected.get(key) instanceof JSONArray) {
+					JSONArray a = (JSONArray) expected.get(key);
+					JSONArray b = (JSONArray) result.get(key);
+					assertEquals(a.length(), b.length());
+					for (int i=0; i< a.length(); i++)
+					{
+						assertEquals(a.get(i), b.get(i));
+					}
+						
+				} else {
+					assertEquals(expected.get(key), result.get(key));
+				}
 			}
 		}
 		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
@@ -356,7 +401,18 @@ public class TestLevelProductMetadataExtractor {
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				assertEquals(expected.get(key), result.get(key));
+				if (expected.get(key) instanceof JSONArray) {
+					JSONArray a = (JSONArray) expected.get(key);
+					JSONArray b = (JSONArray) result.get(key);
+					assertEquals(a.length(), b.length());
+					for (int i=0; i< a.length(); i++)
+					{
+						assertEquals(a.get(i), b.get(i));
+					}
+						
+				} else {
+					assertEquals(expected.get(key), result.get(key));
+				}
 			}
 		}
 		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
@@ -403,7 +459,18 @@ public class TestLevelProductMetadataExtractor {
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				assertEquals(expected.get(key), result.get(key));
+				if (expected.get(key) instanceof JSONArray) {
+					JSONArray a = (JSONArray) expected.get(key);
+					JSONArray b = (JSONArray) result.get(key);
+					assertEquals(a.length(), b.length());
+					for (int i=0; i< a.length(); i++)
+					{
+						assertEquals(a.get(i), b.get(i));
+					}
+						
+				} else {
+					assertEquals(expected.get(key), result.get(key));
+				}
 			}
 		}
 		verify(obsClient, times(1)).download(Mockito.any(), Mockito.any());
