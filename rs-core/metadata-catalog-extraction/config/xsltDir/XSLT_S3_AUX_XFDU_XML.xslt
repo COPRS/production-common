@@ -21,6 +21,22 @@
 				</xsl:with-param>
 			</xsl:call-template>
 		</validityStopTime>
+		<startTime>
+			<xsl:call-template name="formatDateTime">
+				<xsl:with-param name="receivedDateTime">
+					<xsl:value-of
+						select="//*[local-name()='generalProductInformation']/*[local-name()='validityStartTime']" />
+				</xsl:with-param>
+			</xsl:call-template>
+		</startTime>
+		<stopTime>
+			<xsl:call-template name="formatDateTime">
+				<xsl:with-param name="receivedDateTime">
+					<xsl:value-of
+						select="//*[local-name()='generalProductInformation']/*[local-name()='validityStopTime']" />
+				</xsl:with-param>
+			</xsl:call-template>
+		</stopTime>
 		<creationTime>
 			<xsl:call-template name="formatDateTime">
 				<xsl:with-param name="receivedDateTime">

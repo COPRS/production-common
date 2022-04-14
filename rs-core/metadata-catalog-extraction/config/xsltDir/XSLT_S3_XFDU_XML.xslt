@@ -25,6 +25,24 @@
 			</xsl:call-template>
 		</stopTime>
 
+		<!-- currently the aux search is used to search for level products, and the aux 
+			search needs the field validityStartTime -->
+		<validityStartTime>
+			<xsl:call-template name="formatDateTime">
+				<xsl:with-param name="receivedDateTime"
+					select="//*[local-name()='acquisitionPeriod']/*[local-name()='startTime']" />
+			</xsl:call-template>
+		</validityStartTime>
+
+		<!-- currently the aux search is used to search for level products, and the aux 
+			search needs the field validityStopTime -->
+		<validityStopTime>
+			<xsl:call-template name="formatDateTime">
+				<xsl:with-param name="receivedDateTime"
+					select="//*[local-name()='acquisitionPeriod']/*[local-name()='stopTime']" />
+			</xsl:call-template>
+		</validityStopTime>
+
 		<creationTime>
 			<xsl:call-template name="formatDateTime">
 				<xsl:with-param name="receivedDateTime"

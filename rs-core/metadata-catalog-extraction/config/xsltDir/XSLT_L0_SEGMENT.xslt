@@ -50,7 +50,17 @@
 		</stopTimeANX>
 		<segmentCoordinates>
 			<xsl:copy-of select="//*[local-name() = 'coordinates']/text()"/>
-		</segmentCoordinates>	
+		</segmentCoordinates>
+		<xsl:if test="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfMissingElements']/text() != ''">
+			<qualityNumOfMissingElements>
+				<xsl:copy-of select="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfMissingElements']/text()"/>
+			</qualityNumOfMissingElements>
+		</xsl:if>
+		<xsl:if test="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfCorruptedElements']/text() != ''">
+			<qualityNumOfCorruptedElements>
+				<xsl:copy-of select="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfCorruptedElements']/text()"/>
+			</qualityNumOfCorruptedElements>
+		</xsl:if>
 		<xsl:apply-templates select="node()"/>
 	</xsl:template>
 

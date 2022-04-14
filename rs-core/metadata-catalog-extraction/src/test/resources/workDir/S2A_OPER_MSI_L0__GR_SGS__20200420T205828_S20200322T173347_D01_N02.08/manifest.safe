@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<xfdu:XFDU xmlns:xfdu="urn:ccsds:schema:xfdu:1" version="esa/safe/sentinel-1.0/sentinel-2/msi/archive_l0_datastrip" xmlns:gml="http://www.opengis.net/gml" xmlns:safe="http://www.esa.int/safe/sentinel-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:ccsds:schema:xfdu:1 /dpc/app/s2ipf/FORMAT_METADATA_GR_L0C/01.09.00/scripts/../../../xmlschemas/SAFE/xsd/int/esa/safe/sentinel-1.0/xfdu.xsd">
+
+  <informationPackageMap>
+    <xfdu:contentUnit dmdID="acquisitionPeriod platform" pdiID="processing" textInfo="SENTINEL-2 MSI Level-0_Granule PDI" unitType="Product_Level-0">
+      <xfdu:contentUnit ID="S2_Level-0_Granule_Metadata_Unit" repID="S2_Level-0_Granule_Schema" unitType="Metadata Unit">
+        <dataObjectPointer dataObjectID="S2_Level-0_Granule_Metadata"/>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit ID="IMG_DATA" textInfo="Image Data container">
+        <xfdu:contentUnit ID="IMG_DATA_Band_20m_4_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_20m_4_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_10m_3_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_10m_3_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_20m_3_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_20m_3_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_10m_2_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_10m_2_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_60m_2_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_60m_2_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_10m_4_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_10m_4_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_60m_1_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_60m_1_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_10m_1_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_10m_1_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_60m_3_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_60m_3_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_20m_1_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_20m_1_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_20m_5_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_20m_5_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_20m_2_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_20m_2_Band"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="IMG_DATA_Band_20m_6_Unit" dmdID="measurementOrbitReference measurementFrameSet" unitType="Measurement Data Unit">
+          <dataObjectPointer dataObjectID="IMG_DATA_Band_20m_6_Band"/>
+        </xfdu:contentUnit>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit ID="QI_DATA" textInfo="Quality control container">
+      </xfdu:contentUnit>
+      <xfdu:contentUnit ID="ANC_DATA" textInfo="Ancilliary datas">
+      </xfdu:contentUnit>
+      <xfdu:contentUnit ID="AUX_DATA" textInfo="Auxilliary datas">
+      </xfdu:contentUnit>
+    </xfdu:contentUnit>
+
+  </informationPackageMap>
+
+  <metadataSection>
+    <metadataObject ID="platform" category="DMD" classification="DESCRIPTION">
+
+    </metadataObject>
+    <metadataObject ID="processing" category="PDI" classification="PROVENANCE">
+
+    </metadataObject>
+    <metadataObject ID="acquisitionPeriod" category="DMD" classification="DESCRIPTION">
+
+    </metadataObject>
+    <metadataObject ID="measurementOrbitReference" category="DMD" classification="DESCRIPTION">
+
+    </metadataObject>
+    <metadataObject ID="measurementFrameSet" category="DMD" classification="DESCRIPTION">
+
+    </metadataObject>
+    <metadataObject ID="S2_Level-0_Granule_Information" category="DMD" classification="DESCRIPTION">
+      <dataObjectPointer dataObjectID="S2_Level-0_Granule_Metadata"/>
+    </metadataObject>
+    <metadataObject ID="S2_Level-0_Granule_Schema" category="REP" classification="SYNTAX">
+      <metadataReference href="rep_info/S2_Level-0_Granule_Metadata.xsd" locatorType="URL" mimeType="text/xml" vocabularyName="SDF"/>
+    </metadataObject>
+    <metadataObject ID="Inventory_Metadata_Schema" category="REP" classification="SYNTAX">
+      <metadataReference href="rep_info/Inventory_Metadata.xsd" locatorType="URL" mimeType="text/xml" vocabularyName="SDF"/>
+    </metadataObject>
+    <metadataObject ID="OLQC_Report_Schema" category="REP" classification="SYNTAX">
+      <metadataReference href="rep_info/OLQC_Report.xsd" locatorType="URL" mimeType="text/xml" vocabularyName="SDF"/>
+    </metadataObject>
+  </metadataSection>
+
+  <dataObjectSection>
+    <dataObject ID="S2_Level-0_Granule_Metadata"  repID="S2_Level-0_Granule_Schema">
+      <byteStream mimeType="text/xml" size="6495">
+        <fileLocation href="./S2A_OPER_MTD_L0__GR_SGS__20200420T205828_S20200322T173347_D01.xml" locatorType="URL"/>
+        <checksum checksumName="MD5">99521e73193aeb19638ceb4b228cd8d2</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_20m_4_Band" >
+      <byteStream mimeType="application/octet-stream" size="853344">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B8A.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">415a1535562aa1fdc21f54af4e120cac</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_10m_3_Band" >
+      <byteStream mimeType="application/octet-stream" size="3035520">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B04.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">c0826177b816de358e961c1ccf3ed63b</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_20m_3_Band" >
+      <byteStream mimeType="application/octet-stream" size="853344">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B07.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">8175952ec80d6794599c832965b7e10a</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_10m_2_Band" >
+      <byteStream mimeType="application/octet-stream" size="3035520">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B03.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">a34d5ddcd253f49fc4fdd5b01357e89f</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_60m_2_Band" >
+      <byteStream mimeType="application/octet-stream" size="284448">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B09.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">09dcebb7c2941c7947c6b10077aa761a</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_10m_4_Band" >
+      <byteStream mimeType="application/octet-stream" size="3035520">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B08.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">e7452691563c9a7765c547d3fcdcbb77</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_60m_1_Band" >
+      <byteStream mimeType="application/octet-stream" size="284448">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B01.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">b3bc0944304047004ef9490e313cb8a2</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_10m_1_Band" >
+      <byteStream mimeType="application/octet-stream" size="3035520">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B02.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">7cde1186992168e88baa91df8250f746</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_60m_3_Band" >
+      <byteStream mimeType="application/octet-stream" size="284448">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B10.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">ba394aef884773991724fa6456fde13a</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_20m_1_Band" >
+      <byteStream mimeType="application/octet-stream" size="853344">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B05.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">70ef6b3f21a0f8c86f047b6c75fbc70d</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_20m_5_Band" >
+      <byteStream mimeType="application/octet-stream" size="942912">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B11.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">6afe90c9ec67feae8225dfbbbe2debe6</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_20m_2_Band" >
+      <byteStream mimeType="application/octet-stream" size="853344">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B06.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">0fe381fea4b220a74fc6cb4d63e8be52</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="IMG_DATA_Band_20m_6_Band" >
+      <byteStream mimeType="application/octet-stream" size="942912">
+        <fileLocation href="./IMG_DATA/S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_B12.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">a522915757941971f2faa6e562dcb41c</checksum>
+      </byteStream>
+    </dataObject>
+
+  </dataObjectSection>
+
+</xfdu:XFDU>

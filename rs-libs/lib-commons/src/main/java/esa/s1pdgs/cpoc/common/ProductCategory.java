@@ -57,7 +57,8 @@ public enum ProductCategory {
     ON_DEMAND_EVENT(OnDemandEvent.class),
     DOWNLOAD_JOB(DownloadJob.class),
     // S2 based categories
-    LEVEL_INPUT(IngestionEvent.class), // represent level product that has been ingested
+    S2_AUX(ProductionEvent.class),
+    S2_PRODUCTS(ProductionEvent.class),
 	// S3 based categories
 	S3_AUX(ProductionEvent.class),
 	S3_PRODUCTS(ProductionEvent.class),
@@ -106,9 +107,6 @@ public enum ProductCategory {
 	            return ProductCategory.LEVEL_PRODUCTS;
 	        case L0_SEGMENT:
 	            return ProductCategory.LEVEL_SEGMENTS;
-	        case L1C:
-	        case L2A:
-	        	return ProductCategory.LEVEL_INPUT;
 	        case L1_ETAD:
 	        	return ProductCategory.ETAD_PRODUCTS;
 	        case SPP_MBU:
@@ -131,7 +129,21 @@ public enum ProductCategory {
 			case L1_SLICE_ZIP:
 			case L2_ACN_ZIP:
 			case L2_SLICE_ZIP:
-			case L2A_ZIP:
+		    // S2 zip families
+			case S2_AUX_ZIP:
+			case S2_L0_GR_ZIP:
+			case S2_L0_DS_ZIP:
+			case S2_L1A_GR_ZIP:
+			case S2_L1A_DS_ZIP:
+			case S2_L1B_GR_ZIP:
+			case S2_L1B_DS_ZIP:
+			case S2_L1C_TL_ZIP:
+			case S2_L1C_DS_ZIP:
+			case S2_L1C_TC_ZIP:
+			case S2_L2A_TL_ZIP:
+			case S2_L2A_DS_ZIP:
+			case S2_SAD_ZIP:
+			case S2_HKTM_ZIP:
 			// S3 zip families
 			case S3_AUX_ZIP:
 			case S3_GRANULES_ZIP:
@@ -145,6 +157,24 @@ public enum ProductCategory {
 			case S3_CAL_ZIP:
 			case S3_PUG_ZIP:
 				return ProductCategory.COMPRESSION_JOBS;
+			// S2 families
+			case S2_AUX:
+			case S2_SAD:
+				return ProductCategory.S2_AUX;
+			case S2_L0_GR:
+			case S2_L0_DS:
+			case S2_L1A_GR:
+			case S2_L1A_DS:
+			case S2_L1B_GR:
+			case S2_L1B_DS:
+			case S2_L1C_TL:
+			case S2_L1C_DS:
+			case S2_L1C_TC:
+			case S2_L2A_TL:
+			case S2_L2A_DS:
+			case S2_HKTM:
+				return ProductCategory.S2_PRODUCTS;
+			// S3 families
         	case S3_AUX:
         		return ProductCategory.S3_AUX;
         	case S3_GRANULES:
