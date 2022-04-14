@@ -59,7 +59,7 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 	
 	private XbipHostConfiguration hostConfigFor(final String server) {
 		// lookup host configuration for the given URL	
-		for (final XbipHostConfiguration hostConfig : config.getHostConfigs()) {
+		for (final XbipHostConfiguration hostConfig : config.getHostConfigs().values()) {
 			if (server.equals(hostConfig.getServerName())) {
 				LOG.trace("Found config {}" , hostConfig);
 				return hostConfig;
