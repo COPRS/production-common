@@ -54,6 +54,10 @@ public class ProductServiceImpl implements ProductService {
 				ingestion.getTimeliness()
 		);
 
+		// S1OPS-971: This is a workaround for MDC to allow access of additional metadata
+		if (null != ingestion.getAdditionalMetadata()) {
+			dto.setAdditionalMetadata(ingestion.getAdditionalMetadata());
+		}
 		checkExistingInObs(obsAdapter, ingestion);
 		upload(obsAdapter, ingestion, family, inboxAdapter, uri, obsKey);
 
