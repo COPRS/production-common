@@ -16,7 +16,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.sardine.DavResource;
 import com.github.sardine.Sardine;
 
-import esa.s1pdgs.cpoc.common.errors.SardineRuntimeException;
+import esa.s1pdgs.cpoc.common.errors.sardine.SardineRuntimeException;
+import esa.s1pdgs.cpoc.common.errors.sardine.SardineStreamingIOException;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.xbip.client.XbipClient;
@@ -30,11 +31,15 @@ public class SardineXbipClient implements XbipClient {
 	private final Sardine sardine;
 	private final URI url;
 	private final boolean programmaticRecursion;
+	private final int numRetries;
+	private final long retrySleepMs;
 
-	SardineXbipClient(final Sardine sardine, final URI url, final boolean programmaticRecursion) {
+	SardineXbipClient(final Sardine sardine, final URI url, final boolean programmaticRecursion, int numRetries, long retrySleepMs) {
 		this.sardine = sardine;
 		this.url = url;
 		this.programmaticRecursion = programmaticRecursion;
+		this.numRetries = numRetries;
+		this.retrySleepMs = retrySleepMs;
 	}
 	
 	@Override
@@ -52,13 +57,17 @@ public class SardineXbipClient implements XbipClient {
 	
 	@Override
 	public final List<XbipEntry> list(final XbipEntryFilter filter) throws IOException {
+		try {
 		// S1PRO-1847: special case if infinity depth is disabled on server
 		// each subdirectory needs to be traversed recursively
 		if (programmaticRecursion) {
 			LOG.debug("Performing programmatic recursion on {}", url);
-			return listAllRecursively(url.toString(), filter);
-		}
-		try {
+				return Retries.performWithRetries(
+						() -> listAllRecursively(url.toString(), filter),
+						"listAllRecursively",
+						numRetries,
+						retrySleepMs);
+			} else {
 			return Retries.performWithRetries(
 					() -> sardine.list(url.toString(), -1).stream()
 							.filter(r -> !r.isDirectory())
@@ -66,8 +75,9 @@ public class SardineXbipClient implements XbipClient {
 							.filter(filter::accept)
 							.collect(Collectors.toList()),
 					"list",
-					5,
-					3000);
+						numRetries,
+						retrySleepMs);
+			}
 		} catch (final InterruptedException e) {
 			LOG.error("retries interrupted");
 			throw new SardineRuntimeException(e);
@@ -77,9 +87,21 @@ public class SardineXbipClient implements XbipClient {
 	@Override
 	public final InputStream read(final XbipEntry entry) {
 		try {
+			return Retries.performWithRetries(
+					() -> getInputStream(entry),
+					"getInputStream",
+					numRetries,
+					retrySleepMs);
+		} catch (final InterruptedException e) {
+			LOG.error("retries interrupted");
+			throw new SardineRuntimeException(e);
+		}
+	}
+	private final InputStream getInputStream(final XbipEntry entry) {
+		try {
 			return sardine.get(entry.getUri().toString());
 		} catch (final IOException e) {
-			throw new SardineRuntimeException(
+			throw new SardineStreamingIOException(
 					String.format("Error on retrieving input stream for %s: %s", entry, e.getMessage()),
 					e
 			);

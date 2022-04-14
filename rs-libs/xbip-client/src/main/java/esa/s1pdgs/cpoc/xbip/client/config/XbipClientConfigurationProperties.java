@@ -1,12 +1,13 @@
 package esa.s1pdgs.cpoc.xbip.client.config;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
+@PropertySource({"${xbipConfigFile:classpath:xbip.properties}"})
 @EnableConfigurationProperties
 @Configuration
 @ConfigurationProperties(prefix = "xbip")
@@ -19,6 +20,8 @@ public class XbipClientConfigurationProperties {
 		private boolean programmaticRecursion = false;
 		private int connectTimeoutSec = 60;
 		private boolean enablePreemptiveAuthentication = true;
+		private int numRetries = 5;
+		private long retrySleepMs = 3000;
 		
 		public String getServerName() {
 			return serverName;
@@ -76,25 +79,42 @@ public class XbipClientConfigurationProperties {
 			this.enablePreemptiveAuthentication = enablePreemptiveAuthentication;
 		}
 
+		public int getNumRetries() {
+			return numRetries;
+		}
+
+		public void setNumRetries(int numRetries) {
+			this.numRetries = numRetries;
+		}
+
+		public long getRetrySleepMs() {
+			return retrySleepMs;
+		}
+
+		public void setRetrySleepMs(long retrySleepMs) {
+			this.retrySleepMs = retrySleepMs;
+		}
+
 		@Override
 		public String toString() {
 			return "XbipHostConfiguration [serverName=" + serverName + ", user=" + user + 
 					", pass=****, trustSelfSignedCertificate=" + trustSelfSignedCertificate + 
-					", connectTimeoutSec=" + connectTimeoutSec +", programmaticRecursion=" + 
-					programmaticRecursion + ", enablePreemptiveAuthentication=" + enablePreemptiveAuthentication + "]";
+					", connectTimeoutSec=" + connectTimeoutSec +", programmaticRecursion=" + programmaticRecursion +
+					", enablePreemptiveAuthentication="	+ enablePreemptiveAuthentication + ", numRetries=" + numRetries +
+					", retrySleepMs=" + retrySleepMs + "]";
 		}
 	}
 	
 	private String proxyHost;
 	private int proxyPort = 80;
 
-	private Map<String, XbipHostConfiguration> hostConfigs = new HashMap<>();
+	private List<XbipHostConfiguration> hostConfigs;
 
-	public Map<String, XbipHostConfiguration> getHostConfigs() {
+	public List<XbipHostConfiguration> getHostConfigs() {
 		return hostConfigs;
 	}
 
-	public void setHostConfigs(final Map<String, XbipHostConfiguration> hostConfigs) {
+	public void setHostConfigs(final List<XbipHostConfiguration> hostConfigs) {
 		this.hostConfigs = hostConfigs;
 	}
 	

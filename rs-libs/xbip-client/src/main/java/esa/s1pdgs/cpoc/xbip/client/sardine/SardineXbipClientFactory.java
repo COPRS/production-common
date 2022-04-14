@@ -47,17 +47,19 @@ public class SardineXbipClientFactory implements XbipClientFactory {
 	
 	@Override
 	public XbipClient newXbipClient(final URI serverUrl) {	
-		final XbipHostConfiguration config = hostConfigFor(serverUrl.getHost());
+		final XbipHostConfiguration hostConfig = hostConfigFor(serverUrl.getHost());
 		return new SardineXbipClient(				
-				newSardineFor(config, serverUrl), 
+				newSardineFor(hostConfig, serverUrl), 
 				serverUrl,
-				config.getProgrammaticRecursion()
+				hostConfig.getProgrammaticRecursion(),
+				hostConfig.getNumRetries(),
+				hostConfig.getRetrySleepMs()
 		);
 	}
 	
 	private XbipHostConfiguration hostConfigFor(final String server) {
 		// lookup host configuration for the given URL	
-		for (final XbipHostConfiguration hostConfig : config.getHostConfigs().values()) {
+		for (final XbipHostConfiguration hostConfig : config.getHostConfigs()) {
 			if (server.equals(hostConfig.getServerName())) {
 				LOG.trace("Found config {}" , hostConfig);
 				return hostConfig;

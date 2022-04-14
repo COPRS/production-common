@@ -37,7 +37,9 @@ public class TestSardineXbipClient {
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		uut = new SardineXbipClient(sardine, ROOT_URI, true);
+		int numRetries = 5;
+		long retrySleepMs = 3000;
+		uut = new SardineXbipClient(sardine, ROOT_URI, true, numRetries, retrySleepMs);
 	}
 	
 	@Test
