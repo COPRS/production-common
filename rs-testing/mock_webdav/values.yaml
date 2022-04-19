@@ -22,7 +22,7 @@ worker:
     value: infra 
 
 mock:
-  webdav_path: /var/lib/dav
+  webdav_path: /var/lib/dav/data
   webdav_mission: S1
   webdav_station: MTI_ 
   
