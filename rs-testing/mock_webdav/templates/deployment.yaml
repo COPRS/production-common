@@ -72,7 +72,7 @@ spec:
         command: ['sh', '-c', "mkdir -p {{ .Values.mock.webdav_path }}/NOMINAL/{{ .Values.mock.webdav_station }}/{{ .Values.mock.webdav_mission }}A {{ .Values.mock.webdav_path }}/NOMINAL/{{ .Values.mock.webdav_station }}/{{ .Values.mock.webdav_mission }}B {{ .Values.mock.webdav_path }}/RETRANSFER/{{ .Values.mock.webdav_station }}/{{ .Values.mock.webdav_mission }}A {{ .Values.mock.webdav_path }}/RETRANSFER/{{ .Values.mock.webdav_station }}/{{ .Values.mock.webdav_mission }}B && touch /var/lib/dav/DavLock && chown -R www-data:www-data /var/lib/dav" ]
         volumeMounts: 
         - name: webdavdatadir
-          mountPath: /var/lib/dav        
+          mountPath: {{ .Values.mock.webdav_path }}      
       imagePullSecrets:
       - name: {{ .Values.image.imagePullSecrets }}
       terminationGracePeriodSeconds: 30
