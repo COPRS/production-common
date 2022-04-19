@@ -3,7 +3,7 @@ name: Build RS core examples
 on:
   push:
     paths:
-      - 'processing-common/**'
+      - 'rs-core-examples/**'
       - '.github/workflows/build-rs-core-examples.yml'
     branches:
       - '!main'
