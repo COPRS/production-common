@@ -115,7 +115,7 @@ spec:
       initContainers:
       - name: init-dav
         image: busybox:1.35
-        command: ['sh', '-c', "mkdir -p /data/NOMINAL/S1A /data/NOMINAL/S1B /data/NOMINAL/S2A /data/NOMINAL/S2B /data/NOMINAL/S3A /data/NOMINAL/S3B && chown -R xbip_werum.xbip_werum /data" ]
+        command: ['sh', '-c', "mkdir -p /data/NOMINAL/S1A /data/NOMINAL/S1B /data/NOMINAL/S2A /data/NOMINAL/S2B /data/NOMINAL/S3A /data/NOMINAL/S3B" ]
         volumeMounts: 
         - name: ftpdatadir
           mountPath: /data
