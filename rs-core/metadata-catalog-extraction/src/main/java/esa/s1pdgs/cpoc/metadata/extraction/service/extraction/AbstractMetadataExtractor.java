@@ -26,7 +26,7 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
 	protected final FileDescriptorBuilder fileDescriptorBuilder; 
     protected final String localDirectory;
     protected final ProcessConfiguration processConfiguration;
-    private final ObsClient obsClient;
+    protected final ObsClient obsClient;
 
 	public AbstractMetadataExtractor(
 			final EsServices esServices, 

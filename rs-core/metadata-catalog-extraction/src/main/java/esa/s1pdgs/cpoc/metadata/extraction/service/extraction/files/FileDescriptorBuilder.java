@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -252,6 +253,37 @@ public class FileDescriptorBuilder {
 
         return descriptor;
     }
+	
+	/**
+	 * Builds a S2FileDescriptor based on the given file.
+	 */
+	public S2FileDescriptor buildS2FileDescriptor(final CatalogJob catalogJob)
+			throws MetadataFilePathException, MetadataIgnoredFileException {
+
+
+		// Check if key matches the pattern
+		S2FileDescriptor descriptor = null;
+		final Matcher m = pattern.matcher(catalogJob.getKeyObjectStorage());
+		if (m.matches()) {
+			descriptor = new S2FileDescriptor();
+			descriptor.setProductType(m.group(5));
+			descriptor.setProductClass(m.group(3));
+			descriptor.setRelativePath(catalogJob.getKeyObjectStorage());
+			descriptor.setFilename(catalogJob.getKeyObjectStorage());
+			descriptor.setProductName(catalogJob.getKeyObjectStorage());
+			descriptor.setMissionId(m.group(1));
+			descriptor.setSatelliteId(m.group(2));
+			descriptor.setKeyObjectStorage(catalogJob.getKeyObjectStorage());
+			descriptor.setProductFamily(catalogJob.getProductFamily());
+			descriptor.setMode(catalogJob.getMode());
+
+		} else {
+			throw new MetadataFilePathException(catalogJob.getKeyObjectStorage(), catalogJob.getProductFamily().name(),
+					String.format("File %s does not match the configuration file pattern %s", catalogJob.getKeyObjectStorage(), pattern));
+		}
+
+		return descriptor;
+	}
 
 	/**
 	 * Builds a S3FileDescriptor based on the given file.
