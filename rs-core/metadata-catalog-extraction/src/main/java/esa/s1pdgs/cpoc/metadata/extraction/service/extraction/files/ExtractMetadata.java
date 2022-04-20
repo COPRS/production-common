@@ -42,6 +42,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescripto
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.TimelinessReportingInput;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.TimelinessReportingOutput;
@@ -66,6 +67,8 @@ public class ExtractMetadata {
 	private static final String XSLT_L1_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
 	private static final String XSLT_ETAD_MANIFEST = "XSLT_L1_MANIFEST.xslt";
+	private static final String XSLT_S2_MANIFEST = "XSLT_S2_MANIFEST.xslt";
+	private static final String XSLT_S2_INVENTORY = "XSLT_S2_INVENTORY.xslt";
 	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
@@ -392,6 +395,21 @@ public class ExtractMetadata {
 			LOGGER.error("Extraction of L0 segment file metadata failed", e);
 			throw new MetadataExtractionException(e);
 		}
+	}
+
+	public JSONObject processS2Metadata(S2FileDescriptor descriptor, File safeMetadataFile, File inventoryMetadataFile)
+			throws MetadataExtractionException {
+		JSONObject safeMetadata = transformXMLWithXSLTToJSON(safeMetadataFile,
+				new File(this.xsltDirectory + XSLT_S2_MANIFEST));
+		JSONObject inventoryMetadata = transformXMLWithXSLTToJSON(inventoryMetadataFile,
+				new File(this.xsltDirectory + XSLT_S2_INVENTORY));
+		
+		JSONObject metadataJSONObject = this.mergeJSONObjects(safeMetadata, inventoryMetadata);
+		
+		//TODO process coordinates
+		
+		LOGGER.debug("composed Json: {} ", metadataJSONObject);
+		return metadataJSONObject;
 	}
 
 	/**
@@ -1295,6 +1313,19 @@ public class ExtractMetadata {
 		totalNumberOfSlices = Math.max(totalNumberOfSlices, 1);
 		LOGGER.info("total number of slices: {}", totalNumberOfSlices);
 		return totalNumberOfSlices;
+	}
+	
+	private JSONObject mergeJSONObjects(JSONObject json1, JSONObject json2) {
+		JSONObject mergedJSON = new JSONObject();
+		try {
+			mergedJSON = new JSONObject(json1, JSONObject.getNames(json1));
+			for (String key : JSONObject.getNames(json2)) {
+				mergedJSON.put(key, json2.get(key));
+			}
+		} catch (JSONException e) {
+			throw new RuntimeException("JSON Exception" + e);
+		}
+		return mergedJSON;
 	}
 
 }

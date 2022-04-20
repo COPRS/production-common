@@ -11,6 +11,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -137,6 +138,24 @@ public class MetadataBuilder {
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }
+    
+    /**
+	 * Build the metadata for an S2 product
+	 * 
+	 * @param descriptor file descriptor of the product
+	 * @param file       file to extract metadata from
+	 * 
+	 * @return the JSONObject containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public JSONObject buildS2ProductFileMetadata(final S2FileDescriptor descriptor, final File safeMetadataFile, final File inventoryMetadataFile, final CatalogJob job)
+			throws MetadataExtractionException, MetadataMalformedException {
+		JSONObject metadataToIndex = extractor.processS2Metadata(descriptor, safeMetadataFile, inventoryMetadataFile);
+		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
+		return metadataToIndex;
+	}
     
 	/**
 	 * Build the metadata for an S3 auxiliary product
