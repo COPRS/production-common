@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
@@ -266,14 +265,14 @@ public class FileDescriptorBuilder {
 		final Matcher m = pattern.matcher(catalogJob.getKeyObjectStorage());
 		if (m.matches()) {
 			descriptor = new S2FileDescriptor();
-			descriptor.setProductType(m.group(5));
+			descriptor.setProductType(m.group(4));
 			descriptor.setProductClass(m.group(3));
 			descriptor.setRelativePath(catalogJob.getKeyObjectStorage());
 			descriptor.setFilename(catalogJob.getKeyObjectStorage());
 			descriptor.setProductName(catalogJob.getKeyObjectStorage());
+			descriptor.setKeyObjectStorage(catalogJob.getKeyObjectStorage());
 			descriptor.setMissionId(m.group(1));
 			descriptor.setSatelliteId(m.group(2));
-			descriptor.setKeyObjectStorage(catalogJob.getKeyObjectStorage());
 			descriptor.setProductFamily(catalogJob.getProductFamily());
 			descriptor.setMode(catalogJob.getMode());
 

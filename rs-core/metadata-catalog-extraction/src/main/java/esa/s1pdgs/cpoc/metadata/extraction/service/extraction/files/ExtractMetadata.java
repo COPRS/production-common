@@ -398,15 +398,16 @@ public class ExtractMetadata {
 	}
 
 	public JSONObject processS2Metadata(S2FileDescriptor descriptor, File safeMetadataFile, File inventoryMetadataFile)
-			throws MetadataExtractionException {
+			throws MetadataExtractionException, MetadataMalformedException {
 		JSONObject safeMetadata = transformXMLWithXSLTToJSON(safeMetadataFile,
 				new File(this.xsltDirectory + XSLT_S2_MANIFEST));
 		JSONObject inventoryMetadata = transformXMLWithXSLTToJSON(inventoryMetadataFile,
 				new File(this.xsltDirectory + XSLT_S2_INVENTORY));
 		
 		JSONObject metadataJSONObject = this.mergeJSONObjects(safeMetadata, inventoryMetadata);
-		
-		//TODO process coordinates
+		metadataJSONObject = checkS2Metadata(metadataJSONObject);
+		metadataJSONObject = processS2Coordinates(metadataJSONObject);
+		metadataJSONObject = putS2FileMetadataToJSON(metadataJSONObject, descriptor);
 		
 		LOGGER.debug("composed Json: {} ", metadataJSONObject);
 		return metadataJSONObject;
@@ -552,6 +553,44 @@ public class ExtractMetadata {
 		}
 	}
 
+	private JSONObject checkS2Metadata(final JSONObject metadataJSONObject) throws MetadataMalformedException, MetadataExtractionException {
+		try {
+
+			if (metadataJSONObject.has("startTime")) {
+				try {
+					metadataJSONObject.put("startTime",
+							DateUtils.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("startTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("startTime");
+				}
+			}
+
+			if (metadataJSONObject.has("stopTime")) {
+				try {
+					metadataJSONObject.put("stopTime",
+							DateUtils.convertToMetadataDateTimeFormat((String) metadataJSONObject.get("stopTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("stopTime");
+				}
+			}
+
+			if (metadataJSONObject.has("creationTime")) {
+				try {
+					metadataJSONObject.put("creationTime",
+							DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("creationTime");
+				}
+			}
+
+			return metadataJSONObject;
+
+		} catch (final JSONException e) {
+			LOGGER.error("Error while extraction of config file metadata ", e);
+			throw new MetadataExtractionException(e);
+		}
+	}
+	
 	/**
 	 * Check validityStartTime, validityStopTime and creationTime on
 	 * S3-Aux-Metadata-Objects
@@ -645,6 +684,20 @@ public class ExtractMetadata {
 			LOGGER.error("Error while extraction of config file metadata ", e);
 			throw new MetadataExtractionException(e);
 		}
+	}
+	
+	JSONObject processS2Coordinates(JSONObject metadataJSONObject) {
+
+		if (metadataJSONObject.has("coordinates")) {
+			final String rawCoords = metadataJSONObject.getString("coordinates");
+			if (!rawCoords.trim().isEmpty()) {
+				metadataJSONObject.put("coordinates", transformFromOpengis(rawCoords));
+			} else {
+				metadataJSONObject.remove("coordinates");
+			}
+		}
+
+		return metadataJSONObject;
 	}
 	
 	JSONObject processS3Coordinates(JSONObject metadataJSONObject) {
@@ -886,6 +939,36 @@ public class ExtractMetadata {
 			}
 		}
 		return metadataJSONObject;
+	}
+	
+	/**
+	 * Common metadata from FileDescriptor to insert into S2-Metadata-Objects
+	 */
+	private JSONObject putS2FileMetadataToJSON(final JSONObject metadataJSONObject, final S2FileDescriptor descriptor)
+			throws MetadataExtractionException {
+		try {
+			metadataJSONObject.put("productName", descriptor.getProductName());
+
+			if (!metadataJSONObject.has("productClass") || "".equals((String) metadataJSONObject.get("productClass"))) {
+				metadataJSONObject.put("productClass", descriptor.getProductClass());
+			}
+
+			if (!metadataJSONObject.has("productType") || "".equals((String) metadataJSONObject.get("productType"))) {
+				metadataJSONObject.put("productType", descriptor.getProductType());
+			}
+
+			metadataJSONObject.put(MissionId.FIELD_NAME, descriptor.getMissionId());
+			metadataJSONObject.put("satelliteId", descriptor.getSatelliteId());
+			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
+			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
+			// TODO S1PRO-1030 in future it can be DEBUG or REPROCESSING as well
+			metadataJSONObject.put("processMode", "NOMINAL");
+
+			return metadataJSONObject;
+		} catch (final JSONException e) {
+			LOGGER.error("Error while extraction of config file metadata ", e);
+			throw new MetadataExtractionException(e);
+		}
 	}
 
 	/**
