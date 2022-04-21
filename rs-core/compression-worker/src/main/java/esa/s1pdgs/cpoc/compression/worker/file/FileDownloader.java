@@ -47,7 +47,7 @@ public class FileDownloader {
 	 */
 	public void processInputs(final ReportingFactory reportingFactory) throws AbstractCodedException {
 		// prepare directory structure
-		LOGGER.info("CompressionProcessor 1 - Creating working directory");
+		LOGGER.info("CompressionProcessor 1 - Creating working directory: {}", this.localWorkingDir);
 		final File workingDir = new File(localWorkingDir);
 		workingDir.mkdirs();
 
@@ -74,8 +74,17 @@ public class FileDownloader {
 		if (event.getKeyObjectStorage() == null) {
 			throw new InternalErrorException("productName to download cannot be null");
 		}
-
-		final String targetFile = this.localWorkingDir+"/"+CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
+		
+		// FIXME: This needs to be refactored!
+		String targetFile = "";
+		if (event.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
+			// Uncompression
+			targetFile = this.localWorkingDir+"/"+CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());
+		} else {
+			// Compression
+			targetFile = this.localWorkingDir+"/"+CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());	
+		}
+		
 		LOGGER.info("Input {} will be stored in {}", event.getKeyObjectStorage(), targetFile);
 		return new ObsDownloadObject(event.getProductFamily(), event.getKeyObjectStorage(), targetFile);
 
