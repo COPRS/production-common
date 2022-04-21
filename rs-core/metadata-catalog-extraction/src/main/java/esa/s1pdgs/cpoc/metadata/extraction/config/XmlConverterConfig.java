@@ -31,7 +31,7 @@ public class XmlConverterConfig {
         @Bean
         public Jaxb2Marshaller jaxb2Marshaller() {
                 Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-                jaxb2Marshaller.setPackagesToScan("esa.s1pdgs.cpoc.mdc.worker.extraction.model");
+                jaxb2Marshaller.setPackagesToScan("esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model");
                 Map<String, Object> map = new ConcurrentHashMap<String, Object>();
                 map.put("jaxb.formatted.output", true);
                 map.put("jaxb.encoding", "UTF-8");
