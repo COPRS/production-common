@@ -15,4 +15,7 @@ COPY /target/rs-metadata-catalog-extraction-*.jar rs-metadata-catalog-extraction
 COPY /config/start.sh start.sh
 COPY /config/xsltDir xslt
 
+RUN mkdir -p /data/local-catalog
+RUN chown -R 1001:1001 /data/local-catalog 
+
 ENTRYPOINT ["/app/start.sh"]
