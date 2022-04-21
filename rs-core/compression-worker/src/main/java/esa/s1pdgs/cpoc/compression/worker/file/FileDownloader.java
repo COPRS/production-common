@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
@@ -31,13 +31,13 @@ public class FileDownloader {
 	 */
 	private final String localWorkingDir;
 
-	private final CatalogEvent catalogEvent;
+	private final AbstractMessage event;
 
 
-	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final CatalogEvent catalogEvent) {
+	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final AbstractMessage event) {
 		this.obsClient = obsClient;
 		this.localWorkingDir = localWorkingDir;
-		this.catalogEvent = catalogEvent;
+		this.event = event;
 	}
 
 	/**
@@ -71,13 +71,13 @@ public class FileDownloader {
 	protected ObsDownloadObject buildInput() throws InternalErrorException, UnknownFamilyException {
 		LOGGER.info("CompressionProcessor 3 - Starting organizing inputs");
 		
-		if (catalogEvent.getKeyObjectStorage() == null) {
+		if (event.getKeyObjectStorage() == null) {
 			throw new InternalErrorException("productName to download cannot be null");
 		}
 
-		final String targetFile = this.localWorkingDir+"/"+CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
-		LOGGER.info("Input {} will be stored in {}", catalogEvent.getKeyObjectStorage(), targetFile);
-		return new ObsDownloadObject(catalogEvent.getProductFamily(), catalogEvent.getKeyObjectStorage(), targetFile);
+		final String targetFile = this.localWorkingDir+"/"+CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
+		LOGGER.info("Input {} will be stored in {}", event.getKeyObjectStorage(), targetFile);
+		return new ObsDownloadObject(event.getProductFamily(), event.getKeyObjectStorage(), targetFile);
 
 	}
 }

@@ -11,6 +11,10 @@ public class CompressionEventUtil {
 	public static String composeCompressedKeyObjectStorage(final String inputKeyObjectStorage) {
 		return inputKeyObjectStorage + SUFFIX_ZIPPPRODUCTFILE;
 	}
+	
+	public static String removeZipFromKeyObjectStorage(final String inputKeyObjectStorage) {
+		return removeZipSuffix(inputKeyObjectStorage);
+	}
 
 	public static ProductFamily composeCompressedProductFamily(final ProductFamily inputFamily) {
 		return ProductFamily.fromValue(inputFamily.toString() + SUFFIX_ZIPPRODUCTFAMILY);

@@ -9,8 +9,10 @@ import org.springframework.messaging.Message;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.compression.worker.service.CompressProcessor;
+import esa.s1pdgs.cpoc.compression.worker.service.UncompressProcessor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Configuration
@@ -30,6 +32,10 @@ public class CompressionWorkerServiceConfiguration {
 		return new CompressProcessor(appStatus, properties, obsClient);
 	}
 	
+	@Bean
+	public Function<IngestionEvent, Message<IngestionEvent>> uncompress() {
+		return new UncompressProcessor(appStatus, properties, obsClient);
+	}
 	
 
 }

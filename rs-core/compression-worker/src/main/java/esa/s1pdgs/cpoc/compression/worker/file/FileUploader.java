@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -24,7 +24,9 @@ public class FileUploader {
 
 	private final String workingDir;
 
-	private final CatalogEvent catalogEvent;
+	private final AbstractMessage event;
+	
+	private final ProductFamily outputProductFamily;
 
 	/**
 	 * OBS service
@@ -32,23 +34,23 @@ public class FileUploader {
 	private final ObsClient obsClient;
 	
 
-	public FileUploader(final ObsClient obsClient, final String workingDir, final CatalogEvent catalogEvent) {
+	public FileUploader(final ObsClient obsClient, final String workingDir, final AbstractMessage event, ProductFamily outputProductFamily) {
 		this.obsClient = obsClient;
 		this.workingDir = workingDir;
-		this.catalogEvent = catalogEvent;
+		this.event = event;
+		this.outputProductFamily = outputProductFamily;
 	}
 	
 	public void processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 
-		final String outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
+		final String outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
 		final File productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
 		if (!productPath.exists()) {
 			throw new InternalErrorException(
 					"Operation aborted: The compressed product " + productPath + " does not exist");
 		}
 					
-		LOGGER.info("Uploading compressed product {} [{}]", productPath, catalogEvent.getProductFamily());
-		final ProductFamily outputProductFamily = CompressionEventUtil.composeCompressedProductFamily(catalogEvent.getProductFamily());
+		LOGGER.info("Uploading compressed product {} [{}]", productPath, event.getProductFamily());
 		final FileObsUploadObject uploadObject = new FileObsUploadObject(outputProductFamily, outputFileName, productPath);
 		
 		// upload
