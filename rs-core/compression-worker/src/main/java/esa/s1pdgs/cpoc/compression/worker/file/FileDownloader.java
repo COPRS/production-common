@@ -77,13 +77,10 @@ public class FileDownloader {
 		
 		// FIXME: This needs to be refactored!
 		String targetFile = "";
-		if (event.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
-			// Uncompression
-			targetFile = this.localWorkingDir+"/"+CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());
-		} else {
+		if (!event.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
 			// Compression
 			targetFile = this.localWorkingDir+"/"+CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());	
-		}	
+		}
 
 		
 		LOGGER.info("Input {} will be stored in {}", event.getKeyObjectStorage(), targetFile);
