@@ -80,6 +80,9 @@ public class FileDownloader {
 		if (!event.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
 			// Compression
 			targetFile = this.localWorkingDir+"/"+CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());	
+		} else {
+			//Uncompression
+			targetFile = this.localWorkingDir+"/"+event.getKeyObjectStorage();
 		}
 
 		
