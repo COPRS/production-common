@@ -4,7 +4,7 @@ INPUT=$1
 OUTPUT=$2
 
 echo "Compressing ${INPUT} to ${OUTPUT}"
-7zr a -tzip ${OUTPUT} ./${INPUT}
+7za a -tzip ${OUTPUT} ./${INPUT}
 result=$?
 
 if [ ${result} -eq 0 ]
