@@ -13,7 +13,7 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 #RUN apk update && apk add p7zip
 USER root
-RUN apt-get update && apt-get install p7zip-full
+RUN apt-get update && apt-get -y install p7zip-full
 USER 1001
 
 COPY /target/rs-compression-worker-*.jar rs-compression-worker.jar
