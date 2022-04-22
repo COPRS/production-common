@@ -89,7 +89,7 @@ public class TestS2ProductMetadataExtractor {
 		processConfig.setManifestFilenames(manifestMap);
 
 		extractor = new S2ProductMetadataExtractor(esServices, mdBuilder, fileDescriptorBuilder, testDir.getPath(),
-				processConfig, obsClient);
+				false, processConfig, obsClient);
 	}
 
 	@After

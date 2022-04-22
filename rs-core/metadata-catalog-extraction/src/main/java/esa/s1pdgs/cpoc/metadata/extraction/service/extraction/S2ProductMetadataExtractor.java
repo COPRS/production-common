@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -16,22 +18,36 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.util.S2ProductNameUtil;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class S2ProductMetadataExtractor extends AbstractMetadataExtractor {
-	
+
+	private static final Logger LOG = LogManager.getLogger(S2AuxMetadataExtractor.class);
+
+	private final boolean enableExtractionFromProductName;
+
 	public S2ProductMetadataExtractor(final EsServices esServices, final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, final String localDirectory,
-			final ProcessConfiguration processConfiguration, final ObsClient obsClient) {
+			final boolean enableExtractionFromProductName, final ProcessConfiguration processConfiguration,
+			final ObsClient obsClient) {
 		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
+		this.enableExtractionFromProductName = enableExtractionFromProductName;
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob catalogJob) throws AbstractCodedException {
-		
+	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob catalogJob) throws AbstractCodedException {		
+
+		// When HKTM, skip download and extract metadata from filename
+		if (enableExtractionFromProductName && ProductFamily.S2_HKTM.equals(catalogJob.getProductFamily())) {
+			LOG.trace("Extracting metadata from product name: {}", catalogJob.getProductName());
+			JSONObject metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
+			metadata.put("productFamily", catalogJob.getProductFamily().name());
+			return metadata;
+		}
 		
 		final File safeMetadataFile = downloadS2MetadataFileToLocalFolder(processConfiguration.getManifestFilenames().get("safe"), reportingFactory, catalogJob.getProductFamily(),
 				catalogJob.getKeyObjectStorage());

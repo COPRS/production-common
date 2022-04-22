@@ -128,12 +128,22 @@ public class MetadataExtractorFactory {
 		    			processConfiguration, 
 		    			obsClient
 		    			);
+		    case S2_AUX:
+		    	return new S2AuxMetadataExtractor(
+		    			esServices, 
+		    			mdBuilder, 
+		    			fileDescriptorBuilder, 
+		    			config.getLocalDirectory(),
+		    			config.getEnableExtractionFromProductName(),
+		    			processConfiguration, 
+		    			obsClient);
 		    case S2_PRODUCTS:
 		    	return new S2ProductMetadataExtractor(
 		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
+		    			config.getEnableExtractionFromProductName(),
 		    			processConfiguration, 
 		    			obsClient);
 		    case S3_AUX:

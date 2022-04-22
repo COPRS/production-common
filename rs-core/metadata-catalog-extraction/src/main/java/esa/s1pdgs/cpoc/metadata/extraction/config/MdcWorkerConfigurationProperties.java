@@ -17,6 +17,7 @@ public class MdcWorkerConfigurationProperties {
 		private String localDirectory;
 		private String patternConfig;
 		private String pathPattern = null;
+		private boolean enableExtractionFromProductName = false;
 		private Map<String,Integer> pathMetadataElements = new HashMap<>();
 
 		public String getLocalDirectory() {
@@ -34,13 +35,21 @@ public class MdcWorkerConfigurationProperties {
 		public void setPatternConfig(final String patternConfig) {
 			this.patternConfig = patternConfig;
 		}
-		
+
 		public String getPathPattern() {
 			return pathPattern;
 		}
 
 		public void setPathPattern(final String pathPattern) {
 			this.pathPattern = pathPattern;
+		}
+
+		public boolean getEnableExtractionFromProductName() {
+			return enableExtractionFromProductName;
+		}
+
+		public void setEnableExtractionFromProductname(boolean enableExtractionFromProductName) {
+			this.enableExtractionFromProductName = enableExtractionFromProductName;
 		}
 
 		public Map<String, Integer> getPathMetadataElements() {
@@ -54,7 +63,7 @@ public class MdcWorkerConfigurationProperties {
 		@Override
 		public String toString() {
 			return "CategoryConfig [localDirectory=" + localDirectory + ", patternConfig=" + patternConfig + ", pathPattern="
-					+ pathPattern + ", pathMetadataElements=" + pathMetadataElements + "]";
+					+ pathPattern + ", pathMetadataElements=" + pathMetadataElements + ", enableExtractionFromProductName" + enableExtractionFromProductName + "]";
 		}
 	}
 	
