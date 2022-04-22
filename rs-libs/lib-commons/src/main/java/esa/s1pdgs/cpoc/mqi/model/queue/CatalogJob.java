@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
@@ -24,6 +25,34 @@ public class CatalogJob extends AbstractMessage {
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
+	public CatalogJob(final String productName, final String keyObjectStorage, final ProductFamily family) {
+		this(productName, keyObjectStorage, family, null);	
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
+	}
+
+	public CatalogJob(final String productName, final String keyObjectStorage, final ProductFamily family, final String mode) {
+		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED, null, UUID.randomUUID());
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
+	}
+
+	public CatalogJob(
+			final String productName, 
+			final String keyObjectStorage, 
+			final ProductFamily family, 
+			final String mode, 
+			final OQCFlag oqcFlag,
+			final String timeliness,
+			final UUID reportUid
+	) {
+		super(family, keyObjectStorage);
+		this.productName = productName;
+		this.mode = mode;
+		this.uid = reportUid;
+		this.oqcFlag = oqcFlag;
+		this.timeliness = timeliness;
+		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
+	}
+	
 	public CatalogJob(ProductFamily family, String obsKey, String relativePath, long productSizeByte, String missionId,
 			String stationName, String mode, String timeliness) {
 		super();
