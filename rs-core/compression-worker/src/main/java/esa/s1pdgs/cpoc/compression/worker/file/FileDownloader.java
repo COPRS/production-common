@@ -75,14 +75,13 @@ public class FileDownloader {
 			throw new InternalErrorException("productName to download cannot be null");
 		}
 		
-		// FIXME: This needs to be refactored!
 		String targetFile = "";
 		if (!event.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
 			// Compression
-			targetFile = this.localWorkingDir+"/"+CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());	
+			targetFile = this.localWorkingDir + "/" + CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());	
 		} else {
-			//Uncompression
-			targetFile = this.localWorkingDir+"/"+event.getKeyObjectStorage();
+			// Uncompression
+			targetFile = this.localWorkingDir + "/" + CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());
 		}
 
 		

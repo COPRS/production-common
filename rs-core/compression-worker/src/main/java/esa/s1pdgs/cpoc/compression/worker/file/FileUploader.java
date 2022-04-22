@@ -42,8 +42,15 @@ public class FileUploader {
 	}
 	
 	public void processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
-
-		final String outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
+		String outputFileName;
+		if (!event.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
+			// Compression
+			outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
+		} else {
+			// Uncompression
+			outputFileName = CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());
+		}
+		
 		final File productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
 		if (!productPath.exists()) {
 			throw new InternalErrorException(

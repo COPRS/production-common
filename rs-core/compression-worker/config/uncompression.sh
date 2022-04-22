@@ -3,7 +3,7 @@
 INPUT=$1
 
 echo "Uncompressing ${INPUT}"
-7za x ${INPUT}
+7za x ./${INPUT}
 result=$?
 
 if [ ${result} -eq 0 ]

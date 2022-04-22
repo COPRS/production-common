@@ -59,7 +59,15 @@ public class CompressExecutorCallable implements Callable<Void> {
 		LOGGER.debug("command={}, productName={}, workingDirectory={}", command, catalogEvent.getKeyObjectStorage(),
 				properties.getWorkingDirectory());
 
-		String outputPath = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
+		String outputPath;
+		if (!catalogEvent.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
+			// Compression
+			outputPath = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
+		} else {
+			// Uncompression
+			outputPath = CompressionEventUtil.removeZipFromKeyObjectStorage(catalogEvent.getKeyObjectStorage()); 
+		}
+		
 		execute(command, catalogEvent.getKeyObjectStorage(), outputPath,
 				properties.getWorkingDirectory() + "/" + outputPath);
 
