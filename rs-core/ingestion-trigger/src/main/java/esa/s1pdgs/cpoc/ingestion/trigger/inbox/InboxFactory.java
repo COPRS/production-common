@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.AuxipProductNameEvaluator;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.DirectoryProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.SessionProductNameEvaluator;
@@ -136,7 +137,10 @@ public class InboxFactory {
 	}
 	
 	final ProductNameEvaluator newProductNameEvaluatorFor(final InboxConfiguration config) {
-		if("prip".equals(config.getType())) {
+		if ("directory".equals(config.getType())) {
+			return new DirectoryProductNameEvaluator();
+		}
+		if ("prip".equals(config.getType())) {
 			return new AuxipProductNameEvaluator();
 		}
 		if (config.getFamily() == ProductFamily.EDRS_SESSION 
