@@ -11,10 +11,10 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class S2ProductNameUtil {
 
-	final public static Pattern HKTM_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_(OPER|TEST)_(PRD_HKTM__)_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_([0-9]{4})(.*)");
-	final public static Pattern STANDARD_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_(OPER|TEST)_([0-9A-Z_]{10})_.{4}_([0-9]{8}T[0-9]{6})(.*)");
+	final public static Pattern HKTM_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([A-Z0-9]{4})_(PRD_HKTM__)_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_([0-9]{4})(.*)");
+	final public static Pattern STANDARD_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([A-Z0-9]{4})_([0-9A-Z_]{10})_.{4}_([0-9]{8}T[0-9]{6})(.*)");
 	final public static Pattern COMPACT_PATTERN =  Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([0-9A-Z_]{6})_([0-9]{8}T[0-9]{6})(.*)");
-	final public static Pattern AUX_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_(OPER|TEST)_(AUX_[0-9A-Z_]{7}).*");
+	final public static Pattern AUX_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([A-Z0-9]{4})_(AUX_[0-9A-Z_]{7}).*");
 
 	public static JSONObject extractMetadata(String productName) throws MetadataExtractionException, MetadataMalformedException {
 		final JSONObject metadata = new JSONObject();
