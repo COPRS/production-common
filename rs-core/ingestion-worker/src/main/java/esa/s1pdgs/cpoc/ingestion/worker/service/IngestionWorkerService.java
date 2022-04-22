@@ -23,7 +23,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.product.Product;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.ingestion.worker.product.report.IngestionWorkerReportingOutput;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -31,7 +31,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 import esa.s1pdgs.cpoc.report.message.input.InboxReportingInput;
 
-public class IngestionWorkerService implements Function<IngestionJob, List<Message<IngestionEvent>>> {
+public class IngestionWorkerService implements Function<IngestionJob, List<Message<CatalogJob>>> {
 	static final Logger LOG = LogManager.getLogger(IngestionWorkerService.class);
 
 	private final ProductService productService;
@@ -44,7 +44,7 @@ public class IngestionWorkerService implements Function<IngestionJob, List<Messa
 	}
 
 	@Override
-	public List<Message<IngestionEvent>> apply(IngestionJob ingestion) {
+	public List<Message<CatalogJob>> apply(IngestionJob ingestion) {
 		final String productName;
 		if ("auxip".equalsIgnoreCase(ingestion.getInboxType())) {
 			productName = ingestion.getRelativePath();
@@ -64,9 +64,9 @@ public class IngestionWorkerService implements Function<IngestionJob, List<Messa
 		reporting.begin(new InboxReportingInput(productName, ingestion.getRelativePath(), ingestion.getPickupBaseURL()),
 				new ReportingMessage("Start processing of %s", productName));
 
-		List<Message<IngestionEvent>> events;
+		List<Message<CatalogJob>> events;
 		try {
-			final List<Product<IngestionEvent>> result = identifyAndUpload(inboxAdapter, ingestion, reporting);
+			final List<Product<CatalogJob>> result = identifyAndUpload(inboxAdapter, ingestion, reporting);
 			events = publish(result, reporting.getUid());
 		} catch (Exception e) {
 			reporting.error(new ReportingMessage("Error processing of %s: %s", ingestion.getKeyObjectStorage(),
@@ -80,7 +80,7 @@ public class IngestionWorkerService implements Function<IngestionJob, List<Messa
 		return events;
 	}
 
-	final List<Product<IngestionEvent>> identifyAndUpload(final InboxAdapter inboxAdapter, final IngestionJob ingestion,
+	final List<Product<CatalogJob>> identifyAndUpload(final InboxAdapter inboxAdapter, final IngestionJob ingestion,
 			final ReportingFactory reportingFactory) throws Exception {
 		try {
 			return productService.ingest(ingestion.getProductFamily(), inboxAdapter, ingestion, reportingFactory);
@@ -95,10 +95,10 @@ public class IngestionWorkerService implements Function<IngestionJob, List<Messa
 		}
 	}
 
-	final List<Message<IngestionEvent>> publish(final List<Product<IngestionEvent>> products, final UUID reportingId) {
-		final List<Message<IngestionEvent>> result = new ArrayList<>();
-		for (final Product<IngestionEvent> product : products) {
-			final IngestionEvent event = product.getDto();
+	final List<Message<CatalogJob>> publish(final List<Product<CatalogJob>> products, final UUID reportingId) {
+		final List<Message<CatalogJob>> result = new ArrayList<>();
+		for (final Product<CatalogJob> product : products) {
+			final CatalogJob event = product.getDto();
 			event.setUid(reportingId);
 
 			LOG.info("publishing : {}", event);

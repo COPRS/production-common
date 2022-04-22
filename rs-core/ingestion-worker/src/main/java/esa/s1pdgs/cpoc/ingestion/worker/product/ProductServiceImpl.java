@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterResponse;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -33,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<Product<IngestionEvent>> ingest(
+	public List<Product<CatalogJob>> ingest(
 			final ProductFamily family, 
 			final InboxAdapter inboxAdapter,
 			final IngestionJob ingestion,
@@ -43,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
 		final ObsAdapter obsAdapter = newObsAdapterFor(reportingFactory);
 		final String obsKey = obsKeyFor(ingestion);
 
-		final IngestionEvent dto = new IngestionEvent(
+		final CatalogJob dto = new CatalogJob(
 				family, 
 				obsKey,
 				ingestion.getRelativePath(),

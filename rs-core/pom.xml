@@ -392,7 +392,6 @@
 		<module>on-demand-interface-provider</module>
 		<module>metadata-catalog-extraction</module>
 		<module>metadata-catalog-timer</module>
-		<module>metadata-catalog-filter</module>
 		<module>metadata-catalog-searchcontroller</module>
 		<module>distribution-worker</module>
 		<module>prip-frontend</module>
