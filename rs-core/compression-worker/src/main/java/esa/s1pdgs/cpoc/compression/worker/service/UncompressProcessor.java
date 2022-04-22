@@ -20,7 +20,7 @@ import esa.s1pdgs.cpoc.compression.worker.file.FileDownloader;
 import esa.s1pdgs.cpoc.compression.worker.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.worker.process.CompressExecutorCallable;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
@@ -29,7 +29,7 @@ import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class UncompressProcessor extends AbstractProcessor
-		implements Function<IngestionEvent, Message<IngestionEvent>> {
+		implements Function<CatalogJob, Message<CatalogJob>> {
 	private static final Logger LOGGER = LogManager.getLogger(UncompressProcessor.class);
 
 	@Autowired
@@ -39,7 +39,7 @@ public class UncompressProcessor extends AbstractProcessor
 	}
 
 	@Override
-	public Message<IngestionEvent> apply(IngestionEvent event) {
+	public Message<CatalogJob> apply(CatalogJob event) {
 		// TODO Auto-generated method stub
 		final String workDir = properties.getWorkingDirectory();
 
@@ -90,7 +90,7 @@ public class UncompressProcessor extends AbstractProcessor
 		report.end(ReportingUtils.newFilenameReportingOutputFor(event.getProductFamily(), event.getKeyObjectStorage()),
 				new ReportingMessage("End uncompression processing"));
 
-		IngestionEvent result = new IngestionEvent();
+		CatalogJob result = new CatalogJob();
 		result.setKeyObjectStorage(CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage()));
 		result.setProductName(workDir);
 		result.setProductFamily(outputProductFamily);

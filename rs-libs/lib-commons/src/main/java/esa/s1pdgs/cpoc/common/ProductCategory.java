@@ -5,12 +5,12 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.DownloadJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.DataRequestJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.DisseminationJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.DownloadJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.EvictionManagementJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -18,8 +18,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelReportDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.LtaDownloadEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.OnDemandEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.PripPublishingJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.DisseminationJob;
 
 /**
  * Group products per category
@@ -27,26 +25,26 @@ import esa.s1pdgs.cpoc.mqi.model.queue.DisseminationJob;
  * @author Viveris Technologie
  */
 public enum ProductCategory {
-    AUXILIARY_FILES(ProductionEvent.class), 
-    EDRS_SESSIONS(IngestionEvent.class), 
-    PLANS_AND_REPORTS(IngestionEvent.class),
+    AUXILIARY_FILES(CatalogJob.class), 
+    EDRS_SESSIONS(CatalogJob.class), 
+    PLANS_AND_REPORTS(CatalogJob.class),
     LEVEL_JOBS(IpfExecutionJob.class), 
-    LEVEL_PRODUCTS(ProductionEvent.class), 
+    LEVEL_PRODUCTS(CatalogJob.class), 
     LEVEL_REPORTS(LevelReportDto.class), 
-    LEVEL_SEGMENTS(ProductionEvent.class),
-    ETAD_PRODUCTS(ProductionEvent.class),
-    SPP_PRODUCTS(ProductionEvent.class),
-    SPP_MBU_PRODUCTS(ProductionEvent.class),
-    DEBUG(ProductionEvent.class),
-    FAILED_WORKDIRS(ProductionEvent.class),
+    LEVEL_SEGMENTS(CatalogJob.class),
+    ETAD_PRODUCTS(CatalogJob.class),
+    SPP_PRODUCTS(CatalogJob.class),
+    SPP_MBU_PRODUCTS(CatalogJob.class),
+    DEBUG(CatalogJob.class),
+    FAILED_WORKDIRS(CatalogJob.class),
     COMPRESSION_JOBS(CompressionJob.class),
     COMPRESSED_PRODUCTS(CompressionEvent.class),
     INGESTION(IngestionJob.class),
-    INGESTION_EVENT(IngestionEvent.class),
+    INGESTION_EVENT(CatalogJob.class),
     PREPARATION_JOBS(IpfPreparationJob.class),    
     CATALOG_EVENT(CatalogEvent.class),
     CATALOG_JOBS(CatalogJob.class),
-    PRODUCTION_EVENT(ProductionEvent.class),
+    PRODUCTION_EVENT(CatalogJob.class),
     PRIP_JOBS(PripPublishingJob.class),
     DISSEMINATION_JOBS(DisseminationJob.class),
     EVICTION_MANAGEMENT_JOBS(EvictionManagementJob.class),
@@ -57,11 +55,11 @@ public enum ProductCategory {
     ON_DEMAND_EVENT(OnDemandEvent.class),
     DOWNLOAD_JOB(DownloadJob.class),
     // S2 based categories
-    S2_AUX(ProductionEvent.class),
-    S2_PRODUCTS(ProductionEvent.class),
+    S2_AUX(CatalogJob.class),
+    S2_PRODUCTS(CatalogJob.class),
 	// S3 based categories
-	S3_AUX(ProductionEvent.class),
-	S3_PRODUCTS(ProductionEvent.class),
+	S3_AUX(CatalogJob.class),
+	S3_PRODUCTS(CatalogJob.class),
 	UNDEFINED(null);
 	
     /**
