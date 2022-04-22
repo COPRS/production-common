@@ -11,8 +11,8 @@ import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.compression.worker.service.CompressProcessor;
 import esa.s1pdgs.cpoc.compression.worker.service.UncompressProcessor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Configuration
@@ -33,7 +33,7 @@ public class CompressionWorkerServiceConfiguration {
 	}
 	
 	@Bean
-	public Function<IngestionEvent, Message<IngestionEvent>> uncompress() {
+	public Function<CatalogJob, Message<CatalogJob>> uncompress() {
 		return new UncompressProcessor(appStatus, properties, obsClient);
 	}
 	
