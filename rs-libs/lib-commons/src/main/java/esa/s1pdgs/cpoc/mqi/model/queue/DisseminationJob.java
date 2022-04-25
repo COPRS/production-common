@@ -8,22 +8,22 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class DisseminationJob extends AbstractMessage {
-	
+
 	private List<DisseminationSource> disseminationSources = new ArrayList<>();
-	
+
 	public DisseminationJob() {
 		super();
 		allowedActions = Collections.singletonList(AllowedAction.RESTART);
 	}
-	
+
 	public void addDisseminationSource(ProductFamily productFamily, String keyObjectStorage) {
 		this.disseminationSources.add(new DisseminationSource(productFamily, keyObjectStorage));
 	}
-	
+
 	public List<DisseminationSource> getDisseminationSources() {
 		return this.disseminationSources;
 	}
-	
+
 	public void setDisseminationSources(List<DisseminationSource> disseminationSources) {
 		this.disseminationSources = disseminationSources;
 	}
@@ -52,12 +52,12 @@ public class DisseminationJob extends AbstractMessage {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "DisseminationJob [disseminationSources=" + disseminationSources + ", productFamily=" + productFamily
-				+ ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid + ", creationDate=" + creationDate
-				+ ", hostname=" + hostname + ", allowedActions=" + allowedActions + ", demandType=" + demandType
-				+ ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
+				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", uid=" + uid
+				+ ", creationDate=" + creationDate + ", podName=" + podName + ", allowedActions=" + allowedActions
+				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
 	}
 }

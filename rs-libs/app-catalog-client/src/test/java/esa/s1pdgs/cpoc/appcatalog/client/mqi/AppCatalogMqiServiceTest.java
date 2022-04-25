@@ -47,7 +47,7 @@ import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiGetOffsetApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiReadApiError;
 import esa.s1pdgs.cpoc.common.errors.appcatalog.AppCatalogMqiSendApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 
 /**
@@ -80,12 +80,12 @@ public class AppCatalogMqiServiceTest {
     /**
      * DTO
      */
-    private AppCatMessageDto<ProductionEvent> message;
-    private List<AppCatMessageDto<ProductionEvent>> messages;
-    private AppCatReadMessageDto<ProductionEvent> readMessage;
+    private AppCatMessageDto<CatalogJob> message;
+    private List<AppCatMessageDto<CatalogJob>> messages;
+    private AppCatReadMessageDto<CatalogJob> readMessage;
     private AppCatSendMessageDto sendMessage;
-    private ProductionEvent dto =
-            new ProductionEvent("name", "keyobs", ProductFamily.L0_SLICE, "FAST");
+    private CatalogJob dto =
+            new CatalogJob("name", "keyobs", ProductFamily.L0_SLICE, "FAST");
 
     /**
      * Initialization
@@ -97,7 +97,7 @@ public class AppCatalogMqiServiceTest {
         service = new AppCatalogMqiService(appStatus, restTemplate, "uri", 2, 500);
         message = new AppCatMessageDto<>(ProductCategory.LEVEL_PRODUCTS, 1234, "topic", 2, 9876);
         messages = Collections.singletonList(message);
-        readMessage = new AppCatReadMessageDto<ProductionEvent>("group","pod", false, dto);
+        readMessage = new AppCatReadMessageDto<CatalogJob>("group","pod", false, dto);
         sendMessage = new AppCatSendMessageDto("pod", true);
     }
 
@@ -294,10 +294,10 @@ public class AppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadWhenResponseKO() throws AbstractCodedException {
-        doReturn(new ResponseEntity<AppCatMessageDto<ProductionEvent>>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<AppCatMessageDto<ProductionEvent>>(
+        doReturn(new ResponseEntity<AppCatMessageDto<CatalogJob>>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<AppCatMessageDto<CatalogJob>>(
                         HttpStatus.INTERNAL_SERVER_ERROR),
-                new ResponseEntity<AppCatMessageDto<ProductionEvent>>(HttpStatus.NOT_FOUND))
+                new ResponseEntity<AppCatMessageDto<CatalogJob>>(HttpStatus.NOT_FOUND))
                         .when(restTemplate).exchange(Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
                                 Mockito.any(HttpEntity.class),
@@ -323,7 +323,7 @@ public class AppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testReadWhenResponseEmpty() throws AbstractCodedException {
-        doReturn(new ResponseEntity<AppCatMessageDto<ProductionEvent>>(HttpStatus.OK))
+        doReturn(new ResponseEntity<AppCatMessageDto<CatalogJob>>(HttpStatus.OK))
                 .when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.any(HttpEntity.class),
@@ -347,21 +347,21 @@ public class AppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRead1() throws AbstractCodedException {
-        doReturn(new ResponseEntity<AppCatMessageDto<ProductionEvent>>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<AppCatMessageDto<ProductionEvent>>(message,
+        doReturn(new ResponseEntity<AppCatMessageDto<CatalogJob>>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<AppCatMessageDto<CatalogJob>>(message,
                         HttpStatus.OK)).when(restTemplate).exchange(
                                 Mockito.anyString(),
                                 Mockito.any(HttpMethod.class),
                                 Mockito.any(HttpEntity.class),
                                 Mockito.any(Class.class));
 
-        AppCatMessageDto<ProductionEvent> ret = (AppCatMessageDto<ProductionEvent>) service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
+        AppCatMessageDto<CatalogJob> ret = (AppCatMessageDto<CatalogJob>) service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
         assertEquals(ret, message);
         verify(restTemplate, times(2)).exchange(
                 Mockito.eq("uri/mqi/level_products/topic/2/9876/read"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<AppCatReadMessageDto<ProductionEvent>>(
+                        new HttpEntity<AppCatReadMessageDto<CatalogJob>>(
                                 readMessage)),
                 Mockito.eq(AppCatMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
@@ -375,19 +375,19 @@ public class AppCatalogMqiServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRead2() throws AbstractCodedException {
-        doReturn(new ResponseEntity<AppCatMessageDto<ProductionEvent>>(message,
+        doReturn(new ResponseEntity<AppCatMessageDto<CatalogJob>>(message,
                 HttpStatus.OK)).when(restTemplate).exchange(Mockito.anyString(),
                         Mockito.any(HttpMethod.class),
                         Mockito.any(HttpEntity.class),
                         Mockito.any(Class.class));
 
-        AppCatMessageDto<ProductionEvent> ret = (AppCatMessageDto<ProductionEvent>) service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
+        AppCatMessageDto<CatalogJob> ret = (AppCatMessageDto<CatalogJob>) service.read(ProductCategory.LEVEL_PRODUCTS, "topic", 2, 9876, readMessage);
         assertEquals(ret, message);
         verify(restTemplate, times(1)).exchange(
                 Mockito.eq("uri/mqi/level_products/topic/2/9876/read"),
                 Mockito.eq(HttpMethod.POST),
                 Mockito.eq(
-                        new HttpEntity<AppCatReadMessageDto<ProductionEvent>>(
+                        new HttpEntity<AppCatReadMessageDto<CatalogJob>>(
                                 readMessage)),
                 Mockito.eq(AppCatMessageDto.class));
         verifyNoMoreInteractions(restTemplate);
@@ -758,8 +758,8 @@ public class AppCatalogMqiServiceTest {
     @Test
     public void testNext() throws AbstractCodedException {
     	
-        doReturn(new ResponseEntity<List<AppCatMessageDto<ProductionEvent>>>(HttpStatus.BAD_GATEWAY),
-                new ResponseEntity<List<AppCatMessageDto<ProductionEvent>>>(messages, HttpStatus.OK))
+        doReturn(new ResponseEntity<List<AppCatMessageDto<CatalogJob>>>(HttpStatus.BAD_GATEWAY),
+                new ResponseEntity<List<AppCatMessageDto<CatalogJob>>>(messages, HttpStatus.OK))
         	.when(restTemplate).exchange(
         			Mockito.any(URI.class),
                     Mockito.any(HttpMethod.class), 

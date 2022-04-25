@@ -8,25 +8,26 @@ import java.util.Arrays;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
-public class CompressionEvent extends AbstractMessage {	
-	
+public class CompressionEvent extends AbstractMessage {
+
 	private CompressionDirection compressionDirection = CompressionDirection.UNDEFINED;
-	
+
 	public CompressionEvent() {
 		super();
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
-	
-	public CompressionEvent(final ProductFamily productFamily, final String keyObjectStorage, final CompressionDirection compressionDirection) {
+
+	public CompressionEvent(final ProductFamily productFamily, final String keyObjectStorage,
+			final CompressionDirection compressionDirection) {
 		super(productFamily, keyObjectStorage);
 		this.compressionDirection = compressionDirection;
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
-	
+
 	public CompressionDirection getCompressionDirection() {
 		return this.compressionDirection;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -34,7 +35,7 @@ public class CompressionEvent extends AbstractMessage {
 		result = prime * result + ((compressionDirection == null) ? 0 : compressionDirection.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -52,8 +53,8 @@ public class CompressionEvent extends AbstractMessage {
 	@Override
 	public String toString() {
 		return "CompressionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", uid=" + uid + ", compressionDirection="
-						+ compressionDirection +"]";
+				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
+				+ ", uid=" + uid + ", compressionDirection=" + compressionDirection + "]";
 	}
 
 	public void convertForPublishingCompressed() {

@@ -5,10 +5,10 @@ import java.util.Arrays;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class DataRequestEvent extends AbstractMessage {
-	
+
 	private DataRequestType dataRequestType;
 	private String operatorName;
-	
+
 	public DataRequestEvent() {
 		super();
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
@@ -21,7 +21,7 @@ public class DataRequestEvent extends AbstractMessage {
 	public void setDataRequestType(DataRequestType dataRequestType) {
 		this.dataRequestType = dataRequestType;
 	}
-	
+
 	public String getOperatorName() {
 		return operatorName;
 	}
@@ -29,7 +29,7 @@ public class DataRequestEvent extends AbstractMessage {
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -38,7 +38,7 @@ public class DataRequestEvent extends AbstractMessage {
 		result = prime * result + ((operatorName == null) ? 0 : operatorName.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -60,10 +60,11 @@ public class DataRequestEvent extends AbstractMessage {
 
 	@Override
 	public String toString() {
-		return "DataRequestEvent [operatorName=" + operatorName + ", dataRequestType=" + dataRequestType + ", productFamily=" + productFamily
-				+ ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid + ", creationDate=" + creationDate
-				+ ", hostname=" + hostname + ", allowedActions=" + allowedActions + ", demandType=" + demandType
-				+ ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
+		return "DataRequestEvent [operatorName=" + operatorName + ", dataRequestType=" + dataRequestType
+				+ ", productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", storagePath="
+				+ storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName=" + podName
+				+ ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter=" + retryCounter
+				+ ", debug=" + debug + "]";
 	}
 
 }

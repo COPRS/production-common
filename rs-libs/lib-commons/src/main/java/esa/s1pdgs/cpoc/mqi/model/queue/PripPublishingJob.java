@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
-public class PripPublishingJob extends AbstractMessage {	
-	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
+public class PripPublishingJob extends AbstractMessage {
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
 	private Date evictionDate;
-	
+
 	public PripPublishingJob() {
 		super();
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
@@ -48,11 +48,12 @@ public class PripPublishingJob extends AbstractMessage {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "PripPublishingJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", creationDate="
-				+ creationDate + ", hostname=" + hostname + ", evictionDate=" + evictionDate + ", uid=" + uid +"]";
+		return "PripPublishingJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
+				+ ", evictionDate=" + evictionDate + ", uid=" + uid + "]";
 	}
 
 }

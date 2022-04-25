@@ -16,7 +16,7 @@ public class DataRequestJob extends AbstractMessage {
 	}
 
 	// --------------------------------------------------------------------------
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -24,7 +24,7 @@ public class DataRequestJob extends AbstractMessage {
 		result = prime * result + ((operatorName == null) ? 0 : operatorName.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -44,8 +44,9 @@ public class DataRequestJob extends AbstractMessage {
 
 	@Override
 	public String toString() {
-		return String.format("DataRequestJob [productFamily=%s, keyObjectStorage=%s, creationDate=%s, operatorName=%s]", this.productFamily,
-				this.keyObjectStorage, this.creationDate, this.operatorName);
+		return String.format(
+				"DataRequestJob [productFamily=%s, keyObjectStorage=%s, storagePath=%s, creationDate=%s, operatorName=%s]",
+				this.productFamily, this.keyObjectStorage, this.storagePath, this.creationDate, this.operatorName);
 	}
 
 	// --------------------------------------------------------------------------

@@ -5,9 +5,9 @@ import java.util.Arrays;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class EvictionEvent extends AbstractMessage {
-	
+
 	private String operatorName;
-	
+
 	public EvictionEvent() {
 		super();
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
@@ -45,13 +45,13 @@ public class EvictionEvent extends AbstractMessage {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "EvictionEvent [operatorName=" + operatorName + ", productFamily=" + productFamily
-				+ ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid + ", creationDate=" + creationDate
-				+ ", hostname=" + hostname + ", allowedActions=" + allowedActions + ", demandType=" + demandType
-				+ ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
+				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", uid=" + uid
+				+ ", creationDate=" + creationDate + ", podName=" + podName + ", allowedActions=" + allowedActions
+				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
 	}
-	
+
 }

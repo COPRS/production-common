@@ -20,10 +20,10 @@ public class OnDemandEvent extends AbstractMessage {
 	private String mode = "NOMINAL";
 	private ApplicationLevel productionType;
 	private String productType;
-	private Map<String, Object> metadata;	
+	private Map<String, Object> metadata;
 	private String tasktableName = null;
 	private String outputProductType = null;
-	
+
 	public OnDemandEvent() {
 		super();
 	}
@@ -72,7 +72,7 @@ public class OnDemandEvent extends AbstractMessage {
 
 	public void setProductType(final String productType) {
 		this.productType = productType;
-	}		
+	}
 
 	public String getTasktableName() {
 		return tasktableName;
@@ -155,15 +155,15 @@ public class OnDemandEvent extends AbstractMessage {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "OnDemandEvent [productName=" + productName + ", mode=" + mode + ", productionType=" + productionType
 				+ ", productType=" + productType + ", metadata=" + metadata + ", productFamily=" + productFamily
-				+ ", keyObjectStorage=" + keyObjectStorage + ", uid=" + uid + ", creationDate=" + creationDate
-				+ ", hostname=" + hostname + ", allowedActions=" + allowedActions + ", demandType=" + demandType
-				+ ", retryCounter=" + retryCounter + ", debug=" + debug + ", tasktableName=" + tasktableName 
-				+ ", outputProductType=" + outputProductType + "]";
+				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", uid=" + uid
+				+ ", creationDate=" + creationDate + ", podName=" + podName + ", allowedActions=" + allowedActions
+				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug
+				+ ", tasktableName=" + tasktableName + ", outputProductType=" + outputProductType + "]";
 	}
 
 }
