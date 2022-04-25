@@ -165,8 +165,9 @@ public class CatalogJob extends AbstractMessage {
 
 	@Override
 	public String toString() {
-		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", productName=" + productName
+		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", storagePath="
+				+ storagePath
+				+ ", creationDate=" + creationDate + ", podName=" + podName + ", productName=" + productName
 				+ ", relativePath=" + relativePath + ", mode=" + mode + ", oqcFlag=" + oqcFlag + ", timeliness="
 				+ timeliness + ", uid=" + uid + ", stationName=" + stationName + ", missionId=" + missionId
 				+ ", productSizeByte=" + productSizeByte + ", additionalMetadata=" + additionalMetadata + "]";

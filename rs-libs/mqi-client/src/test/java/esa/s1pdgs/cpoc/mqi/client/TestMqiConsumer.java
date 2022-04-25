@@ -25,7 +25,7 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiAckApiError;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.Ack;
 import esa.s1pdgs.cpoc.mqi.model.rest.AckMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -36,13 +36,13 @@ public class TestMqiConsumer {
 	private MqiClient fakeClient;
 	
 	@Mock
-	private MqiListener<ProductionEvent> fakeListener;
+	private MqiListener<CatalogJob> fakeListener;
 	
 	@Mock
 	private AppStatus fakeappStatus;
 	
-	private final ProductionEvent fakeDto = new ProductionEvent("1", "2", ProductFamily.AUXILIARY_FILE);
-	private final GenericMessageDto<ProductionEvent> mess = new GenericMessageDto<ProductionEvent>(1, "test", fakeDto);
+	private final CatalogJob fakeDto = new CatalogJob("1", "2", ProductFamily.AUXILIARY_FILE);
+	private final GenericMessageDto<CatalogJob> mess = new GenericMessageDto<CatalogJob>(1, "test", fakeDto);
 	
 	@Before
 	public final void setUp() throws Exception {
@@ -240,7 +240,7 @@ public class TestMqiConsumer {
 		mqiMessageFilter.add(filter1);
 		mqiMessageFilter.add(filter2);		
 		
-		final MqiConsumer<ProductionEvent> uut = new MqiConsumer<>(
+		final MqiConsumer<CatalogJob> uut = new MqiConsumer<>(
 				fakeClient, 
 				ProductCategory.AUXILIARY_FILES, 
 				fakeListener,
@@ -250,34 +250,34 @@ public class TestMqiConsumer {
 				fakeappStatus
 		);
 		
-		final ProductionEvent body1 = new ProductionEvent(); 
+		final CatalogJob body1 = new CatalogJob(); 
 		body1.setKeyObjectStorage("auxfoo");
 		body1.setProductFamily(ProductFamily.AUXILIARY_FILE);
-		final GenericMessageDto<ProductionEvent> message1 = new GenericMessageDto<>();
+		final GenericMessageDto<CatalogJob> message1 = new GenericMessageDto<>();
 		message1.setBody(body1);
 		
 		Assert.assertFalse(uut.allowConsumption(message1));
 		
-		final ProductionEvent body2 = new ProductionEvent(); 
+		final CatalogJob body2 = new CatalogJob(); 
 		body2.setKeyObjectStorage("session");
 		body2.setProductFamily(ProductFamily.EDRS_SESSION);
-		final GenericMessageDto<ProductionEvent> message2 = new GenericMessageDto<>();
+		final GenericMessageDto<CatalogJob> message2 = new GenericMessageDto<>();
 		message2.setBody(body2);
 		
 		Assert.assertFalse(uut.allowConsumption(message2));
 		
-		final ProductionEvent body3 = new ProductionEvent(); 
+		final CatalogJob body3 = new CatalogJob(); 
 		body3.setKeyObjectStorage("notexpectedtomatch");
 		body3.setProductFamily(ProductFamily.EDRS_SESSION);
-		final GenericMessageDto<ProductionEvent> message3 = new GenericMessageDto<>();
+		final GenericMessageDto<CatalogJob> message3 = new GenericMessageDto<>();
 		message3.setBody(body3);
 		
 		Assert.assertTrue(uut.allowConsumption(message3));
 		
-		final ProductionEvent body4 = new ProductionEvent(); 
+		final CatalogJob body4 = new CatalogJob(); 
 		body4.setKeyObjectStorage("l1foo");
 		body4.setProductFamily(ProductFamily.L1_SLICE);
-		final GenericMessageDto<ProductionEvent> message4 = new GenericMessageDto<>();
+		final GenericMessageDto<CatalogJob> message4 = new GenericMessageDto<>();
 		message4.setBody(body4);
 		
 		Assert.assertTrue(uut.allowConsumption(message4));		

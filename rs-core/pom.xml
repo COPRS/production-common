@@ -381,29 +381,29 @@
 	</dependencyManagement>
 
 	<modules>
-		<module>disseminator</module>
+		<!-- <module>disseminator</module> -->
 		<module>ingestion-trigger</module>
 		<module>ingestion-filter</module>
 		<module>ingestion-worker</module>
-		<module>production-trigger</module>
-		<module>ipf-preparation-worker</module>
-		<module>ipf-execution-worker</module>
-		<module>request-repository</module>
-		<module>on-demand-interface-provider</module>
+		<!-- <module>production-trigger</module> -->
+		<!-- <module>ipf-preparation-worker</module> -->
+		<!-- <module>ipf-execution-worker</module> -->
+		<!-- <module>request-repository</module> -->
+		<!-- <module>on-demand-interface-provider</module> -->
 		<module>metadata-catalog-extraction</module>
-		<module>metadata-catalog-timer</module>
+		<!-- <module>metadata-catalog-timer</module> -->
 		<module>metadata-catalog-searchcontroller</module>
 		<module>distribution-worker</module>
-		<module>prip-frontend</module>
-		<module>ddip-frontend</module>
+		<!-- <module>prip-frontend</module> -->
+		<!-- <module>ddip-frontend</module> -->
 		<module>native-api</module>
-		<module>data-lifecycle-trigger</module>
-		<module>data-request-worker</module>
-		<module>eviction-management-worker</module>
-		<module>validation</module>
+		<!-- <module>data-lifecycle-trigger</module> -->
+		<!-- <module>data-request-worker</module> -->
+		<!-- <module>eviction-management-worker</module> -->
+		<!-- <module>validation</module> -->
 		<module>compression-worker</module>
-		<module>dissemination-trigger</module>
-		<module>dissemination-worker</module>
+		<!-- <module>dissemination-trigger</module> -->
+		<!-- <module>dissemination-worker</module> -->
 	</modules>
 
 </project>

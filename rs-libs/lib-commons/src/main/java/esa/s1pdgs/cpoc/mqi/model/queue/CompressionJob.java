@@ -5,7 +5,7 @@ import java.util.Arrays;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
-public class CompressionJob extends AbstractMessage {	
+public class CompressionJob extends AbstractMessage {
 	// use some sane defaults
 	private ProductFamily outputProductFamily = ProductFamily.BLANK;
 	private String outputKeyObjectStorage = NOT_DEFINED;
@@ -14,15 +14,11 @@ public class CompressionJob extends AbstractMessage {
 	public CompressionJob() {
 		super();
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
-	}	
+	}
 
-	public CompressionJob(
-			final String inputKeyObjectStorage, 
-			final ProductFamily inputProductFamily, 
-			final String outputKeyObjectStorage, 
-			final ProductFamily outputProductFamily,
-			final CompressionDirection compressionDirection
-	) {
+	public CompressionJob(final String inputKeyObjectStorage, final ProductFamily inputProductFamily,
+			final String outputKeyObjectStorage, final ProductFamily outputProductFamily,
+			final CompressionDirection compressionDirection) {
 		super(inputProductFamily, inputKeyObjectStorage);
 		this.outputKeyObjectStorage = outputKeyObjectStorage;
 		this.outputProductFamily = outputProductFamily;
@@ -53,7 +49,7 @@ public class CompressionJob extends AbstractMessage {
 	public void setCompressionDirection(final CompressionDirection compressionDirection) {
 		this.compressionDirection = compressionDirection;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -63,7 +59,7 @@ public class CompressionJob extends AbstractMessage {
 		result = prime * result + ((outputProductFamily == null) ? 0 : outputProductFamily.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -88,8 +84,8 @@ public class CompressionJob extends AbstractMessage {
 	@Override
 	public String toString() {
 		return "CompressionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", outputProductFamily="
-				+ outputProductFamily + ", outputKeyObjectStorage=" + outputKeyObjectStorage + ", compressionDirection="
-				+ compressionDirection + ", uid=" + uid +"]";
+				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
+				+ ", outputProductFamily=" + outputProductFamily + ", outputKeyObjectStorage=" + outputKeyObjectStorage
+				+ ", compressionDirection=" + compressionDirection + ", uid=" + uid + "]";
 	}
 }

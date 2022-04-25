@@ -14,9 +14,8 @@ import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
 
 /**
- * This is supposed to be the basic element that is used in all other
- * job and event messages. It is containing all data that is shared
- * accross all of them.
+ * This is supposed to be the basic element that is used in all other job and
+ * event messages. It is containing all data that is shared accross all of them.
  * 
  * @author florian_sievert
  *
@@ -24,12 +23,13 @@ import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
 //@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "_class")
 public abstract class AbstractMessage {
 	@JsonIgnore
-	public static final String DEFAULT_HOSTNAME = System.getenv("HOSTNAME");
-	
+	public static final String DEFAULT_PODNAME = System.getenv("HOSTNAME");
+
 	@JsonIgnore
 	public static final String NOT_DEFINED = "NOT_DEFINED";
-	
-	// use a noticeable UUID default value to make it apparent that it has not been set and to have something 
+
+	// use a noticeable UUID default value to make it apparent that it has not been
+	// set and to have something
 	// to grep for in the logs
 	@JsonIgnore
 	public static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
@@ -37,36 +37,37 @@ public abstract class AbstractMessage {
 	// use some sane defaults
 	protected ProductFamily productFamily = ProductFamily.BLANK;
 	protected String keyObjectStorage = NOT_DEFINED;
+	protected String storagePath = NOT_DEFINED;
 	protected UUID uid = UUID.fromString(DEFAULT_UUID);
-	
+
 	/*
-	 * WARNING: the fields below are just for informational purposes and will not be evaluated
-	 * in any functional way.
+	 * WARNING: the fields below are just for informational purposes and will not be
+	 * evaluated in any functional way.
 	 */
-	
-	/* Most of the subsystems are not setting these
-	 * values at the moment. Lets see if this automatic
-	 * approach is working. 
+
+	/*
+	 * Most of the subsystems are not setting these values at the moment. Lets see
+	 * if this automatic approach is working.
 	 */
-	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="UTC")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
 	protected Date creationDate = new Date();
-	protected String hostname = DEFAULT_HOSTNAME;
-	
+	protected String podName = DEFAULT_PODNAME;
+
 	protected List<AllowedAction> allowedActions = Collections.emptyList();
-	
+
 	protected DemandType demandType = DemandType.NOMINAL;
-	
+
 	protected int retryCounter = 0;
-	
+
 	protected boolean debug = false;
-	
+
 	protected String extraParameter1;
 	protected String extraParameter2;
-	protected String extraParameter3;	
-	
+	protected String extraParameter3;
+
 	public AbstractMessage() {
 	}
-	
+
 	public AbstractMessage(final ProductFamily productFamily, final String keyObjectStorage) {
 		this.productFamily = productFamily;
 		this.keyObjectStorage = keyObjectStorage;
@@ -78,6 +79,14 @@ public abstract class AbstractMessage {
 
 	public void setKeyObjectStorage(final String keyObjectStorage) {
 		this.keyObjectStorage = keyObjectStorage;
+	}
+
+	public String getStoragePath() {
+		return storagePath;
+	}
+
+	public void setStoragePath(String storagePath) {
+		this.storagePath = storagePath;
 	}
 
 	public ProductFamily getProductFamily() {
@@ -96,12 +105,12 @@ public abstract class AbstractMessage {
 		this.creationDate = creationDate;
 	}
 
-	public String getHostname() {
-		return hostname;
+	public String getPodName() {
+		return podName;
 	}
 
-	public void setHostname(final String hostname) {
-		this.hostname = hostname;
+	public void setPodName(final String podName) {
+		this.podName = podName;
 	}
 
 	public UUID getUid() {
@@ -111,7 +120,7 @@ public abstract class AbstractMessage {
 	public void setUid(final UUID uid) {
 		this.uid = uid;
 	}
-	
+
 	public List<AllowedAction> getAllowedActions() {
 		return allowedActions;
 	}
@@ -148,25 +157,25 @@ public abstract class AbstractMessage {
 	public String getExtraParameter1() {
 		return extraParameter1;
 	}
-	
+
 	public void setExtraParameter1(String extraParameter1) {
 		this.extraParameter1 = extraParameter1;
 	}
-	
+
 	@JsonProperty("extra_parameter2_string")
 	public String getExtraParameter2() {
 		return extraParameter2;
 	}
-	
+
 	public void setExtraParameter2(String extraParameter2) {
 		this.extraParameter2 = extraParameter2;
 	}
-	
+
 	@JsonProperty("extra_parameter3_string")
 	public String getExtraParameter3() {
 		return extraParameter3;
 	}
-	
+
 	public void setExtraParameter3(String extraParameter3) {
 		this.extraParameter3 = extraParameter3;
 	}
@@ -182,8 +191,9 @@ public abstract class AbstractMessage {
 		result = prime * result + ((extraParameter1 == null) ? 0 : extraParameter1.hashCode());
 		result = prime * result + ((extraParameter2 == null) ? 0 : extraParameter2.hashCode());
 		result = prime * result + ((extraParameter3 == null) ? 0 : extraParameter3.hashCode());
-		result = prime * result + ((hostname == null) ? 0 : hostname.hashCode());
+		result = prime * result + ((podName == null) ? 0 : podName.hashCode());
 		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
+		result = prime * result + ((storagePath == null) ? 0 : storagePath.hashCode());
 		result = prime * result + ((productFamily == null) ? 0 : productFamily.hashCode());
 		result = prime * result + retryCounter;
 		result = prime * result + ((uid == null) ? 0 : uid.hashCode());
@@ -228,15 +238,20 @@ public abstract class AbstractMessage {
 				return false;
 		} else if (!extraParameter3.equals(other.extraParameter3))
 			return false;
-		if (hostname == null) {
-			if (other.hostname != null)
+		if (podName == null) {
+			if (other.podName != null)
 				return false;
-		} else if (!hostname.equals(other.hostname))
+		} else if (!podName.equals(other.podName))
 			return false;
 		if (keyObjectStorage == null) {
 			if (other.keyObjectStorage != null)
 				return false;
 		} else if (!keyObjectStorage.equals(other.keyObjectStorage))
+			return false;
+		if (storagePath == null) {
+			if (other.storagePath != null)
+				return false;
+		} else if (!storagePath.equals(other.storagePath))
 			return false;
 		if (productFamily != other.productFamily)
 			return false;
@@ -249,13 +264,14 @@ public abstract class AbstractMessage {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
-				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedActions=" + allowedActions 
-				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + ", extraParameter1="
-				+ extraParameter1 + ", extraParameter2=" + extraParameter2 + ", extraParameter3=" + extraParameter3 + "]";
+		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
+				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
+				+ retryCounter + ", debug=" + debug + ", extraParameter1=" + extraParameter1 + ", extraParameter2="
+				+ extraParameter2 + ", extraParameter3=" + extraParameter3 + "]";
 	}
 
 }

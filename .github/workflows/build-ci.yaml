@@ -101,26 +101,8 @@ jobs:
           compression-worker: 
             - 'rs-core/compression-worker/**'
             - 'rs-core/pom.xml'
-          data-lifecycle-trigger: 
-            - 'rs-core/data-lifecycle-trigger/**'
-            - 'rs-core/pom.xml'
-          data-request-worker: 
-            - 'rs-core/data-request-worker/**'
-            - 'rs-core/pom.xml'
-          ddip-frontend: 
-            - 'rs-core/ddip-frontend/**'
-            - 'rs-core/pom.xml'
-          dissemination-trigger: 
-            - 'rs-core/dissemination-trigger/**'
-            - 'rs-core/pom.xml'
-          dissemination-worker: 
-            - 'rs-core/dissemination-worker/**'
-            - 'rs-core/pom.xml'
-          disseminator: 
-            - 'rs-core/disseminator/**'
-            - 'rs-core/pom.xml'
-          eviction-management-worker: 
-            - 'rs-core/eviction-management-worker/**'
+          distribution-worker: 
+            - 'rs-core/distribution-worker/**'
             - 'rs-core/pom.xml'
           ingestion-filter: 
             - 'rs-core/ingestion-filter/**'
@@ -131,17 +113,8 @@ jobs:
           ingestion-worker: 
             - 'rs-core/ingestion-worker/**'
             - 'rs-core/pom.xml'
-          ipf-execution-worker: 
-            - 'rs-core/ipf-execution-worker/**'
-            - 'rs-core/pom.xml'
-          ipf-preparation-worker: 
-            - 'rs-core/ipf-preparation-worker/**'
-            - 'rs-core/pom.xml'
           metadata-catalog-extraction: 
             - 'rs-core/metadata-catalog-extraction/**'
-            - 'rs-core/pom.xml'
-          metadata-catalog-timer: 
-            - 'rs-core/metadata-catalog-timer/**'
             - 'rs-core/pom.xml'
           metadata-catalog-searchcontroller: 
             - 'rs-core/metadata-catalog-searchcontroller/**'
@@ -149,24 +122,52 @@ jobs:
           native-api: 
             - 'rs-core/native-api/**'
             - 'rs-core/pom.xml'
-          on-demand-interface-provider: 
-            - 'rs-core/on-demand-interface-provider/**'
-            - 'rs-core/pom.xml'
-          prip-frontend: 
-            - 'rs-core/prip-frontend/**'
-            - 'rs-core/pom.xml'
-          distribution-worker: 
-            - 'rs-core/distribution-worker/**'
-            - 'rs-core/pom.xml'
-          production-trigger: 
-            - 'rs-core/production-trigger/**'
-            - 'rs-core/pom.xml'
-          request-repository: 
-            - 'rs-core/request-repository/**'
-            - 'rs-core/pom.xml'
-          validation: 
-            - 'rs-core/validation/**'
-            - 'rs-core/pom.xml'
+
+#          data-lifecycle-trigger: 
+#            - 'rs-core/data-lifecycle-trigger/**'
+#            - 'rs-core/pom.xml'
+#          data-request-worker: 
+#            - 'rs-core/data-request-worker/**'
+#            - 'rs-core/pom.xml'
+#          ddip-frontend: 
+#            - 'rs-core/ddip-frontend/**'
+#            - 'rs-core/pom.xml'
+#          dissemination-trigger: 
+#            - 'rs-core/dissemination-trigger/**'
+#            - 'rs-core/pom.xml'
+#          dissemination-worker: 
+#            - 'rs-core/dissemination-worker/**'
+#            - 'rs-core/pom.xml'
+#          disseminator: 
+#            - 'rs-core/disseminator/**'
+#            - 'rs-core/pom.xml'
+#          eviction-management-worker: 
+#            - 'rs-core/eviction-management-worker/**'
+#            - 'rs-core/pom.xml'
+#          ipf-execution-worker: 
+#            - 'rs-core/ipf-execution-worker/**'
+#            - 'rs-core/pom.xml'
+#          ipf-preparation-worker: 
+#            - 'rs-core/ipf-preparation-worker/**'
+#            - 'rs-core/pom.xml'
+#          metadata-catalog-timer: 
+#            - 'rs-core/metadata-catalog-timer/**'
+#            - 'rs-core/pom.xml'
+#          on-demand-interface-provider: 
+#            - 'rs-core/on-demand-interface-provider/**'
+#            - 'rs-core/pom.xml'
+#          prip-frontend: 
+#            - 'rs-core/prip-frontend/**'
+#            - 'rs-core/pom.xml'
+#          production-trigger: 
+#            - 'rs-core/production-trigger/**'
+#            - 'rs-core/pom.xml'
+#          request-repository: 
+#            - 'rs-core/request-repository/**'
+#            - 'rs-core/pom.xml'
+#          validation: 
+#            - 'rs-core/validation/**'
+#            - 'rs-core/pom.xml'
           
   exec-worker-changes:
     runs-on: ubuntu-latest
@@ -252,7 +253,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]           
+        component: [compression-worker, distribution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api]
+        #component: [disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]           
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

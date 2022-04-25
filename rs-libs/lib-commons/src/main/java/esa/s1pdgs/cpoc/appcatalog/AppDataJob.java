@@ -106,7 +106,7 @@ public class AppDataJob {
 	public static AppDataJob fromPreparationJob(final IpfPreparationJob prepJob) {
 		final AppDataJob job = new AppDataJob();
 		job.setLevel(prepJob.getLevel());
-		job.setPod(prepJob.getHostname());
+		job.setPod(prepJob.getPodName());
 		job.getMessages().add(prepJob.getEventMessage());
 		job.setProduct(newProductFor(prepJob.getEventMessage()));
 		job.setTaskTableName(prepJob.getTaskTableName());

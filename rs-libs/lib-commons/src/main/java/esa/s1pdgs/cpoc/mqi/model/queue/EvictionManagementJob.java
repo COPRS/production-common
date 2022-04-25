@@ -24,7 +24,7 @@ public class EvictionManagementJob extends AbstractMessage {
 		result = prime * result + ((operatorName == null) ? 0 : operatorName.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -45,8 +45,8 @@ public class EvictionManagementJob extends AbstractMessage {
 	@Override
 	public String toString() {
 		return String.format(
-				"EvictionManagementJob [productFamily=%s, keyObjectStorage=%s, creationDate=%s, operatorName=%s]",
-				this.productFamily, this.keyObjectStorage, this.creationDate, this.operatorName);
+				"EvictionManagementJob [productFamily=%s, keyObjectStorage=%s, storagePath=%s, creationDate=%s, operatorName=%s]",
+				this.productFamily, this.keyObjectStorage, this.storagePath, this.creationDate, this.operatorName);
 	}
 
 	// --------------------------------------------------------------------------

@@ -82,14 +82,14 @@ public class TestProductServiceImpl {
 		ingestionJob.setProductFamily(family);
 		ingestionJob.setProductName("productName");
 		ingestionJob.setCreationDate(new Date());
-		ingestionJob.setHostname("hostname");
+		ingestionJob.setPodName("hostname");
 		final Product<CatalogJob> product = new Product<>();
 		product.setFamily(family);
 		final CatalogJob expectedProductionEvent = new CatalogJob();
 		expectedProductionEvent.setProductName("null");
 		expectedProductionEvent.setKeyObjectStorage("null");
 		expectedProductionEvent.setProductFamily(family);
-		expectedProductionEvent.setHostname("hostname");
+		expectedProductionEvent.setPodName("hostname");
 		expectedProductionEvent.setCreationDate(new Date());
 		product.setDto(expectedProductionEvent);
 		final List<Product<CatalogJob>> expectedResult = Arrays.asList(product);

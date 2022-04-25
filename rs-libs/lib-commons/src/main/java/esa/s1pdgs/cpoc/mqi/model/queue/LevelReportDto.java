@@ -8,39 +8,37 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * @author Viveris Technologies
  */
 public class LevelReportDto extends AbstractMessage {
-    private String content;
-
-    /**
-     * Default constructor
-     */
-    public LevelReportDto() {
-        super();
-    }
-
-    /**
-     * @param productName
-     * @param content
-     */
-    public LevelReportDto(final String productName, final String content,
-            final ProductFamily family) {
-    	super(family, productName);
-        this.content = content;
-    }
-
-    /**
-     * @return the content
-     */
-    public String getContent() {
-        return content;
-    }
+	private String content;
 
 	/**
-     * @param content
-     *            the content to set
-     */
-    public void setContent(final String content) {
-        this.content = content;
-    }
+	 * Default constructor
+	 */
+	public LevelReportDto() {
+		super();
+	}
+
+	/**
+	 * @param productName
+	 * @param content
+	 */
+	public LevelReportDto(final String productName, final String content, final ProductFamily family) {
+		super(family, productName);
+		this.content = content;
+	}
+
+	/**
+	 * @return the content
+	 */
+	public String getContent() {
+		return content;
+	}
+
+	/**
+	 * @param content the content to set
+	 */
+	public void setContent(final String content) {
+		this.content = content;
+	}
 
 	@Override
 	public int hashCode() {
@@ -70,6 +68,7 @@ public class LevelReportDto extends AbstractMessage {
 	@Override
 	public String toString() {
 		return "LevelReportDto [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", creationDate=" + creationDate + ", hostname=" + hostname + ", content=" + content + ", uid=" + uid +"]";
-	}	
+				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
+				+ ", content=" + content + ", uid=" + uid + "]";
+	}
 }

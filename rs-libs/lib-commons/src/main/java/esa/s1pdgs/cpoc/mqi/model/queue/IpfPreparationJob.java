@@ -7,19 +7,19 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
-public class IpfPreparationJob extends AbstractMessage {	
-    private ApplicationLevel level;
-    private GenericMessageDto<CatalogEvent> eventMessage;
-    private String taskTableName;
-    private String startTime;    
-    private String stopTime;    
-    private String outputProductType;
-    private String processingMode = "NOT_DEFINED";
+public class IpfPreparationJob extends AbstractMessage {
+	private ApplicationLevel level;
+	private GenericMessageDto<CatalogEvent> eventMessage;
+	private String taskTableName;
+	private String startTime;
+	private String stopTime;
+	private String outputProductType;
+	private String processingMode = "NOT_DEFINED";
 
-    public IpfPreparationJob() {
+	public IpfPreparationJob() {
 		allowedActions = Collections.singletonList(AllowedAction.RESTART);
 	}
-    
+
 	public ApplicationLevel getLevel() {
 		return level;
 	}
@@ -59,6 +59,7 @@ public class IpfPreparationJob extends AbstractMessage {
 	public void setStopTime(final String stopTime) {
 		this.stopTime = stopTime;
 	}
+
 	public String getOutputProductType() {
 		return outputProductType;
 	}
@@ -66,6 +67,7 @@ public class IpfPreparationJob extends AbstractMessage {
 	public void setOutputProductType(final String outputProductType) {
 		this.outputProductType = outputProductType;
 	}
+
 	public String getProcessingMode() {
 		return processingMode;
 	}
@@ -78,26 +80,9 @@ public class IpfPreparationJob extends AbstractMessage {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(
-				allowedActions,
-				creationDate,
-				debug,
-				demandType,
-				eventMessage,
-				extraParameter1,
-				extraParameter2,
-				extraParameter3,
-				hostname,
-				keyObjectStorage,
-				level,
-				outputProductType,
-				processingMode,
-				productFamily,
-				retryCounter,
-				startTime,
-				stopTime,
-				taskTableName,
-				uid);
+		result = prime * result + Objects.hash(allowedActions, creationDate, debug, demandType, eventMessage,
+				extraParameter1, extraParameter2, extraParameter3, podName, keyObjectStorage, level, outputProductType,
+				processingMode, productFamily, retryCounter, startTime, stopTime, taskTableName, uid);
 		return result;
 	}
 
@@ -115,7 +100,7 @@ public class IpfPreparationJob extends AbstractMessage {
 				&& Objects.equals(eventMessage, other.eventMessage)
 				&& Objects.equals(extraParameter1, other.extraParameter1)
 				&& Objects.equals(extraParameter2, other.extraParameter2)
-				&& Objects.equals(extraParameter3, other.extraParameter3) && Objects.equals(hostname, other.hostname)
+				&& Objects.equals(extraParameter3, other.extraParameter3) && Objects.equals(podName, other.podName)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) && level == other.level
 				&& Objects.equals(outputProductType, other.outputProductType)
 				&& Objects.equals(processingMode, other.processingMode) && productFamily == other.productFamily
@@ -126,12 +111,12 @@ public class IpfPreparationJob extends AbstractMessage {
 
 	@Override
 	public String toString() {
-		return "IpfPreparationJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", uid="
-				+ uid + ", creationDate=" + creationDate + ", hostname=" + hostname + ", allowedActions="
-				+ allowedActions + ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug
-				+ ", extraParameter1=" + extraParameter1 + ", extraParameter2=" + extraParameter2 + ", extraParameter3="
-				+ extraParameter3 + ", level=" + level + ", eventMessage=" + eventMessage + ", taskTableName="
-				+ taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime + ", outputProductType="
-				+ outputProductType + ", processingMode=" + processingMode + "]";
+		return "IpfPreparationJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
+				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
+				+ retryCounter + ", debug=" + debug + ", extraParameter1=" + extraParameter1 + ", extraParameter2="
+				+ extraParameter2 + ", extraParameter3=" + extraParameter3 + ", level=" + level + ", eventMessage="
+				+ eventMessage + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime="
+				+ stopTime + ", outputProductType=" + outputProductType + ", processingMode=" + processingMode + "]";
 	}
 }
