@@ -23,10 +23,12 @@ TBD
 
 ## Dependency
 
-The [infrastructure Layout](https://github.com/COPRS/infrastructure)  components of the Reference System Software shall be already insatalled, up and running,
+- The [infrastructure Layout](https://github.com/COPRS/infrastructure) components of the Reference System Software shall be already insatalled, up and running,
+- The [COPRS ingestion chain](https://github.com/COPRS/production-common/tree/develop/processing-common/ingestion) is already deployed.
 
 
 ## Application properties
+
 **app.*.spring.kafka.bootstrap-servers**
 
 It is a pair of host and port where kafka brokers are running. A Kafka client connects to these servers to bootstrap the application. Comma separated values are provided for multiple enteries.
