@@ -48,7 +48,7 @@ public class MdcWorkerConfigurationProperties {
 			return enableExtractionFromProductName;
 		}
 
-		public void setEnableExtractionFromProductname(boolean enableExtractionFromProductName) {
+		public void setEnableExtractionFromProductName(boolean enableExtractionFromProductName) {
 			this.enableExtractionFromProductName = enableExtractionFromProductName;
 		}
 
