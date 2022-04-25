@@ -169,29 +169,6 @@ jobs:
 #            - 'rs-core/validation/**'
 #            - 'rs-core/pom.xml'
           
-  exec-worker-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      exec-worker: ${{ steps.filter.outputs.exec-worker }}
-    steps:
-    - name: Extract branch or tag name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
-      id: extract_branch
-    - uses: actions/checkout@v2
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        base: ${{ steps.extract_branch.outputs.branch }}
-        filters: |
-          exec-worker:
-            - 'rs-core/ipf-execution-worker/**'
-            - 'rs-libs/obs-sdk/**'
-            - 'rs-libs/lib-commons/**'
-            - 'rs-libs/app-status/**'
-            - 'rs-libs/mqi-client/**'
-            - 'rs-libs/metadata-client/**'
-          
   gg-scan:
     runs-on: ubuntu-latest
     steps:
@@ -268,34 +245,4 @@ jobs:
     - uses: ./.github/actions/generate-report
       with:
         COMPONENT: ${{ matrix.component }}
-
-  # If the execution-worker-jar is updated also update the ACQ simulator docker image
-  build-acq-simulator:
-    needs: [exec-worker-changes, build-core, build-all-core]
-    if: ${{ always() && needs.exec-worker-changes.outputs.exec-worker == 'true' && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
-    uses: coprs/production-common/.github/workflows/build-acqsimulator.yaml@develop
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
-
-  # If the execution-worker-jar is updated also update the S1 IPF Simulator image
-  build-s1-ipf-simulator:
-    needs: [exec-worker-changes, build-core, build-all-core]
-    if: ${{ always() && needs.exec-worker-changes.outputs.exec-worker == 'true' && contains(needs.*.result, 'success') && !(contains(needs.*.result, 'failure')) }}
-    uses: coprs/production-common/.github/workflows/build-s1-ipf-simulator.yaml@develop
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
- 
-  # If the execution-worker-jar is updated also update the S3 IPF AIO image    
-#  build-ipf-s1-aio:
-#    needs: build-core
-#    if: ${{ inputs.exec-worker }}
-#    uses: coprs/production-common/.github/workflows/build-ipf-s1-aio.yaml@develop-build
-#    secrets:
-#      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-#      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-#      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
       
