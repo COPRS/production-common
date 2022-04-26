@@ -408,5 +408,9 @@ public class S3ObsClient extends AbstractObsClient {
 			throw new ObsException(object.getFamily(), object.getKey(), ex);			
 		}
 	}
-	
+
+	@Override
+	public String getAbsoluteStoragePath(ProductFamily family, String keyObs) {
+		return "s3://" + getBucketFor(family) + "/" + keyObs;
+	}
 }

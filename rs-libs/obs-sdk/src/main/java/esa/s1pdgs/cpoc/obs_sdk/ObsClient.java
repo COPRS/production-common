@@ -144,4 +144,6 @@ public interface ObsClient {
     ObsObjectMetadata getMetadata(final ObsObject object) throws ObsServiceException;
 
     URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException;
+    
+    String getAbsoluteStoragePath(final ProductFamily family, String keyObs);
 }

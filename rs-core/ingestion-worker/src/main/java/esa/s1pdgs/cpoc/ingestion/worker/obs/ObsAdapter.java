@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterEntry;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.obs_sdk.StreamObsUploadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -46,6 +47,10 @@ public class ObsAdapter {
         this.reportingFactory = reportingFactory;
         this.copyInputStreamToBuffer = copyInputStreamToBuffer;
         this.appStatus = appStatus;
+    }
+    
+    public final String getAbsoluteStoragePath(ProductFamily family, String keyObs) {
+    	return obsClient.getAbsoluteStoragePath(family, keyObs);
     }
 
     public final void upload(final ProductFamily family, final List<InboxAdapterEntry> entries, final String obsKey) throws ObsEmptyFileException {

@@ -325,4 +325,9 @@ public class SwiftObsClient extends AbstractObsClient {
 	public void delete(ObsObject object) throws ObsException, ObsServiceException {
 		throw new UnsupportedOperationException("delete not yet implemented for swift");
 	}
+	
+	@Override
+	public String getAbsoluteStoragePath(ProductFamily family, String keyObs) {
+		throw new UnsupportedOperationException("getAbsoluteStoragePath not yet implemented for swift");
+	}
 }

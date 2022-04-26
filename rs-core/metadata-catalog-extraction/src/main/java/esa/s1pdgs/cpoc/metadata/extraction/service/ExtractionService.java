@@ -126,6 +126,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		final CatalogEvent catEvent = new CatalogEvent();
 		catEvent.setProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
+		catEvent.setStoragePath(catJob.getStoragePath());
 		catEvent.setProductFamily(catJob.getProductFamily());
 		catEvent.setProductType(metadata.getString("productType"));
 		catEvent.setMetadata(metadata.toMap());

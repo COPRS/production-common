@@ -42,10 +42,12 @@ public class ProductServiceImpl implements ProductService {
 		final URI uri = IngestionJobs.toUri(ingestion);
 		final ObsAdapter obsAdapter = newObsAdapterFor(reportingFactory);
 		final String obsKey = obsKeyFor(ingestion);
-
+		final String storagePath = storagePathFor(obsAdapter, family, obsKey);
+		
 		final CatalogJob dto = new CatalogJob(
 				family, 
 				obsKey,
+				storagePath,
 				ingestion.getRelativePath(),
 				ingestion.getProductSizeByte(),
 				ingestion.getMissionId(),
@@ -102,6 +104,10 @@ public class ProductServiceImpl implements ProductService {
 		}
 
 		return ingestion.getProductName();
+	}
+	
+	private String storagePathFor(final ObsAdapter adapter, final ProductFamily family, final String keyObs) {
+		return adapter.getAbsoluteStoragePath(family, keyObs);
 	}
 
 	final String toObsKey(final Path relPath) {

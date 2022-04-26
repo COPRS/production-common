@@ -26,24 +26,18 @@ public class CatalogJob extends AbstractMessage {
 	}
 
 	public CatalogJob(final String productName, final String keyObjectStorage, final ProductFamily family) {
-		this(productName, keyObjectStorage, family, null);	
+		this(productName, keyObjectStorage, family, null);
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
-	public CatalogJob(final String productName, final String keyObjectStorage, final ProductFamily family, final String mode) {
+	public CatalogJob(final String productName, final String keyObjectStorage, final ProductFamily family,
+			final String mode) {
 		this(productName, keyObjectStorage, family, mode, OQCFlag.NOT_CHECKED, null, UUID.randomUUID());
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
-	public CatalogJob(
-			final String productName, 
-			final String keyObjectStorage, 
-			final ProductFamily family, 
-			final String mode, 
-			final OQCFlag oqcFlag,
-			final String timeliness,
-			final UUID reportUid
-	) {
+	public CatalogJob(final String productName, final String keyObjectStorage, final ProductFamily family,
+			final String mode, final OQCFlag oqcFlag, final String timeliness, final UUID reportUid) {
 		super(family, keyObjectStorage);
 		this.productName = productName;
 		this.mode = mode;
@@ -52,12 +46,26 @@ public class CatalogJob extends AbstractMessage {
 		this.timeliness = timeliness;
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
-	
+
 	public CatalogJob(ProductFamily family, String obsKey, String relativePath, long productSizeByte, String missionId,
 			String stationName, String mode, String timeliness) {
 		super();
 		this.productFamily = family;
 		this.keyObjectStorage = obsKey;
+		this.relativePath = relativePath;
+		this.productSizeByte = productSizeByte;
+		this.missionId = missionId;
+		this.stationName = stationName;
+		this.mode = mode;
+		this.timeliness = timeliness;
+	}
+
+	public CatalogJob(ProductFamily family, String obsKey, String storagePath, String relativePath,
+			long productSizeByte, String missionId, String stationName, String mode, String timeliness) {
+		super();
+		this.productFamily = family;
+		this.keyObjectStorage = obsKey;
+		this.storagePath = storagePath;
 		this.relativePath = relativePath;
 		this.productSizeByte = productSizeByte;
 		this.missionId = missionId;
@@ -165,12 +173,12 @@ public class CatalogJob extends AbstractMessage {
 
 	@Override
 	public String toString() {
-		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", storagePath="
-				+ storagePath
-				+ ", creationDate=" + creationDate + ", podName=" + podName + ", productName=" + productName
-				+ ", relativePath=" + relativePath + ", mode=" + mode + ", oqcFlag=" + oqcFlag + ", timeliness="
-				+ timeliness + ", uid=" + uid + ", stationName=" + stationName + ", missionId=" + missionId
-				+ ", productSizeByte=" + productSizeByte + ", additionalMetadata=" + additionalMetadata + "]";
+		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
+				+ ", productName=" + productName + ", relativePath=" + relativePath + ", mode=" + mode + ", oqcFlag="
+				+ oqcFlag + ", timeliness=" + timeliness + ", uid=" + uid + ", stationName=" + stationName
+				+ ", missionId=" + missionId + ", productSizeByte=" + productSizeByte + ", additionalMetadata="
+				+ additionalMetadata + "]";
 	}
 
 }

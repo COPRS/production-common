@@ -62,7 +62,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		this.reportingProductFactory = reportingProductFactory;
 	}
 
-	protected final String getBucketFor(final ProductFamily family) throws ObsServiceException {
+	protected final String getBucketFor(final ProductFamily family) {
 		return configuration.getBucketFor(family);
 	}
 
