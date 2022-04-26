@@ -93,7 +93,6 @@ Please note that the following parameters are grouped by an inbox. The name of t
 
 ## XBIP
 
-The configuration for the XBIP contains a set of properties that are grouped by the \$host part of the following pattern:
 The configuration for the XBIP contains a set of properties that are grouped by the $host part of the following pattern:
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|

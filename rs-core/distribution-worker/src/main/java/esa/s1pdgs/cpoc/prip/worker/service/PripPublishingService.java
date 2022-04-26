@@ -1,6 +1,5 @@
 package esa.s1pdgs.cpoc.prip.worker.service;
 
-import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.removeZipSuffix;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,6 +31,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
@@ -88,7 +88,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 				.newReportingBuilder(MissionId.fromFileName(compressionEvent.getKeyObjectStorage()))
 				.predecessor(compressionEvent.getUid()).newReporting("PripWorker");
 
-		final String name = removeZipSuffix(compressionEvent.getKeyObjectStorage());
+		final String name = CompressionEventUtil.removeZipFromKeyObjectStorage(compressionEvent.getKeyObjectStorage());
 
 		final ReportingInput in = PripReportingInput.newInstance(name, compressionEvent.getProductFamily());
 		reporting.begin(in, new ReportingMessage("Publishing file %s in PRIP", name));
@@ -110,7 +110,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 	private final void createAndSave(final CompressionEvent compressionEvent) throws MetadataQueryException, InterruptedException, PripPublishingException {
 		
 		if (pripMetadataAlreadyExists(compressionEvent.getKeyObjectStorage())) {
-			throw new PripPublishingException(String.format("PRiP metadata for file %s already exists!", removeZipSuffix(compressionEvent.getKeyObjectStorage())));
+			throw new PripPublishingException(String.format("PRiP metadata for file %s already exists!", CompressionEventUtil.removeZipFromKeyObjectStorage(compressionEvent.getKeyObjectStorage())));
 		}
 		
 		final LocalDateTime creationDate = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
@@ -206,8 +206,8 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 	private SearchMetadata queryMetadata(final ProductFamily productFamily, final String keyObjectStorage) throws MetadataQueryException, InterruptedException {
 		return Retries.performWithRetries(() -> {
 				return metadataClient.queryByFamilyAndProductName(
-						removeZipSuffix(productFamily.name()),
-						removeZipSuffix(keyObjectStorage)
+						CompressionEventUtil.removeZipSuffixFromProductFamily(productFamily).toString(),
+						CompressionEventUtil.removeZipFromKeyObjectStorage(keyObjectStorage)
 				);
 			}, 
 			"metadata query for " + keyObjectStorage, 
