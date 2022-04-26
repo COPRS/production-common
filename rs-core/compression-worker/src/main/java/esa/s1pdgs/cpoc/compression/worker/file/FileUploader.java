@@ -43,7 +43,7 @@ public class FileUploader {
 	
 	public void processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 		String outputFileName;
-		if (!event.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
+		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
 			// Compression
 			outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
 		} else {
