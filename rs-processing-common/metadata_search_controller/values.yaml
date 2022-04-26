@@ -11,6 +11,10 @@ logConfig: ${logConfig:log/log4j2.yml}
 processing:
   namespace: processing
   
+elasticsearch:
+  host: elasticsearch-master
+  port: 9200
+  
 worker:
   label:
     key: node-role.kubernetes.io/worker
