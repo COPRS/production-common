@@ -60,11 +60,11 @@ public class CatalogJob extends AbstractMessage {
 		this.timeliness = timeliness;
 	}
 
-	public CatalogJob(ProductFamily family, String obsKey, String storagePath, String relativePath,
+	public CatalogJob(ProductFamily family, String productName, String storagePath, String relativePath,
 			long productSizeByte, String missionId, String stationName, String mode, String timeliness) {
-		super();
+		super(family, productName);
 		this.productFamily = family;
-		this.keyObjectStorage = obsKey;
+		this.productName = productName;
 		this.storagePath = storagePath;
 		this.relativePath = relativePath;
 		this.productSizeByte = productSizeByte;

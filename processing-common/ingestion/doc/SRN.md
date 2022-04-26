@@ -107,6 +107,28 @@ The configuration for the XBIP contains a set of properties that are grouped by 
 
 ## AUXIP
 
+  
+### AUXIP Client 
+
+AUXIP client module is used by both AUXIP trigger and worker services for both polling and downloading functionalities.
+
+In oder to connect to multiple AUXIP servers, following configuration shall be repeated  and ajdusted by adding incrementing  `host*` propeorties. The configuration parameters `host1` are described below.
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.serviceRootUri``|URI for the AUXIP Server.Default:``https://aux1.s1pdgs.eu/odata/v1``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.user``|Username for the AUXIP Server. This is a referenced variable here, that shall be configured using `secret` . <br>If more than one  AUXIP servers are used for the missions of RS, then the name of  referenced varriable for the field here `user`  shall also be adjusted as configured in the secret. For Example: If another secret configured contain values `AUXIP_USERNAME_2` ,the the varriable referenced here shall be adjusted as `${AUXIP_USERNAME_2}`. Similar goes for the all the varriables here such as  `${AUXIP_PASSWORD}`, `${AUXIP_CLIENT_ID}` and `${AUXIP_CLIENT_SECRET}` Default:``${AUXIP_USERNAME}``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.pass``|Password the configured user of for the AUXIP Server. This is a referenced variable here, that shall be configured using `secret` Default:``${AUXIP_PASSWORD}``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.sslValidation``|SSL validation for the server.Default:``false``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.authType``|Authentication type for the AUXIP server.Possible values: basic, oauth2, disable.Default:``oauth2``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.bearerTokenType``|A Bearer Token is an opaque string, not intended to have any meaning to clients using Default:``OUTH2_ACCESS_TOKEN``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthAuthUrl``|Authentication type for the AUXIP server. Default:``https://aux1.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthClientId``|Oauth2 Client it. This is a referenced variable here, that shall be configured using  Kubernetes secret .Default:``${AUXIP_CLIENT_ID}``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthClientSecret``|Oauth2 Client secret. This is a referenced variable here, that shall be configured using Kubernetes secret .Default:``${AUXIP_CLIENT_SECRET}``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.creationDateAttributeName``|Some PRIP providers use `PublicationDate` and other `creationDate`Default:``PublicationDate``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.productNameAttrName``|Some PRIP providers use `Name` and other `name`. Default:``Name``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.idAttrName``|Some PRIP providers use `Id` and other `id`. Default:``Id``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.contentLengthAttrName``|Some PRIP providers use `ContentLength` and other `contentLength`. Default:``ContentLength``|
+  
 
 ### AUXIP Trigger
 
@@ -126,32 +148,40 @@ The configuration for the XBIP contains a set of properties that are grouped by 
 |``app.ingestion-auxip-trigger.auxip.max-page-size``|Maximum number of new files that are that are divided as per configured page-size, if the the resultset is big.Default:``500``|
 
 
-### AUXIP Client 
-
-AUXIP client is used by both AUXIP trigger and worker services for both polling and downloading functionalities.
-
-In oder to connect to multiple AUXIP servers, following configuration shall be repeated  and ajdusted by adding incrementing  `host*` propeorties. The configuration parameters `host1` are described below.
-| Property                   				                               | Details       |
-|---------------------------------------------------------------|---------------|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.serviceRootUri``|URI for the AUXIP Server.Default:``https://aux1.s1pdgs.eu/odata/v1``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.user``|Username for the AUXIP Server. This is a referenced variable here, that shall be configured using `secret` . <br>If more than one  AUXIP servers are used for the missions of RS, then the name of  referenced varriable for the field here `user`  shall also be adjusted as configured in the secret. For Example: If another secret configured contain values `AUXIP_USERNAME_2` ,the the varriable referenced here shall be adjusted as `${AUXIP_USERNAME_2}`. Similar goes for the all the varriables here such as  `${AUXIP_PASSWORD}`, `${AUXIP_CLIENT_ID}` and `${AUXIP_CLIENT_SECRET}` Default:``${AUXIP_USERNAME}``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.pass``|Password the configured user of for the AUXIP Server. This is a referenced variable here, that shall be configured using `secret` Default:``${AUXIP_PASSWORD}``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.sslValidation``|SSL validation for the server.Default:``false``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.authType``|Authentication type for the AUXIP server.Possible values: basic, oauth2, disable.Default:``oauth2``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.bearerTokenType``|A Bearer Token is an opaque string, not intended to have any meaning to clients using Default:``OUTH2_ACCESS_TOKEN``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthAuthUrl``|Authentication type for the AUXIP server. Default:``https://aux1.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthClientId``|Oauth2 Client it. This is a referenced variable here, that shall be configured using  Kubernetes secret .Default:``${AUXIP_CLIENT_ID}``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthClientSecret``|Oauth2 Client secret. This is a referenced variable here, that shall be configured using Kubernetes secret .Default:``${AUXIP_CLIENT_SECRET}``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.creationDateAttributeName``|Some PRIP providers use `PublicationDate` and other `creationDate`Default:``PublicationDate``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.productNameAttrName``|Some PRIP providers use `Name` and other `name`. Default:``Name``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.idAttrName``|Some PRIP providers use `Id` and other `id`. Default:``Id``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.contentLengthAttrName``|Some PRIP providers use `ContentLength` and other `contentLength`. Default:``ContentLength``|
 
 ## EDIP
-| Property                   				                               | Details       |
-|---------------------------------------------------------------|---------------|
+  
 
-TBD
+ ## EDIP Client
+ EDIP Client module is used by both EDIP triggers and workers. 
+|Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.serverName``|EDIP server name. Default `rs-edip-mock-svc`
+|``app.ingestion-edip-trigger.edip.host-configs.host1.user``|Variable referencing to EDIP user name in the secret `${EDIP_USERNAME}`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.pass``|Variable referencing to EDIP user pass in the secret `${EDIP_PASSWORD}`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.trustSelfSignedCertificate``|Either a self singed certificate shall be trusted or not. `Default: true`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.encryptDataChannel``|FTP data channel shall be encrypted or not. Default: `false`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.ftpsSslSessionReuse``|Default: Should an FTP session shall be reused. Default: `true`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.useExtendedMasterSecret``|Either a master secret shall used. Default: `false`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.connectTimeoutSec``|Connection Timeout in seconds. Default: `60`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.pasv``| PASV FTP protocol, where the cclient initiates the communication. Default: `true`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.enableHostnameVerification``|Hostname verification ensures that hostname in the URL matches with the one in digital certificate. Default: `false`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.sslProtocol``|SLL protocol being used. Supported value: `TLSv1.2`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.explicitFtps``|EDIP client request the server to create a secured session using SSL. Default: `true`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.keyManagerKeyStore``|The keystore is used to keep private keys and certificates. It is needed for FTPS encryption, otherwise can be left empty. Default: ```` |
+|``app.ingestion-edip-trigger.edip.host-configs.host1.keyManagerKeyStorePassword``|Password for `keyManagerKeyStorePassword`. Default: ``changeit``|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.trustManagerKeyStore``|The truststore keeps all trusted Certificate Authorities (CA) and certificates. It is necessary to import the CA or certificate for the trusted FTPS servers. Default: ``app/ssl/truststore.jks``|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.trustManagerKeyStorePassword``|Password for `trustManagerKeyStorePassword`. Default: ``changeit``|
+
+ ### EDIP Trigger
+
+For EDIP trigger following two two properties need to adjusted. Rest of the properties are similar to other Triggers and needs to be adjusted for the client.
+|Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-edip-trigger.ingestion-trigger.polling.inbox1.directory``| URI or directory must start with **ftps://**
+Default:``ftps://rs-edip-mock-svc:21/NOMINAL/``|
+|``app.ingestion-edip-trigger.ingestion-trigger.polling.inbox1.type``| Type of inbox i.e `edip`|
+  
 
 
 ## Ingestion Filter
