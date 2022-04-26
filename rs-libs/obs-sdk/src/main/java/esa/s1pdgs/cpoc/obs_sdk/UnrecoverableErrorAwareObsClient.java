@@ -121,6 +121,11 @@ public class UnrecoverableErrorAwareObsClient implements ObsClient {
     public URL createTemporaryDownloadUrl(ObsObject object, long expirationTimeInSeconds) throws ObsException, ObsServiceException {
         return obsClient.createTemporaryDownloadUrl(object, expirationTimeInSeconds);
     }
+    
+    @Override
+    public String getAbsoluteStoragePath(ProductFamily family, String keyObs) {
+    	return obsClient.getAbsoluteStoragePath(family, keyObs);
+    }
 
     private <T> T performObsCall(final ObsCall<T> obsCall) throws ObsEmptyFileException, AbstractCodedException {
         try {
