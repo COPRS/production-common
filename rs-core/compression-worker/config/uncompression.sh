@@ -1,10 +1,21 @@
-#!/bin/sh
+#!/bin/bash
 
 INPUT=$1
 
-echo "Uncompressing ${INPUT}"
-7za x ./${INPUT}
-result=$?
+if echo ${INPUT} | egrep -i '\.zip$'; then
+  echo "Uncompressing ${INPUT}"
+  7za x ./${INPUT}
+  result=$?
+elif echo ${INPUT} | egrep -i '\.(tar\.gz|tar|tgz)$'; then
+  echo "Uncompressing tarred ${INPUT}"
+  # since tar 1.15 (2004-12-20), 'z' doesn't need to be provided to properly untar gzipped files
+  # see https://www.gnu.org/software/tar/
+  tar xf ./${INPUT}
+  result=$?
+else
+  echo "ERROR: Unexpected file to uncompress ${INPUT}. Supported are: .zip, .tar.gz, .tgz and tar"  
+  exit 1
+fi
 
 if [ ${result} -eq 0 ]
 then

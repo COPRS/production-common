@@ -28,10 +28,14 @@ public class CompressionEventUtilTest {
 
 	@Test
 	public final void testRemoveZipSuffix() {
-		assertEquals("foo.bar", CompressionEventUtil.removeZipSuffix("foo.bar.Zip"));
-		assertEquals("foo.bar", CompressionEventUtil.removeZipSuffix("foo.bar.ZIP"));
-		assertEquals("foo.bar", CompressionEventUtil.removeZipSuffix("foo.bar.zip"));
-		assertEquals("foo.bar", CompressionEventUtil.removeZipSuffix("foo.bar"));
+		assertEquals("foo.bar", CompressionEventUtil.removeZipFromKeyObjectStorage("foo.bar.Zip"));
+		assertEquals("foo.bar", CompressionEventUtil.removeZipFromKeyObjectStorage("foo.bar.ZIP"));
+		assertEquals("foo.bar", CompressionEventUtil.removeZipFromKeyObjectStorage("foo.bar.zip"));
+		assertEquals("foo.bar", CompressionEventUtil.removeZipFromKeyObjectStorage("foo.bar.tgz"));
+		assertEquals("foo.bar", CompressionEventUtil.removeZipFromKeyObjectStorage("foo.bar.tar.gz"));
+		assertEquals("foo.bar", CompressionEventUtil.removeZipFromKeyObjectStorage("foo.bar.tAr"));		
+		assertEquals("foo.bar", CompressionEventUtil.removeZipFromKeyObjectStorage("foo.bar"));		
+		assertEquals("foo.bar.tar_gz", CompressionEventUtil.removeZipFromKeyObjectStorage("foo.bar.tar_gz"));
 	}
 	
 	@Test

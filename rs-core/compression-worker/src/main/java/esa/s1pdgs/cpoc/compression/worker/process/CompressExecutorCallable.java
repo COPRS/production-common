@@ -46,6 +46,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 		this.properties = properties;
 	}
 
+	
 	/**
 	 * Process execution: <br/>
 	 * - Wait for being active (see {@link CompressionWorkerConfigurationProperties} wap fields) <br/>
@@ -60,7 +61,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 				properties.getWorkingDirectory());
 
 		String outputPath;
-		if (!catalogEvent.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
+		if (!CompressionEventUtil.isCompressed(catalogEvent.getKeyObjectStorage())) {
 			// Compression
 			outputPath = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
 		} else {
@@ -68,9 +69,12 @@ public class CompressExecutorCallable implements Callable<Void> {
 			outputPath = CompressionEventUtil.removeZipFromKeyObjectStorage(catalogEvent.getKeyObjectStorage()); 
 		}
 		
-		execute(command, catalogEvent.getKeyObjectStorage(), outputPath,
-				properties.getWorkingDirectory() + "/" + outputPath);
-
+		execute(
+				command, 
+				catalogEvent.getKeyObjectStorage(), 
+				outputPath,
+				properties.getWorkingDirectory() + "/" + outputPath
+		);
 		return null;
 	}
 	
