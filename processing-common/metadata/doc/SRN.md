@@ -6,7 +6,7 @@ COPRS Metadata chain is responsible for extrating metadata from the products rel
 
 ![overview](./media/overview.png "Overview")
 
-# Introduction
+
 TBD
 
 For details, please see [Metadata Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#metadata-extraction)
@@ -30,8 +30,8 @@ TBD
 
 # Prerequisite
 Following components of the COPRS shall be installed and running
-- The [infrastructure Layout](https://github.com/COPRS/infrastructure)
-- The [COPRS ingestion chain](https://github.com/COPRS/production-common/tree/develop/processing-common/ingestion)
+- [infrastructure Layout](https://github.com/COPRS/infrastructure)
+- [COPRS ingestion chain](https://github.com/COPRS/production-common/tree/develop/processing-common/ingestion)
 
 
 
@@ -68,7 +68,7 @@ Following components of the COPRS shall be installed and running
 |``app.metadata-extraction.elasticsearch.socket-timeout-ms``| A maximum time of inactivity between two data packets when exchanging data with a ES server.Example: ``10000``| 
 
 
-###  Metadata Extraction Catalog
+###  Metadata Catalog Extraction
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
 |``app.metadata-extraction.process.manifest-filenames.sen3``| Sentinel-3 product's Manifest name. Metadata conatined within this file is extracted by the extraction Service.Default: ``xfdumanifest.xml``|
