@@ -17,16 +17,20 @@ This software does have the following minimal requirements:
 
 TBD
 
+| Resource                    |  Catalog Extract Worker* | 
+|-----------------------------|---------------|
+| Memory request              |     3500Mi    |
+| CPU request                 |     300m      |
+| Memory limit                |     4000Mi    |
+| CPU limit                   |     1500m     |
+| Disk volume needed          |   yes, Memory, 1500Mi  |
+| Disk access                 |     yes       |
+| Disk storage                |  yes          |
+| Volume Mount                |  data/local-catalog  |         
+| Affinity between Pod / Node |     no       |
 
-| Resource                    | Value       |
-|-----------------------------|-------------|
-| CPU                         |             |
-| Memory                      |             |
-| Disk volume needed          |             |
-| Disk access                 |             |
-| Disk storage capacity       |             |
-| Affinity between Pod / Node |             |
-|                             |             |
+ *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [scaling up workers]( http://TBD for more details.
+
 
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
