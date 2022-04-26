@@ -54,64 +54,30 @@ TBD
 
 ## Ingestion Trigger
 
-### General
+###General
 
-**app.ingestion-trigger.application.name**
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-trigger.application.name``|The name of the ingestion trigger application|
+|``app.ingestion-trigger.process.hostname``|The hostname of the ingestion trigger. This is recommend to be set to ${HOSTNAME}.
+|``app.ingestion-trigger.ingestion-trigger.polling-interval-ms``|The polling interval on the inbox from the trigger in milliseconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.|
 
-The name of the ingestion trigger application
-
-**app.ingestion-trigger.process.hostname**
-
-The hostname of the ingestion trigger. This is recommend to be set to ${HOSTNAME}.
-
-**app.ingestion-trigger.ingestion-trigger.polling-interval-ms**
-
-The polling interval on the inbox from the trigger in milliseconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.
 
 ## Inboxes
 
 Please note that the following parameters are grouped by an inbox. The name of the ``inbox`` can be a descriptive name.
-
-**app.ingestion-trigger.ingestion-trigger.polling.\$inbox.directory**
-
-The location of the inbox on the remote system specified by an URI. Please note that depending on the type of inbox additional configuration paramters might be required for XBIP (WebDAV), AUXIP (ODATA) or EDIP (FTP). A location for an XBIP might look like ``https://s1pro-mock-webdav-cgs01-svc/NOMINAL/``. This specifies that the trigger shall poll on the given location for new products.
-
-**app.ingestion-trigger.ingestion-trigger.polling.\$inbox.matchRegex**
-
-Regular expression that will be used to identify new products on the inbox while doing a poll attempt
-e.g. ``^([A-Za-z_]{4}/)?([0-9A-Za-z_]{1})1([0-9A-Za-z_]{1})/([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml|RAW|AISP|XML))$``
-
-**app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignoreRegex**
-
-An regular expression that allows to specifiy a pattern of files that shall be ignored and not considered to be valid files. This is usually used to exclude temporary files or system files. e.g. ``(^\\..*|.*\\.tmp$|db.*|^lost\+found$)``
-
-**app.ingestion-trigger.ingestion-trigger.polling.\$inbox.family**
-The product family of the products detected on the inbox. In case of ingestion system this will be usually:
-* EDRS_SESSION (all missions)
-* AUXILIARY_FILE (Sentinel-1)
-* S2_AUX (Sentinel-2)
-* S3_AUX (Sentinel-3)
-
-This information is important for the system to know into which OBS bucket the identified product shall be uploaded to.
-
-**app.ingestion-trigger.ingestion-trigger.polling.\$inbox.stationName**
-
-The name of the station from where the products are retrieved from e.g. ``MTI_``
-
-**app.ingestion-trigger.ingestion-trigger.polling.\$inbox.missionId**
-
-The identifier of the mission from the inbox in upper case:
-* S1
-* S2
-* S3
-
-**app.ingestion-trigger.ingestion-trigger.polling.\$inbox.station-retention-time**
-
-Defines after how many days entries shall be deleted from the persistence of the inbox
-
-**app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignore-files-before-date**
-
-Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08:00:00.000Z``. This pattern can be used to avoid that all historical products from the inbox will be pulled into the system.
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-trigger.application.name``|The name of the ingestion trigger application|
+|``app.ingestion-trigger.process.hostname``|The hostname of the ingestion trigger. This is recommend to be set to ${HOSTNAME}.
+|``app.ingestion-trigger.ingestion-trigger.polling-interval-ms``|The polling interval on the inbox from the trigger in milliseconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.directory``|The location of the inbox on the remote system specified by an URI. Please note that depending on the type of inbox additional configuration paramters might be required for XBIP (WebDAV), AUXIP (ODATA) or EDIP (FTP). A location for an XBIP might look like `https://s1pro-mock-webdav-cgs01-svc/NOMINAL/`. This specifies that the trigger shall poll on the given location for new products.|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.matchRegex``|Regular expression that will be used to identify new products on the inbox while doing a poll attempte.g.`^([A-Za-z_]{4}/)?([0-9A-Za-z_]{1})1([0-9A-Za-z_]{1})/([0-9A-Za-z_]+)/(ch[0|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB|DSIB).*\\.(raw|aisp|xml|RAW|AISP|XML))$`||``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignoreRegex``|An regular expression that allows to specifiy a pattern of files that shall be ignored and not considered to be valid files. This is usually used to exclude temporary files or system files. e.g. ``(^\\..*|.*\\.tmp$|db.*|^lost\+found$)``|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.family``|The product family of the products detected on the inbox. In case of ingestion system this will be usually:<li> EDRS_SESSION (all missions)<li> AUXILIARY_FILE (Sentinel-1)<li> S2_AUX (Sentinel-2)<li> S3_AUX (Sentinel-3)<br> This information is important for the system to know into which OBS bucket the identified product shall be uploaded to.|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.stationName``|The name of the station from where the products are retrieved from e.g. ``MTI_``|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.missionId``|The identifier of the mission from the inbox in upper case:<br>* S1<br>* S2<br>* S3|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.station-retention-time``|Defines after how many days entries shall be deleted from the persistence of the inbox|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignore-files-before-date``|Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08:00:00.000Z``. This pattern can be used to avoid that all historical products from the inbox will be pulled into the system.|
 
 
 ### MongoDB
