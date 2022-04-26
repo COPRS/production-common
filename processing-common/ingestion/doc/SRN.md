@@ -134,10 +134,9 @@ Defines the password that shall be used to authenticate against the XBIP instanc
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-``app.ingestion-auxip-trigger.ingestion-trigger.polling-interval-ms``Polling interval between two tries to the AUXIP server in milliseconds. Default:``10000``|
+``app.ingestion-auxip-trigger.ingestion-trigger.polling-interval-ms`` |Polling interval between two tries to the AUXIP server in milliseconds. Default:``10000``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.directory``|The polling directory/url of the AUXIP server.DefaultDefault:``https://aux1.s1pdgs.eu/odata/v1``|
-|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.matchRegex``|Pattern that the trigger service shall be matching against the filenames on the AUXIP server in order to create a job. The pattern shall be adjusted in the associated trigger configruation in order to  match the filenames of Sentinel-2 and Sentinel-3 auxiliaries,
-Default:``^S1.*(AUX_|AMH_|AMV_|MPL_).*$``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.matchRegex``|Pattern that the trigger service shall be matching against the filenames on the AUXIP server in order to create a job. The pattern shall be adjusted in the associated trigger configruation in order to  match the filenames of Sentinel-2 and Sentinel-3 auxiliaries. Default:``^S1.*(AUX_|AMH_|AMV_|MPL_).*$``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.ignoreRegex``Pattern for the filenames that are configured to ignored on the AUXIP server.Default:``(^\\..*|.*\\.tmp$|db.*|^lost\+found$)``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.type``|Type of Inbox. For all AUXIP interfaces, the value shall be `prip`
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.family``|Product Family assoociated with the for the files found on the AUXIP Server.- For S1, related it shall be `AUXILIARY_FILE_ZIP`- For S2, related it shall be `S2_AUX_ZIP`- For S3, related it shall be `S3_AUX_ZIP` <br>Default:``AUXILIARY_FILE_ZIP``|
