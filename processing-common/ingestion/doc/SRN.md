@@ -33,9 +33,17 @@ TBD
 | Affinity between Pod / Node |             |
 |                             |             |
 
+# Deployment Prerequisite
+Following components of the COPRS shall be installed and running
+- [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
+
 # Additional setup
 
 In order to use this RS Core component, it is required to do some additional setup before deploying it.
+- AUXIP
+- EDIP
+- XBIP
+
 
 ## AUXIP
 When using an AUXIP endpoint it will be required to provide some additional credentials in order to allow login to it. For security issues this cannot be done in the normal properties and needs to be setup as Kubernetes secret. 
@@ -43,18 +51,24 @@ When using an AUXIP endpoint it will be required to provide some additional cred
 Using this example the secret can be setup as follow:
 ``kubectl create secret generic auxip --from-literal=USERNAME=<USER_ACCOUNT> --from-literal=PASSWORD=<USER_PASSWORD> --from-literal=CLIENT_ID=<CLIENT_ID --from-literal=CLIENT_SECRET=<CLIENT_SECRET>``
 
+For more details, see [AUXIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#auxip)
+
 
 ## EDIP
 TBD
+For more details, see [EDIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#edip)
 
 ## XBIP
 
+TBD
+
+For more details, see [XBIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#xbip)
 
 # Configuration
 
 ## Ingestion Trigger
 
-###General
+### General
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
@@ -63,7 +77,7 @@ TBD
 |``app.ingestion-trigger.ingestion-trigger.polling-interval-ms``|The polling interval on the inbox from the trigger in milliseconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.|
 
 
-## Inboxes
+### Inboxes
 
 Please note that the following parameters are grouped by an inbox. The name of the ``inbox`` can be a descriptive name.
 | Property                   				                               | Details       |
@@ -81,7 +95,6 @@ Please note that the following parameters are grouped by an inbox. The name of t
 
 
 ### MongoDB
-
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
 |``app.ingestion-trigger.mongodb.host``|The hostname to the MongoDB instance that shall be used for persisting the events of the trigger to identify if a request had been fired already. Mongo is provided by the infrastructure layer.
@@ -91,7 +104,7 @@ Please note that the following parameters are grouped by an inbox. The name of t
 |``app.ingestion-trigger.mongodb.password``|The password to login to the MongoDB instance|
 
 
-## XBIP
+### XBIP
 
 The configuration for the XBIP contains a set of properties that are grouped by the $host part of the following pattern:
 | Property                   				                               | Details       |
@@ -149,10 +162,9 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 
 
 
-## EDIP
+### EDIP
   
-
- ## EDIP Client
+ #### EDIP Client
  EDIP Client module is used by both EDIP triggers and workers. 
 |Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
@@ -173,7 +185,7 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 |``app.ingestion-edip-trigger.edip.host-configs.host1.trustManagerKeyStore``|The truststore keeps all trusted Certificate Authorities (CA) and certificates. It is necessary to import the CA or certificate for the trusted FTPS servers. Default: ``app/ssl/truststore.jks``|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.trustManagerKeyStorePassword``|Password for `trustManagerKeyStorePassword`. Default: ``changeit``|
 
- ### EDIP Trigger
+ #### EDIP Trigger
 
 For EDIP trigger following two two properties need to adjusted. Rest of the properties are similar to other Triggers and needs to be adjusted for the client.
 |Property                   				                               | Details       |
