@@ -11,7 +11,7 @@ TBD
 
 For details, please see [Metadata Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#metadata-extraction)
 
-# Requirements
+# Resource Requirements
 
 This software does have the following minimal requirements:
 
@@ -28,9 +28,9 @@ TBD
 | Affinity between Pod / Node |             |
 |                             |             |
 
-# Prerequisite
+# Deployment Prerequisite
 Following components of the COPRS shall be installed and running
-- [infrastructure Layout](https://github.com/COPRS/infrastructure)
+- [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
 - [COPRS ingestion chain](https://github.com/COPRS/production-common/tree/develop/processing-common/ingestion)
 
 
