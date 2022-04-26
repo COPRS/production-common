@@ -46,7 +46,7 @@ Following components of the COPRS shall be installed and running
 
 
 ## Metadata filter properties
-
+# TBD
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
