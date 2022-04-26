@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [ingestion-auxip, ingestion-edip]
+        component: [ingestion-auxip, ingestion-edip, ingestion-xbip]
     runs-on: ubuntu-latest
     steps:
    
