@@ -91,41 +91,20 @@ Please note that the following parameters are grouped by an inbox. The name of t
 |``app.ingestion-trigger.mongodb.password``|The password to login to the MongoDB instance|
 
 
-### XBIP
+## XBIP
 
 The configuration for the XBIP contains a set of properties that are grouped by the \$host part of the following pattern:
-
-``app.ingestion-trigger.xbip.host-configs.\$host``
-
-``host`` specifies the name of the group
-
-**app.ingestion-trigger.xbip.host-configs.\$host.serverName**
-
-The hostname of the configured XBIP host
-
-**app.ingestion-trigger.xbip.host-configs.\$host.trustSelfSignedCertificate**
-
-Specifies of the TLS certificate of the host is a self signed certificate
-
-**app.ingestion-trigger.xbip.host-configs.\$host.connect-timeout-sec**
-
-Specifies after what amount of seconds the trigger shall give up to establish a connection
-
-**app.ingestion-trigger.xbip.host-configs.\$host.programmaticRecursion**
-
-If the WebDAV does have infinity scan disabled, it can be activated programmatically here by the client
-
-**app.ingestion-trigger.xbip.host-configs.\$host.enablePreemptiveAuthentication**
-
-Defines if basic auth shall use preemptive authentication
-
-**app.ingestion-trigger.xbip.host-configs.\$host.user**
-
-Defines the user name that shall be used to authenticate against the XBIP instance
-
-**app.ingestion-trigger.xbip.host-configs.\$host.pass**
-
-Defines the password that shall be used to authenticate against the XBIP instance
+The configuration for the XBIP contains a set of properties that are grouped by the $host part of the following pattern:
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-trigger.xbip.host-configs.\$host``|host specifies the name of the group|
+|``app.ingestion-trigger.xbip.host-configs.$host.serverName``|The hostname of the configured XBIP host|
+|``app.ingestion-trigger.xbip.host-configs.$host.trustSelfSignedCertificate``|Specifies of the TLS certificate of the host is a self signed certificate|
+|``app.ingestion-trigger.xbip.host-configs.$host.connect-timeout-sec``|Specifies after what amount of seconds the trigger shall give up to establish a connection|
+|``app.ingestion-trigger.xbip.host-configs.$host.programmaticRecursion``|If the WebDAV does have infinity scan disabled, it can be activated programmatically here by the client|
+|``app.ingestion-trigger.xbip.host-configs.$host.enablePreemptiveAuthentication``|Defines if basic auth shall use preemptive authentication|
+|``app.ingestion-trigger.xbip.host-configs.$host.user``|Defines the user name that shall be used to authenticate against the XBIP instance|
+|``app.ingestion-trigger.xbip.host-configs.$host.pass``|Defines the password that shall be used to authenticate against the XBIP instance|
 
 ## AUXIP
 
@@ -170,6 +149,8 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.contentLengthAttrName``|Some PRIP providers use `ContentLength` and other `contentLength`. Default:``ContentLength``|
 
 ## EDIP
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
 
 TBD
 
