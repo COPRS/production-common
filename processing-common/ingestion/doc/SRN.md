@@ -23,7 +23,7 @@ This software does have the following minimal requirements:
 TBD
 
 
-| Resource                    |  Trigger    | Filter     |     Worker | 
+| Resource                    |  Ingestion Trigger    | Ingestion Filter     |   Ingestion Worker* | 
 |-----------------------------|-------------|------------|------------|
 | Memory request              |   477Mi     |   3500Mi   |  3500Mi    |
 | CPU request                 |   500m      |   300m     |  300m      |
@@ -34,6 +34,7 @@ TBD
 | Disk storage capacity       |    n/a      |   n/a      |  n/a       |         
 | Affinity between Pod / Node |   yes       |   no       |  TBD       |
 
+* These resource requirements are applicable for one ingestion worker. TMany instance of an ingestion worker can be scaled, see [scaling ingestion workers]( http://TBD) for more details.
 
 
 # Deployment Prerequisite
