@@ -23,15 +23,18 @@ This software does have the following minimal requirements:
 TBD
 
 
-| Resource                    | Value       |
-|-----------------------------|-------------|
-| CPU                         |             |
-| Memory                      |             |
-| Disk volume needed          |             |
-| Disk access                 |             |
-| Disk storage capacity       |             |
-| Affinity between Pod / Node |             |
-|                             |             |
+| Resource                    |  Trigger    | Filter     |     Worker | 
+|-----------------------------|-------------|------------|------------|
+| Memory request              |   477Mi     |   3500Mi   |  3500Mi    |
+| CPU request                 |   500m      |   300m     |  300m      |
+| Memory limit                |   1907Mi    |   4000Mi   |  4000Mi    |
+| CPU limit                   |   2200m     |   1500m    |  1300m     |
+| Disk volume needed          |   no        |   no       |  yes       |
+| Disk access                 |   no        |   no       |  no        |
+| Disk storage capacity       |    n/a      |   n/a      |  n/a       |         
+| Affinity between Pod / Node |   yes       |   no       |  TBD       |
+
+
 
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
@@ -53,16 +56,19 @@ Using this example the secret can be setup as follow:
 
 For more details, see [AUXIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#auxip)
 
-
-## EDIP
-TBD
-For more details, see [EDIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#edip)
-
 ## XBIP
-
-TBD
+The XBIP interface in the frame of COPRS is used to download raw data (chunks) for Sentinel-1,  Sentinel-2 and  Sentinel-3 missions.
 
 For more details, see [XBIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#xbip)
+
+## EDIP
+The EDIP interface, similar to XBIP, is used by COPRS to download chunks via FTP protocol
+
+For more details, see [EDIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#edip)
+
+
+
+
 
 # Configuration
 
@@ -190,8 +196,7 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 For EDIP trigger following two two properties need to adjusted. Rest of the properties are similar to other Triggers and needs to be adjusted for the client.
 |Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-|``app.ingestion-edip-trigger.ingestion-trigger.polling.inbox1.directory``| URI or directory must start with **ftps://**
-Default:``ftps://rs-edip-mock-svc:21/NOMINAL/``|
+|``app.ingestion-edip-trigger.ingestion-trigger.polling.inbox1.directory``| URI or directory must start with **ftps://** Default:``ftps://rs-edip-mock-svc:21/NOMINAL/``|
 |``app.ingestion-edip-trigger.ingestion-trigger.polling.inbox1.type``| Type of inbox i.e `edip`|
   
 
