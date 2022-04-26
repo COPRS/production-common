@@ -1,18 +1,22 @@
 # RS Core - Ingestion
 
-## General
+The RS Core Ingestion component is able to pull data from a source into the COPRS. Supported interfaces that can be used are AUXIP, EDIP and XBIP interfaces
+
+# Overview
 
 ![overview](./media/overview.png "Overview")
 
-The RS Core Ingestion component is able to pull data from a source into the COPRS. Supported interfaces that can be used are AUXIP, EDIP and XBIP interfaces
+The Ingestion Trigger application polls the configured source and looking for the arrival of new products. If it is detecting a matching input, it will not immediatly start to download it, but generating a new message that will be send to the filter. Products that had been detected already will be written into a MongoDB database to avoid that they are detected again.
 
-The Ingestion Trigger application will poll the configured source and looking for the arrival of new products. If it is detecting a matching input, it will not immediatly start to download it, but generating a new message that will be send to the filter. Products that had been detected already will be written into a MongoDB database to avoid that they are detected again.
-
-The Ingestion Filter application will verify if the product is in the time window for products that are accepted. By default the COPRS is not processing all data arriving, but just about 3%. Products that are not within the accepted time window will be discard. If they are accepted, a message will be send to the Ingestion Worker.
+The Ingestion Filter application verifies if the product is in the time window for products that are accepted. By default the COPRS is not processing all data arriving, but just about 3%. Products that are not within the accepted time window will be discard. If they are accepted, a message will be send to the Ingestion Worker.
 
 The Ingestion Worker application is doing the actual I/O activity and performing the download from the configured interface. Once successfully finished, the product will be uploaded into the Object Storage and a new Ingestion Event generated to notify the COPRS that a new product had been added to the system.
 
-## Respirce Requirements
+For details, please see [Ingestion Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#ingestion-chain)
+
+
+
+# Resource Requirements
 
 This software does have the following minimal requirements:
 
@@ -29,7 +33,7 @@ TBD
 | Affinity between Pod / Node |             |
 |                             |             |
 
-## Additional setup
+# Additional setup
 
 In order to use this RS Core component, it is required to do some additional setup before deploying it.
 
@@ -45,11 +49,12 @@ TBD
 
 ## XBIP
 
-## Configuration
 
-### Ingestion Trigger
+# Configuration
 
-#### General
+## Ingestion Trigger
+
+### General
 
 **app.ingestion-trigger.application.name**
 
@@ -63,7 +68,7 @@ The hostname of the ingestion trigger. This is recommend to be set to ${HOSTNAME
 
 The polling interval on the inbox from the trigger in milliseconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.
 
-#### Inboxes
+## Inboxes
 
 Please note that the following parameters are grouped by an inbox. The name of the ``inbox`` can be a descriptive name.
 
@@ -109,7 +114,7 @@ Defines after how many days entries shall be deleted from the persistence of the
 Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08:00:00.000Z``. This pattern can be used to avoid that all historical products from the inbox will be pulled into the system.
 
 
-#### MongoDB
+### MongoDB
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
@@ -120,7 +125,7 @@ Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08
 |``app.ingestion-trigger.mongodb.password``|The password to login to the MongoDB instance|
 
 
-#### XBIP
+### XBIP
 
 The configuration for the XBIP contains a set of properties that are grouped by the \$host part of the following pattern:
 
@@ -156,10 +161,10 @@ Defines the user name that shall be used to authenticate against the XBIP instan
 
 Defines the password that shall be used to authenticate against the XBIP instance
 
-### AUXIP
+## AUXIP
 
 
-## AUXIP Trigger
+### AUXIP Trigger
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
@@ -178,7 +183,7 @@ Default:``^S1.*(AUX_|AMH_|AMV_|MPL_).*$``|
 |``app.ingestion-auxip-trigger.auxip.max-page-size``|Maximum number of new files that are that are divided as per configured page-size, if the the resultset is big.Default:``500``|
 
 
-## AUXIP Client 
+### AUXIP Client 
 
 AUXIP client is used by both AUXIP trigger and worker services for both polling and downloading functionalities.
 
@@ -199,12 +204,12 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.idAttrName``|Some PRIP providers use `Id` and other `id`. Default:``Id``|
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.contentLengthAttrName``|Some PRIP providers use `ContentLength` and other `contentLength`. Default:``ContentLength``|
 
-### EDIP
+## EDIP
 
 TBD
 
 
-### Ingestion Filter
+## Ingestion Filter
 The following properties can be used in order to modify the application behaviour:
 
 **app.ingestion-filter.application.name**
@@ -237,7 +242,7 @@ e.g. to define a filter for Sentinel-3 that will be accepting all products on We
 ## Ingestion Worker
 TBD
 
-# Deployer properties
+## Deployer properties
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
 |``deployer.*.kubernetes.imagePullPolicy``|The imagePullPolicy suggest the kubelet when to pull the specified image.Default:``Always``|
