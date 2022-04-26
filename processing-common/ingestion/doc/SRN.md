@@ -197,38 +197,38 @@ Default:``ftps://rs-edip-mock-svc:21/NOMINAL/``|
 
 
 ## Ingestion Filter
-The following properties can be used in order to modify the application behaviour:
-
-**app.ingestion-filter.application.name**
-
-The name of the filter application that will be deployed. The name shall be descriptive to allow an easier identification, e.g. ``rs-ingestion-xbip-cgs01-filter`` for a filter used in XBIP context.
-
-**app.ingestion-filter.process.hostname**
-
-The hostname of the system where the application is running. This one will also used identifying the persistence database to avoid firing events twice and thus needs to be unique within the system
-```
-**app.ingestion-filter.ingestion-filter.polling-interval-ms**
-
-The interval in miliseconds between the 
-```
-TBD: This configuration does seems to be used. Might be duplicate of trigger?
-
-**app.ingestion-filter.ingestion-filter.config.\$mission_id.cron-definition=\$cron**
-
-Defines the ingestion filter criteria that will be applied on the job fired by the trigger. 
-
-``mission_id`` must equal the mission id of the event to ensure that a specific mission filter.
-
-``cron`` defines the interval when the product will be accepted and continued to be processed. It is expressed as a [Spring Cron Expression](https://spring.io/blog/2020/11/10/new-in-spring-5-3-improved-cron-expressions).
-
-e.g. to define a filter for Sentinel-3 that will be accepting all products on Wednesday between 0 and 8 o'clock, the property needs to be set as:
-```app.ingestion-filter.ingestion-filter.config.S3.cron-definition=* * 0-8 ? * WED *```
-
+The configuration for the XBIP contains a set of properties that are grouped by the $host part of the following pattern:
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-filter.application.name``|The name of the filter application that will be deployed. The name shall be descriptive to allow an easier identification, e.g. ``rs-ingestion-xbip-cgs01-filter`` for a filter used in XBIP context.|
+|``app.ingestion-filter.process.hostname``|The hostname of the system where the application is running. This one will also used identifying the persistence database to avoid firing events twice and thus needs to be unique within the system|
+|``app.ingestion-filter.ingestion-filter.polling-interval-ms``|The interval in miliseconds between the TBD: This configuration does seems to be used. Might be duplicate of trigger?|
+|``app.ingestion-filter.ingestion-filter.config.\$mission_id.cron-definition=\$cron``|Defines the ingestion filter criteria that will be applied on the job fired by the trigger.<br>``mission_id`` must equal the mission id of the event to ensure that a specific mission filter.<br>``cron`` defines the interval when the product will be accepted and continued to be processed. It is expressed as a [Spring Cron Expression](https://spring.io/blog/2020/11/10/new-in-spring-5-3-improved-cron-expressions).<br>e.g. to define a filter for Sentinel-3 that will be accepting all products on Wednesday between 0 and 8 o'clock, the property needs to be set as:```app.ingestion-filter.ingestion-filter.config.S3.cron-definition=* * 0-8 ? * WED *```  |
 
 
 ## Ingestion Worker
-TBD
-
+Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-worker.spring.cloud.stream.function.bindings.ingest-in-0``| TBD Default  ``input``|
+|``app.ingestion-worker.spring.cloud.stream.function.bindings.ingest-out-0``| TBD  Default  ``output``|
+|``app.ingestion-worker.spring.cloud.stream.function.definition``| TBDDefault  ``ingest``|
+|``app.ingestion-worker.application.name``| Name for the worker application . Example ``coprs-ingestion-xbip-cgs01-worker``|
+|``app.ingestion-worker.process.hostname``| Name of host running process. Example  ``xbip-ingestion-worker-0``|
+|``app.ingestion-worker.ingestion-worker.hostname``| Name of the pod that is derived from the environment varriable. Value  ``${HOSTNAME}``|
+|``app.ingestion-worker.ingestion-worker.polling-interval-ms``| Polling interval in milli seconds. Default  ``100``|
+|``app.ingestion-worker.ingestion-worker.max-retries``| Number of maixmum retries that an application performs to the server. Default  ``10
+|``app.ingestion-worker.ingestion-worker.tempo-retry-ms``| Duration between number of retries to the server. Default  ``10000``|
+|``app.ingestion-worker.ingestion-worker.buffer-inputs``| Default  ``false``|
+|``app.ingestion-worker.xbip.host-configs.host1.serverName``|URI of the server.  Example  ``rs-xbip-mock-s1-svc``|
+|``app.ingestion-worker.xbip.host-configs.host1.trustSelfSignedCertificate``|Shall self signed certificates from the server be trusted. Default  ``true``|
+|``app.ingestion-worker.xbip.host-configs.host1.connect-timeout-sec``|Connection time out in seconds to the server. Default  ``60``|
+|``app.ingestion-worker.xbip.host-configs.host1.programmaticRecursion``| Default  ``false``|
+|``app.ingestion-worker.xbip.host-configs.host1.enablePreemptiveAuthentication``| Preemptive authentication means that the server expects that the authorization credentials without providing the Unauthorized response. Default  ``false``|
+|``app.ingestion-worker.xbip.host-configs.host1.user``| Username that is allowed on the server. This is a referenced variable here, that shall be configured by creating kubernetes secret .Default  ``${XBIP_USERNAME}``|
+|``app.ingestion-worker.xbip.host-configs.host1.pass``|Password for the user that is allowed on the server. This is a referenced variable here, that shall be configured by creating kubernetes secret Default  ``${XBIP_PASSWORD}``|
+|``app.ingestion-worker.xbip.host-configs.host1.numRetries``| Maximum number of retries that an ingestion worker will perform to server. Default  ``5``|
+|``app.ingestion-worker.xbip.host-configs.host1.retrySleepMs``| Duration between number of retries that are performed to reach the server.  Default  ``3000``|
+  
 ## Deployer properties
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
