@@ -46,7 +46,7 @@ Following components of the COPRS shall be installed and running
 
 
 ## Metadata filter properties
-
+# TBD
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
@@ -101,6 +101,8 @@ Following components of the COPRS shall be installed and running
 |``app.metadata-extraction.worker.product-insertion.tempo-retry-ms``| Time between number  of retries the Metadata Extraction Service makes to insert the record in Elasticsearch.Default:``1000``|
 |``app.metadata-extraction.mdextractor.xslt-directory``| The directory available to the Extraction Service where XSLT stylesheets are located. Default:``xslt/``|
 |``app.metadata-extraction.mdextractor.packet-store-types.xxxx``| These are static configuration specific to Sentinel-1 that are required for computation of timeliness. These values are taken as from MPL_OBMEMC (On-board Memory Configuration Files).|
+|``app.metadata-extraction.mdextractor.type-overlapd.xxxx``| These are static configuration specific to Sentinel-1 that are required for computation of slice.|
+|``app.metadata-extraction.mdextractor.type-slice.xxxx``| These are static configuration specific to Sentinel-1 that are required for computation of slice.|
 |``app.metadata-extraction.mdextractor.timeliness-priority-from-high-to-low``| Order of priority for the computed Timeliness of Sentinel-1 products. Default:``PT, NRT, FAST24``|
 |``app.metadata-extraction.mdextractor.fieldTypes.<metadata element>``|  Refers to the Metadata Elements that are extracted from level products and their corresponding format. <br>`` Default:absoluteStartOrbit=long<br>coordinates=string<br>creationTime=date<br>cycleNumber=long<br>instrumentConfigurationId=string<br>instrumentShortName=string<br>missionDataTakeId=long<br>operationalMode=string<br>pass=string<br>platformSerialIdentifier=string<br>platformShortName=string<br>processingDate=date<br>processorName=string<br>processorVersion=string<br>productClass=string<br>productComposition=string<br>productConsolidation=string<br>productType=string<br>qualityDataObjectID=string<br>qualityNumOfCorruptedElements=long<br>qualityNumOfElement=long<br>qualityNumOfMissingElements=long<br>qualityNumOfRSCorrectedElements=long<br>qualityNumOfRSCorrectedSymbols=long<br>qualityNumOfRSIncorrigibleElements=long<br>relativeStartOrbit=long<br>safeTimeliness=string<br>segmentStartTime=date<br>site=string<br>sliceNumber=long<br>sliceProductFlag=boolean<br>startTimeANX=double<br>startTime=date<br>stopTimeANX=double<br>stopTime=date<br>swathIdentifier=string<br>totalNumberOfSlice=long<br>validityStartTime=date<br>validityStopTime=date  
 
