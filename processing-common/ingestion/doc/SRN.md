@@ -34,7 +34,7 @@ TBD
 | Disk storage capacity       |    n/a      |   n/a      |  n/a       |         
 | Affinity between Pod / Node |   yes       |   no       |  TBD       |
 
-* These resource requirements are applicable for one ingestion worker. TMany instance of an ingestion worker can be scaled, see [scaling ingestion workers]( http://TBD) for more details.
+ *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [scaling up workers]( http://TBD for more details.
 
 
 # Deployment Prerequisite
