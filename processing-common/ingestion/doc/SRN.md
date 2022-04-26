@@ -12,7 +12,7 @@ The Ingestion Filter application will verify if the product is in the time windo
 
 The Ingestion Worker application is doing the actual I/O activity and performing the download from the configured interface. Once successfully finished, the product will be uploaded into the Object Storage and a new Ingestion Event generated to notify the COPRS that a new product had been added to the system.
 
-## Requirements
+## Respirce Requirements
 
 This software does have the following minimal requirements:
 
@@ -38,6 +38,7 @@ When using an AUXIP endpoint it will be required to provide some additional cred
 
 Using this example the secret can be setup as follow:
 ``kubectl create secret generic auxip --from-literal=USERNAME=<USER_ACCOUNT> --from-literal=PASSWORD=<USER_PASSWORD> --from-literal=CLIENT_ID=<CLIENT_ID --from-literal=CLIENT_SECRET=<CLIENT_SECRET>``
+
 
 ## EDIP
 TBD
@@ -110,25 +111,13 @@ Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08
 
 #### MongoDB
 
-**app.ingestion-trigger.mongodb.host**
-
-The hostname to the MongoDB instance that shall be used for persisting the events of the trigger to identify if a request had been fired already. Mongo is provided by the infrastructure layer.
-
-**app.ingestion-trigger.mongodb.port**
-
-The port of the MongoDB that shall be used when contacting the host specified under ``app.ingestion-trigger.mongodb.host``
-
-**app.ingestion-trigger.mongodb.database**
-
-The name of the database that shall be used within MongoDB
-
-**app.ingestion-trigger.mongodb.username**
-
-The username to login to the MongoDB instance
-
-**app.ingestion-trigger.mongodb.password**
-
-The password to login to the MongoDB instance 
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-trigger.mongodb.host``|The hostname to the MongoDB instance that shall be used for persisting the events of the trigger to identify if a request had been fired already. Mongo is provided by the infrastructure layer.
+|``app.ingestion-trigger.mongodb.port``|The port of the MongoDB that shall be used when contacting the host specified under |
+|``app.ingestion-trigger.mongodb.database``|The name of the database that shall be used within MongoDB|
+|``app.ingestion-trigger.mongodb.username``|The username to login to the MongoDB instance|
+|``app.ingestion-trigger.mongodb.password``|The password to login to the MongoDB instance|
 
 
 #### XBIP
@@ -167,11 +156,50 @@ Defines the user name that shall be used to authenticate against the XBIP instan
 
 Defines the password that shall be used to authenticate against the XBIP instance
 
-#### AUXIP
+### AUXIP
 
-TBD
 
-#### EDIP
+## AUXIP Trigger
+
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+``app.ingestion-auxip-trigger.ingestion-trigger.polling-interval-ms``Polling interval between two tries to the AUXIP server in milliseconds. Default:``10000``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.directory``|The polling directory/url of the AUXIP server.DefaultDefault:``https://aux1.s1pdgs.eu/odata/v1``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.matchRegex``|Pattern that the trigger service shall be matching against the filenames on the AUXIP server in order to create a job. The pattern shall be adjusted in the associated trigger configruation in order to  match the filenames of Sentinel-2 and Sentinel-3 auxiliaries,
+Default:``^S1.*(AUX_|AMH_|AMV_|MPL_).*$``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.ignoreRegex``Pattern for the filenames that are configured to ignored on the AUXIP server.Default:``(^\\..*|.*\\.tmp$|db.*|^lost\+found$)``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.type``|Type of Inbox. For all AUXIP interfaces, the value shall be `prip`
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.family``|Product Family assoociated with the for the files found on the AUXIP Server.- For S1, related it shall be `AUXILIARY_FILE_ZIP`- For S2, related it shall be `S2_AUX_ZIP`- For S3, related it shall be `S3_AUX_ZIP` <br>Default:``AUXILIARY_FILE_ZIP``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.stationName``|AUXIP Server/station name. Default:``PRIP``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.missionId=S1``|Mission ID for the products to the related mission in COPRS.- `S1` for Sentinel-1 related files- `S2` for Sentinel-2 related files - `S3` for Sentinel-3 related files<br>Default:``S1``||``app.ingestion-auxip-trigger.auxip.start`` |Starting date for the AUXIP trigger for polling files on the server based on the their publicationDate. Files prior to the configured date shall be ingored.Default:``2022-04-10T12:00:00.000000``|
+|``app.ingestion-auxip-trigger.auxip.time-window-sec``|The AUXIP trigger polls starting with a configured timestamp( `start`) and then systematically queries the server by using a configurable timewindow up until the current time.From then on it will stay up-to-date following all new  publications on the PRIPs as long as it is running.Default:``2400``|
+|``app.ingestion-auxip-trigger.auxip.time-window-overlap-sec``|The overlapping of time windows in seconds, for safety, keep smallDefault:``2400``|
+|``app.ingestion-auxip-trigger.auxip.offset-from-now-sec``|The offset from now in seconds, so that the provider (AUXIP) has some time to publish new products, otherwise they might not be seen from AUXIP. The time window will not reach now but now minus `offset-from-now-sec`.Default:``2400``|
+|``app.ingestion-auxip-trigger.auxip.max-page-size``|Maximum number of new files that are that are divided as per configured page-size, if the the resultset is big.Default:``500``|
+
+
+## AUXIP Client 
+
+AUXIP client is used by both AUXIP trigger and worker services for both polling and downloading functionalities.
+
+In oder to connect to multiple AUXIP servers, following configuration shall be repeated  and ajdusted by adding incrementing  `host*` propeorties. The configuration parameters `host1` are described below.
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.serviceRootUri``|URI for the AUXIP Server.Default:``https://aux1.s1pdgs.eu/odata/v1``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.user``|Username for the AUXIP Server. This is a referenced variable here, that shall be configured using `secret` . <br>If more than one  AUXIP servers are used for the missions of RS, then the name of  referenced varriable for the field here `user`  shall also be adjusted as configured in the secret. For Example: If another secret configured contain values `AUXIP_USERNAME_2` ,the the varriable referenced here shall be adjusted as `${AUXIP_USERNAME_2}`. Similar goes for the all the varriables here such as  `${AUXIP_PASSWORD}`, `${AUXIP_CLIENT_ID}` and `${AUXIP_CLIENT_SECRET}` Default:``${AUXIP_USERNAME}``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.pass``|Password the configured user of for the AUXIP Server. This is a referenced variable here, that shall be configured using `secret` Default:``${AUXIP_PASSWORD}``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.sslValidation``|SSL validation for the server.Default:``false``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.authType``|Authentication type for the AUXIP server.Possible values: basic, oauth2, disable.Default:``oauth2``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.bearerTokenType``|A Bearer Token is an opaque string, not intended to have any meaning to clients using Default:``OUTH2_ACCESS_TOKEN``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthAuthUrl``|Authentication type for the AUXIP server. Default:``https://aux1.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthClientId``|Oauth2 Client it. This is a referenced variable here, that shall be configured using  Kubernetes secret .Default:``${AUXIP_CLIENT_ID}``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthClientSecret``|Oauth2 Client secret. This is a referenced variable here, that shall be configured using Kubernetes secret .Default:``${AUXIP_CLIENT_SECRET}``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.creationDateAttributeName``|Some PRIP providers use `PublicationDate` and other `creationDate`Default:``PublicationDate``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.productNameAttrName``|Some PRIP providers use `Name` and other `name`. Default:``Name``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.idAttrName``|Some PRIP providers use `Id` and other `id`. Default:``Id``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.contentLengthAttrName``|Some PRIP providers use `ContentLength` and other `contentLength`. Default:``ContentLength``|
+
+### EDIP
 
 TBD
 
@@ -206,4 +234,18 @@ e.g. to define a filter for Sentinel-3 that will be accepting all products on We
 
 
 
-### Ingestion Worker
+## Ingestion Worker
+TBD
+
+# Deployer properties
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``deployer.*.kubernetes.imagePullPolicy``|The imagePullPolicy suggest the kubelet when to pull the specified image.Default:``Always``|
+|``deployer.*.kubernetes.imagePullSecrets`` | Kubernetes needs credentials to pull an image from the private registry (aretefactory). This field specifies the name of a secret that shall contain the credentials.Default:``artifactory``|
+|``deployer.*.kubernetes.configMapRef``|Reference to the COPRS config map that contains key-value dataDefault:``coprs-logging-config``|
+|``deployer.<POD-NAME>.kubernetes.requests.memory``| This is minimum amount of memory that is required by the pod.Kubernetes will only schedule the pod on a node that can give it required resource.|
+|``deployer.<POD-NAME>.kubernetes.requests.cpu`` | This is minimum amount of memory that is required by the metadata-filter pod.Kubernetes will only schedule the pod on a node that can give it required resource.|
+|``deployer.<POD-NAME>.kubernetes.limits.memory``|This is maximum amount of memory that a pod can avail.|
+|``deployer.<POD-NAME>.kubernetes.volumeMounts``|The property specifies where the mounted volume within the container file-system are available to the application.|
+|``deployer.<POD-NAME>.kubernetes.volumes``| Kubernetes data volume available to the application.|
+|``deployer.<POD-NAME>.kubernetes.secretKeyRefs`` |Similar to ConfigMaps, contain key-value data that is required by the application. ConfigMaps are plain text data, and Secrets are used for the senstive data such as passwords,keys, credentials etc.|
