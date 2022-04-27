@@ -88,4 +88,20 @@ deployer.<POD-NAME>.kubernetes.secretKeyRefs=[{ envVarName: 'OBS_USERNAME', secr
 
 # Configuration
 
-
+| Property | Details |
+|-|-|
+|`app.*.obs.user-id`| Username used to connect to the OBS (e.g. `access_key` of `.s3cfg`) |
+|`app.*.obs.user-secret`| Password used to connect to the OBS (e.g. `secret_key` of `.s3cfg`) |
+|`app.*.obs.endpoint`| Service Endpoint for the OBS (e.g. `host_base` of `.s3cfg`) |
+|`app.*.obs.endpoint-region`| Signing Region for the OBS (e.g. `bucket_location` of `.s3cfg`) |
+|`app.*.obs.multipart-upload-threshold`| Threshold for when to start using multipart upload, in MB (default: 3072) |
+|`app.*.obs.min-upload-part-size`| Minimum size for each part, when using multipart upload, in MB (default: 100) |
+|`app.*.obs.max-obs-retries`| How many times any operation on the OBS shall be performed before considered failed (default: 10) |
+|`app.*.obs.backoff-throttled-base-delay`| Delay between each retry, in ms (default: 500) |
+|`app.*.obs.timeout-shutdown`| Time after an Exception was raised to stop waiting for graceful termination, in s (default: 10) |
+|`app.*.obs.timeout-down-exec`| On batch download: Timeout for each object, in s (default: 15) |
+|`app.*.obs.timeout-up-exec`| On batch upload: Timeout for each object, in s (default: 20) |
+|`app.*.obs.disable-chunked-encoding`| Boolean flag to disable chunked encoding. By default chunked encoding is enabled for all PutObjectRequests and UploadPartRequests. When setting this property to true, all requests have chunked encoding disabled. (default: false) |
+|`app.*.obs.max-input-stream-buffer-size-mb`| When chunked encoding is disabled, maximum size for object for input stream buffer as UploadObject has to be buffered, in MB (default: 1024) |
+|`app.*.obs.upload-cache-location`| Absolute file path to Uplaod Cache (default: /tmp) |
+|`app.*.obs.bucket`| Map containing mappings for buckets. Keys are of Enum `ProductFamily`, values of type String |
