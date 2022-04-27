@@ -41,9 +41,9 @@ TBD
 Following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
 OBS Buckets and ES indices shall be created.
-- See [COPRS OBS Bucket](https://github.com/COPRS/production-common/doc/buckets.md)
-- See [COPRS ES Index](https://github.com/COPRS/production-common/indices.md) 
-- See [COPRS Secret](https://github.com/COPRS/production-common/secrets.md)
+- See [COPRS OBS Bucket](/processing-common/doc/buckets.md)
+- See [COPRS ES Index](/processing-common/doc/indices.md) 
+- See [COPRS Secret](/processing-common/doc/secrets.md)
 
 # Additional setup
 
