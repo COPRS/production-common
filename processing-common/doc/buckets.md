@@ -43,9 +43,11 @@ rs-s1-plans-and-reports-zip
 rs-s2-aux
 rs-s2-l0-gr
 rs-s2-l0-ds
+rs-s2-hktm
 rs-s2-aux-zip
 rs-s2-l0-gr-zip
 rs-s2-l0-ds-zip
+rs-s2-hktm-zip
 rs-s3-granules
 rs-s3-aux
 rs-s3-l0
