@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'rs-core-examples/**'
+      - 'processing-common/obs-stream-parameters.properties'
       - '.github/workflows/build-rs-core-examples.yml'
     branches:
       - '!main'
