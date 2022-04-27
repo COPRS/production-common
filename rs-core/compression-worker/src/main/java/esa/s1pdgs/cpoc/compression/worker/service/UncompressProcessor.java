@@ -40,7 +40,6 @@ public class UncompressProcessor extends AbstractProcessor
 
 	@Override
 	public Message<CatalogJob> apply(CatalogJob event) {
-		// TODO Auto-generated method stub
 		final String workDir = properties.getWorkingDirectory();
 
 		final Reporting report = ReportingUtils.newReportingBuilder(MissionId.fromFileName(event.getKeyObjectStorage()))
@@ -90,9 +89,11 @@ public class UncompressProcessor extends AbstractProcessor
 		report.end(ReportingUtils.newFilenameReportingOutputFor(event.getProductFamily(), event.getKeyObjectStorage()),
 				new ReportingMessage("End uncompression processing"));
 
+		String keyObs = CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());
 		CatalogJob result = new CatalogJob();
-		result.setKeyObjectStorage(CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage()));
-		result.setProductName(workDir);
+		result.setKeyObjectStorage(keyObs);
+		result.setStoragePath(obsClient.getAbsoluteStoragePath(outputProductFamily, keyObs));
+		result.setProductName(keyObs);
 		result.setProductFamily(outputProductFamily);
 		result.setRelativePath(event.getRelativePath());
 		result.setMissionId(event.getMissionId());
