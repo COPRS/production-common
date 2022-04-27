@@ -42,16 +42,34 @@ public class FileUploader {
 	}
 	
 	public void processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
+		File productPath;
 		String outputFileName;
 		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
 			// Compression
 			outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
-		} else {
+			productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
+		} 
+		else {
 			// Uncompression
 			outputFileName = CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());
+			productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
+			
+			// dirty workaround to avoid regressions here. HKTM files are coming in a zip without the SAFE suffix
+			// while the directory inside the zip still carries the SAFE suffix. Hence, the previous logic here
+			// did not work and to cover this specific scenario, we simply use the directory that has been extracted.
+			// To indicate that the workaround is active, it will be logged that this logic tries to detect the 
+			// uncompressed file.
+			if (!productPath.exists()) {
+				final File directory = new File(workingDir + "/" + outputFileName);		
+				LOGGER.debug("Searching for uncompressed product in {}", directory);
+				final File[] files = directory.listFiles();
+				
+				if (files != null && files.length == 1) {		
+					productPath = files[0];
+					LOGGER.debug("Found product {}", productPath);
+				}				
+			}			
 		}
-		
-		final File productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
 		if (!productPath.exists()) {
 			throw new InternalErrorException(
 					"Operation aborted: The compressed product " + productPath + " does not exist");
