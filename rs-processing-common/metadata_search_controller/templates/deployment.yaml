@@ -38,7 +38,7 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            memory: {{ .Values.hardware.ram.request }}
+            memory: {{ .Values.resources.ram.request }}
             cpu: {{ .Values.resources.cpu.request }}
           limits:
             memory: {{ .Values.resources.ram.limit }}
