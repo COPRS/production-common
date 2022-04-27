@@ -31,7 +31,7 @@ TBD
 | CPU limit                   |   2200m     |   1500m    |  1300m     |
 | Disk volume needed          |   no        |   no       |  yes       |
 | Disk access                 |   no        |   no       |  no        |
-| Disk storage capacity       |    n/a      |   n/a      |  n/a       |         
+| Disk storage capacity       |    n/a      |   n/a      |  n/a       |
 | Affinity between Pod / Node |   yes       |   no       |  TBD       |
 
  *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [COPRS Worker Scaling] (https://github.com/COPRS/production-common/scaling.md) for more details.
@@ -43,33 +43,43 @@ Following components of the COPRS shall be installed and running
 OBS Buckets and ES indices shall be created.
 - See [COPRS OBS Bucket](https://github.com/COPRS/production-common/doc/buckets.md)
 - See [COPRS ES Index](https://github.com/COPRS/production-common/indices.md) 
+- See [COPRS Secret](https://github.com/COPRS/production-common/secrets.md)
 
 # Additional setup
 
-In order to use this RS Core component, it is required to do some additional setup before deploying it.
+This RS Core component does contain a generic component for ingesting products from different endpoints into the RS environment. The following types are supported:
 - AUXIP
 - EDIP
 - XBIP
 
+For each of these types a different type of inbox configuration needs to be setup. The following sections are giving an overview about how to use and configure the different endpoints.
 
 ## AUXIP
 When using an AUXIP endpoint it will be required to provide some additional credentials in order to allow login to it. For security issues this cannot be done in the normal properties and needs to be setup as Kubernetes secret. 
 
-Using this example the secret can be setup as follow:
-``kubectl create secret generic auxip --from-literal=USERNAME=<USER_ACCOUNT> --from-literal=PASSWORD=<USER_PASSWORD> --from-literal=CLIENT_ID=<CLIENT_ID --from-literal=CLIENT_SECRET=<CLIENT_SECRET>``
+Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secrets.md) documentation for giving detailed information on how to create secrets and passing the credentials.
 
 For more details, see [AUXIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#auxip)
+
+For an example configuration of an AUXIP endpoint, please have a look at the [example](https://github.com/COPRS/production-common/tree/develop/rs-core-examples/ingestion-auxip)
 
 ## XBIP
 The XBIP interface in the frame of COPRS is used to download raw data (chunks) for Sentinel-1,  Sentinel-2 and  Sentinel-3 missions.
 
+Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secrets.md) documentation for giving detailed information on how to create secrets and passing the credentials.
+
 For more details, see [XBIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#xbip)
+
+The RS Core ingestion does contain an example for an XBIP endpoint already. For an example with multiple inboxes, please have a look at the [example](https://github.com/COPRS/production-common/tree/develop/rs-core-examples/ingestion-xbip)
 
 ## EDIP
 The EDIP interface, similar to XBIP, is used by COPRS to download chunks via FTP protocol
 
+Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secrets.md) documentation for giving detailed information on how to create secrets and passing the credentials.
+
 For more details, see [EDIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#edip)
 
+For an example configuration for an EDIP endpoint, please have a look at the [example](https://github.com/COPRS/production-common/tree/develop/rs-core-examples/ingestion-edip)
 
 
 
