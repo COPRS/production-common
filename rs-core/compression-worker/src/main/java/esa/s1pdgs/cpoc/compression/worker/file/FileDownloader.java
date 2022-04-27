@@ -76,7 +76,7 @@ public class FileDownloader {
 		}
 		
 		String targetFile = "";
-		if (!event.getKeyObjectStorage().toLowerCase().endsWith(".zip")) {
+		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
 			// Compression
 			targetFile = this.localWorkingDir + "/" + CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());	
 		} else {
