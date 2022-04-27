@@ -125,8 +125,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("OPER", m7.getString("productClass"));
 		assertEquals("GIP_R2DEFI", m7.getString("productType"));
 		assertEquals("2017-02-06T10:30:39.000000Z", m7.getString("creationTime"));
-		assertEquals("2017-01-01T00:00:00.000000Z", m7.getString("startTime"));
-		assertEquals("2100-01-01T00:00:00.000000Z", m7.getString("stopTime"));
+		assertEquals("2017-01-01T00:00:00.000000Z", m7.getString("validityStartTime"));
+		assertEquals("2100-01-01T00:00:00.000000Z", m7.getString("validityStopTime"));
 		assertEquals("8A", m7.getString("bandIndexId"));
 		assertEquals(9, m7.length());
 		

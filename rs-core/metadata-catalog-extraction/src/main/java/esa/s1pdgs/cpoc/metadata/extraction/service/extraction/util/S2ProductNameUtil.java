@@ -11,17 +11,17 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class S2ProductNameUtil {
 
-	final public static Pattern HKTM_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([A-Z0-9]{4})_(PRD_HKTM__)_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_([0-9]{4})(.*)");
-	final public static Pattern STANDARD_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([A-Z0-9]{4})_([0-9A-Z_]{10})_.{4}_([0-9]{8}T[0-9]{6})(.*)");
-	final public static Pattern COMPACT_PATTERN =  Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([0-9A-Z_]{6})_([0-9]{8}T[0-9]{6})(.*)");
-	final public static Pattern AUX_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([A-Z0-9]{4})_(AUX_[0-9A-Z_]{7}).*");
+	final public static Pattern HKTM_PRODUCT_NAME_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([A-Z0-9]{4})_(PRD_HKTM__)_([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})_([0-9]{4})(.*)");
+	final public static Pattern STANDARD_PRODUCT_NAME_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([A-Z0-9]{4})_([0-9A-Z_]{10})_.{4}_([0-9]{8}T[0-9]{6})(.*)");
+	final public static Pattern COMPACT_PRODUCT_NAME_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([0-9A-Z_]{6})_([0-9]{8}T[0-9]{6})(.*)");
+	final public static Pattern AUX_PRODUCT_TYPE_PATTERN = Pattern.compile("^(AUX|DEM|GIP)_.*");
 
 	public static JSONObject extractMetadata(String productName) throws MetadataExtractionException, MetadataMalformedException {
 		final JSONObject metadata = new JSONObject();
 
 		// HKTM PRODUCT NAMES
 		
-		final Matcher hktmMatcher = HKTM_PATTERN.matcher(productName);
+		final Matcher hktmMatcher = HKTM_PRODUCT_NAME_PATTERN.matcher(productName);
 		if (hktmMatcher.matches()) {
 			metadata.put("productName", productName);
 			metadata.put("missionId", hktmMatcher.group(1));
@@ -35,9 +35,8 @@ public class S2ProductNameUtil {
 		
 		// STANDARD, COMPACT AND AUX PRODUCT NAMES
 
-		final Matcher standardMatcher = STANDARD_PATTERN.matcher(productName);
-		final Matcher compactMatcher = COMPACT_PATTERN.matcher(productName);
-		final boolean isAuxProduct = AUX_PATTERN.matcher(productName).matches();
+		final Matcher standardMatcher = STANDARD_PRODUCT_NAME_PATTERN.matcher(productName);
+		final Matcher compactMatcher = COMPACT_PRODUCT_NAME_PATTERN.matcher(productName);
 		final boolean isCompact;
 		final String variablePart;
 		
@@ -60,9 +59,11 @@ public class S2ProductNameUtil {
 			variablePart = compactMatcher.group(5);
 		} else {
 			throw new MetadataExtractionException(
-				new Exception(String.format("Product %s not matchting pattern %s", productName, STANDARD_PATTERN)));
+				new Exception(String.format("Product %s not matchting pattern %s", productName, STANDARD_PRODUCT_NAME_PATTERN)));
 		}
 
+		final boolean isAuxProduct = AUX_PRODUCT_TYPE_PATTERN.matcher(metadata.getString("productType")).matches();
+		
 		int idx = 0;
 		while (idx + 1 < variablePart.length() && '_' == variablePart.charAt(idx++)) {
 			int valueLength = 0;
