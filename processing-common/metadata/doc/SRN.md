@@ -13,7 +13,7 @@ The filter allows to configure some gate to prevent that products that are inges
 
 The actual work is done by the extraction. Based on the incoming file and their product family, it will extract the metadata from the file by either evaluating a manifest or other metadata files or extracting the information from the filename. The collected data will then be added to the catalog.
 
-The Metadata Search Controller provides REST services in order to query upon the catalog. Further information on how to deploy it can be found [here](https://github.com/COPRS/production-common/tree/develop/rs-processing-common)
+The Metadata Search Controller provides REST services in order to query upon the catalog. Further information on how to deploy it can be found [here](/rs-processing-common)
 
 For details, please see [Metadata Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#metadata-extraction)
 
@@ -39,7 +39,7 @@ This software does have the following minimal requirements:
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
-- [COPRS ingestion chain](https://github.com/COPRS/production-common/tree/develop/processing-common/ingestion)
+- [COPRS ingestion chain](/processing-common/ingestion)
 
 
 
