@@ -7,15 +7,19 @@ COPRS Metadata chain is responsible for extrating metadata from the products rel
 ![overview](./media/overview.png "Overview")
 
 
-TBD
+The metadata chain does have the task to extract the metadata from products that had been either ingested or produced and store them into the elastic search. Basically two elements are contained in the chain.
+
+The filter allows to configure some gate to prevent that products that are ingested will be processed. This can be the case to filter out e.g. reports that are not used for the processing at all. Additionally the filter can be used to create mission specific ingestion chain if this is required for load balancing.
+
+The actual work is done by the extraction. Based on the incoming file and their product family, it will extract the metadata from the file by either evaluating a manifest or other metadata files or extracting the information from the filename. The collected data will then be added to the catalog.
+
+The Metadata Search Controller provides REST services in order to query upon the catalog. Further information on how to deploy it can be found [here](https://github.com/COPRS/production-common/tree/develop/rs-processing-common)
 
 For details, please see [Metadata Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#metadata-extraction)
 
 # Resource Requirements
 
 This software does have the following minimal requirements:
-
-TBD
 
 | Resource                    |  Catalog Extract Worker* | 
 |-----------------------------|---------------|
@@ -50,17 +54,9 @@ Following components of the COPRS shall be installed and running
 
 
 ## Metadata filter properties
-# TBD
 
-| Property                   				                               | Details       |
-|---------------------------------------------------------------|---------------|
-|``app.metadata-filter.spring.cloud.stream.function.bindings.convertToCatalogJob-in-0=input``| ..| 
-|``app.metadata-filter.spring.cloud.stream.function.bindings.convertToCatalogJob-out-0=output``|..|
-|``app.metadata-filter.spring.cloud.stream.function.definition=convertToCatalogJob``|..|
-|``app.metadata-filter.application.name=coprs-metadata-filter``|..| |``app.metadata-extraction.spring.cloud.stream.function.bindings.extractMetadata-in-0=input``|..|
-|``app.metadata-extraction.spring.cloud.stream.function.bindings.extractMetadata-out-0=output``|..|
-|``app.metadata-extraction.spring.cloud.stream.function.definition=extractMetadata``|..|
-|``app.metadata-extraction.application.name=coprs-metadata-extraction``| 
+The filter component is a generic component from SCDF and further information can be found under:
+[https://github.com/spring-cloud/stream-applications/tree/main/applications/processor/filter-processor]
 
 ### Elasticsearch (ES)
 
@@ -117,7 +113,7 @@ Following components of the COPRS shall be installed and running
 |``deployer.*.kubernetes.configMapRef``|Reference to the COPRS config map that contains key-value dataDefault:``coprs-logging-config``|
 |``deployer.<POD-NAME>.kubernetes.requests.memory``| This is minimum amount of memory that is required by the pod.Kubernetes will only schedule the pod on a node that can give it required resource.|
 |``deployer.<POD-NAME>.kubernetes.requests.cpu`` | This is minimum amount of memory that is required by the metadata-filter pod.Kubernetes will only schedule the pod on a node that can give it required resource.|
-|``deployer.<POD-NAME>.kubernetes.limits.memory``|This is maximum amount of memory that a pod can avail.|
+|``deployer.<POD-NAME>.kubernetes.limits.memory``|This is maximum amount of memory that a pod can available.|
 |``deployer.<POD-NAME>.kubernetes.volumeMounts``|The property specifies where the mounted volume within the container file-system are available to the application.|
 |``deployer.<POD-NAME>.kubernetes.volumes``| Kubernetes data volume available to the application.|
-|``deployer.<POD-NAME>.kubernetes.secretKeyRefs`` |Similar to ConfigMaps, contain key-value data that is required by the application. ConfigMaps are plain text data, and Secrets are used for the senstive data such as passwords,keys, credentials etc.|
+|``deployer.<POD-NAME>.kubernetes.secretKeyRefs`` |Similar to ConfigMaps, contain key-value data that is required by the application. ConfigMaps are plain text data, and Secrets are used for the sensitive data such as passwords,keys, credentials etc.|
