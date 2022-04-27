@@ -30,7 +30,7 @@ image:
   imagePullSecrets: artifactory
   
 
-rs_metadata_catalog_searchcontroller:
+resources:
   cpu:
     request: "200m"
     limit: "500m"

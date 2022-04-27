@@ -38,11 +38,11 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            memory: {{ .Values.rs_metadata_catalog_searchcontroller.ram.request }}
-            cpu: {{ .Values.rs_metadata_catalog_searchcontroller.cpu.request }}
+            memory: {{ .Values.hardware.ram.request }}
+            cpu: {{ .Values.resources.cpu.request }}
           limits:
-            memory: {{ .Values.rs_metadata_catalog_searchcontroller.ram.limit }}
-            cpu: {{ .Values.rs_metadata_catalog_searchcontroller.cpu.limit }}
+            memory: {{ .Values.resources.ram.limit }}
+            cpu: {{ .Values.resources.cpu.limit }}
 
         volumeMounts:
         - name: logging-config-volume
@@ -59,9 +59,9 @@ spec:
           privileged: false
         env:
         - name: JAVA_XMS
-          value: {{ .Values.rs_metadata_catalog_searchcontroller.javaOpts.xms }}
+          value: {{ .Values.resources.javaOpts.xms }}
         - name: JAVA_XMX
-          value: {{ .Values.rs_metadata_catalog_searchcontroller.javaOpts.xmx }}
+          value: {{ .Values.resources.javaOpts.xmx }}
         - name: storage_user_id
           valueFrom:
             secretKeyRef:
