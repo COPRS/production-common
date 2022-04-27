@@ -34,12 +34,15 @@ TBD
 | Disk storage capacity       |    n/a      |   n/a      |  n/a       |         
 | Affinity between Pod / Node |   yes       |   no       |  TBD       |
 
- *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [scaling up workers]( http://TBD for more details.
+ *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [COPRS Worker Scaling] (https://github.com/COPRS/production-common/scaling.md) for more details.
 
 
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
+OBS Buckets and ES indices shall be created.
+- See [COPRS OBS Bucket](https://github.com/COPRS/production-common/doc/buckets.md)
+- See [COPRS ES Index](https://github.com/COPRS/production-common/indices.md) 
 
 # Additional setup
 
