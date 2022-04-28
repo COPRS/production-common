@@ -1,8 +1,0 @@
-#!/bin/bash
-#
-# This is a helper script in order to perform the health check using
-# the old wrapper script. It will invoke a check on all modules to
-# verify the health status of the cluster
-#
-
-$LOCATION/wrapper.sh $ENV_DIR/wrapper/configuration.sh check

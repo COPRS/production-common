@@ -1,6 +1,0 @@
-# Be careful! This is just used for "mongo" script and NOT for init!
-appDataJob
-mqiMessage
-failedProcessing
-inboxEntry
-auxipState
