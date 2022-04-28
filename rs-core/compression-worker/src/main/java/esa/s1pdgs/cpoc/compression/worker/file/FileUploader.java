@@ -43,7 +43,7 @@ public class FileUploader {
 		this.outputProductFamily = outputProductFamily;
 	}
 	
-	public void processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
+	public String processOutput(final ReportingFactory reportingFactory) throws AbstractCodedException, ObsEmptyFileException {
 		File productPath;
 		String outputFileName;
 		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
@@ -93,6 +93,7 @@ public class FileUploader {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
 		obsClient.upload(Collections.singletonList(new FileObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
+		return outputFileName;
 	}
 
 }
