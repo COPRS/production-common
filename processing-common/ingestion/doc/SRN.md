@@ -30,8 +30,8 @@ TBD
 | Memory limit                |   1907Mi    |   4000Mi   |  4000Mi    |
 | CPU limit                   |   2200m     |   1500m    |  1300m     |
 | Disk volume needed          |   no        |   no       |  yes       |
-| Disk access                 |   no        |   no       |  no        |
-| Disk storage capacity       |    n/a      |   n/a      |  n/a       |
+| Disk access                 |   no        |   no       |  ReadWriteOnce |
+| Disk storage capacity       |    n/a      |   n/a      |  TBD       |
 | Affinity between Pod / Node |   yes       |   no       |  TBD       |
 
  *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [COPRS Worker Scaling] (https://github.com/COPRS/production-common/scaling.md) for more details.
@@ -40,10 +40,10 @@ TBD
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
-OBS Buckets and ES indices shall be created.
+OBS Buckets, Kubernetes Secrets and ES indices shall be created.
 - See [COPRS OBS Bucket](/processing-common/doc/buckets.md)
-- See [COPRS ES Index](/processing-common/doc/indices.md) 
-- See [COPRS Secret](/processing-common/doc/secrets.md)
+- See [COPRS ES Indice](/processing-common/doc/indices.md) 
+- See [COPRS Kubernetes Secret](/processing-common/doc/secrets.md)
 
 # Additional setup
 
@@ -80,7 +80,6 @@ Please check [this](https://github.com/COPRS/production-common/tree/develop/proc
 For more details, see [EDIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#edip)
 
 For an example configuration for an EDIP endpoint, please have a look at the [example](https://github.com/COPRS/production-common/tree/develop/rs-core-examples/ingestion-edip)
-
 
 
 
