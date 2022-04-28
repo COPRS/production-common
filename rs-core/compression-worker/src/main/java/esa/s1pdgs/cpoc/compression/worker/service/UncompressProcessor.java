@@ -58,7 +58,8 @@ public class UncompressProcessor extends AbstractProcessor
 		final FileUploader fileUploader = new FileUploader(obsClient, workDir, event, outputProductFamily);
 		report.begin(ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getKeyObjectStorage()),
 				new ReportingMessage("Start uncompression processing"));
-
+		
+		String keyObs;
 		try {
 
 			checkThreadInterrupted();
@@ -73,7 +74,7 @@ public class UncompressProcessor extends AbstractProcessor
 
 			checkThreadInterrupted();
 			LOGGER.info("Uploading uncompressed outputs for {}", event);
-			fileUploader.processOutput(report);
+			keyObs = fileUploader.processOutput(report);
 
 		} catch (AbstractCodedException | InterruptedException | ObsEmptyFileException e) {
 			LOGGER.error(e);
@@ -88,8 +89,7 @@ public class UncompressProcessor extends AbstractProcessor
 
 		report.end(ReportingUtils.newFilenameReportingOutputFor(event.getProductFamily(), event.getKeyObjectStorage()),
 				new ReportingMessage("End uncompression processing"));
-
-		String keyObs = CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());
+				
 		CatalogJob result = new CatalogJob();
 		result.setKeyObjectStorage(keyObs);
 		result.setStoragePath(obsClient.getAbsoluteStoragePath(outputProductFamily, keyObs));
