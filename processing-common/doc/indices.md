@@ -24,10 +24,6 @@ aux_ice
 aux_wav
 raw
 session
-msk_ew_slc
-msk__land_
-msk_ocean_
-msk_ovrpas
 aux_ece
 aux_scs
 plan_and_report
@@ -81,19 +77,6 @@ s3_pug
 
 ```
 {"mappings":{"properties":{"creationTime":{"type":"date"},"startTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape","tree":"geohash"},"oqcFlag":{"type":"text"}}}}
-```
-
--------------------
-
-```
-ewslcmask
-landmask
-oceanmask
-overpassmask
-```
-
-```
-{"mappings":{"properties":{"geometry":{"type":"geo_shape","tree":"geohash"}}}}
 ```
 
 -------------------
