@@ -20,7 +20,7 @@ This software does have the following minimal requirements:
 
 | Resource                    |  Ingestion Trigger    | Ingestion Filter     |   Ingestion Worker* | 
 |-----------------------------|-------------|------------|------------|
-| Memory request              |   477Mi     |   3500Mi   |  3500Mi    |
+| Memory request              |   477Mi     |   3500Mi   |  3500Mi**   |
 | CPU request                 |   500m      |   300m     |  300m      |
 | Memory limit                |   1907Mi    |   4000Mi   |  4000Mi    |
 | CPU limit                   |   2200m     |   1500m    |  1300m     |
@@ -31,6 +31,7 @@ This software does have the following minimal requirements:
 
  *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [COPRS Worker Scaling] (https://github.com/COPRS/production-common/scaling.md) for more details.
 
+**Additionally a Memory volume is mounted for an upload cache. By default it is configured to use 1500m.
 
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
