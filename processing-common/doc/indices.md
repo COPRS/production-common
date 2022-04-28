@@ -26,9 +26,6 @@ raw
 session
 aux_ece
 aux_scs
-plan_and_report
-spp_mbu
-spp_obs
 s2_aux
 s3_aux
 ```
