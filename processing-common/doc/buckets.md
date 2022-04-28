@@ -17,12 +17,6 @@ rs-s1-l0-slices
 rs-l0-acns
 rs-s1-l0-segments
 rs-s1-l0-blanks
-rs-s1-l1-slices
-rs-s1-l1-acns
-rs-s1-l2-slices
-rs-s1-l2-acns
-rs-s1-spp-mbu
-rs-s1-spp
 rs-s1-invalid
 rs-s1-ghost
 rs-debug
