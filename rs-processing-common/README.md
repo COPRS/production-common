@@ -49,7 +49,7 @@ This component is providing a query interface against the elastic search catalog
 
 The following example illustrated the installation of the Chart setting the `elasticsearch.port` to `9200`.
 
-``helm install rs-metadata-catalog-searchcontroller --set elastichsearch.port=9200``
+``helm install rs-metadata-catalog-searchcontroller --set elastichsearch.port=9200 --version 1.0.1``
 
 The following instance specific configurations are available for the Search Controller:
 
@@ -63,7 +63,7 @@ The following instance specific configurations are available for the Search Cont
 The User Web Client is using the interface to the DDIP in order to provide the user a graphical interface to explore the products stored within the Reference System.
 
 The following command can be used in order to deploy the User Web Client:
-``helm install rs-user-web-client``
+``helm install rs-user-web-client --version 1.0.1``
 
 | Name                              | Description                                              | Default |
 | ----------------------------------|----------------------------------------------------------|---------|
