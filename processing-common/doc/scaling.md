@@ -10,7 +10,7 @@ Each topic in Kafka is divided in a number of partitions. Each partition can onl
 The maximum number of parallel consumers is therefore limited by the number of partitions the topics the consumer is listening to has.
 
 By default SCDF will automatically create the topics with the number of partitions matching the maximum instance count of any consumer group.
-This means, that without additional configuration, an upscaling is possible but not have any effect, as not enough partitions are available to be provided to the newly created consumers.
+This means, that without additional configuration, an upscaling is possible but will not have any effect, as not enough partitions are available to be provided to the newly created consumers.
 
 It is therefore necessary to create the kafka topics with the maximum number of consumers in one consumer group in mind.
 
