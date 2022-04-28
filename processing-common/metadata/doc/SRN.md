@@ -28,8 +28,8 @@ This software does have the following minimal requirements:
 | Memory limit                |     4000Mi    |
 | CPU limit                   |     1500m     |
 | Disk volume needed          |   yes, Memory, 1500Mi  |
-| Disk access                 |     yes       |
-| Disk storage                |  yes          |
+| Disk access                 |     ReadWriteOnce       |
+| Disk storage                |  TBD         |
 | Volume Mount                |  data/local-catalog  |         
 | Affinity between Pod / Node |     no       |
 
