@@ -33,7 +33,7 @@ This software does have the following minimal requirements:
 | Volume Mount                |  data/local-catalog  |         
 | Affinity between Pod / Node |     no       |
 
- *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [scaling up workers]( http://TBD for more details.
+ *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [scaling up workers](/processing-common/doc/scaling.md) for more details.
 
 
 # Deployment Prerequisite
