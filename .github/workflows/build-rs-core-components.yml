@@ -37,7 +37,7 @@ jobs:
       shell: bash
       run: |
         corecomp=${{ matrix.component }}
-        corefilename="RS_CORE_${corecomp^^}_${{ steps.extract_branch.outputs.branch }}_$(date '+%Y-%m-%d')"
+        corefilename="RS_CORE_${corecomp^^}_${{ steps.extract_branch.outputs.branch }}"
         echo "##[set-output name=filename;]$(echo ${corefilename})"
       id: gen_filename
       
