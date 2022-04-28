@@ -109,8 +109,8 @@ public class S2ProductNameUtil {
 					}
 					break;
 				case "orbitPeriod":
-					metadata.put("firstAbsoluteOrbitNumber", valueMatcher.group(1));
-					metadata.put("lastAbsoluteOrbitNumber", valueMatcher.group(2));
+					metadata.put("absoluteStartOrbit", valueMatcher.group(1));
+					metadata.put("absoluteStopOrbit", valueMatcher.group(2));
 					break;
 				case "productDiscriminator":
 					metadata.put(attributeName, DateUtils.formatToMetadataDateTimeFormat(DateUtils.parse(suffix + value)));
