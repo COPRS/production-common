@@ -4,7 +4,7 @@ The RS Core Ingestion component is able to pull data from a source into the COPR
 
 # Overview
 
-![overview](/processing-common/ingestion/doc/media/overview.png "Overview")
+![overview](media/overview.png "Overview of the ingestion chain")
 
 The Ingestion Trigger application polls the configured source and looking for the arrival of new products. If it is detecting a matching input, it will not immediatly start to download it, but generating a new message that will be send to the filter. Products that had been detected already will be written into a MongoDB database to avoid that they are detected again.
 
@@ -14,28 +14,22 @@ The Ingestion Worker application is doing the actual I/O activity and performing
 
 For details, please see [Ingestion Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#ingestion-chain)
 
-
-
 # Resource Requirements
 
 This software does have the following minimal requirements:
 
-TBD
-
-
 | Resource                    |  Ingestion Trigger    | Ingestion Filter     |   Ingestion Worker* | 
 |-----------------------------|-------------|------------|------------|
-| Memory request              |   477Mi     |   3500Mi   |  3500Mi    |
+| Memory request              |   477Mi     |   3500Mi   |  3500Mi   |
 | CPU request                 |   500m      |   300m     |  300m      |
 | Memory limit                |   1907Mi    |   4000Mi   |  4000Mi    |
 | CPU limit                   |   2200m     |   1500m    |  1300m     |
-| Disk volume needed          |   no        |   no       |  yes       |
+| Disk volume needed          |   no        |   no       |  yes, Memory, 1500Mi       |
 | Disk access                 |   no        |   no       |  ReadWriteOnce |
-| Disk storage capacity       |    n/a      |   n/a      |  TBD       |
-| Affinity between Pod / Node |   yes       |   no       |  TBD       |
+| Disk storage capacity       |    n/a      |   n/a      |  n/a       |
+| Affinity between Pod / Node |   no       |   no       |  no       |
 
  *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [COPRS Worker Scaling] (https://github.com/COPRS/production-common/scaling.md) for more details.
-
 
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
@@ -105,7 +99,7 @@ Please note that the following parameters are grouped by an inbox. The name of t
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.directory``|The location of the inbox on the remote system specified by an URI. Please note that depending on the type of inbox additional configuration paramters might be required for XBIP (WebDAV), AUXIP (ODATA) or EDIP (FTP). A location for an XBIP might look like `https://s1pro-mock-webdav-cgs01-svc/NOMINAL/`. This specifies that the trigger shall poll on the given location for new products.|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.matchRegex``|Regular expression that will be used to identify new products on the inbox while doing a poll attempt e.g.`^([A-Za-z_]{4}/)?([0-9A-Za-z_]{1})1([0-9A-Za-z_]{1})/([0-9A-Za-z_]+)/(ch[0\|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB\|DSIB).*\\.(raw|aisp|xml|RAW|AISP|XML))$`|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignoreRegex`` | A regular expression that allows to specifiy a pattern of files that shall be ignored and not considered to be valid files. This is usually used to exclude temporary files or system files. e.g. ``(^\\..*|.*\\.tmp$|db.*|^lost\+found$)``|
-|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.family``|The product family of the products detected on the inbox. In case of ingestion system this will be usually: - EDRS_SESSION (all missions) - AUXILIARY_FILE (Sentinel-1) - S2_AUX (Sentinel-2) - S3_AUX (Sentinel-3) This information is important for the system to know into which OBS bucket the identified product shall be uploaded to.|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.family``|The product family of the products detected on the inbox. In case of ingestion system this will be usually: <br>* EDRS_SESSION (all missions) <br>* AUXILIARY_FILE (Sentinel-1) <br>* S2_AUX (Sentinel-2) <br>* S3_AUX (Sentinel-3) <br>This information is important for the system to know into which OBS bucket the identified product shall be uploaded to.|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.stationName``|The name of the station from where the products are retrieved from e.g. ``MTI_``|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.missionId``|The identifier of the mission from the inbox in upper case:<br>* S1<br>* S2<br>* S3|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.station-retention-time``|Defines after how many days entries shall be deleted from the persistence of the inbox|
@@ -184,7 +178,7 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 ### EDIP
   
 #### EDIP Client
- 
+
 EDIP Client module is used by both EDIP triggers and workers. 
 
 |Property                   				                               | Details       |
@@ -215,8 +209,6 @@ For EDIP trigger following two two properties need to adjusted. Rest of the prop
 |``app.ingestion-edip-trigger.ingestion-trigger.polling.inbox1.directory``| URI or directory must start with **ftps://** Default:``ftps://rs-edip-mock-svc:21/NOMINAL/``|
 |``app.ingestion-edip-trigger.ingestion-trigger.polling.inbox1.type``| Type of inbox i.e `edip`|
   
-
-
 ## Ingestion Filter
 
 The configuration for the XBIP contains a set of properties that are grouped by the $host part of the following pattern:
