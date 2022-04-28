@@ -4,7 +4,7 @@ The RS Core Ingestion component is able to pull data from a source into the COPR
 
 # Overview
 
-![overview](/processing-common/ingestion/doc/media/overview.png "Overview")
+![overview](media/overview.png "Overview of the ingestion chain")
 
 The Ingestion Trigger application polls the configured source and looking for the arrival of new products. If it is detecting a matching input, it will not immediatly start to download it, but generating a new message that will be send to the filter. Products that had been detected already will be written into a MongoDB database to avoid that they are detected again.
 
