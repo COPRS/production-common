@@ -24,8 +24,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("MSI_L1A_GR", m1.getString("productType"));
 		assertEquals("2020-01-01T12:59:59.000000Z", m1.getString("creationTime"));
 		assertEquals("2013-04-01T12:30:00.000000Z", m1.getString("sensingTime"));
-		assertEquals("123456", m1.getString("firstAbsoluteOrbitNumber"));
-		assertEquals("123457", m1.getString("lastAbsoluteOrbitNumber"));
+		assertEquals("123456", m1.getString("absoluteStartOrbit"));
+		assertEquals("123457", m1.getString("absoluteStopOrbit"));
 		assertEquals("2009-12-10T23:51:34.000000Z", m1.getString("startTime"));
 		assertEquals("2009-12-10T23:52:24.000000Z", m1.getString("stopTime"));
 		assertEquals("05", m1.getString("detectorId"));
@@ -47,8 +47,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("TEST", m2.getString("productClass"));
 		assertEquals("AUX_DUMMY_", m2.getString("productType"));
 		assertEquals("2020-01-01T12:59:59.000000Z", m2.getString("creationTime"));
-		assertEquals("123456", m2.getString("firstAbsoluteOrbitNumber"));
-		assertEquals("123457", m2.getString("lastAbsoluteOrbitNumber"));
+		assertEquals("123456", m2.getString("absoluteStartOrbit"));
+		assertEquals("123457", m2.getString("absoluteStopOrbit"));
 		assertEquals("2013-04-01T12:30:00.000000Z", m2.getString("validityStartTime"));
 		assertEquals("9999-12-31T23:59:59.999999Z", m2.getString("validityStopTime"));
 		assertEquals("05", m2.getString("detectorId"));
