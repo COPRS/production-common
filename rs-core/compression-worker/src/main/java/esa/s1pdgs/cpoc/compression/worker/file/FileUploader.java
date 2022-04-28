@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.compression.worker.file;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,12 +64,19 @@ public class FileUploader {
 			if (!productPath.exists()) {
 				final File directory = new File(workingDir + "/" + outputFileName);		
 				LOGGER.debug("Searching for uncompressed product in {}", directory);
-				final File[] files = directory.listFiles();
+				final File[] files = directory.listFiles(f -> {
+					return !event.getKeyObjectStorage().equals(f.getName());
+				});
 				
 				if (files != null && files.length == 1) {		
 					productPath = files[0];
 					LOGGER.debug("Found product {}", productPath);
-				}				
+				}		
+				else {
+					final File[] allFiles = directory.listFiles();
+					final List<File> filenames = allFiles != null ? Arrays.asList(allFiles) : Collections.emptyList();					
+					LOGGER.warn("Found following unexpected files in directory: {}", filenames);
+				}
 			}			
 		}
 		if (!productPath.exists()) {
