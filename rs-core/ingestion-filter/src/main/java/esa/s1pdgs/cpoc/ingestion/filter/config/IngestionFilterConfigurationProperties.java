@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.ingestion.filter.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.core.util.CronExpression;
@@ -28,7 +29,7 @@ public class IngestionFilterConfigurationProperties {
 	private long pollingIntervalMs = 1000;
 	private long pollingInitialDelayMs = 5000;
 	
-	private Map<MissionId, FilterProperties> config;
+	private Map<MissionId, FilterProperties> config = new HashMap<>();
 	
 	public long getPollingIntervalMs() {
 		return pollingIntervalMs;
