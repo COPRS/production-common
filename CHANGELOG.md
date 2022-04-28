@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1-rc1] - 2022-04-28
+
+This version is the first delivery for V1.1 and contains migrated components for SCDF workflows for Ingestion and Metadata Extraction.
+
+### Added
+- RS-212: Develop "Catalog" as RS-Core component
+- RS-321: Split MDC Worker into extraction workflow and standalone query interface
+- RS-330: Create factory ingestion trigger app
+- RS-331: Create factory ingestion filter app
+- RS-332: Create factory ingestion worker app
+
+### Changed
+- N/A
+
+### Removed
+- N/A
+
 ## [0.3.0-rc11] - 2022-03-01
 ### Added
 - N/A
