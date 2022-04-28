@@ -58,3 +58,18 @@ The following instance specific configurations are available for the Search Cont
 | `elasticsearch.host` | The hostname of the elastic search server that shall be used as backend and contains the catalog | `elasticsearch-master`|
 | `elasticsearch.port` | The port of the elastic search server that shall be used as backend and contains the catalog | `9200` |
 
+## User Web Client
+
+The User Web Client is using the interface to the DDIP in order to provide the user a graphical interface to explore the products stored within the Reference System.
+
+The following command can be used in order to deploy the User Web Client:
+``helm install rs-user-web-client``
+
+| Name                              | Description                                              | Default |
+| ----------------------------------|----------------------------------------------------------|---------|
+| `env.apiUrl` | The URL to the endpoint that shall be used as backend to query the products | `http://coprs.werum.de/prip/odata/v1/Products`|
+| `env.mapBackground` | Allows to define as JSON the different background layers that shall be used | `"[{\"name\":\"TESTING\",\"layers\":[{\"url\":\"testing_url\",\"layerName\":\"LayerName\"}]}]"` |
+| `baseHref` | Defines the HRef used within the baseHref used by the UWC | `/uwc/` |
+| `keycloak` | Allows setting the information about the keycloak endpoint, realm and clientid that shall be used by the UWC | `"{\"url\":\"http://localhost:8080/auth\",\"realm\":\"master\",\"clientId\": \"user-web-client\"}` |
+
+For further information regarding the User Web Client, please consult [https://github.com/COPRS/user-web-client].
