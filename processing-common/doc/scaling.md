@@ -33,7 +33,7 @@ deployer.<application-name>.count
 
 This will define the number of instances for the application on deploying this chain.
 
-## Dynamically scale application while running
+## Dynamically scale an application while running
 
 SCDF provided a seperate command in order to dynamically scale an application up or down.
 This is necessary as the deployer properties are only considered ondeploying the stream, not when updating a stream.
