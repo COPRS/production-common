@@ -248,6 +248,9 @@ Property                   				                               | Details       |
 |``app.ingestion-worker.xbip.host-configs.host1.retrySleepMs``| Duration between number of retries that are performed to reach the server.  Default  ``3000``|
   
 ## Deployer properties
+
+The following table only contains a few properties used by the factory default configuration. For more information please refer to the [official documentation](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-kubernetes-deployer).
+  
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
 |``deployer.*.kubernetes.imagePullPolicy``|The imagePullPolicy suggest the kubelet when to pull the specified image.Default:``Always``|
