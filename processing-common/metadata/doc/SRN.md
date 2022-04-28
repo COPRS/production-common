@@ -105,18 +105,27 @@ The filter component is a generic component from SCDF and further information ca
 |``app.metadata-extraction.mdextractor.type-slice.xxxx``| These are static configuration specific to Sentinel-1 that are required for computation of slice.|
 |``app.metadata-extraction.mdextractor.timeliness-priority-from-high-to-low``| Order of priority for the computed Timeliness of Sentinel-1 products. Default:``PT, NRT, FAST24``|
 |``app.metadata-extraction.mdextractor.fieldTypes.<metadata element>``|  Refers to the Metadata Elements that are extracted from level products and their corresponding format.  <br /> Default: absoluteStartOrbit=long  <br /> coordinates=string <br /> creationTime=date <br /> cycleNumber=long <br /> instrumentConfigurationId=string <br /> instrumentShortName=string <br /> missionDataTakeId=long <br /> operationalMode=string <br /> pass=string <br /> platformSerialIdentifier=string <br /> platformShortName=string <br /> processingDate=date <br /> processorName=string <br /> processorVersion=string <br /> productClass=string <br /> productComposition=string <br /> productConsolidation=string <br /> productType=string <br /> qualityDataObjectID=string <br /> qualityNumOfCorruptedElements=long <br /> qualityNumOfElement=long <br /> qualityNumOfMissingElements=long <br /> qualityNumOfRSCorrectedElements=long <br /> qualityNumOfRSCorrectedSymbols=long <br /> qualityNumOfRSIncorrigibleElements=long <br /> relativeStartOrbit=long <br /> safeTimeliness=string <br /> segmentStartTime=date <br /> site=string <br /> sliceNumber=long <br /> sliceProductFlag=boolean <br /> startTimeANX=double <br /> startTime=date <br /> stopTimeANX=double <br /> stopTime=date <br /> swathIdentifier=string <br /> totalNumberOfSlice=long <br /> validityStartTime=date <br /> validityStopTime=date|
-# Deployer properties
 
-The following table only contains a few properties used by the factory default configuration. For more information please refer to the [official documentation](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-kubernetes-deployer).
+## Deployer properties
 
-| Property                   				                               | Details       |
-|---------------------------------------------------------------|---------------|
-|``deployer.*.kubernetes.imagePullPolicy``|The imagePullPolicy suggest the kubelet when to pull the specified image.Default:``Always``|
-|``deployer.*.kubernetes.imagePullSecrets`` | Kubernetes needs credentials to pull an image from the private registry (aretefactory). This field specifies the name of a secret that shall contain the credentials.Default:``artifactory``|
-|``deployer.*.kubernetes.configMapRef``|Reference to the COPRS config map that contains key-value dataDefault:``coprs-logging-config``|
-|``deployer.<POD-NAME>.kubernetes.requests.memory``| This is minimum amount of memory that is required by the pod.Kubernetes will only schedule the pod on a node that can give it required resource.|
-|``deployer.<POD-NAME>.kubernetes.requests.cpu`` | This is minimum amount of memory that is required by the metadata-filter pod.Kubernetes will only schedule the pod on a node that can give it required resource.|
-|``deployer.<POD-NAME>.kubernetes.limits.memory``|This is maximum amount of memory that a pod can available.|
-|``deployer.<POD-NAME>.kubernetes.volumeMounts``|The property specifies where the mounted volume within the container file-system are available to the application.|
-|``deployer.<POD-NAME>.kubernetes.volumes``| Kubernetes data volume available to the application.|
-|``deployer.<POD-NAME>.kubernetes.secretKeyRefs`` |Similar to ConfigMaps, contain key-value data that is required by the application. ConfigMaps are plain text data, and Secrets are used for the sensitive data such as passwords,keys, credentials etc.|
+The following table only contains a few properties used by the factory default configuration. For more information please refer to the [official documentation](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-kubernetes-deployer) or COPRS-ICD-ADST-001139201 - ICD RS core.
+  
+| Property | Details |
+|-|-|
+| `deployer.<application-name>.kubernetes.namespace` | Namespace to use | 
+| `deployer.<application-name>.kubernetes.livenessProbeDelay` | Delay in seconds when the Kubernetes liveness check of the app container should start checking its health status. | 
+| `deployer.<application-name>.kubernetes.livenessProbePeriod` | Period in seconds for performing the Kubernetes liveness check of the app container. | 
+| `deployer.<application-name>.kubernetes.livenessProbeTimeout` | Timeout in seconds for the Kubernetes liveness check of the app container. If the health check takes longer than this value to return it is assumed as 'unavailable'. | 
+| `deployer.<application-name>.kubernetes.livenessProbePath` | Path that app container has to respond to for liveness check. | 
+| `deployer.<application-name>.kubernetes.livenessProbePort` | Port that app container has to respond on for liveness check. | 
+| `deployer.<application-name>.kubernetes.readinessProbeDelay` | Delay in seconds when the readiness check of the app container should start checking if the module is fully up and running. | 
+| `deployer.<application-name>.kubernetes.readinessProbePeriod` | Period in seconds to perform the readiness check of the app container. | 
+| `deployer.<application-name>.kubernetes.readinessProbeTimeout` | Timeout in seconds that the app container has to respond to its health status during the readiness check. | 
+| `deployer.<application-name>.kubernetes.readinessProbePath` | Path that app container has to respond to for readiness check. | 
+| `deployer.<application-name>.kubernetes.readinessProbePort` | Port that app container has to respond on for readiness check. | 
+| `deployer.<application-name>.kubernetes.limits.memory` | The memory limit, maximum needed value to allocate a pod, Default unit is mebibytes, 'M' and 'G" suffixes supported | 
+| `deployer.<application-name>.kubernetes.limits.cpu` | The CPU limit, maximum needed value to allocate a pod | 
+| `deployer.<application-name>.kubernetes.requests.memory` | The memory request, guaranteed needed value to allocate a pod. | 
+| `deployer.<application-name>.kubernetes.requests.cpu` | The CPU request, guaranteed needed value to allocate a pod. | 
+| `deployer.<application-name>.kubernetes.maxTerminatedErrorRestarts` | Maximum allowed restarts for app that fails due to an error or excessive resource use. | 
+
