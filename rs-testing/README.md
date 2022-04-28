@@ -25,7 +25,7 @@ In order to deploy the mock to simulate an inbox for an EDRS endpoint, please us
 
 You find the inboxes for this system when you go into the Pod under /data/NOMINAL/. Each mission does have an inbox.
 
-For further information on how to use the EDIP endpoint, please have a look [here](../production-common/rs-core-examples/ingestion-edip)
+For further information on how to use the EDIP endpoint, please have a look [here](/rs-core-examples/ingestion-edip)
 
 
 ## XBIP
@@ -38,4 +38,4 @@ After deploying the chart, you find the inboxes for the mock under the directory
 
 ``/var/lib/dav/data/NOMINAL/MTI_/S1A.``
 
-for a S1A EDRS session. To see how this inbox can be configured by the component, please have a look [here](../production-common/rs-core-examples/ingestion-xbip).
+for a S1A EDRS session. To see how this inbox can be configured by the component, please have a look [here](/rs-core-examples/ingestion-xbip).
