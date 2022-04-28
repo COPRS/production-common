@@ -57,7 +57,7 @@ jobs:
     - name: Create PDF
       uses: docker://ghcr.io/coprs/reference-system-software:dependencies_pandoc_latex
       with:
-        args: -s --resource-path="/github/workspace/${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/" --listings -H /root/.pandoc/listings-setup.tex --table-of-contents --pdf-engine=xelatex --output="${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Release_Note.pdf" --from=markdown "./${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/doc/SRN.md"
+        args: -s --resource-path="/github/workspace/${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/doc" --listings -H /root/.pandoc/listings-setup.tex --table-of-contents --pdf-engine=xelatex --output="${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Release_Note.pdf" --from=markdown "./${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/doc/SRN.md"
     
     - name: Install zip
       uses: montudor/action-zip@v1
