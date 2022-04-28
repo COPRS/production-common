@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.ingestion.filter.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.core.util.CronExpression;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
