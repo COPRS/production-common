@@ -70,6 +70,7 @@ public class FileUploader {
 				
 				if (files != null && files.length == 1) {		
 					productPath = files[0];
+					outputFileName = productPath.getName();
 					LOGGER.debug("Found product {}", productPath);
 				}		
 				else {
