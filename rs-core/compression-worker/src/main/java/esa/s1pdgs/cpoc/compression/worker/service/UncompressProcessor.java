@@ -95,7 +95,6 @@ public class UncompressProcessor extends AbstractProcessor
 		result.setStoragePath(obsClient.getAbsoluteStoragePath(outputProductFamily, keyObs));
 		result.setProductName(keyObs);
 		result.setProductFamily(outputProductFamily);
-		result.setRelativePath(event.getRelativePath());
 		result.setMissionId(event.getMissionId());
 		result.setProductSizeByte(event.getProductSizeByte()); // New size?
 		result.setStationName(event.getStationName());
