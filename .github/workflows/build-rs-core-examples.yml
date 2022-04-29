@@ -10,7 +10,10 @@ on:
       - '!main'
       - 'release/**'
       - 'develop**'
-    workflow_dispatch:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+-rc[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
       
 env:
   RS_CORE_FOLDER: rs-core-examples
