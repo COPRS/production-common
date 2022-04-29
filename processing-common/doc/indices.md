@@ -26,6 +26,10 @@ raw
 session
 aux_ece
 aux_scs
+aux_itc
+aux_scf
+aux_tec
+aux_tro
 s2_aux
 s3_aux
 ```
