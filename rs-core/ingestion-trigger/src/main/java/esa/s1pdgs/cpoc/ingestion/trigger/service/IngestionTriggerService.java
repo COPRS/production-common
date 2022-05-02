@@ -2,7 +2,6 @@ package esa.s1pdgs.cpoc.ingestion.trigger.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ public final class IngestionTriggerService implements Supplier<List<IngestionJob
 	private static final Logger LOG = LoggerFactory.getLogger(IngestionTriggerService.class);
 	
 	private final List<Inbox> inboxes;
-	private final AtomicLong counter = new AtomicLong(1L);
 		
 	public IngestionTriggerService(final List<Inbox> inboxes) {
 		this.inboxes 	= inboxes;

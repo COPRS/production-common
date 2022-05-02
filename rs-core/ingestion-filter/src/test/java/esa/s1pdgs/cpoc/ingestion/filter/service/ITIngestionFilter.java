@@ -51,21 +51,21 @@ public class ITIngestionFilter {
 		jobThatShallBeAccepted.setLastModified(Date.from(DateUtils.parse("2021-11-24T08:00:00").toInstant(ZoneOffset.UTC)));
 		ingestionJobs.add(jobThatShallBeAccepted);
 
-		IngestionJob jobThatShallBeRected = new IngestionJob();
-		jobThatShallBeRected.setMissionId("S3");
-		jobThatShallBeRected.setProductFamily(ProductFamily.AUXILIARY_FILE);
-		jobThatShallBeRected.setKeyObjectStorage("S3__AX___MA1_AX_20150118T030000_20150118T150000_20150118T173546___________________ECW___SN____.SEN3");
-		jobThatShallBeRected.setUid(UUID.fromString("00000000-0000-000c-0000-000000000002"));
-		jobThatShallBeRected.setCreationDate(DateUtils.toDate("2015-01-18T17:35:46.000Z"));
-		jobThatShallBeRected.setAllowedActions(Arrays.asList(AllowedAction.RESTART));
-		jobThatShallBeRected.setDemandType(DemandType.NOMINAL);
-		jobThatShallBeRected.setPickupBaseURL("file:///data/inbox/AUX");
-		jobThatShallBeRected.setInboxType("file");
-		jobThatShallBeRected.setRelativePath("S3__AX___MA1_AX_20150118T030000_20150118T150000_20150118T173546___________________ECW___SN____.SEN3");
-		jobThatShallBeRected.setProductName("S3__AX___MA1_AX_20150118T030000_20150118T150000_20150118T173546___________________ECW___SN____.SEN3");
-		jobThatShallBeRected.setProductSizeByte(415447L);
-		jobThatShallBeRected.setLastModified(Date.from(DateUtils.parse("2021-11-24T09:00:00").toInstant(ZoneOffset.UTC)));
-		ingestionJobs.add(jobThatShallBeRected);
+		IngestionJob jobThatShallBeRejected = new IngestionJob();
+		jobThatShallBeRejected.setMissionId("S3");
+		jobThatShallBeRejected.setProductFamily(ProductFamily.AUXILIARY_FILE);
+		jobThatShallBeRejected.setKeyObjectStorage("S3__AX___MA1_AX_20150118T030000_20150118T150000_20150118T173546___________________ECW___SN____.SEN3");
+		jobThatShallBeRejected.setUid(UUID.fromString("00000000-0000-000c-0000-000000000002"));
+		jobThatShallBeRejected.setCreationDate(DateUtils.toDate("2015-01-18T17:35:46.000Z"));
+		jobThatShallBeRejected.setAllowedActions(Arrays.asList(AllowedAction.RESTART));
+		jobThatShallBeRejected.setDemandType(DemandType.NOMINAL);
+		jobThatShallBeRejected.setPickupBaseURL("file:///data/inbox/AUX");
+		jobThatShallBeRejected.setInboxType("file");
+		jobThatShallBeRejected.setRelativePath("S3__AX___MA1_AX_20150118T030000_20150118T150000_20150118T173546___________________ECW___SN____.SEN3");
+		jobThatShallBeRejected.setProductName("S3__AX___MA1_AX_20150118T030000_20150118T150000_20150118T173546___________________ECW___SN____.SEN3");
+		jobThatShallBeRejected.setProductSizeByte(415447L);
+		jobThatShallBeRejected.setLastModified(Date.from(DateUtils.parse("2021-11-24T09:00:00").toInstant(ZoneOffset.UTC)));
+		ingestionJobs.add(jobThatShallBeRejected);
 
 		List<Message<IngestionJob>> filteredJobs = ingestionFilterService.apply(ingestionJobs);
 
