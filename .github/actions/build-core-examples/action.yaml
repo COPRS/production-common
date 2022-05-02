@@ -53,4 +53,4 @@ runs:
       
   - name: Push to Artifactory
     shell: bash
-    run: curl -u "${{ secrets.WERUM_ARTIFACTORY_USER }}:${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}" -T ${{ steps.gen_filename.outputs.filename }}.zip "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_EXAMPLES_PROJECT }}/"
+    run: curl -u "${{ inputs.WERUM_ARTIFACTORY_USER }}:${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}" -T ${{ steps.gen_filename.outputs.filename }}.zip "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ env.ARTIFACTORY_EXAMPLES_PROJECT }}/"
