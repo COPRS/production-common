@@ -2,6 +2,7 @@ name: 'Generate Vulnerabilities Report'
 description: 'Generate Vulnerabilities Report'
 inputs:
   COMPONENT:
+    description: 'Component to generate the Anchore Report for'
     required: true
 
 runs:

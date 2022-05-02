@@ -1,0 +1,58 @@
+name: 'Build Container'
+description: 'Build docker image for any Dockerfile in rs-container'
+inputs:
+  IMAGE_NAME_SUFFIX: 
+    description: 'Suffix for the image name'
+    required: true
+  BUILD_CONTEXT:
+    description: 'Build context for docker build'
+    required: true
+  WERUM_ARTIFACTORY_USER:
+    description: 'Username for Artifactory'
+    required: true
+  WERUM_ARTIFACTORY_PASSWORD:
+    description: 'Password for Artifactory'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - name: Login to Artifactory
+    uses: docker/login-action@v1
+    with:
+      registry: ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}
+      username: ${{ inputs.WERUM_ARTIFACTORY_USER }}
+      password: ${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}
+                
+  - name: Extract Docker metadata
+    id: meta
+    uses: docker/metadata-action@v3
+    with:
+      images:  ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-core-${{ inputs.IMAGE_NAME_SUFFIX }} 
+          
+  - name: Build image
+    uses: docker/build-push-action@v2
+    with:
+      load: true
+      context: ${{ inputs.BUILD_CONTEXT }} 
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
+
+  - name: Scan image
+    uses: anchore/scan-action@v2
+    id: scan
+    with:
+      image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+      acs-report-enable: true
+      severity-cutoff: critical
+
+  - name: Upload Anchore scan json report
+    uses: actions/upload-artifact@master
+    with:
+      name: vulnerabilities-${{ inputs.IMAGE_NAME_SUFFIX }} 
+      path: ${{ steps.scan.outputs.vulnerabilities }}
+
+  - name: Push image
+    shell: bash
+    run: |
+      docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
