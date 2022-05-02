@@ -4,6 +4,17 @@
 service:
   port: 8080
 
+logLevel: ${logLevel:DEBUG}
+logConfig: ${logConfig:log/log4j2.yml}
+
+processing:
+  namespace: processing
+  
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
+
 image:
   name: rs-core-request-repository
 
