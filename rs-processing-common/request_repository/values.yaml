@@ -6,7 +6,7 @@ service:
 
 replicaCount:
   request_repository: 1
-  
+
 logLevel: ${logLevel:DEBUG}
 logConfig: ${logConfig:log/log4j2.yml}
 
@@ -19,7 +19,13 @@ worker:
     value: infra
 
 image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+
   name: rs-core-request-repository
+  tag: develop
+  
+  imagePullSecrets: artifactory
 
 request_repository:
   cpu:
