@@ -47,7 +47,7 @@ jobs:
           COMPONENT: base
 
   deploy-parent-poms:
-    needs: [gg-scane] 
+    needs: [gg-scan] 
     runs-on: ubuntu-latest
     strategy:
       matrix:
