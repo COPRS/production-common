@@ -2,14 +2,19 @@ name: 'Build Core and Docker'
 description: 'Build core services and docker image and generate reports'
 inputs:
   COMPONENT:
+    description: ''
     required: true
   WERUM_ARTIFACTORY_USER:
+    description: ''
     required: true
   WERUM_ARTIFACTORY_PASSWORD:
+    description: ''
     required: true
   SONARQUBE_HOST:
+    description: ''
     required: true
   SONARQUBE_TOKEN:
+    description: ''
     required: true
 
 runs:

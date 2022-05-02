@@ -12,10 +12,8 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT: werum-docker
-  USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-  PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_DOCKER: werum-docker
 
 jobs:
   gg-scan:

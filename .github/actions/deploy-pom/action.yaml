@@ -2,14 +2,19 @@ name: 'Deploy Pom'
 description: 'Deploys pom.xml'
 inputs:
   POM:
+    description: ''
     required: true
   ARTIFACTORY_BASE:
+    description: ''
     required: true
   ARTIFACTORY_PROJECT:
+    description: ''
     required: true
   WERUM_ARTIFACTORY_USER:
+    description: ''
     required: true
   WERUM_ARTIFACTORY_PASSWORD:
+    description: ''
     required: true
 
     

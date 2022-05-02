@@ -38,5 +38,5 @@ runs:
   - name: Push to Artifactory
     shell: bash
     run: |
-      curl -u "${{ inputs.WERUM_ARTIFACTORY_USER }}:${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}" -T *.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT }}/${{ inputs.ARTIFACTORY_HELM_PROJECT }}/"
+      curl -u "${{ inputs.WERUM_ARTIFACTORY_USER }}:${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}" -T *.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT_HELM }}/${{ inputs.ARTIFACTORY_HELM_PROJECT }}/"
         
