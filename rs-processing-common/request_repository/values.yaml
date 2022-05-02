@@ -4,7 +4,9 @@
 service:
   port: 8080
 
-replicaCount: 1
+replicaCount:
+  request_repository: 1
+  
 logLevel: ${logLevel:DEBUG}
 logConfig: ${logConfig:log/log4j2.yml}
 
