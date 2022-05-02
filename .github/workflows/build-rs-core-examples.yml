@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [ingestion-auxip, ingestion-edip, ingestion-xbip, ingestion-mock-auxip, compression]
+        component: [ingestion-auxip, ingestion-edip, ingestion-xbip, ingestion-mock-auxip]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
