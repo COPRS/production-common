@@ -32,15 +32,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 @DirtiesContext
 @TestPropertySource(properties = "scheduling.enable=false")
 public class TestApplication {
-
-	//	 uncomment, if embedded mongo needs to be updated
-//	{
-//		System.setProperty("http.proxyHost", "proxy.net.werum");
-//		System.setProperty("http.proxyPort", "8080");
-//		System.setProperty("https.proxyHost", "proxy.net.werum");
-//		System.setProperty("https.proxyPort", "8080");
-//	}
-
 	@Autowired
 	private IngestionTriggerService service;
 	
