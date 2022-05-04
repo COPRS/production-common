@@ -1,6 +1,6 @@
 spring:
   application:
-    name: rs-ddip-frontend
+    name: {{ .Values.service.name }}
 
 # Logging
 logging:
@@ -27,4 +27,4 @@ ddip:
 
 # REST controller
 server:
-  port: 8080
+  port: {{ .Values.service.port }}

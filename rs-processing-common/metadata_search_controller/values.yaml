@@ -2,6 +2,7 @@
 # Declare variables to be passed into your templates.
 
 service:
+  name: rs-core-metadata-catalog-searchcontroller
   port: 8080
   
 replicaCount: 1
@@ -14,6 +15,8 @@ processing:
 elasticsearch:
   host: elasticsearch-master
   port: 9200
+  connect-timeout-ms: 2000
+  socket-timeout-ms: 10000
   
 worker:
   label:

@@ -2,8 +2,9 @@
 # Declare variables to be passed into your templates.
 
 service:
+  name: rs-ddip-frontend
   port: 8080
-  
+
 replicaCount: 1
 logLevel: ${logLevel:DEBUG}
 logConfig: ${logConfig:log/log4j2.yml}

@@ -2,7 +2,7 @@ spring:
   main:
     banner-mode: "off"
   application:
-    name: rs-prip-frontend
+    name: {{ .Values.service.name }}
 
 # Logging config
 logging:
@@ -15,16 +15,16 @@ elasticsearch:
   # Port of Elasticsearch cluster                                        
   port: {{ .Values.elasticsearch.port }}
   # Timeout in milliseconds of connection to the cluster
-  connect-timeout-ms: 2000
+  connect-timeout-ms: {{ .Values.elasticsearch.connect-timeout-ms }}
   # Timeout in milliseconds of the socket to the cluster
-  socket-timeout-ms: 10000
+  socket-timeout-ms: {{ .Values.elasticsearch.socket-timeout-ms }}
   
 # PRIP Frontend config
 prip-frontend:
   # Time in seconds until a download URL expires
   download-url-expiration-time-in-seconds: 600
   # Expose the debug support for OLingo (Default: false)
-  debug-support: false
+  debug-support: {{ .Values.prip-frontend.debug-support }}
 
 # PRIP client config
 prip-client:

@@ -4,12 +4,12 @@ spring:
     banner-mode: "off"
   application:
     # Application name
-    name: rs-core-metadata-catalog-searchcontroller
+    name: {{ .Values.service.name }}
 
 # REST controller
 server:
   # Port used for publishing REST API
-  port: 8080
+  port: {{ .Values.service.port }}
       
 # Logging
 logging:
@@ -23,9 +23,9 @@ elasticsearch:
   # Port of Elasticsearch cluster                                
   port: {{ .Values.elasticsearch.port }}
   # Timeout in milliseconds of connection to the cluster                                        
-  connect-timeout-ms: 2000                
+  connect-timeout-ms: {{ .Values.elasticsearch.connect-timeout-ms }}
   # Timeout in milliseconds of the socket to the cluster                        
-  socket-timeout-ms: 10000                                        
+  socket-timeout-ms: {{ .Values.elasticsearch.socket-timeout-ms }}
 
 # Search Controller configuration
 searchcontroller:

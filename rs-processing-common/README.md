@@ -32,6 +32,7 @@ The following global parameters exist per instance and can be used when deployin
 | ----------------------------------|----------------------------------------------------------|---------|
 | `replicaCount` | The amount of instances that shall be spawned as replica | `1`|
 | `service.port` | The port that shall be exposed by the deployed service | `8080`|
+| `service.name` | The name of the service when it is deployed | e.g. `rs-core-metadata-catalog-searchcontroller` |
 | `processing.namespace` | The namespace into that the chart shall be deployed | `processing` |
 | `image.registry` | The registry from that the image shall be pulled | `artifactory.coprs.esa-copernicus.eu` |
 | `image.repository` | The path within the directory from that the image shall be pulled | `werum-docker` |
@@ -69,6 +70,8 @@ The latest version can be deployed by using the following command line:
 | ----------------------------------|----------------------------------------------------------|---------|
 | `elasticsearch.host` | The hostname of the elastic search server that shall be used as backend and contains the catalog | `elasticsearch-master`|
 | `elasticsearch.port` | The port of the elastic search server that shall be used as backend and contains the catalog | `9200` |
+| `elasticsearch.connect-timeout-ms` | Timeout in milliseconds of connection to the cluster | `2000` |
+| `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
 | `prip-frontend.debug-support` | Adding additional debug information on the Odata interface. Don't use this in an operational setup | `false` |
 
 
@@ -86,6 +89,8 @@ The following instance specific configurations are available for the Search Cont
 | ----------------------------------|----------------------------------------------------------|---------|
 | `elasticsearch.host` | The hostname of the elastic search server that shall be used as backend and contains the catalog | `elasticsearch-master`|
 | `elasticsearch.port` | The port of the elastic search server that shall be used as backend and contains the catalog | `9200` |
+| `elasticsearch.connect-timeout-ms` | Timeout in milliseconds of connection to the cluster | `2000` |
+| `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
 
 ## User Web Client
 

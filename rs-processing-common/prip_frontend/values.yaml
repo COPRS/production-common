@@ -2,6 +2,7 @@
 # Declare variables to be passed into your templates.
 
 service:
+  name: rs-prip-frontend
   port: 8080
   
 replicaCount: 1
@@ -10,6 +11,12 @@ logConfig: ${logConfig:log/log4j2.yml}
 
 processing:
   namespace: processing
+  
+elasticsearch:
+  host: elasticsearch-master
+  port: 9200
+  connect-timeout-ms: 2000
+  socket-timeout-ms: 10000
   
 worker:
   label:
