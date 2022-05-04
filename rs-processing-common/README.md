@@ -74,6 +74,21 @@ The latest version can be deployed by using the following command line:
 | `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
 | `prip-frontend.debug-support` | Adding additional debug information on the Odata interface. Don't use this in an operational setup | `false` |
 
+## Native API
+
+This component provides a STAC API that can be used to query products on the DDIP.
+
+The latest version can be deployed by using the following command line:
+``helm install rs-helm/rs-native-api``
+
+| Name                              | Description                                              | Default |
+| ----------------------------------|----------------------------------------------------------|---------|
+| `nativeapi.prip.protocol` | The protocol that shall be used to contact the PRIP backend | `http`|
+| `nativeapi.prip.host` | The host that shall be used to contact the PRIP backend| `s1pro-prip-frontend-svc.processing.svc.cluster.local` |
+| `nativeapi.prip.port` | The port that shall be used to contact the PRIP backend | `8080` |
+| `nativeapi.external.protocol` | The protocol used to externally connect to the PRIP/DDIP frontend | `http` |
+| `nativeapi.external.host` | The externally reachable hostname or IP used to connect to the PRIP/DDIP frontend | `coprs.werum.de/prip/odata/v1/` |
+| `nativeapi.external.port` | The port on which the PRIP/DDIP frontend listens externally for requests | `80` |
 
 ## Metadata Search Controller
 
