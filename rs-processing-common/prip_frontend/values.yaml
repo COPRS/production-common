@@ -15,8 +15,9 @@ processing:
 elasticsearch:
   host: elasticsearch-master
   port: 9200
-  connect-timeout-ms: 2000
-  socket-timeout-ms: 10000
+  timeout:
+    connection: 2000
+    socket: 10000
   
 worker:
   label:
@@ -32,8 +33,8 @@ image:
   
   imagePullSecrets: artifactory
   
-prip-frontend:
-  debug-support: false
+prip:
+  debug: false
 
 resources:
   cpu:

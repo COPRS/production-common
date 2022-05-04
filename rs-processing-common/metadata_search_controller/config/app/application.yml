@@ -23,9 +23,9 @@ elasticsearch:
   # Port of Elasticsearch cluster                                
   port: {{ .Values.elasticsearch.port }}
   # Timeout in milliseconds of connection to the cluster                                        
-  connect-timeout-ms: {{ .Values.elasticsearch.connect-timeout-ms }}
+  connect-timeout-ms: {{ .Values.elasticsearch.timeout.connection }}
   # Timeout in milliseconds of the socket to the cluster                        
-  socket-timeout-ms: {{ .Values.elasticsearch.socket-timeout-ms }}
+  socket-timeout-ms: {{ .Values.elasticsearch.timeout.socket }}
 
 # Search Controller configuration
 searchcontroller:
