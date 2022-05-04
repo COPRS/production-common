@@ -58,6 +58,20 @@ The latest version of it can be deployed using the following command line:
 | `ddip.dispatch.prip.port` | The port on which the PRIP listens for requests | `8080` |
 | `ddip.dispatch.collections` | value (collection name) and key (ODATA expression) pairs to define collections that can be searched via DDIP feature (filter=Collection/Name eq 'Sentinel1')  | Sentinel1: startswith(Name,'S1')</br> Sentinel3: startswith(Name,'S3') |
 
+## PRIP
+
+This component provides an PRIP interface. It is not supposed to be used directly by the end-user. Instead the DDIP is operated as frontend. The PRIP service is running in the backend to perform the queries on the elastic search query and providing an OData interface.
+
+The latest version can be deployed by using the following command line:
+``helm install rs-helm/rs-prip-frontend``
+
+| Name                              | Description                                              | Default |
+| ----------------------------------|----------------------------------------------------------|---------|
+| `elasticsearch.host` | The hostname of the elastic search server that shall be used as backend and contains the catalog | `elasticsearch-master`|
+| `elasticsearch.port` | The port of the elastic search server that shall be used as backend and contains the catalog | `9200` |
+| `prip-frontend.debug-support` | Adding additional debug information on the Odata interface. Don't use this in an operational setup | `false` |
+
+
 ## Metadata Search Controller
 
 This component is providing a query interface against the elastic search catalog that is feed by the Metadata Extraction SCDF application. This interface can be used by the preparation worker to query products and auxiliary files for the mission specific RS-Add-ons.
