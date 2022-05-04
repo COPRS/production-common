@@ -1,6 +1,6 @@
 spring:
   application:
-    name: rs-native-api
+    name: {{ .Values.service.name }}
 
 # Logging
 logging:
@@ -8,7 +8,7 @@ logging:
 
 # REST controller
 server:
-  port: 8080
+  port: {{ .Values.service.port }}
 
 # Native API config
 native-api:
@@ -17,12 +17,12 @@ native-api:
   # version (to communicate minor changes that are compatible with the major version)
   version: 1.0
   # configuration for internal interfacing to PRIP
-  prip-protocol: http
-  prip-host: s1pro-prip-frontend-svc.processing.svc.cluster.local
-  prip-port: 8080
+  prip-protocol: {{ .Values.nativeapi.prip.protocol }}
+  prip-host: {{ .Values.nativeapi.prip.host }}
+  prip-port: {{ .Values.nativeapi.prip.port }}
   # configuration to create PRIP metadata and download links that are externaly accessible
-  external-prip-protocol: http
-  external-prip-host: coprs.werum.de/prip/odata/v1/
-  external-prip-port: 80
+  external-prip-protocol: {{ .Values.nativeapi.external.protocol }}
+  external-prip-host: {{ .Values.nativeapi.external.host }}
+  external-prip-port: {{ .Values.nativeapi.external.port }}
   # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
   include-additional-attributes: true

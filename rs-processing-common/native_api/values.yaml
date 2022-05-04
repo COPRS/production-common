@@ -2,22 +2,11 @@
 # Declare variables to be passed into your templates.
 
 service:
+  name: rs-native-api
   port: 8080
 
 logLevel: ${logLevel:DEBUG}
 logConfig: ${logConfig:log/log4j2.yml}
-
-resources:
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-#  requests:
-#    storage: 10Gi
-  #   memory: 128Mi
 
 image:
   registry: artifactory.coprs.esa-copernicus.eu
@@ -31,12 +20,22 @@ image:
 processing:
   namespace: processing
   
+nativeapi:
+    prip:
+        protocol: http
+        host: s1pro-prip-frontend-svc.processing.svc.cluster.local
+        port: 8080
+    external:
+        protocol: http
+        host: coprs.werum.de/prip/odata/v1/
+        port: 80
+  
 worker:
   label:
     key: node-role.kubernetes.io/worker
     value: infra
 
-native_api:
+resources:
   cpu:
     request: "100m"
     limit: "500m"
