@@ -31,6 +31,7 @@ The following global parameters exist per instance and can be used when deployin
 | Name                              | Description                                              | Default |
 | ----------------------------------|----------------------------------------------------------|---------|
 | `replicaCount` | The amount of instances that shall be spawned as replica | `1`|
+| `service.port` | The port that shall be exposed by the deployed service | `8080`|
 | `processing.namespace` | The namespace into that the chart shall be deployed | `processing` |
 | `image.registry` | The registry from that the image shall be pulled | `artifactory.coprs.esa-copernicus.eu` |
 | `image.repository` | The path within the directory from that the image shall be pulled | `werum-docker` |
@@ -42,6 +43,20 @@ The following global parameters exist per instance and can be used when deployin
 | `resources.ram.limit` | Specifies the maximum amount of RAM that is requested. More information can be found [here](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/]) | Instance specific | Instance specific | Instance specific |
 | `resources.javaOpts.xms` | Specifies the amount of memory used when starting the Java JVM | Instance specific |
 | `resources.javaOpts.xmx` | Specifies the maximum memory allocation pool for Java JVM | Instance specific |
+
+## DDIP
+
+This component provides an DDIP interface for the User Web Client and other external systems and is operated as a frontend before the PRIP interface.
+
+The latest version of it can be deployed using the following command line:
+``helm install rs-helm/rs-ddip-frontend``
+
+| Name                              | Description                                              | Default |
+| ----------------------------------|----------------------------------------------------------|---------|
+| `ddip.dispatch.prip.protocol` | The protocol used to connect to the PRIP | `http`|
+| `ddip.dispatch.prip.host` | The hostname or IP used to connect to the PRIP | `s1pro-prip-frontend-svc.processing.svc.cluster.local` |
+| `ddip.dispatch.prip.port` | The port on which the PRIP listens for requests | `8080` |
+| `ddip.dispatch.collections` | value (collection name) and key (ODATA expression) pairs to define collections that can be searched via DDIP feature (filter=Collection/Name eq 'Sentinel1')  | Sentinel1: startswith(Name,'S1')</br> Sentinel3: startswith(Name,'S3') |
 
 ## Metadata Search Controller
 

@@ -37,11 +37,11 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            memory: {{ .Values.ddip_frontend.ram.request }}
-            cpu: {{ .Values.ddip_frontend.cpu.request }}
+            memory: {{ .Values.resources.ram.request }}
+            cpu: {{ .Values.resources.cpu.request }}
           limits:
-            memory: {{ .Values.ddip_frontend.ram.limit }}
-            cpu: {{ .Values.ddip_frontend.cpu.limit }}
+            memory: {{ .Values.resources.ram.limit }}
+            cpu: {{ .Values.resources.cpu.limit }}
         volumeMounts:
         - name: logging-config-volume
           mountPath: /app/log
@@ -53,9 +53,9 @@ spec:
           containerPort: {{ .Values.service.port }}
         env:
         - name: JAVA_XMS
-          value: {{ .Values.ddip_frontend.javaOpts.xms }}
+          value: {{ .Values.resources.javaOpts.xms }}
         - name: JAVA_XMX
-          value: {{ .Values.ddip_frontend.javaOpts.xmx }}
+          value: {{ .Values.resources.javaOpts.xmx }}
         - name: storage_user_id
           valueFrom:
             secretKeyRef:
