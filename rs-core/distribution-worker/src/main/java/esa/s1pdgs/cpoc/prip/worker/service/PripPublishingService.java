@@ -74,7 +74,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		this.metadataClient = metadataClient;
 		this.pripMetadataRepo = pripMetadataRepo;
 		this.props = props;
-		mdcToPripMapper = new MdcToPripMapper(props.getProductTypeRegexp(), props.getMetadataMapping());
+		mdcToPripMapper = new MdcToPripMapper(props.getMetadataMapping());
 	}
 	
 	
@@ -100,8 +100,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 					LogUtils.toString(e));
 			reporting.error(new ReportingMessage(errorMessage));
 			LOGGER.error(errorMessage);
-//					errorAppender.send(
-//							new FailedProcessingDto(props.getHostname(), new Date(), errorMessage, message));
+			return;
 		}
 	
 		reporting.end(PripReportingOutput.newInstance(new Date()), new ReportingMessage("Finished publishing file %s in PRIP", name));
@@ -158,7 +157,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 			}
 			if (!coordinates.isEmpty()) {
 				// Differentiate polygon and linestring!
-				String footprintIsLineStringCondition = props.getMetadataMapping().getFootprintIsLineStringRegexp();
+				String footprintIsLineStringCondition = props.getFootprintIsLineStringRegexp();
 				boolean isLineString = pripMetadata.getName().matches(footprintIsLineStringCondition);
 				LOGGER.debug("Product '{}' matching '{}': {}", pripMetadata.getName(), footprintIsLineStringCondition, isLineString);
 				if (isLineString) {
