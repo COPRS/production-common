@@ -39,8 +39,6 @@ This software does have the following minimal requirements:
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
-- [COPRS ingestion chain](/processing-common/ingestion)
-
 
 
 # Configuration
