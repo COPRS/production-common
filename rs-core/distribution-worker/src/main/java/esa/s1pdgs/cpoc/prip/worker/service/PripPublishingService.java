@@ -74,7 +74,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		this.metadataClient = metadataClient;
 		this.pripMetadataRepo = pripMetadataRepo;
 		this.props = props;
-		mdcToPripMapper = new MdcToPripMapper(props.getMetadataMapping());
+		mdcToPripMapper = new MdcToPripMapper(props.getMetadata());
 	}
 	
 	
