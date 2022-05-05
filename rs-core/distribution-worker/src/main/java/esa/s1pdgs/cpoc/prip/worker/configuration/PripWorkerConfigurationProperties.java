@@ -87,11 +87,11 @@ public class PripWorkerConfigurationProperties {
 		this.hostname = hostname;
 	}
 
-	public Map<String, MetadataMapping> getMetadataMapping() {
+	public Map<String, MetadataMapping> getMetadata() {
 		return metadata;
 	}
 
-	public void setMetadataMapping(Map<String, MetadataMapping> metadata) {
+	public void setMetadata(Map<String, MetadataMapping> metadata) {
 		this.metadata = metadata;
 	}
 
