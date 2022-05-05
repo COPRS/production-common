@@ -13,7 +13,6 @@ import org.json.JSONException;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.worker.configuration.PripWorkerConfigurationProperties.MetadataMapping;
-import esa.s1pdgs.cpoc.prip.worker.configuration.PripWorkerConfigurationProperties.ProductTypeRegexp;
 import esa.s1pdgs.cpoc.prip.worker.service.PripPublishingService;
 
 public class MdcToPripMapper {	
@@ -41,18 +40,12 @@ public class MdcToPripMapper {
 
 	}
 
-	public MdcToPripMapper(final ProductTypeRegexp regexp, MetadataMapping metadataMapping) {
+	public MdcToPripMapper(final Map<String, MetadataMapping> metadataMapping) {
 		mappingConfiguration = new HashMap<>();
-		mappingConfiguration.put(Pattern.compile(regexp.getL0Std()), createMapping(metadataMapping.getL0Std()));
-		mappingConfiguration.put(Pattern.compile(regexp.getL0Ann()), createMapping(metadataMapping.getL0Ann()));
-		mappingConfiguration.put(Pattern.compile(regexp.getL0Cal()), createMapping(metadataMapping.getL0Cal()));
-		mappingConfiguration.put(Pattern.compile(regexp.getL0Noise()), createMapping(metadataMapping.getL0Noise()));
-		mappingConfiguration.put(Pattern.compile(regexp.getL0Gps()), createMapping(metadataMapping.getL0Gps()));
-		mappingConfiguration.put(Pattern.compile(regexp.getL0Hktm()), createMapping(metadataMapping.getL0Hktm()));
-		mappingConfiguration.put(Pattern.compile(regexp.getL1()), createMapping(metadataMapping.getL1()));
-		mappingConfiguration.put(Pattern.compile(regexp.getL2()), createMapping(metadataMapping.getL2()));
-		mappingConfiguration.put(Pattern.compile(regexp.getAuxSafe()), createMapping(metadataMapping.getAuxSafe()));
-		mappingConfiguration.put(Pattern.compile(regexp.getAuxEof()), createMapping(metadataMapping.getAuxEof()));
+		
+		for (Entry<String, MetadataMapping> entry : metadataMapping.entrySet()) {
+			mappingConfiguration.put(Pattern.compile(entry.getValue().getRegexp()), createMapping(entry.getValue().getMap()));
+		}
 	}
 	
 	private Map<String,PripAttribute> createMapping(final Map<String,String> mapping) {
