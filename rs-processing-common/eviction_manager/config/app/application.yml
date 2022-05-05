@@ -1,0 +1,21 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: {{ .Values.service.name}}
+ 
+# Logging
+logging:
+  config: ${log4j_config:log/log4j2.yml}
+
+process:
+  hostname: ${HOSTNAME}                                          # Hostname
+
+server:
+  port: {{ .Values.service.port }}
+
+# Eviction Management Worker config
+eviction-management-worker:
+  # Hostname
+  hostname: ${HOSTNAME}
+
