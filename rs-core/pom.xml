@@ -397,7 +397,7 @@
 		<!-- <module>prip-frontend</module> -->
 		<!-- <module>ddip-frontend</module> -->
 		<module>native-api</module>
-		<!-- <module>data-lifecycle-trigger</module> -->
+		<module>data-lifecycle-worker</module>
 		<!-- <module>data-request-worker</module> -->
 		<!-- <module>eviction-management-worker</module> -->
 		<!-- <module>validation</module> -->
