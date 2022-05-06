@@ -65,7 +65,68 @@ Following components of the COPRS shall be installed and running
 |``app.distribution-worker.distribution-worker.metadata-insertion-retries-number``| Amount of retries how often the worker will attempt to add a new entry into the PRIP index Default: ``3``|
 |``app.distribution-worker.distribution-worker.metadata-insertion-retries-interval-ms``| Amount of ms the worker will wait before retrying to add an entry in the PRIP index. Default: ``1000``|
 
-TBD Describe the attribute mapping
+Additionally a configuration for the product metadata mapping needs to be created. This configuration is shown in the section below. It does basically consist of two types of configuration:
+* A regular expresson define the product that shall match
+* A list of metadata mappings.
+
+The following examples are showing the configuration for a S1 Annotation file:
+```
+app.distribution-worker.distribution-worker.metadata.l0Ann.regexp=(S[1-6]|IW|EW|WV)_RAW__0A
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_beginningDateTime_date=startTime
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_endingDateTime_date=stopTime
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_startTimeFromAscendingNode_double=startTimeANX
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_completionTimeFromAscendingNode_double=stopTimeANX
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_platformShortName_string=platformShortName
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_platformSerialIdentifier_string=platformSerialIdentifier
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_instrumentShortName_string=instrumentShortName
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_operationalMode_string=operationalMode
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_swathIdentifier_string=swathIdentifier
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_productClass_string=productClass
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_productConsolidation_string=productConsolidation
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_instrumentConfigurationID_string=instrumentConfigurationId
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_missionDatatakeID_long=missionDataTakeId
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_sliceProductFlag_boolean=sliceProductFlag
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_sliceNumber_long=sliceNumber
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_totalSlices_long=totalNumberOfSlice
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_polarisationChannels_string=polarisationChannels
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_orbitNumber_long=absoluteStartOrbit
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_relativeOrbitNumber_long=relativeStartOrbit
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_cycleNumber_long=cycleNumber
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_orbitDirection_string=pass
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_processingDate_date=processingDate
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_processingCenter_string=site
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_processorName_string=processorName
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_processorVersion_string=processorVersion
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_coordinates_string=coordinates
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_productType_string=productType
+```
+
+The first line contains the regular expression that defines a pattern on how to identify the product type. The property use the following structure:
+app.distribution-worker.distribution-worker.metadata.<product_type>.regexp=<regular_expression>
+
+``product_type`` shall be a descriptive string for the product type that can consist of the following characters `[a-zA-Z0-9]`. This string will be also used to reference the product type mapping below. The ``regular_expression`` is a regular expression that needs to match to assign the incoming product from the event in order to assign the product to the specified product type. It shall be ensured that regular expression are assigning the product only to a single product type and not matching for multiple ones.
+
+The actual metadata mapping does follow this pattern:
+``app.distribution-worker.distribution-worker.metadata.<product_type>.attr_<attribute_name>_<value_type>=<metadata_name>``
+
+``product_type`` references the product type that shall be mapped from the section above. The ``attribute_name`` will be the name of the attribute that is stored within the PRIP index and shall be available for the product type via an OData query on the PRIP. The name shall contain normal characters and being specified in camel case.
+
+The ``value_type`` specifies what data type the attribute shall have and can be one of the following types:
+* string
+* date
+* double
+* long
+* boolean
+
+``metadata_name`` is the name of the field of the product metadata from the catalog that shall be assigned to that attribute.
+
+For example the following configuration:
+```
+app.distribution-worker.distribution-worker.metadata.l0Ann.regexp=(S[1-6]|IW|EW|WV)_RAW__0A
+app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_orbitDirection_string=pass
+```
+
+Will map the field `pass` from the metadata catalog for S1 Annotation files into an PRIP index attribute `orbitDirection` that will be specified as `string`. 
 
 ## Deployer properties
 
