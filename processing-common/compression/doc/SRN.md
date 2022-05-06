@@ -1,65 +1,95 @@
 # RS Core - Compression
 
+COPRS Compression chain is responsible to perform a compression operation on a file or directory product.
+
 ## General
 
 ![overview](./media/overview.png "Overview")
 
-The RS Core Compression chain is capable of performing compression operation on products that had been produced by the Reference System. It is downloading the uncompressed products into a local working directory, performing the compression operation and uploading the zipped product into the OBS. A compression event is raised that will be usually consumed by the Distribution Chain.
+In order to be published on the PRIP, it is required that the product that had been produced is zipped before. This is especially required as handling directory products are more difficult to handle during downloads. The RS Core Compression chain takes action to convert an uncompressed product into a compressed one.
 
-At the beginning of the chain there is the Compression Filter that is used as a gate for the chain and determinates what product family or product types shall be consumed by the Compression chain. Just product that are matching the criteria will be passed into the chain. All other requests will be discarded.
+When a product is produced within the COPRS and added to the catalog a new catalog event will be raised. The compression chain will hook upon these events and invoking its workflow. A filter component will ensure that just product types will be compressed and published that are wanted to be published. E.g. to avoid that auxiliary or intermediate products will be published as well.
 
-The Compression Router will analyze the timeliness that is required by the products and routing the products into prioritized queues. That was all requests with the same priority will be in the same queues.
+If an event passes the filter, the product referenced in the event will be downloaded into a local working directory and the configured compression command will be executed on the product. This results in a compressed product that will be uploaded into the Object Storage. For this the compression worker will use the same bucket as it would be used by the uncompressed one, followed by the suffix "-zip". After the compression was finished successfully a compression event is raised that will be consumed by the Distribution Chain in order to publish the zipped product into the PRIP index. Please note that compressed products will not be published on the Metadata Catalog.
 
-On each of the priority queues a Compression Worker will be listening. These workers are doing the actual work within the chain and downloading the product mentioned in the event into a local working directory. They are then performing the configured zip command onto the product. The finished compressed product will then be uploaded into an OBS bucket followed with the zip extension.
+The compression chain does handle three different priorities:
+* High
+* Medium
+* Low
 
-Finally a compression event will be written mentioning the compressed products and allow other systems to react upon the compression.
+These can be used to honour the different requirements on timeliness. Each priority will have a filter that can be configured to determinate the priority of the incoming event and decide which priority will be responsible for performing the processing. It is possible to scale the different compression worker priorities individually as it might be required to spawn more workers for the high priorities than for the lower ones.
+
+For details, please see [Compression Chain Design](https://github.com/COPRS/reference-system-documentation/blob/develop/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#compression-chain)
 
 ## Requirements
 
 This software does have the following minimal requirements:
 
-TBD
-
-
-| Resource                    | Value       |
+| Resource                    | Compression Worker* |
 |-----------------------------|-------------|
-| CPU                         |             |
-| Memory                      |             |
-| Disk volume needed          |             |
-| Disk access                 |             |
-| Disk storage capacity       |             |
-| Affinity between Pod / Node |             |
+| CPU                         | 300m        |
+| Memory                      | 3500Mi      |
+| Disk volume needed          | yes         |
+| Disk access                 | ReadWriteOnce |
+| Disk storage capacity       | 120Gi **    |
+| Affinity between Pod / Node | N/A         |
 |                             |             |
+
+*These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see scaling up workers for more details.
+** This amount had been used in previous operational S1 environment. The disk size might be lower depending on the products that are processed. This needs to be at least twice of the product size of the biggest product. An additional margin of 10% is recommended however.
 
 ## Compression Filter
 
-TBD
+The compression chain are using two different types of filters:
+* A filter used as gate to decide what products shall be processed
+* Multiple filters that decides upon the priority of the event
 
-## Compression Router
-
-TBD
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.message-filter.filter.function.expression``| A [SpEL](https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/expressions.html) expression that will be performed on the event to decide if the event is applicable for a compression. E.g. for Sentinel-1 the filter configuration using productFamily and keyObjectStorage name of the product could be like: ``((payload.productFamily matches '^((S\\d.*)|(AUX.*)|(L\\d.*))(?<!(ZIP|AUX|JOB|GRANULES|REPORT|ETAD|SAD|BLANK)$)$') && (!(payload.productFamily == AUXILIARY_FILE) || !(payload.keyObjectStorage matches 'S1__OPER_MSK_EW_SLC_.*\\.EOF')) && (!(payload.productFamily == L0_SEGMENT) || ((payload.keyObjectStorage matches 'S1._(GP|HK|RF).*_RAW.*\.SAFE)') && !(product.keyObjectStorage matches 'S1._RF_RAW__0.(HH|HV|VV|VH)_.*\.SAFE'))))``| 
+|``app.priority-filter-high.filter.function.expression``| A [SpEL](https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/expressions.html) expression defining what request are supposed to be handled by the high priority chain. E.g. handling all S1 events with FAST24 timeliness: ``payload.timeliness == 'FAST24'``| 
+|``app.priority-filter-medium.filter.function.expression``| A [SpEL](https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/expressions.html) expression defining what request are supposed to be handled by the medium priority chain. E.g. handling all S1 events with NRT timeliness. ``payload.timeliness == 'NRT'``| 
+|``app.priority-filter-low.filter.function.expression``|  [SpEL](https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/expressions.html) expression defining what request are supposed to be handled by the low priority chain. E.g. handling all events that are not having a timeliness: ``payload.timeliness == null``| 
 
 ## Compression Worker
 
-``app.compression-worker.compression-worker.compressionCommand``
+For each priority chain a separate configuration needs to be created. The configuration is however identically and applicable for:
+* app.compression-worker-high
+* app.compression-worker-medium
+* app.compression-worker-low
 
-The command that shall be used to perform the compression action. This can be used to execute a different kind of compression on the archive by providing a different compression script in the base image. By default it will be using
+The following description is just given for high priority workers:
 
-``/app/compression.sh`` that is doing an archive operation using the tool ``7za``.
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.compression-worker-high.compression-worker.compressionCommand``| The command that shall be used to perform the compression action. This can be used to execute a different kind of compression on the archive by providing a different compression script in the base image. By default it will be using: ``/app/compression.sh`` that is doing an archive operation using the tool ``7za``.| 
+|``app.compression-worker-high.compression-worker.workingDirectory`` | The local directory of the worker that shall be used as temporary working directory to perform the compression activity. This is set by default to ``/tmp/compression`` |
+|``app.compression-worker-high.compression-worker.compressionTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
+|``app.compression-worker-high.compression-worker.requestTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
+|``app.compression-worker-high.compression-worker.hostname`` | The timeout of the overall request. If the request takes more seconds than configured, it is considered to be hanging. |
 
 
-``app.compression-worker.compression-worker.hostname``
+## Deployer properties
 
-Defines the hostname of the compression worker. This is recommend to be set to ${HOSTNAME}.
+The following table only contains a few properties used by the factory default configuration. For more information please refer to the [official documentation](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-kubernetes-deployer) or COPRS-ICD-ADST-001139201 - ICD RS core.
+  
+| Property | Details |
+|-|-|
+| `deployer.<application-name>.kubernetes.namespace` | Namespace to use | 
+| `deployer.<application-name>.kubernetes.livenessProbeDelay` | Delay in seconds when the Kubernetes liveness check of the app container should start checking its health status. | 
+| `deployer.<application-name>.kubernetes.livenessProbePeriod` | Period in seconds for performing the Kubernetes liveness check of the app container. | 
+| `deployer.<application-name>.kubernetes.livenessProbeTimeout` | Timeout in seconds for the Kubernetes liveness check of the app container. If the health check takes longer than this value to return it is assumed as 'unavailable'. | 
+| `deployer.<application-name>.kubernetes.livenessProbePath` | Path that app container has to respond to for liveness check. | 
+| `deployer.<application-name>.kubernetes.livenessProbePort` | Port that app container has to respond on for liveness check. | 
+| `deployer.<application-name>.kubernetes.readinessProbeDelay` | Delay in seconds when the readiness check of the app container should start checking if the module is fully up and running. | 
+| `deployer.<application-name>.kubernetes.readinessProbePeriod` | Period in seconds to perform the readiness check of the app container. | 
+| `deployer.<application-name>.kubernetes.readinessProbeTimeout` | Timeout in seconds that the app container has to respond to its health status during the readiness check. | 
+| `deployer.<application-name>.kubernetes.readinessProbePath` | Path that app container has to respond to for readiness check. | 
+| `deployer.<application-name>.kubernetes.readinessProbePort` | Port that app container has to respond on for readiness check. | 
+| `deployer.<application-name>.kubernetes.limits.memory` | The memory limit, maximum needed value to allocate a pod, Default unit is mebibytes, 'M' and 'G" suffixes supported | 
+| `deployer.<application-name>.kubernetes.limits.cpu` | The CPU limit, maximum needed value to allocate a pod | 
+| `deployer.<application-name>.kubernetes.requests.memory` | The memory request, guaranteed needed value to allocate a pod. | 
+| `deployer.<application-name>.kubernetes.requests.cpu` | The CPU request, guaranteed needed value to allocate a pod. | 
+| `deployer.<application-name>.kubernetes.maxTerminatedErrorRestarts` | Maximum allowed restarts for app that fails due to an error or excessive resource use. | 
 
-``app.compression-worker.compression-worker.workingDirectory``
-
-The local directory of the worker that shall be used as temporary working directory to perform the compression activity. This is set by default to ``/tmp/compression``
-
-``app.compression-worker.compression-worker.compressionTimeout``
-
-The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging.
-
-``app.compression-worker.compression-worker.requestTimeout``
-
-The timeout of the overall request. If the request takes more seconds than configured, it is considered to be hanging.
+Please note that it will be required to setup certain deployer properties like imagePullSecrets or hardware requirement for the different workers individually. The configuration items are the same as described above however.
