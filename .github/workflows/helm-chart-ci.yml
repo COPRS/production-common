@@ -35,6 +35,7 @@ jobs:
         base: ${{ steps.extract_branch.outputs.branch }}
         filters: |
           ddip_frontend: '${{ env.CHART_FOLDER }}/ddip_frontend/**'
+          eviction_manager: '${{ env.CHART_FOLDER }}/eviction_manager/**'
           metadata_search_controller: '${{ env.CHART_FOLDER }}/metadata_search_controller/**'
           native_api: '${{ env.CHART_FOLDER }}/native_api/**'
           prip_frontend: '${{ env.CHART_FOLDER }}/prip_frontend/**'
