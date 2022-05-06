@@ -10,7 +10,7 @@ The Distribution chain is publishing products that had been produced within the 
 
 It is a sink and no further processing occurs. 
 
-For details, please see [Metadata Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#metadata-extraction)
+For details, please see [Distribution Chain Design](https://github.com/COPRS/reference-system-documentation/blob/develop/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#distribution-chain)
 
 # Resource Requirements
 
