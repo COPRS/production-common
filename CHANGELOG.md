@@ -6,16 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## NEXT - 2022-05-13
 
-## [1.0.1-rc1] - 2022-04-28
-
 ### Added
 - N/A
 
 ### Changed
+- Fixed RS Core component ingestion pushing to wrong named destination. Using "catalog jobs" instead to be in line with examples.
 - RS-364: User web client statefulset template has no keycloak parameter
 
 ### Removed
 - N/A
+
+## [1.0.1-rc1] - 2022-04-28
 
 This version is the first delivery for V1.1 and contains migrated components for SCDF workflows for Ingestion and Metadata Extraction.
 
