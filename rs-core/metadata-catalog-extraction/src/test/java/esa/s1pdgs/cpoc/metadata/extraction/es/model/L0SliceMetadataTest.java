@@ -20,6 +20,8 @@ public class L0SliceMetadataTest {
 	public void testToString() {
 		L0SliceMetadata obj = new L0SliceMetadata();
 		obj.setProductName("name");
+		obj.setMissionId("S1");
+		obj.setSatelliteId("A");
 		obj.setProductType("type");
 		obj.setKeyObjectStorage("kobs");
 		obj.setValidityStart("start");
@@ -30,6 +32,8 @@ public class L0SliceMetadataTest {
 		
 		String str = obj.toJsonString();
 		assertTrue(str.contains("productName\":\"name"));
+		assertTrue(str.contains("missionId\":\"S1\""));
+		assertTrue(str.contains("satelliteId\":\"A\""));
 		assertTrue(str.contains("productType\":\"type"));
 		assertTrue(str.contains("keyObjectStorage\":\"kobs"));
 		assertTrue(str.contains("validityStart\":\"start"));

@@ -22,6 +22,8 @@ public class EdrsSessionMetadataTest {
 	public void testToString() {
 		EdrsSessionMetadata obj = new EdrsSessionMetadata();
 		obj.setProductName("name");
+		obj.setMissionId("S1");
+		obj.setSatelliteId("A");
 		obj.setProductType("type");
 		obj.setKeyObjectStorage("kobs");
 		obj.setStartTime("start");
@@ -32,6 +34,8 @@ public class EdrsSessionMetadataTest {
 		
 		String str = obj.toJsonString();
 		assertTrue(str.contains("productName\":\"name"));
+		assertTrue(str.contains("missionId\":\"S1\""));
+		assertTrue(str.contains("satelliteId\":\"A\""));
 		assertTrue(str.contains("productType\":\"type"));
 		assertTrue(str.contains("keyObjectStorage\":\"kobs"));
 		assertTrue(str.contains("startTime\":\"start"));

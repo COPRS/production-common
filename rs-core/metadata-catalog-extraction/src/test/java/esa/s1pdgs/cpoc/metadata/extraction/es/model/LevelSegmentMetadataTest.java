@@ -21,6 +21,8 @@ public class LevelSegmentMetadataTest {
 	public void testToString() {
 		LevelSegmentMetadata obj = new LevelSegmentMetadata();
 		obj.setProductName("name");
+		obj.setMissionId("S1");
+		obj.setSatelliteId("A");
 		obj.setProductType("type");
 		obj.setKeyObjectStorage("kobs");
 		obj.setValidityStart("start");
@@ -32,6 +34,8 @@ public class LevelSegmentMetadataTest {
 		String str = obj.toJsonString();
 		
 		assertTrue(str.contains("\"productName\":\"name\""));
+		assertTrue(str.contains("missionId\":\"S1\""));
+		assertTrue(str.contains("satelliteId\":\"A\""));
 		assertTrue(str.contains("\"productType\":\"type\""));
 		assertTrue(str.contains("\"keyObjectStorage\":\"kobs\""));
 		assertTrue(str.contains("\"validityStart\":\"start\""));
