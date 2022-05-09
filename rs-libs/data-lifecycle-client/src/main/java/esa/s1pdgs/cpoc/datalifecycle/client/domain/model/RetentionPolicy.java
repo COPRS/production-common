@@ -1,16 +1,18 @@
 package esa.s1pdgs.cpoc.datalifecycle.client.domain.model;
 
+import esa.s1pdgs.cpoc.common.ProductFamily;
+
 public class RetentionPolicy {
 
-	private String productFamily;
+	private ProductFamily productFamily;
 	private String filePattern;
 	private int retentionTimeDays = -1;
 
-	public String getProductFamily() {
+	public ProductFamily getProductFamily() {
 		return productFamily;
 	}
 
-	public void setProductFamily(String productFamily) {
+	public void setProductFamily(ProductFamily productFamily) {
 		this.productFamily = productFamily;
 	}
 

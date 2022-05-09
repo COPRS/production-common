@@ -14,4 +14,4 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY /target/rs-data-lifecycle-worker-*.jar rs-data-lifecycle-worker.jar
 COPY /config/start.sh start.sh
 
-ENTRYPOINT "/app/start.sh"
+ENTRYPOINT ["/app/start.sh"]

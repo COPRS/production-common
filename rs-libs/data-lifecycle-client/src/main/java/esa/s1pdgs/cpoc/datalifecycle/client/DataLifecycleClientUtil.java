@@ -1,8 +1,8 @@
 package esa.s1pdgs.cpoc.datalifecycle.client;
 
 import java.time.Period;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
@@ -29,14 +29,14 @@ public class DataLifecycleClientUtil {
 	}
 	
 	public static  Date calculateEvictionDate(
-			final List<RetentionPolicy> retentionPolicies, 
+			final Collection<RetentionPolicy> retentionPolicies, 
 			final Date creationDate, 
 			final ProductFamily productFamily,
 			final String fileName
 	) {
 		for (final RetentionPolicy r : retentionPolicies) {
 
-			if (r.getProductFamily().equals(productFamily.name()) && Pattern.matches(r.getFilePattern(), fileName)) {
+			if (r.getProductFamily() == productFamily && Pattern.matches(r.getFilePattern(), fileName)) {
 				if (r.getRetentionTimeDays() > 0) {
 					LOG.info("retention time is {} days for file: {}", r.getRetentionTimeDays(), fileName);
 					return Date.from(creationDate.toInstant().plus(Period.ofDays(r.getRetentionTimeDays())));
