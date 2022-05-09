@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Fixed RS Core component ingestion pushing to wrong named destination. Using "catalog jobs" instead to be in line with examples.
+- RS-240: Improving configuration and documentation on how to set JVM XMX argument to RS Core components 
 - RS-364: User web client statefulset template has no keycloak parameter
 
 ### Removed
