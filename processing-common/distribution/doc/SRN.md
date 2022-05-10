@@ -28,11 +28,11 @@ This software does have the following minimal requirements:
 | Volume Mount                |  n/a  |         
 | Affinity between Pod / Node |     no       |
 
- *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [scaling up workers](/processing-common/doc/scaling.md) for more details.
+ *These resource requirements are applicable for one worker. There may be many instances of an distribution worker, see [scaling up workers](/processing-common/doc/scaling.md) for more details.
 
 
 # Deployment Prerequisite
-Following components of the COPRS shall be installed and running
+The following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
 
 
@@ -66,6 +66,7 @@ Following components of the COPRS shall be installed and running
 |``app.distribution-worker.distribution-worker.metadata-insertion-retries-interval-ms``| Amount of ms the worker will wait before retrying to add an entry in the PRIP index. Default: ``1000``|
 
 Additionally a configuration for the product metadata mapping needs to be created. This configuration is shown in the section below. It does basically consist of two types of configuration:
+
 * A regular expresson define the product that shall match
 * A list of metadata mappings.
 
@@ -104,7 +105,7 @@ app.distribution-worker.distribution-worker.metadata.l0Ann.map.attr_productType_
 The first line contains the regular expression that defines a pattern on how to identify the product type. The property use the following structure:
 app.distribution-worker.distribution-worker.metadata.<product_type>.regexp=<regular_expression>
 
-``product_type`` shall be a descriptive string for the product type that can consist of the following characters `[a-zA-Z0-9]`. This string will be also used to reference the product type mapping below. The ``regular_expression`` is a regular expression that needs to match to assign the incoming product from the event in order to assign the product to the specified product type. It shall be ensured that regular expression are assigning the product only to a single product type and not matching for multiple ones.
+``product_type`` shall be a descriptive string for the product type that can consist of the following characters `[a-zA-Z0-9]`. This string will be also used to reference the product type mapping below. The ``regular_expression`` is a regular expression that needs to match to assign the incoming product from the event to the specified product type. It shall be ensured that regular expressions are assigning the product only to a single product type and not matching for multiple ones.
 
 The actual metadata mapping does follow this pattern:
 ``app.distribution-worker.distribution-worker.metadata.<product_type>.attr_<attribute_name>_<value_type>=<metadata_name>``
@@ -112,6 +113,7 @@ The actual metadata mapping does follow this pattern:
 ``product_type`` references the product type that shall be mapped from the section above. The ``attribute_name`` will be the name of the attribute that is stored within the PRIP index and shall be available for the product type via an OData query on the PRIP. The name shall contain normal characters and being specified in camel case.
 
 The ``value_type`` specifies what data type the attribute shall have and can be one of the following types:
+
 * string
 * date
 * double
