@@ -914,7 +914,13 @@ public class ExtractMetadata {
 			metadataJSONObject.put("dataTakeId", descriptor.getDataTakeId());
 			metadataJSONObject.put("url", descriptor.getKeyObjectStorage());
 			metadataJSONObject.put("insertionTime", dt);
-			metadataJSONObject.put("creationTime", dt);
+			
+			if (metadataJSONObject.has("creationTime")) {
+				metadataJSONObject.put("creationTime",
+						DateUtils.convertToMetadataDateTimeFormat(metadataJSONObject.getString("creationTime")));
+			} else {
+				metadataJSONObject.put("creationTime", dt);
+			}
 			metadataJSONObject.put("productFamily", descriptor.getProductFamily().name());
 			// TODO S1PRO-1030 in future it can be DEBUG or REPROCESSING as well
 			metadataJSONObject.put("processMode", "NOMINAL");
