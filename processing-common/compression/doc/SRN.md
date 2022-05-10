@@ -6,18 +6,19 @@ COPRS Compression chain is responsible to perform a compression operation on a f
 
 ![overview](./media/overview.png "Overview")
 
-In order to be published on the PRIP, it is required that the product that had been produced is zipped before. This is especially required as handling directory products are more difficult to handle during downloads. The RS Core Compression chain takes action to convert an uncompressed product into a compressed one.
+In order to be published on the PRIP, it is required that the product that had been produced is zipped before. This is especially required as handling directory products is more difficult during downloads. The RS Core Compression chain takes action to convert an uncompressed product into a compressed one.
 
-When a product is produced within the COPRS and added to the catalog a new catalog event will be raised. The compression chain will hook upon these events and invoking its workflow. A filter component will ensure that just product types will be compressed and published that are wanted to be published. E.g. to avoid that auxiliary or intermediate products will be published as well.
+When a product is produced within the COPRS and added to the catalog a new catalog event will be raised. The compression chain will hook upon these events and invoke its workflow. A filter component will ensure that just product types will be compressed and published that should be published. E.g. to avoid that auxiliary or intermediate products will be published as well.
 
-If an event passes the filter, the product referenced in the event will be downloaded into a local working directory and the configured compression command will be executed on the product. This results in a compressed product that will be uploaded into the Object Storage. For this the compression worker will use the same bucket as it would be used by the uncompressed one, followed by the suffix "-zip". After the compression was finished successfully a compression event is raised that will be consumed by the Distribution Chain in order to publish the zipped product into the PRIP index. Please note that compressed products will not be published on the Metadata Catalog.
+If an event passes the filter, the product referenced in the event will be downloaded into a local working directory and the configured compression command will be executed on the product. This results in a compressed product that will be uploaded into the Object Storage. For this the compression worker will use the same bucket as it would be used by the uncompressed one, followed by the suffix "-zip". After the compression was finished successfully a compression event is raised that will be consumed by the Distribution Chain in order to publish the zipped product into the PRIP index. Please note that compressed products will not be published on the Metadata Catalog as their uncompressed counterparts will be used in the processing chains.
 
 The compression chain does handle three different priorities:
+
 * High
 * Medium
 * Low
 
-These can be used to honour the different requirements on timeliness. Each priority will have a filter that can be configured to determinate the priority of the incoming event and decide which priority will be responsible for performing the processing. It is possible to scale the different compression worker priorities individually as it might be required to spawn more workers for the high priorities than for the lower ones.
+These can be used to honour the different requirements on timeliness. Each priority will have a filter that can be configured to determine the priority of the incoming event and decide which priority will be responsible for performing the processing. It is possible to scale the different compression worker priorities individually as it might be required to spawn more workers for the high priorities than for the lower ones.
 
 For details, please see [Compression Chain Design](https://github.com/COPRS/reference-system-documentation/blob/develop/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#compression-chain)
 
@@ -35,14 +36,15 @@ This software does have the following minimal requirements:
 | Affinity between Pod / Node | N/A         |
 |                             |             |
 
-*These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see scaling up workers for more details.
+*These resource requirements are applicable for one worker. There may be many instances of an compression worker, see scaling up workers for more details.
 ** This amount had been used in previous operational S1 environment. The disk size might be lower depending on the products that are processed. This needs to be at least twice of the product size of the biggest product. An additional margin of 10% is recommended however.
 
 ## Compression Filter
 
-The compression chain are using two different types of filters:
-* A filter used as gate to decide what products shall be processed
-* Multiple filters that decides upon the priority of the event
+The compression chain is using two different types of filters:
+
+* A filter used as a gate to decide what products shall be processed (``message-filter``)
+* Multiple filters that decides upon the priority of the event (``priority-filter-<high|medium|low>``)
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
@@ -54,6 +56,7 @@ The compression chain are using two different types of filters:
 ## Compression Worker
 
 For each priority chain a separate configuration needs to be created. The configuration is however identically and applicable for:
+
 * app.compression-worker-high
 * app.compression-worker-medium
 * app.compression-worker-low
@@ -62,7 +65,7 @@ The following description is just given for high priority workers:
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-|``app.compression-worker-high.compression-worker.compressionCommand``| The command that shall be used to perform the compression action. This can be used to execute a different kind of compression on the archive by providing a different compression script in the base image. By default it will be using: ``/app/compression.sh`` that is doing an archive operation using the tool ``7za``.| 
+|``app.compression-worker-high.compression-worker.compressionCommand``| The command that shall be used to perform the compression action. This can be used to execute a different kind of compression on the archive by providing a different compression script in the base image. By default it will be using: ``/app/compression.sh`` that is doing the archiving-operation using the tool ``7za``.| 
 |``app.compression-worker-high.compression-worker.workingDirectory`` | The local directory of the worker that shall be used as temporary working directory to perform the compression activity. This is set by default to ``/tmp/compression`` |
 |``app.compression-worker-high.compression-worker.compressionTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
 |``app.compression-worker-high.compression-worker.requestTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
