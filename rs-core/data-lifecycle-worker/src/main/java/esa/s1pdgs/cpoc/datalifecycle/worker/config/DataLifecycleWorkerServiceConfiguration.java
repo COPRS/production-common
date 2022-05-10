@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.worker.service.CatalogEventService;
+import esa.s1pdgs.cpoc.datalifecycle.worker.service.CompressionEventService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 
 @Configuration
 public class DataLifecycleWorkerServiceConfiguration {
@@ -24,6 +26,9 @@ public class DataLifecycleWorkerServiceConfiguration {
 		return new CatalogEventService(configurationProperties, metadataRepo);
 	}
 	
-	
+	@Bean
+	public Consumer<CompressionEvent> updateCompressed() {
+		return new CompressionEventService(configurationProperties, metadataRepo);
+	}
 
 }
