@@ -12,7 +12,6 @@ import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 public class CatalogJob extends AbstractMessage {
 	private String productName = NOT_DEFINED;
 	private String relativePath = NOT_DEFINED;
-	private String missionId = NOT_DEFINED;
 	private long productSizeByte = 0L;
 	private String mode = "NOMINAL";
 	private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
@@ -130,14 +129,6 @@ public class CatalogJob extends AbstractMessage {
 		this.additionalMetadata = additionalMetadata;
 	}
 
-	public String getMissionId() {
-		return missionId;
-	}
-
-	public void setMissionId(String missionId) {
-		this.missionId = missionId;
-	}
-
 	public long getProductSizeByte() {
 		return productSizeByte;
 	}
@@ -151,7 +142,7 @@ public class CatalogJob extends AbstractMessage {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + Objects.hash(additionalMetadata, mode, oqcFlag, productName, relativePath,
-				stationName, timeliness, missionId, productSizeByte);
+				stationName, timeliness, productSizeByte);
 		return result;
 	}
 
@@ -167,7 +158,7 @@ public class CatalogJob extends AbstractMessage {
 		return Objects.equals(additionalMetadata, other.additionalMetadata) && Objects.equals(mode, other.mode)
 				&& oqcFlag == other.oqcFlag && Objects.equals(productName, other.productName)
 				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(stationName, other.stationName)
-				&& Objects.equals(timeliness, other.timeliness) && Objects.equals(missionId, other.missionId)
+				&& Objects.equals(timeliness, other.timeliness)
 				&& Objects.equals(productSizeByte, other.productSizeByte);
 	}
 

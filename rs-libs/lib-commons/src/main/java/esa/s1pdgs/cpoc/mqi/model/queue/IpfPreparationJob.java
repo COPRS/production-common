@@ -80,9 +80,9 @@ public class IpfPreparationJob extends AbstractMessage {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(allowedActions, creationDate, debug, demandType, eventMessage,
-				extraParameter1, extraParameter2, extraParameter3, podName, keyObjectStorage, level, outputProductType,
-				processingMode, productFamily, retryCounter, startTime, stopTime, taskTableName, uid);
+		result = prime * result + Objects.hash(allowedActions, creationDate, debug, demandType, eventMessage, podName,
+				keyObjectStorage, level, outputProductType, processingMode, productFamily, retryCounter, startTime,
+				stopTime, taskTableName, uid);
 		return result;
 	}
 
@@ -97,10 +97,7 @@ public class IpfPreparationJob extends AbstractMessage {
 		final IpfPreparationJob other = (IpfPreparationJob) obj;
 		return Objects.equals(allowedActions, other.allowedActions) && Objects.equals(creationDate, other.creationDate)
 				&& debug == other.debug && demandType == other.demandType
-				&& Objects.equals(eventMessage, other.eventMessage)
-				&& Objects.equals(extraParameter1, other.extraParameter1)
-				&& Objects.equals(extraParameter2, other.extraParameter2)
-				&& Objects.equals(extraParameter3, other.extraParameter3) && Objects.equals(podName, other.podName)
+				&& Objects.equals(eventMessage, other.eventMessage) && Objects.equals(podName, other.podName)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) && level == other.level
 				&& Objects.equals(outputProductType, other.outputProductType)
 				&& Objects.equals(processingMode, other.processingMode) && productFamily == other.productFamily
@@ -114,9 +111,8 @@ public class IpfPreparationJob extends AbstractMessage {
 		return "IpfPreparationJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
 				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
-				+ retryCounter + ", debug=" + debug + ", extraParameter1=" + extraParameter1 + ", extraParameter2="
-				+ extraParameter2 + ", extraParameter3=" + extraParameter3 + ", level=" + level + ", eventMessage="
-				+ eventMessage + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime="
-				+ stopTime + ", outputProductType=" + outputProductType + ", processingMode=" + processingMode + "]";
+				+ retryCounter + ", debug=" + debug + ", level=" + level + ", eventMessage=" + eventMessage
+				+ ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime
+				+ ", outputProductType=" + outputProductType + ", processingMode=" + processingMode + "]";
 	}
 }
