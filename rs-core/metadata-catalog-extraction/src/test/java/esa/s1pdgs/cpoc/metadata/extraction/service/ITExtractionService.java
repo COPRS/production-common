@@ -192,7 +192,7 @@ public class ITExtractionService {
 		
 		extractionService.apply(newCatalogJob(
 				"S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE",
-				NOT_DEFINED, ProductFamily.L0_SEGMENT, "NRT", null)); // timeliness will only be persisted if not null
+				NOT_DEFINED, ProductFamily.L0_SEGMENT, "unused (uses mdextractor.packetstore-type-timelinesses.Standard instead)", null));
 		
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
@@ -228,7 +228,7 @@ public class ITExtractionService {
 		assertEquals(2672620.053, metadata.getDouble("stopTimeANX"));
 		assertEquals("S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE", metadata.getString("url"));
 		assertEquals("", metadata.getString("productSensingConsolidation"));
-		assertEquals("FAST24", metadata.getString("timeliness"));
+		assertEquals("FAST24", metadata.getString("timeliness")); // obtained from mdextractor.packetstore-type-timelinesses.Standard
 		assertEquals(2466932.111, metadata.getDouble("startTimeANX"));
 		assertEquals("2020-01-20T12:47:46.019051Z", metadata.getString("validityStartTime"));
 		assertEquals("NOMINAL", metadata.getString("processMode"));
