@@ -61,9 +61,9 @@ public abstract class AbstractMessage {
 
 	protected int retryCounter = 0;
 	
-	protected Map<String, String> additionalFields = new HashMap<>();
+	protected Map<String, Object> additionalFields = new HashMap<>();
 	
-	protected Map<String, String> metadata = new HashMap<>();
+	protected Map<String, Object> metadata = new HashMap<>();
 	
 	protected DemandType demandType = DemandType.NOMINAL;
 
@@ -175,19 +175,19 @@ public abstract class AbstractMessage {
 		this.satelliteId = satelliteId;
 	}
 
-	public Map<String, String> getAdditionalFields() {
+	public Map<String, Object> getAdditionalFields() {
 		return additionalFields;
 	}
 
-	public void setAdditionalFields(Map<String, String> additionalFields) {
+	public void setAdditionalFields(Map<String, Object> additionalFields) {
 		this.additionalFields = additionalFields;
 	}
 
-	public Map<String, String> getMetadata() {
+	public Map<String, Object> getMetadata() {
 		return metadata;
 	}
 
-	public void setMetadata(Map<String, String> metadata) {
+	public void setMetadata(Map<String, Object> metadata) {
 		this.metadata = metadata;
 	}
 
