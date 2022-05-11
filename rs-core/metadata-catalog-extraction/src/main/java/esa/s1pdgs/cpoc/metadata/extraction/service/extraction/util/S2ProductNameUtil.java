@@ -75,7 +75,7 @@ public class S2ProductNameUtil {
 				case 'O': valueLength = 13; valueFormat = "^([0-9]{6})_([0-9]{6})$"; attributeName = "orbitPeriod"; break;
 				case 'V': valueLength = 31; valueFormat = "^([0-9]{8}T[0-9]{6})_([0-9]{8}T[0-9]{6})$"; attributeName = "applicabilityTimePeriod"; break;
 				case 'D': valueLength = 2; valueFormat = "^[0-9]{2}$"; attributeName = "detectorId"; break;
-				case 'A': valueLength = 6; valueFormat = "^[0-9]{6}$"; attributeName = "absoluteOrbit"; break;
+				case 'A': valueLength = 6; valueFormat = "^[0-9]{6}$"; attributeName = "absolutOrbit"; break;
 				case 'R': valueLength = 3; valueFormat = "^[0-9]{3}$"; attributeName = "relativeOrbit"; break;
 				case 'T': valueLength = 5; valueFormat = "^[0-9A-Z]{5}$"; attributeName = "tileNumber"; break;
 				case 'N': valueLength = isCompact ? 4 : 5; valueFormat = "^[0-9]{2}\\.?[0-9]{2}$"; attributeName = "processingBaselineNumber"; break;
@@ -99,6 +99,9 @@ public class S2ProductNameUtil {
 			}
 			
 			switch(attributeName) {
+				case "absolutOrbit":
+					metadata.put(attributeName, Integer.parseInt(value));
+					break;
 				case "applicabilityTimePeriod": // validity with start and stop or sensing start and stop
 					if (isAuxProduct) {
 						metadata.put("validityStartTime", DateUtils.formatToMetadataDateTimeFormat(DateUtils.parse(valueMatcher.group(1))));
@@ -109,11 +112,21 @@ public class S2ProductNameUtil {
 					}
 					break;
 				case "orbitPeriod":
-					metadata.put("absoluteStartOrbit", valueMatcher.group(1));
-					metadata.put("absoluteStopOrbit", valueMatcher.group(2));
+					metadata.put("absoluteStartOrbit", Integer.parseInt(valueMatcher.group(1)));
+					metadata.put("absoluteStopOrbit", Integer.parseInt(valueMatcher.group(2)));
+					break;
+				case "processingBaselineNumber":
+					if (4 == valueLength) {
+						metadata.put(attributeName, value.substring(0, 2) + '.' + value.substring(2, 4));	
+					} else {
+						metadata.put(attributeName, value);
+					}
 					break;
 				case "productDiscriminator":
 					metadata.put(attributeName, DateUtils.formatToMetadataDateTimeFormat(DateUtils.parse(suffix + value)));
+					break;
+				case "relativeOrbit":
+					metadata.put(attributeName, Integer.parseInt(value));
 					break;
 				case "sensingTime": // average sensing time
 					metadata.put(attributeName, DateUtils.formatToMetadataDateTimeFormat(DateUtils.parse(value)));

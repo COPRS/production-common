@@ -371,7 +371,7 @@ public class ITExtractionService {
 		assertEquals("2019-02-22T00:35:15.000000Z", metadata.getString("creationTime"));
 		assertEquals("2019-02-21T19:04:38.000000Z", metadata.getString("validityStartTime"));
 		assertEquals("2019-02-21T20:45:19.000000Z", metadata.getString("validityStopTime"));
-		assertEquals("019158", metadata.getString("absoluteOrbit"));
+		assertEquals(19158, metadata.getInt("absolutOrbit"));
 		assertEquals("F", metadata.getString("completenessId"));
 		assertEquals("N", metadata.getString("degradationId"));
 		assertEquals("NRT", metadata.getString("timeliness"));

@@ -24,13 +24,13 @@ public class TestS2ProductNameUtil {
 		assertEquals("MSI_L1A_GR", m1.getString("productType"));
 		assertEquals("2020-01-01T12:59:59.000000Z", m1.getString("creationTime"));
 		assertEquals("2013-04-01T12:30:00.000000Z", m1.getString("sensingTime"));
-		assertEquals("123456", m1.getString("absoluteStartOrbit"));
-		assertEquals("123457", m1.getString("absoluteStopOrbit"));
+		assertEquals(123456, m1.getInt("absoluteStartOrbit"));
+		assertEquals(123457, m1.getInt("absoluteStopOrbit"));
 		assertEquals("2009-12-10T23:51:34.000000Z", m1.getString("startTime"));
 		assertEquals("2009-12-10T23:52:24.000000Z", m1.getString("stopTime"));
 		assertEquals("05", m1.getString("detectorId"));
-		assertEquals("123456", m1.getString("absoluteOrbit"));
-		assertEquals("123", m1.getString("relativeOrbit"));
+		assertEquals(123456, m1.getInt("absolutOrbit"));
+		assertEquals(123, m1.getInt("relativeOrbit"));
 		assertEquals("15SWC", m1.getString("tileNumber"));
 		assertEquals("01.01", m1.getString("processingBaselineNumber"));
 		assertEquals("8A", m1.getString("bandIndexId"));
@@ -47,13 +47,13 @@ public class TestS2ProductNameUtil {
 		assertEquals("TEST", m2.getString("productClass"));
 		assertEquals("AUX_DUMMY_", m2.getString("productType"));
 		assertEquals("2020-01-01T12:59:59.000000Z", m2.getString("creationTime"));
-		assertEquals("123456", m2.getString("absoluteStartOrbit"));
-		assertEquals("123457", m2.getString("absoluteStopOrbit"));
+		assertEquals(123456, m2.getInt("absoluteStartOrbit"));
+		assertEquals(123457, m2.getInt("absoluteStopOrbit"));
 		assertEquals("2013-04-01T12:30:00.000000Z", m2.getString("validityStartTime"));
 		assertEquals("9999-12-31T23:59:59.999999Z", m2.getString("validityStopTime"));
 		assertEquals("05", m2.getString("detectorId"));
-		assertEquals("823456", m2.getString("absoluteOrbit"));
-		assertEquals("123", m2.getString("relativeOrbit"));
+		assertEquals(823456, m2.getInt("absolutOrbit"));
+		assertEquals(123, m2.getInt("relativeOrbit"));
 		assertEquals("15SWC", m2.getString("tileNumber"));
 		assertEquals("01.01", m2.getString("processingBaselineNumber"));
 		assertEquals("8A", m2.getString("bandIndexId"));
@@ -85,7 +85,7 @@ public class TestS2ProductNameUtil {
 		assertEquals("2019-02-22T00:35:15.000000Z", m4.getString("creationTime"));
 		assertEquals("2019-02-21T19:04:38.000000Z", m4.getString("validityStartTime"));
 		assertEquals("2019-02-21T20:45:19.000000Z", m4.getString("validityStopTime"));
-		assertEquals("019158", m4.getString("absoluteOrbit"));
+		assertEquals(19158, m4.getInt("absolutOrbit"));
 		assertEquals("F", m4.getString("completenessId"));
 		assertEquals("N", m4.getString("degradationId"));
 		assertEquals(11, m4.length());
@@ -100,7 +100,7 @@ public class TestS2ProductNameUtil {
 		assertEquals("2019-02-22T00:35:15.000000Z", m5.getString("creationTime"));
 		assertEquals("2019-02-21T19:04:38.000000Z", m5.getString("validityStartTime"));
 		assertEquals("2019-02-21T20:45:19.000000Z", m5.getString("validityStopTime"));
-		assertEquals("019158", m5.getString("absoluteOrbit"));
+		assertEquals(19158, m5.getInt("absolutOrbit"));
 		assertEquals("F", m5.getString("completenessId"));
 		assertEquals("N", m5.getString("degradationId"));
 		assertEquals(11, m5.length());
@@ -163,7 +163,7 @@ public class TestS2ProductNameUtil {
 		assertEquals("MSI_L1A_GR", m10.getString("productType"));
 		assertEquals("2014-11-04T13:40:12.000000Z", m10.getString("creationTime"));
 		assertEquals("2014-11-04T13:40:12.000000Z", m10.getString("sensingTime"));
-		assertEquals("03", m10.getString("detectorId"));
+		assertEquals(3, m10.getInt("detectorId"));
 		assertEquals("01.12", m10.getString("processingBaselineNumber"));
 		assertEquals(9, m10.length());
 		
@@ -176,7 +176,7 @@ public class TestS2ProductNameUtil {
 		assertEquals("MSI_L1A_GR", m11.getString("productType"));
 		assertEquals("2020-01-14T01:46:01.000000Z", m11.getString("creationTime"));
 		assertEquals("2020-01-14T00:21:21.000000Z", m11.getString("sensingTime"));
-		assertEquals("12", m11.getString("detectorId"));
+		assertEquals(12, m11.getInt("detectorId"));
 		assertEquals("02.08", m11.getString("processingBaselineNumber"));
 		assertEquals(9, m11.length());
 		
@@ -200,7 +200,7 @@ public class TestS2ProductNameUtil {
 		assertEquals("OPER", m13.getString("productClass"));
 		assertEquals("MSI_L1C_TC", m13.getString("productType"));
 		assertEquals("2019-10-01T10:26:54.000000Z", m13.getString("creationTime"));
-		assertEquals("013417", m13.getString("absoluteOrbit"));
+		assertEquals(13417, m13.getInt("absolutOrbit"));
 		assertEquals("39UWP", m13.getString("tileNumber"));
 		assertEquals("02.08", m13.getString("processingBaselineNumber"));
 		assertEquals(9, m13.length());
@@ -227,7 +227,7 @@ public class TestS2ProductNameUtil {
 		assertEquals("A", m15.getString("satelliteId"));
 		assertEquals("OPER", m15.getString("productClass"));
 		assertEquals("PRD_MSIL1C", m15.getString("productType"));
-		assertEquals("121", m15.getString("relativeOrbit"));
+		assertEquals(121, m15.getInt("relativeOrbit"));
 		assertEquals("2016-06-15T08:20:12.000000Z", m15.getString("startTime"));
 		assertEquals("2016-06-15T08:31:35.000000Z", m15.getString("stopTime"));
 		assertEquals(9, m15.length());
@@ -241,8 +241,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("A", m16.getString("satelliteId"));
 		assertEquals("MSIL1C", m16.getString("productType"));
 		assertEquals("2015-08-02T10:54:14.000000Z", m16.getString("startTime"));
-		assertEquals("0102", m16.getString("processingBaselineNumber"));
-		assertEquals("008", m16.getString("relativeOrbit"));
+		assertEquals("01.02", m16.getString("processingBaselineNumber"));
+		assertEquals(8, m16.getInt("relativeOrbit"));
 		assertEquals("2015-08-03T12:40:46.000000Z", m16.getString("productDiscriminator"));
 		assertEquals(8, m16.length());
 		
@@ -255,8 +255,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("A", m17.getString("satelliteId"));
 		assertEquals("MSIL2A", m17.getString("productType"));
 		assertEquals("2017-11-03T10:22:01.000000Z", m17.getString("startTime"));
-		assertEquals("0206", m17.getString("processingBaselineNumber"));
-		assertEquals("065", m17.getString("relativeOrbit"));
+		assertEquals("02.06", m17.getString("processingBaselineNumber"));
+		assertEquals(65, m17.getInt("relativeOrbit"));
 		assertEquals("32TNS", m17.getString("tileNumber"));
 		assertEquals("2017-11-06T19:52:36.000000Z", m17.getString("productDiscriminator"));
 		assertEquals(9, m17.length());
