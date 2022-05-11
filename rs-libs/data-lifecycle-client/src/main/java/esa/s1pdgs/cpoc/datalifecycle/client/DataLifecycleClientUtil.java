@@ -49,5 +49,4 @@ public class DataLifecycleClientUtil {
 		LOG.warn("no retention time found for file: {}", fileName);
 		return null;
 	}
-
 }
