@@ -30,4 +30,3 @@ resources:
   javaOpts:
 #   xms: "256m"
     xmx: "512m"
-
