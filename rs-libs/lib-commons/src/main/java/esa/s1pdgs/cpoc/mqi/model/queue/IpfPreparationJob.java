@@ -5,15 +5,13 @@ import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 public class IpfPreparationJob extends AbstractMessage {
 	private ApplicationLevel level;
-	private GenericMessageDto<CatalogEvent> eventMessage;
+	private CatalogEvent catalogEvent;
 	private String taskTableName;
 	private String startTime;
 	private String stopTime;
-	private String outputProductType;
 	private String processingMode = "NOT_DEFINED";
 
 	public IpfPreparationJob() {
@@ -28,12 +26,12 @@ public class IpfPreparationJob extends AbstractMessage {
 		this.level = level;
 	}
 
-	public GenericMessageDto<CatalogEvent> getEventMessage() {
-		return eventMessage;
+	public CatalogEvent getCatalogEvent() {
+		return catalogEvent;
 	}
 
-	public void setEventMessage(final GenericMessageDto<CatalogEvent> eventMessage) {
-		this.eventMessage = eventMessage;
+	public void setCatalogEvent(final CatalogEvent catalogEvent) {
+		this.catalogEvent = catalogEvent;
 	}
 
 	public String getTaskTableName() {
@@ -60,14 +58,6 @@ public class IpfPreparationJob extends AbstractMessage {
 		this.stopTime = stopTime;
 	}
 
-	public String getOutputProductType() {
-		return outputProductType;
-	}
-
-	public void setOutputProductType(final String outputProductType) {
-		this.outputProductType = outputProductType;
-	}
-
 	public String getProcessingMode() {
 		return processingMode;
 	}
@@ -80,9 +70,9 @@ public class IpfPreparationJob extends AbstractMessage {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(allowedActions, creationDate, debug, demandType, eventMessage,
-				extraParameter1, extraParameter2, extraParameter3, podName, keyObjectStorage, level, outputProductType,
-				processingMode, productFamily, retryCounter, startTime, stopTime, taskTableName, uid);
+		result = prime * result + Objects.hash(allowedActions, creationDate, debug, demandType, catalogEvent,
+				extraParameter1, extraParameter2, extraParameter3, podName, keyObjectStorage, level, processingMode,
+				productFamily, retryCounter, startTime, stopTime, taskTableName, uid);
 		return result;
 	}
 
@@ -97,12 +87,11 @@ public class IpfPreparationJob extends AbstractMessage {
 		final IpfPreparationJob other = (IpfPreparationJob) obj;
 		return Objects.equals(allowedActions, other.allowedActions) && Objects.equals(creationDate, other.creationDate)
 				&& debug == other.debug && demandType == other.demandType
-				&& Objects.equals(eventMessage, other.eventMessage)
+				&& Objects.equals(catalogEvent, other.catalogEvent)
 				&& Objects.equals(extraParameter1, other.extraParameter1)
 				&& Objects.equals(extraParameter2, other.extraParameter2)
 				&& Objects.equals(extraParameter3, other.extraParameter3) && Objects.equals(podName, other.podName)
 				&& Objects.equals(keyObjectStorage, other.keyObjectStorage) && level == other.level
-				&& Objects.equals(outputProductType, other.outputProductType)
 				&& Objects.equals(processingMode, other.processingMode) && productFamily == other.productFamily
 				&& retryCounter == other.retryCounter && Objects.equals(startTime, other.startTime)
 				&& Objects.equals(stopTime, other.stopTime) && Objects.equals(taskTableName, other.taskTableName)
@@ -115,8 +104,8 @@ public class IpfPreparationJob extends AbstractMessage {
 				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
 				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
 				+ retryCounter + ", debug=" + debug + ", extraParameter1=" + extraParameter1 + ", extraParameter2="
-				+ extraParameter2 + ", extraParameter3=" + extraParameter3 + ", level=" + level + ", eventMessage="
-				+ eventMessage + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime="
-				+ stopTime + ", outputProductType=" + outputProductType + ", processingMode=" + processingMode + "]";
+				+ extraParameter2 + ", extraParameter3=" + extraParameter3 + ", level=" + level + ", catalogEvent="
+				+ catalogEvent + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime="
+				+ stopTime + ", processingMode=" + processingMode + "]";
 	}
 }

@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.util.StringUtils;
 
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.preparation.worker.service.PreparationWorkerService;
+import esa.s1pdgs.cpoc.preparation.worker.service.TaskTableMapperService;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.ConfigurableKeyEvaluator;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.RoutingBasedTasktableMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.SingleTasktableMapper;
@@ -39,5 +41,12 @@ public class PreparationWorkerServiceConfiguration {
 					new ConfigurableKeyEvaluator(properties.getRoutingKeyTemplate())).newMapper();
 		}
 		throw new IllegalStateException(String.format("Missing required elements in configuration: %s", this));
+	}
+
+	@Bean
+	@Autowired
+	public TaskTableMapperService taskTableMapperService(final TasktableMapper ttMapper,
+			final ProcessProperties processProperties, final MetadataClient metadataClient) {
+		return new TaskTableMapperService(ttMapper, processProperties, metadataClient);
 	}
 }
