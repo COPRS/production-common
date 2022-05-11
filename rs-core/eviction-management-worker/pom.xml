@@ -7,15 +7,15 @@
 		<artifactId>s1pro-core</artifactId>
 		<version>3.32.1</version>
 	</parent>
-	<artifactId>s1pro-core-eviction-management-worker</artifactId>
+	<artifactId>rs-eviction-management-worker</artifactId>
 	<packaging>jar</packaging>
 
 	<description>S1PDGS Cloud POC - Eviction Management Worker</description>
 
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-eviction-management-worker</project.build.finalName>
-		<project.artifactId>s1pdgs-eviction-management-worker</project.artifactId>
+		<project.build.finalName>rs-eviction-management-worker</project.build.finalName>
+		<project.artifactId>rs-eviction-management-worker</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.evictionmanagement.worker.Application</start-class>
 	</properties>
 
@@ -61,6 +61,12 @@
 					<artifactId>elasticsearch</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-data-lifecycle-client</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>

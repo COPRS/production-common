@@ -11,7 +11,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY /target/s1pro-core-eviction-management-worker-*.jar s1pdgs-eviction-management-worker.jar
+COPY /target/rs-eviction-management-worker-*.jar rs-eviction-management-worker.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"
