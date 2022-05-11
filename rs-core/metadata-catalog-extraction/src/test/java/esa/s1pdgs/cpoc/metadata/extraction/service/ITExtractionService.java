@@ -182,10 +182,78 @@ public class ITExtractionService {
 
 	}
 	
-//	@Test
-//	public void testExtractionService_onS1L0Segment_shallPersistValidRecord() throws IOException, AbstractCodedException {
-//		//TODO S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE
-//	}
+	@Test
+	public void testExtractionService_onS1L0Segment_shallPersistValidRecord() throws IOException, AbstractCodedException {
+		List<File> files = List.of(new File(testDir, "S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE/manifest.safe"));
+		doReturn(files).when(mockObsClient).download(Mockito.any(), Mockito.any());
+		doReturn(newGetResponse_withExistsFalse()).when(mockElasticsearchDAO).get(Mockito.any(GetRequest.class));
+		doReturn(newIndexResponse_withCreatedTrue()).when(mockElasticsearchDAO).index(Mockito.any(IndexRequest.class));
+		ArgumentCaptor<IndexRequest> argumentCaptor = ArgumentCaptor.forClass(IndexRequest.class);
+		
+		extractionService.apply(newCatalogJob(
+				"S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE",
+				NOT_DEFINED, ProductFamily.L0_SEGMENT, "NRT", null)); // timeliness will only be persisted if not null
+		
+		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
+		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
+		IndexRequest indexRequest = argumentCaptor.getValue();
+		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString(4));
+		
+		assertEquals(232286, metadata.getInt("missionDataTakeId"));
+		assertEquals(ProductFamily.L0_SEGMENT.name(), metadata.getString("productFamily"));
+		assertEquals(0, metadata.getInt("qualityNumOfCorruptedElements"));
+		assertEquals("2021-04-19T14:45:16.778287Z", metadata.getString("creationTime"));
+		assertEquals("VH", metadata.getString("polarisation"));
+		assertEquals(30884, metadata.getInt("absoluteStopOrbit"));
+		assertEquals("_", metadata.getString("resolution"));
+		assertEquals(5, metadata.getInt("circulationFlag"));
+		assertEquals("S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE", metadata.getString("productName"));
+		assertEquals("038B5E", metadata.getString("dataTakeId"));
+		assertEquals("FULL", metadata.getString("productConsolidation"));
+		assertEquals(30884, metadata.getInt("absoluteStartOrbit"));
+		assertEquals("2020-01-20T12:51:11.706993Z", metadata.getString("validityStopTime"));
+		assertEquals("6", metadata.getString("instrumentConfigurationId"));
+		assertEquals(12, metadata.getInt("relativeStopOrbit"));
+		assertEquals(12, metadata.getInt("relativeStartOrbit"));
+		assertEquals("2020-01-20T12:47:46.019051Z", metadata.getString("startTime"));
+		assertEquals("2020-01-20T12:51:11.706993Z", metadata.getString("stopTime"));
+		assertEquals(0, metadata.getInt("qualityNumOfMissingElements"));
+		assertEquals("IW_RAW__0S", metadata.getString("productType"));
+		assertEquals("S", metadata.getString("productClass"));
+		assertEquals("S1", metadata.getString("missionId"));
+		assertEquals("IW", metadata.getString("swathtype"));
+		assertEquals("DESCENDING", metadata.getString("pass"));
+		assertEquals("A", metadata.getString("satelliteId"));
+		assertEquals(2672620.053, metadata.getDouble("stopTimeANX"));
+		assertEquals("S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE", metadata.getString("url"));
+		assertEquals("", metadata.getString("productSensingConsolidation"));
+		assertEquals("FAST24", metadata.getString("timeliness"));
+		assertEquals(2466932.111, metadata.getDouble("startTimeANX"));
+		assertEquals("2020-01-20T12:47:46.019051Z", metadata.getString("validityStartTime"));
+		assertEquals("NOMINAL", metadata.getString("processMode"));
+		JSONObject segmentCoordinates = metadata.getJSONObject("segmentCoordinates");
+		assertEquals(3, segmentCoordinates.length());
+		assertEquals("counterclockwise", segmentCoordinates.getString("orientation"));
+		assertEquals("polygon", segmentCoordinates.getString("type"));
+		JSONArray coordinates = segmentCoordinates.getJSONArray("coordinates");
+		assertEquals(1, coordinates.length());
+		JSONArray points = (JSONArray)coordinates.get(0);
+		assertEquals(5, points.length());
+		assertEquals(-103.1979, ((JSONArray)points.get(0)).getDouble(0));
+		assertEquals(30.4307, ((JSONArray)points.get(0)).getDouble(1));
+		assertEquals(-105.6059, ((JSONArray)points.get(1)).getDouble(0));
+		assertEquals(17.9991, ((JSONArray)points.get(1)).getDouble(1));
+		assertEquals(-103.3109, ((JSONArray)points.get(2)).getDouble(0));
+		assertEquals(17.7208, ((JSONArray)points.get(2)).getDouble(1));
+		assertEquals(-100.6624, ((JSONArray)points.get(3)).getDouble(0));
+		assertEquals(30.1622, ((JSONArray)points.get(3)).getDouble(1));
+		assertEquals(-103.1979, ((JSONArray)points.get(4)).getDouble(0));
+		assertEquals(30.4307, ((JSONArray)points.get(4)).getDouble(1));
+		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
+				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
+		assertEquals(34, metadata.length());
+	}
 
 	@Test
 	public void testExtractionService_onS1L0Slice_shallPersistValidRecord() throws IOException, AbstractCodedException {

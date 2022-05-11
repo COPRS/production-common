@@ -51,6 +51,11 @@
 		<segmentCoordinates>
 			<xsl:copy-of select="//*[local-name() = 'coordinates']/text()"/>
 		</segmentCoordinates>
+		<xsl:if test="string(//*[local-name() = 'processing']/@start) != ''">
+			<creationTime>
+				<xsl:copy-of select="string(//*[local-name() = 'processing']/@start)"/>
+			</creationTime>
+		</xsl:if>
 		<xsl:if test="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfMissingElements']/text() != ''">
 			<qualityNumOfMissingElements>
 				<xsl:copy-of select="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfMissingElements']/text()"/>
