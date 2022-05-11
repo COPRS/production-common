@@ -125,6 +125,9 @@ jobs:
           data-lifecycle-worker: 
             - 'rs-core/data-lifecycle-worker/**'
             - 'rs-core/pom.xml'
+          eviction-management-worker: 
+            - 'rs-core/eviction-management-worker/**'
+            - 'rs-core/pom.xml'
 
 #          data-request-worker: 
 #            - 'rs-core/data-request-worker/**'
@@ -140,9 +143,6 @@ jobs:
 #            - 'rs-core/pom.xml'
 #          disseminator: 
 #            - 'rs-core/disseminator/**'
-#            - 'rs-core/pom.xml'
-#          eviction-management-worker: 
-#            - 'rs-core/eviction-management-worker/**'
 #            - 'rs-core/pom.xml'
 #          ipf-execution-worker: 
 #            - 'rs-core/ipf-execution-worker/**'
