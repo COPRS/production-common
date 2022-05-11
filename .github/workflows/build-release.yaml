@@ -8,6 +8,7 @@ on:
   create:
 
 env:
+  IMAGE_NAME: rs-core
   RS_CORE_FOLDER: processing-common
   RS_EXAMPLES_FOLDER: rs-core-examples
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
