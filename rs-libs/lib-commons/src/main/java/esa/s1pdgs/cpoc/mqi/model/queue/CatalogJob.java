@@ -94,6 +94,9 @@ public class CatalogJob extends AbstractMessage {
 
 	@JsonIgnore
 	public String getMode() {
+		if (metadata.get(MODE_KEY) == null) {
+			return null;
+		}
 		return metadata.getOrDefault(MODE_KEY, "").toString();
 	}
 
