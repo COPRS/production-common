@@ -32,7 +32,7 @@ ingestion-trigger:
       # possible type values: prip
       type: prip
       # Filename regex for matching files
-      matchRegex: ^S1.*(AUX_|AMH_|AMV_|MPL_).*$
+      matchRegex: ^S1.*(AUX_|AMH_|AMV_|MPL_ORB).*$
       # Filename regex for ignoring files
       ignoreRegex: (^\..*|.*\.tmp$|db.*|^lost\+found$)
       # Kafka topic to put the ingestion jobs for the worker
