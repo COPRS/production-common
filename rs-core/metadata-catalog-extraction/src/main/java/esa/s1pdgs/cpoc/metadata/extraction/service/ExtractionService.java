@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -124,8 +125,16 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 
 	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final JSONObject metadata) {
 		final CatalogEvent catEvent = new CatalogEvent();
+		String satelliteId;
+		try {
+			satelliteId = metadata.getString("satelliteId");
+		} catch (JSONException e) {
+			satelliteId = catJob.getSatelliteId();
+		}
+		
 		catEvent.setMetadata(metadata.toMap());
 		catEvent.setMissionId(catJob.getMissionId());
+		catEvent.setSatelliteId(satelliteId);
 		catEvent.setProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
 		catEvent.setStoragePath(catJob.getStoragePath());

@@ -97,6 +97,7 @@ public class UncompressProcessor extends AbstractProcessor
 		result.setProductName(keyObs);
 		result.setProductFamily(outputProductFamily);
 		result.setMissionId(event.getMissionId());
+		result.setSatelliteId(event.getSatelliteId());
 		result.setProductSizeByte(event.getProductSizeByte()); // New size?
 		result.setStationName(event.getStationName());
 		result.setMode(event.getMode());
