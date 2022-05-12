@@ -10,7 +10,6 @@ on:
       - '!main'
       - 'release/**'
       - 'develop**'
-      - 'feature/**'
   workflow_dispatch:
       
 env:
