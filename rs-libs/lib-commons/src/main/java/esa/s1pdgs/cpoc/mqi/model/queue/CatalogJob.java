@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
@@ -72,6 +74,7 @@ public class CatalogJob extends AbstractMessage {
 		this.timeliness = timeliness;
 	}
 
+	@JsonIgnore
 	public String getProductName() {
 		return metadata.getOrDefault(PRODUCT_NAME_KEY, "").toString();
 	}
@@ -80,6 +83,7 @@ public class CatalogJob extends AbstractMessage {
 		this.metadata.put(PRODUCT_NAME_KEY, productName);
 	}
 
+	@JsonIgnore
 	public String getRelativePath() {
 		return metadata.getOrDefault(RELATIVE_PATH_KEY, "").toString();
 	}
@@ -88,6 +92,7 @@ public class CatalogJob extends AbstractMessage {
 		this.metadata.put(RELATIVE_PATH_KEY, relativePath);
 	}
 
+	@JsonIgnore
 	public String getMode() {
 		return metadata.getOrDefault(MODE_KEY, "").toString();
 	}

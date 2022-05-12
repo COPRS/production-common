@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class CatalogEvent extends AbstractMessage {
@@ -13,6 +15,7 @@ public class CatalogEvent extends AbstractMessage {
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
+	@JsonIgnore
 	public String getProductName() {
 		return metadata.getOrDefault(PRODUCT_NAME_KEY, "").toString();
 	}
@@ -21,6 +24,7 @@ public class CatalogEvent extends AbstractMessage {
 		this.metadata.put(PRODUCT_NAME_KEY, productName);
 	}
 
+	@JsonIgnore
 	public String getProductType() {
 		return metadata.getOrDefault(PRODUCT_TYPE_KEY, "").toString();
 	}
