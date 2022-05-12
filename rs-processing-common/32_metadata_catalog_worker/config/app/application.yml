@@ -42,7 +42,9 @@ process:
     isip: "<PRODUCTNAME>_iif.xml"
     safe: manifest.safe
   # Hostname                               
-  hostname: ${HOSTNAME}                   
+  hostname: ${HOSTNAME}
+  numObsDownloadRetries: 99
+  sleepBetweenObsRetriesMillis: 3000
 
 # Message queue interface
 mqi:
