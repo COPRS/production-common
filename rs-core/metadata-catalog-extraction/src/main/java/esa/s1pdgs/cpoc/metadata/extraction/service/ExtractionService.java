@@ -125,6 +125,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final JSONObject metadata) {
 		final CatalogEvent catEvent = new CatalogEvent();
 		catEvent.setMetadata(metadata.toMap());
+		catEvent.setMissionId(catJob.getMissionId());
 		catEvent.setProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
 		catEvent.setStoragePath(catJob.getStoragePath());
