@@ -73,7 +73,7 @@ public class CatalogJob extends AbstractMessage {
 	}
 
 	public String getProductName() {
-		return metadata.get(PRODUCT_NAME_KEY).toString();
+		return metadata.getOrDefault(PRODUCT_NAME_KEY, "").toString();
 	}
 
 	public void setProductName(final String productName) {
@@ -81,7 +81,7 @@ public class CatalogJob extends AbstractMessage {
 	}
 
 	public String getRelativePath() {
-		return metadata.get(RELATIVE_PATH_KEY).toString();
+		return metadata.getOrDefault(RELATIVE_PATH_KEY, "").toString();
 	}
 
 	public void setRelativePath(final String relativePath) {
@@ -89,7 +89,7 @@ public class CatalogJob extends AbstractMessage {
 	}
 
 	public String getMode() {
-		return metadata.get(MODE_KEY).toString();
+		return metadata.getOrDefault(MODE_KEY, "").toString();
 	}
 
 	public void setMode(final String mode) {

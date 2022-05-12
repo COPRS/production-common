@@ -14,7 +14,7 @@ public class CatalogEvent extends AbstractMessage {
 	}
 
 	public String getProductName() {
-		return metadata.get(PRODUCT_NAME_KEY).toString();
+		return metadata.getOrDefault(PRODUCT_NAME_KEY, "").toString();
 	}
 
 	public void setProductName(final String productName) {
@@ -22,7 +22,7 @@ public class CatalogEvent extends AbstractMessage {
 	}
 
 	public String getProductType() {
-		return metadata.get(PRODUCT_TYPE_KEY).toString();
+		return metadata.getOrDefault(PRODUCT_TYPE_KEY, "").toString();
 	}
 
 	public void setProductType(final String productType) {
