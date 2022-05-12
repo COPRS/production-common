@@ -8,6 +8,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class CatalogJob extends AbstractMessage {
+	public static final String ADDITIONAL_METADATA_FLAG_KEY = "isPathExtracted";
+	
 	private static final String PRODUCT_NAME_KEY = "productName";
 	private static final String RELATIVE_PATH_KEY = "relativePath";
 	private static final String MODE_KEY = "mode";
