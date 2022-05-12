@@ -10,51 +10,21 @@ import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class CompressionEvent extends AbstractMessage {
 
-	private CompressionDirection compressionDirection = CompressionDirection.UNDEFINED;
-
 	public CompressionEvent() {
 		super();
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
-	public CompressionEvent(final ProductFamily productFamily, final String keyObjectStorage,
-			final CompressionDirection compressionDirection) {
+	public CompressionEvent(final ProductFamily productFamily, final String keyObjectStorage) {
 		super(productFamily, keyObjectStorage);
-		this.compressionDirection = compressionDirection;
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
-	}
-
-	public CompressionDirection getCompressionDirection() {
-		return this.compressionDirection;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((compressionDirection == null) ? 0 : compressionDirection.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		CompressionEvent other = (CompressionEvent) obj;
-		if (compressionDirection != other.compressionDirection)
-			return false;
-		return true;
 	}
 
 	@Override
 	public String toString() {
 		return "CompressionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
-				+ ", uid=" + uid + ", compressionDirection=" + compressionDirection + "]";
+				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName + ", uid="
+				+ uid + "]";
 	}
 
 	public void convertForPublishingCompressed() {

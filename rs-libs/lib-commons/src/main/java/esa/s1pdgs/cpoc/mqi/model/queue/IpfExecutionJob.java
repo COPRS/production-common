@@ -248,9 +248,7 @@ public class IpfExecutionJob extends AbstractMessage {
 				+ ipfPreparationJobMessage + ", timedOut=" + timedOut + "productFamily=" + productFamily
 				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", uid=" + uid
 				+ ", creationDate=" + creationDate + ", podName=" + podName + ", allowedActions=" + allowedActions
-				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug
-				+ ", extraParameter1=" + extraParameter1 + ", extraParameter2=" + extraParameter2 + ", extraParameter3="
-				+ extraParameter3 + "]";
+				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
 	}
 
 	@Override

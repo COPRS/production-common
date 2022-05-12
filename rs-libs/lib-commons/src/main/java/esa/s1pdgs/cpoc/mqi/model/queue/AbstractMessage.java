@@ -2,14 +2,16 @@ package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
 
@@ -34,37 +36,41 @@ public abstract class AbstractMessage {
 	@JsonIgnore
 	public static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
-	// use some sane defaults
-	protected ProductFamily productFamily = ProductFamily.BLANK;
-	protected String keyObjectStorage = NOT_DEFINED;
-	protected String storagePath = NOT_DEFINED;
 	protected UUID uid = UUID.fromString(DEFAULT_UUID);
-
-	/*
-	 * WARNING: the fields below are just for informational purposes and will not be
-	 * evaluated in any functional way.
-	 */
-
+	
 	/*
 	 * Most of the subsystems are not setting these values at the moment. Lets see
 	 * if this automatic approach is working.
 	 */
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
 	protected Date creationDate = new Date();
+	
+	protected String missionId = "";
+	
+	protected String satelliteId = "";
+	
+	protected String keyObjectStorage = NOT_DEFINED;
+	
+	protected String storagePath = NOT_DEFINED;
+	
+	protected ProductFamily productFamily = ProductFamily.BLANK;
+	
 	protected String podName = DEFAULT_PODNAME;
 
 	protected List<AllowedAction> allowedActions = Collections.emptyList();
 
+	protected int retryCounter = 0;
+	
+	protected Map<String, Object> additionalFields = new HashMap<>();
+	
+	protected Map<String, Object> metadata = new HashMap<>();
+	
 	protected DemandType demandType = DemandType.NOMINAL;
 
-	protected int retryCounter = 0;
-
 	protected boolean debug = false;
-
-	protected String extraParameter1;
-	protected String extraParameter2;
-	protected String extraParameter3;
-
+		
+	protected String timeliness = null;
+	
 	public AbstractMessage() {
 	}
 
@@ -152,32 +158,45 @@ public abstract class AbstractMessage {
 	public void setDebug(final boolean debug) {
 		this.debug = debug;
 	}
-
-	@JsonProperty("extra_parameter1_string")
-	public String getExtraParameter1() {
-		return extraParameter1;
+	
+	public String getMissionId() {
+		return missionId;
 	}
 
-	public void setExtraParameter1(String extraParameter1) {
-		this.extraParameter1 = extraParameter1;
+	public void setMissionId(String missionId) {
+		this.missionId = missionId;
 	}
 
-	@JsonProperty("extra_parameter2_string")
-	public String getExtraParameter2() {
-		return extraParameter2;
+	public String getSatelliteId() {
+		return satelliteId;
 	}
 
-	public void setExtraParameter2(String extraParameter2) {
-		this.extraParameter2 = extraParameter2;
+	public void setSatelliteId(String satelliteId) {
+		this.satelliteId = satelliteId;
 	}
 
-	@JsonProperty("extra_parameter3_string")
-	public String getExtraParameter3() {
-		return extraParameter3;
+	public Map<String, Object> getAdditionalFields() {
+		return additionalFields;
 	}
 
-	public void setExtraParameter3(String extraParameter3) {
-		this.extraParameter3 = extraParameter3;
+	public void setAdditionalFields(Map<String, Object> additionalFields) {
+		this.additionalFields = additionalFields;
+	}
+
+	public Map<String, Object> getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(Map<String, Object> metadata) {
+		this.metadata = metadata;
+	}
+
+	public String getTimeliness() {
+		return timeliness;
+	}
+
+	public void setTimeliness(String timeliness) {
+		this.timeliness = timeliness;
 	}
 
 	@Override
@@ -188,18 +207,22 @@ public abstract class AbstractMessage {
 		result = prime * result + ((creationDate == null) ? 0 : creationDate.hashCode());
 		result = prime * result + (debug ? 1231 : 1237);
 		result = prime * result + ((demandType == null) ? 0 : demandType.hashCode());
-		result = prime * result + ((extraParameter1 == null) ? 0 : extraParameter1.hashCode());
-		result = prime * result + ((extraParameter2 == null) ? 0 : extraParameter2.hashCode());
-		result = prime * result + ((extraParameter3 == null) ? 0 : extraParameter3.hashCode());
 		result = prime * result + ((podName == null) ? 0 : podName.hashCode());
 		result = prime * result + ((keyObjectStorage == null) ? 0 : keyObjectStorage.hashCode());
 		result = prime * result + ((storagePath == null) ? 0 : storagePath.hashCode());
 		result = prime * result + ((productFamily == null) ? 0 : productFamily.hashCode());
 		result = prime * result + retryCounter;
 		result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+		result = prime * result + ((missionId == null) ? 0 : missionId.hashCode());
+		result = prime * result + ((additionalFields == null) ? 0 : additionalFields.hashCode());
+		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
+		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
+		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
 		return result;
 	}
 
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -222,21 +245,6 @@ public abstract class AbstractMessage {
 		if (debug != other.debug)
 			return false;
 		if (demandType != other.demandType)
-			return false;
-		if (extraParameter1 == null) {
-			if (other.extraParameter1 != null)
-				return false;
-		} else if (!extraParameter1.equals(other.extraParameter1))
-			return false;
-		if (extraParameter2 == null) {
-			if (other.extraParameter2 != null)
-				return false;
-		} else if (!extraParameter2.equals(other.extraParameter2))
-			return false;
-		if (extraParameter3 == null) {
-			if (other.extraParameter3 != null)
-				return false;
-		} else if (!extraParameter3.equals(other.extraParameter3))
 			return false;
 		if (podName == null) {
 			if (other.podName != null)
@@ -262,6 +270,32 @@ public abstract class AbstractMessage {
 				return false;
 		} else if (!uid.equals(other.uid))
 			return false;
+		if (timeliness == null) {
+			if (other.timeliness != null)
+				return false;
+		} else if (!timeliness.equals(other.timeliness))
+			return false;
+		if (additionalFields == null) {
+			if (other.additionalFields != null)
+				return false;
+		} else if (!additionalFields.equals(other.additionalFields))
+			return false;
+		if (metadata == null) {
+			if (other.metadata != null)
+				return false;
+		} else if (!metadata.equals(other.metadata))
+			return false;
+		if (missionId == null) {
+			if (other.missionId != null)
+				return false;
+		} else if (!missionId.equals(other.missionId))
+			return false;
+		if (satelliteId == null) {
+			if (other.satelliteId != null)
+				return false;
+		} else if (!satelliteId.equals(other.satelliteId))
+			return false;
+		
 		return true;
 	}
 
@@ -270,8 +304,7 @@ public abstract class AbstractMessage {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
 				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
-				+ retryCounter + ", debug=" + debug + ", extraParameter1=" + extraParameter1 + ", extraParameter2="
-				+ extraParameter2 + ", extraParameter3=" + extraParameter3 + "]";
+				+ retryCounter + ", debug=" + debug + "]";
 	}
 
 }
