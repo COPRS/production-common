@@ -23,7 +23,7 @@ runs:
   
   - name: Extract image tag name
     shell: bash
-    run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+    run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF_NAME} | rev | cut -d / -f 1 | rev)"
     id: extract_branch
       
   - name: Set up JDK 11
