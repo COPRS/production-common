@@ -11,10 +11,8 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
@@ -30,7 +28,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 
-@Service
 public class EvictionManagementService {
 	
 	private static final Logger LOG = LogManager.getLogger(EvictionManagementService.class);
@@ -39,7 +36,6 @@ public class EvictionManagementService {
 	private final EvictionUpdater evictionUpdater;
 	private final ObsClient obsClient;
 	
-	@Autowired
 	public EvictionManagementService(final DataLifecycleMetadataRepository metadataRepo, final ObsClient obsClient) {
 		this.metadataRepo = metadataRepo;
 		this.obsClient = obsClient;
