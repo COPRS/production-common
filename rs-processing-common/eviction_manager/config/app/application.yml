@@ -28,7 +28,7 @@ server:
   port: {{ .Values.service.port }}
 
 eviction-management-worker:
-  eviction-interval-ms: 600000
+  eviction-interval-ms: 60000
   
 # Generated from obs-stream-parameters.properties  
 obs:
