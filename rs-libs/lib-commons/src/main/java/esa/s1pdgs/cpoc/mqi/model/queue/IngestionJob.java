@@ -35,8 +35,6 @@ public class IngestionJob extends AbstractMessage {
 
 	private long productSizeByte = 0L;
 
-	private String missionId;
-
 	private String stationName;
 
 	private String mode;
@@ -112,14 +110,6 @@ public class IngestionJob extends AbstractMessage {
 		this.lastModified = lastModified;
 	}
 
-	public String getMissionId() {
-		return missionId;
-	}
-
-	public void setMissionId(String missionId) {
-		this.missionId = missionId;
-	}
-
 	public String getStationName() {
 		return stationName;
 	}
@@ -165,7 +155,7 @@ public class IngestionJob extends AbstractMessage {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + Objects.hash(additionalMetadata, inboxType, mode, pickupBaseURL, productName,
-				productSizeByte, lastModified, relativePath, missionId, stationName, timeliness);
+				productSizeByte, lastModified, relativePath, stationName, timeliness);
 		return result;
 	}
 
@@ -183,8 +173,8 @@ public class IngestionJob extends AbstractMessage {
 				&& Objects.equals(inboxType, other.inboxType) && Objects.equals(mode, other.mode)
 				&& Objects.equals(pickupBaseURL, other.pickupBaseURL) && Objects.equals(productName, other.productName)
 				&& productSizeByte == other.productSizeByte && Objects.equals(lastModified, other.lastModified)
-				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(missionId, other.missionId)
-				&& Objects.equals(stationName, other.stationName) && Objects.equals(timeliness, other.timeliness);
+				&& Objects.equals(relativePath, other.relativePath) && Objects.equals(stationName, other.stationName)
+				&& Objects.equals(timeliness, other.timeliness);
 	}
 
 	@Override
@@ -193,8 +183,8 @@ public class IngestionJob extends AbstractMessage {
 				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
 				+ ", relativePath=" + relativePath + ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName
 				+ ", uid=" + uid + ", productSizeByte=" + productSizeByte + ", lastModified=" + lastModified
-				+ ", missionId=" + missionId + ", stationName=" + stationName + ", mode=" + mode + ", timeliness="
-				+ timeliness + ", inboxType=" + inboxType + ", additionalMetadata=" + additionalMetadata + "]";
+				+ ", stationName=" + stationName + ", mode=" + mode + ", timeliness=" + timeliness + ", inboxType="
+				+ inboxType + ", additionalMetadata=" + additionalMetadata + "]";
 	}
 
 }

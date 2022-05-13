@@ -92,8 +92,11 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 
 		CompressionEvent result = new CompressionEvent(
 				CompressionEventUtil.composeCompressedProductFamily(event.getProductFamily()),
-				CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage()),
-				CompressionDirection.COMPRESS);
+				CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage()));
+		result.setMissionId(event.getMissionId());
+		result.setSatelliteId(event.getSatelliteId());
+		result.setUid(report.getUid());
+		result.setStoragePath(obsClient.getAbsoluteStoragePath(event.getProductFamily(), event.getKeyObjectStorage()));
 
 		return MessageBuilder.withPayload(result).build();
 	}

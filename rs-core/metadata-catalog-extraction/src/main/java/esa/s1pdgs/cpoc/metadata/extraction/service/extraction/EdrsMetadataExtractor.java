@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONObject;
 
@@ -57,7 +58,11 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 
 	private Map<String, String> additionalMetadataFor(final CatalogJob catJob) {
 		final Map<String, String> additionalMetadata = new LinkedHashMap<>();
-		additionalMetadata.putAll(catJob.getAdditionalMetadata());
+		for (Entry<String, Object> entry : catJob.getMetadata().entrySet()) {
+			if (entry.getValue() != null) {
+				additionalMetadata.put(entry.getKey(), entry.getValue().toString());
+			}
+		}
 
 		// S1OPS-971: This is a workaround to keep the old requests working: Only if
 		// additionalMetadata
@@ -65,7 +70,7 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 		// Once all metadata path based extraction is moved to ingestion trigger and
 		// there are no
 		// old requests within the system, this conditional check can be removed.
-		if (additionalMetadata.isEmpty()) {
+		if (additionalMetadata.get(CatalogJob.ADDITIONAL_METADATA_FLAG_KEY) == null) {
 			for (final Map.Entry<String, String> entry : pathExtractor.metadataFrom(catJob.getRelativePath())
 					.entrySet()) {
 				additionalMetadata.put(entry.getKey(), entry.getValue());

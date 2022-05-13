@@ -1,85 +1,43 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import java.util.Arrays;
-import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class CatalogEvent extends AbstractMessage {
-	private String productName;
-	private String productType;
-	private Map<String, Object> metadata;
+	private static final String PRODUCT_NAME_KEY = "productName";
+	private static final String PRODUCT_TYPE_KEY = "productType";
 
 	public CatalogEvent() {
 		super();
 		setAllowedActions(Arrays.asList(AllowedAction.RESUBMIT));
 	}
 
+	@JsonIgnore
 	public String getProductName() {
-		return productName;
+		return metadata.getOrDefault(PRODUCT_NAME_KEY, "").toString();
 	}
 
 	public void setProductName(final String productName) {
-		this.productName = productName;
+		this.metadata.put(PRODUCT_NAME_KEY, productName);
 	}
 
+	@JsonIgnore
 	public String getProductType() {
-		return productType;
+		return metadata.getOrDefault(PRODUCT_TYPE_KEY, "").toString();
 	}
 
 	public void setProductType(final String productType) {
-		this.productType = productType;
-	}
-
-	public Map<String, Object> getMetadata() {
-		return metadata;
-	}
-
-	public void setMetadata(final Map<String, Object> metadata) {
-		this.metadata = metadata;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
-		result = prime * result + ((productName == null) ? 0 : productName.hashCode());
-		result = prime * result + ((productType == null) ? 0 : productType.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		CatalogEvent other = (CatalogEvent) obj;
-		if (metadata == null) {
-			if (other.metadata != null)
-				return false;
-		} else if (!metadata.equals(other.metadata))
-			return false;
-		if (productName == null) {
-			if (other.productName != null)
-				return false;
-		} else if (!productName.equals(other.productName))
-			return false;
-		if (productType == null) {
-			if (other.productType != null)
-				return false;
-		} else if (!productType.equals(other.productType))
-			return false;
-		return true;
+		this.metadata.put(PRODUCT_TYPE_KEY, productType);
 	}
 
 	@Override
 	public String toString() {
-		return "CatalogEvent [productName=" + productName + ", productType=" + productType + ", metadata=" + metadata
-				+ ", productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", storagePath="
-				+ storagePath + ", creationDate=" + creationDate + ", podName=" + podName + ", uid=" + uid + "]";
+		return "CatalogEvent [productName=" + metadata.get(PRODUCT_NAME_KEY) + ", productType="
+				+ metadata.get(PRODUCT_TYPE_KEY) + ", metadata=" + metadata + ", productFamily=" + productFamily
+				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", creationDate="
+				+ creationDate + ", podName=" + podName + ", uid=" + uid + "]";
 	}
 }

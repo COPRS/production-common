@@ -7,7 +7,9 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +85,8 @@ public class TestProductServiceImpl {
 		ingestionJob.setProductName("productName");
 		ingestionJob.setCreationDate(new Date());
 		ingestionJob.setPodName("hostname");
+		Map<String, String> metadata = new HashMap<>();
+		metadata.put("test", "test");
 		final Product<CatalogJob> product = new Product<>();
 		product.setFamily(family);
 		final CatalogJob expectedProductionEvent = new CatalogJob();
@@ -91,6 +95,7 @@ public class TestProductServiceImpl {
 		expectedProductionEvent.setProductFamily(family);
 		expectedProductionEvent.setPodName("hostname");
 		expectedProductionEvent.setCreationDate(new Date());
+		expectedProductionEvent.getMetadata().put("test", "test");
 		product.setDto(expectedProductionEvent);
 		final List<Product<CatalogJob>> expectedResult = Arrays.asList(product);
 		final List<Product<CatalogJob>> actualResult = uut.ingest(family, inboxAdapter, ingestionJob, ReportingFactory.NULL);
