@@ -18,6 +18,7 @@ public class SchedulingConfiguration {
 	@Autowired
 	private DataLifecycleMetadataRepository metadataRepo;
 	
+	@Autowired
 	private ObsClient obsClient;
 	
 	@Bean
