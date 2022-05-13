@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -21,7 +20,6 @@ import esa.s1pdgs.cpoc.compression.worker.file.FileUploader;
 import esa.s1pdgs.cpoc.compression.worker.process.CompressExecutorCallable;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -30,7 +28,6 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
-@Service
 public class CompressProcessor extends AbstractProcessor implements Function<CatalogEvent, Message<CompressionEvent>> {
 	private static final Logger LOGGER = LogManager.getLogger(CompressProcessor.class);
 
