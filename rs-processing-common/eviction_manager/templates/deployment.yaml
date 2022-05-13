@@ -56,12 +56,12 @@ spec:
           value: {{ .Values.resources.javaOpts.xms }}
         - name: JAVA_XMX
           value: {{ .Values.resources.javaOpts.xmx }}
-        - name: storage_user_id
+        - name: OBS_USERNAME
           valueFrom:
             secretKeyRef:
               name: obs
               key: USER_ID
-        - name: storage_user_secret
+        - name: OBS_PASSWORD
           valueFrom:
             secretKeyRef:
               name: obs
