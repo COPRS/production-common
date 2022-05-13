@@ -14,8 +14,6 @@ process:
 server:
   port: {{ .Values.service.port }}
 
-# Eviction Management Worker config
 eviction-management-worker:
-  # Hostname
-  hostname: ${HOSTNAME}
+  eviction-interval-ms: 600000
 
