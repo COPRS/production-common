@@ -67,6 +67,8 @@ spec:
               name: obs
               key: USER_SECRET
 #        envFrom:
+        securityContext:
+          privileged: false
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness

@@ -4,7 +4,11 @@
 service:
   name: eviction-manager
   port: 8080
-  
+
+replicaCount: 1
+logLevel: ${logLevel:DEBUG}
+logConfig: ${logConfig:log/log4j2.yml}
+
 processing:
   namespace: processing
   
@@ -19,6 +23,8 @@ image:
   
   name: rs-core-eviction-management-worker
   tag: develop
+  
+  imagePullSecrets: artifactory
 
 resources:
   cpu:
