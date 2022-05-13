@@ -18,6 +18,8 @@ elasticsearch:
   connect-timeout-ms: {{ .Values.elasticsearch.timeout.connection }}
   # Timeout in milliseconds of the socket to the cluster                        
   socket-timeout-ms: {{ .Values.elasticsearch.timeout.socket }}
+  # limitation of Elastic search results
+  search-result-limit: {{ .Values.elasticsearch.searchResultLimit }}
 
 process:
   hostname: ${HOSTNAME}                                          # Hostname

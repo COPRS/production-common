@@ -18,6 +18,7 @@ elasticsearch:
   timeout:
     connection: 2000
     socket: 10000
+  searchResultLimit: 1000
   
 worker:
   label:
