@@ -43,7 +43,7 @@ spec:
             memory: {{ .Values.resources.ram.limit }}
             cpu: {{ .Values.resources.cpu.limit }}
         volumeMounts:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           mountPath: /app/log
         - name: service-config-volume
           mountPath: /app/config
@@ -66,18 +66,10 @@ spec:
             secretKeyRef:
               name: obs
               key: USER_SECRET
-        envFrom:
-        - configMapRef:
-            name: s1pdgs-config
-        - configMapRef:
-            name: s1pdgs-logging-config
-        - configMapRef:
-            name: s1pdgs-env
-        securityContext:
-          privileged: false
+#        envFrom:
         livenessProbe:
           httpGet:
-            path: /app/status
+            path: /actuator/health/liveness
             port: {{ .Values.service.port }}
           initialDelaySeconds: 30
           periodSeconds: 30
@@ -91,9 +83,9 @@ spec:
       securityContext: {}
       schedulerName: default-scheduler
       volumes:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           configMap:
-            name: s1pdgs-logging-config
+            name: {{ .Release.Name }}-logging-config
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
