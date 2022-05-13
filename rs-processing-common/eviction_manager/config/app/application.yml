@@ -6,7 +6,18 @@ spring:
  
 # Logging
 logging:
-  config: ${log4j_config:log/log4j2.yml}
+  config: {{ .Values.logConfig }}
+  
+# Elastic Search
+elasticsearch:
+  # Host of Elasticsearch cluster
+  host: {{ .Values.elasticsearch.host }}
+  # Port of Elasticsearch cluster                                
+  port: {{ .Values.elasticsearch.port }}
+  # Timeout in milliseconds of connection to the cluster                                        
+  connect-timeout-ms: {{ .Values.elasticsearch.timeout.connection }}
+  # Timeout in milliseconds of the socket to the cluster                        
+  socket-timeout-ms: {{ .Values.elasticsearch.timeout.socket }}
 
 process:
   hostname: ${HOSTNAME}                                          # Hostname
