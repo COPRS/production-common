@@ -48,7 +48,7 @@ public class CatalogEventService implements Consumer<CatalogEvent> {
 				new ReportingMessage("Handling event for %s", catalogEvent.getKeyObjectStorage()));
 		
 		try {
-			updater.updateMetadata(catalogEvent);
+			updater.updateMetadata(catalogEvent, catalogEvent.getProductType());
 		} catch (DataLifecycleMetadataRepositoryException | InterruptedException e) {
 			LOG.error(e);
 			reporting.error(new ReportingMessage("Error handling event for %s: on %s -> %s", catalogEvent.getKeyObjectStorage(),
