@@ -75,17 +75,6 @@
 
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-app-status</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-mqi-client</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-error-repo-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -120,11 +109,6 @@
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
         </dependency>
-        
-        <dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>elasticsearch-rest-high-level-client</artifactId>
-		</dependency>
 
         <dependency>
 			<groupId>org.openapi4j</groupId>
