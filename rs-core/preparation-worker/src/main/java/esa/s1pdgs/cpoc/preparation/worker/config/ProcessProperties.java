@@ -1,8 +1,12 @@
 package esa.s1pdgs.cpoc.preparation.worker.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 
 /**
@@ -28,6 +32,11 @@ public class ProcessProperties {
      * Process level
      */
     private ApplicationLevel level;
+    
+    /**
+     * Process level
+     */
+    private ApplicationMode mode;
 
     /**
      * Hostname
@@ -53,6 +62,42 @@ public class ProcessProperties {
     private long initialDelayMs;
     
 	private ProductCategory category;
+	
+	/**
+     * Log level for the sdtout
+     */
+    private String loglevelstdout;
+
+    /**
+     * Log level for the stderr
+     */
+    private String loglevelstderr;
+
+    /**
+     * Processing station
+     */
+    private String processingstation;
+
+    /**
+     * Processing dynamic parameters: key = parameter name, value = parameter
+     * value
+     */
+    private Map<String, String> params;
+
+    /**
+     * Regular expression: key = output file type, value = regular expression to
+     * use for file name.<br/>
+     * This is used to customize the way to match the outputs in the job
+     */
+    private Map<String, String> outputregexps = new HashMap<>();
+    
+	/**
+	 * processing group to identify AppDataJobs in the JobGenerator. Is used
+	 * additionally to the tasktableName to determine if a job is suitable for the
+	 * generator. Needed if two separate Preparation Worker use the same TaskTable
+	 * with different settings (ex. timeliness)
+	 */
+	private String processingGroup;
 
     public ApplicationLevel getLevel() {
         return level;
@@ -140,5 +185,61 @@ public class ProcessProperties {
 
 	public void setProductType(final String productType) {
 		this.productType = productType;
+	}
+
+	public ApplicationMode getMode() {
+		return mode;
+	}
+
+	public void setMode(ApplicationMode mode) {
+		this.mode = mode;
+	}
+
+	public String getLoglevelstdout() {
+		return loglevelstdout;
+	}
+
+	public void setLoglevelstdout(String loglevelstdout) {
+		this.loglevelstdout = loglevelstdout;
+	}
+
+	public String getLoglevelstderr() {
+		return loglevelstderr;
+	}
+
+	public void setLoglevelstderr(String loglevelstderr) {
+		this.loglevelstderr = loglevelstderr;
+	}
+
+	public String getProcessingstation() {
+		return processingstation;
+	}
+
+	public void setProcessingstation(String processingstation) {
+		this.processingstation = processingstation;
+	}
+
+	public Map<String, String> getParams() {
+		return params;
+	}
+
+	public void setParams(Map<String, String> params) {
+		this.params = params;
+	}
+
+	public Map<String, String> getOutputregexps() {
+		return outputregexps;
+	}
+
+	public void setOutputregexps(Map<String, String> outputregexps) {
+		this.outputregexps = outputregexps;
+	}
+
+	public String getProcessingGroup() {
+		return processingGroup;
+	}
+
+	public void setProcessingGroup(String processingGroup) {
+		this.processingGroup = processingGroup;
 	}
 }

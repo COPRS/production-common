@@ -11,7 +11,6 @@ import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * Class used for exchanging applicative data of a job
@@ -58,9 +57,9 @@ public class AppDataJob {
     private Date lastUpdateDate;
 
     /**
-     * MQI messages linked to this job
+     * Catalog Events linked to this job
      */
-    private List<GenericMessageDto<CatalogEvent>> messages = new ArrayList<>();
+    private List<CatalogEvent> catalogEvents = new ArrayList<>();
 
     /**
      * Product of this job
@@ -85,7 +84,7 @@ public class AppDataJob {
     
     private UUID reportingId;
     
-    private GenericMessageDto<IpfPreparationJob> prepJobMessage;
+    private IpfPreparationJob prepJob;
     
     /**
 	 * Processing group to identify AppDataJobs in the JobGenerator. Is used
@@ -107,8 +106,7 @@ public class AppDataJob {
 		final AppDataJob job = new AppDataJob();
 		job.setLevel(prepJob.getLevel());
 		job.setPod(prepJob.getPodName());
-		job.getMessages().add(prepJob.getEventMessage());
-		job.setProduct(newProductFor(prepJob.getEventMessage()));
+		job.setProduct(newProductFor(prepJob.getCatalogEvent()));
 		job.setTaskTableName(prepJob.getTaskTableName());
 		job.setStartTime(prepJob.getStartTime());
 		job.setStopTime(prepJob.getStopTime());
@@ -116,8 +114,7 @@ public class AppDataJob {
 		return job;
 	}
 
-	private static AppDataJobProduct newProductFor(final GenericMessageDto<CatalogEvent> mqiMessage) {
-		final CatalogEvent event = mqiMessage.getBody();
+	private static AppDataJobProduct newProductFor(final CatalogEvent event) {
 		final AppDataJobProduct productDto = new AppDataJobProduct();
 
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(event);
@@ -143,7 +140,7 @@ public class AppDataJob {
      */
     public AppDataJob() {
         this.state = AppDataJobState.WAITING;
-        this.messages = new ArrayList<>();
+        this.catalogEvents = new ArrayList<>();
         this.generation = new AppDataJobGeneration();
     }
     
@@ -233,18 +230,18 @@ public class AppDataJob {
     }
 
     /**
-     * @return the messages
+     * @return the catalogEvents
      */
-    public List<GenericMessageDto<CatalogEvent>> getMessages() {
-        return messages;
+    public List<CatalogEvent> getCatalogEvents() {
+        return catalogEvents;
     }
 
     /**
-     * @param messages
-     *            the messages to set
+     * @param catalogEvents
+     *            the catalogEvents to set
      */
-    public void setMessages(final List<GenericMessageDto<CatalogEvent>> messages) {
-        this.messages = messages;
+    public void setCatalogEvents(final List<CatalogEvent> catalogEvents) {
+        this.catalogEvents = catalogEvents;
     }
 
     /**
@@ -341,12 +338,12 @@ public class AppDataJob {
 		this.productName = productName;
 	}
 
-	public GenericMessageDto<IpfPreparationJob> getPrepJobMessage() {
-		return prepJobMessage;
+	public IpfPreparationJob getPrepJob() {
+		return prepJob;
 	}
 
-	public void setPrepJobMessage(final GenericMessageDto<IpfPreparationJob> prepJobMessage) {
-		this.prepJobMessage = prepJobMessage;
+	public void setPrepJob(final IpfPreparationJob prepJob) {
+		this.prepJob = prepJob;
 	}
 	
 	public String getProcessingGroup() {
@@ -369,16 +366,16 @@ public class AppDataJob {
 	public String toString() {
 		return "AppDataJob [id=" + id + ", level=" + level + ", pod=" + pod + ", state=" + state + ", taskTableName="
 				+ taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime + ", productName=" + productName
-				+ ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", messages=" + messages
+				+ ", creationDate=" + creationDate + ", lastUpdateDate=" + lastUpdateDate + ", catalogEvents=" + catalogEvents
 				+ ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation=" + generation
-				+ ", reportingId=" + reportingId + ", prepJobMessage=" + prepJobMessage + ", processingGroup="
+				+ ", reportingId=" + reportingId + ", prepJob=" + prepJob + ", processingGroup="
 				+ processingGroup + ", timedOut=" + timedOut + ", preselectedInputs=" + preselectedInputs + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(additionalInputs, creationDate, generation, id, lastUpdateDate, level, messages, pod,
-				prepJobMessage, processingGroup, product, productName, reportingId, startTime, state, stopTime,
+		return Objects.hash(additionalInputs, creationDate, generation, id, lastUpdateDate, level, catalogEvents, pod,
+				prepJob, processingGroup, product, productName, reportingId, startTime, state, stopTime,
 				taskTableName,timedOut, preselectedInputs);
 	}
 
@@ -397,10 +394,10 @@ public class AppDataJob {
 				&& id == other.id 
 				&& Objects.equals(lastUpdateDate, other.lastUpdateDate) 
 				&& level == other.level
-				&& Objects.equals(messages, other.messages) 
+				&& Objects.equals(catalogEvents, other.catalogEvents) 
 				&& timedOut == other.timedOut
 				&& Objects.equals(pod, other.pod)
-				&& Objects.equals(prepJobMessage, other.prepJobMessage)
+				&& Objects.equals(prepJob, other.prepJob)
 				&& Objects.equals(processingGroup, other.processingGroup) 
 				&& Objects.equals(product, other.product)
 				&& Objects.equals(productName, other.productName) 
