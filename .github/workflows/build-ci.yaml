@@ -128,20 +128,20 @@ jobs:
           eviction-management-worker: 
             - 'rs-core/eviction-management-worker/**'
             - 'rs-core/pom.xml'
-#          data-request-worker: 
-#            - 'rs-core/data-request-worker/**'
-#            - 'rs-core/pom.xml'
           ddip-frontend: 
             - 'rs-core/ddip-frontend/**'
             - 'rs-core/pom.xml'
+          prip-frontend: 
+            - 'rs-core/prip-frontend/**'
+            - 'rs-core/pom.xml'
+#          data-request-worker: 
+#            - 'rs-core/data-request-worker/**'
+#            - 'rs-core/pom.xml'
 #          dissemination-trigger: 
 #            - 'rs-core/dissemination-trigger/**'
 #            - 'rs-core/pom.xml'
 #          dissemination-worker: 
 #            - 'rs-core/dissemination-worker/**'
-#            - 'rs-core/pom.xml'
-#          disseminator: 
-#            - 'rs-core/disseminator/**'
 #            - 'rs-core/pom.xml'
 #          ipf-execution-worker: 
 #            - 'rs-core/ipf-execution-worker/**'
@@ -155,17 +155,11 @@ jobs:
 #          on-demand-interface-provider: 
 #            - 'rs-core/on-demand-interface-provider/**'
 #            - 'rs-core/pom.xml'
-          prip-frontend: 
-            - 'rs-core/prip-frontend/**'
-            - 'rs-core/pom.xml'
 #          production-trigger: 
 #            - 'rs-core/production-trigger/**'
 #            - 'rs-core/pom.xml'
 #          request-repository: 
 #            - 'rs-core/request-repository/**'
-#            - 'rs-core/pom.xml'
-#          validation: 
-#            - 'rs-core/validation/**'
 #            - 'rs-core/pom.xml'
           
   gg-scan:
