@@ -394,8 +394,8 @@
 		<!-- <module>metadata-catalog-timer</module> -->
 		<module>metadata-catalog-searchcontroller</module>
 		<module>distribution-worker</module>
-		<!-- <module>prip-frontend</module> -->
-		<!-- <module>ddip-frontend</module> -->
+		<module>prip-frontend</module>
+		<module>ddip-frontend</module>
 		<module>native-api</module>
 		<module>data-lifecycle-worker</module>
 		<!-- <module>data-request-worker</module> -->
