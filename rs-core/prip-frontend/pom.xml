@@ -17,7 +17,7 @@
 		<project.build.finalName>s1pdgs-prip-frontend</project.build.finalName>
 		<project.artifactId>s1pdgs-prip-frontend</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.prip.frontend.Application</start-class>
-	</properties>
+	</properties> 
 
 	<dependencies>
 		<dependency>
