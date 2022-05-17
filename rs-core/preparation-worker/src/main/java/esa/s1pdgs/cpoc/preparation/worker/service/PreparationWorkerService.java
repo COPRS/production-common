@@ -23,7 +23,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.report.TaskTableLookupReportingOutput;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
@@ -130,14 +129,14 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 		final AppDataJob firstJob = jobsFromMessage.get(0);
 
 		final CatalogEvent firstEvent = firstJob.getCatalogEvents().get(0);
-		final Optional<List<AppDataJob>> jobForMess = appCatJobService.findJobsFor(firstEvent);
+		final List<AppDataJob> jobForMess = appCatJobService.findByCatalogEventsUid(firstEvent.getUid());
 
 		List<AppDataJob> dispatchedJobs = new ArrayList<>();
 
 		// there is already a job for this message --> possible restart scenario -->
 		// just update the pod name
-		if (jobForMess.isPresent() && getJobMatchingTasktable(jobForMess.get(), tasktableFilename) != null) {
-			final AppDataJob job = getJobMatchingTasktable(jobForMess.get(), tasktableFilename);
+		if (!jobForMess.isEmpty() && getJobMatchingTasktable(jobForMess, tasktableFilename) != null) {
+			final AppDataJob job = getJobMatchingTasktable(jobForMess, tasktableFilename);
 			LOGGER.warn("Found job {} already associated to catalogEvent {}. Ignoring new message ...", job.getId(),
 					firstEvent.getUid());
 		} else {
@@ -152,7 +151,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 					final AppDataJob existingJob = specificJob.get();
 					LOGGER.info("Found job {} already being handled. Appending new event {} ...", existingJob.getId(),
 							firstEvent.getUid());
-					appCatJobService.appendMessage(existingJob.getId(), firstEvent);
+					appCatJobService.appendCatalogEvent(existingJob.getId(), firstEvent);
 				} else {
 					LOGGER.debug("Persisting new job for preparation job {} (catalog event {}) ...", preparationJob.getUid(),
 							firstEvent.getUid());
@@ -170,7 +169,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 					job.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
 					job.setPod(processProperties.getHostname());
 
-					final AppDataJob newlyCreatedJob = appCatJobService.create(job);
+					final AppDataJob newlyCreatedJob = appCatJobService.newJob(job);
 					LOGGER.info("dispatched job {}", newlyCreatedJob.getId());
 					dispatchedJobs.add(newlyCreatedJob);
 				}

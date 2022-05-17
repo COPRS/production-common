@@ -297,6 +297,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter)
 			throws IpfPrepWorkerInputsMissingException {
 		// Check if timeout is reached -> start job with current input
+		// TODO: Remove timeout logic
+		/*
 		if (workerSettings.getWaitprimarycheck().getMaxTimelifeS() != 0) {
 			final long startTime = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
 			final long timeoutTime = startTime + (workerSettings.getWaitprimarycheck().getMaxTimelifeS() * 1000);
@@ -308,6 +310,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				return;
 			}
 		}
+		*/
 
 		// Extract a list of all inputs from the tasks
 		final List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
@@ -351,13 +354,13 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 		if (settings.isRangeSearchActiveForProductType(ttAdapter.taskTable().getProcessorName(), productType)) {
 			LOGGER.debug("Look for existing job for productType {} and tasktable {}", productType,
 					job.getTaskTableName());
-			final Optional<List<AppDataJob>> jobsInDatabase = appCat.findJobsForProductType(productType);
+			final List<AppDataJob> jobsInDatabase = appCat.findByProductType(productType);
 
-			if (jobsInDatabase.isPresent()) {
+			if (jobsInDatabase != null && !jobsInDatabase.isEmpty()) {
 				final TimeInterval newJobRange = new TimeInterval(DateUtils.parse(job.getStartTime()),
 						DateUtils.parse(job.getStopTime()));
 
-				for (final AppDataJob jobInDatabase : jobsInDatabase.get()) {
+				for (final AppDataJob jobInDatabase : jobsInDatabase) {
 					final TimeInterval databaseJobRange = new TimeInterval(
 							DateUtils.parse(jobInDatabase.getStartTime()),
 							DateUtils.parse(jobInDatabase.getStopTime()));

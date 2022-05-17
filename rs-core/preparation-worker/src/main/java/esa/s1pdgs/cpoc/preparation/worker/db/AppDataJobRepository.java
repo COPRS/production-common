@@ -26,8 +26,8 @@ public interface AppDataJobRepository extends MongoRepository<AppDataJob, Long> 
 	List<AppDataJob> findByGenerationStateAndGenerationNbErrorsGreaterThanEqual(
 			final AppDataJobGenerationState generationsState, final int nbErrors);
 
-	@Query(value = "{ 'messages._id' : ?0, 'state' : { $ne: 'TERMINATED' } }")
-	List<AppDataJob> findByMessagesId(final long messageId);
+	@Query(value = "{ 'catalogEvents.uid' : ?0, 'state' : { $ne: 'TERMINATED' } }")
+	List<AppDataJob> findByCatalogEventsUid(final String uid);
 
 	@Query(value = "{ 'product.metadata.dataTakeId' : ?0, 'product.metadata.productType' : { $ne: 'RF_RAW__0S' }, 'state' : { $ne: 'TERMINATED' } }")
 	List<AppDataJob> findByProductDataTakeId_NonRfc(final String dataTakeId);

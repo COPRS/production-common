@@ -54,7 +54,13 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	@Override
 	public final Optional<AppDataJob> findAssociatedJobFor(final AppCatJobService appCat,
 			final CatalogEventAdapter catEvent, final AppDataJob job) throws AbstractCodedException {
-		return appCat.findJobForSession(catEvent.sessionId());
+		List<AppDataJob> result = appCat.findByProductSessionId(catEvent.sessionId());
+		
+		if (result == null || result.isEmpty()) {
+			LOGGER.debug("No AppDataJob found for {}", "session" + catEvent.sessionId());
+			return Optional.empty();
+		}
+		return Optional.of(result.get(0));
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.AspProperties;
+import esa.s1pdgs.cpoc.preparation.worker.config.type.AspProperties;
 
 /**
  * Properties adapter for L0ASP segments.

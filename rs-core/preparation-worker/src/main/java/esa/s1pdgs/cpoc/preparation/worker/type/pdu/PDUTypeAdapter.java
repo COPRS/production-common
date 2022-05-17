@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.preparation.worker.type.pdu;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +23,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingExcept
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.time.TimeInterval;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ipf.preparation.worker.config.PDUSettings.PDUTypeSettings;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -118,10 +116,10 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 			// For DUMP based STRIPE PDUs check if there already is a job for this interval
 			if (typeSettings.getType() == PDUType.STRIPE && typeSettings.getReference() == PDUReferencePoint.DUMP) {
-				Optional<List<AppDataJob>> productTypeJobs = appCat.findJobsForProductType(catEvent.productType());
+				List<AppDataJob> productTypeJobs = appCat.findByProductType(catEvent.productType());
 
-				if (productTypeJobs.isPresent()) {
-					for (AppDataJob databaseJob : productTypeJobs.get()) {
+				if (productTypeJobs != null && !productTypeJobs.isEmpty()) {
+					for (AppDataJob databaseJob : productTypeJobs) {
 						// Only check start time, because the stop time may have been adjusted already
 						if (databaseJob.getTaskTableName().equals(job.getTaskTableName())
 								&& databaseJob.getStartTime().equals(job.getStartTime())) {
@@ -219,6 +217,8 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter)
 			throws IpfPrepWorkerInputsMissingException {
 		// Check if timeout is reached -> start job with current input
+		// TODO: Remove Timeout logic
+		/*
 		if (workerSettings.getWaitprimarycheck().getMaxTimelifeS() != 0) {
 			final long startTime = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
 			final long timeoutTime = startTime + (workerSettings.getWaitprimarycheck().getMaxTimelifeS() * 1000);
@@ -231,6 +231,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 				return;
 			}
 		}
+		*/
 
 		// Extract a list of all inputs from the tasks
 		final List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
