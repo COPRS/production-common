@@ -22,7 +22,7 @@ RUN ln -s /usr/local/conf/IPFSimulator/bin/Processor_wrapper.sh S3IPF.sh
 
 # link task table binaries
 # rsync required for ipf-sim-for-tc25
-RUN apk add rsync
+RUN apt-get install rsync -y
 
 ADD files/linkBin.sh /app/linkBin.sh
 RUN /app/linkBin.sh

@@ -1,6 +1,6 @@
 ARG BRANCH
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
-RUN apk add libxslt rpm wget
+RUN apt-get install xsltproc rpm wget -y 
 
 RUN mkdir -p /rpms && mkdir -p /data/localWD
 COPY S1PD-DYN-IPF-SIM-*.rpm /rpms/

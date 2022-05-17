@@ -23,8 +23,8 @@ COPY --from=build /app/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Add Tini as entry point
-RUN apk add --no-cache tini
-ENTRYPOINT ["/sbin/tini", "--"] 
+RUN apt-get install tini -y
+ENTRYPOINT ["/usr/bin/tini", "--"] 
 
 CMD ["/app/start.sh"]
  
