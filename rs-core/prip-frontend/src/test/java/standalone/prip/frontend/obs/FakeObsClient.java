@@ -130,6 +130,12 @@ public class FakeObsClient implements ObsClient {
 	@Override
 	public void delete(ObsObject object) throws ObsException, ObsServiceException {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public String getAbsoluteStoragePath(ProductFamily family, String keyObs) {
+		// TODO Auto-generated method stub
+		return null;
 	}	
 
 }
