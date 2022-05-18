@@ -14,8 +14,8 @@ processing:
   
 metadata:
   host: rs-metadata-catalog-searchcontroller-svc:8080
-  rest-api_nb-retry: 3
-  rest-api_tempo-retry-ms: 1000 
+  restApiNbRetry: 3
+  restApiTempoRetryMs: 1000 
   
 elasticsearch:
   host: elasticsearch-master
