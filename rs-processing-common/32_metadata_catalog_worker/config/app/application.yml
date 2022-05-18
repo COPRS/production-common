@@ -43,7 +43,7 @@ process:
     safe: manifest.safe
   # Hostname                               
   hostname: ${HOSTNAME}
-  numObsDownloadRetries: 99
+  numObsDownloadRetries: 10
   sleepBetweenObsRetriesMillis: 3000
 
 # Message queue interface
