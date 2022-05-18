@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -29,6 +31,10 @@ public class ElasticsearchDAO {
 		return this.restHighLevelClient.get(getRequest, RequestOptions.DEFAULT);
 	}
 	
+	public DeleteResponse delete(DeleteRequest deleteRequest) throws IOException {
+		return this.restHighLevelClient.delete(deleteRequest, RequestOptions.DEFAULT);
+	}
+	
 	public IndexResponse index (IndexRequest request) throws IOException {
 		return this.restHighLevelClient.index(request, RequestOptions.DEFAULT);
 	}
@@ -40,5 +46,7 @@ public class ElasticsearchDAO {
 	public RefreshResponse refresh(RefreshRequest refreshRequest) throws IOException {
 		return this.restHighLevelClient.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
 	}
+	
+	
 
 }

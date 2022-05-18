@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
@@ -24,6 +25,7 @@ import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm.DataLifecycleSortOrder;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
@@ -35,13 +37,14 @@ public class EvictionManagementService {
 	private final DataLifecycleMetadataRepository metadataRepo;
 	private final EvictionUpdater evictionUpdater;
 	private final ObsClient obsClient;
+	private final MetadataClient metadataClient;
 	
-	public EvictionManagementService(final DataLifecycleMetadataRepository metadataRepo, final ObsClient obsClient) {
+	public EvictionManagementService(final DataLifecycleMetadataRepository metadataRepo, final ObsClient obsClient, final MetadataClient metadataClient) {
 		this.metadataRepo = metadataRepo;
 		this.obsClient = obsClient;
+		this.metadataClient = metadataClient;
 		this.evictionUpdater = new EvictionUpdater(metadataRepo);
 	}
-	
 	
 	@Scheduled(fixedRateString = "${eviction-management-worker.eviction-interval-ms}" )
 	public void evict() {
@@ -76,7 +79,7 @@ public class EvictionManagementService {
 				for (final DataLifecycleMetadata metadata : productsToDelete) {
 					try {
 						numEvictions += this.updateAndDelete(metadata, false, false);
-					} catch (final DataLifecycleTriggerInternalServerErrorException | ObsException | ObsServiceException e) {
+					} catch (final DataLifecycleTriggerInternalServerErrorException | ObsException | ObsServiceException | MetadataQueryException e) {
 						LOG.error("error on evicting product, will skip this one: " + e.getMessage());
 						errors.add(e);
 						continue;
@@ -108,7 +111,7 @@ public class EvictionManagementService {
 	
 	private int updateAndDelete(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed,
 			boolean forceUncompressed)
-			throws DataLifecycleTriggerInternalServerErrorException, ObsException, ObsServiceException {
+			throws DataLifecycleTriggerInternalServerErrorException, ObsException, ObsServiceException, MetadataQueryException {
 		int numEvicted = 0;
 		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
@@ -126,6 +129,10 @@ public class EvictionManagementService {
 			LOG.debug("eviction of product from uncompressed storage: " + dataLifecycleMetadata);
 			evictionUpdater.updateEvictedMetadata(pathInUncompressedStorage, productFamilyInUncompressedStorage);
 			obsClient.delete(new ObsObject(productFamilyInUncompressedStorage, pathInUncompressedStorage));
+			boolean metadataDeleted = metadataClient.deleteByFamilyAndProductName(productFamilyInUncompressedStorage, pathInUncompressedStorage);
+			if (!metadataDeleted) {
+				throw new DataLifecycleTriggerInternalServerErrorException("metadata not deleted for: " + dataLifecycleMetadata);
+			}
 			numEvicted++;
 			
 		} else {

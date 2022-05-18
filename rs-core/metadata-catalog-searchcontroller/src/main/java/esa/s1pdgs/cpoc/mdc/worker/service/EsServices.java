@@ -21,7 +21,10 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.search.TotalHits.Relation;
 import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -2023,6 +2026,35 @@ public class EsServices {
 			return 100;
 		} catch (final Exception e) {
 			throw new RuntimeException("Failed to check for sea coverage", e);
+		}
+	}
+	
+	public boolean deleteProduct(final ProductFamily family, final String productName) throws MetadataNotPresentException {
+		
+		final String index = getIndexForFilename(family, productName);
+		
+		GetResponse response;
+		try {
+			response = elasticsearchDAO.get(new GetRequest(index, productName));
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to check product exists " + productName, e);
+		}
+		
+		if (!response.isExists()) {
+			throw new MetadataNotPresentException(productName);
+		}
+		
+		DeleteResponse deleteResponse;
+		try {
+			deleteResponse = elasticsearchDAO.delete(new DeleteRequest(index, productName));
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to delete product " + productName, e);
+		}
+		
+		if (deleteResponse.getResult() == Result.DELETED) {
+			return true;
+		} else {			
+			return false;
 		}
 	}
 	

@@ -514,6 +514,54 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
+	
+	public boolean deleteByFamilyAndProductName(final ProductFamily family, final String productName)
+			throws MetadataQueryException {
+		
+		
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family
+				+ "/deleteProduct";
+		
+		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productName",
+				productName);
+
+		final String commandDescription = String.format("delete metadata with URI: %s", builder.build().toUri());
+
+		final ResponseEntity<Boolean> result = performWithRetries(commandDescription, () -> {
+			int notAvailableRetries = 10;
+			LOGGER.debug(commandDescription);
+			ResponseEntity<Boolean> response = this.restTemplate.exchange(builder.build().toUri(), HttpMethod.DELETE, null, Boolean.class);
+			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+				LOGGER.debug("Product not available yet. Waiting...");
+				try {
+					Thread.sleep(this.retryInMillis);
+				} catch (final InterruptedException e) {
+					throw new MetadataQueryException(e.getMessage(), e);
+				}
+				notAvailableRetries--;
+				LOGGER.debug("Retrying delete metadata of {}", uri);
+				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
+				if (notAvailableRetries <= 0) {
+					LOGGER.trace("Max number of retries reached for {}", productName);
+					break;
+				}
+			}
+			handleReturnValueErrors(uri, response);
+			return response;
+		});
+
+		if (result == null) {
+			throw new MetadataQueryException("No result for deleting metadata of " + productName);
+		}
+		final Boolean deleted = result.getBody();
+		if (deleted == null) {
+			throw new MetadataQueryException("No result body for deleting metadata of" + productName);
+		}
+		LOGGER.debug("Deleted {}", deleted);
+		return deleted;
+	}
+	
+	
 
 	/**
 	 */

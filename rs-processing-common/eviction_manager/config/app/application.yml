@@ -8,6 +8,12 @@ spring:
 logging:
   config: {{ .Values.logConfig }}
   
+# Metadata Search Controller
+metadata:
+  host: {{ .Values.metadata.host }}
+  rest-api_nb-retry: {{ .Values.metadata.rest-api_nb-retry }}
+  rest-api_tempo-retry-ms: {{ .Values.metadata.rest-api_tempo-retry-ms }}
+  
 # Elastic Search
 elasticsearch:
   # Host of Elasticsearch cluster

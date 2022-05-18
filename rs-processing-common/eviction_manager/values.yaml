@@ -12,6 +12,11 @@ logConfig: ${logConfig:log/log4j2.yml}
 processing:
   namespace: processing
   
+metadata:
+  host: rs-metadata-catalog-searchcontroller-svc:8080
+  rest-api_nb-retry: 3
+  rest-api_tempo-retry-ms: 1000 
+  
 elasticsearch:
   host: elasticsearch-master
   port: 9200

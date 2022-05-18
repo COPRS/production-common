@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.evictionmanagement.worker.service.EvictionManagementService;
+import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @ConditionalOnProperty(value = "scheduling.enable", havingValue="true", matchIfMissing = true)
@@ -21,9 +22,12 @@ public class SchedulingConfiguration {
 	@Autowired
 	private ObsClient obsClient;
 	
+	@Autowired
+	private MetadataClient metadataClient;
+	
 	@Bean
 	public EvictionManagementService evictionManagement() {
-		return new EvictionManagementService(metadataRepo, obsClient);
+		return new EvictionManagementService(metadataRepo, obsClient, metadataClient);
 		
 	}
 	
