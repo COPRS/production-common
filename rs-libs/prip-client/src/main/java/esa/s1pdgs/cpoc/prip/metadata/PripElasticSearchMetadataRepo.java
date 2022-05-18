@@ -43,6 +43,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.stereotype.Service;
@@ -79,7 +80,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	private final RestHighLevelClient restHighLevelClient;
 
 	@Autowired
-	public PripElasticSearchMetadataRepo(RestHighLevelClient restHighLevelClient,
+	public PripElasticSearchMetadataRepo(@Qualifier("pripEsClient") RestHighLevelClient restHighLevelClient,
 			@Value("${prip-client.repository.max-search-hits}") final int maxSearchHits) {
 		this.restHighLevelClient = restHighLevelClient;
 		this.maxSearchHits = maxSearchHits;

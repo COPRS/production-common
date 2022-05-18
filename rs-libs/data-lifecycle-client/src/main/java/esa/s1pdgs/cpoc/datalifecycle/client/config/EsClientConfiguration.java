@@ -33,7 +33,7 @@ public class EsClientConfiguration {
 	
 	// --------------------------------------------------------------------------
 	
-	@Bean(destroyMethod = "close")
+	@Bean(name = "dlmEsClient", destroyMethod = "close")
 	RestHighLevelClient restHighLevelClient() throws UnknownHostException {
 		final HttpHost host = new HttpHost(this.esHost, this.esPort, "http");
 		final RestClientBuilder builder = RestClient.builder(host)

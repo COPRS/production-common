@@ -51,6 +51,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
@@ -83,7 +84,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	// --------------------------------------------------------------------------
 
 	@Autowired
-	public DataLifecycleMetadataRepositoryImpl(EsClientConfiguration config, RestHighLevelClient elasticsearchClient) {
+	public DataLifecycleMetadataRepositoryImpl(EsClientConfiguration config, @Qualifier("dlmEsClient") RestHighLevelClient elasticsearchClient) {
 		this.config = config;
 		this.elasticsearchClient = elasticsearchClient;
 	}

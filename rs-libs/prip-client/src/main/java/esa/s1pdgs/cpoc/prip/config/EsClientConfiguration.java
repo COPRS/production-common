@@ -26,7 +26,7 @@ public class EsClientConfiguration {
 	@Value("${elasticsearch.socket-timeout-ms}")
     private int socketTimeoutMs;
 	
-	@Bean(destroyMethod = "close")
+	@Bean(name = "pripEsClient", destroyMethod = "close")
 	RestHighLevelClient restHighLevelClient() throws UnknownHostException {
 		HttpHost host1 = new HttpHost(esHost, esPort, "http");
 		RestClientBuilder builder = RestClient.builder(host1)
