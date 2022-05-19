@@ -34,7 +34,7 @@ public class EsClientConfiguration {
 	// --------------------------------------------------------------------------
 	
 	@Bean(name = "dlmEsClient", destroyMethod = "close")
-	RestHighLevelClient restHighLevelClientDlm() throws UnknownHostException {
+	RestHighLevelClient restHighLevelClient() throws UnknownHostException {
 		final HttpHost host = new HttpHost(this.esHost, this.esPort, "http");
 		final RestClientBuilder builder = RestClient.builder(host)
 				.setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
