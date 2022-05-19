@@ -16,6 +16,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.DocWriteResponse.Result;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -146,6 +149,32 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 		LOGGER.info("finding PRIP metadata successful");
 		return pripMetadata;
+	}
+	
+	@Override
+	public boolean deleteById(String id) {
+
+		LOGGER.info("delete PRIP metadata with id {}", id);
+
+		PripMetadata pripMetadata = findById(id);
+
+		if (pripMetadata == null) {
+			return false;
+		}
+
+		DeleteResponse deleteResponse;
+		try {
+			deleteResponse = this.restHighLevelClient.delete(new DeleteRequest(ES_INDEX, pripMetadata.getName()),
+					RequestOptions.DEFAULT);
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to delete product " + id, e);
+		}
+
+		if (deleteResponse.getResult() == Result.DELETED) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override

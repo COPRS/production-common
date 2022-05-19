@@ -25,6 +25,15 @@ public interface PripMetadataRepository {
 	 */
 	PripMetadata findById(String id);
 	
+	
+	/**
+	 * Deletes a PRIP metadata by its name. Returns true if succeeded.
+	 * 
+	 * @param id
+	 * @return
+	 */
+	boolean deleteById(String id);
+	
 	/**
 	 * Finds a PRIP metadata by its name. Returns null if not found.
 	 *

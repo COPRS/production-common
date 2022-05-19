@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 
 public class EvictionManagementService {
 	
@@ -38,11 +39,13 @@ public class EvictionManagementService {
 	private final EvictionUpdater evictionUpdater;
 	private final ObsClient obsClient;
 	private final MetadataClient metadataClient;
+	private final PripMetadataRepository pripMetadataRepo;
 	
-	public EvictionManagementService(final DataLifecycleMetadataRepository metadataRepo, final ObsClient obsClient, final MetadataClient metadataClient) {
+	public EvictionManagementService(final DataLifecycleMetadataRepository metadataRepo, final ObsClient obsClient, final MetadataClient metadataClient, final PripMetadataRepository pripMetadataRepo) {
 		this.metadataRepo = metadataRepo;
 		this.obsClient = obsClient;
 		this.metadataClient = metadataClient;
+		this.pripMetadataRepo = pripMetadataRepo;
 		this.evictionUpdater = new EvictionUpdater(metadataRepo);
 	}
 	
@@ -127,13 +130,14 @@ public class EvictionManagementService {
 						"error trigger eviction of product, no valid product family found for uncompressed storage for: " + dataLifecycleMetadata);
 			}
 			LOG.debug("eviction of product from uncompressed storage: " + dataLifecycleMetadata);
-			evictionUpdater.updateEvictedMetadata(pathInUncompressedStorage, productFamilyInUncompressedStorage);
 			obsClient.delete(new ObsObject(productFamilyInUncompressedStorage, pathInUncompressedStorage));
 			boolean metadataDeleted = metadataClient.deleteByFamilyAndProductName(productFamilyInUncompressedStorage, pathInUncompressedStorage);
-			if (!metadataDeleted) {
-				throw new DataLifecycleTriggerInternalServerErrorException("metadata not deleted for: " + dataLifecycleMetadata);
+			if (metadataDeleted) {
+				evictionUpdater.updateEvictedMetadata(pathInUncompressedStorage, productFamilyInUncompressedStorage);
+				numEvicted++;
+			} else {
+				LOG.warn("metadata not deleted for: " + pathInUncompressedStorage);
 			}
-			numEvicted++;
 			
 		} else {
 			LOG.debug("cannot evict product from uncompressed storage: " + dataLifecycleMetadata);
@@ -151,9 +155,14 @@ public class EvictionManagementService {
 						"error trigger evictiion of product, no valid product family found for compressed storage for: " + dataLifecycleMetadata);
 			}
 			LOG.debug("eviction of product from compressed storage: " + dataLifecycleMetadata);
-			evictionUpdater.updateEvictedMetadata(pathInCompressedStorage, productFamilyInCompressedStorage);
 			obsClient.delete(new ObsObject(productFamilyInCompressedStorage, pathInCompressedStorage));
-			numEvicted++;
+			boolean metadataDeleted = pripMetadataRepo.deleteById(pathInCompressedStorage);
+			if (metadataDeleted) {
+				evictionUpdater.updateEvictedMetadata(pathInCompressedStorage, productFamilyInCompressedStorage);
+				numEvicted++;
+			} else {
+				LOG.warn("metadata not deleted for: " + pathInCompressedStorage);
+			}
 		} else {
 			LOG.debug("cannot evict product from compressed storage: " + dataLifecycleMetadata);
 		}

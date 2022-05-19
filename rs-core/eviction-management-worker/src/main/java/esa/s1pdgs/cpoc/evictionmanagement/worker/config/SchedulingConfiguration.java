@@ -10,6 +10,7 @@ import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMeta
 import esa.s1pdgs.cpoc.evictionmanagement.worker.service.EvictionManagementService;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 
 @ConditionalOnProperty(value = "scheduling.enable", havingValue="true", matchIfMissing = true)
 @EnableScheduling
@@ -25,11 +26,13 @@ public class SchedulingConfiguration {
 	@Autowired
 	private MetadataClient metadataClient;
 	
+	@Autowired
+	private PripMetadataRepository pripMetadataRepo;
+	
 	@Bean
 	public EvictionManagementService evictionManagement() {
-		return new EvictionManagementService(metadataRepo, obsClient, metadataClient);
+		return new EvictionManagementService(metadataRepo, obsClient, metadataClient, pripMetadataRepo);
 		
 	}
-	
 
 }
