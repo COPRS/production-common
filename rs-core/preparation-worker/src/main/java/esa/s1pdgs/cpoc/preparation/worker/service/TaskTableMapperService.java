@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.preparation.worker.config.TaskTableMappingProperties;
 import esa.s1pdgs.cpoc.preparation.worker.report.DispatchReportInput;
 import esa.s1pdgs.cpoc.preparation.worker.report.L0EWSliceMaskCheckReportingOutput;
 import esa.s1pdgs.cpoc.preparation.worker.report.SeaCoverageCheckReportingOutput;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.TasktableMapper;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;

@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.preparation.worker.tasktable;
+package esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper;
 
 import java.util.ArrayList;
 import java.util.List;

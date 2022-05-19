@@ -10,10 +10,10 @@ import esa.s1pdgs.cpoc.preparation.worker.db.AppDataJobRepository;
 import esa.s1pdgs.cpoc.preparation.worker.db.SequenceDao;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
 import esa.s1pdgs.cpoc.preparation.worker.service.TaskTableMapperService;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.ConfigurableKeyEvaluator;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.RoutingBasedTasktableMapper;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.SingleTasktableMapper;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.TasktableMapper;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.ConfigurableKeyEvaluator;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.RoutingBasedTasktableMapper;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.SingleTasktableMapper;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
 
 @Configuration

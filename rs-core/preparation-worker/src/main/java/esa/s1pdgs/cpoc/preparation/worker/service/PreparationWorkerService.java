@@ -82,7 +82,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 
 		reporting.end(null, new ReportingMessage("End preparation of new execution jobs"));
 
-		return null;
+		return new ArrayList<>();
 	}
 
 	public final List<AppDataJob> dispatch(final IpfPreparationJob preparationJob) throws Exception {
