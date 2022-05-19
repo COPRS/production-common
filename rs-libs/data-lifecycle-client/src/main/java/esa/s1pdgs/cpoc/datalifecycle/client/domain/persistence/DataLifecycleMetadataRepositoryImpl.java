@@ -58,7 +58,7 @@ import org.springframework.stereotype.Repository;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.datalifecycle.client.config.EsClientConfiguration;
+import esa.s1pdgs.cpoc.datalifecycle.client.config.DlmEsClientConfiguration;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleSortTerm;
@@ -77,14 +77,14 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	private static final Logger LOG = LogManager.getLogger(DataLifecycleMetadataRepositoryImpl.class);
 
 	private final RestHighLevelClient elasticsearchClient;
-	private final EsClientConfiguration config;
+	private final DlmEsClientConfiguration config;
 	private String elasticsearchIndex;
 	private int searchResultLimit;
 
 	// --------------------------------------------------------------------------
 
 	@Autowired
-	public DataLifecycleMetadataRepositoryImpl(EsClientConfiguration config, @Qualifier("dlmEsClient") RestHighLevelClient elasticsearchClient) {
+	public DataLifecycleMetadataRepositoryImpl(DlmEsClientConfiguration config, @Qualifier("dlmEsClient") RestHighLevelClient elasticsearchClient) {
 		this.config = config;
 		this.elasticsearchClient = elasticsearchClient;
 	}

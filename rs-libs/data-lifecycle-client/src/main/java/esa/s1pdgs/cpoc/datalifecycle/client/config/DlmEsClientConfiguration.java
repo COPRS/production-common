@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class EsClientConfiguration {
+public class DlmEsClientConfiguration {
 
 	@Value("${elasticsearch.host}")
 	private String esHost;
@@ -40,8 +40,8 @@ public class EsClientConfiguration {
 				.setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
 					@Override
 					public RequestConfig.Builder customizeRequestConfig(RequestConfig.Builder requestConfigBuilder) {
-						return requestConfigBuilder.setConnectTimeout(EsClientConfiguration.this.connectTimeoutMs)
-								.setSocketTimeout(EsClientConfiguration.this.socketTimeoutMs);
+						return requestConfigBuilder.setConnectTimeout(DlmEsClientConfiguration.this.connectTimeoutMs)
+								.setSocketTimeout(DlmEsClientConfiguration.this.socketTimeoutMs);
 					}
 				});
 		
