@@ -57,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
 		);
 
 		// S1OPS-971: This is a workaround for MDC to allow access of additional metadata
-		if (null != ingestion.getAdditionalMetadata()) {
+		if (null != ingestion.getAdditionalMetadata() && !ingestion.getAdditionalMetadata().isEmpty()) {
 			dto.getMetadata().putAll(ingestion.getAdditionalMetadata());
 			dto.getMetadata().put(CatalogJob.ADDITIONAL_METADATA_FLAG_KEY, true);
 		}
