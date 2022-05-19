@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.ingestion.trigger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,24 +14,28 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.TestConfig;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-@TestPropertySource(properties = "scheduling.enable=false")
+@ComponentScan("esa.s1pdgs.cpoc")
+@Import(TestConfig.class)
+@PropertySource("classpath:stream-parameters--fs.properties")
 public class TestApplication {
 	@Autowired
 	private IngestionTriggerService service;
@@ -45,7 +50,7 @@ public class TestApplication {
 	private InboxEntryFactory factory;
 
 	@Test
-	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntriesForInboxStation() throws URISyntaxException {
+	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntriesForInboxStation() throws URISyntaxException {	
 		final InboxConfiguration edrsInboxConf = props.getPolling().get("testApplicationInboxForEDRS");
 		final URI inboxURL = new URI(edrsInboxConf.getDirectory());
 		final Path inboxPath = Paths.get(inboxURL.getPath());
@@ -79,9 +84,8 @@ public class TestApplication {
 		repo.save(edrsEntry);
 		repo.save(auxEntry);
 		assertEquals(2, repo.findAll().size());
-
 		List<IngestionJob> jobs = service.get();
-		assertEquals(null, jobs); // is null when no new job has been created
+		assertNull(jobs); // is null when no new job has been created
 
 		final List<InboxEntry> inboxEntries = repo.findAll();
 		assertEquals(1, inboxEntries.size());
