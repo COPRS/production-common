@@ -27,7 +27,7 @@ public class EsClientConfiguration {
     private int socketTimeoutMs;
 	
 	@Bean(name = "pripEsClient", destroyMethod = "close")
-	RestHighLevelClient restHighLevelClient() throws UnknownHostException {
+	RestHighLevelClient restHighLevelClientPrip() throws UnknownHostException {
 		HttpHost host1 = new HttpHost(esHost, esPort, "http");
 		RestClientBuilder builder = RestClient.builder(host1)
 		        .setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
