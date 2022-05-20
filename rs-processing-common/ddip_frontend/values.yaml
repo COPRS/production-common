@@ -24,7 +24,7 @@ image:
   name: rs-core-ddip-frontend
   tag: develop
   
-  imagePullSecrets: artifactory
+  imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
   
 ddip:
   dispatch:

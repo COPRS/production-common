@@ -19,7 +19,7 @@ image:
   name: rs-user-web-client
   tag: develop
   
-  imagePullSecrets: artifactory
+  imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
 
   # use image from local computer
   #repository: rs-user-client

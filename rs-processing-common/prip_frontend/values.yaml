@@ -31,7 +31,7 @@ image:
   name: rs-core-prip-frontend
   tag: develop
   
-  imagePullSecrets: artifactory
+  imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
   
 prip:
   debug: false

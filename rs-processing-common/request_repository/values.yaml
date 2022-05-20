@@ -25,7 +25,7 @@ image:
   name: rs-core-request-repository
   tag: develop
   
-  imagePullSecrets: artifactory
+  imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
 
 request_repository:
   cpu:

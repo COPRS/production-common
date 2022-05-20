@@ -31,7 +31,7 @@ image:
   name: rs-core-metadata-catalog-searchcontroller
   tag: develop
   
-  imagePullSecrets: artifactory
+  imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
   
 
 resources:
