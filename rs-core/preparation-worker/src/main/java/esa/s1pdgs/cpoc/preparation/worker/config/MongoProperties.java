@@ -1,10 +1,14 @@
 package esa.s1pdgs.cpoc.preparation.worker.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for the mongodb connection
  */
+@Component
+@Validated
 @ConfigurationProperties(prefix = "mongodb")
 public class MongoProperties {
 
@@ -14,9 +18,9 @@ public class MongoProperties {
     
     private String database;
 
-    private String username;
-
-    private String password;
+    private String username = "";
+    
+    private String password = "";
     
     private int connectTimeoutMs = 60000;
 

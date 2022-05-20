@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
@@ -18,7 +17,6 @@ import esa.s1pdgs.cpoc.preparation.worker.db.SequenceDao;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.AppCatJobUpdateFailedException;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.AppCatalogJobNotFoundException;
 
-@Service
 public class AppCatJobService {
 
 	private static final Logger LOGGER = LogManager.getLogger(AppCatJobService.class);

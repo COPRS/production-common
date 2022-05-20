@@ -8,11 +8,17 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.preparation.worker.model.ProductMode;
 
+@Component
+@Validated
+@ConfigurationProperties(prefix = "worker")
 public class PreparationWorkerProperties {
 	
 	/**

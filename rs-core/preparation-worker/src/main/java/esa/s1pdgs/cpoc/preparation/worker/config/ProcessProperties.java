@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
@@ -14,6 +16,8 @@ import esa.s1pdgs.cpoc.common.ProductCategory;
  * 
  * @author Cyrielle Gailliard
  */
+@Component
+@Validated
 @ConfigurationProperties(prefix = "process")
 public class ProcessProperties {
 

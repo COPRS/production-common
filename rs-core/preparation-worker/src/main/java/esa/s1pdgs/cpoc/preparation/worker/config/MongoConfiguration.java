@@ -47,7 +47,7 @@ public class MongoConfiguration {
 		LOG.info("Creating mongo client for hosts {} to database {}", hosts, mongoProperties.getDatabase());
 		return MongoClients
 				.create(format("mongodb://%s%s/%s?uuidRepresentation=STANDARD&connectTimeoutMS=%s&socketTimeoutMS=%s",
-						credentials, hosts, mongoProperties.getDatabase(), mongoProperties.getConnectTimeoutMs(),
+						credentials, stringJoinerHosts, mongoProperties.getDatabase(), mongoProperties.getConnectTimeoutMs(),
 						mongoProperties.getSocketTimeoutMS()));
 	}
 

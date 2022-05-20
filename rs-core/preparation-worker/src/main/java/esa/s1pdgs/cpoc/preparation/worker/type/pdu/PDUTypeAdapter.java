@@ -35,9 +35,9 @@ import esa.s1pdgs.cpoc.preparation.worker.config.type.PDUProperties.PDUTypePrope
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
 import esa.s1pdgs.cpoc.preparation.worker.model.pdu.PDUReferencePoint;
 import esa.s1pdgs.cpoc.preparation.worker.model.pdu.PDUType;
-import esa.s1pdgs.cpoc.preparation.worker.model.tasktable.ElementMapper;
-import esa.s1pdgs.cpoc.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.preparation.worker.type.pdu.generator.PDUGenerator;

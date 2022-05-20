@@ -14,8 +14,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.TimedOutException;
-import esa.s1pdgs.cpoc.preparation.worker.model.tasktable.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 
 public interface ProductTypeAdapter {	

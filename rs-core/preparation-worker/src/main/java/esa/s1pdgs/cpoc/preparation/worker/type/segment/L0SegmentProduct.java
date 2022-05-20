@@ -17,7 +17,7 @@ import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.AbstractMetadata;
 import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
-import esa.s1pdgs.cpoc.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.AbstractProduct;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderTimeInterval;
 

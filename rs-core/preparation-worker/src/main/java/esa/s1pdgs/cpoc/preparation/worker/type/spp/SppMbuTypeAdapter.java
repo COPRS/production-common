@@ -18,7 +18,7 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
-import esa.s1pdgs.cpoc.preparation.worker.model.tasktable.TaskTableAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;

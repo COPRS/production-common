@@ -20,9 +20,9 @@ public final class CatalogEventAdapter {
 	}
 	
 	public static final CatalogEventAdapter of(final AppDataJob job) {
-		Assert.isTrue(!job.getMessages().isEmpty(), "Missing message in job " + job.getId());		
-		final GenericMessageDto<CatalogEvent> mqiMessage = job.getMessages().get(0);				
-		return new CatalogEventAdapter(mqiMessage.getBody());
+		Assert.isTrue(!job.getCatalogEvents().isEmpty(), "Missing CatalogEvent in job " + job.getId());		
+		final CatalogEvent event = job.getCatalogEvents().get(0);				
+		return new CatalogEventAdapter(event);
 	}
 	
 	public static final CatalogEventAdapter of(final CatalogEvent catalogEvent) {

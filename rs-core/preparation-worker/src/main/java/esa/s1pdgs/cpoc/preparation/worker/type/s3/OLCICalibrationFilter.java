@@ -3,7 +3,7 @@ package esa.s1pdgs.cpoc.preparation.worker.type.s3;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.preparation.worker.model.tasktable.ElementMapper;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
 
 public class OLCICalibrationFilter {
 

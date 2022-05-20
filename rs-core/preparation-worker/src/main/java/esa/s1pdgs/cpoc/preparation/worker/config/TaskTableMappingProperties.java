@@ -1,17 +1,11 @@
 package esa.s1pdgs.cpoc.preparation.worker.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.ConfigurableKeyEvaluator;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.RoutingBasedTasktableMapper;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.SingleTasktableMapper;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
-import esa.s1pdgs.cpoc.xml.XmlConverter;
-
+@Component
+@Validated
 @ConfigurationProperties(prefix = "tasktable")
 public class TaskTableMappingProperties {	
 	

@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -257,6 +259,17 @@ public class TaskTableAdapter {
 				.flatMap(TaskTableTask::inputs)
 				.flatMap(TaskTableInput::alternativesOrdered)
 				.collect(toList());
+	}
+	
+	/**
+	 * Create a list of all filetypes in a tasktable
+	 * @return list of filetypes
+	 */
+	public List<String> getAllPossibleFileTypes() {
+		return new ArrayList<>(
+				getAllAlternatives().stream()
+				.map(t -> t.getFileType())
+				.collect(Collectors.toSet()));
 	}
 	
 	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputAlternatives() {
