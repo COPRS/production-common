@@ -14,7 +14,7 @@ image:
   name: rs-core-mock-webdav
   tag: develop
   
-  imagePullSecrets: artifactory
+  imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
   
 worker:
   label:
