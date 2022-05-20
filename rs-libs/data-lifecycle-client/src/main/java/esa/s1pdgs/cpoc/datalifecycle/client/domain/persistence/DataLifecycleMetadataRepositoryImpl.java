@@ -15,7 +15,6 @@ import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMet
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_COMPRESSED_STORAGE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE;
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_NAME;
-import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.PRODUCT_TYPE;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -500,7 +499,6 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		final DataLifecycleMetadata metadata = new DataLifecycleMetadata();
 
 		metadata.setProductName((String) sourceAsMap.get(PRODUCT_NAME.fieldName()));
-		metadata.setProductType((String) sourceAsMap.get(PRODUCT_TYPE.fieldName()));
 		metadata.setPathInUncompressedStorage((String) sourceAsMap.get(PATH_IN_UNCOMPRESSED_STORAGE.fieldName()));
 		metadata.setPathInCompressedStorage((String) sourceAsMap.get(PATH_IN_COMPRESSED_STORAGE.fieldName()));
 		metadata.setPersistentInUncompressedStorage((Boolean) sourceAsMap.get(PERSISTENT_IN_UNCOMPRESSED_STORAGE.fieldName()));

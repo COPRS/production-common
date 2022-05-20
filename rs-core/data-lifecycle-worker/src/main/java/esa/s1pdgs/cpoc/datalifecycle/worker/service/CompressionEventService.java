@@ -49,7 +49,7 @@ public class CompressionEventService implements Consumer<CompressionEvent> {
 				new ReportingMessage("Handling event for %s", compressionEvent.getKeyObjectStorage()));
 		
 		try {
-			updater.updateMetadata(compressionEvent, null);
+			updater.updateMetadata(compressionEvent);
 		} catch (DataLifecycleMetadataRepositoryException | InterruptedException e) {
 			LOG.error(e);
 			reporting.error(new ReportingMessage("Error handling event for %s: on %s -> %s", compressionEvent.getKeyObjectStorage(),

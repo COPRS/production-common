@@ -74,7 +74,7 @@ public class DataLifecycleUpdater {
 		}
 	}
 	
-	public void updateMetadata(final AbstractMessage inputEvent, String productType) throws DataLifecycleMetadataRepositoryException, InterruptedException {
+	public void updateMetadata(final AbstractMessage inputEvent) throws DataLifecycleMetadataRepositoryException, InterruptedException {
 		final String obsKey = inputEvent.getKeyObjectStorage();
 		
 		final String fileName = DataLifecycleClientUtil.getFileName(obsKey);
@@ -93,11 +93,6 @@ public class DataLifecycleUpdater {
 		final Map<String,Object> updateFields = new HashMap<>();
 
 		metadata.setProductName(productName); // _id field (hence no update field)
-		
-		if (productType != null ) {
-			metadata.setProductType(productType);
-			updateFields.put(DataLifecycleMetadata.FIELD_NAME.PRODUCT_TYPE.fieldName(), metadata.getProductType());
-		}
 		
 		if (isCompressedStorage) {
 			metadata.setEvictionDateInCompressedStorage(evictionDateTime);

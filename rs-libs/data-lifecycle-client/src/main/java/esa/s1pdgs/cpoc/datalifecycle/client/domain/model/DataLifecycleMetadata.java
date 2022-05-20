@@ -18,7 +18,6 @@ public class DataLifecycleMetadata {
 
 	public static enum FIELD_NAME {
 		PRODUCT_NAME("ProductName", FIELD_TYPE.TEXT, DataLifecycleMetadata::getProductName), //
-		PRODUCT_TYPE("ProductType", FIELD_TYPE.TEXT, DataLifecycleMetadata::getProductType), //
 		PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE("ProductFamilyInUncompressedStorage", FIELD_TYPE.TEXT,
 				DataLifecycleMetadata::getProductFamilyInUncompressedStorageAsString), //
 		PRODUCT_FAMILY_IN_COMPRESSED_STORAGE("ProductFamilyInCompressedStorage", FIELD_TYPE.TEXT,
@@ -74,9 +73,6 @@ public class DataLifecycleMetadata {
 			if (PRODUCT_NAME.fieldName.equals(fieldName)) {
 				return PRODUCT_NAME;
 			}
-			if (PRODUCT_TYPE.fieldName.equals(fieldName)) {
-				return PRODUCT_TYPE;
-			}
 			if (PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE.fieldName.equals(fieldName)) {
 				return PRODUCT_FAMILY_IN_UNCOMPRESSED_STORAGE;
 			}
@@ -128,8 +124,6 @@ public class DataLifecycleMetadata {
 	// --------------------------------------------------------------------------
 
 	private String productName;
-	
-	private String productType;
 
 	private ProductFamily productFamilyInUncompressedStorage;
 
@@ -166,12 +160,10 @@ public class DataLifecycleMetadata {
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.productName, this.productType, this.productFamilyInUncompressedStorage,
-				this.productFamilyInCompressedStorage, this.pathInUncompressedStorage, this.pathInCompressedStorage,
-				this.evictionDateInUncompressedStorage, this.evictionDateInCompressedStorage,
-				this.lastInsertionInUncompressedStorage, this.lastInsertionInCompressedStorage,
-				this.persistentInUncompressedStorage, this.persistentInCompressedStorage, this.availableInLta,
-				this.lastModified, this.lastDataRequest);
+		return Objects.hash(this.productName, this.productFamilyInUncompressedStorage, this.productFamilyInCompressedStorage, this.pathInUncompressedStorage,
+				this.pathInCompressedStorage, this.evictionDateInUncompressedStorage, this.evictionDateInCompressedStorage,
+				this.lastInsertionInUncompressedStorage, this.lastInsertionInCompressedStorage, this.persistentInUncompressedStorage,
+				this.persistentInCompressedStorage, this.availableInLta, this.lastModified, this.lastDataRequest);
 	}
 	
 	@Override
@@ -188,7 +180,6 @@ public class DataLifecycleMetadata {
 
 		final DataLifecycleMetadata other = (DataLifecycleMetadata) obj;
 		return Objects.equals(this.productName, other.productName)
-				&& Objects.equals(this.productType, other.productType)
 				&& Objects.equals(this.productFamilyInUncompressedStorage, other.productFamilyInUncompressedStorage)
 				&& Objects.equals(this.productFamilyInCompressedStorage, other.productFamilyInCompressedStorage)
 				&& Objects.equals(this.pathInUncompressedStorage, other.pathInUncompressedStorage)
@@ -230,14 +221,6 @@ public class DataLifecycleMetadata {
 
 	public void setProductName(String productName) {
 		this.productName = productName;
-	}
-	
-	public String getProductType() {
-		return productType;
-	}
-
-	public void setProductType(String productType) {
-		this.productType = productType;
 	}
 
 	public ProductFamily getProductFamilyInUncompressedStorage() {
