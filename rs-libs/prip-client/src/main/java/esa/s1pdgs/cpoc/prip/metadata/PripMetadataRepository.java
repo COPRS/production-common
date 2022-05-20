@@ -32,7 +32,7 @@ public interface PripMetadataRepository {
 	 * @param id
 	 * @return
 	 */
-	boolean deleteById(String id);
+	boolean deleteByName(String name);
 	
 	/**
 	 * Finds a PRIP metadata by its name. Returns null if not found.
