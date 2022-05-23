@@ -156,7 +156,7 @@ public class EvictionManagementService {
 			}
 			LOG.debug("eviction of product from compressed storage: " + dataLifecycleMetadata);
 			obsClient.delete(new ObsObject(productFamilyInCompressedStorage, pathInCompressedStorage));
-			boolean metadataDeleted = pripMetadataRepo.deleteById(pathInCompressedStorage);
+			boolean metadataDeleted = pripMetadataRepo.deleteByName(pathInCompressedStorage);
 			if (metadataDeleted) {
 				evictionUpdater.updateEvictedMetadata(pathInCompressedStorage, productFamilyInCompressedStorage);
 				numEvicted++;

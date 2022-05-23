@@ -19,6 +19,7 @@ import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMet
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -144,7 +145,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 		}
 		final WriteRequest<?> request;
 		if (!updateMetadata.isEmpty()) {
-			final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+			final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.MILLIS);
 			updateMetadata.put(DataLifecycleMetadata.FIELD_NAME.LAST_MODIFIED.fieldName(), (Object)now);
 
 			if (pureUpdate) {

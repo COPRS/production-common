@@ -152,11 +152,11 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	}
 	
 	@Override
-	public boolean deleteById(String id) {
+	public boolean deleteByName(String name) {
 
-		LOGGER.info("delete PRIP metadata with id {}", id);
+		LOGGER.info("delete PRIP metadata with name {}", name);
 
-		PripMetadata pripMetadata = findById(id);
+		PripMetadata pripMetadata = findByName(name);
 
 		if (pripMetadata == null) {
 			return false;
@@ -167,7 +167,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			deleteResponse = this.restHighLevelClient.delete(new DeleteRequest(ES_INDEX, pripMetadata.getName()),
 					RequestOptions.DEFAULT);
 		} catch (final IOException e) {
-			throw new RuntimeException("Failed to delete product " + id, e);
+			throw new RuntimeException("Failed to delete product " + name, e);
 		}
 
 		if (deleteResponse.getResult() == Result.DELETED) {
