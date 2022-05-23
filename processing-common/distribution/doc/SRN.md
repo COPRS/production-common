@@ -49,7 +49,7 @@ The following components of the COPRS shall be installed and running
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-|``app.*.elasticsearch.host``|Elasticsearch host name running in the Kubernetes cluster. Default: ``elasticsearch-master.monitoring``| 
+|``app.*.elasticsearch.host``|Elasticsearch host name running in the Kubernetes cluster. Default: ``elasticsearch-processing-es-http.database.svc.cluster.local``| 
 |``app.*.elasticsearch.port``| Elasticsearch port name running in the Kubernetes cluster.Default: ``9200``| 
 |``app.*.elasticsearch.connect-timeout-ms``| Timeout for a period in which this client should establish a connection Elasticsearch Service.Example: ``2000``| 
 |``app.*.elasticsearch.socket-timeout-ms``| A maximum time of inactivity between two data packets when exchanging data with a ES server.Example: ``10000``| 
