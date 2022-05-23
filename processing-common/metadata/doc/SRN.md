@@ -45,7 +45,7 @@ Following components of the COPRS shall be installed and running
 ## Application properties
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-|``app.*.spring.kafka.bootstrap-servers``| It is a pair of host and port where kafka brokers are running. A Kafka client connects to these servers to bootstrap the application. Comma separated values are provided for multiple enteries.Example : ``kafka-headless:9092``|
+|``app.*.spring.kafka.bootstrap-servers``| It is a pair of host and port where kafka brokers are running. A Kafka client connects to these servers to bootstrap the application. Comma separated values are provided for multiple enteries.Example : ``kafka-cluster-kafka-bootstrap.infra.svc.cluster.local:9092``|
 |``app.*.main.banner-mode``| Disable Spring Boot Banner Using banner-mode at System Console.Default : ``off``|
 |``app.*.management.endpoint.health.show-details``| Spring Boot provides a health stats for the application. Default : ``always``|
 |``app.*.logging.config``| Path to the file that describes logging configuration for the application.Default : ``log/log4j2.yml``
