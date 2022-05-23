@@ -1,5 +1,5 @@
-# RS-Core compression chain
+# RS Core Component - Compression
 
-This folder contains the definition for the factory default of the compression-chain.
+This folder contains the factory default configuration for the RS Core component Compression that will compression unzipped products into zipped ones or to extract products that are ingested via AUXIP.
 
 For more information please refer to the [Software Release Notes](./doc/SRN.md).

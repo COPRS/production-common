@@ -1,5 +1,5 @@
-# RS-Core metadata chain
+# RS Core Component - Metadata
 
-This folder contains the definition for the factory default of the metadata-extraction-chain.
+This folder contains the factory default configuration for the RS Core component Metadata that handled the metadata extraction for the COPRS.
 
 For more information please refer to the [Software Release Notes](./doc/SRN.md).
