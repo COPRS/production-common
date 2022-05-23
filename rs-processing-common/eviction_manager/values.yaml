@@ -25,10 +25,14 @@ elasticsearch:
     socket: 10000
   searchResultLimit: 1000
   
+pripClient:
+  repositoryMaxSearchHits: 1000
+  
 worker:
   label:
     key: node-role.kubernetes.io/worker
     value: infra
+  evictionIntervalMs: 60000
 
 image:
   registry: artifactory.coprs.esa-copernicus.eu

@@ -29,7 +29,7 @@ elasticsearch:
   
 # Prip Client 
 prip-client:
-  repository.max-search-hits: 1000
+  repository.max-search-hits: {{ .Values.pripClient.repositoryMaxSearchHits }}
 
 process:
   hostname: ${HOSTNAME}                                          # Hostname
@@ -38,7 +38,7 @@ server:
   port: {{ .Values.service.port }}
 
 eviction-management-worker:
-  eviction-interval-ms: 60000
+  eviction-interval-ms: {{ .Values.worker.evictionIntervalMs }}
   
 # Generated from obs-stream-parameters.properties  
 obs:
