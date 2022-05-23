@@ -518,6 +518,7 @@ public class MetadataClient {
 	public boolean deleteByFamilyAndProductName(final ProductFamily family, final String productName)
 			throws MetadataQueryException {
 		
+		LOGGER.info("delete MDC metadata for family {} and name {}", family, productName);
 		
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family
 				+ "/deleteProduct";
@@ -557,7 +558,12 @@ public class MetadataClient {
 		if (deleted == null) {
 			throw new MetadataQueryException("No result body for deleting metadata of" + productName);
 		}
-		LOGGER.debug("Deleted {}", deleted);
+		
+		if (deleted) {
+			LOGGER.info("MDC metadata for family {} and name {} deleted", family, productName);
+		} else {
+			LOGGER.warn("MDC metadata for family {} and name {} not deleted!", family, productName);
+		}
 		return deleted;
 	}
 	
