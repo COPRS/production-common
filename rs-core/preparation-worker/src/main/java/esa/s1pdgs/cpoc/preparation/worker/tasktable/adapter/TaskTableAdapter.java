@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.CollectionUtils;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
@@ -49,6 +48,8 @@ public class TaskTableAdapter {
 	private final TaskTable taskTable;
 	private final ElementMapper elementMapper;
 	private final ProductMode productMode;
+	
+	private List<String> possibleFileTypes;
 	
 	public TaskTableAdapter(final File file, final TaskTable taskTable, final ElementMapper elementMapper, final ProductMode productMode) {
 		this.file = file;
@@ -266,10 +267,15 @@ public class TaskTableAdapter {
 	 * @return list of filetypes
 	 */
 	public List<String> getAllPossibleFileTypes() {
-		return new ArrayList<>(
+		// As this method is called for each newly generated job -> only calculate this List once
+		if (this.possibleFileTypes == null) {
+			this.possibleFileTypes = new ArrayList<>(
 				getAllAlternatives().stream()
 				.map(t -> t.getFileType())
 				.collect(Collectors.toSet()));
+		}
+		
+		return possibleFileTypes;
 	}
 	
 	public Map<TaskTableInputAlternative.TaskTableInputAltKey, List<TaskTableInputAlternative>> allTaskTableInputAlternatives() {

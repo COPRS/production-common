@@ -145,7 +145,6 @@ public class IpfPreparationWorkerConfiguration {
 	@Bean
 	@Autowired
 	public ProductTypeAdapter typeAdapter(
-			final Function<File, TaskTableAdapter> tasktableAdapterForFile
 	) {
 		
 		switch(processSettings.getLevel()) {

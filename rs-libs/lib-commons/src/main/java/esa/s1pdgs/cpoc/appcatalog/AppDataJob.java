@@ -115,6 +115,8 @@ public class AppDataJob {
 		job.setStartTime(prepJob.getStartTime());
 		job.setStopTime(prepJob.getStopTime());
 		job.setProductName(prepJob.getKeyObjectStorage());
+		job.setTriggerProducts(prepJob.getTriggerProducts());
+		
 		return job;
 	}
 

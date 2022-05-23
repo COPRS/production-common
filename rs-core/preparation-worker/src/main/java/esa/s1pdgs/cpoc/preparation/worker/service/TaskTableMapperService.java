@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.preparation.worker.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,6 +20,7 @@ import esa.s1pdgs.cpoc.preparation.worker.config.TaskTableMappingProperties;
 import esa.s1pdgs.cpoc.preparation.worker.report.DispatchReportInput;
 import esa.s1pdgs.cpoc.preparation.worker.report.L0EWSliceMaskCheckReportingOutput;
 import esa.s1pdgs.cpoc.preparation.worker.report.SeaCoverageCheckReportingOutput;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -32,12 +34,14 @@ public class TaskTableMapperService {
 	private TasktableMapper ttMapper;
 	private ProcessProperties processProperties;
 	private MetadataClient metadataClient;
+	private Map<String, TaskTableAdapter> ttAdapters;
 
 	public TaskTableMapperService(final TasktableMapper ttMapper, final ProcessProperties processProperties,
-			final MetadataClient metadataClient) {
+			final MetadataClient metadataClient, final Map<String, TaskTableAdapter> ttAdapters) {
 		this.ttMapper = ttMapper;
 		this.processProperties = processProperties;
 		this.metadataClient = metadataClient;
+		this.ttAdapters = ttAdapters;
 	}
 
 	/**
@@ -66,7 +70,11 @@ public class TaskTableMapperService {
 			for (final String taskTableName : taskTableNames) {
 				if (l0EwSliceMaskCheck(reporting, productName, family, taskTableName)) {
 					LOGGER.debug("Tasktable for {} is {}", productName, taskTableName);
-					preparationJobs.add(dispatch(event, reporting, taskTableName));
+					IpfPreparationJob job = dispatch(event, reporting, taskTableName);
+					
+					if (job != null) {
+						preparationJobs.add(job);
+					}
 				}
 			}
 			if (preparationJobs.isEmpty()) {
@@ -144,6 +152,12 @@ public class TaskTableMapperService {
 	private final IpfPreparationJob dispatch(final CatalogEvent event, final ReportingFactory reportingFactory,
 			final String taskTableName) {
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(event);
+		final TaskTableAdapter ttAdapter = ttAdapters.get(taskTableName);
+		
+		if (ttAdapter == null) {
+			LOGGER.warn("CatalogEvent got mapped to unknown TaskTable \"{}\" - Please update your TaskTableMapping!", taskTableName);
+			return null;
+		}
 
 		// FIXME reporting of AppDataJob doesn't make sense here any more, needs to be
 		// replaced by something
@@ -161,6 +175,7 @@ public class TaskTableMapperService {
 		job.setPodName(processProperties.getHostname());
 		job.setCatalogEvent(event);
 		job.setTaskTableName(taskTableName);
+		job.setTriggerProducts(ttAdapter.getAllPossibleFileTypes());
 		// S1PRO-1772: user productSensing accessors here to make start/stop optional
 		// here (RAWs don't have them)
 		job.setStartTime(eventAdapter.productSensingStartDate());

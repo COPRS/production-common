@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
@@ -13,6 +15,7 @@ public class IpfPreparationJob extends AbstractMessage {
 	private String startTime;
 	private String stopTime;
 	private String processingMode = "NOT_DEFINED";
+	private List<String> triggerProducts = new ArrayList<>();
 
 	public IpfPreparationJob() {
 		allowedActions = Collections.singletonList(AllowedAction.RESTART);
@@ -66,13 +69,21 @@ public class IpfPreparationJob extends AbstractMessage {
 		this.processingMode = processingMode;
 	}
 
+	public List<String> getTriggerProducts() {
+		return triggerProducts;
+	}
+
+	public void setTriggerProducts(List<String> triggerProducts) {
+		this.triggerProducts = triggerProducts;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + Objects.hash(allowedActions, creationDate, debug, demandType, catalogEvent,
 				extraParameter1, extraParameter2, extraParameter3, podName, keyObjectStorage, level, processingMode,
-				productFamily, retryCounter, startTime, stopTime, taskTableName, uid);
+				productFamily, retryCounter, startTime, stopTime, taskTableName, uid, triggerProducts);
 		return result;
 	}
 
@@ -95,7 +106,7 @@ public class IpfPreparationJob extends AbstractMessage {
 				&& Objects.equals(processingMode, other.processingMode) && productFamily == other.productFamily
 				&& retryCounter == other.retryCounter && Objects.equals(startTime, other.startTime)
 				&& Objects.equals(stopTime, other.stopTime) && Objects.equals(taskTableName, other.taskTableName)
-				&& Objects.equals(uid, other.uid);
+				&& Objects.equals(uid, other.uid) && Objects.equals(triggerProducts, other.triggerProducts);
 	}
 
 	@Override
@@ -106,6 +117,6 @@ public class IpfPreparationJob extends AbstractMessage {
 				+ retryCounter + ", debug=" + debug + ", extraParameter1=" + extraParameter1 + ", extraParameter2="
 				+ extraParameter2 + ", extraParameter3=" + extraParameter3 + ", level=" + level + ", catalogEvent="
 				+ catalogEvent + ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime="
-				+ stopTime + ", processingMode=" + processingMode + "]";
+				+ stopTime + ", processingMode=" + processingMode + ", triggerProducts=" + triggerProducts + "]";
 	}
 }
