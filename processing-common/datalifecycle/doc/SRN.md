@@ -1,6 +1,8 @@
-# Template
+# RS Core Component - Datalifecycle
 
-## General
+## Overview
+
+![overview](media/overview.png "Overview of the Datalifecycle")
 
 TBD
 
