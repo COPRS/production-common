@@ -44,6 +44,7 @@ The following components of the COPRS shall be installed and running
 ## Error Management
 | Property | Details |
 |-|-|
+TBD
 
 ## Elastic Search
 | Property | Details |
