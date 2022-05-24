@@ -386,7 +386,7 @@
 		<module>ingestion-filter</module>
 		<module>ingestion-worker</module>
 		<!-- <module>production-trigger</module> -->
-		<!-- <module>ipf-preparation-worker</module> -->
+		<module>preparation-worker</module>
 		<!-- <module>ipf-execution-worker</module> -->
 		<!-- <module>request-repository</module> -->
 		<!-- <module>on-demand-interface-provider</module> -->

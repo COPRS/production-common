@@ -36,7 +36,7 @@ level0:
 level-products:
   pathroutingxmlfile: ./test/data/l1_config/routing.xml
 
-ipf-preparation-worker:
+worker:
   diroftasktables: ./test/data/l0_config/task_tables/
   inputWaiting:
   - processorNameRegexp: .._RAW__0_(SLC|GRD).*_1
