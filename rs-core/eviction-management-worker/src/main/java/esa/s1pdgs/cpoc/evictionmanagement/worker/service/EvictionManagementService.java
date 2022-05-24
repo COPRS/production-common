@@ -157,12 +157,11 @@ public class EvictionManagementService {
 			LOG.debug("eviction of product from compressed storage: " + dataLifecycleMetadata);
 			obsClient.delete(new ObsObject(productFamilyInCompressedStorage, pathInCompressedStorage));
 			boolean metadataDeleted = pripMetadataRepo.deleteByName(pathInCompressedStorage);
-			if (metadataDeleted) {
-				evictionUpdater.updateEvictedMetadata(pathInCompressedStorage, productFamilyInCompressedStorage);
-				numEvicted++;
-			} else {
-				LOG.warn("metadata not deleted for: " + pathInCompressedStorage);
+			if (!metadataDeleted) {
+				LOG.warn("Prip metadata not deleted for: " + pathInCompressedStorage);
 			}
+			evictionUpdater.updateEvictedMetadata(pathInCompressedStorage, productFamilyInCompressedStorage);
+			numEvicted++;
 		} else {
 			LOG.debug("cannot evict product from compressed storage: " + dataLifecycleMetadata);
 		}
