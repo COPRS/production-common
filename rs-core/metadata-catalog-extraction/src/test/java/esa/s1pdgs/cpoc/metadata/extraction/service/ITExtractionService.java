@@ -372,6 +372,8 @@ public class ITExtractionService {
 		
 		assertEquals("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.zip",
 				metadata.getString("productName"));
+		assertEquals("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.zip",
+				metadata.getString("url"));
 		assertEquals(ProductFamily.S2_AUX.name(), metadata.getString("productFamily"));
 		assertEquals("S2", metadata.getString("missionId"));
 		assertEquals("A", metadata.getString("satelliteId"));
@@ -386,7 +388,7 @@ public class ITExtractionService {
 		assertEquals("NRT", metadata.getString("timeliness"));
 		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
-		assertEquals(14, metadata.length());
+		assertEquals(15, metadata.length());
 	}
 	
 	@Test
@@ -407,7 +409,10 @@ public class ITExtractionService {
 		assertEquals("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ",
 				indexRequest.id());
 		
-		assertEquals("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ", metadata.getString("productName"));
+		assertEquals("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ",
+				metadata.getString("productName"));
+		assertEquals("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ",
+				metadata.getString("url"));
 		assertEquals(ProductFamily.S2_AUX.name(), metadata.getString("productFamily"));
 		assertEquals("S2", metadata.getString("missionId"));
 		assertEquals("B", metadata.getString("satelliteId"));
@@ -420,7 +425,7 @@ public class ITExtractionService {
 		assertEquals("NRT", metadata.getString("timeliness"));
 		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
-		assertEquals(12, metadata.length());
+		assertEquals(13, metadata.length());
 	}
 	
 	@Test
