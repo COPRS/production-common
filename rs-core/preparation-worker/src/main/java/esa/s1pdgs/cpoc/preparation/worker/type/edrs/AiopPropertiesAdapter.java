@@ -122,8 +122,8 @@ public final class AiopPropertiesAdapter {
     		} 
     	}    	
     	aiopParams.put("Processing_Station", stationCode);    	
-    	aiopParams.put("NRTOutputPath", nrtOutputPath.replace("<WORKING_DIR_NUMBER>", Long.toString(job.getId())));
-    	aiopParams.put("PTOutputPath", ptOutputPath.replace("<WORKING_DIR_NUMBER>", Long.toString(job.getId())));
+    	aiopParams.put("NRTOutputPath", nrtOutputPath.replace("%WORKING_DIR_NUMBER%", Long.toString(job.getId())));
+    	aiopParams.put("PTOutputPath", ptOutputPath.replace("%WORKING_DIR_NUMBER%", Long.toString(job.getId())));
     	return aiopParams;
 	}
 	
