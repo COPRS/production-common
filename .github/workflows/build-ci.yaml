@@ -134,6 +134,13 @@ jobs:
           prip-frontend: 
             - 'rs-core/prip-frontend/**'
             - 'rs-core/pom.xml'
+          preparation-worker:
+            - 'rs-core/preparation-worker/**'
+            - 'rs-core/pom.xml'
+
+#          data-lifecycle-trigger: 
+#            - 'rs-core/data-lifecycle-trigger/**'
+#            - 'rs-core/pom.xml'
 #          data-request-worker: 
 #            - 'rs-core/data-request-worker/**'
 #            - 'rs-core/pom.xml'
@@ -145,9 +152,6 @@ jobs:
 #            - 'rs-core/pom.xml'
 #          ipf-execution-worker: 
 #            - 'rs-core/ipf-execution-worker/**'
-#            - 'rs-core/pom.xml'
-#          ipf-preparation-worker: 
-#            - 'rs-core/ipf-preparation-worker/**'
 #            - 'rs-core/pom.xml'
 #          metadata-catalog-timer: 
 #            - 'rs-core/metadata-catalog-timer/**'
@@ -223,7 +227,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [compression-worker, distribution-worker, eviction-management-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, data-lifecycle-worker, prip-frontend, ddip-frontend]
+        component: [compression-worker, distribution-worker, eviction-management-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, data-lifecycle-worker, prip-frontend, ddip-frontend, preparation-worker] 
         #component: [disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]           
     runs-on: ubuntu-latest
     steps:

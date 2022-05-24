@@ -1,0 +1,13 @@
+mongodb:
+  host: 127.0.0.1
+  port: 27017
+  database: s1pdgs
+  old-entry-ms: 86400000
+  clean-cron: 0 0 0 * * *
+
+tasktable:
+  name: test
+
+spp:
+  obs-timeout-sec: 90000
+  minimal-waiting-time-sec: 10800
