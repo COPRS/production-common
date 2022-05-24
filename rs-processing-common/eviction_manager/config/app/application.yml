@@ -26,13 +26,9 @@ elasticsearch:
   socket-timeout-ms: {{ .Values.elasticsearch.timeout.socket }}
   # limitation of Elastic search results
   search-result-limit: {{ .Values.elasticsearch.searchResultLimit }}
-  
-# Prip Client 
-prip-client:
-  repository.max-search-hits: {{ .Values.pripClient.repositoryMaxSearchHits }}
 
 process:
-  hostname: ${HOSTNAME}                                          # Hostname
+  hostname: ${HOSTNAME}
 
 server:
   port: {{ .Values.service.port }}
