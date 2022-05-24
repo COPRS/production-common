@@ -31,6 +31,8 @@ spec:
               value: {{ .Values.env.baseHref }}
             - name: KEYCLOAK
               value: {{ .Values.env.keycloak }}
+            - name: MAP_VIEW
+              value: {{ .Values.env.mapView }}
           ports:
             - name: http
               containerPort: 80

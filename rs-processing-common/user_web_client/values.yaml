@@ -9,6 +9,8 @@ env:
   baseHref: /uwc/
   keycloak: |
     "{\"url\":\"http://localhost:8080/auth\",\"realm\":\"master\",\"clientId\": \"user-web-client\"}"
+  mapView: |
+    "{\"selectionFillColor\":\"rgba(255,155,51,0.3)\",\"selectionStrokeColor\":\"rgba(255,155,51,0.6)\"}"
 
 image:
   # Overrides the image tag whose default is the chart appVersion.
