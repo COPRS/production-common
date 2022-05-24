@@ -20,8 +20,8 @@ public class DlmEsClientConfiguration {
 	@Value("${elasticsearch.port}")
 	private int esPort;
 	
-	@Value("${elasticsearch.search-result-limit}")
-	private int esSearchResultLimit = 1000;
+	@Value("${elasticsearch.search-result-limit:1000}")
+	private int esSearchResultLimit;
 	
 	@Value("${elasticsearch.connect-timeout-ms}")
     private int connectTimeoutMs;
