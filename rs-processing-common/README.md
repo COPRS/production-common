@@ -122,3 +122,23 @@ The following command can be used in order to deploy the User Web Client:
 | `keycloak` | Allows setting the information about the keycloak endpoint, realm and clientid that shall be used by the UWC | `"{\"url\":\"http://localhost:8080/auth\",\"realm\":\"master\",\"clientId\": \"user-web-client\"}` |
 
 For further information regarding the User Web Client, please consult [https://github.com/COPRS/user-web-client].
+
+## Eviction Manager
+
+The part of DLM responsible for eviction is provided by the Eviction Manager service that is running independently. It works with a scheduler that runs periodically and checks for expired files and removes them from the Object Store, Metadata Catalog and Prip index accordingly.
+
+The following command can be used in order to deploy the Eviction Manager:
+
+``helm install rs-helm/rs-eviction-manager --version 1.0.1``
+
+| Name | Description | Default |
+| -|-|-|
+| `metadata.host`| The hostname + Port of the Metadata Search Controller connected to the catalog (for deletion of metadata) | `rs-metadata-catalog-searchcontroller-svc:8080` |
+| `metadata.restApiNbRetry` | Number of retries for calling the Metadata Search Controller in case of errors| `3` |
+| `metadata.restApiTempoRetryMs` | Interval in miliseconds between calls to Metadata Search Controller in case of errors | `1000` |
+| `elasticsearch.host` | The hostname of the elastic search server that shall be used as backend and contains the DLM index (for updates) | `elasticsearch-master`|
+| `elasticsearch.port` | The port of the elastic search server that shall be used as backend and contains the DLM index | `9200` |
+| `elasticsearch.connect-timeout-ms` | Timeout in milliseconds of connection to the cluster | `2000` |
+| `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
+| `elasticsearch.search-result-limit` | Limitation of search result when searching for evictable files in the DLM index. Only this amount of files will be handled in one iteration | `1000` |
+| `eviction-management-worker.eviction-interval-ms` | Specifies the interval in milliseconds between invocations of the Eviction routine for searching and deleting evictable files from OBS/MDC/Prip | `600000` |
