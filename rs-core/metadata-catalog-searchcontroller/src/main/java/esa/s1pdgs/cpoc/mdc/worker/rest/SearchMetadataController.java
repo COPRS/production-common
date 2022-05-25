@@ -268,7 +268,7 @@ public class SearchMetadataController {
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("ValIntersect".equals(mode)) {
 				LOGGER.debug(
-						"Using val intersect with productType={}, mode={}, t0={}, t1={}, proccessingMode={}, insConfId={}, dt0={}, dt1={}",
+						"Using val intersect with productType={}, mode={}, t0={}, t1={}, processMode={}, insConfId={}, dt0={}, dt1={}",
 						productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1);
 
 				final List<SearchMetadata> f = esServices.valIntersect(
