@@ -2,6 +2,6 @@ apiVersion: v1
 appVersion: "<VERSION>"
 description: COPRS Eviction Manager
 name: rs-eviction-manager
-version: <VERSION>
+version: 1.0.1
 maintainers:
   - name: Werum Software & Systems
