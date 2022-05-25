@@ -75,13 +75,16 @@ public class DataLifecycleUpdater {
 	}
 	
 	public void updateMetadata(final AbstractMessage inputEvent) throws DataLifecycleMetadataRepositoryException, InterruptedException {
+		updateMetadata(inputEvent, LocalDateTime.now(ZoneId.of("UTC")));
+	}
+	
+	public void updateMetadata(final AbstractMessage inputEvent, final LocalDateTime now) throws DataLifecycleMetadataRepositoryException, InterruptedException {
 		final String obsKey = inputEvent.getKeyObjectStorage();
 		
 		final String fileName = DataLifecycleClientUtil.getFileName(obsKey);
 		final String productName = DataLifecycleClientUtil.getProductName(obsKey);
 		final ProductFamily productFamily = inputEvent.getProductFamily();
 		final boolean isCompressedStorage = productFamily.isCompressed();
-		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
 		final Date evictionDate = DataLifecycleClientUtil.calculateEvictionDate(this.retentionPolicies, inputEvent.getCreationDate(), productFamily, fileName);
 		LocalDateTime evictionDateTime = null;
