@@ -2,6 +2,8 @@ package esa.s1pdgs.cpoc.preparation.worker.config.type;
 
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +30,8 @@ import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppObsTypeAdapter;
 @Configuration
 public class TypeAdapterConfiguration {
 
+	static final Logger LOGGER = LogManager.getLogger(TypeAdapterConfiguration.class);
+	
 	@Autowired
 	private MetadataClient metadataClient;
 	
@@ -61,6 +65,8 @@ public class TypeAdapterConfiguration {
 	@Bean
 	@Autowired
 	public ProductTypeAdapter typeAdapter() {
+		
+		LOGGER.info("Create ProductTypeAdapter for level {}", processSettings.getLevel());
 		
 		switch(processSettings.getLevel()) {
 			case L0:
