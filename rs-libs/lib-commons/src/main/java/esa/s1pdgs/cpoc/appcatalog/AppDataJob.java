@@ -110,6 +110,7 @@ public class AppDataJob {
 		final AppDataJob job = new AppDataJob();
 		job.setLevel(prepJob.getLevel());
 		job.setPod(prepJob.getPodName());
+		job.getCatalogEvents().add(prepJob.getCatalogEvent());
 		job.setProduct(newProductFor(prepJob.getCatalogEvent()));
 		job.setTaskTableName(prepJob.getTaskTableName());
 		job.setStartTime(prepJob.getStartTime());
