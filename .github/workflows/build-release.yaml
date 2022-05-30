@@ -124,7 +124,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [ingestion-auxip, ingestion-edip, ingestion-xbip]
+        component: [ingestion-auxip, ingestion-edip, ingestion-xbip, ingestion-mock-auxip]
     steps:
     - uses: actions/checkout@v2
     - uses: ./.github/actions/build-core-examples
