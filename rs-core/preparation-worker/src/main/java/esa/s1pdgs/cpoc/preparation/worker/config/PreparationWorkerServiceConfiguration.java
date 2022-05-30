@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
 import esa.s1pdgs.cpoc.preparation.worker.service.PreparationWorkerService;
 import esa.s1pdgs.cpoc.preparation.worker.service.TaskTableMapperService;
+import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 
 /**
  * Configuration class containing the interface for Spring Cloud Dataflow.
@@ -28,8 +29,11 @@ public class PreparationWorkerServiceConfiguration {
 	@Autowired
 	private AppCatJobService appCatJobService;
 	
+	@Autowired
+	private ProductTypeAdapter typeAdapter;
+	
 	@Bean
 	public Function<CatalogEvent, List<IpfExecutionJob>> prepareExecutionJobs() {
-		return new PreparationWorkerService(taskTableMapperService, null, processProperties, appCatJobService);
+		return new PreparationWorkerService(taskTableMapperService, typeAdapter, processProperties, appCatJobService);
 	}
 }
