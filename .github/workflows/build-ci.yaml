@@ -52,9 +52,6 @@ jobs:
           error-repo-client: 
             - 'rs-libs/error-repo-client/**'
             - 'rs-libs/pom.xml'
-          app-catalog-client: 
-            - 'rs-libs/app-catalog-client/**'
-            - 'rs-libs/pom.xml'
           obs-sdk: 
             - 'rs-libs/obs-sdk/**'
             - 'rs-libs/pom.xml'

@@ -47,7 +47,6 @@
 		cd s1pro-core
 		for t in $(find . -name pom.xml -exec grep 's1pro-core-' {} \; | tr -d '\t' | tr -d ' ' | sort -u); do echo "<dependency><groupId>de.werum.s1pdgs</groupId>${t}<version>\${project.version}</version></dependency>"; done
 	 -->	
-<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-app-catalog-client</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-app-status</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-auxip-client</artifactId><version>${project.version}</version></dependency>
 <dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-data-lifecycle-client</artifactId><version>${project.version}</version></dependency>

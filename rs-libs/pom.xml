@@ -346,7 +346,6 @@
 	</dependencyManagement>
 
 	<modules>
-		<module>app-catalog-client</module>
 		<module>xbip-client</module>
 		<module>auxip-client</module>
 		<module>edip-client</module>
