@@ -10,8 +10,8 @@ elif echo ${INPUT} | egrep -i '\.(tar\.gz|tar|tgz)$'; then
   echo "Uncompressing tarred ${INPUT}"
   
   # if the tar doesn't contain any subdirectories, create a subdirectory with the basename
-  # of the tar
-  if tar tf ./${INPUT} | grep -v /; then
+  # of the tar. Also catch the case that leading relative paths are contained in tar.
+  if tar tf ./${INPUT} | sed -e 's;\./;;g' | grep -v /; then
     # remove the compression suffix
     SUBDIR=$(echo $INPUT | sed -r 's;\.(tar\.gz|tar|tgz)$;;gI')
     echo "Creating subdirectory ${SUBDIR}"
