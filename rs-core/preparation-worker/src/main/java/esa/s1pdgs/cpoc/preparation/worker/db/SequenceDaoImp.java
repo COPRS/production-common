@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.SequenceException;
 import esa.s1pdgs.cpoc.preparation.worker.model.sequence.SequenceId;
@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.preparation.worker.model.sequence.SequenceId;
  * @author Viveris Technologies
  *
  */
-@Service
+@Component
 public class SequenceDaoImp implements SequenceDao {
 
     /**

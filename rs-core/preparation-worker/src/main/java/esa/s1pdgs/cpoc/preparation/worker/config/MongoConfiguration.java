@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.util.Assert;
 
 import com.mongodb.client.MongoClient;
@@ -20,6 +21,7 @@ import com.mongodb.client.MongoClients;
  * to create MongoClient instance.
  */
 @Configuration
+@EnableMongoRepositories
 public class MongoConfiguration {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MongoConfiguration.class);

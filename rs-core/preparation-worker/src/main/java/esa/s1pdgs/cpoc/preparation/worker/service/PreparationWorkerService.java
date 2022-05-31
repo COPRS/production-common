@@ -169,6 +169,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 					job.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
 					job.setPod(processProperties.getHostname());
 
+					LOGGER.info("Try to save new job in MongoDB...");
 					final AppDataJob newlyCreatedJob = appCatJobService.newJob(job);
 					LOGGER.info("dispatched job {}", newlyCreatedJob.getId());
 					dispatchedJobs.add(newlyCreatedJob);

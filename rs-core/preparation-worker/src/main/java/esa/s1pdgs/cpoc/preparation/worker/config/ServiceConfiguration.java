@@ -22,7 +22,6 @@ import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.ConfigurableKeyEvalua
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.RoutingBasedTasktableMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.SingleTasktableMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
-import esa.s1pdgs.cpoc.report.message.Task;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
 
 @Configuration
