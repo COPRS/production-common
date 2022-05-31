@@ -112,6 +112,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 				result = handleJobs(preparationJob, jobs, reporting.getUid(), tasktableFilename);
 			}
 		} catch (Exception e) {
+			LOGGER.error("Error handling PreparationJob {}: {}", preparationJob.getUid().toString(), LogUtils.toString(e));
 			reporting.error(
 					new ReportingMessage("Error associating TaskTables to AppDataJobs: %s", LogUtils.toString(e)));
 		}

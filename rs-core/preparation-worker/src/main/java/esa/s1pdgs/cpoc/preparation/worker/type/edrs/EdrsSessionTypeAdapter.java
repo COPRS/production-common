@@ -116,7 +116,9 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	public List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) {
 		final AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
 		// Add productType RAW, as it is not included in the TaskTable
-		appDataJob.getTriggerProducts().add("RAW");
+		if (!appDataJob.getTriggerProducts().contains("RAW")) {
+			appDataJob.getTriggerProducts().add("RAW");
+		}
 		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);				
 		final EdrsSessionProduct product = EdrsSessionProduct.of(appDataJob);		
