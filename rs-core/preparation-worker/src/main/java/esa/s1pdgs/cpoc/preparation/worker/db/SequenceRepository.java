@@ -1,10 +1,10 @@
 package esa.s1pdgs.cpoc.preparation.worker.db;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.preparation.worker.model.sequence.SequenceId;
 
-@Service
+@Component
 public interface SequenceRepository extends MongoRepository<SequenceId, String> {
 }
