@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,8 @@ import esa.s1pdgs.cpoc.xml.XmlConverter;
 @Configuration
 public class ServiceConfiguration {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ServiceConfiguration.class);
+	
 	@Bean
 	@Autowired
 	public TasktableMapper newTastTableMapper(final XmlConverter xmlConverter,
@@ -53,6 +57,7 @@ public class ServiceConfiguration {
 	@Bean
 	@Autowired
 	public AppCatJobService appCatJobService(final AppDataJobRepository repository, final SequenceDao sequenceDao) {
+		LOG.info("Create new AppCatJobService with {} and {}", repository.toString(), sequenceDao.toString());
 		return new AppCatJobService(repository, sequenceDao);
 	}
 	
