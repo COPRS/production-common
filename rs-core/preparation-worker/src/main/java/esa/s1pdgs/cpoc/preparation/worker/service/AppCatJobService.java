@@ -57,6 +57,10 @@ public class AppCatJobService {
 	public List<AppDataJob> findByProductType(final String productType) {
 		return appDataJobRepository.findByProductType(productType);
 	}
+	
+	public List<AppDataJob> findByTriggerProduct(final String productType) {
+		return appDataJobRepository.findByTriggerProduct(productType);
+	}
 
 	public List<AppDataJob> findByProductSessionId(final String sessionId) {
 		return appDataJobRepository.findByProductSessionId(sessionId);

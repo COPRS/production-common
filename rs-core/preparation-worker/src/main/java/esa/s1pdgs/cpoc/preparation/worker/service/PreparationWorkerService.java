@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +19,9 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
+import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -24,7 +29,15 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
+import esa.s1pdgs.cpoc.preparation.worker.model.exception.AppCatJobUpdateFailed;
+import esa.s1pdgs.cpoc.preparation.worker.model.exception.AppCatalogJobNotFoundException;
+import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
+import esa.s1pdgs.cpoc.preparation.worker.model.exception.JobStateTransistionFailed;
+import esa.s1pdgs.cpoc.preparation.worker.model.exception.TimedOutException;
+import esa.s1pdgs.cpoc.preparation.worker.model.generator.ThrowingRunnable;
 import esa.s1pdgs.cpoc.preparation.worker.report.TaskTableLookupReportingOutput;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -41,13 +54,16 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 	private ProcessProperties processProperties;
 
 	private AppCatJobService appCatJobService;
+	
+	private Map<String, TaskTableAdapter> taskTableAdapters;
 
 	public PreparationWorkerService(final TaskTableMapperService taskTableService, final ProductTypeAdapter typeAdapter,
-			final ProcessProperties properties, final AppCatJobService appCat) {
+			final ProcessProperties properties, final AppCatJobService appCat, final Map<String, TaskTableAdapter> taskTableAdapters) {
 		this.taskTableService = taskTableService;
 		this.typeAdapter = typeAdapter;
 		this.processProperties = properties;
 		this.appCatJobService = appCat;
+		this.taskTableAdapters = taskTableAdapters;
 	}
 
 	@Override
@@ -61,6 +77,8 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 						catalogEvent.getProductName()),
 				new ReportingMessage("Check if any jobs can be finalized for the IPF"));
 
+		List<IpfExecutionJob> result = new ArrayList<>();
+
 		try {
 			// Map event to tasktables
 			List<IpfPreparationJob> preparationJobs = taskTableService.mapEventToTaskTables(catalogEvent, reporting);
@@ -71,10 +89,11 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			}
 
 			// Find matching jobs
+			List<AppDataJob> appDataJobs = appCatJobService.findByTriggerProduct(catalogEvent.getProductType());
 
 			// Check if jobs are ready
+			result = checkIfJobsAreReady(appDataJobs);
 
-			// Save new status
 		} catch (Exception e) {
 			reporting.error(new ReportingMessage("Preparation worker failed: %s", LogUtils.toString(e)));
 			throw new RuntimeException(e);
@@ -82,7 +101,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 
 		reporting.end(null, new ReportingMessage("End preparation of new execution jobs"));
 
-		return new ArrayList<>();
+		return result;
 	}
 
 	public final List<AppDataJob> dispatch(final IpfPreparationJob preparationJob) throws Exception {
@@ -112,7 +131,8 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 				result = handleJobs(preparationJob, jobs, reporting.getUid(), tasktableFilename);
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error handling PreparationJob {}: {}", preparationJob.getUid().toString(), LogUtils.toString(e));
+			LOGGER.error("Error handling PreparationJob {}: {}", preparationJob.getUid().toString(),
+					LogUtils.toString(e));
 			reporting.error(
 					new ReportingMessage("Error associating TaskTables to AppDataJobs: %s", LogUtils.toString(e)));
 		}
@@ -154,8 +174,8 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 							firstEvent.getUid());
 					appCatJobService.appendCatalogEvent(existingJob.getId(), firstEvent);
 				} else {
-					LOGGER.debug("Persisting new job for preparation job {} (catalog event {}) ...", preparationJob.getUid(),
-							firstEvent.getUid());
+					LOGGER.debug("Persisting new job for preparation job {} (catalog event {}) ...",
+							preparationJob.getUid(), firstEvent.getUid());
 					final Date now = new Date();
 					final AppDataJobGeneration gen = new AppDataJobGeneration();
 					gen.setState(AppDataJobGenerationState.INITIAL);
@@ -181,6 +201,70 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 		return dispatchedJobs;
 	}
 
+	public synchronized List<IpfExecutionJob> checkIfJobsAreReady(List<AppDataJob> appDataJobs) {
+
+		for (AppDataJob job : appDataJobs) {			
+			if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
+				job = mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+			}
+
+			if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
+//				auxSearch()
+			}
+
+			if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
+//				send();
+			}
+
+			if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
+//				terminate();
+			}
+			
+			// Update Job in Mongo
+			try {
+				appCatJobService.updateJob(job);
+			} catch (AppCatalogJobNotFoundException e ) {
+				LOGGER.error("Error while saving new state of AppDataJob {}: {}", job.getId(), e.getMessage());
+			}
+		}
+		
+		return new ArrayList<>();
+	}
+	
+	public AppDataJob mainInputSearch(AppDataJob job, TaskTableAdapter taskTableAdapter) {
+		AppDataJobGenerationState newState = job.getGeneration().getState();
+		
+		final AtomicBoolean timeout = new AtomicBoolean(false);
+		Product queried = null;
+		try {
+			queried = perform(
+					() -> typeAdapter.mainInputSearch(job, taskTableAdapter),
+					"querying input " + job.getProductName()
+			);
+			job.setProduct(queried.toProduct());
+			job.setAdditionalInputs(queried.overridingInputs());
+			// FIXME dirty workaround warning, the product above is still altered in validate by modifying 
+			// the start stop time for segments
+			performVoid(
+				() -> {
+					try {
+						typeAdapter.validateInputSearch(job, taskTableAdapter);
+					} catch (final TimedOutException e) {
+						timeout.set(true);
+					} 
+				},
+				"validating availability of input products for " + job.getProductName()
+			);
+			newState = AppDataJobGenerationState.PRIMARY_CHECK;
+		}
+		finally
+		{
+			job.getGeneration().setState(newState);
+		}
+		
+		return job;
+	}
+
 	/**
 	 * Returns the job of the list with the matching tasktable name. Returns null if
 	 * no matching job was found
@@ -192,6 +276,43 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			}
 		}
 		return null;
+	}
+	
+	
+	private final void performVoid(final ThrowingRunnable command, final String name) throws JobStateTransistionFailed {
+		perform(
+				() -> {command.run(); return null;}, 
+				name
+		);
+	}
+	
+	private final <E> E perform(final Callable<E> command, final String name) throws JobStateTransistionFailed {
+		try {
+			return command.call();
+		} 
+		// expected on failed transition
+		catch (final IpfPrepWorkerInputsMissingException e) {
+			// TODO once there is some time for refactoring, cleanup the created error message of 
+			// IpfPrepWorkerInputsMissingException to be more descriptive
+			throw new JobStateTransistionFailed(e.getLogMessage());
+		}
+		// expected on updating AppDataJob in persistence -> simply retry next time
+		catch (final AppCatJobUpdateFailed e) {
+			throw new JobStateTransistionFailed(
+					String.format("Error on persisting change of '%s': %s", name, Exceptions.messageOf(e)), 
+					e
+			);
+		}
+		// expected on discard scenarios -> terminate job
+		catch (final DiscardedException e) {
+			throw e;
+		}
+		catch (final Exception e) {
+			throw new RuntimeException(
+					String.format("Fatal error on %s: %s", name, Exceptions.messageOf(e)),
+					e
+			);
+		}
 	}
 
 }
