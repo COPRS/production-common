@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.preparation.worker.db.AppDataJobRepository;
 import esa.s1pdgs.cpoc.preparation.worker.db.SequenceDao;
+import esa.s1pdgs.cpoc.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
 import esa.s1pdgs.cpoc.preparation.worker.service.TaskTableMapperService;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
@@ -30,7 +31,7 @@ import esa.s1pdgs.cpoc.xml.XmlConverter;
 public class ServiceConfiguration {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServiceConfiguration.class);
-	
+
 	@Bean
 	@Autowired
 	public TasktableMapper newTastTableMapper(final XmlConverter xmlConverter,
@@ -60,7 +61,7 @@ public class ServiceConfiguration {
 		LOG.info("Create new AppCatJobService with {} and {}", repository.toString(), sequenceDao.toString());
 		return new AppCatJobService(repository, sequenceDao);
 	}
-	
+
 	@Bean
 	@Autowired
 	public TasktableManager tasktableManager(final PreparationWorkerProperties settings) {
@@ -73,15 +74,21 @@ public class ServiceConfiguration {
 			final ElementMapper elementMapper, final TaskTableFactory taskTableFactory,
 			final PreparationWorkerProperties settings, final TasktableManager ttManager) {
 		Map<String, TaskTableAdapter> ttAdapters = new HashMap<>();
-		
+
 		for (File taskTableFile : ttManager.tasktables()) {
-			ttAdapters.put(taskTableFile.getName(), new TaskTableAdapter(
-					taskTableFile, 
-					taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), 
-					elementMapper,
-					settings.getProductMode()));
+			ttAdapters.put(taskTableFile.getName(),
+					new TaskTableAdapter(taskTableFile,
+							taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), elementMapper,
+							settings.getProductMode()));
 		}
-		
+
 		return ttAdapters;
+	}
+
+	@Bean
+	@Autowired
+	public AuxQueryHandler auxQueryHandler(final MetadataClient metadataClient,
+			final PreparationWorkerProperties settings) {
+		return new AuxQueryHandler(metadataClient, settings.getProductMode());
 	}
 }

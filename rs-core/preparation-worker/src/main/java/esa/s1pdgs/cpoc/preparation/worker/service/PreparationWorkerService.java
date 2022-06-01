@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
@@ -35,6 +36,8 @@ import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.TimedOutException;
 import esa.s1pdgs.cpoc.preparation.worker.model.generator.ThrowingRunnable;
+import esa.s1pdgs.cpoc.preparation.worker.query.AuxQuery;
+import esa.s1pdgs.cpoc.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.preparation.worker.report.TaskTableLookupReportingOutput;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.Product;
@@ -54,16 +57,20 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 	private ProcessProperties processProperties;
 
 	private AppCatJobService appCatJobService;
-	
+
 	private Map<String, TaskTableAdapter> taskTableAdapters;
 
+	private AuxQueryHandler auxQueryHandler;
+
 	public PreparationWorkerService(final TaskTableMapperService taskTableService, final ProductTypeAdapter typeAdapter,
-			final ProcessProperties properties, final AppCatJobService appCat, final Map<String, TaskTableAdapter> taskTableAdapters) {
+			final ProcessProperties properties, final AppCatJobService appCat,
+			final Map<String, TaskTableAdapter> taskTableAdapters, final AuxQueryHandler auxQueryHandler) {
 		this.taskTableService = taskTableService;
 		this.typeAdapter = typeAdapter;
 		this.processProperties = properties;
 		this.appCatJobService = appCat;
 		this.taskTableAdapters = taskTableAdapters;
+		this.auxQueryHandler = auxQueryHandler;
 	}
 
 	@Override
@@ -203,13 +210,23 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 
 	public synchronized List<IpfExecutionJob> checkIfJobsAreReady(List<AppDataJob> appDataJobs) {
 
-		for (AppDataJob job : appDataJobs) {			
+		for (AppDataJob job : appDataJobs) {
 			if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
-				job = mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+				try {
+					LOGGER.info("Start main input search for AppDataJob {}", job.getId());
+					job = mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+				} catch (JobStateTransistionFailed e) {
+					LOGGER.info("Main input search did not complete successfully: ", e.getMessage());
+				}
 			}
 
 			if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
-//				auxSearch()
+				try {
+					LOGGER.info("Start aux input search for AppDataJob {}", job.getId());
+					job = auxInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+				} catch (JobStateTransistionFailed e) {
+					LOGGER.info("Aux input search did not complete successfully: ", e.getMessage());
+				}
 			}
 
 			if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
@@ -219,49 +236,63 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
 //				terminate();
 			}
-			
+
 			// Update Job in Mongo
 			try {
 				appCatJobService.updateJob(job);
-			} catch (AppCatalogJobNotFoundException e ) {
+			} catch (AppCatalogJobNotFoundException e) {
 				LOGGER.error("Error while saving new state of AppDataJob {}: {}", job.getId(), e.getMessage());
 			}
 		}
-		
+
 		return new ArrayList<>();
 	}
-	
-	public AppDataJob mainInputSearch(AppDataJob job, TaskTableAdapter taskTableAdapter) {
+
+	public AppDataJob mainInputSearch(AppDataJob job, TaskTableAdapter taskTableAdapter)
+			throws JobStateTransistionFailed {
 		AppDataJobGenerationState newState = job.getGeneration().getState();
-		
+
 		final AtomicBoolean timeout = new AtomicBoolean(false);
 		Product queried = null;
 		try {
-			queried = perform(
-					() -> typeAdapter.mainInputSearch(job, taskTableAdapter),
-					"querying input " + job.getProductName()
-			);
+			queried = perform(() -> typeAdapter.mainInputSearch(job, taskTableAdapter),
+					"querying input " + job.getProductName());
 			job.setProduct(queried.toProduct());
 			job.setAdditionalInputs(queried.overridingInputs());
-			// FIXME dirty workaround warning, the product above is still altered in validate by modifying 
+			// FIXME dirty workaround warning, the product above is still altered in
+			// validate by modifying
 			// the start stop time for segments
-			performVoid(
-				() -> {
-					try {
-						typeAdapter.validateInputSearch(job, taskTableAdapter);
-					} catch (final TimedOutException e) {
-						timeout.set(true);
-					} 
-				},
-				"validating availability of input products for " + job.getProductName()
-			);
+			performVoid(() -> {
+				try {
+					typeAdapter.validateInputSearch(job, taskTableAdapter);
+				} catch (final TimedOutException e) {
+					timeout.set(true);
+				}
+			}, "validating availability of input products for " + job.getProductName());
 			newState = AppDataJobGenerationState.PRIMARY_CHECK;
-		}
-		finally
-		{
+		} finally {
 			job.getGeneration().setState(newState);
 		}
-		
+
+		return job;
+	}
+
+	public AppDataJob auxInputSearch(AppDataJob job, TaskTableAdapter taskTableAdapter)
+			throws JobStateTransistionFailed {
+		AppDataJobGenerationState newState = job.getGeneration().getState();
+		final AuxQuery auxQuery = auxQueryHandler.queryFor(job, taskTableAdapter);
+
+		List<AppDataJobTaskInputs> queried = Collections.emptyList();
+
+		try {
+			queried = perform(() -> auxQuery.queryAux(), "querying required AUX");
+			job.setAdditionalInputs(queried);
+			performVoid(() -> auxQuery.validate(job), "validating availability of AUX for " + job.getProductName());
+			newState = AppDataJobGenerationState.READY;
+		} finally {
+			job.getGeneration().setState(newState);
+		}
+
 		return job;
 	}
 
@@ -277,41 +308,35 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 		}
 		return null;
 	}
-	
-	
+
 	private final void performVoid(final ThrowingRunnable command, final String name) throws JobStateTransistionFailed {
-		perform(
-				() -> {command.run(); return null;}, 
-				name
-		);
+		perform(() -> {
+			command.run();
+			return null;
+		}, name);
 	}
-	
+
 	private final <E> E perform(final Callable<E> command, final String name) throws JobStateTransistionFailed {
 		try {
 			return command.call();
-		} 
+		}
 		// expected on failed transition
 		catch (final IpfPrepWorkerInputsMissingException e) {
-			// TODO once there is some time for refactoring, cleanup the created error message of 
+			// TODO once there is some time for refactoring, cleanup the created error
+			// message of
 			// IpfPrepWorkerInputsMissingException to be more descriptive
 			throw new JobStateTransistionFailed(e.getLogMessage());
 		}
 		// expected on updating AppDataJob in persistence -> simply retry next time
 		catch (final AppCatJobUpdateFailed e) {
 			throw new JobStateTransistionFailed(
-					String.format("Error on persisting change of '%s': %s", name, Exceptions.messageOf(e)), 
-					e
-			);
+					String.format("Error on persisting change of '%s': %s", name, Exceptions.messageOf(e)), e);
 		}
 		// expected on discard scenarios -> terminate job
 		catch (final DiscardedException e) {
 			throw e;
-		}
-		catch (final Exception e) {
-			throw new RuntimeException(
-					String.format("Fatal error on %s: %s", name, Exceptions.messageOf(e)),
-					e
-			);
+		} catch (final Exception e) {
+			throw new RuntimeException(String.format("Fatal error on %s: %s", name, Exceptions.messageOf(e)), e);
 		}
 	}
 

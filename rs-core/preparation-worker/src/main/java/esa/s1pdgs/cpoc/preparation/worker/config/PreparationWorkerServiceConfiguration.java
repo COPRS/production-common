@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
 import esa.s1pdgs.cpoc.preparation.worker.service.PreparationWorkerService;
 import esa.s1pdgs.cpoc.preparation.worker.service.TaskTableMapperService;
@@ -36,10 +37,13 @@ public class PreparationWorkerServiceConfiguration {
 
 	@Autowired
 	private Map<String, TaskTableAdapter> taskTableAdapters;
+	
+	@Autowired
+	private AuxQueryHandler auxQueryHandler;
 
 	@Bean
 	public Function<CatalogEvent, List<IpfExecutionJob>> prepareExecutionJobs() {
 		return new PreparationWorkerService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
-				taskTableAdapters);
+				taskTableAdapters, auxQueryHandler);
 	}
 }
