@@ -17,8 +17,10 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
+import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
@@ -271,7 +273,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			}, "validating availability of input products for " + job.getProductName());
 			newState = AppDataJobGenerationState.PRIMARY_CHECK;
 		} finally {
-			job.getGeneration().setState(newState);
+			updateJobMainInputSearch(job, queried, newState);
 		}
 
 		return job;
@@ -290,7 +292,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			performVoid(() -> auxQuery.validate(job), "validating availability of AUX for " + job.getProductName());
 			newState = AppDataJobGenerationState.READY;
 		} finally {
-			job.getGeneration().setState(newState);
+			updateJobAuxSearch(job, queried, newState);
 		}
 
 		return job;
@@ -337,6 +339,55 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			throw e;
 		} catch (final Exception e) {
 			throw new RuntimeException(String.format("Fatal error on %s: %s", name, Exceptions.messageOf(e)), e);
+		}
+	}
+	
+	private void updateJobMainInputSearch(AppDataJob job, Product queried, AppDataJobGenerationState newState) {
+		if (queried != null) {
+			final AppDataJobProduct prod = queried.toProduct();
+			job.setProduct(prod);						
+			job.setAdditionalInputs(queried.overridingInputs());
+			job.setPreselectedInputs(queried.preselectedInputs());
+			
+			// dirty workaround for segment and session scenario
+			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
+			job.setStartTime(productAdapter.getStartTime());
+			job.setStopTime(productAdapter.getStopTime());
+		}
+		
+		// Before updating the state -> save last state
+		job.getGeneration().setPreviousState(job.getGeneration().getState());
+		
+		// no transition?
+		if (job.getGeneration().getState() == newState) {
+			// don't update jobs last modified date here to enable timeout, just update the generations 
+			// last update time
+			job.getGeneration().setLastUpdateDate(new Date());		
+			job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
+		}
+		else {
+			job.getGeneration().setState(newState);
+			job.setLastUpdateDate(new Date());
+		}
+	}
+	
+	private void updateJobAuxSearch(AppDataJob job, List<AppDataJobTaskInputs> queried, AppDataJobGenerationState newState) {
+		if (!queried.isEmpty()) {
+			job.setAdditionalInputs(queried);	
+		}
+		
+		// Before updating the state -> save last state
+		job.getGeneration().setPreviousState(job.getGeneration().getState());
+		
+		// no transition?
+		if (job.getGeneration().getState() == newState) {
+			// don't update jobs last modified date here to enable timeout, just update the generation time
+			job.getGeneration().setLastUpdateDate(new Date());
+			job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
+		}
+		else {
+			job.getGeneration().setState(newState);
+			job.setLastUpdateDate(new Date());
 		}
 	}
 
