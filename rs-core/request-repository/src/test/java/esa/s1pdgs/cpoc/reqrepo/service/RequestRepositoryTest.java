@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.config.RequestRepositoryConfiguration;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
@@ -133,7 +133,7 @@ public class RequestRepositoryTest {
 
 	@Test
 	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRequest_ShallResubmitAndDelete() {	
-		final FailedProcessing fp = newFailedProcessing(123, new ProductionEvent("f","b", ProductFamily.AUXILIARY_FILE)); 
+		final FailedProcessing fp = newFailedProcessing(123, new CatalogJob("f","b", ProductFamily.AUXILIARY_FILE)); 
 		doReturn(fp)
 			.when(failedProcessingRepo)
 			.findById(123);
@@ -147,7 +147,7 @@ public class RequestRepositoryTest {
 
 	@Test(expected = RuntimeException.class)
 	public void testRestartAndDeleteFailedProcessing_OnTopicNull_ShallThrowException() {		
-		final FailedProcessing fp = newFailedProcessing(456, new ProductionEvent("f","b", ProductFamily.AUXILIARY_FILE));
+		final FailedProcessing fp = newFailedProcessing(456, new CatalogJob("f","b", ProductFamily.AUXILIARY_FILE));
 		fp.setTopic(null);
 
 		doReturn(fp)
@@ -251,10 +251,6 @@ public class RequestRepositoryTest {
 		assertEquals(0, actual.size());	
 	}
 	
-	
-	
-	
-	
 	private FailedProcessingDto newFailedProcessingDto(final long id) {
 		final GenericMessageDto<?> mess = new GenericMessageDto<>();
 		mess.setId(id);
@@ -266,7 +262,7 @@ public class RequestRepositoryTest {
 	}
 	
 	private FailedProcessing newFailedProcessing(final long id) {
-		return newFailedProcessing(id, new ProductionEvent());
+		return newFailedProcessing(id, new CatalogJob());
 	}
 	
 	private FailedProcessing newFailedProcessing(final long id, final AbstractMessage mess) {

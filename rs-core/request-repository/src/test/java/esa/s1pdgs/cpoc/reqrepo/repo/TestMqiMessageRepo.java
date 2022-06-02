@@ -7,52 +7,35 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.common.MessageState;
+import esa.s1pdgs.cpoc.reqrepo.config.TestConfig;
 import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
-@Ignore
 @RunWith(SpringRunner.class)
 @DataMongoTest
-@EnableMongoRepositories(basePackageClasses = MqiMessageRepo.class)
-@ActiveProfiles("test")
+@Import(TestConfig.class)
+@TestPropertySource(locations="classpath:default-mongodb-port.properties")
 public class TestMqiMessageRepo {	
-	private static final List<String> PROCESSING_TYPES_LIST = Arrays.asList("foo","bar");	
+	private static final List<String> PROCESSING_TYPES_LIST = Arrays.asList("foo","bar", "t-pdgs-aio-l0-segment-production-events");	
 	
     @Autowired
     private MongoOperations ops;
 
     @Autowired
     private MqiMessageRepo uut;
-
-    /*
-     * This doesn't seems to be working. A possible work around can be to download the package manually, so it is not downloaded
-     * at runtime anymore causing issues with the Werum-Proxy. E.g. under linux:
-     * mkdir -p ~/.embedmongo/linux && cd .embedmongo/linux && wget https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.5.5.tgz 
-     */
-	{
-		if ("http://proxy.net.werum:8080/".equals(System.getenv("http_proxy"))) {
-			System.setProperty("http.proxyHost", "proxy.net.werum");
-			System.setProperty("http.proxyPort", "8080");
-			System.setProperty("https.proxyHost", "proxy.net.werum");
-			System.setProperty("https.proxyPort", "8080");
-		}
-
-	}
-	
     @Test
     public final void testFindByIdentifier_OnExistingId_ShallReturnObject() throws Exception
     {
@@ -274,6 +257,7 @@ public class TestMqiMessageRepo {
     	ops.insert(newMqiMessage(3));  
     	assertEquals(3L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, Collections.singletonList("t-pdgs-aio-l0-segment-production-events")));
     	uut.deleteAll();
+    	assertEquals(0L, uut.countByStateInAndTopicIn(RequestRepository.PROCESSING_STATE_LIST, Collections.singletonList("t-pdgs-aio-l0-segment-production-events")));
     }
     
     @Test

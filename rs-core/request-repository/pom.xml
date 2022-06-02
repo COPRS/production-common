@@ -89,6 +89,8 @@
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
             <scope>test</scope>
+            <!-- Override managed versions -->
+            <version>3.4.5</version>
         </dependency>
         
         <dependency>
@@ -108,6 +110,11 @@
 			<artifactId>openapi-parser</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
 	<build>
