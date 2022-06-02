@@ -56,7 +56,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	 */
 	private List<LevelJobPoolDto> pools = new ArrayList<>();
 
-	private GenericMessageDto<IpfPreparationJob> ipfPreparationJobMessage;
+	private IpfPreparationJob preparationJob;
 
 	private boolean timedOut = false;
 
@@ -216,12 +216,12 @@ public class IpfExecutionJob extends AbstractMessage {
 		this.pools.add(pool);
 	}
 
-	public GenericMessageDto<IpfPreparationJob> getIpfPreparationJobMessage() {
-		return ipfPreparationJobMessage;
+	public IpfPreparationJob getPreparationJob() {
+		return preparationJob;
 	}
 
-	public void setIpfPreparationJobMessage(final GenericMessageDto<IpfPreparationJob> ipfPreparationJobMessage) {
-		this.ipfPreparationJobMessage = ipfPreparationJobMessage;
+	public void setPreparationJob(final IpfPreparationJob preparationJob) {
+		this.preparationJob = preparationJob;
 	}
 
 	public boolean isTimedOut() {
@@ -244,8 +244,8 @@ public class IpfExecutionJob extends AbstractMessage {
 	public String toString() {
 		return "IpfExecutionJob [productProcessMode=" + productProcessMode + ", workDirectory=" + workDirectory
 				+ ", jobOrder=" + jobOrder + ", timeliness=" + timeliness + ", etadMode=" + etadMode + ", inputs="
-				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", ipfPreparationJobMessage="
-				+ ipfPreparationJobMessage + ", timedOut=" + timedOut + "productFamily=" + productFamily
+				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", preparationJob="
+				+ preparationJob + ", timedOut=" + timedOut + "productFamily=" + productFamily
 				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", uid=" + uid
 				+ ", creationDate=" + creationDate + ", podName=" + podName + ", allowedActions=" + allowedActions
 				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
@@ -255,7 +255,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(etadMode, inputs, ipfPreparationJobMessage, jobOrder, outputs, pools,
+		result = prime * result + Objects.hash(etadMode, inputs, preparationJob, jobOrder, outputs, pools,
 				productProcessMode, timedOut, timeliness, workDirectory);
 		return result;
 	}
@@ -270,7 +270,7 @@ public class IpfExecutionJob extends AbstractMessage {
 			return false;
 		final IpfExecutionJob other = (IpfExecutionJob) obj;
 		return Objects.equals(etadMode, other.etadMode) && Objects.equals(inputs, other.inputs)
-				&& Objects.equals(ipfPreparationJobMessage, other.ipfPreparationJobMessage)
+				&& Objects.equals(preparationJob, other.preparationJob)
 				&& Objects.equals(jobOrder, other.jobOrder) && Objects.equals(outputs, other.outputs)
 				&& Objects.equals(pools, other.pools) && Objects.equals(productProcessMode, other.productProcessMode)
 				&& timedOut == other.timedOut && Objects.equals(timeliness, other.timeliness)
