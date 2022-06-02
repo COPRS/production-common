@@ -248,6 +248,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			}
 
 			if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
+				// TODO: This step was mandatory before to make sure no duplicate jobs are created. Is this still necessary?
 //				terminate();
 			}
 
@@ -259,7 +260,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			}
 		}
 
-		return new ArrayList<>();
+		return executionJobs;
 	}
 
 	public AppDataJob mainInputSearch(AppDataJob job, TaskTableAdapter taskTableAdapter)
