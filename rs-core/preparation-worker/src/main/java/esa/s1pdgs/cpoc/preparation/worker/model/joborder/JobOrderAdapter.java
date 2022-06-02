@@ -48,13 +48,13 @@ import esa.s1pdgs.cpoc.xml.model.joborder.enums.JobOrderFileNameType;
 public final class JobOrderAdapter
 {
 	public static final class Factory {	
-		private final Supplier<JobOrder> jobOrderSupplier;
+		private final Function<TaskTableAdapter, JobOrder> jobOrderSupplier;
 		private final ProductTypeAdapter typeAdapter;
 		private final ElementMapper elementMapper;
 		private final XmlConverter xmlConverter;
 
 		public Factory(
-				final Supplier<JobOrder> jobOrderSupplier, 
+				final Function<TaskTableAdapter, JobOrder> jobOrderSupplier, 
 				final ProductTypeAdapter typeAdapter,
 				final ElementMapper elementMapper,
 				final XmlConverter xmlConverter
@@ -65,7 +65,7 @@ public final class JobOrderAdapter
 			this.xmlConverter = xmlConverter;
 		}
 
-		public final JobOrderAdapter newJobOrderFor(final AppDataJob job) {
+		public final JobOrderAdapter newJobOrderFor(final AppDataJob job, final TaskTableAdapter taskTableAdapter) {
 			final long inc = job.getId();
 			
 			final String workingDir = "/data/localWD/" + inc + "/";
@@ -73,7 +73,7 @@ public final class JobOrderAdapter
 					workingDir,
 					"JobOrder." + inc + ".xml"
 			);
-			final JobOrder jobOrder = jobOrderSupplier.get();
+			final JobOrder jobOrder = jobOrderSupplier.apply(taskTableAdapter);
 			
 			// collect all additional inputs
 			final Map<String, AppDataJobInput> inputsByReference =

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
 import esa.s1pdgs.cpoc.preparation.worker.service.PreparationWorkerService;
@@ -40,10 +41,13 @@ public class PreparationWorkerServiceConfiguration {
 	
 	@Autowired
 	private AuxQueryHandler auxQueryHandler;
+	
+	@Autowired
+	private Publisher publisher;
 
 	@Bean
 	public Function<CatalogEvent, List<IpfExecutionJob>> prepareExecutionJobs() {
 		return new PreparationWorkerService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
-				taskTableAdapters, auxQueryHandler);
+				taskTableAdapters, auxQueryHandler, publisher);
 	}
 }

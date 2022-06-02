@@ -91,7 +91,7 @@ public class SppMbuTypeAdapterTest {
         final JobOrder jobOrder = taskTableAdapter.newJobOrder(processSettings, ProductMode.NON_SLICING);
 
         jobOrderFactory = new JobOrderAdapter.Factory(
-                () -> jobOrder,
+                (t) -> jobOrder,
                 productTypeAdapter,
                 elementMapper,
                 xmlConverter
@@ -138,7 +138,7 @@ public class SppMbuTypeAdapterTest {
 			fail("All necessary inputs shall be provided, selection logic have a bug!");
 		}
 		
-		JobOrderAdapter jobOrderAdapter = jobOrderFactory.newJobOrderFor(appDataJob);
+		JobOrderAdapter jobOrderAdapter = jobOrderFactory.newJobOrderFor(appDataJob, taskTableAdapter);
 		
 		final String expectedJobOrder = new String(Files.readAllBytes(new File(
 				"./src/test/resources/jobOrder_SPP_MBU_expected.xml").toPath()), StandardCharsets.UTF_8);

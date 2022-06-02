@@ -79,7 +79,7 @@ public class JobOrderAdapterTest {
         final JobOrder jobOrder = taskTableAdapter.newJobOrder(processSettings, ProductMode.SLICING);
 
         final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
-                () -> jobOrder,
+                (t) -> jobOrder,
                 productTypeAdapter,
                 elementMapper,
                 xmlConverter
@@ -101,7 +101,7 @@ public class JobOrderAdapterTest {
 
 
         //internally the inputs are now added to the jobOrder
-        jobOrderFactory.newJobOrderFor(job);
+        jobOrderFactory.newJobOrderFor(job, taskTableAdapter);
 
         assertThat(
                 procOfType("AIOP_PROC_APP", jobOrder),

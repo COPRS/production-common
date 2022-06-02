@@ -38,6 +38,7 @@ import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.TimedOutException;
 import esa.s1pdgs.cpoc.preparation.worker.model.generator.ThrowingRunnable;
+import esa.s1pdgs.cpoc.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.preparation.worker.query.AuxQuery;
 import esa.s1pdgs.cpoc.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.preparation.worker.report.TaskTableLookupReportingOutput;
@@ -64,15 +65,19 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 
 	private AuxQueryHandler auxQueryHandler;
 
+	private Publisher publisher;
+
 	public PreparationWorkerService(final TaskTableMapperService taskTableService, final ProductTypeAdapter typeAdapter,
 			final ProcessProperties properties, final AppCatJobService appCat,
-			final Map<String, TaskTableAdapter> taskTableAdapters, final AuxQueryHandler auxQueryHandler) {
+			final Map<String, TaskTableAdapter> taskTableAdapters, final AuxQueryHandler auxQueryHandler,
+			final Publisher publisher) {
 		this.taskTableService = taskTableService;
 		this.typeAdapter = typeAdapter;
 		this.processProperties = properties;
 		this.appCatJobService = appCat;
 		this.taskTableAdapters = taskTableAdapters;
 		this.auxQueryHandler = auxQueryHandler;
+		this.publisher = publisher;
 	}
 
 	@Override
@@ -211,7 +216,9 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 	}
 
 	public synchronized List<IpfExecutionJob> checkIfJobsAreReady(List<AppDataJob> appDataJobs) {
-
+		
+		List<IpfExecutionJob> executionJobs = new ArrayList<>();
+		
 		for (AppDataJob job : appDataJobs) {
 			if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
 				try {
@@ -232,7 +239,12 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			}
 
 			if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
-//				send();
+				try {
+					LOGGER.info("Start generating IpfExecutionJob for AppDataJob {}", job.getId());
+					executionJobs.add(createIpfExecutionJob(job, taskTableAdapters.get(job.getTaskTableName())));
+				} catch (JobStateTransistionFailed e) {
+					LOGGER.info("Generation of IpfExecutionJob did not complete successfully: ", e.getMessage());
+				}
 			}
 
 			if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
@@ -297,6 +309,20 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 
 		return job;
 	}
+	
+	public IpfExecutionJob createIpfExecutionJob(AppDataJob job, TaskTableAdapter taskTableAdapter) throws JobStateTransistionFailed {
+		AppDataJobGenerationState newState = job.getGeneration().getState();
+		IpfExecutionJob executionJob = null;
+		
+		try {
+			executionJob = publisher.createExecutionJob(job, taskTableAdapter);
+			newState = AppDataJobGenerationState.SENT;
+		} finally {
+			updateSend(job, newState);
+		}
+		
+		return executionJob;
+	}
 
 	/**
 	 * Returns the job of the list with the matching tasktable name. Returns null if
@@ -341,51 +367,69 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 			throw new RuntimeException(String.format("Fatal error on %s: %s", name, Exceptions.messageOf(e)), e);
 		}
 	}
-	
+
 	private void updateJobMainInputSearch(AppDataJob job, Product queried, AppDataJobGenerationState newState) {
 		if (queried != null) {
 			final AppDataJobProduct prod = queried.toProduct();
-			job.setProduct(prod);						
+			job.setProduct(prod);
 			job.setAdditionalInputs(queried.overridingInputs());
 			job.setPreselectedInputs(queried.preselectedInputs());
-			
+
 			// dirty workaround for segment and session scenario
 			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(prod);
 			job.setStartTime(productAdapter.getStartTime());
 			job.setStopTime(productAdapter.getStopTime());
 		}
-		
+
 		// Before updating the state -> save last state
 		job.getGeneration().setPreviousState(job.getGeneration().getState());
-		
+
 		// no transition?
 		if (job.getGeneration().getState() == newState) {
-			// don't update jobs last modified date here to enable timeout, just update the generations 
+			// don't update jobs last modified date here to enable timeout, just update the
+			// generations
 			// last update time
-			job.getGeneration().setLastUpdateDate(new Date());		
-			job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
+			job.getGeneration().setLastUpdateDate(new Date());
+			job.getGeneration().setNbErrors(job.getGeneration().getNbErrors() + 1);
+		} else {
+			job.getGeneration().setState(newState);
+			job.setLastUpdateDate(new Date());
 		}
-		else {
+	}
+
+	private void updateJobAuxSearch(AppDataJob job, List<AppDataJobTaskInputs> queried,
+			AppDataJobGenerationState newState) {
+		if (!queried.isEmpty()) {
+			job.setAdditionalInputs(queried);
+		}
+
+		// Before updating the state -> save last state
+		job.getGeneration().setPreviousState(job.getGeneration().getState());
+
+		// no transition?
+		if (job.getGeneration().getState() == newState) {
+			// don't update jobs last modified date here to enable timeout, just update the
+			// generation time
+			job.getGeneration().setLastUpdateDate(new Date());
+			job.getGeneration().setNbErrors(job.getGeneration().getNbErrors() + 1);
+		} else {
 			job.getGeneration().setState(newState);
 			job.setLastUpdateDate(new Date());
 		}
 	}
 	
-	private void updateJobAuxSearch(AppDataJob job, List<AppDataJobTaskInputs> queried, AppDataJobGenerationState newState) {
-		if (!queried.isEmpty()) {
-			job.setAdditionalInputs(queried);	
-		}
-		
-		// Before updating the state -> save last state
-		job.getGeneration().setPreviousState(job.getGeneration().getState());
-		
-		// no transition?
+	private void updateSend(AppDataJob job, AppDataJobGenerationState newState) {
 		if (job.getGeneration().getState() == newState) {
+			// Before updating the state -> save last state
+			job.getGeneration().setPreviousState(job.getGeneration().getState());
+			
 			// don't update jobs last modified date here to enable timeout, just update the generation time
 			job.getGeneration().setLastUpdateDate(new Date());
 			job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
 		}
-		else {
+		else {		
+			// set the previous state to output state in order to wait before termination
+			job.getGeneration().setPreviousState(newState);
 			job.getGeneration().setState(newState);
 			job.setLastUpdateDate(new Date());
 		}
