@@ -64,6 +64,6 @@ public class TestIngestionFilterService {
 		
 		List<Message<IngestionJob>> filteredJobs = service.apply(ingestionJobs);
 		
-		assertEquals(0, filteredJobs.size());
+		assertEquals(null, filteredJobs);
 	}
 }

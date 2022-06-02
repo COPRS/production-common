@@ -7,6 +7,7 @@ import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
 
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -46,7 +47,7 @@ public class PreparationWorkerServiceConfiguration {
 	private Publisher publisher;
 
 	@Bean
-	public Function<CatalogEvent, List<IpfExecutionJob>> prepareExecutionJobs() {
+	public Function<CatalogEvent, List<Message<IpfExecutionJob>>> prepareExecutionJobs() {
 		return new PreparationWorkerService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
 				taskTableAdapters, auxQueryHandler, publisher);
 	}

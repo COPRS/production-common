@@ -10,9 +10,12 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
@@ -49,7 +52,7 @@ import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
-public class PreparationWorkerService implements Function<CatalogEvent, List<IpfExecutionJob>> {
+public class PreparationWorkerService implements Function<CatalogEvent, List<Message<IpfExecutionJob>>> {
 
 	static final Logger LOGGER = LogManager.getLogger(PreparationWorkerService.class);
 
@@ -81,7 +84,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 	}
 
 	@Override
-	public List<IpfExecutionJob> apply(CatalogEvent catalogEvent) {
+	public List<Message<IpfExecutionJob>> apply(CatalogEvent catalogEvent) {
 		final Reporting reporting = ReportingUtils
 				.newReportingBuilder(MissionId.fromFileName(catalogEvent.getKeyObjectStorage()))
 				.predecessor(catalogEvent.getUid()).newReporting("PreparationWorkerService");
@@ -115,7 +118,13 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Ipf
 
 		reporting.end(null, new ReportingMessage("End preparation of new execution jobs"));
 
-		return result;
+		// Prevent empty array messages on kafka topic
+		if (result.isEmpty()) {
+			return null;
+		} else {
+			// Wrap each ExecutionJob into a KafkaMessage so they are sent individually to execution workers
+			return result.stream().map(job -> MessageBuilder.withPayload(job).build()).collect(Collectors.toList());
+		}
 	}
 
 	public final List<AppDataJob> dispatch(final IpfPreparationJob preparationJob) throws Exception {

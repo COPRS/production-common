@@ -79,6 +79,11 @@ public class IngestionFilterService implements Function<List<IngestionJob>, List
 			}
 		}
 		
+		// Prevent empty array messages on kafka topic
+		if (filteredJobs.isEmpty()) {
+			return null;
+		}
+		
 		return filteredJobs;
 	}	
 }
