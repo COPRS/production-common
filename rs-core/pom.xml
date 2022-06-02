@@ -394,6 +394,7 @@
 		<!-- <module>metadata-catalog-timer</module> -->
 		<module>metadata-catalog-searchcontroller</module>
 		<module>distribution-worker</module>
+		<module>dlq-manager</module>
 		<module>prip-frontend</module>
 		<module>ddip-frontend</module>
 		<module>native-api</module>
