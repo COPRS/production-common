@@ -6,9 +6,9 @@ public class Rule {
 	private String errorTitle;
 	private String errorId;
 	private ActionType actionType;
-	private String targetTopic;
+	private String targetTopic = "";
 	private int maxRetry;
-	private String comment;
+	private String comment = "";
 	private Pattern regexPattern; 
 	
 	public boolean matches(String text) {

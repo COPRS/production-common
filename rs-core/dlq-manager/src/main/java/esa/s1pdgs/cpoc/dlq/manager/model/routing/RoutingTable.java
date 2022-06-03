@@ -77,9 +77,10 @@ public class RoutingTable {
 			}
 		}
 
+		// PROPERTY_NAME_TARGET_TOPIC and PROPERTY_NAME_COMMENT can be omitted
 		for (String property : Arrays.asList(PROPERTY_NAME_ERROR_TITLE, PROPERTY_NAME_ERROR_ID,
-				PROPERTY_NAME_ACTION_TYPE, PROPERTY_NAME_TARGET_TOPIC, PROPERTY_NAME_MAX_RETRY,
-				PROPERTY_NAME_PRIORITY, PROPERTY_NAME_COMMENT)) {
+				PROPERTY_NAME_ACTION_TYPE, PROPERTY_NAME_MAX_RETRY,
+				PROPERTY_NAME_PRIORITY)) {
 			if (!isPresent.get(unifyCase(property))) {
 				throw new IllegalArgumentException(String.format("Missing property '%s' in '%s'",
 						property, ruleConfiguration));
