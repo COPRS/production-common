@@ -11,8 +11,8 @@
 	<packaging>jar</packaging>
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-dlq-manager</project.build.finalName>
-		<project.artifactId>s1pdgs-dlq-manager</project.artifactId>
+		<project.build.finalName>rs-dlq-manager</project.build.finalName>
+		<project.artifactId>rs-dlq-manager</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.dlq.manager.Application</start-class>
 	</properties>
 
