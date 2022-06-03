@@ -63,5 +63,11 @@ public class Rule {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
+	
+	@Override
+	public String toString() {
+		return "Rule [errorTitle=" + errorTitle + ", errorId=" + errorId + ", actionType=" + actionType
+				+ ", targetTopic=" + targetTopic + ", maxRetry=" + maxRetry + ", comment=" + comment + "]";
+	}
 
 }

@@ -1,2 +1,3 @@
 # Logging
 logging.config=classpath:log4j2-test.yml
+kafka.enable=false

@@ -24,7 +24,7 @@ class TestRoutingTable {
 	
 	@Test
 	void testAutomaticLoading() {
-		assertEquals(2, routingTable.size());
+		assertEquals(8, routingTable.size());
 	}
 
 }

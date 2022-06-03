@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.dlq.manager.model.routing;
 
+import static esa.s1pdgs.cpoc.dlq.manager.model.routing.ActionType.NO_ACTION;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,11 +10,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import static esa.s1pdgs.cpoc.dlq.manager.model.routing.ActionType.NO_ACTION;
 
 public class RoutingTable {
 	
@@ -40,14 +41,15 @@ public class RoutingTable {
 			rule.setErrorID(getPropertyValue(PROPERTY_NAME_ERROR_ID, ruleConfiguration));
 			rule.setActionType(ActionType.fromValue(getPropertyValue(PROPERTY_NAME_ACTION_TYPE, ruleConfiguration)));
 			rule.setTargetTopic(getPropertyValue(PROPERTY_NAME_TARGET_TOPIC, ruleConfiguration));
-			rule.setMaxRetry(Integer.parseInt(getPropertyValue(PROPERTY_NAME_PRIORITY, ruleConfiguration)));
+			rule.setMaxRetry(Integer.parseInt(getPropertyValue(PROPERTY_NAME_MAX_RETRY, ruleConfiguration)));
 			rule.setComment(getPropertyValue(PROPERTY_NAME_COMMENT, ruleConfiguration));
-			final int priority = Integer.parseInt(getPropertyValue(PROPERTY_NAME_MAX_RETRY, ruleConfiguration));
+			final int priority = Integer.parseInt(getPropertyValue(PROPERTY_NAME_PRIORITY, ruleConfiguration));
 			if (!routingTable.rules.containsKey(priority)) {
 				routingTable.rules.put(priority, new ArrayList<>());				
 			}
 			routingTable.rules.get(priority).add(rule);
 		}
+		LOGGER.info("Routing table: {}", routingTable);
 		return routingTable;
 	}
 	
@@ -137,5 +139,11 @@ public class RoutingTable {
 	
 	public int size() {
 		return rules.values().stream().mapToInt(List::size).sum();
+	}
+	
+	@Override
+	public String toString() {
+		return rules.values().stream().flatMap(List::stream)
+		        .collect(Collectors.toList()).toString();
 	}
 }
