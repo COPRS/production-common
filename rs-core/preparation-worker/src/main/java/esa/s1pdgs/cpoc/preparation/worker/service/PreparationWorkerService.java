@@ -219,7 +219,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 					LOGGER.info("Start main input search for AppDataJob {}", job.getId());
 					job = inputSearchService.mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
 				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Main input search did not complete successfully: ", e.getMessage());
+					LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
 				}
 			}
 
@@ -228,7 +228,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 					LOGGER.info("Start aux input search for AppDataJob {}", job.getId());
 					job = inputSearchService.auxInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
 				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Aux input search did not complete successfully: ", e.getMessage());
+					LOGGER.info("Aux input search did not complete successfully: {}", e.getMessage());
 				}
 			}
 
@@ -244,7 +244,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 						LOGGER.error("Could not generate ExecutionJob for AppDataJob {}", job.getId());
 					}
 				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Generation of IpfExecutionJob did not complete successfully: ", e.getMessage());
+					LOGGER.info("Generation of IpfExecutionJob did not complete successfully: {}", e.getMessage());
 				}
 			}
 
