@@ -9,14 +9,13 @@ import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelB
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.json.JSONException;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.dlq.manager.config.TestConfig;
+import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerServiceConfiguration;
 import esa.s1pdgs.cpoc.dlq.manager.stream.StreamBridgeMessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
@@ -45,15 +45,14 @@ public class ITDlqManagerService {
 	StreamBridgeMessageProducer<String> producer;
 	
 	@Autowired
-	DlqManagerService dlqManagerService;
+	DlqManagerServiceConfiguration dlqManagerServiceConfiguration;
 	
-	@BeforeEach
-	public void beforeEach() {
-		MockitoAnnotations.openMocks(this);
-	}
+	Consumer<Message<?>> consumer;
 	
 	@Test
 	public void testSameTopicRetryTwiceThenParkingLot() throws JsonProcessingException, JSONException {
+		consumer = dlqManagerServiceConfiguration.route();
+		
 		ArgumentCaptor<String> targetTopicCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
 		
@@ -68,7 +67,7 @@ public class ITDlqManagerService {
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
 		
-		dlqManagerService.accept(message1);
+		consumer.accept(message1);
 		
 		verify(producer, times(1)).send(targetTopicCaptor.capture(), messageCaptor.capture());
 		assertEquals("t-pdgs-same", targetTopicCaptor.getValue());
@@ -88,7 +87,7 @@ public class ITDlqManagerService {
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
 		
-		dlqManagerService.accept(message2);
+		consumer.accept(message2);
 		
 		verify(producer, times(2)).send(targetTopicCaptor.capture(), messageCaptor.capture());
 		assertEquals("t-pdgs-same", targetTopicCaptor.getValue());
@@ -108,7 +107,7 @@ public class ITDlqManagerService {
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
 		
-		dlqManagerService.accept(message3);
+		consumer.accept(message3);
 		
 		verify(producer, times(3)).send(targetTopicCaptor.capture(), messageCaptor.capture());
 		assertEquals("t-pdgs-parking-lot", targetTopicCaptor.getValue());
@@ -116,6 +115,8 @@ public class ITDlqManagerService {
 	
 	@Test
 	public void testDifferentTopicRetry() throws JsonProcessingException, JSONException {
+		consumer = dlqManagerServiceConfiguration.route();
+		
 		ArgumentCaptor<String> targetTopicCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
 		
@@ -128,7 +129,7 @@ public class ITDlqManagerService {
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-origin".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "!$%foobar#§!".getBytes(StandardCharsets.UTF_8)));
 		
-		dlqManagerService.accept(message);
+		consumer.accept(message);
 		
 		verify(producer, times(1)).send(targetTopicCaptor.capture(), messageCaptor.capture());
 		assertEquals("t-pdgs-different", targetTopicCaptor.getValue());
@@ -144,6 +145,8 @@ public class ITDlqManagerService {
 	
 	@Test
 	public void testNoActionShallRouteToParkingLot() throws JsonProcessingException, JSONException {
+		consumer = dlqManagerServiceConfiguration.route();
+		
 		ArgumentCaptor<String> targetTopicCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
 		
@@ -157,7 +160,7 @@ public class ITDlqManagerService {
 						X_EXCEPTION_MESSAGE, "IOException"
 						.getBytes(StandardCharsets.UTF_8)));
 		
-		dlqManagerService.accept(message);
+		consumer.accept(message);
 		
 		verify(producer, times(1)).send(targetTopicCaptor.capture(), messageCaptor.capture());
 		assertEquals("t-pdgs-parking-lot", targetTopicCaptor.getValue());
@@ -171,7 +174,9 @@ public class ITDlqManagerService {
 	}
 	
 	@Test
-	public void testDeleteShallBeIgnored() throws JsonProcessingException, JSONException {	
+	public void testDeleteShallBeIgnored() throws JsonProcessingException, JSONException {
+		consumer = dlqManagerServiceConfiguration.route();
+		
 		CatalogJob catalogJob = new CatalogJob("foo", "foo", ProductFamily.AUXILIARY_FILE);
 		assertEquals(0, catalogJob.getRetryCounter());
 
@@ -182,7 +187,7 @@ public class ITDlqManagerService {
 						X_EXCEPTION_MESSAGE, "a message to IGNORE..."
 						.getBytes(StandardCharsets.UTF_8)));
 		
-		dlqManagerService.accept(message);
+		consumer.accept(message);
 		
 		verify(producer, times(0)).send(Mockito.anyString(), Mockito.anyString());
 	}

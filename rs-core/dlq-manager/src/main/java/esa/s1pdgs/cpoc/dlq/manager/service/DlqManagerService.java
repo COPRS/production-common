@@ -9,18 +9,15 @@ import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.messaging.Message;
-import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperties;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
 import esa.s1pdgs.cpoc.dlq.manager.stream.StreamBridgeMessageProducer;
 
-@Service
 public class DlqManagerService implements Consumer<Message<?>> {
 
 	private static final Logger LOGGER = LogManager.getLogger(DlqManagerService.class);
@@ -29,7 +26,6 @@ public class DlqManagerService implements Consumer<Message<?>> {
 	private final String parkingLotTopic;
 	private final StreamBridgeMessageProducer<String> producer;
 	
-	@Autowired
 	public DlqManagerService(final RoutingTable routingTable, 
 			final StreamBridgeMessageProducer<String> producer,
 			final DlqManagerConfigurationProperties properties) {
