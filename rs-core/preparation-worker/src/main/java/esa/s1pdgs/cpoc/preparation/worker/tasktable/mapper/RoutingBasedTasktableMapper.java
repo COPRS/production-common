@@ -1,14 +1,13 @@
 package esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-
-import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,64 +17,41 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
-import esa.s1pdgs.cpoc.xml.XmlConverter;
-import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRoute;
-import esa.s1pdgs.cpoc.xml.model.tasktable.routing.LevelProductsRouting;
 
 public class RoutingBasedTasktableMapper implements TasktableMapper {	
 	public static final class Factory {
-	    private final XmlConverter converter;
-	    private final String file;
+	    private final Map<String, String> inputMap;
 	    private final Function<AppDataJobProduct, String> keyFunction;
 	    
 	    private final Map<Pattern, List<String>> routingMap = new LinkedHashMap<>();
 
 		public Factory(
-				final XmlConverter xmlConverter, 
-				final String file, 
+				final Map<String, String> inputMap, 
 				final Function<AppDataJobProduct, String> keyFunction
 		) {
-			this.converter = xmlConverter;
-			this.file = file;
+			this.inputMap = inputMap;
 			this.keyFunction = keyFunction;
 		}
 				
-		public final RoutingBasedTasktableMapper newMapper() {			
-	        // Init the routing map from XML file located in the task table folder
-            final LevelProductsRouting routing = parse();
-            
-            Assert.isTrue(routing != null, String.format("Routing of '%s' is null", file));
-            Assert.isTrue(routing.getRoutes() != null, String.format("Routing of '%s' has no routes", file));
+		public final RoutingBasedTasktableMapper newMapper() {			  
+			Assert.isTrue(inputMap.isEmpty(), "No routing found. Please use the parameter 'tasktable.routing' to configure mappings between input events and tasktables.");
 
-            for (final LevelProductsRoute route : routing.getRoutes()) {
-            	final Pattern key = routeKeyPatternOf(route);
-            	final List<String> ttName = route.getRouteTo().getTaskTables();
-            	LOGGER.debug("-> adding tasktable route for {} -> {}", key, ttName);
-            	final List<String> value = routingMap.getOrDefault(key, new ArrayList<>());
-            	value.addAll(ttName);
-            	routingMap.put(key, value);
-            }
+			for (Entry<String, String> entry : inputMap.entrySet()) {
+				final Pattern key = routeSourceOf(entry);
+				final List<String> ttNames = routeDestinationOf(entry);
+				LOGGER.debug("-> adding tasktable route for {} -> {}", key, ttNames);
+				routingMap.put(key, ttNames);
+			}
+
             return new RoutingBasedTasktableMapper(keyFunction, routingMap);
 		}
 		
-		private Pattern routeKeyPatternOf(final LevelProductsRoute route) {
-			return Pattern.compile(routeKeyOf(route), Pattern.CASE_INSENSITIVE);
+		private Pattern routeSourceOf(final Entry<String,String> route) {
+			return Pattern.compile(route.getKey(), Pattern.CASE_INSENSITIVE);
 		}
 		
-		private final String routeKeyOf(final LevelProductsRoute route) {
-			return route.getRouteFrom().getAcquisition() + "_" + route.getRouteFrom().getSatelliteId();
-		}
-		
-		private final LevelProductsRouting parse() {
-			try {
-				return (LevelProductsRouting) converter.convertFromXMLToObject(file);
-			} 
-			catch (IOException | JAXBException e) {
-	            throw new IllegalStateException(
-	            		String.format("Cannot parse routing XML file located in %s", file),
-	                    e
-	            );
-			}
+		private List<String> routeDestinationOf(final Entry<String, String> route) {
+			return new ArrayList<String>(Arrays.asList(route.getValue().split(",")));
 		}
 	}
 	private static final Logger LOGGER = LogManager.getLogger(RoutingBasedTasktableMapper.class);

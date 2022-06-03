@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.preparation.worker.db.AppDataJobRepository;
@@ -26,7 +25,6 @@ import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableFactory;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TasktableManager;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.ConfigurableKeyEvaluator;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.RoutingBasedTasktableMapper;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.SingleTasktableMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
@@ -38,17 +36,9 @@ public class ServiceConfiguration {
 
 	@Bean
 	@Autowired
-	public TasktableMapper newTastTableMapper(final XmlConverter xmlConverter,
-			final TaskTableMappingProperties properties) {
-
-		if (!StringUtils.isEmpty(properties.getName())) {
-			return new SingleTasktableMapper(properties.getName());
-		}
-		if (!StringUtils.isEmpty(properties.getRoutingFile())) {
-			return new RoutingBasedTasktableMapper.Factory(xmlConverter, properties.getRoutingFile(),
-					new ConfigurableKeyEvaluator(properties.getRoutingKeyTemplate())).newMapper();
-		}
-		throw new IllegalStateException(String.format("Missing required elements in configuration: %s", this));
+	public TasktableMapper newTastTableMapper(final TaskTableMappingProperties properties) {
+		return new RoutingBasedTasktableMapper.Factory(properties.getRouting(),
+				new ConfigurableKeyEvaluator(properties.getRoutingKeyTemplate())).newMapper();
 	}
 
 	@Bean
@@ -95,23 +85,22 @@ public class ServiceConfiguration {
 			final PreparationWorkerProperties settings) {
 		return new AuxQueryHandler(metadataClient, settings.getProductMode());
 	}
-	
+
 	@Bean
 	@Autowired
-	public InputSearchService inputSearchService(final ProductTypeAdapter typeAdapter, final AuxQueryHandler auxQueryHandler) {
+	public InputSearchService inputSearchService(final ProductTypeAdapter typeAdapter,
+			final AuxQueryHandler auxQueryHandler) {
 		return new InputSearchService(typeAdapter, auxQueryHandler);
 	}
 
 	@Bean
 	@Autowired
-	public JobCreationService publisher(final PreparationWorkerProperties settings, final ProcessProperties processSettings,
-			final ProductTypeAdapter typeAdapter, final ElementMapper elementMapper, final XmlConverter xmlConverter) {
+	public JobCreationService publisher(final PreparationWorkerProperties settings,
+			final ProcessProperties processSettings, final ProductTypeAdapter typeAdapter,
+			final ElementMapper elementMapper, final XmlConverter xmlConverter) {
 		final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
-				(tasktableAdapter) -> tasktableAdapter.newJobOrder(processSettings, settings.getProductMode()), 
-				typeAdapter,
-				elementMapper, 
-				xmlConverter
-		);
+				(tasktableAdapter) -> tasktableAdapter.newJobOrder(processSettings, settings.getProductMode()),
+				typeAdapter, elementMapper, xmlConverter);
 
 		return new JobCreationService(settings, processSettings, jobOrderFactory, typeAdapter);
 	}

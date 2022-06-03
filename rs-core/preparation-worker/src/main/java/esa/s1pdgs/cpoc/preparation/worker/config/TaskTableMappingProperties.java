@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.preparation.worker.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -9,26 +12,9 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "tasktable")
 public class TaskTableMappingProperties {	
 	
-	private String routingFile = null;
-	private String name = null;
 	private String routingKeyTemplate = "${product.swathtype}_${product.satelliteId}";
+	private Map<String, String> routing = new HashMap<>();
 	
-	public String getRoutingFile() {
-		return routingFile;
-	}
-
-	public void setRoutingFile(String routingFile) {
-		this.routingFile = routingFile;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getRoutingKeyTemplate() {
 		return routingKeyTemplate;
 	}
@@ -37,9 +23,17 @@ public class TaskTableMappingProperties {
 		this.routingKeyTemplate = routingKeyTemplate;
 	}
 
+	public Map<String, String> getRouting() {
+		return routing;
+	}
+
+	public void setRouting(Map<String, String> routing) {
+		this.routing = routing;
+	}
+
 	@Override
 	public String toString() {
-		return "TaskTableMappingConfig [routingFile=" + routingFile + ", name=" + name + ", routingKeyTemplate="
-				+ routingKeyTemplate + "]";
+		return "TaskTableMappingConfig [routingKeyTemplate="
+				+ routingKeyTemplate + ", routing" + routing.toString() + "]";
 	}
 }
