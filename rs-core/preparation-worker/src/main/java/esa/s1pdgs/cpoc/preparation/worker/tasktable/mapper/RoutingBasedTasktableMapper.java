@@ -98,8 +98,8 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
 		productDto.getMetadata().put(MissionId.FIELD_NAME, eventAdapter.missionId());
 		productDto.getMetadata().put("processMode", eventAdapter.processMode());
-		productDto.getMetadata().put("startTime", eventAdapter.startTime());
-		productDto.getMetadata().put("stopTime", eventAdapter.stopTime());
+		productDto.getMetadata().put("startTime", eventAdapter.productSensingStartDate());
+		productDto.getMetadata().put("stopTime", eventAdapter.productSensingStopDate());
 		productDto.getMetadata().put("timeliness", eventAdapter.timeliness());
 		productDto.getMetadata().put("acquistion", eventAdapter.swathType());
 		return productDto;
