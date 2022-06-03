@@ -1,4 +1,4 @@
-package esa.s1pdgs.cpoc.preparation.worker.publish;
+package esa.s1pdgs.cpoc.preparation.worker.service;
 
 import static java.util.stream.Collectors.toList;
 
@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -38,15 +39,15 @@ import esa.s1pdgs.cpoc.report.message.output.JobOrderReportingOutput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
 import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 
-public class Publisher {
-	private static final Logger LOGGER = LogManager.getLogger(Publisher.class);
+public class JobCreationService {
+	private static final Logger LOGGER = LogManager.getLogger(JobCreationService.class);
 
 	private final PreparationWorkerProperties prepperSettings;
 	private final ProcessProperties settings;
 	private final JobOrderAdapter.Factory jobOrderFactory;
 	private final ProductTypeAdapter typeAdapter;
 
-	public Publisher(final PreparationWorkerProperties prepperSettings, final ProcessProperties settings,
+	public JobCreationService(final PreparationWorkerProperties prepperSettings, final ProcessProperties settings,
 			final JobOrderAdapter.Factory jobOrderFactory,
 			final ProductTypeAdapter typeAdapter) {
 		this.prepperSettings = prepperSettings;
@@ -65,12 +66,14 @@ public class Publisher {
 		reporting.begin(new ReportingMessage("Start job generation"));
 
 		IpfExecutionJob executionJob = null;
+		AppDataJobGenerationState newState = job.getGeneration().getState();
 		
 		try {
 			final JobOrderAdapter jobOrderAdapter = jobOrderFactory.newJobOrderFor(job, tasktableAdapter);
 
 			// Create the ExecutionJob as output of the PreparationWorker
 			executionJob = createIpfExecutionJob(job, jobOrderAdapter, tasktableAdapter, reporting);
+			newState = AppDataJobGenerationState.SENT;
 			
 			final ReportingOutput reportOut = new JobOrderReportingOutput(jobOrderAdapter.getJobOrderName(),
 					jobOrderAdapter.toProcParamMap(tasktableAdapter));
@@ -78,6 +81,8 @@ public class Publisher {
 		} catch (final AbstractCodedException e) {
 			// TODO cause is not contained in reporting message
 			reporting.error(new ReportingMessage("Error on job generation"));
+		} finally {
+			updateSend(job, newState);
 		}
 		
 		LOGGER.info("Publishing job {} (product {})", job.getId(), job.getProductName());
@@ -170,5 +175,22 @@ public class Publisher {
 			}
 		}
 		return execJob;
+	}
+	
+	private void updateSend(AppDataJob job, AppDataJobGenerationState newState) {
+		if (job.getGeneration().getState() == newState) {
+			// Before updating the state -> save last state
+			job.getGeneration().setPreviousState(job.getGeneration().getState());
+			
+			// don't update jobs last modified date here to enable timeout, just update the generation time
+			job.getGeneration().setLastUpdateDate(new Date());
+			job.getGeneration().setNbErrors(job.getGeneration().getNbErrors()+1);
+		}
+		else {		
+			// set the previous state to output state in order to wait before termination
+			job.getGeneration().setPreviousState(newState);
+			job.getGeneration().setState(newState);
+			job.setLastUpdateDate(new Date());
+		}
 	}
 }

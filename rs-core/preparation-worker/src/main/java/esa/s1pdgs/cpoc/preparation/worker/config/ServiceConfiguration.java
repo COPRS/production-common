@@ -15,9 +15,10 @@ import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.preparation.worker.db.AppDataJobRepository;
 import esa.s1pdgs.cpoc.preparation.worker.db.SequenceDao;
 import esa.s1pdgs.cpoc.preparation.worker.model.joborder.JobOrderAdapter;
-import esa.s1pdgs.cpoc.preparation.worker.publish.Publisher;
 import esa.s1pdgs.cpoc.preparation.worker.query.AuxQueryHandler;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
+import esa.s1pdgs.cpoc.preparation.worker.service.InputSearchService;
+import esa.s1pdgs.cpoc.preparation.worker.service.JobCreationService;
 import esa.s1pdgs.cpoc.preparation.worker.service.TaskTableMapperService;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
@@ -94,10 +95,16 @@ public class ServiceConfiguration {
 			final PreparationWorkerProperties settings) {
 		return new AuxQueryHandler(metadataClient, settings.getProductMode());
 	}
+	
+	@Bean
+	@Autowired
+	public InputSearchService inputSearchService(final ProductTypeAdapter typeAdapter, final AuxQueryHandler auxQueryHandler) {
+		return new InputSearchService(typeAdapter, auxQueryHandler);
+	}
 
 	@Bean
 	@Autowired
-	public Publisher publisher(final PreparationWorkerProperties settings, final ProcessProperties processSettings,
+	public JobCreationService publisher(final PreparationWorkerProperties settings, final ProcessProperties processSettings,
 			final ProductTypeAdapter typeAdapter, final ElementMapper elementMapper, final XmlConverter xmlConverter) {
 		final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
 				(tasktableAdapter) -> tasktableAdapter.newJobOrder(processSettings, settings.getProductMode()), 
@@ -106,7 +113,7 @@ public class ServiceConfiguration {
 				xmlConverter
 		);
 
-		return new Publisher(settings, processSettings, jobOrderFactory, typeAdapter);
+		return new JobCreationService(settings, processSettings, jobOrderFactory, typeAdapter);
 	}
 
 }
