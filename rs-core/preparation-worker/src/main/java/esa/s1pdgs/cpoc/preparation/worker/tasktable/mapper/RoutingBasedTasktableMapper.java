@@ -78,12 +78,6 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 			}
 		}
 
-		if (taskTableHolder.isEmpty()) {
-			throw new IllegalArgumentException(
-					String.format("No tasktable found for AppDataJobProduct %s, key: %s in: %s",
-							product.getMetadata().get("productName"), key, routingMap));
-		}
-
 		return taskTableHolder;
 	}
 
