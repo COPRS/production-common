@@ -65,7 +65,10 @@ worker:
     AN_RAW__0N: N[1-6]_RAW__0N
 
 tasktable:
-  name: test
+  routingKeyTemplate: $(product.productType)
+  routing:
+    SESSION: test
+    RAW: test
 
 # L0 Process configuration
 process:

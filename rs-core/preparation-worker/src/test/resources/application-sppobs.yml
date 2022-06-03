@@ -6,7 +6,10 @@ mongodb:
   clean-cron: 0 0 0 * * *
 
 tasktable:
-  name: test
+  routingKeyTemplate: $(product.productType)
+  routing:
+    SESSION: test
+    RAW: test
 
 spp:
   obs-timeout-sec: 90000

@@ -108,7 +108,10 @@ worker:
       init-delay-poll-ms: 2000
 
 tasktable:
-  name: test
+  routingKeyTemplate: $(product.productType)
+  routing:
+    SESSION: test
+    RAW: test
   
 obs:
   user-id: test
