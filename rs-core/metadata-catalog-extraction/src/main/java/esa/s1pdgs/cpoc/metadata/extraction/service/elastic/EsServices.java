@@ -28,6 +28,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
 import org.elasticsearch.common.geo.ShapeRelation;
 import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
 import org.elasticsearch.common.geo.builders.PolygonBuilder;
@@ -168,7 +169,7 @@ public class EsServices {
 			final String productName = product.getString("productName");
 
 			IndexRequest request = new IndexRequest(productType).id(productName).source(product.toString(),
-					XContentType.JSON);
+					XContentType.JSON).setRefreshPolicy(RefreshPolicy.WAIT_UNTIL);
 
 			IndexResponse response;
 			try {
@@ -207,7 +208,7 @@ public class EsServices {
 
 				LOGGER.debug("Content of JSON second attempt: {}", product.toString());
 
-				request = new IndexRequest(productType).id(productName).source(product.toString(), XContentType.JSON);
+				request = new IndexRequest(productType).id(productName).source(product.toString(), XContentType.JSON).setRefreshPolicy(RefreshPolicy.WAIT_UNTIL);
 				response = elasticsearchDAO.index(request);
 				// END OF WORKAROUND S1PRO-783
 			}
@@ -237,7 +238,7 @@ public class EsServices {
 		}
 		try {
 			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(product.toString(),
-					XContentType.JSON);
+					XContentType.JSON).setRefreshPolicy(RefreshPolicy.WAIT_UNTIL);
 
 			final IndexResponse response = elasticsearchDAO.index(request);
 
