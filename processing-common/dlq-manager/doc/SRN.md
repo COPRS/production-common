@@ -1,25 +1,41 @@
-# Template
+# RS Core - DLQ Manager
 
-## General
+The RS Core component Dead Letter Queue Manager is responsible for automated restarting of failed processings.
 
-TBD
+## Overview
+
+![overview](media/overview.png "Overview of the DLQ Manager")
+
+The DLQ Manager polls the configured dead letter queue topic for failed processing messages. The messages are then routed according to a set of routing rules. A rule consists of the following attributes.
+
+ErrorTitle: A free properties to title the rule
+ErrorID: Regex to identify an error
+ActionType:
+- Restart: Republish message in error message while MaxRetry is not reached, else move it to the ParkingLot
+- Delete: Ignore the message (error is deleted)
+- NoAction: Disable a rule without deleting it
+TargetTopic: The target topic for restart. If not set, the original topic is used.
+MaxRetry: Maximum retry for error
+Comment: A free properties to describe the rule
+Priority: For the case while several rules match the same errorID, the rule with the highest priority is applied
+
 
 ## Requirements
 
 This software does have the following minimal requirements:
 
-TBD
-
-
-| Resource                    | Value       |
+| Resource                    | DLQ Manager |
 |-----------------------------|-------------|
-| CPU                         |             |
-| Memory                      |             |
-| Disk volume needed          |             |
-| Disk access                 |             |
-| Disk storage capacity       |             |
-| Affinity between Pod / Node |             |
-|                             |             |
+| Memory request              |    512Mi    |
+| CPU request                 |    500m     |
+| Memory limit                |    4000Mi   |
+| CPU limit                   |    1500m    |
+| Disk volume needed          |    no       |
+| Disk access                 |    n/a      |
+| Disk storage capacity       |    n/a      |
+| Volume Mount                |    n/a      |
+| Affinity between Pod / Node |    no       |
+
 
 ## Deployer properties
 
