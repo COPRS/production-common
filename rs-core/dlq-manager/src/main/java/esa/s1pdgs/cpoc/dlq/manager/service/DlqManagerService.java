@@ -9,8 +9,8 @@ import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.messaging.Message;
 
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperties;
