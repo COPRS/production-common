@@ -14,6 +14,7 @@ public class RoutingTableConfiguration {
 	
 	@Bean
 	public RoutingTable getRoutingTable() {
+		System.out.println(dlqManagerConfigurationProperties);
 		return RoutingTable.of(dlqManagerConfigurationProperties.getRouting());
 	}
 	

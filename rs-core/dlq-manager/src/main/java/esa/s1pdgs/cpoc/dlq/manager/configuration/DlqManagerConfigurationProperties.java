@@ -11,7 +11,7 @@ import esa.s1pdgs.cpoc.dlq.manager.model.routing.ActionType;
 
 @Component
 @Validated
-@ConfigurationProperties("dlq-manager")
+@ConfigurationProperties(prefix = "dlq-manager")
 public class DlqManagerConfigurationProperties {
 
 	public static class RoutingProperties {
@@ -64,6 +64,12 @@ public class DlqManagerConfigurationProperties {
 		public void setComment(String comment) {
 			this.comment = comment;
 		}
+		@Override
+		public String toString() {
+			return "RoutingProperties [errorTitle=" + errorTitle + ", errorId=" + errorId + ", actionType=" + actionType
+					+ ", targetTopic=" + targetTopic + ", maxRetry=" + maxRetry + ", priority=" + priority
+					+ ", comment=" + comment + "]";
+		}
 	}
 	
 	private String hostname;
@@ -93,5 +99,11 @@ public class DlqManagerConfigurationProperties {
 
 	public void setRouting(Map<String, RoutingProperties> routing) {
 		this.routing = routing;
+	}
+
+	@Override
+	public String toString() {
+		return "DlqManagerConfigurationProperties [hostname=" + hostname + ", parkingLotTopic=" + parkingLotTopic
+				+ ", routing=" + routing + "]";
 	}
 }
