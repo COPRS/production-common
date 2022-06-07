@@ -1,8 +1,5 @@
 package esa.s1pdgs.cpoc.dlq.manager.service;
 
-import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE;
-import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TOPIC;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -21,6 +18,9 @@ import esa.s1pdgs.cpoc.dlq.manager.stream.StreamBridgeMessageProducer;
 public class DlqManagerService implements Consumer<Message<?>> {
 
 	private static final Logger LOGGER = LogManager.getLogger(DlqManagerService.class);
+	
+	public static String X_EXCEPTION_MESSAGE = "x-exception-message";
+	public static String X_ORIGINAL_TOPIC = "x-original-topic";
 	
 	private final RoutingTable routingTable;
 	private final String parkingLotTopic;

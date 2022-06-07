@@ -1,11 +1,11 @@
 package esa.s1pdgs.cpoc.dlq.manager.service;
 
+import static esa.s1pdgs.cpoc.dlq.manager.service.DlqManagerService.X_EXCEPTION_MESSAGE;
+import static esa.s1pdgs.cpoc.dlq.manager.service.DlqManagerService.X_ORIGINAL_TOPIC;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE;
-import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TOPIC;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
