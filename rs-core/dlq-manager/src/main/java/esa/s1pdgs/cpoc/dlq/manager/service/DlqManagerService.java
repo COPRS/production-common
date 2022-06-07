@@ -42,7 +42,7 @@ public class DlqManagerService implements Consumer<Message<?>> {
 		LOGGER.debug("DLQ message topic: {}", originalTopic);
 		final String exceptionMessage = new String(message.getHeaders().get(X_EXCEPTION_MESSAGE, byte[].class),
 				StandardCharsets.UTF_8);
-		final String payload = (String)message.getPayload();
+		final String payload = new String((byte[])message.getPayload());
 		LOGGER.debug("Payload: {}", payload);
 		
 		Optional<Rule> optRule = routingTable.findRule(exceptionMessage);

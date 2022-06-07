@@ -62,8 +62,8 @@ public class ITDlqManagerService {
 		assertEquals(0, catalogJob.getRetryCounter());
 
 		ObjectMapper mapper = new ObjectMapper();
-		Message<String> message1 = new GenericMessage<>( //
-				mapper.writeValueAsString(catalogJob), //
+		Message<byte[]> message1 = new GenericMessage<>( //
+				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
 		
@@ -82,8 +82,8 @@ public class ITDlqManagerService {
 
 		// second retry
 		
-		Message<String> message2 = new GenericMessage<>( //
-				capturedMessage1, //
+		Message<byte[]> message2 = new GenericMessage<>( //
+				capturedMessage1.getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
 		
@@ -102,8 +102,8 @@ public class ITDlqManagerService {
 		
 		// to parking lot
 		
-		Message<String> message3 = new GenericMessage<>( //
-				capturedMessage2, //
+		Message<byte[]> message3 = new GenericMessage<>( //
+				capturedMessage2.getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
 		
@@ -124,8 +124,8 @@ public class ITDlqManagerService {
 		assertEquals(0, catalogJob.getRetryCounter());
 
 		ObjectMapper mapper = new ObjectMapper();
-		Message<String> message = new GenericMessage<>( //
-				mapper.writeValueAsString(catalogJob), //
+		Message<byte[]> message = new GenericMessage<>( //
+				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-origin".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "!$%foobar#§!".getBytes(StandardCharsets.UTF_8)));
 		
@@ -154,8 +154,8 @@ public class ITDlqManagerService {
 		assertEquals(0, catalogJob.getRetryCounter());
 
 		ObjectMapper mapper = new ObjectMapper();
-		Message<String> message = new GenericMessage<>( //
-				mapper.writeValueAsString(catalogJob), //
+		Message<byte[]> message = new GenericMessage<>( //
+				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-origin".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "IOException"
 						.getBytes(StandardCharsets.UTF_8)));
@@ -181,8 +181,8 @@ public class ITDlqManagerService {
 		assertEquals(0, catalogJob.getRetryCounter());
 
 		ObjectMapper mapper = new ObjectMapper();
-		Message<String> message = new GenericMessage<>( //
-				mapper.writeValueAsString(catalogJob), //
+		Message<byte[]> message = new GenericMessage<>( //
+				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-origin".getBytes(StandardCharsets.UTF_8), //
 						X_EXCEPTION_MESSAGE, "a message to IGNORE..."
 						.getBytes(StandardCharsets.UTF_8)));
