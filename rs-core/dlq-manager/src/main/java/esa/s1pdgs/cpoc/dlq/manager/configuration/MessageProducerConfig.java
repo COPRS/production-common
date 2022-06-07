@@ -14,7 +14,7 @@ public class MessageProducerConfig {
 	private StreamBridge streamBridge;
 	
 	@Bean
-	StreamBridgeMessageProducer<String> getMessageProducer() {
+	public StreamBridgeMessageProducer<String> getMessageProducer() {
 		return new StreamBridgeMessageProducer<String>(streamBridge);
 	}
 }
