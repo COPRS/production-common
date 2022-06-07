@@ -8,11 +8,9 @@
 		<version>3.32.1</version>
 	</parent>
 	<artifactId>rs-dlq-manager</artifactId>
-	<packaging>jar</packaging>
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>rs-dlq-manager</project.build.finalName>
-		<project.artifactId>rs-dlq-manager</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.dlq.manager.Application</start-class>
 	</properties>
 
@@ -83,16 +81,16 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>org.springframework.cloud</groupId>
-		    <artifactId>spring-cloud-stream-test-support</artifactId>
-		    <scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
-			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+		    <groupId>org.springframework.cloud</groupId>
+		    <artifactId>spring-cloud-stream-test-support</artifactId>
+		    <scope>test</scope>
+		</dependency>		
 		<dependency>
 			<groupId>org.junit.vintage</groupId>
 			<artifactId>junit-vintage-engine</artifactId>
@@ -113,11 +111,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
 	</dependencies>
 
