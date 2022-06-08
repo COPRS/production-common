@@ -4,7 +4,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## NEXT - 2022-05-13
+## [1.2.0-rc1] - 2022-06-08
+
+### Added
+- RS-387: Migration of Preparation Worker to SCDF Application
+- RS-207: Develop "DATALIFECYCLE" as a RS-core component
+
+### Changed
+- RS-388: Request Chunks and DSIB through Search Metadata Controller
+- RS-373: RS-Addon: ingestion and metadata add-ons have multiple wrong deployment variables
+- RS-391: Update RS Core to be in line with ICD RS Core release V5.0
+- RS-372: Documents, code and ICD dont form a coherent whole for RS Core Catalog
+- RS-392: Update RS Core to be in line with ICD Message Format ICD V3.0
+
+## Removed
+- N/A
+
+## [1.1.2-rc1] - 2022-05-30
+
+### Added
+- N/A
+
+### Changed
+- RS-397: Fix: compression-worker: one of two s2 auxiliary directory format is not taken into account
+- RS-398: Fix: Nullpointer exception when query S2_AUX via SearchMetadata Controller
+
+### Removed
+- N/A
+
+## [1.1.1-rc1] - 2022-05-20
+
+### Added
+- N/A
+
+### Changed
+- RS-396: Fix: Metadata extraction for EDRS session fails with NumberFormatException
+
+### Removed
+- N/A
+
+## [1.1.0-rc1] - 2022-05-13
 
 ### Added
 - RS-206: RS Core component "Distribution" was added
