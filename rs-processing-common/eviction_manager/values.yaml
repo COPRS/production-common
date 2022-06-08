@@ -11,7 +11,7 @@ logConfig: ${logConfig:log/log4j2.yml}
 
 processing:
   namespace: processing
-  
+
 metadata:
   host: rs-metadata-catalog-searchcontroller-svc:8080
   restApiNbRetry: 3
