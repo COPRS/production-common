@@ -1,7 +1,7 @@
 # Default values for rs-user-client-chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
+ 
 env:
   apiUrl: http://coprs.werum.de/prip/odata/v1/Products
   mapBackgrounds: | 
