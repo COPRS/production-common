@@ -11,11 +11,6 @@ logConfig: ${logConfig:log/log4j2.yml}
 
 processing:
   namespace: processing
-  
-worker:
-  label:
-    key: node-role.kubernetes.io/worker
-    value: infra
 
 image:
   registry: artifactory.coprs.esa-copernicus.eu

@@ -21,15 +21,6 @@ spec:
         type: {{ .Values.processing.namespace }}
     spec:
       terminationGracePeriodSeconds: 30
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: {{ .Values.worker.label.key }}
-                operator: In
-                values:
-                - {{ .Values.worker.label.value }}
       containers:
       
       - name: {{ .Release.Name }}

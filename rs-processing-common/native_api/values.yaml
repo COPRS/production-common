@@ -29,11 +29,6 @@ nativeapi:
         protocol: http
         host: coprs.werum.de/prip/odata/v1/
         port: 80
-  
-worker:
-  label:
-    key: node-role.kubernetes.io/worker
-    value: infra
 
 resources:
   cpu:

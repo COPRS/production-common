@@ -26,9 +26,6 @@ elasticsearch:
   searchResultLimit: 1000
   
 worker:
-  label:
-    key: node-role.kubernetes.io/worker
-    value: infra
   evictionIntervalMs: 600000
 
 image:

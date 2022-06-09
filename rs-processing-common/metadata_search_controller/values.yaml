@@ -18,11 +18,6 @@ elasticsearch:
   timeout:
     connection: 2000
     socket: 10000
-  
-worker:
-  label:
-    key: node-role.kubernetes.io/worker
-    value: infra
 
 image:
   registry: artifactory.coprs.esa-copernicus.eu
