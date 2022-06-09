@@ -26,6 +26,7 @@ public class RoutingTable {
 		RoutingTable routingTable = new RoutingTable();
 		LOGGER.info("Parsing routing table");
 		if (routing.isEmpty()) {
+			LOGGER.error("No routing rules found");
 			throw new RuleParsingException("No routing rules found");
 		}
 		for (Entry<String, RoutingProperties> ruleEntry : routing.entrySet()) {

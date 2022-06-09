@@ -36,14 +36,16 @@ public class DlqManagerService implements Consumer<Message<?>> {
 	
 	@Override
 	public void accept(Message<?> message) {
-		LOGGER.info("Receiving DLQ message: {}", message);
+		LOGGER.debug("Receiving new message: {}", message);
 		final String originalTopic = new String(message.getHeaders().get(X_ORIGINAL_TOPIC, byte[].class),
 				StandardCharsets.UTF_8);
 		LOGGER.debug("DLQ message topic: {}", originalTopic);
 		final String exceptionMessage = new String(message.getHeaders().get(X_EXCEPTION_MESSAGE, byte[].class),
 				StandardCharsets.UTF_8);
 		final String payload = new String((byte[])message.getPayload());
-		LOGGER.debug("Payload: {}", payload);
+		
+		LOGGER.info("Receiving DLQ message on topic {} with error: {}", originalTopic, exceptionMessage);
+		LOGGER.info("Payload: {}", payload);
 		
 		Optional<Rule> optRule = routingTable.findRule(exceptionMessage);
 		if (optRule.isEmpty()) {
@@ -53,7 +55,7 @@ public class DlqManagerService implements Consumer<Message<?>> {
 		} else {
 			Rule rule = optRule.get();
 			final String targetTopic = "".equals(rule.getTargetTopic()) ? originalTopic : rule.getTargetTopic();
-			LOGGER.info("Found rule: {} with action {}", rule.getErrorTitle(), rule.getActionType());
+			LOGGER.info("Found rule {}: {}", rule.getActionType().name(), rule.getErrorTitle());
 			switch(rule.getActionType()) {
 				case DELETE:
 					LOGGER.info("Ignoring message (error is deleted)");
@@ -71,10 +73,12 @@ public class DlqManagerService implements Consumer<Message<?>> {
 							producer.send(parkingLotTopic, payload);
 						}
 					} catch (JSONException e) {
+						LOGGER.error("Corrupt message");
 						throw new IllegalArgumentException("Corrupt message", e);
 					}
 					break;
 				default:
+					LOGGER.error("Invalid configuration");
 					throw new IllegalStateException("Invalid configuration");
 			}
 		}
