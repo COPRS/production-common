@@ -37,10 +37,10 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCDefaultTaskFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCExecutor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.GhostHandlingSegmentReportingOutput;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
@@ -555,7 +555,7 @@ public class OutputProcessor {
 	 * Process product: upload in OBS and publish in message queue system per batch
 	 * 
 	 */
-	final List<GenericPublicationMessageDto<ProductionEvent>> processProducts(
+	final List<CatalogJob> processProducts(
 			final ReportingFactory reportingFactory, 
 			final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish,
@@ -572,7 +572,7 @@ public class OutputProcessor {
 		// to products that have not been uploaded.
 		// As time is scarce, all this crap needs to be cleaned up in the IPF refactoring story in the future
 		// and this piece of code should never become operational.
-		final List<GenericPublicationMessageDto<ProductionEvent>> res = new ArrayList<>();
+		final List<CatalogJob> res = new ArrayList<>();
 		
 		final double size = uploadBatch.size();
 		final double nbPool = Math.ceil(size / sizeUploadBatch);
@@ -609,13 +609,13 @@ public class OutputProcessor {
 	 * upload
 	 * 
 	 */
-	private List<GenericPublicationMessageDto<ProductionEvent>> publishAccordingUploadFiles(
+	private List<CatalogJob> publishAccordingUploadFiles(
 			final double nbBatch,
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid
 	) throws Exception {
-		final List<GenericPublicationMessageDto<ProductionEvent>> result = new ArrayList<>();
+		final List<CatalogJob> result = new ArrayList<>();
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
 		final Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
 		boolean stop = false;
@@ -635,14 +635,14 @@ public class OutputProcessor {
 		return result;
 	}
 
-	private GenericPublicationMessageDto<ProductionEvent> publish(
+	private CatalogJob publish(
 			final UUID uuid, 
 			final ObsQueueMessage msg
 	) throws Exception {
 		try {
 			LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
-			final GenericPublicationMessageDto<ProductionEvent> res = procuderFactory.sendOutput(msg, inputMessage, uuid);
+			final CatalogJob res = procuderFactory.sendOutput(msg, inputMessage, uuid);
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			return res;
@@ -684,7 +684,7 @@ public class OutputProcessor {
 	/**
 	 * Function which process all the output of L0 process
 	 */
-	public List<GenericPublicationMessageDto<ProductionEvent>> processOutput(
+	public List<CatalogJob> processOutput(
 			final ReportingFactory reportingFactory, 
 			final UUID uuid,
 			final IpfExecutionJob job			  
@@ -723,7 +723,7 @@ public class OutputProcessor {
 		// Upload per batch the output
 		// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
 		//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);
-		final List<GenericPublicationMessageDto<ProductionEvent>> res = processProducts(
+		final List<CatalogJob> res = processProducts(
 						reportingFactory,
 						uploadBatch,
 						outputToPublish,

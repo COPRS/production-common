@@ -80,7 +80,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     /**
      * Processor to test
      */
-    private JobProcessor processor;
+    private ExecutionWorkerService processor;
 
     /**
      * Working directory
@@ -133,7 +133,7 @@ public class JobProcessorTest extends MockPropertiesTest {
             workingDir.mkdir();
         }
         mockWorkingdirProperties(workingDir.toPath());
-        processor = new JobProcessor(appStatus, properties, devProperties,
+        processor = new ExecutionWorkerService(appStatus, properties, devProperties,
                 obsClient, procuderFactory, mqiService, Collections.emptyList(), errorAppender, mqiStatusService, 0L, 10L);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
