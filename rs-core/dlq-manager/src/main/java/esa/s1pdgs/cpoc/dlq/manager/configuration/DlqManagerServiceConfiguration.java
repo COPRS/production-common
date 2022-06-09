@@ -24,7 +24,7 @@ public class DlqManagerServiceConfiguration {
 	private StreamBridgeMessageProducer<String> producer;
 	
 	@Bean
-	public Consumer<Message<?>> route() {
+	public Consumer<Message<byte[]>> route() {
 		return new DlqManagerService(routingTable, producer, dlqManagerConfigurationProperties);
 	}
 }

@@ -47,7 +47,7 @@ public class ITDlqManagerService {
 	@Autowired
 	DlqManagerServiceConfiguration dlqManagerServiceConfiguration;
 	
-	Consumer<Message<?>> consumer;
+	Consumer<Message<byte[]>> consumer;
 	
 	@Test
 	public void testSameTopicRetryTwiceThenParkingLot() throws JsonProcessingException, JSONException {
