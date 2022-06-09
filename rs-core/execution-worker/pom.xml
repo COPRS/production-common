@@ -8,13 +8,13 @@
 	  <artifactId>s1pro-core</artifactId>
 	  <version>3.32.1</version>
 	</parent>
-	<artifactId>s1pro-core-ipf-execution-worker</artifactId>
+	<artifactId>rs-execution-worker</artifactId>
 	<packaging>jar</packaging>
 
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
-		<project.build.finalName>s1pdgs-ipf-execution-worker-app</project.build.finalName>
-		<project.artifactId>s1pdgs-ipf-execution-worker-app</project.artifactId>
+		<project.build.finalName>rs-execution-worker-app</project.build.finalName>
+		<project.artifactId>rs-execution-worker-app</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.ipf.execution.worker.Application</start-class>
 	</properties>
 

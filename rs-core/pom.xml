@@ -387,7 +387,7 @@
 		<module>ingestion-worker</module>
 		<!-- <module>production-trigger</module> -->
 		<module>preparation-worker</module>
-		<!-- <module>ipf-execution-worker</module> -->
+		<module>execution-worker</module>
 		<!-- <module>request-repository</module> -->
 		<!-- <module>on-demand-interface-provider</module> -->
 		<module>metadata-catalog-extraction</module>
