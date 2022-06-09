@@ -24,7 +24,7 @@ Please verify that the helm was added successfully using:
 
 The individual components can be deployed via charts and are described more in detail using the following sections:
 
-### Global configuration
+## Global configuration
 
 The following global parameters exist per instance and can be used when deploying the Helm Chart:
 
