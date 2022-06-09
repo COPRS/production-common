@@ -11,9 +11,6 @@
 	<artifactId>rs-preparation-worker</artifactId>
 	<packaging>jar</packaging>
 
-	<!-- <parent> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-parent</artifactId> 
-		<version>2.0.0.RELEASE</version> <relativePath /> </parent> -->
-
 	<properties>
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>rs-preparation-worker</project.build.finalName>
@@ -99,11 +96,6 @@
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>de.werum.s1pdgs</groupId>
-			<artifactId>s1pro-core-mqi-client</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>
 			<artifactId>s1pro-core-xml-tools</artifactId>

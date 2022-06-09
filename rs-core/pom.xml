@@ -13,7 +13,7 @@
 
 		<!-- dependency version definitions -->
 		<spring.boot.version>2.6.6</spring.boot.version>
-		<spring-cloud.version>2021.0.2</spring-cloud.version>
+		<spring-cloud.version>2021.0.1</spring-cloud.version>
 
 		<kafka.version>2.5.0</kafka.version>
 
