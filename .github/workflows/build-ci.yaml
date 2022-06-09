@@ -87,7 +87,7 @@ jobs:
     steps:
     - name: Extract branch or tag name
       shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | rev | cut -d / -f 1 | rev)"
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
       id: extract_branch
     - uses: actions/checkout@v2
     - uses: dorny/paths-filter@v2
