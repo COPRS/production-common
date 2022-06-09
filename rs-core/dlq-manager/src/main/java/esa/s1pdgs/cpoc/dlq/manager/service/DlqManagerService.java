@@ -15,7 +15,7 @@ import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
 import esa.s1pdgs.cpoc.dlq.manager.stream.StreamBridgeMessageProducer;
 
-public class DlqManagerService implements Consumer<Message<?>> {
+public class DlqManagerService implements Consumer<Message<byte[]>> {
 
 	private static final Logger LOGGER = LogManager.getLogger(DlqManagerService.class);
 	
@@ -35,14 +35,14 @@ public class DlqManagerService implements Consumer<Message<?>> {
 	}
 	
 	@Override
-	public void accept(Message<?> message) {
+	public void accept(Message<byte[]> message) {
 		LOGGER.debug("Receiving new message: {}", message);
 		final String originalTopic = new String(message.getHeaders().get(X_ORIGINAL_TOPIC, byte[].class),
 				StandardCharsets.UTF_8);
 		LOGGER.debug("DLQ message topic: {}", originalTopic);
 		final String exceptionMessage = new String(message.getHeaders().get(X_EXCEPTION_MESSAGE, byte[].class),
 				StandardCharsets.UTF_8);
-		final String payload = new String((byte[])message.getPayload());
+		final String payload = new String(message.getPayload());
 		
 		LOGGER.info("Receiving DLQ message on topic {} with error: {}", originalTopic, exceptionMessage);
 		LOGGER.info("Payload: {}", payload);
