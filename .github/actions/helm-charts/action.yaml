@@ -25,18 +25,18 @@ runs:
     with:
       version: v3.4.0
       
-  - name: Lint helm
-    shell: bash
-    run: |
-      helm lint ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}
-      
   - name: Update version number
     shell: bash
     run: |
       VERSION="$(echo ${GITHUB_REF} | cut -d / -f3-)"
       echo "Preparing chart version $VERSION"
       sed -i "s,{{CHART_VERSION}},$CHART_VERSION,g" ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}/Chart.yaml
-    
+      
+  - name: Lint helm
+    shell: bash
+    run: |
+      helm lint ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}
+          
   - name: Package helm
     shell: bash
     run: |
