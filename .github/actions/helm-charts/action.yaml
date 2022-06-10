@@ -28,9 +28,7 @@ runs:
   - name: Update version number
     shell: bash
     run: |
-      echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
-      echo "Preparing chart version $branch"
-      sed -i "s,{{CHART_VERSION}},${{ branch }},g" ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}/Chart.yaml
+      sed -i "s,{{CHART_VERSION}},$(echo ${GITHUB_REF} | cut -d / -f3-),g" ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}/Chart.yaml
       
   - name: Lint helm
     shell: bash
