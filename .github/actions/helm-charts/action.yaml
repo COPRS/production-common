@@ -28,7 +28,7 @@ runs:
   - name: Update version number
     shell: bash
     run: |
-      sed -i "s,{{CHART_VERSION}},$(echo ${GITHUB_REF} | cut -d / -f3-),g" ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}/Chart.yaml
+      sed -i "s,{{CHART_VERSION}},$(if ${GITHUB_REF_NAME} == *[0-9]\.[0-9]\.[0-9]; then echo ${GITHUB_REF_NAME}; else echo "0.0.1";fi) ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}/Chart.yaml
       
   - name: Lint helm
     shell: bash
