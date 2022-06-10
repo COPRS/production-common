@@ -29,6 +29,11 @@ runs:
     shell: bash
     run: |
       helm lint ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}
+      
+  - name: Update version number
+    shell: bash
+    run: |
+      echo ${{ steps.extract_branch.outputs.branch }}
     
   - name: Package helm
     shell: bash
