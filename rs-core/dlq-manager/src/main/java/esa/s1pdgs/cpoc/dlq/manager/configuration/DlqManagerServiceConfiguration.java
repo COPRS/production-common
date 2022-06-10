@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.dlq.manager.configuration;
 import java.util.List;
 import java.util.function.Function;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +21,7 @@ public class DlqManagerServiceConfiguration {
 	private DlqManagerConfigurationProperties dlqManagerConfigurationProperties;
 	
 	@Bean
-	public Function<Message<byte[]>, List<Message<JSONObject>>> route() {
+	public Function<Message<byte[]>, List<Message<byte[]>>> route() {
 		return new DlqManagerService(routingTable, dlqManagerConfigurationProperties);
 	}
 }

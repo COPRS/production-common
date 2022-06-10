@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperti
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
 
-public class DlqManagerService implements Function<Message<byte[]>, List<Message<JSONObject>>> {
+public class DlqManagerService implements Function<Message<byte[]>, List<Message<byte[]>>> {
 
 	private static final Logger LOGGER = LogManager.getLogger(DlqManagerService.class);
 	
@@ -35,8 +35,8 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 	}
 	
 	@Override
-	public List<Message<JSONObject>> apply(Message<byte[]> message) {
-		final List<Message<JSONObject>> result = new ArrayList<>();
+	public List<Message<byte[]>> apply(Message<byte[]> message) {
+		final List<Message<byte[]>> result = new ArrayList<>();
 		LOGGER.debug("Receiving new message: {}", message);
 		final String originalTopic = new String(message.getHeaders().get(X_ORIGINAL_TOPIC, byte[].class),
 				StandardCharsets.UTF_8);
@@ -53,7 +53,8 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		if (optRule.isEmpty()) {
 			LOGGER.info("No matching rule found");
 			LOGGER.info("Route to {}", parkingLotTopic);
-			result.add(MessageBuilder.withPayload(json).setHeader(X_ROUTE_TO, parkingLotTopic).build());
+			result.add(MessageBuilder.withPayload(json.toString().getBytes(StandardCharsets.UTF_8))
+					.setHeader(X_ROUTE_TO, parkingLotTopic).build());
 		} else {
 			Rule rule = optRule.get();
 			LOGGER.info("Found rule {}: {}", rule.getActionType().name(), rule.getErrorTitle());
@@ -67,10 +68,12 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 					if (retryCounter < rule.getMaxRetry()) {
 						json.put("retryCounter", ++retryCounter);
 						LOGGER.info("Route to {} (retry {}/{})", targetTopic, retryCounter, rule.getMaxRetry());
-						result.add(MessageBuilder.withPayload(json).setHeader(X_ROUTE_TO, targetTopic).build());
+						result.add(MessageBuilder.withPayload(json.toString().getBytes(StandardCharsets.UTF_8))
+								.setHeader(X_ROUTE_TO, targetTopic).build());
 					} else {
 						LOGGER.info("Route to {} ({}/{} retries used)", parkingLotTopic, retryCounter, rule.getMaxRetry());
-						result.add(MessageBuilder.withPayload(json).setHeader(X_ROUTE_TO, parkingLotTopic).build());
+						result.add(MessageBuilder.withPayload(json.toString().getBytes(StandardCharsets.UTF_8))
+								.setHeader(X_ROUTE_TO, parkingLotTopic).build());
 					}
 					break;
 				default:
