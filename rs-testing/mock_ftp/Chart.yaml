@@ -5,3 +5,4 @@ name: rs-mock-edip
 version: {{CHART_VERSION}}
 maintainers:
   - name: Werum Software & Systems
+  
