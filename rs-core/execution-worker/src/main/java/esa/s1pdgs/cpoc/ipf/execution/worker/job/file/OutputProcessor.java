@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -33,7 +35,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.FileQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCDefaultTaskFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCExecutor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.GhostHandlingSegmentReportingOutput;
@@ -41,8 +42,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -84,11 +83,6 @@ public class OutputProcessor {
 	private final ObsClient obsClient;
 
 	/**
-	 * Output producer factory for message queue system
-	 */
-	private final OutputProcuderFactory procuderFactory;
-
-	/**
 	 * Working directory
 	 */
 	private final String workDirectory;
@@ -101,7 +95,7 @@ public class OutputProcessor {
 	/**
 	 * Input message
 	 */
-	private final GenericMessageDto<IpfExecutionJob> inputMessage;
+	private final IpfExecutionJob inputMessage;
 
 	/**
 	 * List of authorized and family correspondance define in the job
@@ -142,8 +136,7 @@ public class OutputProcessor {
 	@Deprecated
 	public OutputProcessor(
 			final ObsClient obsClient, 
-			final OutputProcuderFactory procuderFactory,
-			final GenericMessageDto<IpfExecutionJob> inputMessage, 
+			final IpfExecutionJob inputMessage, 
 			final String listFile, 
 			final int sizeUploadBatch,
 			final String prefixMonitorLogs, 
@@ -152,24 +145,22 @@ public class OutputProcessor {
 	) {
 		this(
 				obsClient,
-				procuderFactory, 
-				inputMessage.getBody().getWorkDirectory(),
+				inputMessage.getWorkDirectory(),
 				listFile,
 				inputMessage,
-				inputMessage.getBody().getOutputs(),
+				inputMessage.getOutputs(),
 				sizeUploadBatch,
 				prefixMonitorLogs,
 				appLevel,
 				properties,
-				inputMessage.getDto().isDebug());
+				inputMessage.isDebug());
 	}
 	
 	public OutputProcessor(
 			final ObsClient obsClient,
-			final OutputProcuderFactory procuderFactory,
 			final String workDirectory,
 			final String listFile,
-			final GenericMessageDto<IpfExecutionJob> inputMessage,
+			final IpfExecutionJob inputMessage,
 			final List<LevelJobOutputDto> authorizedOutputs,
 			final int sizeUploadBatch,
 			final String prefixMonitorLogs,
@@ -177,7 +168,6 @@ public class OutputProcessor {
 			final ApplicationProperties properties,
 			final boolean debugMode) {
 		this.obsClient = obsClient;
-		this.procuderFactory = procuderFactory;
 		this.workDirectory = workDirectory;
 		this.listFile = listFile;
 		this.inputMessage = inputMessage;
@@ -288,14 +278,14 @@ public class OutputProcessor {
 						LOGGER.info("Output {} is recognized as belonging to the family {}", productName, family);
 						
 						if (!ghostCandidate) {
-							LOGGER.info("Product {} is not a ghost candidate and processMode is {}", productName,inputMessage.getBody().getProductProcessMode());							
+							LOGGER.info("Product {} is not a ghost candidate and processMode is {}", productName,inputMessage.getProductProcessMode());							
 							reporting.end(
 									new GhostHandlingSegmentReportingOutput(false),
 									new ReportingMessage("%s (%s) is not a ghost candidate", productName, family)
 							);
 							uploadBatch.add(newUploadObject(family,productName,file));
 							outputToPublish.add(
-								new ObsQueueMessage(family, productName, productName, inputMessage.getBody().getProductProcessMode(),oqcFlag));
+								new ObsQueueMessage(family, productName, productName, inputMessage.getProductProcessMode(),oqcFlag));
 
 						} 
 						else {
@@ -313,7 +303,7 @@ public class OutputProcessor {
 								matchOutput.getFamily());						
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getBody().getProductProcessMode(),oqcFlag));
+								inputMessage.getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					}
 					break;
@@ -329,14 +319,14 @@ public class OutputProcessor {
 						LOGGER.warn("Product {} is not expected as output of AIO", productName);
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getBody().getProductProcessMode(),oqcFlag));
+								inputMessage.getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					} else {
 						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getBody().getProductProcessMode(),oqcFlag));
+								inputMessage.getProductProcessMode(),oqcFlag));
 						productSize += size(file);
 					}
 					break;
@@ -363,7 +353,7 @@ public class OutputProcessor {
 							matchOutput.getFamily());
 					uploadBatch.add(newUploadObject(family, productName, file));
 					outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-							inputMessage.getBody().getProductProcessMode(), oqcFlag));
+							inputMessage.getProductProcessMode(), oqcFlag));
 					productSize += size(file);
 					break;
 				case BLANK:
@@ -555,7 +545,7 @@ public class OutputProcessor {
 	 * Process product: upload in OBS and publish in message queue system per batch
 	 * 
 	 */
-	final List<CatalogJob> processProducts(
+	final List<Message<CatalogJob>> processProducts(
 			final ReportingFactory reportingFactory, 
 			final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish,
@@ -572,7 +562,7 @@ public class OutputProcessor {
 		// to products that have not been uploaded.
 		// As time is scarce, all this crap needs to be cleaned up in the IPF refactoring story in the future
 		// and this piece of code should never become operational.
-		final List<CatalogJob> res = new ArrayList<>();
+		final List<Message<CatalogJob>> res = new ArrayList<>();
 		
 		final double size = uploadBatch.size();
 		final double nbPool = Math.ceil(size / sizeUploadBatch);
@@ -609,13 +599,13 @@ public class OutputProcessor {
 	 * upload
 	 * 
 	 */
-	private List<CatalogJob> publishAccordingUploadFiles(
+	private List<Message<CatalogJob>> publishAccordingUploadFiles(
 			final double nbBatch,
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid
 	) throws Exception {
-		final List<CatalogJob> result = new ArrayList<>();
+		final List<Message<CatalogJob>> result = new ArrayList<>();
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
 		final Iterator<ObsQueueMessage> iter = outputToPublish.iterator();
 		boolean stop = false;
@@ -627,7 +617,7 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				result.add(publish(uuid, msg));
+				result.add(MessageBuilder.withPayload(publish(uuid, msg)).build());
 				iter.remove();
 			}
 
@@ -642,7 +632,9 @@ public class OutputProcessor {
 		try {
 			LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
-			final CatalogJob res = procuderFactory.sendOutput(msg, inputMessage, uuid);
+			// TODO: Put logic of old sendOutput message here (?)
+//			final CatalogJob res = procuderFactory.sendOutput(msg, inputMessage, uuid);
+			final CatalogJob res = new CatalogJob();
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			return res;
@@ -668,7 +660,8 @@ public class OutputProcessor {
 					try {
 						LOGGER.info("{} 4 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 								msg.getProductName());
-						procuderFactory.sendOutput(msg, inputMessage, uuid);
+						// TODO: fix this!
+						//procuderFactory.sendOutput(msg, inputMessage, uuid);
 						LOGGER.info("{} 4 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 								msg.getProductName());
 					} catch (final Exception e) {
@@ -684,7 +677,7 @@ public class OutputProcessor {
 	/**
 	 * Function which process all the output of L0 process
 	 */
-	public List<CatalogJob> processOutput(
+	public List<Message<CatalogJob>> processOutput(
 			final ReportingFactory reportingFactory, 
 			final UUID uuid,
 			final IpfExecutionJob job			  
@@ -723,7 +716,7 @@ public class OutputProcessor {
 		// Upload per batch the output
 		// S1PRO-1494: WARNING--- list will be emptied by this method. For reporting, make a copy beforehand
 		//final List<ObsQueueMessage> outs = new ArrayList<>(outputToPublish);
-		final List<CatalogJob> res = processProducts(
+		final List<Message<CatalogJob>> res = processProducts(
 						reportingFactory,
 						uploadBatch,
 						outputToPublish,

@@ -12,11 +12,8 @@ import org.mockito.Mockito;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.appstatus.Status;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.DevProperties;
-import esa.s1pdgs.cpoc.ipf.execution.worker.status.TestAppStatusImpl;
-import esa.s1pdgs.cpoc.mqi.client.StatusService;
 
 /**
  * Test class with properties mocked
@@ -47,12 +44,6 @@ public class MockPropertiesTest {
      */
     @Mock
     protected AppStatus appStatus;
-
-    /**
-     * MQI service for stopping the MQI
-     */
-    @Mock
-    protected StatusService mqiStatusService;
 
     /**
      * Mock the default development properties (all step activation at true)
@@ -130,16 +121,6 @@ public class MockPropertiesTest {
     
     protected void mockWorkingdirProperties(final Path workingdir) {
     	doReturn(workingdir.toString()).when(properties).getWorkingDir();
-    }
-
-    /**
-     * Mock default status
-     * 
-     * @throws AbstractCodedException
-     */
-    protected void mockDefaultStatus() throws AbstractCodedException {
-        doNothing().when(mqiStatusService).stop();
-        mockStatus((new TestAppStatusImpl(3, 30, () -> {}, mqiStatusService)).getStatus(), 3, false);
     }
 
     /**

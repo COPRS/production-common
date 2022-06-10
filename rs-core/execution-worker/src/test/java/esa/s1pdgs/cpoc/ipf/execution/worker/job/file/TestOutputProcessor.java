@@ -33,7 +33,6 @@ public class TestOutputProcessor {
 				null, 
 				null, 
 				null, 
-				null, 
 				42, 
 				null, 
 				null, 

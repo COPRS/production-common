@@ -12,23 +12,19 @@ import org.mockito.Mock;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class GhostTest {
 	@Mock
 	private ObsClient obsClient;
-	@Mock
-	private OutputProcuderFactory procuderFactory;
 
 	private OutputProcessor processor;
 
 	@Before
 	public void setup() {
-		final GenericMessageDto<IpfExecutionJob> inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
-				new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order", "FAST24", new UUID(23L, 42L)));
+		final IpfExecutionJob inputMessage = 
+				new IpfExecutionJob(ProductFamily.L0_JOB, "product-name", "FAST24", "", "job-order", "FAST24", new UUID(23L, 42L));
 		
 		final ApplicationProperties properties = new ApplicationProperties();
 		properties.setThresholdEw(2);
@@ -36,7 +32,7 @@ public class GhostTest {
 		properties.setThresholdSm(2);
 		properties.setThresholdWv(30);
 
-		processor = new OutputProcessor(obsClient, procuderFactory, inputMessage, "outputs.list", 2, "MONITOR",
+		processor = new OutputProcessor(obsClient, inputMessage, "outputs.list", 2, "MONITOR",
 				ApplicationLevel.L0, properties);
 	}
 

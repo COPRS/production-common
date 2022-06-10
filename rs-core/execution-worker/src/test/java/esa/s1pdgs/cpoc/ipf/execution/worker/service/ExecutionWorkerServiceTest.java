@@ -32,17 +32,13 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessTimeoutException;
-import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ipf.execution.worker.TestUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.test.MockPropertiesTest;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -52,13 +48,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
  * 
  * @author Viveris Technologies
  */
-public class JobProcessorTest extends MockPropertiesTest {
-
-    /**
-     * Output processsor
-     */
-    @Mock
-    private OutputProcuderFactory procuderFactory;
+public class ExecutionWorkerServiceTest extends MockPropertiesTest {
 
     /**
      * Output processsor
@@ -67,15 +57,9 @@ public class JobProcessorTest extends MockPropertiesTest {
     private ObsClient obsClient;
 
     /**
-     * MQI service
-     */
-    @Mock
-    private GenericMqiClient mqiService;
-
-    /**
      * Job to process
      */
-    private GenericMessageDto<IpfExecutionJob> inputMessage;
+    private IpfExecutionJob inputMessage;
 
     /**
      * Processor to test
@@ -109,8 +93,6 @@ public class JobProcessorTest extends MockPropertiesTest {
     public ExpectedException thrown = ExpectedException.none();
     
     private final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("TestOutputHandling");
-	
-    private final ErrorRepoAppender errorAppender = ErrorRepoAppender.NULL;
 
     /**
      * Initialization
@@ -123,18 +105,16 @@ public class JobProcessorTest extends MockPropertiesTest {
 
         mockDefaultAppProperties();
         mockDefaultDevProperties();
-        mockDefaultStatus();
         //devProperties.getStepsActivation().put("erasing", Boolean.FALSE);
 
-        inputMessage = new GenericMessageDto<IpfExecutionJob>(123, "",
-                TestUtils.buildL0IpfExecutionJob());
-        workingDir = new File(inputMessage.getBody().getWorkDirectory());
+        inputMessage = TestUtils.buildL0IpfExecutionJob();
+        workingDir = new File(inputMessage.getWorkDirectory());
         if (!workingDir.exists()) {
             workingDir.mkdir();
         }
         mockWorkingdirProperties(workingDir.toPath());
         processor = new ExecutionWorkerService(appStatus, properties, devProperties,
-                obsClient, procuderFactory, mqiService, Collections.emptyList(), errorAppender, mqiStatusService, 0L, 10L);
+                obsClient);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
     }
@@ -193,17 +173,17 @@ public class JobProcessorTest extends MockPropertiesTest {
     @Test
     public void testCleanJobProcessing() throws IOException {
         final File folder1 =
-                new File(inputMessage.getBody().getWorkDirectory() + "folder1");
+                new File(inputMessage.getWorkDirectory() + "folder1");
         folder1.mkdir();
-        final File file1 = new File(inputMessage.getBody().getWorkDirectory()
+        final File file1 = new File(inputMessage.getWorkDirectory()
                 + "folder1" + File.separator + "file1");
         file1.createNewFile();
         final File file2 =
-                new File(inputMessage.getBody().getWorkDirectory() + "file2");
+                new File(inputMessage.getWorkDirectory() + "file2");
         file2.createNewFile();
         assertTrue(workingDir.exists());
         assertTrue(file1.exists());      
-        processor.cleanJobProcessing(inputMessage.getBody(), true, procExecutorSrv);
+        processor.cleanJobProcessing(inputMessage, true, procExecutorSrv);
 
         verify(properties, times(1)).getTmProcStopS();
         assertTrue(workingDir.exists());
@@ -229,13 +209,13 @@ public class JobProcessorTest extends MockPropertiesTest {
         doReturn(Collections.emptyList()).when(outputProcessor).processOutput(reporting, UUID.randomUUID(), new IpfExecutionJob());
         // Step 5
         final File folder1 =
-                new File(inputMessage.getBody().getWorkDirectory() + "folder1");
+                new File(inputMessage.getWorkDirectory() + "folder1");
         folder1.mkdir();
-        final File file1 = new File(inputMessage.getBody().getWorkDirectory()
+        final File file1 = new File(inputMessage.getWorkDirectory()
                 + "folder1" + File.separator + "file1");
         file1.createNewFile();
         final File file2 =
-                new File(inputMessage.getBody().getWorkDirectory() + "file2");
+                new File(inputMessage.getWorkDirectory() + "file2");
         file2.createNewFile();
     }
 
@@ -247,7 +227,7 @@ public class JobProcessorTest extends MockPropertiesTest {
     public void testCallWithNext() throws Exception {
         mockAllStep(false);
         doReturn(ApplicationLevel.L0).when(properties).getLevel();
-        processor.onMessage(inputMessage);
+        processor.apply(inputMessage);
         doReturn(ApplicationLevel.L1).when(properties).getLevel();
     }
     
@@ -373,7 +353,7 @@ public class JobProcessorTest extends MockPropertiesTest {
         verify(properties, times(0)).getTmProcStopS();
 
         // REexcute erase to purge test folder
-        processor.cleanJobProcessing(inputMessage.getBody(), false,
+        processor.cleanJobProcessing(inputMessage, false,
                 procExecutorSrv);
     }
 

@@ -15,7 +15,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -39,10 +37,7 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.integration.filter.MessageFilter;
 import org.springframework.messaging.Message;
-import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -54,32 +49,19 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.DevProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.MonitorLogUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.WorkingDirectoryUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
-import esa.s1pdgs.cpoc.ipf.execution.worker.job.mqi.OutputProcuderFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.IpfFilenameReportingOutput;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.JobReportingInput;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.MqiClient;
-import esa.s1pdgs.cpoc.mqi.client.MqiConsumer;
-import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
-import esa.s1pdgs.cpoc.mqi.client.MqiPublishingJob;
-import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
-import esa.s1pdgs.cpoc.mqi.model.queue.ProductionEvent;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericPublicationMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
@@ -235,6 +217,18 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 //		this.workDirectory = inputMessage.getBody().getWorkDirectory();
 //		this.debugMode = inputMessage.getDto().isDebug();
 		
+		final OutputProcessor outputProcessor = new OutputProcessor(
+				obsClient,
+				job.getWorkDirectory(),
+				outputListFile,
+				job, 
+				job.getOutputs(),
+				properties.getSizeBatchUpload(), 
+				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
+				properties.getLevel(), 
+				properties,
+				job.isDebug());
+		
 		reporting.begin(
 				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName, extractIpfVersionFromJobOrder(job)),	
 				new ReportingMessage("Start job processing")
@@ -242,66 +236,24 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		
 		List<Message<CatalogJob>> result = null;
 		try {
-			result = processJob(job, inputDownloader, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 		} catch (Exception e) {
 			reporting.error(errorReportMessage(e));
 		}
 		
-		reporting.end(toReportingOutput(result, job.isDebug()), new ReportingMessage("End job processing"))
+		reporting.end(toReportingOutput(result, job.isDebug()), new ReportingMessage("End job processing"));
 		return result;
 	}
 
-	@Override
-	public final MqiMessageEventHandler onMessage(final GenericMessageDto<IpfExecutionJob> message) {
-		return new MqiMessageEventHandler.Builder<ProductionEvent>(category)
-				.onSuccess(res -> reporting.end(toReportingOutput(res, job.isDebug()),
-						new ReportingMessage("End job processing")))
-				.onWarning(res -> reporting.warning(toReportingOutput(res, job.isDebug()),
-						new ReportingMessage("End job processing")))
-				.onError(e -> reporting.error(errorReportMessage(e))).publishMessageProducer(() -> processJob(message,
-						inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting))
-				.newResult();
-	}
-
-	@Override
-	public void onTerminalError(final GenericMessageDto<IpfExecutionJob> message, final Exception error) {
-		LOGGER.error(error);
-
-		final FailedProcessingDto failedProcessing = new FailedProcessingDto(properties.getHostname(), new Date(),
-				String.format("Error on handling IpfExecutionJob message %s: %s", message.getId(),
-						LogUtils.toString(error)),
-				message);
-		// FIXME: workaraound for retry counter, shall only be increased when restarting
-		// or reevaluating
-		message.getBody().getIpfPreparationJobMessage().getBody().increaseRetryCounter();
-		failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
-		errorAppender.send(failedProcessing);
-		exitOnAppStatusStopOrWait();
-	}
-
-	@Override
-	public void onWarning(final GenericMessageDto<IpfExecutionJob> message, final String warningMessage) {
-		LOGGER.warn(warningMessage);
-
-		final FailedProcessingDto failedProcessing = new FailedProcessingDto(properties.getHostname(), new Date(),
-				String.format("Warning on handling IpfExecutionJob message %s: %s", message.getId(), warningMessage),
-				message);
-		// FIXME: workaraound for retry counter, shall only be increased when restarting
-		// or reevaluating
-		message.getBody().getIpfPreparationJobMessage().getBody().increaseRetryCounter();
-		failedProcessing.setPredecessor(message.getBody().getIpfPreparationJobMessage());
-		errorAppender.send(failedProcessing);
-	}
-
-	protected MqiPublishingJob<ProductionEvent> processJob(final GenericMessageDto<IpfExecutionJob> message,
-			final InputDownloader inputDownloader, final OutputProcessor outputProcessor,
+	protected List<Message<CatalogJob>> processJob(final IpfExecutionJob job,
+			final InputDownloader inputDownloader,
+			final OutputProcessor outputProcessor,
 			final ExecutorService procExecutorSrv, final ExecutorCompletionService<Void> procCompletionSrv,
 			final PoolExecutorCallable procExecutor,
 			final Reporting reporting /* TODO: Refactor to not expect an already begun reporting... */)
 			throws Exception {
 		boolean poolProcessing = false;
-		final IpfExecutionJob job = message.getBody();
-		final List<GenericPublicationMessageDto<? extends AbstractMessage>> productionEvents = new ArrayList<>();
+		final List<Message<CatalogJob>> catalogJobs = new ArrayList<>();
 
 		try {
 			LOGGER.info("{} Starting process executor", getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));
@@ -326,7 +278,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			if (devProperties.getStepsActivation().get("upload")) {
 				checkThreadInterrupted();
 				LOGGER.info("{} Processing l0 outputs", getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
-				productionEvents.addAll(outputProcessor.processOutput(reporting, reporting.getUid(), job));
+				catalogJobs.addAll(outputProcessor.processOutput(reporting, reporting.getUid(), job));
 			} else {
 				LOGGER.info("{} Processing l0 outputs bypasssed", getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
 			}
@@ -344,16 +296,16 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				warningMessage = String.format(
 						"Missing RAWs detected for successful production %s: %s. "
 								+ "Restart if chunks become available or delete this request if they are lost",
-						message.getId(), missingChunks);
+						job.getUid().toString(), missingChunks);
 			} else if (job.isTimedOut()) {
 				warningMessage = String.format(
 						"JobGeneration timed out before successful production %s. "
 								+ "Restart if missing inputs become available or delete this request if they are lost",
-						message.getId());
+								job.getUid().toString());
 			} else {
 				warningMessage = "";
 			}
-			return new MqiPublishingJob<>(productionEvents, warningMessage);
+			return catalogJobs;
 		} catch (Exception e) {
 			WorkingDirectoryUtils workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());
 			workingDirUtils.copyWorkingDirectory(reporting, reporting.getUid(), job, ProductFamily.FAILED_WORKDIR);
@@ -501,26 +453,6 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	private ReportingFilenameEntry newEntry(final LevelJobInputDto input) {
 		return new ReportingFilenameEntry(ProductFamily.fromValue(input.getFamily()),
 				new File(input.getLocalPath()).getName());
-	}
-
-	// checks AppStatus, whether app shall be stopped and in that case, shut down
-	// this service as well
-	private void exitOnAppStatusStopOrWait() {
-		if (appStatus.getStatus().isStopping()) {
-			// TODO send stop to the MQI
-			try {
-				mqiStatusService.stop();
-			} catch (final AbstractCodedException ace) {
-				LOGGER.error("MQI service couldn't be stopped", ace);
-			}
-			appStatus.setShallBeStopped(true);
-			appStatus.forceStopping(); // only stops when isShallBeStopped() == true
-		} else if (appStatus.getStatus().isFatalError()) {
-			appStatus.setShallBeStopped(true);
-			appStatus.forceStopping(); // only stops when isShallBeStopped() == true
-		} else {
-			appStatus.setWaiting();
-		}
 	}
 
 	private ReportingMessage errorReportMessage(final Exception e) {
