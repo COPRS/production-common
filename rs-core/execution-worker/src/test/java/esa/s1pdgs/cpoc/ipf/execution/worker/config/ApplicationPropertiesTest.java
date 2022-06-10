@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ipf.execution.worker.config;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +11,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 
 /**
  * Check the application properties
  * @author Viveris Technologies
  *
  */
+@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext

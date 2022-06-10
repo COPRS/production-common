@@ -4,18 +4,6 @@ spring:
     
 logging:
   config: classpath:log4j2-test.yml
-    
-server:
-  port: ${wrapper_rest_server_port:8080}
-  
-  # KAFKA config for error queue
-kafka:
-  bootstrap-servers: ${kafka_bootstrap-servers:kafka-headless:9092}   # the bootstrap servers for KAFKA
-  group-id: error                                                # the group identifier to use for KAFKA publishers  
-  max-retries: 10                                                # number of retries if kafka is not available
-  error-topic: t-pdgs-errors
-  producer:
-    max-retries: 10
   
 process:
   level: L0
@@ -35,11 +23,6 @@ process:
   threshold-iw : 2
   threshold-sm : 2
   threshold-wv : 30
-  
-mqi:
-  host-uri: http://localhost:8081
-  max-retries: 3
-  tempo-retry-ms: 1000
 
 status:
   delete-fixed-delay-ms: 3000
@@ -52,3 +35,70 @@ dev:
     download: ${wrapper_process_dev-steps-activation_download:true}
     upload: ${wrapper_process_dev-steps-activation_upload:true}
     erasing: ${wrapper_process_dev-steps-activation_erasing:true}
+    
+obs:
+  bucket:
+    s3-pug: rs-s3-pug
+    l0-slice: rs-s1-l0-slices
+    s2-aux-zip: rs-s2-aux-zip
+    plan-and-report: rs-s1-plans-and-reports
+    s3-l0-zip: rs-s3-l0-zip
+    edrs-session: rs-session-files
+    l1-slice: rs-s1-l1-slices
+    l0-slice-zip: rs-s1-l0-slices-zip
+    s3-l2-nrt: 'rs-s3-l2-nrt '
+    s3-granules: rs-s3-granules
+    spp-mbu: rs-s1-spp-mbu
+    spp-obs: rs-s1-spp
+    l2-acn-zip: rs-s1-l2-acns-zip
+    s3-l1-nrt-zip: rs-s3-l1-nrt-zip
+    s3-l1-stc-zip: rs-s3-l1-stc-zip
+    l0-acn-zip: rs-s1-l0-acns-zip
+    s3-l2-stc: rs-s3-l2-stc
+    s2-hktm-zip: rs-s2-hktm-zip
+    invalid: rs-s1-invalid
+    failed-workdir: rs-failed-workdir
+    s3-l2-ntc-zip: rs-s3-l2-ntc-zip
+    s3-l1-nrt: rs-s3-l1-nrt
+    debug: rs-debug
+    s3-l1-stc: rs-s3-l1-stc
+    s3-l0: rs-s3-l0
+    s2-l0-gr: rs-s2-l0-gr
+    s3-aux: rs-s3-aux
+    auxiliary-file-zip: rs-s1-aux-zip
+    l0-acn: rs-l0-acns
+    s2-aux: rs-s2-aux
+    ghost: rs-s1-ghost
+    l0-segment-zip: rs-s1-l0-segments-zip
+    s3-cal-zip: rs-s3-cal-zip
+    s2-l0-ds-zip: rs-s2-l0-ds-zip
+    plan-and-report-zip: rs-s1-plans-and-reports-zip
+    l0-segment: rs-s1-l0-segments
+    l2-slice-zip: rs-s1-l2-slices-zip
+    s3-cal: rs-s3-cal
+    s3-aux-zip: rs-s3-aux-zip
+    s3-pug-zip: rs-s3-pug-zip
+    s2-l0-ds: rs-s2-l0-ds
+    l1-acn-zip: rs-s1-l1-acns-zip
+    s3-l1-ntc: rs-s3-l1-ntc
+    s2-l0-gr-zip: rs-s2-l0-gr-zip
+    s3-l2-nrt-zip: rs-s3-l2-nrt-zip
+    s3-l1-ntc-zip: rs-s3-l1-ntc-zip
+    s3-granules-zip: rs-s3-granules-zip
+    s3-l2-stc-zip: rs-s3-l2-stc-zip
+    l0-blank-zip: rs-s1-l0-blanks-zip
+    l2-acn: rs-s1-l2-acns
+    s3-l2-ntc: rs-s3-l2-ntc
+    auxiliary-file: rs-s1-aux
+    l1-acn: rs-s1-l1-acns
+    l2-slice: rs-s1-l2-slices
+    l1-slice-zip: rs-s1-l1-slices-zip
+    s2-hktm: rs-s2-hktm
+    spp-obs-zip: rs-s1-spp-zip
+    session-retransfer: rs-session-retransfer
+    l0-blank: rs-s1-l0-blanks
+  user-secret: test
+  disable-chunked-encoding: 'false'
+  endpoint-region: eu-west-0
+  user-id: test
+  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com
