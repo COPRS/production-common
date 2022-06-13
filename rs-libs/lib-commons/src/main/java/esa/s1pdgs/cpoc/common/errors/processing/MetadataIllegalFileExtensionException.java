@@ -5,7 +5,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 /**
  * @author Viveris Technlogies
  */
-public class MetadataIllegalFileExtension extends AbstractCodedException {
+public class MetadataIllegalFileExtensionException extends AbstractCodedException {
 
     /**
      * 
@@ -21,7 +21,7 @@ public class MetadataIllegalFileExtension extends AbstractCodedException {
     /**
      * @param productName
      */
-    public MetadataIllegalFileExtension(final String extension) {
+    public MetadataIllegalFileExtensionException(final String extension) {
         super(ErrorCode.METADATA_FILE_EXTENSION,
                 String.format(MESSAGE, extension));
     }

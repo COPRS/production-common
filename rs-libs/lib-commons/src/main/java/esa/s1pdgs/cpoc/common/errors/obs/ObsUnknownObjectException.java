@@ -8,7 +8,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
  * @author Cyrielle Gailliard
  *
  */
-public class ObsUnknownObject extends ObsException {
+public class ObsUnknownObjectException extends ObsException {
 
 	/**
 	 * Serial UID
@@ -21,7 +21,7 @@ public class ObsUnknownObject extends ObsException {
 	 * @param bucket
 	 * @param message
 	 */
-	public ObsUnknownObject(final ProductFamily family, final String key) {
+	public ObsUnknownObjectException(final ProductFamily family, final String key) {
 		super(ErrorCode.OBS_UNKOWN_OBJ, family, key, "Object not found");
 	}
 

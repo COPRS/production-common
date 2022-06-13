@@ -14,15 +14,15 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
  * 
  * @author Viveris Technologies
  */
-public class StatusProcessingApiErrorTest {
+public class StatusProcessingApiErrorExceptionTest {
 
     /**
      * Test the exception
      */
     @Test
     public void test() {
-        StatusProcessingApiError e1 =
-                new StatusProcessingApiError("uri-mqi", "error-message");
+        StatusProcessingApiErrorException e1 =
+                new StatusProcessingApiErrorException("uri-mqi", "error-message");
         assertEquals("uri-mqi", e1.getUri());
         assertEquals("error-message", e1.getMessage());
         assertEquals(ErrorCode.STATUS_PROCESSING_API_ERROR, e1.getCode());
@@ -32,7 +32,7 @@ public class StatusProcessingApiErrorTest {
         assertTrue(str1.contains("[uri uri-mqi]"));
         assertTrue(str1.contains("[msg error-message]"));
 
-        StatusProcessingApiError e2 = new StatusProcessingApiError("uri-mqi",
+        StatusProcessingApiErrorException e2 = new StatusProcessingApiErrorException("uri-mqi",
                 "error-message", new Exception("cause-message"));
         assertEquals("uri-mqi", e1.getUri());
         assertEquals("error-message", e2.getMessage());

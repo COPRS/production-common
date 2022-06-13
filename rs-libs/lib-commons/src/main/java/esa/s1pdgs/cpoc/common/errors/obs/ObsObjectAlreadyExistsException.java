@@ -5,7 +5,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 /**
  * Exception raised when object already exist in object storage
  */
-public class ObsAlreadyExist extends ObsException {
+public class ObsObjectAlreadyExistsException extends ObsException {
 
     /**
      * 
@@ -22,7 +22,7 @@ public class ObsAlreadyExist extends ObsException {
      * @param productName
      * @param cause
      */
-    public ObsAlreadyExist(final ProductFamily family, final String key,
+    public ObsObjectAlreadyExistsException(final ProductFamily family, final String key,
             final Throwable cause) {
         super(ErrorCode.OBS_ALREADY_EXIST, family, key,
                 MESSAGE + ": " + cause.getMessage(), cause);

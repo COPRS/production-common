@@ -5,14 +5,14 @@ package esa.s1pdgs.cpoc.common.errors;
  * 
  * @author Viveris Technologies
  */
-public class InvalidFormatProduct extends AbstractCodedException {
+public class InvalidFormatProductException extends AbstractCodedException {
 
     private static final long serialVersionUID = 3720211649870339168L;
 
     /**
      * @param message
      */
-    public InvalidFormatProduct(final String message) {
+    public InvalidFormatProductException(final String message) {
         super(ErrorCode.INVALID_PRODUCT_FORMAT, message);
     }
 

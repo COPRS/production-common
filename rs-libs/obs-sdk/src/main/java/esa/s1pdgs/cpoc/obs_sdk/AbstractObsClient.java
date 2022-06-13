@@ -30,7 +30,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsParallelAccessException;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObjectException;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -109,7 +109,7 @@ public abstract class AbstractObsClient implements ObsClient {
              	try {
 					final List<File> results = downloadObject(object);
 					if (results.size() <= 0) {
-						throw new ObsUnknownObject(object.getFamily(), object.getKey());
+						throw new ObsUnknownObjectException(object.getFamily(), object.getKey());
 					}					
 					final long dlSize =	FileUtils.size(results);
 					reporting.end(new ReportingMessage(dlSize, "End downloading from OBS"));             	

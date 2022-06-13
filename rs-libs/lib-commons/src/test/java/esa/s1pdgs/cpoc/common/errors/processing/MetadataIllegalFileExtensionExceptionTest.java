@@ -6,20 +6,20 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtensionException;
 
 /**
  * Test the exception FilePathException
  */
-public class MetadataIllegalFileExtensionTest {
+public class MetadataIllegalFileExtensionExceptionTest {
 
     /**
      * Test getters and constructors
      */
     @Test
     public void testGettersConstructors() {
-        MetadataIllegalFileExtension exception =
-                new MetadataIllegalFileExtension("exten");
+        MetadataIllegalFileExtensionException exception =
+                new MetadataIllegalFileExtensionException("exten");
 
         assertEquals(ErrorCode.METADATA_FILE_EXTENSION, exception.getCode());
         assertEquals(ErrorCode.METADATA_FILE_EXTENSION.getCode(),
@@ -31,8 +31,8 @@ public class MetadataIllegalFileExtensionTest {
      */
     @Test
     public void testLogMessage() {
-        MetadataIllegalFileExtension exception =
-                new MetadataIllegalFileExtension("exten");
+        MetadataIllegalFileExtensionException exception =
+                new MetadataIllegalFileExtensionException("exten");
 
         String log = exception.getLogMessage();
         assertTrue(log.contains("[msg "));

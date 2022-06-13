@@ -5,7 +5,7 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 /**
  * @author Viveris Technologies
  */
-public class StatusProcessingApiError extends AbstractCodedException {
+public class StatusProcessingApiErrorException extends AbstractCodedException {
 
     /**
      * 
@@ -21,7 +21,7 @@ public class StatusProcessingApiError extends AbstractCodedException {
      * @param uri
      * @param message
      */
-    public StatusProcessingApiError(final String uri, final String message) {
+    public StatusProcessingApiErrorException(final String uri, final String message) {
         super(ErrorCode.STATUS_PROCESSING_API_ERROR, message);
         this.uri = uri;
     }
@@ -31,7 +31,7 @@ public class StatusProcessingApiError extends AbstractCodedException {
      * @param message
      * @param cause
      */
-    public StatusProcessingApiError(final String uri, final String message,
+    public StatusProcessingApiErrorException(final String uri, final String message,
             final Throwable cause) {
         super(ErrorCode.STATUS_PROCESSING_API_ERROR, message, cause);
         this.uri = uri;

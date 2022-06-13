@@ -16,7 +16,7 @@ import esa.s1pdgs.cpoc.common.FileExtension;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataFilePathException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataIgnoredFileException;
-import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtension;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataIllegalFileExtensionException;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
@@ -138,7 +138,7 @@ public class FileDescriptorBuilder {
 	 */
 	public EdrsSessionFileDescriptor buildEdrsSessionFileDescriptor(final File file,
 			final Map<String, String> metadataFromPath, final CatalogJob catJob)
-			throws MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtension {
+			throws MetadataFilePathException, MetadataIgnoredFileException, MetadataIllegalFileExtensionException {
 		// Extract relative path
 		final String absolutePath = file.getAbsolutePath();
 		if (absolutePath.length() <= localDirectory.getAbsolutePath().length()) {

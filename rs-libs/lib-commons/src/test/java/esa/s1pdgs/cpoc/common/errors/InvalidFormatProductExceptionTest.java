@@ -6,20 +6,20 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import esa.s1pdgs.cpoc.common.errors.InvalidFormatProduct;
+import esa.s1pdgs.cpoc.common.errors.InvalidFormatProductException;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 
 /**
  * @author Viveris Technologies
  */
-public class InvalidFormatProductTest {
+public class InvalidFormatProductExceptionTest {
 
     /**
      * Test the InternalErrorException
      */
     @Test
     public void testInternalErrorException() {
-        InvalidFormatProduct e1 = new InvalidFormatProduct("erreur message");
+        InvalidFormatProductException e1 = new InvalidFormatProductException("erreur message");
 
         assertEquals(ErrorCode.INVALID_PRODUCT_FORMAT, e1.getCode());
         assertEquals("erreur message", e1.getMessage());

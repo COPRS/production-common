@@ -8,22 +8,22 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObject;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsUnknownObjectException;
 
 /**
  * Test the class ObsUnknownObject
  * 
  * @author Viveris Technologies
  */
-public class ObsUnknownObjectTest {
+public class ObsUnknownObjectExceptionTest {
 
     /**
      * Test the ObsUnknownObjectException
      */
     @Test
     public void testObsUnknownObjectException() {
-        ObsUnknownObject e1 =
-                new ObsUnknownObject(ProductFamily.EDRS_SESSION, "key1");
+        ObsUnknownObjectException e1 =
+                new ObsUnknownObjectException(ProductFamily.EDRS_SESSION, "key1");
 
         assertEquals("key1", e1.getKey());
         assertEquals(ProductFamily.EDRS_SESSION, e1.getFamily());

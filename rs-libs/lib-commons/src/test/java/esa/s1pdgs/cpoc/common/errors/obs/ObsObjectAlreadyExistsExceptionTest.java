@@ -7,12 +7,12 @@ import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
-import esa.s1pdgs.cpoc.common.errors.obs.ObsAlreadyExist;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsObjectAlreadyExistsException;
 
 /**
  * Test the exception ObsAlreadyExist
  */
-public class ObsAlreadyExistTest {
+public class ObsObjectAlreadyExistsExceptionTest {
 
     /**
      * Test getters and constructors
@@ -20,7 +20,7 @@ public class ObsAlreadyExistTest {
     @Test
     public void testGettersConstructors() {
         Throwable cause = new Exception("cause exception");
-        ObsAlreadyExist exception = new ObsAlreadyExist(
+        ObsObjectAlreadyExistsException exception = new ObsObjectAlreadyExistsException(
                 ProductFamily.AUXILIARY_FILE, "key-test", cause);
 
         assertEquals(ErrorCode.OBS_ALREADY_EXIST, exception.getCode());
@@ -36,7 +36,7 @@ public class ObsAlreadyExistTest {
     @Test
     public void testLogMessage() {
         Throwable cause = new Exception("cause exception");
-        ObsAlreadyExist exception = new ObsAlreadyExist(
+        ObsObjectAlreadyExistsException exception = new ObsObjectAlreadyExistsException(
                 ProductFamily.AUXILIARY_FILE, "key-test", cause);
 
         String log = exception.getLogMessage();
