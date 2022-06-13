@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperties;
@@ -53,8 +54,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		if (optRule.isEmpty()) {
 			LOGGER.info("No matching rule found");
 			LOGGER.info("Route to {}", parkingLotTopic);
-			result.add(MessageBuilder.withPayload(json.toString().getBytes(StandardCharsets.UTF_8))
-					.setHeader(X_ROUTE_TO, parkingLotTopic).build());
+			result.add(newParkingLotMessage(json, message.getHeaders()));
 		} else {
 			Rule rule = optRule.get();
 			LOGGER.info("Found rule {}: {}", rule.getActionType().name(), rule.getErrorTitle());
@@ -72,8 +72,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 								.setHeader(X_ROUTE_TO, targetTopic).build());
 					} else {
 						LOGGER.info("Route to {} ({}/{} retries used)", parkingLotTopic, retryCounter, rule.getMaxRetry());
-						result.add(MessageBuilder.withPayload(json.toString().getBytes(StandardCharsets.UTF_8))
-								.setHeader(X_ROUTE_TO, parkingLotTopic).build());
+						result.add(newParkingLotMessage(json, message.getHeaders()));
 					}
 					break;
 				default:
@@ -83,4 +82,12 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		}
 		return result;
 	}
+	
+	private Message<byte[]> newParkingLotMessage(JSONObject payload, MessageHeaders originalMessageHeader) {
+		// TODO: In future add a FailedProcessing here containing additional attributes from the originalMessageHeader, e.g. stacktrace
+		Message<byte[]> message = MessageBuilder.withPayload(payload.toString().getBytes(StandardCharsets.UTF_8))
+				.setHeader(X_ROUTE_TO, parkingLotTopic).build();
+		return message;
+	}
+	
 }
