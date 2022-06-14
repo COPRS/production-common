@@ -54,9 +54,12 @@ public class RoutingTable {
 	}
 	
 	public Optional<Rule> findRule(String text) {
+		LOGGER.info("Find rule for: {}", text);
 		for (List<Rule> currentPriorityLevel : rules.descendingMap().values()) {
 			for (Rule rule : currentPriorityLevel) {
+				LOGGER.info("Checking against rule: {}", rule);
 				if (NO_ACTION != rule.getActionType() && rule.matches(text)) {
+					LOGGER.info("Found matching rule: {}", rule);
 					return Optional.of(rule);
 				}
 			}
