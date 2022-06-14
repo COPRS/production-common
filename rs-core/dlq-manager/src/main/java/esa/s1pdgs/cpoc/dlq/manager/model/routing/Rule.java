@@ -23,7 +23,7 @@ public class Rule {
 	private Pattern regexPattern; 
 	
 	public boolean matches(String text) {
-		return regexPattern.matcher(text).matches();
+		return regexPattern.matcher(text).find();
 	}
 	
 	public String getErrorTitle() {
@@ -40,7 +40,7 @@ public class Rule {
 	
 	public void setErrorID(String errorId) {
 		this.errorId = errorId;
-		regexPattern = Pattern.compile(errorId);
+		regexPattern = Pattern.compile(errorId, Pattern.MULTILINE);
 	}
 	
 	public ActionType getActionType() {

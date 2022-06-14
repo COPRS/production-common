@@ -55,7 +55,7 @@ public class ITDlqManagerService {
 		Message<byte[]> message1 = new GenericMessage<>( //
 				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
-						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
+						X_EXCEPTION_MESSAGE, "first line\nRuntimeException".getBytes(StandardCharsets.UTF_8)));
 		
 		List<Message<byte[]>> actual1 = dlqManagerService.apply(message1);
 		
@@ -112,7 +112,7 @@ public class ITDlqManagerService {
 		Message<byte[]> message = new GenericMessage<>( //
 				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-origin".getBytes(StandardCharsets.UTF_8), //
-						X_EXCEPTION_MESSAGE, "!$%foobar#§!".getBytes(StandardCharsets.UTF_8)));
+						X_EXCEPTION_MESSAGE, "!$%foobar#§!\nsecond line".getBytes(StandardCharsets.UTF_8)));
 		
 		List<Message<byte[]>> actual = dlqManagerService.apply(message);
 		
