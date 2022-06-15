@@ -63,7 +63,7 @@ public class ApplicationProperties {
      * Tempo between two loops when waiting for inputs downloading
      */
     private long wapTempoS;
-    
+   
     private String hostname;
     
     /**

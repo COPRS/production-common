@@ -242,4 +242,13 @@ jobs:
     - uses: ./.github/actions/generate-report
       with:
         COMPONENT: ${{ matrix.component }}
-      
+
+  build-s1-simulator:
+    needs: [lib-changes, core-changes, build-core, build-all-core]
+    if: ${{ needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), "execution-worker") }}
+    uses: ./.github/workflows/build-s1-ipf-simulator.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
