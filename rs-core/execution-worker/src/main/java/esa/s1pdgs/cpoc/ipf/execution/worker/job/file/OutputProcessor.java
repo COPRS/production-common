@@ -632,9 +632,8 @@ public class OutputProcessor {
 		try {
 			LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
-			// TODO: Put logic of old sendOutput message here (?)
-//			final CatalogJob res = procuderFactory.sendOutput(msg, inputMessage, uuid);
-			final CatalogJob res = new CatalogJob();
+			final CatalogJob res = new CatalogJob(msg.getProductName(), msg.getKeyObs(), msg.getFamily(),
+					toUppercaseOrNull(msg.getProcessMode()), msg.getOqcFlag(), inputMessage.getTimeliness(), uuid);
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			return res;
@@ -644,6 +643,18 @@ public class OutputProcessor {
 			throw e;
 		}
 	}
+	
+	/**
+	 * Utility method for conversion of product mode into Uppercase
+	 */
+	private final String toUppercaseOrNull(final String string)
+    {
+    	if (string == null)
+    	{
+    		return null;
+    	}
+    	return string.toUpperCase();
+    }
 
 	/**
 	 * Publish reports in message queue system
