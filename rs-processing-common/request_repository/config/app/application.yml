@@ -28,4 +28,4 @@ openapi:
 mongodb:
   host: {{ .Values.mongodb.host }}
   port: {{ .Values.mongodb.port }}
-  database: ${{{ .Values.mongodb.database }}}
+  database: {{ .Values.mongodb.database }}
