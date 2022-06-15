@@ -1,5 +1,8 @@
 ARG BRANCH
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
+
+# Use user root to use apt-get
+USER root
 RUN apt-get install xsltproc rpm wget -y 
 
 RUN mkdir -p /rpms && mkdir -p /data/localWD
@@ -38,5 +41,6 @@ COPY oqc /usr/local/components/OQCSimulator
 RUN ln -s /usr/local/components/OQCSimulator/bin/oqcSimulator.sh /app/amalfi/bin/IpfJobSubmitter.sh
 RUN ln -s /usr/local/components/OQCSimulator/bin/oqcSimulator.sh /usr/local/components/amalfi/bin/IpfJobSubmitter.sh
 
+USER rsuser
 WORKDIR /data/localWD/
 ENTRYPOINT ["/bin/bash"]
