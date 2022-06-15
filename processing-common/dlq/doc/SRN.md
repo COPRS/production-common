@@ -1,10 +1,10 @@
-# RS Core - DLQ Manager
+# RS Core - DLQ
 
-The RS Core component Dead Letter Queue Manager is responsible for automated restarting of failed processings.
+The RS Core component Dead Letter Queue is responsible for automated restarting of failed processings.
 
 ## Overview
 
-![overview](media/overview.png "Overview of the DLQ Manager")
+![overview](media/overview.png "Overview of the DLQ")
 
 The DLQ Manager polls the configured dead letter queue topic for failed processing messages. The messages are then routed according to a set of routing rules. A rule consists of the following attributes.
 
@@ -13,7 +13,7 @@ ErrorID: Regex to identify an error
 ActionType:
 - Restart: Republish message in error message while MaxRetry is not reached, else move it to the Parking Lot
 - Delete: Ignore the message (the error will be deleted)
-- NoAction: Disable rule without deleting it
+- NoAction: Disable rule without deleting the error message
 TargetTopic: The target topic for restart. If not set, the original topic is used.
 MaxRetry: Maximum retry for error
 Comment: Description and further notes about an error
