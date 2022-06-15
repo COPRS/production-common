@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}
-  replicas: {{ .Values.replicaCount.request_repository }}
+  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       name: {{ .Release.Name }}
