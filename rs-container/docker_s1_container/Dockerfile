@@ -3,7 +3,8 @@ FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
 
 # Use user root to use apt-get
 USER root
-RUN apt-get install xsltproc rpm wget -y 
+RUN apt-get update && \
+    apt-get install xsltproc rpm wget -y 
 
 RUN mkdir -p /rpms && mkdir -p /data/localWD
 COPY S1PD-DYN-IPF-SIM-*.rpm /rpms/
