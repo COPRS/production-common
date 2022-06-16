@@ -15,6 +15,20 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: {{ .Release.Name }}-logging-config
+  namespace: {{ .Values.processing.namespace }}
+  
+data:
+  {{- $files := .Files }}
+  {{- range $path, $bytes := .Files.Glob "config/log/**" }}
+  {{- $name := base $path }}
+  {{ $name }} : |-
+{{ (tpl ($.Files.Get (printf "%s" $path)) $ ) | indent 4 }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: {{ .Release.Name }}-openapi-config
   namespace: {{ .Values.processing.namespace }}
   
