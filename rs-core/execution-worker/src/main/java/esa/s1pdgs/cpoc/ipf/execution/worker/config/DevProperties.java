@@ -20,7 +20,7 @@ public class DevProperties {
     /**
      * Activation of each step of job processing
      */
-    private Map<String, Boolean> stepsActivation;
+    private Map<String, Boolean> stepsActivation = new HashMap<>();
 
     /**
      * Constructors

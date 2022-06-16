@@ -399,7 +399,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	}
 
 	private void eraseWorkingDirectory(final String workingDirectoryPath) {
-		if (devProperties.getStepsActivation().get("erasing")) {
+		if (devProperties.getStepsActivation().getOrDefault("erasing", true)) {
 			final Path workingDir = Paths.get(workingDirectoryPath);
 			if (Files.exists(workingDir)) {
 				try {
