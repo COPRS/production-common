@@ -24,7 +24,5 @@ RUN chmod +x /app/start.sh
 
 # Add Tini as entry point
 RUN apt-get update && apt-get install tini -y
-ENTRYPOINT ["/usr/bin/tini", "--"] 
-
-CMD ["/app/start.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/start.sh"] 
  
