@@ -33,7 +33,7 @@ spec:
             memory: {{ .Values.request_repository.ram.limit }}
             cpu: {{ .Values.request_repository.cpu.limit }}
         volumeMounts:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           mountPath: /app/log
         - name: service-config-volume
           mountPath: /app/config
@@ -54,26 +54,17 @@ spec:
             secretKeyRef:
               name: mongodb
               key: PASSWORD
-        envFrom:
-        - configMapRef:
-            name: s1pdgs-config
-        - configMapRef:
-            name: s1pdgs-logging-config
-        - configMapRef:
-            name: s1pdgs-env
         ports:
         - name: web
           protocol: TCP
           containerPort: {{ .Values.service.port }}
         livenessProbe:
           httpGet:
-            path: /app/status
+            path: /actuator/health/liveness
             port: {{ .Values.service.port }}
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 5
-        securityContext:
-          privileged: false
       imagePullSecrets:
       - name: {{ .Values.image.imagePullSecrets }}
       dnsPolicy: ClusterFirst
@@ -81,9 +72,9 @@ spec:
       securityContext: {}
       schedulerName: default-scheduler
       volumes:
-        - name: service-logging-config-volume
+        - name: logging-config-volume
           configMap:
-            name: s1pdgs-logging-config
+            name: {{ .Release.Name }}-logging-config
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
