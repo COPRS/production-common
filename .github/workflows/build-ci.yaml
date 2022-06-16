@@ -140,6 +140,9 @@ jobs:
           execution-worker: 
             - 'rs-core/execution-worker/**'
             - 'rs-core/pom.xml'
+          request-repository: 
+            - 'rs-core/request-repository/**'
+            - 'rs-core/pom.xml'
 
 #          data-lifecycle-trigger: 
 #            - 'rs-core/data-lifecycle-trigger/**'
@@ -161,9 +164,6 @@ jobs:
 #            - 'rs-core/pom.xml'
 #          production-trigger: 
 #            - 'rs-core/production-trigger/**'
-#            - 'rs-core/pom.xml'
-#          request-repository: 
-#            - 'rs-core/request-repository/**'
 #            - 'rs-core/pom.xml'
           
   gg-scan:
