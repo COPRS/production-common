@@ -10,8 +10,7 @@ env:
   keycloak: |
     "{\"url\":\"http://localhost:8080/auth\",\"realm\":\"master\",\"clientId\": \"user-web-client\"}"
   mapView: |
-    "{\"selectionFillColor\":\"rgba(255,155,51,0.3)\",\"selectionStrokeColor\":\"rgba(255,155,51,0.6)\"}"
-
+    "{\"regionSelectionFillColor\":\"rgba(255,155,51,0.3)\",\"regionSelectionStrokeColor\":\"rgba(255,155,51,0.6)\",\"selectionFillColor\":\"rgba(0, 114, 163, 0.3)\",\"selectionStrokeColor\":\"rgba(0, 114, 163, 0.6)\",\"highlightFillColor\":\"rgba(50, 211, 63, 0.3)\",\"highlightStrokeColor\":\"rgba(50, 211, 63, 0.8)\"}"
 image:
   # Overrides the image tag whose default is the chart appVersion.
   # use image from COPRS repository
