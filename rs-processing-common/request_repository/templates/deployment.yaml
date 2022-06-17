@@ -47,12 +47,12 @@ spec:
         - name: mongodb.username
           valueFrom:
             secretKeyRef:
-              name: mongodb
+              name: mongorequestrepository
               key: USERNAME
         - name: mongodb.password
           valueFrom:
             secretKeyRef:
-              name: mongodb
+              name: mongorequestrepository
               key: PASSWORD
         ports:
         - name: web
