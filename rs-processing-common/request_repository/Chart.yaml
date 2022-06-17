@@ -4,4 +4,4 @@ description: COPRS Request Repository
 name: rs-request-repository
 version: {{CHART_VERSION}}
 maintainers:
-  - name: Werum Software & Systems
+  - name: Werum Software & Systems 
