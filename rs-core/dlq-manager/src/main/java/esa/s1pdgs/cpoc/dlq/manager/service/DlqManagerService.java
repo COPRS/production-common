@@ -1,7 +1,10 @@
 package esa.s1pdgs.cpoc.dlq.manager.service;
 
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE;
+import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_STACKTRACE;
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TOPIC;
+import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP;
+import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP_TYPE;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 
+import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperties;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
@@ -85,6 +89,11 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 	
 	private Message<byte[]> newParkingLotMessage(JSONObject payload, MessageHeaders originalMessageHeader) {
 		// TODO: In future add a FailedProcessing here containing additional attributes from the originalMessageHeader, e.g. stacktrace
+		final String originalTopic = new String(originalMessageHeader.get(X_ORIGINAL_TOPIC, byte[].class), StandardCharsets.UTF_8);
+		final String exceptionMessage = new String(originalMessageHeader.get(X_EXCEPTION_MESSAGE, byte[].class), StandardCharsets.UTF_8);
+		final String exceptionStracktrace = new String(originalMessageHeader.get(X_EXCEPTION_STACKTRACE, byte[].class), StandardCharsets.UTF_8);
+		// TODO: FailedProcessing failedProcessing = new FailedProcessing(originalTopic, payload);
+		
 		Message<byte[]> message = MessageBuilder.withPayload(payload.toString().getBytes(StandardCharsets.UTF_8))
 				.setHeader(X_ROUTE_TO, parkingLotTopic).build();
 		return message;
