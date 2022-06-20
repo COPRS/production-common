@@ -12,7 +12,6 @@ RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY /target/rs-preparation-worker-*.jar rs-preparation-worker.jar
-COPY /config/tasktables tasktables
 COPY /config/start.sh start.sh
 
 ENTRYPOINT ["/app/start.sh"]
