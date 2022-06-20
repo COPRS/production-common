@@ -27,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductCategory;
-import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
@@ -45,9 +44,6 @@ public class RequestRepositoryControllerTest {
 	@MockBean
 	private FailedProcessingRepo failedProcessingRepo;
 
-	@MockBean
-	private MessageProducer<Object> messageProducer;
-	
 	@MockBean
 	private RequestRepository requestRepository;
 	

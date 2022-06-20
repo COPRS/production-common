@@ -24,11 +24,9 @@ import org.springframework.data.domain.Sort;
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.common.Processing;
-import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
@@ -46,8 +44,6 @@ public class RequestRepositoryTest {
 	private FailedProcessingRepo failedProcessingRepo;
 	@Mock
 	private MqiMessageRepo mqiMessageRepository;	
-	@Mock
-	private MessageProducer<Object> messageProducer;
 
 	
 	private RequestRepository uut;
@@ -59,8 +55,6 @@ public class RequestRepositoryTest {
 		this.uut = new RequestRepositoryImpl(
 				mqiMessageRepository, 
 				failedProcessingRepo,
-                messageProducer,
-				AppStatus.NULL,
 				config
 		);
 	}
@@ -142,7 +136,9 @@ public class RequestRepositoryTest {
 		
 		verify(failedProcessingRepo, times(1)).findById(123);
 		verify(failedProcessingRepo, times(1)).deleteById(123);
-		verify(messageProducer, times(1)).send(fp.getTopic(), fp.getDto());
+		
+		// FIXME: Update when replacement for messageProducer is available
+		//verify(messageProducer, times(1)).send(fp.getTopic(), fp.getDto());
 	}
 
 	@Test(expected = RuntimeException.class)

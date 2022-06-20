@@ -39,6 +39,11 @@ public class FailedProcessing extends AbstractRequest {
 	
 	public FailedProcessing()	{		
 	}
+	
+	public FailedProcessing(String topic, String payload) {
+		predecessorTopic = topic;
+		predecessorDto = payload;
+	}
 
 	public FailedProcessing(final long id, final ProductCategory category, final String topic, final int partition, final long offset, final String group,
 			final MessageState state, final String sendingPod, final Date lastSendDate, final Date lastAckDate, final int nbRetries, final Object dto,

@@ -15,10 +15,8 @@ import org.springframework.stereotype.Component;
 import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
 import esa.s1pdgs.cpoc.appcatalog.common.MqiMessage;
 import esa.s1pdgs.cpoc.appcatalog.common.Processing;
-import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
-import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.reqrepo.config.RequestRepositoryConfiguration;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
@@ -28,22 +26,16 @@ import esa.s1pdgs.cpoc.reqrepo.repo.MqiMessageRepo;
 public class RequestRepositoryImpl implements RequestRepository {
 	private final FailedProcessingRepo failedProcessingRepo;
 	private final MqiMessageRepo mqiMessageRepository;
-	private final MessageProducer<Object> messageProducer;
-	private final AppStatus status;
 	private final RequestRepositoryConfiguration config;
 
 	@Autowired
 	public RequestRepositoryImpl(
 			final MqiMessageRepo mqiMessageRepository,
 			final FailedProcessingRepo failedProcessingRepo,
-			final MessageProducer<Object> messageProducer,
-			final AppStatus status,
 			final RequestRepositoryConfiguration config
 	) {
 		this.mqiMessageRepository = mqiMessageRepository;
 		this.failedProcessingRepo = failedProcessingRepo;
-		this.messageProducer = messageProducer;
-		this.status = status;
 		this.config = config;
 	}
 
@@ -106,7 +98,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		// TODO: is not possible to alter the retry counter here because the object being returned
 		// by Jackson is not a AbstractMessage its LinkedHashMap
 		// ((AbstractMessage) failedProcessing.getDto()).increaseControlRetryCounter();
-		resubmit(id, failedProcessing.getTopic(), failedProcessing.getDto(), status);
+		resubmit(id, failedProcessing.getTopic(), failedProcessing.getDto());
 		failedProcessingRepo.deleteById(id);
 	}
 	
@@ -119,7 +111,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 		// TODO: is not possible to alter the retry counter here because the object being returned
 		// by Jackson is not a AbstractMessage its LinkedHashMap	
 		// ((AbstractMessage) failedProcessing.getPredecessorDto()).increaseControlRetryCounter(); 
-		resubmit(id, failedProcessing.getPredecessorTopic(), failedProcessing.getPredecessorDto(), status);
+		resubmit(id, failedProcessing.getPredecessorTopic(), failedProcessing.getPredecessorDto());
 		failedProcessingRepo.deleteById(id);
 	}
 
@@ -172,21 +164,24 @@ public class RequestRepositoryImpl implements RequestRepository {
 		return provided;
 	}
 
-	private void resubmit(final long id, final String predecessorTopic, final Object predecessorDto, final AppStatus status) {
-		try {
-			messageProducer.send(predecessorTopic, predecessorDto);
-		} catch (final Exception e) {
-			status.getStatus().setFatalError();
-			throw new RuntimeException(
-					String.format(
-							"Error restarting failedRequest '%s' on topic '%s': %s",
-							id,
-							predecessorTopic,
-							e
-					),
-					e
-			);
-		}
+	private void resubmit(final long id, final String predecessorTopic, final Object predecessorDto) {
+
+// FIXME: Instead of the removed messageProducer use e.g. StreamBridge or similar
+		
+//		try {
+//			messageProducer.send(predecessorTopic, predecessorDto);
+//		} catch (final Exception e) {
+//			status.getStatus().setFatalError();
+//			throw new RuntimeException(
+//					String.format(
+//							"Error restarting failedRequest '%s' on topic '%s': %s",
+//							id,
+//							predecessorTopic,
+//							e
+//					),
+//					e
+//			);
+//		}
 	}
 
 

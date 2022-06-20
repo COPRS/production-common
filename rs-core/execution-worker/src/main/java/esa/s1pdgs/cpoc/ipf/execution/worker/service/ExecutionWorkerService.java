@@ -234,7 +234,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				new ReportingMessage("Start job processing")
 		);
 		
-		List<Message<CatalogJob>> result = null;
+		List<Message<CatalogJob>> result = new ArrayList<>();
 		try {
 			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 		} catch (Exception e) {
