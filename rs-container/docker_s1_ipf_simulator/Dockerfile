@@ -7,7 +7,7 @@ ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
 
-USER root
+USER root 
 
 # Create dummy /var/tmp/conf.sh to be used by /app/start.sh
 WORKDIR /var/tmp
