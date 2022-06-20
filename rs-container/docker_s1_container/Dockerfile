@@ -11,7 +11,7 @@ COPY S1PD-DYN-IPF-SIM-*.rpm /rpms/
 RUN rpm --nodeps -ivh /rpms/S1PD-DYN-IPF-SIM-*.rpm
 RUN rm -rf /rpms/
 
-RUN mkdir -p /usr/local/COTS/pic/java1.8/bin && ln -s /usr/lib/jvm/java-1.8-openjdk/jre/bin/java /usr/local/COTS/pic/java1.8/bin/java
+RUN mkdir -p /usr/local/COTS/pic/java1.8/bin && ln -s /usr/lib/jvm/java-11-openjdk-amd64/bin/java /usr/local/COTS/pic/java1.8/bin/java
 
 # overwrite createSoftLinksForTaskTable.sh from S1PD-DYN-IPF-SIM-*.rpm with a modified version
 COPY createSoftLinksForTaskTable.sh /usr/local/components/IPFSimulator/etc/createSoftLinksForTaskTable.sh
