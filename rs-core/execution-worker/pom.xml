@@ -139,7 +139,6 @@
 			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
-
 		<!-- spring oxm -->
 		<!-- http://mvnrepository.com/artifact/org.springframework/spring-oxm -->
 		<dependency>
