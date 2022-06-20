@@ -32,11 +32,14 @@ runs:
   - name: Build structure
     shell: bash
     run: |
-      mkdir -p ${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Executables
+      mkdir -p ${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Executables/additional_resources
       sed -i 's/<VERSION>/${{ steps.extract_branch.outputs.branch }}/' ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-application-list.properties
       cat ${{ env.RS_CORE_FOLDER }}/obs-stream-parameters.properties >> ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-parameters.properties
       cp -r ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/* ${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Executables
-      
+      if [[ -e ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/additional_resources ]] 
+        then cp -r ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/additional_resources/* ${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Executables/additional_resources
+      fi
+
   - name: Create PDF
     uses: docker://ghcr.io/coprs/reference-system-software:dependencies_pandoc_latex
     with:
