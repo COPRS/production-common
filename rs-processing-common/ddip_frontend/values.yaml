@@ -25,7 +25,7 @@ ddip:
   dispatch:
     prip:
       protocol: http
-      host: s1pro-prip-frontend-svc.processing.svc.cluster.local
+      host: rs-prip-frontend-svc.processing.svc.cluster.local
       port: 8080
   collections:
     Sentinel1: startswith(Name,'S1')

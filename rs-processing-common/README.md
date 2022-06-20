@@ -55,7 +55,7 @@ The latest version of it can be deployed using the following command line:
 | Name                              | Description                                              | Default |
 | ----------------------------------|----------------------------------------------------------|---------|
 | `ddip.dispatch.prip.protocol` | The protocol used to connect to the PRIP | `http`|
-| `ddip.dispatch.prip.host` | The hostname or IP used to connect to the PRIP | `s1pro-prip-frontend-svc.processing.svc.cluster.local` |
+| `ddip.dispatch.prip.host` | The hostname or IP used to connect to the PRIP | `rs-prip-frontend-svc.processing.svc.cluster.local` |
 | `ddip.dispatch.prip.port` | The port on which the PRIP listens for requests | `8080` |
 | `ddip.dispatch.collections` | value (collection name) and key (ODATA expression) pairs to define collections that can be searched via DDIP feature (filter=Collection/Name eq 'Sentinel1')  | Sentinel1: startswith(Name,'S1')</br> Sentinel3: startswith(Name,'S3') |
 
