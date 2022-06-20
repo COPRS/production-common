@@ -5,7 +5,7 @@ WORKDIR /app
 FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/l0_aio:integration-032
 ARG VERSION
 ARG COMMIT_ID
-ARG BRANCH_TEXT 
+ARG BRANCH_TEXT
 
 WORKDIR /app
 
