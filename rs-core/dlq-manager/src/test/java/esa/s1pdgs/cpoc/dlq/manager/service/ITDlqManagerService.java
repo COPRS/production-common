@@ -4,14 +4,18 @@ import static esa.s1pdgs.cpoc.dlq.manager.service.DlqManagerService.X_ROUTE_TO;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE;
+import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_STACKTRACE;
+import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP;
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TOPIC;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +59,9 @@ public class ITDlqManagerService {
 		Message<byte[]> message1 = new GenericMessage<>( //
 				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
-						X_EXCEPTION_MESSAGE, "first line\nRuntimeException".getBytes(StandardCharsets.UTF_8)));
+						X_EXCEPTION_MESSAGE, "first line\nRuntimeException".getBytes(StandardCharsets.UTF_8), //
+						X_EXCEPTION_STACKTRACE, "stacktrace".getBytes(StandardCharsets.UTF_8), //
+						X_ORIGINAL_TIMESTAMP, ByteBuffer.allocate(Long.BYTES).putLong(1234L).array()));
 		
 		List<Message<byte[]>> actual1 = dlqManagerService.apply(message1);
 		
@@ -73,7 +79,9 @@ public class ITDlqManagerService {
 		Message<byte[]> message2 = new GenericMessage<>( //
 				actualJson1.toString().getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
-						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
+						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8), //
+						X_EXCEPTION_STACKTRACE, "stacktrace".getBytes(StandardCharsets.UTF_8), //
+						X_ORIGINAL_TIMESTAMP, ByteBuffer.allocate(Long.BYTES).putLong(1234L).array()));
 		
 		List<Message<byte[]>> actual2 = dlqManagerService.apply(message2);
 		
@@ -91,7 +99,9 @@ public class ITDlqManagerService {
 		Message<byte[]> message3 = new GenericMessage<>( //
 				actualJson2.toString().getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-same".getBytes(StandardCharsets.UTF_8), //
-						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8)));
+						X_EXCEPTION_MESSAGE, "RuntimeException".getBytes(StandardCharsets.UTF_8), //
+						X_EXCEPTION_STACKTRACE, "stacktrace".getBytes(StandardCharsets.UTF_8), //
+						X_ORIGINAL_TIMESTAMP, ByteBuffer.allocate(Long.BYTES).putLong(1234L).array()));
 		
 		List<Message<byte[]>> actual3 = dlqManagerService.apply(message3);
 		
@@ -112,7 +122,9 @@ public class ITDlqManagerService {
 		Message<byte[]> message = new GenericMessage<>( //
 				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-origin".getBytes(StandardCharsets.UTF_8), //
-						X_EXCEPTION_MESSAGE, "!$%foobar#§!\nsecond line".getBytes(StandardCharsets.UTF_8)));
+						X_EXCEPTION_MESSAGE, "!$%foobar#§!\nsecond line".getBytes(StandardCharsets.UTF_8), //
+						X_EXCEPTION_STACKTRACE, "stacktrace".getBytes(StandardCharsets.UTF_8), //
+						X_ORIGINAL_TIMESTAMP, ByteBuffer.allocate(Long.BYTES).putLong(1234L).array()));
 		
 		List<Message<byte[]>> actual = dlqManagerService.apply(message);
 		
@@ -137,18 +149,23 @@ public class ITDlqManagerService {
 		Message<byte[]> message = new GenericMessage<>( //
 				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-origin".getBytes(StandardCharsets.UTF_8), //
-						X_EXCEPTION_MESSAGE, "IOException"
-						.getBytes(StandardCharsets.UTF_8)));
+						X_EXCEPTION_MESSAGE, "IOException".getBytes(StandardCharsets.UTF_8), //
+						X_EXCEPTION_STACKTRACE, "stacktrace".getBytes(StandardCharsets.UTF_8), //
+						X_ORIGINAL_TIMESTAMP, ByteBuffer.allocate(Long.BYTES).putLong(1234L).array()));
 		
 		List<Message<byte[]>> actual = dlqManagerService.apply(message);
 		
 		assertEquals("t-pdgs-parking-lot", (String)actual.get(0).getHeaders().get(X_ROUTE_TO));
 		
-		JsonNode actualJson = mapper.readTree(new String(actual.get(0).getPayload()));
-		assertEquals(0, actualJson.get("retryCounter").asInt()); // this is not a retry
+		JSONObject actualJson = new JSONObject(new String(actual.get(0).getPayload()));
+		assertEquals(0, actualJson.getInt("retryCounter")); // this is not a retry
+		assertEquals("t-pdgs-origin", actualJson.get("topic"));
+		assertEquals("IOException", actualJson.get("failureMessage"));
+		assertEquals("stacktrace", actualJson.get("stacktrace"));
 
 		JsonNode expectedJson = mapper.readTree(mapper.writeValueAsString(catalogJob));
-		assertTrue(expectedJson.equals(actualJson));
+		JsonNode actualAsJsonNode = mapper.readTree(actualJson.get("message").toString());
+		assertTrue(expectedJson.equals(actualAsJsonNode));
 	}
 	
 	@Test
@@ -162,11 +179,21 @@ public class ITDlqManagerService {
 		Message<byte[]> message = new GenericMessage<>( //
 				mapper.writeValueAsString(catalogJob).getBytes(StandardCharsets.UTF_8), //
 				Map.of( X_ORIGINAL_TOPIC, "t-pdgs-origin".getBytes(StandardCharsets.UTF_8), //
-						X_EXCEPTION_MESSAGE, "a message to IGNORE..."
-						.getBytes(StandardCharsets.UTF_8)));
+						X_EXCEPTION_MESSAGE, "a message to IGNORE...".getBytes(StandardCharsets.UTF_8), //
+						X_EXCEPTION_STACKTRACE, "stacktrace".getBytes(StandardCharsets.UTF_8), //
+						X_ORIGINAL_TIMESTAMP, ByteBuffer.allocate(Long.BYTES).putLong(1234L).array()));
 		
 		List<Message<byte[]>> actual = dlqManagerService.apply(message);
 		assertEquals(0, actual.size());
+	}
+	
+	@Test
+	public void testBytesToLong() {
+		byte[] bytesPos = ByteBuffer.allocate(Long.BYTES).putLong(0x0123456789ABCDEFL).array();
+		assertEquals(0x0123456789ABCDEFL, DlqManagerService.bytesToLong(bytesPos));
+
+		byte[] bytesNeg = ByteBuffer.allocate(Long.BYTES).putLong(0xFEDCBA9876543210L).array();
+		assertEquals(0xFEDCBA9876543210L, DlqManagerService.bytesToLong(bytesNeg));
 	}
 	
 }

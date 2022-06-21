@@ -2,12 +2,12 @@ package esa.s1pdgs.cpoc.dlq.manager.service;
 
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE;
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_STACKTRACE;
-import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TOPIC;
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP;
-import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP_TYPE;
+import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TOPIC;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -19,10 +19,13 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 
-import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperties;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 
 public class DlqManagerService implements Function<Message<byte[]>, List<Message<byte[]>>> {
 
@@ -58,7 +61,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		if (optRule.isEmpty()) {
 			LOGGER.info("No matching rule found");
 			LOGGER.info("Route to {}", parkingLotTopic);
-			result.add(newParkingLotMessage(json, message.getHeaders()));
+			result.add(newParkingLotMessage(originalTopic, json, message.getHeaders()));
 		} else {
 			Rule rule = optRule.get();
 			LOGGER.info("Found rule {}: {}", rule.getActionType().name(), rule.getErrorTitle());
@@ -76,7 +79,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 								.setHeader(X_ROUTE_TO, targetTopic).build());
 					} else {
 						LOGGER.info("Route to {} ({}/{} retries used)", parkingLotTopic, retryCounter, rule.getMaxRetry());
-						result.add(newParkingLotMessage(json, message.getHeaders()));
+						result.add(newParkingLotMessage(originalTopic, json, message.getHeaders()));
 					}
 					break;
 				default:
@@ -87,16 +90,35 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		return result;
 	}
 	
-	private Message<byte[]> newParkingLotMessage(JSONObject payload, MessageHeaders originalMessageHeader) {
-		// TODO: In future add a FailedProcessing here containing additional attributes from the originalMessageHeader, e.g. stacktrace
-		final String originalTopic = new String(originalMessageHeader.get(X_ORIGINAL_TOPIC, byte[].class), StandardCharsets.UTF_8);
-		final String exceptionMessage = new String(originalMessageHeader.get(X_EXCEPTION_MESSAGE, byte[].class), StandardCharsets.UTF_8);
-		final String exceptionStracktrace = new String(originalMessageHeader.get(X_EXCEPTION_STACKTRACE, byte[].class), StandardCharsets.UTF_8);
-		// TODO: FailedProcessing failedProcessing = new FailedProcessing(originalTopic, payload);
+	private Message<byte[]> newParkingLotMessage(String originalTopic, JSONObject payload, MessageHeaders originalMessageHeader) {
+		final Date originalTimestamp = new Date(bytesToLong(originalMessageHeader.get(X_ORIGINAL_TIMESTAMP, byte[].class)));
+		final String exceptionMessage = new String(originalMessageHeader.get(X_EXCEPTION_MESSAGE, byte[].class),
+				StandardCharsets.UTF_8);
+		final String exceptionStacktrace = new String(originalMessageHeader.get(X_EXCEPTION_STACKTRACE, byte[].class), StandardCharsets.UTF_8);
+		final String errorLevel = !originalMessageHeader.containsKey("errorLevel")
+				? "NOT_DEFINED" : (String)originalMessageHeader.get("errorLevel");
 		
-		Message<byte[]> message = MessageBuilder.withPayload(payload.toString().getBytes(StandardCharsets.UTF_8))
-				.setHeader(X_ROUTE_TO, parkingLotTopic).build();
-		return message;
+		FailedProcessingDto failedProcessingDto = new FailedProcessingDto(originalTopic, originalTimestamp,
+				errorLevel, payload.toMap(), exceptionMessage, exceptionStacktrace,
+				payload.getInt("retryCounter"));
+		
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			String s = mapper.writeValueAsString(failedProcessingDto);
+			return MessageBuilder.withPayload(s.getBytes(StandardCharsets.UTF_8))
+					.setHeader(X_ROUTE_TO, parkingLotTopic).build();
+		} catch (JsonProcessingException e) {
+			LOGGER.error(e.getMessage(), e);
+			throw new RuntimeException("Serialization error", e);
+		}
+	}
+	
+	static long bytesToLong(byte[] bytes) {
+		long result = 0;
+		for (int idx = 0; idx < 8; idx++) {
+			result |= (bytes[idx] & 0xffL) << 8L * (7L - idx);
+		}
+		return result;
 	}
 	
 }
