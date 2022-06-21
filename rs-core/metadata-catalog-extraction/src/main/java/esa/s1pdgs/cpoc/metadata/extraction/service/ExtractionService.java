@@ -115,6 +115,12 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		if (!metadata.has("insertionTime")) {
 			metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 		}
+		
+		// RS-248: Adding t0_pdgs_date into metadata
+		if (catJob.getT0_pdgs_date() != null) {
+			metadata.put("t0_pdgs_date", catJob.getT0_pdgs_date());
+		}
+		
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 
 		String warningMessage = esServices.createMetadataWithRetries(metadata, productName,
