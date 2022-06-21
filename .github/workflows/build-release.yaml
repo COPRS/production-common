@@ -73,7 +73,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        component: [lib-commons, app-status, message-adapter, xml-tools, error-repo-client, obs-sdk, mqi-client, metadata-client, prip-client, auxip-client, xbip-client, edip-client, data-lifecycle-client, jacoco-report] 
+        component: [lib-commons, app-status, message-adapter, xml-tools, error-repo-client, obs-sdk, metadata-client, prip-client, auxip-client, xbip-client, edip-client, data-lifecycle-client, jacoco-report] 
     steps:
     - uses: actions/checkout@v2
     - uses: ./.github/actions/build-libs

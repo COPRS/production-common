@@ -55,9 +55,6 @@ jobs:
           obs-sdk: 
             - 'rs-libs/obs-sdk/**'
             - 'rs-libs/pom.xml'
-          mqi-client: 
-            - 'rs-libs/mqi-client/**'
-            - 'rs-libs/pom.xml'
           metadata-client: 
             - 'rs-libs/metadata-client/**'
             - 'rs-libs/pom.xml'
