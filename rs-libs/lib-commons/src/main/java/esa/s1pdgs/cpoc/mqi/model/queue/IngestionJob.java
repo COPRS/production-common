@@ -67,6 +67,7 @@ public class IngestionJob extends AbstractMessage {
 		this.timeliness = timeliness;
 		this.inboxType = inboxType;
 		this.additionalMetadata = additionalMetadata;
+		this.t0_pdgs_date = lastModified; // Last Modification date is used as availability time
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 

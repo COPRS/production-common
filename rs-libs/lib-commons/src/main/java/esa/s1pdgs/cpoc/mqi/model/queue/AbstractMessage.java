@@ -71,6 +71,9 @@ public abstract class AbstractMessage {
 		
 	protected String timeliness = null;
 	
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+	protected Date t0_pdgs_date;
+	
 	public AbstractMessage() {
 	}
 
