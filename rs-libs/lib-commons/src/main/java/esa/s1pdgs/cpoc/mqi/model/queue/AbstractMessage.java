@@ -221,6 +221,7 @@ public abstract class AbstractMessage {
 		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
 		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
 		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
+		result = prime * result + ((t0_pdgs_date == null) ? 0 : t0_pdgs_date.hashCode());
 		return result;
 	}
 
@@ -297,6 +298,11 @@ public abstract class AbstractMessage {
 			if (other.satelliteId != null)
 				return false;
 		} else if (!satelliteId.equals(other.satelliteId))
+			return false;		
+		if (t0_pdgs_date == null) {
+			if (other.t0_pdgs_date != null)
+				return false;
+		} else if (!t0_pdgs_date.equals(other.t0_pdgs_date))
 			return false;
 		
 		return true;
@@ -305,7 +311,7 @@ public abstract class AbstractMessage {
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
+				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", t0_pdgs_date=" + t0_pdgs_date + ", podName="
 				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
 				+ retryCounter + ", debug=" + debug + "]";
 	}
