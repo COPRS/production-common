@@ -91,6 +91,8 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			}
 		}
 		reporting.end(reportingOutput(result), new ReportingMessage("End metadata extraction"), quality);
+		
+		LOG.info("Sucessfully processed metadata extraction for {}", result.getProductName());
 
 		return result;
 	}
