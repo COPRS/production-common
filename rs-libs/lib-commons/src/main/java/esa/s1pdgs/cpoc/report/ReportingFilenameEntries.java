@@ -18,10 +18,6 @@ public final class ReportingFilenameEntries {
 		return ReportingUtils.filenamesOf(reportingEntries);
 	}
 	
-	public final List<String> getSegments() {
-		return ReportingUtils.segmentsOf(reportingEntries);
-	}	
-	
 	final List<ReportingFilenameEntry> entries() {
 		return reportingEntries;
 	}
