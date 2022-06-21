@@ -37,6 +37,8 @@ public class MongoConfiguration {
 			
 		String credentials = "".equals(mongoProperties.getUsername()) ? ""
 				: mongoProperties.getUsername() + ":" + mongoProperties.getPassword() + "@";
+		LOG.info("MongoDB ConnectionString: " + "mongodb://" + credentials + stringJoinerHosts.toString() + "/"
+				+ mongoProperties.getDatabase() + "?uuidRepresentation=STANDARD");
 		return MongoClients.create("mongodb://" + credentials + stringJoinerHosts.toString() + "/"
 				+ mongoProperties.getDatabase() + "?uuidRepresentation=STANDARD");
 	}
