@@ -140,6 +140,8 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		catEvent.setStoragePath(catJob.getStoragePath());
 		catEvent.setProductFamily(catJob.getProductFamily());
 		catEvent.setProductType(metadata.getString("productType"));
+		catEvent.setT0_pdgs_date(catJob.getT0_pdgs_date());
+		
 		return catEvent;
 	}
 

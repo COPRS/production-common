@@ -202,6 +202,14 @@ public abstract class AbstractMessage {
 		this.timeliness = timeliness;
 	}
 
+	public Date getT0_pdgs_date() {
+		return t0_pdgs_date;
+	}
+
+	public void setT0_pdgs_date(Date t0_pdgs_date) {
+		this.t0_pdgs_date = t0_pdgs_date;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

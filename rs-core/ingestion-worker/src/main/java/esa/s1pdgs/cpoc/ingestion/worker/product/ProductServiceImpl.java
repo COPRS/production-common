@@ -55,6 +55,9 @@ public class ProductServiceImpl implements ProductService {
 				ingestion.getMode(),
 				ingestion.getTimeliness()
 		);
+		
+		// RS-248: We are using the t0_pdgs_date from the ingestion event
+		dto.setT0_pdgs_date(ingestion.getT0_pdgs_date());
 
 		// S1OPS-971: This is a workaround for MDC to allow access of additional metadata
 		if (null != ingestion.getAdditionalMetadata() && !ingestion.getAdditionalMetadata().isEmpty()) {
