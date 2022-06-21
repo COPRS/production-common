@@ -44,12 +44,12 @@ spec:
           value: {{ .Values.resources.javaOpts.xms }}
         - name: JAVA_XMX
           value: {{ .Values.resources.javaOpts.xmx }}
-        - name: mongodb.username
+        - name: MONGODB_USERNAME
           valueFrom:
             secretKeyRef:
               name: mongorequestrepository
               key: USERNAME
-        - name: mongodb.password
+        - name: MONGODB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mongorequestrepository
