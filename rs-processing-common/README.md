@@ -142,3 +142,21 @@ The following command can be used in order to deploy the Eviction Manager:
 | `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
 | `elasticsearch.search-result-limit` | Limitation of search result when searching for evictable files in the DLM index. Only this amount of files will be handled in one iteration | `1000` |
 | `eviction-management-worker.eviction-interval-ms` | Specifies the interval in milliseconds between invocations of the Eviction routine for searching and deleting evictable files from OBS/MDC/Prip | `600000` |
+
+## Request Repository
+
+The component provides an interface to list and restart failed processings.
+
+Prerequisites:
+
+A secret `mongorequestrepository` has to be created with the fields `USERNAME` and `PASSWORD` holding the corresponding MongoDB credentials.
+
+The following command can be used in order to deploy the Request Repository:
+
+`helm install rs-helm/rs-request-repository --version 1.0.1`
+
+| Name | Description | Default |
+| -|-|-|
+| `mongodb.host`| The hostname of the MongoDB server that shall be used as backend and contains the failedProcessings collection | `mongodb-0.mongodb-headless.database.svc.cluster.local` |
+| `mongodb.port` | The port of the MongoDB server that shall be used as backend and contains the failedProcessings collection | `27017` |
+| `mongodb.database` | The database that contains the failedProcessings collection | `coprs` |
