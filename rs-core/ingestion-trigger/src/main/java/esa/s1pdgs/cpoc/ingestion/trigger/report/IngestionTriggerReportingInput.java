@@ -21,16 +21,11 @@ public final class IngestionTriggerReportingInput extends AbstractFilenameReport
 	@JsonProperty("pickup_point_available_date")
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'000Z'", timezone="UTC")
 	private Date availDate = new Date();
-	
-	@JsonProperty("t0_pdgs_date")
-	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss.SSS'000Z'", timezone="UTC")
-	private Date t0_pdgs_date = new Date();
 
 	public IngestionTriggerReportingInput(final ReportingFilenameEntries entry, final Date pollingDate, final Date availDate) {
 		super(entry);
 		this.pollingDate = pollingDate;
 		this.availDate = availDate;
-		this.t0_pdgs_date = availDate;
 	}
 	
 	@JsonIgnore
@@ -61,14 +56,5 @@ public final class IngestionTriggerReportingInput extends AbstractFilenameReport
 	public void setAvailDate(final Date availDate) {
 		this.availDate = availDate;
 	}
-
-	public Date getT0_pdgs_date() {
-		return t0_pdgs_date;
-	}
-
-	public void setT0_pdgs_date(Date t0_pdgs_date) {
-		this.t0_pdgs_date = t0_pdgs_date;
-	}
-	
 	
 }
