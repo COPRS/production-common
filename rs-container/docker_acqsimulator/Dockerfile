@@ -15,14 +15,15 @@ RUN echo "${COMMIT_ID}" >> VERSION
 #RUN apk update && apk add python2
 USER root
 RUN apt-get update && apt-get install -y python2
+
+#create local WD
+RUN mkdir -p /data/localWD
+
 USER 1001
 
 COPY files/* /opt/
 
 COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY /config/start.sh start.sh
-
-#create local WD
-RUN mkdir -p /data/localWD
 
 CMD ["/app/start.sh"]
