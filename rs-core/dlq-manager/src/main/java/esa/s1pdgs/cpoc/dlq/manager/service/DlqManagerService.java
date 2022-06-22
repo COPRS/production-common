@@ -73,7 +73,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
               .predecessor(uid).newReporting("DlqManagement");
 		
 		reporting.begin(DlqReportingInput.newInstance(originalTopic, retryCounter),
-				new ReportingMessage("Starting routing of message ", uid));		
+				new ReportingMessage("Start routing"));		
 		
 		Optional<Rule> optRule = routingTable.findRule(exceptionMessage);
 		if (optRule.isEmpty()) {
