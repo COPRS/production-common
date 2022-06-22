@@ -26,6 +26,8 @@ import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperti
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
+
 
 public class DlqManagerService implements Function<Message<byte[]>, List<Message<byte[]>>> {
 
@@ -54,6 +56,8 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		final String payload = new String(message.getPayload());
 		final JSONObject json = new JSONObject(payload);
 		
+		MissionId missionId = extractMissionId(json);
+		
 		LOGGER.info("Receiving DLQ message on topic {} with error: {}", originalTopic, exceptionMessage);
 		LOGGER.info("Payload: {}", json);
 		
@@ -61,7 +65,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		if (optRule.isEmpty()) {
 			LOGGER.info("No matching rule found");
 			LOGGER.info("Route to {}", parkingLotTopic);
-			result.add(newParkingLotMessage(originalTopic, json, message.getHeaders()));
+			result.add(newParkingLotMessage(originalTopic, json, message.getHeaders(), missionId));
 		} else {
 			Rule rule = optRule.get();
 			LOGGER.info("Found rule {}: {}", rule.getActionType().name(), rule.getErrorTitle());
@@ -79,7 +83,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 								.setHeader(X_ROUTE_TO, targetTopic).build());
 					} else {
 						LOGGER.info("Route to {} ({}/{} retries used)", parkingLotTopic, retryCounter, rule.getMaxRetry());
-						result.add(newParkingLotMessage(originalTopic, json, message.getHeaders()));
+						result.add(newParkingLotMessage(originalTopic, json, message.getHeaders(), missionId));
 					}
 					break;
 				default:
@@ -90,7 +94,8 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		return result;
 	}
 	
-	private Message<byte[]> newParkingLotMessage(String originalTopic, JSONObject payload, MessageHeaders originalMessageHeader) {
+	private Message<byte[]> newParkingLotMessage(String originalTopic, JSONObject payload,
+			MessageHeaders originalMessageHeader, MissionId missionId) {
 		final Date originalTimestamp = new Date(bytesToLong(originalMessageHeader.get(X_ORIGINAL_TIMESTAMP, byte[].class)));
 		final String exceptionMessage = new String(originalMessageHeader.get(X_EXCEPTION_MESSAGE, byte[].class),
 				StandardCharsets.UTF_8);
@@ -99,7 +104,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 				? "NOT_DEFINED" : (String)originalMessageHeader.get("errorLevel");
 		
 		FailedProcessingDto failedProcessingDto = new FailedProcessingDto(originalTopic, originalTimestamp,
-				errorLevel, payload.toMap(), exceptionMessage, exceptionStacktrace,
+				missionId, errorLevel, payload.toMap(), exceptionMessage, exceptionStacktrace,
 				payload.getInt("retryCounter"));
 		
 		try {
@@ -113,6 +118,14 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		}
 	}
 	
+	static MissionId extractMissionId(JSONObject payload) {
+		try {
+			return MissionId.fromFileName(payload.getString("missionId"));
+		} catch (Exception e) {
+			return MissionId.UNDEFINED;
+		}
+	}
+
 	static long bytesToLong(byte[] bytes) {
 		long result = 0;
 		for (int idx = 0; idx < 8; idx++) {

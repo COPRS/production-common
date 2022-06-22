@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
@@ -13,6 +14,7 @@ import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 public class FailedProcessingDto {    
 	private String failedPod; // deprecated
 	private Date failedDate;
+	private MissionId missionId;
 	private String failureMessage;
 	private GenericMessageDto<?> processingDetails; // deprecated
 	private GenericMessageDto<?> predecessor; // deprecated
@@ -25,11 +27,12 @@ public class FailedProcessingDto {
 	public FailedProcessingDto() {
 	}
 
-	public FailedProcessingDto(final String topic, final Date failedDate, final String errorLevel,
-			final Object message, final String failureMessage, final String stacktrace,
-			 final int retryCounter) {
+	public FailedProcessingDto(final String topic, final Date failedDate,
+			final MissionId missionId, final String errorLevel, final Object message,
+			final String failureMessage, final String stacktrace, final int retryCounter) {
 		this.topic = topic;
 		this.failedDate = failedDate;
+		this.missionId = missionId;
 		this.errorLevel = errorLevel;
 		this.message = message;
 		this.failureMessage = failureMessage;
@@ -62,6 +65,14 @@ public class FailedProcessingDto {
 
 	public void setFailedDate(final Date failedDate) {
 		this.failedDate = failedDate;
+	}
+	
+	public MissionId getMissionId() {
+		return missionId;
+	}
+
+	public void setMissionId(MissionId missionId) {
+		this.missionId = missionId;
 	}
 
 	public String getFailureMessage() {
@@ -130,10 +141,10 @@ public class FailedProcessingDto {
 
 	@Override
 	public String toString() {
-		return "FailedProcessingDto [failedPod=" + failedPod + ", failedDate=" + failedDate + ", failureMessage="
-				+ failureMessage + ", processingDetails=" + processingDetails + ", predecessor=" + predecessor
-				+ ", topic=" + topic + ", message=" + message + ", stacktrace=" + stacktrace + ", errorLevel="
-				+ errorLevel + ", retryCounter=" + retryCounter + "]";
+		return "FailedProcessingDto [failedPod=" + failedPod + ", failedDate=" + failedDate + ", missionId=" + missionId
+				+ ", failureMessage=" + failureMessage + ", processingDetails=" + processingDetails + ", predecessor="
+				+ predecessor + ", topic=" + topic + ", message=" + message + ", stacktrace=" + stacktrace
+				+ ", errorLevel=" + errorLevel + ", retryCounter=" + retryCounter + "]";
 	}
 
 }
