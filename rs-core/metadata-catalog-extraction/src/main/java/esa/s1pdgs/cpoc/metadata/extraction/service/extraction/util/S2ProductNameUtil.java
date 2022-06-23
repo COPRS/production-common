@@ -59,7 +59,7 @@ public class S2ProductNameUtil {
 			variablePart = compactMatcher.group(5);
 		} else {
 			throw new MetadataExtractionException(
-				new Exception(String.format("Product %s not matchting pattern %s", productName, STANDARD_PRODUCT_NAME_PATTERN)));
+				new Exception(String.format("Product %s not matching pattern %s", productName, STANDARD_PRODUCT_NAME_PATTERN)));
 		}
 
 		final boolean isAuxProduct = AUX_PRODUCT_TYPE_PATTERN.matcher(metadata.getString("productType")).matches();
