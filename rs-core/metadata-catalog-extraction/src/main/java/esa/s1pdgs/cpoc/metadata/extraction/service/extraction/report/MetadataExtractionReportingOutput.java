@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -62,6 +64,15 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	
 	@JsonProperty("raw_count_short")
 	private Integer rawCountShort; // S1PRO-1840
+	
+	@JsonProperty("timeliness_name_string")
+	private String timelinessName; // RS-407
+	
+	@JsonProperty("timeliness_value_seconds_integer")
+	private Integer timelinessValueSeconds; // RS-407
+	
+	@JsonProperty("product_metadata_custom_object")
+	private Map<String, Object> productMetadataCustomObject; // RS-407
 	
 	// --------------------------------------------------------------------------
 	
@@ -181,4 +192,29 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	public void setTypeString(String typeString) {
 		this.typeString = typeString;
 	}
+
+	public String getTimelinessName() {
+		return timelinessName;
+	}
+
+	public void setTimelinessName(String timelinessName) {
+		this.timelinessName = timelinessName;
+	}
+
+	public Integer getTimelinessValueSeconds() {
+		return timelinessValueSeconds;
+	}
+
+	public void setTimelinessValueSeconds(Integer timelinessValueSeconds) {
+		this.timelinessValueSeconds = timelinessValueSeconds;
+	}
+
+	public Map<String, Object> getProductMetadataCustomObject() {
+		return productMetadataCustomObject;
+	}
+
+	public void setProductMetadataCustomObject(Map<String, Object> productMetadataCustomObject) {
+		this.productMetadataCustomObject = productMetadataCustomObject;
+	}
+	
 }
