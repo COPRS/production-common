@@ -111,7 +111,8 @@ public class TaskCallable implements Callable<TaskResult> {
 			if (process != null) {
 				process.destroy();
 			}
-		}        
+		}
+        LOGGER.info("Ending task {} with exit code {}", binaryPath, r);
         reporting.end(new ReportingMessage("End Task {} with exit code {}", binaryPath, r));
 
         return new TaskResult(binaryPath, r);
