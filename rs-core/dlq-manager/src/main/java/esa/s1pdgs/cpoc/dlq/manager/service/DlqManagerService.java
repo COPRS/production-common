@@ -103,7 +103,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 					} else {
 						LOGGER.info("Route to {} ({}/{} retries used)", parkingLotTopic, retryCounter, rule.getMaxRetry());
 						result.add(newParkingLotMessage(originalTopic, json, message.getHeaders(), missionId));
-						reporting.end(DlqReportingOutput.newInstance(rule.getErrorTitle(), rule.getActionType(), originalTopic),
+						reporting.end(DlqReportingOutput.newInstance(rule.getErrorTitle(), rule.getActionType(), parkingLotTopic),
 								new ReportingMessage("Finished routing"));
 					}
 					break;
