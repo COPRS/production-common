@@ -194,6 +194,7 @@ public class OutputProcessor {
 				List<File> files = Arrays.asList(dir.listFiles(fileFilter));
 
 				if (files.size() != 1) {
+					LOGGER.error("Found an unexpected number of LIST-files. Expected 1 found {}.", files.size());
 					throw new InternalErrorException(
 							"Found an unexpected number of LIST-files. Expected 1 found " + files.size() + ".");
 				}
@@ -203,6 +204,7 @@ public class OutputProcessor {
 				return Files.lines(Paths.get(listFile)).collect(Collectors.toList());
 			}
 		} catch (final IOException | NullPointerException ioe) {
+			LOGGER.error("Cannot parse result list file {}: {}", listFile, ioe.getMessage());
 			throw new InternalErrorException("Cannot parse result list file " + listFile + ": " + ioe.getMessage(),
 					ioe);
 		}
