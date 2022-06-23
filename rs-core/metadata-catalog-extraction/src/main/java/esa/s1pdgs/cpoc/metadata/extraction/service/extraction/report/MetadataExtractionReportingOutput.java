@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -68,6 +70,9 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	
 	@JsonProperty("timeliness_value_seconds_integer")
 	private Integer timelinessValueSeconds; // RS-407
+	
+	@JsonProperty("product_metadata_custom_object")
+	private Map<String,String> productMetadataCustomObject; // RS-407
 	
 	// --------------------------------------------------------------------------
 	
@@ -203,5 +208,12 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	public void setTimelinessValueSeconds(Integer timelinessValueSeconds) {
 		this.timelinessValueSeconds = timelinessValueSeconds;
 	}
-		
+
+	public Map<String, String> getProductMetadataCustomObject() {
+		return productMetadataCustomObject;
+	}
+
+	public void setProductMetadataCustomObject(Map<String, String> productMetadataCustomObject) {
+		this.productMetadataCustomObject = productMetadataCustomObject;
+	}	
 }
