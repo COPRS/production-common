@@ -71,7 +71,8 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 	@Override
 	public List<Message<IpfExecutionJob>> apply(CatalogEvent catalogEvent) {
 		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(MissionId.fromFileName(catalogEvent.getKeyObjectStorage()))
+				.newReportingBuilder(MissionId
+						.valueOf((String) catalogEvent.getMetadata().get(MissionId.FIELD_NAME)))
 				.predecessor(catalogEvent.getUid()).newReporting("PreparationWorkerService");
 
 		reporting.begin(
