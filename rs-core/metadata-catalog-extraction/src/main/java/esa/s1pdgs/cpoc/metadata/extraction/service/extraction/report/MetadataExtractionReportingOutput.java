@@ -72,7 +72,7 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	private Integer timelinessValueSeconds; // RS-407
 	
 	@JsonProperty("product_metadata_custom_object")
-	private Map<String,String> productMetadataCustomObject; // RS-407
+	private Map<String, Object> productMetadataCustomObject; // RS-407
 	
 	// --------------------------------------------------------------------------
 	
@@ -209,11 +209,12 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 		this.timelinessValueSeconds = timelinessValueSeconds;
 	}
 
-	public Map<String, String> getProductMetadataCustomObject() {
+	public Map<String, Object> getProductMetadataCustomObject() {
 		return productMetadataCustomObject;
 	}
 
-	public void setProductMetadataCustomObject(Map<String, String> productMetadataCustomObject) {
+	public void setProductMetadataCustomObject(Map<String, Object> productMetadataCustomObject) {
 		this.productMetadataCustomObject = productMetadataCustomObject;
-	}	
+	}
+	
 }

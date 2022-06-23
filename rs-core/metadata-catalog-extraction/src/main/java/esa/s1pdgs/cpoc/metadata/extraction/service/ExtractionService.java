@@ -78,7 +78,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			reporting.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e)));
 			throw new RuntimeException(e);
 		}
-		
+
 		// S1PRO-2337
 		Map<String, String> quality = new LinkedHashMap<>();
 		if (result.getProductFamily() != ProductFamily.EDRS_SESSION) {
@@ -91,7 +91,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			}
 		}
 		reporting.end(reportingOutput(result), new ReportingMessage("End metadata extraction"), quality);
-		
+
 		LOG.info("Sucessfully processed metadata extraction for {}", result.getProductName());
 
 		return result;
@@ -115,12 +115,12 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		if (!metadata.has("insertionTime")) {
 			metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 		}
-		
+
 		// RS-248: Adding t0_pdgs_date into metadata
 		if (catJob.getT0_pdgs_date() != null) {
 			metadata.put("t0_pdgs_date", catJob.getT0_pdgs_date());
 		}
-		
+
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 
 		String warningMessage = esServices.createMetadataWithRetries(metadata, productName,
@@ -139,7 +139,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		} catch (JSONException e) {
 			satelliteId = catJob.getSatelliteId();
 		}
-		
+
 		catEvent.setMetadata(metadata.toMap());
 		catEvent.setMissionId(catJob.getMissionId());
 		catEvent.setSatelliteId(satelliteId);
@@ -149,7 +149,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		catEvent.setProductFamily(catJob.getProductFamily());
 		catEvent.setProductType(metadata.getString("productType"));
 		catEvent.setT0_pdgs_date(catJob.getT0_pdgs_date());
-		
+
 		return catEvent;
 	}
 
@@ -195,6 +195,22 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			output.setMissionIdentifierString(eventAdapter.missionId());
 			output.setTypeString(catalogEvent.getProductFamily().name());
 		}
+		
+		// RS-407
+		// Sentinel-1 Custom Object
+		if ((catalogEvent.getProductFamily() == ProductFamily.L0_SEGMENT) || 
+				(catalogEvent.getProductFamily() == ProductFamily.L0_SLICE) || 
+				(catalogEvent.getProductFamily() == ProductFamily.L0_ACN)) {
+			
+			output.getProductMetadataCustomObject().put("instrument_mode_string", catalogEvent.getMetadata().get("swathtype"));
+			output.getProductMetadataCustomObject().put("product_type_string", catalogEvent.getMetadata().get("productType"));
+			output.getProductMetadataCustomObject().put("resolution_class_string", catalogEvent.getMetadata().get("resolution"));
+			output.getProductMetadataCustomObject().put("polarisation_string", catalogEvent.getMetadata().get("polarisation"));
+			output.getProductMetadataCustomObject().put("product_class_String", catalogEvent.getMetadata().get("productClass"));
+			output.getProductMetadataCustomObject().put("processing_level_integer", 0);			
+			output.getProductMetadataCustomObject().put("segment_boolean",catalogEvent.getProductFamily() == ProductFamily.L0_SEGMENT);
+		}
+		
 
 		return output.build();
 	}
