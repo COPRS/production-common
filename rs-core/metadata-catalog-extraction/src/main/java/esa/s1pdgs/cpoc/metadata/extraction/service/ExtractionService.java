@@ -68,7 +68,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 				.newReporting("MetadataExtraction");
 
 		reporting.begin(
-				ReportingUtils.newFilenameReportingInputFor(catalogJob.getProductFamily(), catalogJob.getProductName()),
+				ReportingUtils.newFilenameReportingInputFor(catalogJob.getProductFamily(), catalogJob.getKeyObjectStorage()),
 				new ReportingMessage("Starting metadata extraction"));
 
 		CatalogEvent result;
@@ -92,7 +92,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		}
 		reporting.end(reportingOutput(result), new ReportingMessage("End metadata extraction"), quality);
 
-		LOG.info("Sucessfully processed metadata extraction for {}", result.getProductName());
+		LOG.info("Sucessfully processed metadata extraction for {}", result.getKeyObjectStorage());
 
 		return result;
 	}
