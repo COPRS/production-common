@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -25,8 +26,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperties;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
+import esa.s1pdgs.cpoc.dlq.manager.report.DlqReportingInput;
+import esa.s1pdgs.cpoc.dlq.manager.report.DlqReportingOutput;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
+import esa.s1pdgs.cpoc.report.Reporting;
+import esa.s1pdgs.cpoc.report.ReportingMessage;
+import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 
 public class DlqManagerService implements Function<Message<byte[]>, List<Message<byte[]>>> {
@@ -54,36 +60,51 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		final String exceptionMessage = new String(message.getHeaders().get(X_EXCEPTION_MESSAGE, byte[].class),
 				StandardCharsets.UTF_8);
 		final String payload = new String(message.getPayload());
-		final JSONObject json = new JSONObject(payload);
-		
-		MissionId missionId = extractMissionId(json);
-		
+		final JSONObject json = new JSONObject(payload);		
+
 		LOGGER.info("Receiving DLQ message on topic {} with error: {}", originalTopic, exceptionMessage);
-		LOGGER.info("Payload: {}", json);
+		LOGGER.debug("Payload: {}", json);
+
+		final UUID uid = UUID.fromString(json.getString("uid"));
+		final MissionId missionId = extractMissionId(json);
+		int retryCounter = json.getInt("retryCounter");
+
+		final Reporting reporting = ReportingUtils.newReportingBuilder(missionId)
+              .predecessor(uid).newReporting("DlqManagement");
+		
+		reporting.begin(DlqReportingInput.newInstance(originalTopic, retryCounter),
+				new ReportingMessage("Start routing"));		
 		
 		Optional<Rule> optRule = routingTable.findRule(exceptionMessage);
 		if (optRule.isEmpty()) {
 			LOGGER.info("No matching rule found");
 			LOGGER.info("Route to {}", parkingLotTopic);
 			result.add(newParkingLotMessage(originalTopic, json, message.getHeaders(), missionId));
+			reporting.end(DlqReportingOutput.newInstance(null, null, parkingLotTopic),
+					new ReportingMessage("Finished routing"));
 		} else {
 			Rule rule = optRule.get();
 			LOGGER.info("Found rule {}: {}", rule.getActionType().name(), rule.getErrorTitle());
 			switch(rule.getActionType()) {
 				case DELETE:
 					LOGGER.info("Ignoring message");
+					reporting.end(DlqReportingOutput.newInstance(rule.getErrorTitle(), rule.getActionType(), null),
+							new ReportingMessage("Finished routing"));
 					break;
 				case RESTART:
-					final String targetTopic = "".equals(rule.getTargetTopic()) ? originalTopic : rule.getTargetTopic();
-					int retryCounter = json.getInt("retryCounter");
+					final String targetTopic = "".equals(rule.getTargetTopic()) ? originalTopic : rule.getTargetTopic();					
 					if (retryCounter < rule.getMaxRetry()) {
 						json.put("retryCounter", ++retryCounter);
 						LOGGER.info("Route to {} (retry {}/{})", targetTopic, retryCounter, rule.getMaxRetry());
 						result.add(MessageBuilder.withPayload(json.toString().getBytes(StandardCharsets.UTF_8))
 								.setHeader(X_ROUTE_TO, targetTopic).build());
+						reporting.end(DlqReportingOutput.newInstance(rule.getErrorTitle(), rule.getActionType(), targetTopic),
+								new ReportingMessage("Finished routing"));
 					} else {
 						LOGGER.info("Route to {} ({}/{} retries used)", parkingLotTopic, retryCounter, rule.getMaxRetry());
 						result.add(newParkingLotMessage(originalTopic, json, message.getHeaders(), missionId));
+						reporting.end(DlqReportingOutput.newInstance(rule.getErrorTitle(), rule.getActionType(), originalTopic),
+								new ReportingMessage("Finished routing"));
 					}
 					break;
 				default:
