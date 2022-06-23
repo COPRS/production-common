@@ -37,7 +37,7 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 			throws AbstractCodedException {
 		JSONObject metadata = new JSONObject();		
 		metadata.put("productFamily", message.getProductFamily().name());
-		metadata.put("productName", message.getProductName());
+		metadata.put("productName", message.getKeyObjectStorage());
 		metadata.put("productType", message.getProductFamily().name());
 		
 		if (message.getCreationDate() != null) {
@@ -47,7 +47,7 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 		}
 		metadata.put("url", message.getKeyObjectStorage());
 		
-		Matcher matcher = MISSION_ID_PATTERN.matcher(message.getProductName());
+		Matcher matcher = MISSION_ID_PATTERN.matcher(message.getKeyObjectStorage());
 		if (matcher.matches()) {
 			metadata.put(MissionId.FIELD_NAME, matcher.group(1));			
 		} else {

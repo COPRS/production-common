@@ -43,8 +43,8 @@ public class S2ProductMetadataExtractor extends AbstractMetadataExtractor {
 
 		// When HKTM, skip download and extract metadata from filename
 		if (enableExtractionFromProductName && ProductFamily.S2_HKTM.equals(catalogJob.getProductFamily())) {
-			LOG.trace("Extracting metadata from product name: {}", catalogJob.getProductName());
-			JSONObject metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
+			LOG.trace("Extracting metadata from product name: {}", catalogJob.getKeyObjectStorage());
+			JSONObject metadata = S2ProductNameUtil.extractMetadata(catalogJob.getKeyObjectStorage());
 			metadata.put("productFamily", catalogJob.getProductFamily().name());
 			return metadata;
 		}

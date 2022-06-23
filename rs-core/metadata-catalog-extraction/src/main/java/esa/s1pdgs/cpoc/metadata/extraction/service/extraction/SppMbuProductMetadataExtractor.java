@@ -30,7 +30,7 @@ public class SppMbuProductMetadataExtractor extends AbstractMetadataExtractor {
 
 	@Override
 	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob catJob) throws AbstractCodedException {
-		return putMetadataToJSON(catJob.getProductName(), fileDescriptorBuilder.getPattern());
+		return putMetadataToJSON(catJob.getKeyObjectStorage(), fileDescriptorBuilder.getPattern());
 	}
 
 	static JSONObject putMetadataToJSON(String productName, Pattern fileNamePattern)
