@@ -26,4 +26,4 @@ COPY files/* /opt/
 COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY /config/start.sh start.sh
 
-CMD ["/app/start.sh"]
+ENTRYPOINT ["/app/start.sh"]
