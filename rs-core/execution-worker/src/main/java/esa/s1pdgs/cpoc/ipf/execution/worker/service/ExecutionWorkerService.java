@@ -239,6 +239,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 		} catch (Exception e) {
 			reporting.error(errorReportMessage(e));
+			throw new RuntimeException(e);
 		}
 		
 		reporting.end(toReportingOutput(result, job.isDebug()), new ReportingMessage("End job processing"));
