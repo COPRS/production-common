@@ -249,3 +249,20 @@ jobs:
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
+  build-acq-simulator:
+    needs: [lib-changes, core-changes, build-core, build-all-core]
+    if: ${{ always() && (needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), 'execution-worker')) }}
+    uses: ./.github/workflows/build-acqsimulator.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-simulator:
+    needs: [lib-changes, core-changes, build-core, build-all-core]
+    if: ${{ always() && (needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), 'execution-worker')) }}
+    uses: ./.github/workflows/build-s3-ipf-simulator.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
