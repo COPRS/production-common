@@ -92,9 +92,9 @@ public class ITExtractionService {
 				SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, created);
 	}
 	
-	private static CatalogJob newCatalogJob(final String keyObjectStorage,
+	private static CatalogJob newCatalogJob(final String productName, final String relativePath,
 			final ProductFamily productFamily, final String timeliness, final String stationName) {
-		return new CatalogJob(productFamily, keyObjectStorage, null, 0L, NOT_DEFINED,
+		return new CatalogJob(productFamily, productName, NOT_DEFINED, relativePath, 0L, NOT_DEFINED,
 				stationName, "NOMINAL", timeliness);
 	}
 		
@@ -108,7 +108,7 @@ public class ITExtractionService {
 
 		extractionService.apply(newCatalogJob(
 				"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
-				ProductFamily.AUXILIARY_FILE, "NRT", null)); // timeliness will only be persisted if not null
+				NOT_DEFINED, ProductFamily.AUXILIARY_FILE, "NRT", null)); // timeliness will only be persisted if not null
 		
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
@@ -152,6 +152,7 @@ public class ITExtractionService {
 		
 		extractionService.apply(newCatalogJob(
 				"L20171109175634707000125/DCS_02_SESSION1_ch1_DSIB.xml",
+				"S1B/L20171109175634707000125/DCS_02_SESSION1_ch1_DSIB.xml",
 				ProductFamily.EDRS_SESSION, "NRT", "WILE")); // timeliness will only be persisted if not null
 		
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
@@ -194,7 +195,7 @@ public class ITExtractionService {
 		
 		extractionService.apply(newCatalogJob(
 				"S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE",
-				ProductFamily.L0_SEGMENT, "unused (uses mdextractor.packetstore-type-timelinesses.Standard instead)", null));
+				NOT_DEFINED, ProductFamily.L0_SEGMENT, "unused (uses mdextractor.packetstore-type-timelinesses.Standard instead)", null));
 		
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
@@ -270,7 +271,7 @@ public class ITExtractionService {
 
 		extractionService.apply(newCatalogJob(
 				"S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE",
-				ProductFamily.L0_SLICE, "NRT", null)); // timeliness will only be persisted if not null
+				NOT_DEFINED, ProductFamily.L0_SLICE, "NRT", null)); // timeliness will only be persisted if not null
 		
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
@@ -358,7 +359,7 @@ public class ITExtractionService {
 
 		extractionService.apply(newCatalogJob(
 				"S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.zip",
-				ProductFamily.S2_AUX, "NRT", null)); // timeliness will only be persisted if not null
+				NOT_DEFINED, ProductFamily.S2_AUX, "NRT", null)); // timeliness will only be persisted if not null
 		
 		verify(mockObsClient, times(0)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
@@ -398,7 +399,7 @@ public class ITExtractionService {
 
 		extractionService.apply(newCatalogJob(
 				"S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ",
-				ProductFamily.S2_AUX, "NRT", null)); // timeliness will only be persisted if not null
+				NOT_DEFINED, ProductFamily.S2_AUX, "NRT", null)); // timeliness will only be persisted if not null
 		
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
@@ -435,7 +436,7 @@ public class ITExtractionService {
 
 		extractionService.apply(newCatalogJob(
 				"S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar",
-				ProductFamily.S2_HKTM, "NRT", null)); // timeliness will only be persisted if not null
+				NOT_DEFINED, ProductFamily.S2_HKTM, "NRT", null)); // timeliness will only be persisted if not null
 		
 		verify(mockObsClient, times(0)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
@@ -471,7 +472,7 @@ public class ITExtractionService {
 
 		extractionService.apply(newCatalogJob(
 				"S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08",
-				ProductFamily.S2_L0_GR, "NRT", null)); // timeliness will only be persisted if not null
+				NOT_DEFINED, ProductFamily.S2_L0_GR, "NRT", null)); // timeliness will only be persisted if not null
 		
 		verify(mockObsClient, times(2)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
@@ -525,36 +526,6 @@ public class ITExtractionService {
 	    assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
 		assertEquals(25, metadata.length());
-	}
-	
-	@Test
-	public void test1() throws IOException, AbstractCodedException {
-		doReturn(newGetResponse_withExistsFalse()).when(mockElasticsearchDAO).get(Mockito.any(GetRequest.class));
-		doReturn(newIndexResponse_withCreatedTrue()).when(mockElasticsearchDAO).index(Mockito.any(IndexRequest.class));
-		ArgumentCaptor<IndexRequest> argumentCaptor = ArgumentCaptor.forClass(IndexRequest.class);
-
-		extractionService.apply(newCatalogJob(
-				"S2B_OPER_AUX_SADATA_REFS_20220622T101311_V20220413T112125_20220413T130206_A026647_WF_LN",
-				ProductFamily.S2_HKTM, "NRT", null)); // timeliness will only be persisted if not null
-		
-		verify(mockObsClient, times(0)).download(Mockito.any(), Mockito.any());
-		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
-
-	}
-
-	@Test
-	public void test2() throws IOException, AbstractCodedException {
-		
-		doReturn(newGetResponse_withExistsFalse()).when(mockElasticsearchDAO).get(Mockito.any(GetRequest.class));
-		doReturn(newIndexResponse_withCreatedTrue()).when(mockElasticsearchDAO).index(Mockito.any(IndexRequest.class));
-		ArgumentCaptor<IndexRequest> argumentCaptor = ArgumentCaptor.forClass(IndexRequest.class);
-
-		extractionService.apply(newCatalogJob(
-				"S2B_OPER_PRD_HKTM___20220413T133358_20220413T133443_0001.SAFE",
-				ProductFamily.S2_HKTM, "NRT", null)); // timeliness will only be persisted if not null
-		
-		verify(mockObsClient, times(0)).download(Mockito.any(), Mockito.any());
-		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
-	}
+	}	
 
 }

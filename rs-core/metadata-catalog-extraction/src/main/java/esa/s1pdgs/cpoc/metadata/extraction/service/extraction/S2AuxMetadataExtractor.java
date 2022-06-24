@@ -31,8 +31,8 @@ public class S2AuxMetadataExtractor extends AbstractMetadataExtractor {
 	@Override
 	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob catalogJob) throws AbstractCodedException {
 		if (enableExtractionFromProductName) {
-			LOG.trace("Extracting metadata from product name: {}", catalogJob.getKeyObjectStorage());
-			JSONObject metadata = S2ProductNameUtil.extractMetadata(catalogJob.getKeyObjectStorage());
+			LOG.trace("Extracting metadata from product name: {}", catalogJob.getProductName());
+			JSONObject metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
 			metadata.put("productFamily", catalogJob.getProductFamily().name());
 			metadata.put("url", catalogJob.getKeyObjectStorage());
 			return metadata;

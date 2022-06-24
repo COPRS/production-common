@@ -32,7 +32,7 @@ public final class LevelSegmentMetadataExtractor extends AbstractMetadataExtract
 	@Override
 	public final JSONObject extract(final ReportingFactory reportingFactory, final CatalogJob job)
 			throws AbstractCodedException {   
-        final String productName = job.getKeyObjectStorage();
+        final String productName = job.getProductName();
         final ProductFamily family = job.getProductFamily();
         
         logger.debug("starting to download metadatafile for for product: {}", productName);        

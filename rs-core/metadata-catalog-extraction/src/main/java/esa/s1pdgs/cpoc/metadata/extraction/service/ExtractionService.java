@@ -98,7 +98,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 	}
 
 	private final CatalogEvent handleMessage(final CatalogJob catJob, final Reporting reporting) throws Exception {
-		final String productName = catJob.getKeyObjectStorage();
+		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();
 		final ProductCategory category = ProductCategory.of(family);
 
@@ -143,7 +143,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		catEvent.setMetadata(metadata.toMap());
 		catEvent.setMissionId(catJob.getMissionId());
 		catEvent.setSatelliteId(satelliteId);
-		catEvent.setProductName(catJob.getKeyObjectStorage());
+		catEvent.setProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
 		catEvent.setStoragePath(catJob.getStoragePath());
 		catEvent.setProductFamily(catJob.getProductFamily());
