@@ -111,9 +111,9 @@ public class TestFileDescriptorBuilder {
         fromPath.put("channelId","2");
         
         final CatalogJob job = new CatalogJob();
-        job.setProductName("512000176");
+        job.setMetadataProductName("512000176");
         job.setKeyObjectStorage("512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
-        job.setRelativePath("512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
+        job.setMetadataRelativePath("512000176/ch02/DCS_02_L20171109180334512000176_ch2_DSDB_00034.raw");
         job.setProductFamily(ProductFamily.EDRS_SESSION);
         job.setStationName("WILE");
         
@@ -151,9 +151,9 @@ public class TestFileDescriptorBuilder {
         fromPath.put("channelId","1");
         
         final CatalogJob job = new CatalogJob();
-        job.setProductName("L20180724144436762001030");
+        job.setMetadataProductName("L20180724144436762001030");
         job.setKeyObjectStorage("L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
-        job.setRelativePath("L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
+        job.setMetadataRelativePath("L20180724144436762001030/ch01/DCS_93_S1B__SGS__________017076_ch1_DSIB.xml");
         job.setProductFamily(ProductFamily.EDRS_SESSION);
         job.setStationName("WILE");
   

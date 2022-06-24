@@ -47,18 +47,18 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 				LOGGER.debug("Product is first in orbit - generate PDUs with type STRIPE (Reference: Orbit)");
 				final S3Metadata firstOfLastOrbit = mdClient.performWithReindexOnNull(
 						() -> mdClient.getFirstProductForOrbit(job.getProductFamily(),
-								job.getCatalogEvent().getProductType(), metadata.getSatelliteId(),
+								job.getCatalogEvent().getMetadataProductType(), metadata.getSatelliteId(),
 								Long.parseLong(metadata.getAbsoluteStartOrbit()) - 1),
-						job.getCatalogEvent().getProductType(), job.getProductFamily());
+						job.getCatalogEvent().getMetadataProductType(), job.getProductFamily());
 
 				// Offset calculation
 				if (settings.getOffsetInS() > 0) {
 
 					final S3Metadata firstOfSecondLastOrbit = mdClient.performWithReindexOnNull(
 							() -> mdClient.getFirstProductForOrbit(job.getProductFamily(),
-									job.getCatalogEvent().getProductType(), metadata.getSatelliteId(),
+									job.getCatalogEvent().getMetadataProductType(), metadata.getSatelliteId(),
 									Long.parseLong(metadata.getAbsoluteStartOrbit()) - 2),
-							job.getCatalogEvent().getProductType(), job.getProductFamily());
+							job.getCatalogEvent().getMetadataProductType(), job.getProductFamily());
 
 					// Priority: ANX1Time > ANXTime of next orbit > Estimate
 					String orbitANX1 = metadata.getAnx1Time();

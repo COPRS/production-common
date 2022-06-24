@@ -76,31 +76,36 @@ public class CatalogJob extends AbstractMessage {
 
 	@JsonIgnore
 	public String getProductName() {
+		return keyObjectStorage;
+	}
+	
+	@JsonIgnore
+	public String getMetadataProductName() {
 		return metadata.getOrDefault(PRODUCT_NAME_KEY, "").toString();
 	}
 
-	public void setProductName(final String productName) {
+	public void setMetadataProductName(final String productName) {
 		this.metadata.put(PRODUCT_NAME_KEY, productName);
 	}
 
 	@JsonIgnore
-	public String getRelativePath() {
+	public String getMetadataRelativePath() {
 		return metadata.getOrDefault(RELATIVE_PATH_KEY, "").toString();
 	}
 
-	public void setRelativePath(final String relativePath) {
+	public void setMetadataRelativePath(final String relativePath) {
 		this.metadata.put(RELATIVE_PATH_KEY, relativePath);
 	}
 
 	@JsonIgnore
-	public String getMode() {
+	public String getMetadataMode() {
 		if (metadata.get(MODE_KEY) == null) {
 			return null;
 		}
 		return metadata.getOrDefault(MODE_KEY, "").toString();
 	}
 
-	public void setMode(final String mode) {
+	public void setMetadataMode(final String mode) {
 		this.metadata.put(MODE_KEY, mode);
 	}
 

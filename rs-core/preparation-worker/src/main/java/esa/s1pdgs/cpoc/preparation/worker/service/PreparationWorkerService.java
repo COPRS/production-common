@@ -92,7 +92,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 			}
 
 			// Find matching jobs
-			List<AppDataJob> appDataJobs = appCatJobService.findByTriggerProduct(catalogEvent.getProductType());
+			List<AppDataJob> appDataJobs = appCatJobService.findByTriggerProduct(catalogEvent.getMetadataProductType());
 
 			// Check if jobs are ready
 			result = checkIfJobsAreReady(appDataJobs);

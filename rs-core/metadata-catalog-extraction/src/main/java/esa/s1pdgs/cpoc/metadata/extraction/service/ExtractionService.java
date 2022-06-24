@@ -59,7 +59,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			PathMetadataExtractor mExtractor = MetadataExtractorFactory
 					.newPathMetadataExtractor(properties.getProductCategories().get(ProductCategory.EDRS_SESSIONS));
 			mission = MissionId
-					.valueOf(mExtractor.metadataFrom(catalogJob.getRelativePath()).get(MissionId.FIELD_NAME));
+					.valueOf(mExtractor.metadataFrom(catalogJob.getMetadataRelativePath()).get(MissionId.FIELD_NAME));
 		} else {
 			mission = MissionId.fromFileName(catalogJob.getKeyObjectStorage());
 		}
@@ -143,11 +143,11 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		catEvent.setMetadata(metadata.toMap());
 		catEvent.setMissionId(catJob.getMissionId());
 		catEvent.setSatelliteId(satelliteId);
-		catEvent.setProductName(catJob.getProductName());
+		catEvent.setMetadataProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
 		catEvent.setStoragePath(catJob.getStoragePath());
 		catEvent.setProductFamily(catJob.getProductFamily());
-		catEvent.setProductType(metadata.getString("productType"));
+		catEvent.setMetadataProductType(metadata.getString("productType"));
 		catEvent.setT0_pdgs_date(catJob.getT0_pdgs_date());
 
 		return catEvent;

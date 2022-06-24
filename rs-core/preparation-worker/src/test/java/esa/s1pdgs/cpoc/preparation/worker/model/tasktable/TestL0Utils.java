@@ -91,7 +91,7 @@ public class TestL0Utils {
     	
     	final CatalogEvent event = new CatalogEvent();
     	event.setProductFamily(family);
-    	event.setProductType(type);
+    	event.setMetadataProductType(type);
     	event.setKeyObjectStorage(keyObs);
     	event.setMetadata(map);    	
     	return event;
@@ -118,7 +118,7 @@ public class TestL0Utils {
     	final CatalogEvent event = new CatalogEvent();
     	event.setCreationDate(new Date(0L));
     	event.setProductFamily(ProductFamily.EDRS_SESSION);
-    	event.setProductType(type.name());
+    	event.setMetadataProductType(type.name());
     	event.setKeyObjectStorage(keyObs);
     	event.setMetadata(map);    	
     	return event;

@@ -21,11 +21,11 @@ public class Utils {
 	public static final CatalogJob newCatalogJob(final String name, final String keyObs, final ProductFamily family,
 			final String mode, final String relativePath) {
 		final CatalogJob job = new CatalogJob();
-		job.setProductName(name);
+		job.setMetadataProductName(name);
 		job.setKeyObjectStorage(keyObs);
 		job.setProductFamily(family);
-		job.setMode(mode);
-		job.setRelativePath(relativePath);
+		job.setMetadataMode(mode);
+		job.setMetadataRelativePath(relativePath);
 		return job;
 	}
 

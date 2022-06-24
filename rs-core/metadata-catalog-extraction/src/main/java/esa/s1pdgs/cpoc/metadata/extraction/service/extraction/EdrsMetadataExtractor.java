@@ -71,7 +71,7 @@ public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 		// there are no
 		// old requests within the system, this conditional check can be removed.
 		if (additionalMetadata.get(CatalogJob.ADDITIONAL_METADATA_FLAG_KEY) == null) {
-			for (final Map.Entry<String, String> entry : pathExtractor.metadataFrom(catJob.getRelativePath())
+			for (final Map.Entry<String, String> entry : pathExtractor.metadataFrom(catJob.getMetadataRelativePath())
 					.entrySet()) {
 				additionalMetadata.put(entry.getKey(), entry.getValue());
 			}

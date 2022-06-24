@@ -17,19 +17,24 @@ public class CatalogEvent extends AbstractMessage {
 
 	@JsonIgnore
 	public String getProductName() {
+		return keyObjectStorage;
+	}
+
+	@JsonIgnore
+	public String getMetadataProductName() {
 		return metadata.getOrDefault(PRODUCT_NAME_KEY, "").toString();
 	}
 
-	public void setProductName(final String productName) {
+	public void setMetadataProductName(final String productName) {
 		this.metadata.put(PRODUCT_NAME_KEY, productName);
 	}
 
 	@JsonIgnore
-	public String getProductType() {
+	public String getMetadataProductType() {
 		return metadata.getOrDefault(PRODUCT_TYPE_KEY, "").toString();
 	}
 
-	public void setProductType(final String productType) {
+	public void setMetadataProductType(final String productType) {
 		this.metadata.put(PRODUCT_TYPE_KEY, productType);
 	}
 

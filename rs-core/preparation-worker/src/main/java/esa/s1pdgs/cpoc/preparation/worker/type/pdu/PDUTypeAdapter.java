@@ -69,7 +69,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 	@Override
 	public List<AppDataJob> createAppDataJobs(IpfPreparationJob job) throws Exception {
-		PDUTypeProperties typeSettings = settings.getConfig().get(job.getCatalogEvent().getProductType());
+		PDUTypeProperties typeSettings = settings.getConfig().get(job.getCatalogEvent().getMetadataProductType());
 
 		if (typeSettings != null) {
 			PDUGenerator jobGenerator = PDUGenerator.getPDUGenerator(processSettings, typeSettings, metadataClient);

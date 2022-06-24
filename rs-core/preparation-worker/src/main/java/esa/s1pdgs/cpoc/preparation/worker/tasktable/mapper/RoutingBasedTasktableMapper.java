@@ -89,7 +89,7 @@ public class RoutingBasedTasktableMapper implements TasktableMapper {
 		final CatalogEventAdapter eventAdapter = new CatalogEventAdapter(event);
 		productDto.getMetadata().put("productFamily", event.getProductFamily().toString());
 		productDto.getMetadata().put("productName", event.getProductName());
-		productDto.getMetadata().put("productType", event.getProductType());
+		productDto.getMetadata().put("productType", event.getMetadataProductType());
 		productDto.getMetadata().put("satelliteId", eventAdapter.satelliteId());
 		productDto.getMetadata().put(MissionId.FIELD_NAME, eventAdapter.missionId());
 		productDto.getMetadata().put("processMode", eventAdapter.processMode());

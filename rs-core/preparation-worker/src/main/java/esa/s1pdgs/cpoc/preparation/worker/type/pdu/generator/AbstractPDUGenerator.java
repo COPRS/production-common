@@ -30,9 +30,9 @@ public abstract class AbstractPDUGenerator {
 			final IpfPreparationJob job) throws MetadataQueryException {
 		final S3Metadata firstOfOrbit = mdClient.performWithReindexOnNull(
 				() -> mdClient.getFirstProductForOrbit(job.getProductFamily(),
-						job.getCatalogEvent().getProductType(), metadata.getSatelliteId(),
+						job.getCatalogEvent().getMetadataProductType(), metadata.getSatelliteId(),
 						Long.parseLong(metadata.getAbsoluteStartOrbit())),
-				job.getCatalogEvent().getProductType(), job.getProductFamily());
+				job.getCatalogEvent().getMetadataProductType(), job.getProductFamily());
 
 		if (firstOfOrbit != null) {
 			return firstOfOrbit.getInsertionTime().equals(metadata.getInsertionTime());
@@ -91,7 +91,7 @@ public abstract class AbstractPDUGenerator {
 		S3Metadata metadata = mdClient.performWithReindexOnNull(
 				() -> mdClient.getS3MetadataForProduct(job.getProductFamily(),
 						job.getCatalogEvent().getProductName()),
-				job.getCatalogEvent().getProductType(), job.getProductFamily());
+				job.getCatalogEvent().getMetadataProductType(), job.getProductFamily());
 
 		if (metadata == null) {
 			// If metadata is still null, there may be an inconsistency with the es index -

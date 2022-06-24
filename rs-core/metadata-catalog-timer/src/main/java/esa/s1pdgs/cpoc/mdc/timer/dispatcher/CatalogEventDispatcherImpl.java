@@ -111,9 +111,9 @@ public class CatalogEventDispatcherImpl implements CatalogEventDispatcher {
 	private CatalogEvent toCatalogEvent(SearchMetadata metadata) {
 		CatalogEvent event = new CatalogEvent();
 		event.setProductFamily(this.productFamily);
-		event.setProductName(metadata.getProductName());
+		event.setMetadataProductName(metadata.getProductName());
 		event.setKeyObjectStorage(metadata.getKeyObjectStorage());
-		event.setProductType(this.productType);
+		event.setMetadataProductType(this.productType);
 		event.setUid(UUID.randomUUID());
 		
 		event.getMetadata().put("satelliteId", this.satelliteId);

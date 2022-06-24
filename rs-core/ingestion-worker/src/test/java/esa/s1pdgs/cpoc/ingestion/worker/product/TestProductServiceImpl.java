@@ -90,7 +90,7 @@ public class TestProductServiceImpl {
 		final Product<CatalogJob> product = new Product<>();
 		product.setFamily(family);
 		final CatalogJob expectedProductionEvent = new CatalogJob();
-		expectedProductionEvent.setProductName("null");
+		expectedProductionEvent.setMetadataProductName("null");
 		expectedProductionEvent.setKeyObjectStorage("null");
 		expectedProductionEvent.setProductFamily(family);
 		expectedProductionEvent.setPodName("hostname");

@@ -43,9 +43,9 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 			LOGGER.debug("Product is first in orbit - generate PDUs with type FRAME");
 			final S3Metadata firstOfLastOrbit = mdClient.performWithReindexOnNull(
 					() -> mdClient.getFirstProductForOrbit(job.getProductFamily(),
-							job.getCatalogEvent().getProductType(), metadata.getSatelliteId(),
+							job.getCatalogEvent().getMetadataProductType(), metadata.getSatelliteId(),
 							Long.parseLong(metadata.getAbsoluteStartOrbit()) - 1),
-					job.getCatalogEvent().getProductType(), job.getProductFamily());
+					job.getCatalogEvent().getMetadataProductType(), job.getProductFamily());
 
 			String startTime = metadata.getAnxTime();
 			if (firstOfLastOrbit != null) {

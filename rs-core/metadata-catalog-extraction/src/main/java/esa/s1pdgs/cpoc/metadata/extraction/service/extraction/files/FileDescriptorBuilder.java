@@ -161,7 +161,7 @@ public class FileDescriptorBuilder {
 
 			final EdrsSessionFileDescriptor descriptor = new EdrsSessionFileDescriptor();
 			descriptor.setFilename(file.getName());
-			descriptor.setRelativePath(catJob.getRelativePath());
+			descriptor.setRelativePath(catJob.getMetadataRelativePath());
 			descriptor.setKeyObjectStorage(catJob.getKeyObjectStorage());
 			descriptor.setProductFamily(catJob.getProductFamily());
 			descriptor.setExtension(ext); // FIXME: is this really required and WHY...
@@ -229,7 +229,7 @@ public class FileDescriptorBuilder {
             descriptor.setProductName(productName);
             descriptor.setRelativePath(relativePath);
             descriptor.setFilename(filename);
-            descriptor.setMode(product.getMode());
+            descriptor.setMode(product.getMetadataMode());
             descriptor.setMissionId(m.group(1));
             descriptor.setSatelliteId(m.group(2));
             descriptor.setSwathtype(m.group(3));
@@ -274,7 +274,7 @@ public class FileDescriptorBuilder {
 			descriptor.setMissionId(m.group(1));
 			descriptor.setSatelliteId(m.group(2));
 			descriptor.setProductFamily(catalogJob.getProductFamily());
-			descriptor.setMode(catalogJob.getMode());
+			descriptor.setMode(catalogJob.getMetadataMode());
 
 		} else {
 			throw new MetadataFilePathException(catalogJob.getKeyObjectStorage(), catalogJob.getProductFamily().name(),
@@ -334,7 +334,7 @@ public class FileDescriptorBuilder {
 			descriptor.setSatelliteId(m.group(2));
 			descriptor.setKeyObjectStorage(productName);
 			descriptor.setProductFamily(productFamily);
-			descriptor.setMode(product.getMode());
+			descriptor.setMode(product.getMetadataMode());
 			descriptor.setInstanceId(m.group(9));
 			descriptor.setGeneratingCentre(m.group(10));
 			descriptor.setClassId(m.group(11));
