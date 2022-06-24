@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -72,7 +73,7 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	private Integer timelinessValueSeconds; // RS-407
 	
 	@JsonProperty("product_metadata_custom_object")
-	private Map<String, Object> productMetadataCustomObject; // RS-407
+	private Map<String, Object> productMetadataCustomObject = new HashMap<>(); // RS-407
 	
 	// --------------------------------------------------------------------------
 	
