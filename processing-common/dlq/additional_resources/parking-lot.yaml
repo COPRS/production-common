@@ -7,11 +7,11 @@ metadata:
     app.kubernetes.io/instance: dlq-manager
     app.kubernetes.io/managed-by: additional_resources
 spec:
-partitions: 2
-replicas: 4
-config:
-retention.bytes: 89478485
-retention.ms: 1000
-segment.bytes: 22369621
-cleanup.policy: delete
-min.insync.replicas: 2
+  partitions: 2
+  replicas: 4
+  config:
+    retention.bytes: 89478485
+    retention.ms: 1000
+    segment.bytes: 22369621
+    cleanup.policy: delete
+    min.insync.replicas: 2
