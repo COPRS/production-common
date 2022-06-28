@@ -47,7 +47,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ComponentScan("esa.s1pdgs.cpoc")
-public class ExtractionServiceTest {
+public class ITExtractionService {
 
 	@MockBean
 	ObsClient mockObsClient;
