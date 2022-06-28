@@ -24,8 +24,11 @@ public class ExtractionServiceConfiguration {
 	@Autowired
 	private MetadataExtractorFactory factory;
 	
+	@Autowired
+	private TimelinessConfiguration timelinessConfig;
+	
 	@Bean
 	public Function<CatalogJob, CatalogEvent> extractMetadata() {
-		return new ExtractionService(esServices, properties, factory);
+		return new ExtractionService(esServices, properties, factory, timelinessConfig);
 	}
 }

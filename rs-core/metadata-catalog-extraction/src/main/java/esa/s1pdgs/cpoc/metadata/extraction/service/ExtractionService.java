@@ -1,10 +1,13 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service;
 
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.*;
+
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +22,7 @@ import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties;
+import esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.MetadataExtractorFactory;
@@ -39,16 +43,19 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 	public static final String QUALITY_CORRUPTED_ELEMENT_COUNT = "corrupted_element_count_long";
 	public static final String QUALITY_MISSING_ELEMENT_COUNT = "missing_element_count_long";
 
+
 	private final EsServices esServices;
 	private final MdcWorkerConfigurationProperties properties;
 	private final MetadataExtractorFactory extractorFactory;
+	private final TimelinessConfiguration timelinessConfig;
 
 	@Autowired
 	public ExtractionService(final EsServices esServices, final MdcWorkerConfigurationProperties properties,
-			final MetadataExtractorFactory extractorFactory) {
+			final MetadataExtractorFactory extractorFactory, final TimelinessConfiguration timelinessConfig) {
 		this.esServices = esServices;
 		this.properties = properties;
 		this.extractorFactory = extractorFactory;
+		this.timelinessConfig = timelinessConfig;
 	}
 
 	@Override
@@ -90,7 +97,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 				quality.put(QUALITY_CORRUPTED_ELEMENT_COUNT, eventAdapter.qualityNumOfCorruptedElements().toString());
 			}
 		}
-		reporting.end(reportingOutput(result), new ReportingMessage("End metadata extraction"), quality);
+		reporting.end(reportingOutput(result, mission), new ReportingMessage("End metadata extraction"), quality);
 
 		LOG.info("Sucessfully processed metadata extraction for {}", result.getProductName());
 
@@ -153,7 +160,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		return catEvent;
 	}
 
-	private final ReportingOutput reportingOutput(final CatalogEvent catalogEvent) {
+	private final ReportingOutput reportingOutput(final CatalogEvent catalogEvent, MissionId mission) {
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(catalogEvent);
 
 		final MetadataExtractionReportingOutput output = new MetadataExtractionReportingOutput();
@@ -196,6 +203,15 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			output.setTypeString(catalogEvent.getProductFamily().name());
 		}
 		
+		fillCustomObject(catalogEvent, output);
+		
+		fillTimelinessValues(catalogEvent, mission, output);
+
+		return output.build();
+	}
+
+
+	private void fillCustomObject(final CatalogEvent catalogEvent, final MetadataExtractionReportingOutput output) {
 		// RS-407
 		// Sentinel-1 Custom Object
 		if ((catalogEvent.getProductFamily() == ProductFamily.L0_SEGMENT) || 
@@ -210,8 +226,84 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			output.getProductMetadataCustomObject().put("processing_level_integer", 0);			
 			output.getProductMetadataCustomObject().put("segment_boolean",catalogEvent.getProductFamily() == ProductFamily.L0_SEGMENT);
 		}
-		
+	}
+	
+	private void fillTimelinessValues(CatalogEvent catalogEvent, MissionId mission,
+			MetadataExtractionReportingOutput output) {
 
-		return output.build();
+		switch (catalogEvent.getProductFamily()) {
+		case S2_L0_DS:
+		case S2_L0_GR:
+			output.setTimelinessName(S2_L0);
+			output.setTimelinessValueSeconds(timelinessConfig.get(S2_L0));
+			break;
+		case S2_HKTM:
+		case S2_SAD:
+			output.setTimelinessName(S2_SESSION);
+			output.setTimelinessValueSeconds(timelinessConfig.get(S2_SESSION));
+			break;
+		case S2_L1A_DS:
+		case S2_L1A_GR:
+		case S2_L1B_DS:
+		case S2_L1B_GR:
+		case S2_L1C_DS:
+		case S2_L1C_TL:
+		case S2_L1C_TC:
+			output.setTimelinessName(S2_L1);
+			output.setTimelinessValueSeconds(timelinessConfig.get(S2_L1));
+			break;
+		case S2_L2A_DS:
+		case S2_L2A_TL:
+			output.setTimelinessName(S2_L2);
+			output.setTimelinessValueSeconds(timelinessConfig.get(S2_L2));
+			break;
+		case S3_L1_NRT:
+		case S3_L2_NRT:
+			output.setTimelinessName(S3_NRT);
+			output.setTimelinessValueSeconds(timelinessConfig.get(S3_NRT));
+			break;
+		case S3_L1_NTC:
+		case S3_L2_NTC:
+			output.setTimelinessName(S3_NTC);
+			output.setTimelinessValueSeconds(timelinessConfig.get(S3_NTC));
+			break;
+		case S3_L1_STC:
+		case S3_L2_STC:
+			output.setTimelinessName(S3_STC);
+			output.setTimelinessValueSeconds(timelinessConfig.get(S3_STC));
+			break;
+		default:
+			if (mission == MissionId.S1) {
+				Matcher matcher = FILE_PATTERN_S1_GP_HK.matcher(catalogEvent.getProductName());
+				if (matcher.matches()) {
+					output.setTimelinessName(S1_SESSION);
+					output.setTimelinessValueSeconds(timelinessConfig.get(S1_SESSION));
+				} else {
+					String t = catalogEvent.getTimeliness();
+					if (t == null) {
+						LOG.warn("Timeliness in CatalogEvent is null");
+						break;
+					}
+					switch (t) {
+					case NRT:
+						output.setTimelinessName(S1_NRT);
+						output.setTimelinessValueSeconds(timelinessConfig.get(S1_NRT));
+						break;
+					case FAST24:
+						output.setTimelinessName(S1_FAST24);
+						output.setTimelinessValueSeconds(timelinessConfig.get(S1_FAST24));
+						break;
+					case PT:
+						output.setTimelinessName(S1_PT);
+						output.setTimelinessValueSeconds(timelinessConfig.get(S1_PT));
+						break;
+					default:
+						LOG.warn("Unexpected timeliness in CatalogEvent {}", t);
+						break;
+					}
+				}
+			}
+			break;
+		}
 	}
 }
