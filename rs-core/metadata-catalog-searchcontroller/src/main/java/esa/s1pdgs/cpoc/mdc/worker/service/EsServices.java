@@ -1427,6 +1427,9 @@ public class EsServices {
 							throw new MetadataMalformedException("insertionTime");
 						}
 					}
+					
+					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					
 					r.add(local);
 				}
 				return r;
@@ -1516,9 +1519,9 @@ public class EsServices {
 						final String firstTwoCharsOfType = leType.substring(0,2);
 						local.setSwathtype(firstTwoCharsOfType);
 					}
-					if (source.containsKey("dataTakeId")) {
-						local.addAdditionalProperty("dataTakeId", source.get("dataTakeId").toString());
-					} else {
+					
+					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					if (!local.getAdditionalProperties().containsKey("dataTakeId")) {
 						throw new MetadataMalformedException("dataTakeId");
 					}
 					r.add(local);
@@ -1728,6 +1731,7 @@ public class EsServices {
 							throw new MetadataMalformedException("insertionTime");
 						}
 					}
+					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
 					result.add(local);
 				}				
 			}
@@ -1997,6 +2001,8 @@ public class EsServices {
 		} else {
 			throw new MetadataMalformedException("dataTakeId");
 		}
+		
+		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
 		return r;
 	}
 
@@ -2397,6 +2403,7 @@ public class EsServices {
 				throw new MetadataMalformedException("dumpStart");
 			}
 		}
+		source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
 		return local;
 	}
 }

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.xml.model.joborder;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -71,6 +72,11 @@ public class JobOrderInput {
 	private ProductFamily family;
 
 	/**
+	 * Date, when all inputs where ready for this product
+	 */
+	private Date t0_pdgs_date;
+	
+	/**
 	 * Default constructor
 	 */
 	public JobOrderInput() {
@@ -87,6 +93,14 @@ public class JobOrderInput {
 	public JobOrderInput(final String fileType, final JobOrderFileNameType fileNameType,
 			final List<JobOrderInputFile> filenames, final List<JobOrderTimeInterval> timeIntervals,
 			final ProductFamily family) {
+		this(fileType, fileNameType, filenames, timeIntervals, family, null);
+	}
+	
+	/**
+	 */
+	public JobOrderInput(final String fileType, final JobOrderFileNameType fileNameType,
+			final List<JobOrderInputFile> filenames, final List<JobOrderTimeInterval> timeIntervals,
+			final ProductFamily family, final Date t0_pdgs_date) {
 		this();
 		this.fileType = fileType;
 		this.fileNameType = fileNameType;
@@ -213,6 +227,14 @@ public class JobOrderInput {
 		this.family = family;
 	}
 
+	public Date getT0_pdgs_date() {
+		return t0_pdgs_date;
+	}
+
+	public void setT0_pdgs_date(Date t0_pdgs_date) {
+		this.t0_pdgs_date = t0_pdgs_date;
+	}
+
 	/**
 	 * @see java.lang.Object#toString()
 	 */
@@ -228,7 +250,7 @@ public class JobOrderInput {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(fileType, fileNameType, filenames, nbFilenames, timeIntervals, nbTimeIntervals, family);
+		return Objects.hash(fileType, fileNameType, filenames, nbFilenames, timeIntervals, nbTimeIntervals, family, t0_pdgs_date);
 	}
 
 	/**
@@ -246,7 +268,7 @@ public class JobOrderInput {
 			ret = Objects.equals(fileType, other.fileType) && Objects.equals(fileNameType, other.fileNameType)
 					&& Objects.equals(filenames, other.filenames) && nbFilenames == other.nbFilenames
 					&& Objects.equals(timeIntervals, other.timeIntervals) && nbTimeIntervals == other.nbTimeIntervals
-					&& Objects.equals(family, other.family);
+					&& Objects.equals(family, other.family) && Objects.equals(t0_pdgs_date, other.t0_pdgs_date);
 		}
 		return ret;
 	}

@@ -56,7 +56,8 @@ public class SppMbuTypeAdapter extends AbstractProductTypeAdapter implements Pro
     			product.getProductName(),
     			product.getProductName(),
     			TaskTableAdapter.convertDateToJobOrderFormat(product.getStartTime()),
-    			TaskTableAdapter.convertDateToJobOrderFormat(product.getStopTime())
+    			TaskTableAdapter.convertDateToJobOrderFormat(product.getStopTime()),
+    			null
     	);
     	final AppDataJobInput mbuInput = new AppDataJobInput(
     			first.getTaskTableInputReference(),

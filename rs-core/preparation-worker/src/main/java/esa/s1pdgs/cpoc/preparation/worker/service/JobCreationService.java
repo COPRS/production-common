@@ -13,7 +13,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -130,6 +133,19 @@ public class JobCreationService {
 				}
 				execJob.addPool(poolDto);
 			}
+			
+			// Determine t0_pdgs_date
+			Date t0 = null;
+			for (AppDataJobTaskInputs inputs : job.getAdditionalInputs()) {
+				for (AppDataJobInput input : inputs.getInputs()) {
+					for (AppDataJobFile file : input.getFiles()) {
+						if (file.getT0_pdgs_date() != null && (t0 == null || t0.before(file.getT0_pdgs_date()))) {
+							t0 = file.getT0_pdgs_date();
+						}
+					}
+				}
+			}
+			execJob.setT0_pdgs_date(t0);
 
 			typeAdapter.customJobDto(job, execJob);
 			return execJob;

@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.preparation.worker.type.segment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -92,11 +93,18 @@ public class L0SegmentProduct extends AbstractProduct {
 		}		
 		final List<AppDataJobFile> res = product.getProductsFor(metadata.getPolarisation());
 		
+		// Extract t0_pdgs_date if possible to determine when all inputs where ready
+		Date t0 = null;
+		if (metadata.getAdditionalProperties().containsKey("t0_pdgs_date")) {
+			t0 = DateUtils.toDate(metadata.getAdditionalProperties().get("t0_pdgs_date"));
+		}
+		
 		final AppDataJobFile segment = new AppDataJobFile(
 				metadata.getProductName(), 
 				metadata.getKeyObjectStorage(), 				
 				TaskTableAdapter.convertDateToJobOrderFormat(metadata.getValidityStart()),
 				TaskTableAdapter.convertDateToJobOrderFormat(metadata.getValidityStop()),
+				t0,
 				toMetadataMap(metadata)
 		);
 

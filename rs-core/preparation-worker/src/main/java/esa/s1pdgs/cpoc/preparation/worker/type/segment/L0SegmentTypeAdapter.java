@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -272,11 +273,18 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}
 
 	private final AppDataJobFile toAppDataJobFile(final LevelSegmentMetadata segment) {
+		// Extract t0_pdgs_date if possible to determine when all inputs where ready
+		Date t0 = null;
+		if (segment.getAdditionalProperties().containsKey("t0_pdgs_date")) {
+			t0 = DateUtils.toDate(segment.getAdditionalProperties().get("t0_pdgs_date"));
+		}
+		
 		return new AppDataJobFile(
 				segment.getProductName(),
 				segment.getKeyObjectStorage(),
 				TaskTableAdapter.convertDateToJobOrderFormat(segment.getValidityStart()),
-				TaskTableAdapter.convertDateToJobOrderFormat(segment.getValidityStop())
+				TaskTableAdapter.convertDateToJobOrderFormat(segment.getValidityStop()),
+				t0
 		);
 	} 
 

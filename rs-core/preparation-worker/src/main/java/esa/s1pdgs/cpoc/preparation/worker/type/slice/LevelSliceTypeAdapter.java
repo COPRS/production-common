@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.preparation.worker.type.slice;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -97,11 +98,18 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			preselected.setFileType(alt.getFileType());		
 			preselected.setFileNameType(alt.getFileNameType().toString());
 			
+			// Extract t0_pdgs_date if possible to determine when all inputs where ready
+			Date t0 = null;
+			if (file.getAdditionalProperties().containsKey("t0_pdgs_date")) {
+				t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0_pdgs_date"));
+			}
+			
 			final AppDataJobFile appJobFile = new AppDataJobFile(
 					file.getProductName(), 
 					file.getKeyObjectStorage(), 
 					TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStart()),
 					TaskTableAdapter.convertDateToJobOrderFormat(file.getValidityStop()),
+					t0,
 					file.getAdditionalProperties()
 			);
 			preselected.setFiles(Collections.singletonList(appJobFile));
@@ -176,12 +184,19 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 						preselected.setFileNameType(alternative.getFileNameType().toString());
 						
 						final List<AppDataJobFile> files = new ArrayList<>();
-						for (final SearchMetadata meta : queryResults) {														
+						for (final SearchMetadata meta : queryResults) {
+							// Extract t0_pdgs_date if possible to determine when all inputs where ready
+							Date t0 = null;
+							if (meta.getAdditionalProperties().containsKey("t0_pdgs_date")) {
+								t0 = DateUtils.toDate(meta.getAdditionalProperties().get("t0_pdgs_date"));
+							}
+							
 							files.add(new AppDataJobFile(
 									meta.getProductName(), 
 									meta.getKeyObjectStorage(), 
 									TaskTableAdapter.convertDateToJobOrderFormat(meta.getValidityStart()),
 									TaskTableAdapter.convertDateToJobOrderFormat(meta.getValidityStop()),
+									t0,
 									meta.getAdditionalProperties()
 							));
 						}

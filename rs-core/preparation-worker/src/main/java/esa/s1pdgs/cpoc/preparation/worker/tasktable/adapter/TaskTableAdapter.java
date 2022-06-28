@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toMap;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,12 +215,24 @@ public class TaskTableAdapter {
 						.map(this::newJobOrderTimeIntervalFor)
 						.collect(toList());
 					
+					// FIXME: Dirty workaround to determine t0_pdgs_date
+					Date t0 = null;
+					for (SearchMetadata metadata : queryResults) {
+						if (metadata.getAdditionalProperties().containsKey("t0_pdgs_date")) {
+							Date metT0 = DateUtils.toDate(metadata.getAdditionalProperties().get("t0_pdgs_date"));
+							if (t0 == null || t0.before(metT0)) {
+								t0 = metT0;
+							}
+						}
+					}
+					
 					return new JobOrderInput(
 							alt.getFileType(), 
 							type,
 							jobOrderInputFiles, 
 							jobOrderTimeIntervals, 
-							family
+							family,
+							t0
 					);
 				}
 			// is PROC input?

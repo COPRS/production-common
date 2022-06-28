@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -215,8 +216,14 @@ public class MultipleProductCoverSearch {
 		final List<AppDataJobFile> files = new ArrayList<>();
 
 		for (final S3Metadata product : products) {
+			// Extract t0_pdgs_date if possible to determine when all inputs where ready
+			Date t0 = null;
+			if (product.getAdditionalProperties().containsKey("t0_pdgs_date")) {
+				t0 = DateUtils.toDate(product.getAdditionalProperties().get("t0_pdgs_date"));
+			}
+			
 			files.add(new AppDataJobFile(product.getProductName(), product.getKeyObjectStorage(),
-					product.getValidityStart(), product.getValidityStop()));
+					product.getValidityStart(), product.getValidityStop(), t0));
 		}
 		return files;
 	}

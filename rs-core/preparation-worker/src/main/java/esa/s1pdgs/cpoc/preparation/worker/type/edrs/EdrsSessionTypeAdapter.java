@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -173,6 +174,7 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
         // Add input relative to the channels
         if (job.getProduct() != null) {
         	final EdrsSessionProduct product = EdrsSessionProduct.of(job);
+        	Date t0 = null;
         	
         	final List<AppDataJobFile> raws1 = product.getRawsForChannel(1);
         	final List<AppDataJobFile> raws2 = product.getRawsForChannel(2);
@@ -180,16 +182,31 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
             // Add raw to the job order, one file per channel, alternating and in alphabetic order
             for (int i = 0; i < Math.max(raws1.size(), raws2.size()); i++) {            	            	
                 if (i < raws1.size()) { 
-                    dto.addInput(newInputFor(raws1.get(i), dto.getWorkDirectory(), "ch01"));
+                	AppDataJobFile raw = raws1.get(i);
+                    dto.addInput(newInputFor(raw, dto.getWorkDirectory(), "ch01"));
+                    
+                    if (raw.getT0_pdgs_date() != null && (t0 == null || t0.before(raw.getT0_pdgs_date()))) {
+                    	t0 = raw.getT0_pdgs_date();
+                    }
                 }
                 if (i < raws2.size()) {
-                    dto.addInput(newInputFor(raws2.get(i), dto.getWorkDirectory(), "ch02"));
+                	AppDataJobFile raw = raws2.get(i);
+                    dto.addInput(newInputFor(raw, dto.getWorkDirectory(), "ch02"));
+                    
+                    if (raw.getT0_pdgs_date() != null && (t0 == null || t0.before(raw.getT0_pdgs_date()))) {
+                    	t0 = raw.getT0_pdgs_date();
+                    }
                 }
             }
             
             // Add DSIB as Input (at least necessary for S3 SESSIONs)
             dto.addInput(newInputForDSIB(product.getDsibForChannel(1), dto.getWorkDirectory(), "ch01"));
             dto.addInput(newInputForDSIB(product.getDsibForChannel(2), dto.getWorkDirectory(), "ch02"));
+            
+            // Correct t0_pdgs_date
+            if (dto.getT0_pdgs_date() == null || dto.getT0_pdgs_date().before(t0)) {
+            	dto.setT0_pdgs_date(t0);
+            }
         }		
 	}
 

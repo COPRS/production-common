@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -293,15 +294,16 @@ public class AuxQuery {
 				.collect(toMap(JobOrderInputFile::getFilename, fn -> fn));
 		return new AppDataJobInput(inputReference, input.getFileType(), input.getFileNameType().toString(),
 				TaskTableMandatoryEnum.YES.equals(mandatory), input.getTimeIntervals().stream()
-						.map(ti -> merge(fileNames.get(ti.getFileName()), ti)).collect(toList()));
+						.map(ti -> merge(fileNames.get(ti.getFileName()), ti, input.getT0_pdgs_date())).collect(toList()));
 	}
 
-	private AppDataJobFile merge(final JobOrderInputFile file, final JobOrderTimeInterval interval) {
+	private AppDataJobFile merge(final JobOrderInputFile file, final JobOrderTimeInterval interval, final Date t0) {
 		return new AppDataJobFile(
 				file.getFilename(), 
 				file.getKeyObjectStorage(), 
 				interval.getStart(),
-				interval.getStop()
+				interval.getStop(),
+				t0
 		);
 	}
 
