@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.metadata.extraction.service;
 
 import static esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage.NOT_DEFINED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -528,5 +529,10 @@ public class ITExtractionService {
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
 		assertEquals(25, metadata.length());
 	}	
+	
+	@Test
+	public void failing() {
+		fail();
+	}
 
 }
