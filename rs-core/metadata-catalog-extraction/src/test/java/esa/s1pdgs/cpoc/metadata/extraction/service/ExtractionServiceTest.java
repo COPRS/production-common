@@ -458,7 +458,8 @@ public class ExtractionServiceTest {
 		assertEquals("NRT", metadata.getString("timeliness"));
 		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
-		assertEquals(10, metadata.length());
+		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar", metadata.getString("url"));
+		assertEquals(11, metadata.length());
 	}
 	
 	@Test

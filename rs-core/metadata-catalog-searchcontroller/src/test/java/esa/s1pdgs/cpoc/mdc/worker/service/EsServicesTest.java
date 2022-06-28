@@ -652,6 +652,17 @@ public class EsServicesTest{
 		expectedResult.setInstrumentConfigurationId(0);
 		expectedResult.setNumberSlice(2);
 		expectedResult.setDatatakeId("datatakeId");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {
+			{
+			    put("startTime", "2000-01-01T00:00:00.000000Z");
+			    put("stopTime", "2001-01-01T00:00:00.000000Z");
+			    put("productName", "name");
+			    put("productType", "product_type");
+			    put("url", "url");
+			    put("sliceNumber", "2");
+			    put("instrumentConfigurationId", "0");
+			    put("dataTakeId", "datatakeId");
+			}});
 		
 		//Response 
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -1709,6 +1720,15 @@ public class EsServicesTest{
 		expectedResult.setValidityStart("2000-01-01T00:00:00.000000Z");
 		expectedResult.setValidityStop("2001-01-01T00:00:00.000000Z");
 		expectedResult.setMissionId("missionId");
+		expectedResult.setAdditionalProperties(new HashMap<String,String>() {
+		{
+		    put("startTime", "2000-01-01T00:00:00.000000Z");
+		    put("stopTime", "2001-01-01T00:00:00.000000Z");
+		    put("productName", "name");
+		    put("productType", "product_type");
+		    put("url", "url");
+		    put("missionId", "missionId");
+		}});
 		
 		//Response
 		final BytesReference source = new BytesArray("{\"productName\":\"name\",\"url\""
@@ -1727,7 +1747,7 @@ public class EsServicesTest{
 		
 		try {
 			final List<SearchMetadata> result = esServices.intervalTypeQuery("2000-01-01T00:00:00.000000Z", "2001-01-01T00:00:00.000000Z", ProductFamily.L0_ACN, 
-					"type", "satelliteId");
+					"type", "satelliteId");			
 			assertEquals("Search metadata are not equals", expectedResult, result.get(0));
 		} catch (final Exception e) {
 			fail("Exception occurred: " + e.getMessage());
