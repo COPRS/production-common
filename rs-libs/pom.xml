@@ -354,7 +354,6 @@
 		<module>lib-commons</module>
 		<module>message-adapter</module>
 		<module>metadata-client</module>
-		<module>mqi-client</module>
 		<module>obs-sdk</module>
 		<module>prip-client</module>
 		<module>data-lifecycle-client</module>
