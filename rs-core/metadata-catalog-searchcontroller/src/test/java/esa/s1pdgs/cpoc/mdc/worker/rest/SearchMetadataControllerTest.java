@@ -38,7 +38,7 @@ public class SearchMetadataControllerTest extends RestControllerTest {
 	}
 
 	private void mockSearchMetadataLastValCover(SearchMetadata response) throws Exception {
-		doReturn(response).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
+		doReturn(response).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString());
 	}
 	
 	private void mockSearchMetadataValIntersect(List<SearchMetadata> response) throws Exception {
@@ -54,11 +54,11 @@ public class SearchMetadataControllerTest extends RestControllerTest {
     }
 
 	private void mockSearchMetadataNotPresentException() throws Exception {
-		doThrow(new MetadataNotPresentException("name")).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
+		doThrow(new MetadataNotPresentException("name")).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString());
 	}
 	
 	private void mockSearchMetadataException() throws Exception {
-		doThrow(new Exception()).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString());
+		doThrow(new Exception()).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString());
 	}
 	
 	

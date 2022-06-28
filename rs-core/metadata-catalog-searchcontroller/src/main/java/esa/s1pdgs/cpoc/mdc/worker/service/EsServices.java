@@ -358,7 +358,8 @@ public class EsServices {
 	 */
 	public SearchMetadata lastValCover(final String productType, final ProductFamily productFamily,
 			final String beginDate, final String endDate, final String satelliteId, final int instrumentConfId,
-			final String processMode) throws Exception {
+			final String processMode,
+			final String bandIndexId) throws Exception {
 
 		final ProductCategory category = ProductCategory.of(productFamily);
 
@@ -381,6 +382,12 @@ public class EsServices {
 		if (category == ProductCategory.LEVEL_PRODUCTS || category == ProductCategory.LEVEL_SEGMENTS) {
 			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		}
+		
+		//RS-422: Allowing to use optional parameter bandIndexId on latestValCover query
+		if (bandIndexId != null) {
+			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("bandIndexId", bandIndexId));
+		}
+		
 		LOGGER.debug("query composed is {}", queryBuilder);
 
 		sourceBuilder.query(queryBuilder);

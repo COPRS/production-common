@@ -229,7 +229,8 @@ public class SearchMetadataController {
 			@RequestParam(name = "insConfId", defaultValue = "-1") final int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") final double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") final double dt1,
-			@RequestParam(value = "polarisation", defaultValue = "NONE") final String polarisation) {
+			@RequestParam(value = "polarisation", defaultValue = "NONE") final String polarisation,
+			@RequestParam(value = "bandIndexId", required = false) final String bandIndexId) {
 		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",
 				productFamily, productType, mode, satellite);
 		try {
@@ -259,7 +260,7 @@ public class SearchMetadataController {
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						satellite, insConfId, processMode);
+						satellite, insConfId, processMode, bandIndexId);
 				if (f != null) {
 					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
 							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
