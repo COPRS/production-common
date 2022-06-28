@@ -1,5 +1,5 @@
 # DDIP Frontend
-The DDIP Frontend functions as a facade to the PRIP and adds additional functionality like querying over collections. Together with the Native API the DDIP/PRIP forms the RS API as outgoing interface of the Copernicus Reference System.
+The DDIP Frontend functions as a facade to the PRIP and adds additional functionality like querying over collections. Together with the Native API the DDIP/PRIP forms the RS API as outgoing interface of the Copernicus Reference System. 
 
 As a facade to the PRIP the DDIP forwards incoming PRIP requests (OData based product queries and downloads) to the PRIP frontend and returns its response. OData queries utilizing collections are handled by the DDIP Frontend by translating the query to a PRIP-compatible query before sending it to the PRIP.
 
