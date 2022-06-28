@@ -54,7 +54,7 @@ public class SearchMetadataControllerTest extends RestControllerTest {
     }
 
 	private void mockSearchMetadataNotPresentException() throws Exception {
-		doThrow(new MetadataNotPresentException("name")).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString(), Mockito.anyString());
+		doThrow(new MetadataNotPresentException("name")).when(esServices).lastValCover(Mockito.any(String.class), Mockito.any(ProductFamily.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.anyInt(), Mockito.anyString(), Mockito.isNull());
 	}
 	
 	private void mockSearchMetadataException() throws Exception {
