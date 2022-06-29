@@ -13,6 +13,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -551,7 +552,8 @@ public class OutputProcessor {
 			final ReportingFactory reportingFactory, 
 			final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish,
-			final UUID uuid
+			final UUID uuid,
+			final Date t0_pdgs_date
 	) throws Exception {
 		// I can't believe this stuff is actually working in any reliable form. It seems to be operating on
 		// 2 indepenent lists associated via the obsKey. This REALLY needs some refactoring since there are
@@ -574,7 +576,7 @@ public class OutputProcessor {
 			final List<FileObsUploadObject> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
 
 			if (i > 0) {
-				res.addAll(publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish, uuid));
+				res.addAll(publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish, uuid, t0_pdgs_date));
 			}
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InternalErrorException("The current thread as been interrupted");
@@ -584,7 +586,7 @@ public class OutputProcessor {
 		// ok, this seems to be some kind of 'poison pill' pattern here to indicate that upload is done.
 		// as nothing else is done. If there is a remainder in 'outputToPublish', I guess it will be published
 		// but it will not be uploaded. But to be safe, we add it also here...
-		res.addAll(publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid));
+		res.addAll(publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid, t0_pdgs_date));
 		return res;
 	}
 
@@ -605,7 +607,8 @@ public class OutputProcessor {
 			final double nbBatch,
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,
-			final UUID uuid
+			final UUID uuid,
+			final Date t0_pdgsDate
 	) throws Exception {
 		final List<Message<CatalogJob>> result = new ArrayList<>();
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
@@ -619,7 +622,7 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				result.add(MessageBuilder.withPayload(publish(uuid, msg)).build());
+				result.add(MessageBuilder.withPayload(publish(uuid, msg, t0_pdgsDate)).build());
 				iter.remove();
 			}
 
@@ -629,13 +632,15 @@ public class OutputProcessor {
 
 	private CatalogJob publish(
 			final UUID uuid, 
-			final ObsQueueMessage msg
+			final ObsQueueMessage msg,
+			final Date t0_pdgs_date
 	) throws Exception {
 		try {
 			LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			final CatalogJob res = new CatalogJob(msg.getProductName(), msg.getKeyObs(), msg.getFamily(),
 					toUppercaseOrNull(msg.getProcessMode()), msg.getOqcFlag(), inputMessage.getTimeliness(), uuid);
+			res.setT0_pdgs_date(t0_pdgs_date);
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			return res;
@@ -733,7 +738,8 @@ public class OutputProcessor {
 						reportingFactory,
 						uploadBatch,
 						outputToPublish,
-						uuid);
+						uuid, 
+						job.getT0_pdgs_date());
 		// Publish reports
 		processReports(reportToPublish, uuid);	
 		return res;
