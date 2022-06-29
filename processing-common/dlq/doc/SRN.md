@@ -54,6 +54,22 @@ This software does have the following minimal requirements:
 | Affinity between Pod / Node |    no       |
 
 
+## Deployment Prerequisite
+
+Following components of the COPRS shall be installed and running
+- [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
+Kubernetes Secrets shall be created.
+- See [COPRS Kubernetes Secret](/processing-common/doc/secrets.md)
+
+Additionally the DLQ system needs a persistence in order to store failed processings arriving at the parking lot Kafka topic. Thus it is required to have a MongoDB instance available and setup. For further general information regarding the creation of a secret for the  MongoDB instance, please see [COPRS MongoDB](/processing-common/doc/secrets.md)
+
+The default configuration provided in the RS Core Component is expecting a secret "mongodlq" in the namespace "processing" containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
+
+Please note that further initialization might be required. For the DLQ component please execute the following commands in the MongoDB in order to create the credentials for the secret:
+``
+db.createUser({user: "<USER>", pwd: "<PASSWORD>", roles: [{role: "readWrite", db: "coprs"}]})
+``
+
 ## Deployer properties
 
 The following table only contains a few properties used by the factory default configuration. For more information please refer to the [official documentation](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-kubernetes-deployer) or COPRS-ICD-ADST-001139201 - ICD RS core.

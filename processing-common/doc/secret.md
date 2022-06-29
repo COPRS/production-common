@@ -48,6 +48,7 @@ Some application of the COPRS like the ingestion or preparation worker are requi
 By default it is assumed that the RS Core Components Ingestion and the RS Add-ons (with the Preparation worker) are not sharing the same secrets and for each one a own secret is generated. Even tho the credentials used to login to the MongoDB can be the same. The procedure in order to generate the sescrets is however indentically.
 
 In order to generate a secrets for the components, you can use the following commands:
+``kubectl create secret generic mongodlq --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
 ``kubectl create secret generic mongoingestion --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
 ``kubectl create secret generic mongopreparation --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
 ``kubectl create secret generic mongorequestrepository --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``

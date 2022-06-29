@@ -149,7 +149,14 @@ The component provides an interface to list and restart failed processings.
 
 Prerequisites:
 
-A secret `mongorequestrepository` has to be created with the fields `USERNAME` and `PASSWORD` holding the corresponding MongoDB credentials.
+As a frontend to the COPRS DLQ sub system, the Request Repository needs to access the failed processings, that are stored by the DLQ component in a MongoDB database. Thus it is required to have a MongoDB instance available and setup. For further general information regarding the creation of a secret for the  MongoDB instance, please see [COPRS MongoDB](/processing-common/doc/secrets.md)
+
+The default configuration provided is expecting a secret "mongorequestrepository" in the namespace "processing" containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
+
+Please note that further initialization might be required. For the Request Repository component please execute the following commands in the MongoDB in order to create the credentials for the secret:
+``
+db.createUser({user: "<USER>", pwd: "<PASSWORD>", roles: [{role: "readWrite", db: "coprs"}]})
+``
 
 The following command can be used in order to deploy the Request Repository:
 
