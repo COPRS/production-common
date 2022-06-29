@@ -41,7 +41,7 @@ OBS Buckets, Kubernetes Secrets and ES indices shall be created.
 
 Additionally the Ingestion system needs a persistence in order to store which products had been identified in the past already and avoid firing another event for them again. Thus it is required to have a MongoDB instance available and setup. For further general information regarding the creation of a secret for the  MongoDB instance, please see [COPRS MongoDB](/processing-common/doc/secrets.md)
 
-The default configuration provided in the RS Core Component is expecting a secret "mongoingestion" in the namespace "processing" containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB
+The default configuration provided in the RS Core Component is expecting a secret "mongoingestion" in the namespace "processing" containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
 
 Please note that further initialization might be required. For the Ingestion component please execute the following commands in the MongoDB in order to create the credentials for the secret:
 ``
