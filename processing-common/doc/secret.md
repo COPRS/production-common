@@ -4,6 +4,8 @@ Especially when tackle with sensible information as user credentials it is not r
 
 What exactly needs to be setup is different for the setups. This documentation is trying to give an example on how to make a secret available.
 
+## AUXIP
+
 Initially a new secret needs to be generated. This can be done using the tool kubectl from your cluster by using the following command line:
 
 ``kubectl create secret generic auxip --from-literal=USERNAME=<USER_ACCOUNT> --from-literal=PASSWORD=<USER_PASSWORD> --from-literal=CLIENT_ID=<CLIENT_ID --from-literal=CLIENT_SECRET=<CLIENT_SECRET>``
@@ -39,3 +41,15 @@ In this case 4 new environmental variables are created. All will be taken from t
 app.ingestion-auxip-trigger.auxip.host-configs.host1.user=${AUXIP_USERNAME}
 app.ingestion-auxip-trigger.auxip.host-configs.host1.pass=${AUXIP_PASSWORD}
 ```
+## MongoDB
+
+Some application of the COPRS like the ingestion or preparation worker are requiring MongoDB as persistence layer to store runtime information. The MongoDB instance is part of the infrastructure. Further information please see [https://github.com/COPRS/infrastructure].
+
+By default it is assumed that the RS Core Components Ingestion and the RS Add-ons (with the Preparation worker) are not sharing the same secrets and for each one a own secret is generated. Even tho the credentials used to login to the MongoDB can be the same. The procedure in order to generate the sescrets is however indentically.
+
+In order to generate a secrets for the components, you can use the following commands:
+``kubectl create secret generic mongoingestion --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
+``kubectl create secret generic mongopreparation --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
+``kubectl create secret generic mongorequestrepository --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
+
+Be aware that it might be required to generate the user and set its password with MongoDB after the database had been generated. Please consult the documentation for the components for further information.
