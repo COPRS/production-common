@@ -237,6 +237,11 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		List<Message<CatalogJob>> result = new ArrayList<>();
 		try {
 			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+			
+			// Fix t0_pdgs_date for jobs (extract from job)
+			for (Message<CatalogJob> message : result) {
+				message.getPayload().setT0_pdgs_date(job.getT0_pdgs_date());
+			}
 		} catch (Exception e) {
 			reporting.error(errorReportMessage(e));
 			throw new RuntimeException(e);
@@ -306,6 +311,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			} else {
 				warningMessage = "";
 			}
+			
 			return catalogJobs;
 		} catch (Exception e) {
 			WorkingDirectoryUtils workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());
