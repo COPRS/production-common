@@ -55,7 +55,11 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
     }
     
     public AppDataJobFile(final String fileName, final String keyObs) {
-    	this(fileName, keyObs, null, null,null,new LinkedHashMap<>());
+    	this(fileName, keyObs, null, null, null, new LinkedHashMap<>());
+    }
+    
+    public AppDataJobFile(final String fileName, final String keyObs, final Date t0_pdgs_date) {
+    	this(fileName, keyObs, null, null, t0_pdgs_date, new LinkedHashMap<>());
     }
     
     public AppDataJobFile(

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.preparation.worker.type.edrs;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 
 public class EdrsSessionMetadataAdapter {
@@ -88,7 +90,17 @@ public class EdrsSessionMetadataAdapter {
 	
 	private final List<AppDataJobFile> raws(final Collection<String> names, final Map<String,EdrsSessionMetadata> raws) {
     	return names.stream()
-    			.map(s -> new AppDataJobFile(s, raws.getOrDefault(s, NULL).getKeyObjectStorage()))
+    			.map(s -> 
+    			{ 
+    				// Save t0_pdgs_date for further computations on AppDataJobFile
+    				Date metT0 = null;
+    				String t0_pdgs_date = raws.getOrDefault(s, NULL).getAdditionalProperties().get("t0_pdgs_date");
+    				if (t0_pdgs_date != null) {
+    					metT0 = DateUtils.toDate(t0_pdgs_date);
+    				}
+    				
+    				return new AppDataJobFile(s, raws.getOrDefault(s, NULL).getKeyObjectStorage(), metT0);
+    			})
                 .collect(Collectors.toList());
     }
 }
