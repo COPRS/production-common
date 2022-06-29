@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.metadata.extraction.service;
 import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +126,8 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 
 		// RS-248: Adding t0_pdgs_date into metadata
 		if (catJob.getT0_pdgs_date() != null) {
-			metadata.put("t0_pdgs_date", catJob.getT0_pdgs_date());
+			metadata.put("t0_pdgs_date", DateUtils.formatToMetadataDateTimeFormat(
+					catJob.getT0_pdgs_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
 		}
 
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
