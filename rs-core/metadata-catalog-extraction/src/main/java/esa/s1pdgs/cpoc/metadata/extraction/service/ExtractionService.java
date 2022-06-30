@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.MetadataExtractorFactory;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.MetadataExtractionReportingOutput;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.MetadataExtractionReportingOutput.EffectiveDownlink;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.ProductMetadataCustomObjectFiller;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -205,77 +206,11 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			output.setTypeString(catalogEvent.getProductFamily().name());
 		}
 		
-		fillCustomObject(catalogEvent, output);
-		
+		// RS-407
+		new ProductMetadataCustomObjectFiller(catalogEvent, output).fillCustomObject();
 		fillTimelinessValues(catalogEvent, mission, output);
 
 		return output.build();
-	}
-
-
-	private void fillCustomObject(final CatalogEvent catalogEvent, final MetadataExtractionReportingOutput output) {
-		// RS-407
-		// Sentinel-1 Custom Object
-		if ((catalogEvent.getProductFamily() == ProductFamily.L0_SEGMENT) || 
-				(catalogEvent.getProductFamily() == ProductFamily.L0_SLICE) || 
-				(catalogEvent.getProductFamily() == ProductFamily.L0_ACN)) {
-			
-			output.getProductMetadataCustomObject().put("beginning_date_time_date", catalogEvent.getMetadata().get("startTime"));
-			output.getProductMetadataCustomObject().put("ending_date_time_date", catalogEvent.getMetadata().get("stopTime"));
-			output.getProductMetadataCustomObject().put("platform_short_name_string", catalogEvent.getMetadata().get("platformShortName"));
-			output.getProductMetadataCustomObject().put("platform_serial_identifier_string", catalogEvent.getMetadata().get("platformSerialIdentifier"));
-			output.getProductMetadataCustomObject().put("operational_mode_string", catalogEvent.getMetadata().get("operationalMode"));
-			output.getProductMetadataCustomObject().put("product_class_string", catalogEvent.getMetadata().get("productClass"));
-			output.getProductMetadataCustomObject().put("product_consolidation_string", catalogEvent.getMetadata().get("productConsolidation"));
-			if (catalogEvent.getMetadata().get("productSensingConsolidation") != null) {
-				output.getProductMetadataCustomObject().put("product_sensing_consolidation_string", catalogEvent.getMetadata().get("productSensingConsolidation"));
-			}
-			output.getProductMetadataCustomObject().put("datatake_id_integer", catalogEvent.getMetadata().get("missionDataTakeId"));
-			output.getProductMetadataCustomObject().put("slice_product_flag_boolean", catalogEvent.getMetadata().get("sliceProductFlag"));
-			output.getProductMetadataCustomObject().put("polarisation_channels_string", catalogEvent.getMetadata().get("polarisationChannels"));
-			output.getProductMetadataCustomObject().put("orbit_number_integer", catalogEvent.getMetadata().get("absoluteStartOrbit"));
-			output.getProductMetadataCustomObject().put("processing_level_integer", 0);
-			output.getProductMetadataCustomObject().put("instrument_short_name_string", catalogEvent.getMetadata().get("instrumentShortName"));
-			output.getProductMetadataCustomObject().put("swath_identifier_integer", catalogEvent.getMetadata().get("swathIdentifier"));
-			output.getProductMetadataCustomObject().put("slice_number_integer", catalogEvent.getMetadata().get("sliceNumber"));
-			output.getProductMetadataCustomObject().put("total_slice_integer", catalogEvent.getMetadata().get("totalNumberOfSlice"));
-			if (catalogEvent.getMetadata().get("packetStoreID") != null) {
-				output.getProductMetadataCustomObject().put("packet_store_integer", catalogEvent.getMetadata().get("packetStoreID"));
-			}
-			output.getProductMetadataCustomObject().put("processor_name_string", catalogEvent.getMetadata().get("processorName"));
-			output.getProductMetadataCustomObject().put("processor_version_string", catalogEvent.getMetadata().get("processorVersion"));
-			output.getProductMetadataCustomObject().put("product_type_string", catalogEvent.getMetadata().get("productType"));
-			output.getProductMetadataCustomObject().put("coordinates_object", catalogEvent.getMetadata().get("coordinates"));
-
-		} else if ((catalogEvent.getProductFamily() == ProductFamily.S2_L0_DS) || 
-					(catalogEvent.getProductFamily() == ProductFamily.S2_L0_GR)) {
-			output.getProductMetadataCustomObject().put("product_group_id", catalogEvent.getMetadata().get("productGroupId"));
-			output.getProductMetadataCustomObject().put("beginning_date_time_date", catalogEvent.getMetadata().get("startTime"));
-			output.getProductMetadataCustomObject().put("ending_date_time_date", catalogEvent.getMetadata().get("stopTime"));
-			output.getProductMetadataCustomObject().put("orbit_number_integer", catalogEvent.getMetadata().get("orbitNumber"));
-			output.getProductMetadataCustomObject().put("product_type_string", catalogEvent.getMetadata().get("productType"));
-			output.getProductMetadataCustomObject().put("platform_serial_identifier_string", catalogEvent.getMetadata().get("platformSerialIdentifier"));
-			output.getProductMetadataCustomObject().put("platform_short_name_string", catalogEvent.getMetadata().get("platfomShortName"));
-			output.getProductMetadataCustomObject().put("processing_level_integer", 0);
-			output.getProductMetadataCustomObject().put("processor_version_string", catalogEvent.getMetadata().get("processorVersion"));
-			output.getProductMetadataCustomObject().put("quality_status_integer", catalogEvent.getMetadata().get("qualityStatus"));
-			output.getProductMetadataCustomObject().put("instrument_short_name_string", catalogEvent.getMetadata().get("instrumentShortName"));
-			output.getProductMetadataCustomObject().put("coordinates_object", catalogEvent.getMetadata().get("coordinates"));
-			
-		} else if (catalogEvent.getProductFamily() == ProductFamily.S3_L0) {
-			output.getProductMetadataCustomObject().put("beginning_date_time_date", catalogEvent.getMetadata().get("startTime"));
-			output.getProductMetadataCustomObject().put("ending_date_time_date", catalogEvent.getMetadata().get("stopTime"));
-			output.getProductMetadataCustomObject().put("platform_short_name_string", catalogEvent.getMetadata().get("platformShortName"));//TODO extract
-			output.getProductMetadataCustomObject().put("platform_serial_identifier_string", catalogEvent.getMetadata().get("platformSerialIdentifier"));//TODO extract
-			output.getProductMetadataCustomObject().put("instrument_short_name_string", catalogEvent.getMetadata().get("instrumentName"));
-			output.getProductMetadataCustomObject().put("orbit_number_integer", catalogEvent.getMetadata().get("orbitNumber"));
-			output.getProductMetadataCustomObject().put("processing_level_integer", catalogEvent.getMetadata().get("processingLevel"));
-			output.getProductMetadataCustomObject().put("product_type_string", catalogEvent.getMetadata().get("productType"));
-			output.getProductMetadataCustomObject().put("cycle_number_integer", catalogEvent.getMetadata().get("cycleNumber"));
-			output.getProductMetadataCustomObject().put("processor_name_string", catalogEvent.getMetadata().get("procName"));
-			output.getProductMetadataCustomObject().put("processor_version_string", catalogEvent.getMetadata().get("procVersion"));
-			output.getProductMetadataCustomObject().put("coordinates_object", catalogEvent.getMetadata().get("sliceCoordinates"));
-		}
 	}
 	
 	private void fillTimelinessValues(CatalogEvent catalogEvent, MissionId mission,
