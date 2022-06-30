@@ -81,6 +81,11 @@
 			<xsl:with-param name="stopOrbitName"
 				select="'relativeStopOrbit'" />
 		</xsl:call-template>
+		
+		<cycleNumber>
+			<xsl:value-of
+				select="//*[local-name()='orbitReference']/*[local-name()='cycleNumber']/text()" />
+		</cycleNumber>
 
 		<receivingGroundStation>
 			<xsl:value-of
