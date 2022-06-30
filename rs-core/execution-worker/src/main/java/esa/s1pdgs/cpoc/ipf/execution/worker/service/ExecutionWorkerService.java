@@ -15,6 +15,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -242,7 +243,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			throw new RuntimeException(e);
 		}
 		
-		reporting.end(toReportingOutput(result, job.isDebug()), new ReportingMessage("End job processing"));
+		reporting.end(toReportingOutput(result, job.isDebug(), job.getT0_pdgs_date()), new ReportingMessage("End job processing"));
 		return result;
 	}
 
@@ -317,12 +318,12 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		}
 	}
 
-	private ReportingOutput toReportingOutput(final List<Message<CatalogJob>> out, final boolean debug) {
+	private ReportingOutput toReportingOutput(final List<Message<CatalogJob>> out, final boolean debug, final Date lastInputAvailable) {
 		final List<ReportingFilenameEntry> reportingEntries = out.stream()
 				.map(m -> new ReportingFilenameEntry(m.getPayload().getProductFamily(),
 						new File(m.getPayload().getProductName()).getName()))
 				.collect(Collectors.toList());
-		return new IpfFilenameReportingOutput(new ReportingFilenameEntries(reportingEntries), debug);
+		return new IpfFilenameReportingOutput(new ReportingFilenameEntries(reportingEntries), debug, lastInputAvailable);
 	}
 
 	/**
