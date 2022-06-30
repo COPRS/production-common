@@ -100,6 +100,16 @@
 					select="//*[local-name()='L1Triggering']/@triggers" />
 			</L1Triggering>
 		</xsl:if>
+		
+		<platformShortName>
+			<xsl:value-of
+				select="//*[local-name()='platform']/*[local-name()='familyName']/text()" />
+		</platformShortName>
+		
+		<platformSerialIdentifier>
+			<xsl:value-of
+				select="//*[local-name()='platform']/*[local-name()='number']/text()" />
+		</platformSerialIdentifier>
 
 		<instrumentName>
 			<xsl:value-of
