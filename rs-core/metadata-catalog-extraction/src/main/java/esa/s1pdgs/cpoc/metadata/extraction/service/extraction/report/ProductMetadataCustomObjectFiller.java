@@ -61,8 +61,8 @@ public class ProductMetadataCustomObjectFiller {
 		} else if (catalogEvent.getProductFamily() == ProductFamily.S3_L0) {
 			fillwithKeyMapping("beginning_date_time_date", "startTime");
 			fillwithKeyMapping("ending_date_time_date", "stopTime");
-			fillwithKeyMapping("platform_short_name_string", "platformShortName");//TODO extract
-			fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");//TODO extract
+			fillwithKeyMapping("platform_short_name_string", "platformShortName");
+			fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
 			fillwithKeyMapping("instrument_short_name_string", "instrumentName");
 			fillwithKeyMapping("orbit_number_integer", "orbitNumber");
 			fillwithKeyMapping("processing_level_integer", "processingLevel");
