@@ -154,5 +154,5 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		}
 		return result;
 	}
-	
+
 }
