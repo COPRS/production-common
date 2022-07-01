@@ -28,7 +28,7 @@ import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
 import esa.s1pdgs.cpoc.dlq.manager.report.DlqReportingInput;
 import esa.s1pdgs.cpoc.dlq.manager.report.DlqReportingOutput;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -124,7 +124,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		final String errorLevel = !originalMessageHeader.containsKey("errorLevel")
 				? "NOT_DEFINED" : (String)originalMessageHeader.get("errorLevel");
 		
-		FailedProcessingDto failedProcessingDto = new FailedProcessingDto(originalTopic, originalTimestamp,
+		FailedProcessing failedProcessingDto = new FailedProcessing(originalTopic, originalTimestamp,
 				missionId, errorLevel, payload.toMap(), exceptionMessage, exceptionStacktrace,
 				payload.getInt("retryCounter"));
 		

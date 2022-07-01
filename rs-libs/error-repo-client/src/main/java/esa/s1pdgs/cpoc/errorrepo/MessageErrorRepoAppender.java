@@ -1,21 +1,21 @@
 package esa.s1pdgs.cpoc.errorrepo;
 
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import esa.s1pdgs.cpoc.message.MessageProducer;
 
 public class MessageErrorRepoAppender implements ErrorRepoAppender {
 
     private final String topic;
-    private final MessageProducer<FailedProcessingDto> messageProducer;
+    private final MessageProducer<FailedProcessing> messageProducer;
 
-    public MessageErrorRepoAppender(final String topic, final MessageProducer<FailedProcessingDto> messageProducer) {
+    public MessageErrorRepoAppender(final String topic, final MessageProducer<FailedProcessing> messageProducer) {
         this.topic = topic;
         this.messageProducer = messageProducer;
     }
 
     @Override
-    public void send(final FailedProcessingDto errorRequest) {
+    public void send(final FailedProcessing errorRequest) {
         try {
             messageProducer.send(topic, errorRequest);
         } catch (final Exception e) {

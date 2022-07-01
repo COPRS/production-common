@@ -5,6 +5,9 @@ info:
     This API provides acces to the S1PRO subsystem
       
       ## Changelog
+      ### V1.0.1
+      - updated type failedProcessing and related methods
+      - removed `POST /failedProcessings/{id}/reevaluate`, `POST /failedProcessings/reevaluate`, `GET /processings`, `GET /processings/count` and `GET /processings/{id}` and associated type Processing
       ### V1.0.0
       - initial version
       ### V1.0.1
@@ -114,8 +117,6 @@ servers:
 tags:
 - name: ProcessingTypes
   description: All supported processing types of S1PRO subsystem. A `ProcessingType` is equivalient to a KAFKA-topic
-- name: Processings
-  description: Current ongoing processings of S1PRO subsystem. Main purpose is, to provide the monitoring subsystem of S1ITC with information about processings and the ability to interact with S1PRO subsystem. A `Processing` is equivalent to a MQI message stored in ApplicationCatalog.
 - name: FailedProcessings
   description: Failed processings of S1PRO subsystem. Main purpose is, to provide the monitoring subsystem of S1ITC with information about failed processings and the ability to interact with S1PRO subsystem. A `FailedProcessing` is created when execution of a `Processing` failed.
 paths:
@@ -152,185 +153,6 @@ paths:
           content: {}
         403:
           description: Forbidden, e.g. Invalid API key supplied
-          content: {}
-        500:
-          description: Internal Server Error
-          content: {}
-      deprecated: false
-      security:
-      - ApiKey: []
-  /processings:
-    get:
-      tags:
-      - Processings
-      summary: get the list of processings ordered by creation time (ascending)
-      operationId: getProcessings
-      parameters:
-      - name: ApiKey
-        in: header
-        required: true
-        style: simple
-        schema:
-          type: string
-      - name: processingType
-        in: query
-        description: Type values that need to be considered for filtering. one of
-          the values returned by `processingTypes`
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: array
-          items:
-            type: string
-      - name: processingStatus
-        in: query
-        description: Status values that need to be considered for filtering
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - READ
-            - SEND
-            - ACK_OK
-            - ACK_KO
-            - ACK_WARN
-      - name: pageSize
-        in: query
-        description: Number of processings returned per page (default is unlimited)
-        required: false
-        style: form
-        schema:
-          type: integer
-      - name: pageNumber
-        in: query
-        description: Page number, first page is pageNumber=0 (default). Only used in case `pageSize` is provided.
-        required: false
-        style: form
-        schema:
-          type: integer
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Processing'
-        400:
-          description: Invalid parameters supplied
-          content: {}
-        403:
-          description: Forbidden, e.g. Invalid API key supplied
-          content: {}
-        500:
-          description: Internal Server Error
-          content: {}
-      deprecated: false
-      security:
-      - ApiKey: []
-  /processings/count:
-    get:
-      tags:
-      - Processings
-      summary: get the number of processings
-      operationId: countProcessings
-      parameters:
-      - name: ApiKey
-        in: header
-        required: true
-        style: simple
-        schema:
-          type: string
-      - name: processingType
-        in: query
-        description: Type values that need to be considered for filtering. one of
-          the values returned by `processingTypes`
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: array
-          items:
-            type: string
-      - name: processingStatus
-        in: query
-        description: Status values that need to be considered for filtering
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - READ
-            - SEND
-            - ACK_OK
-            - ACK_KO
-            - ACK_WARN
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: integer
-                format: int64
-                description: number of processings matching the query criteria
-        400:
-          description: Invalid parameters supplied
-          content: {}
-        403:
-          description: Forbidden, e.g. Invalid API key supplied
-          content: {}
-        500:
-          description: Internal Server Error
-          content: {}
-      deprecated: false
-      security:
-      - ApiKey: []
-  /processings/{id}:
-    get:
-      tags:
-      - Processings
-      summary: get processing by id
-      operationId: getProcessingById
-      parameters:
-      - name: ApiKey
-        in: header
-        required: true
-        style: simple
-        schema:
-          type: string
-      - name: id
-        in: path
-        description: Processing id to get
-        required: true
-        style: simple
-        schema:
-          type: integer
-          format: int64
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Processing'
-        400:
-          description: Invalid parameters supplied
-          content: {}
-        403:
-          description: Forbidden, e.g. Invalid API key supplied
-          content: {}
-        404:
-          description: item not found
           content: {}
         500:
           description: Internal Server Error
@@ -425,8 +247,7 @@ paths:
         required: true
         style: simple
         schema:
-          type: integer
-          format: int64
+          type: string
       responses:
         200:
           description: OK
@@ -467,8 +288,7 @@ paths:
         required: true
         style: simple
         schema:
-          type: integer
-          format: int64
+          type: string
       responses:
         200:
           description: OK
@@ -510,100 +330,7 @@ paths:
                   description: "array of `id`s of FailedProcessing to delete"
                   type: array
                   items:
-                    type: integer
-                    format: int64
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        400:
-          description: Invalid parameters supplied
-          content: {}
-        403:
-          description: Forbidden, e.g. Invalid API key supplied
-          content: {}
-        404:
-          description: item not found
-          content: {}
-        500:
-          description: Internal Server Error
-          content: {}
-      deprecated: false
-      security:
-      - ApiKey: []
-  /failedProcessings/{id}/reevaluate:
-    post:
-      tags:
-      - FailedProcessings
-      summary: reevaluate a failed processing job. This removes the failed processing from
-        the list and restarts it.
-      operationId: reevaluateFailedProcessing
-      parameters:
-      - name: ApiKey
-        in: header
-        required: true
-        style: simple
-        schema:
-          type: string
-      - name: id
-        in: path
-        description: "`id` of FailedProcessing job to reevaluate"
-        required: true
-        style: simple
-        schema:
-          type: integer
-          format: int64
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        400:
-          description: Invalid parameters supplied
-          content: {}
-        403:
-          description: Forbidden, e.g. Invalid API key supplied
-          content: {}
-        404:
-          description: item not found
-          content: {}
-        500:
-          description: Internal Server Error
-          content: {}
-      deprecated: false
-      security:
-      - ApiKey: []
-  /failedProcessings/reevaluate:
-    post:
-      tags:
-      - FailedProcessings
-      summary: reevaluate multiple failed processing jobs in a batch. This removes the failed processings from
-        the list and restarts them. Ids for not existing failed processings are ignored.
-      operationId: reevaluateFailedProcessingsInBatch
-      parameters:
-      - name: ApiKey
-        in: header
-        required: true
-        style: simple
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                ids:
-                  description: "array of `id`s of FailedProcessing job to reevaluate"
-                  type: array
-                  items:
-                    type: integer
-                    format: int64
+                    type: string
       responses:
         200:
           description: OK
@@ -646,8 +373,7 @@ paths:
         required: true
         style: simple
         schema:
-          type: integer
-          format: int64
+          type: string
       responses:
         200:
           description: OK
@@ -694,8 +420,7 @@ paths:
                   description: "array of `id`s of FailedProcessing job to restart"
                   type: array
                   items:
-                    type: integer
-                    format: int64
+                    type: string
       responses:
         200:
           description: OK
@@ -736,8 +461,7 @@ paths:
         required: true
         style: simple
         schema:
-          type: integer
-          format: int64
+          type: string
       responses:
         200:
           description: OK
@@ -784,8 +508,7 @@ paths:
                   description: "array of `id`s of FailedProcessing events to resubmit"
                   type: array
                   items:
-                    type: integer
-                    format: int64
+                    type: string
       responses:
         200:
           description: OK
@@ -842,21 +565,18 @@ components:
           type: string
           enum:
            - restart
-           - reevaluate
            - delete
           description: action performed
         idsWithSuccess:
           type: array
           description: list of ids, where 'action' was be applied succesfully
           items:
-            type: integer
-            format: int64
+            type: string
         idsSkipped:
           type: array
           description: list of ids, where 'action' was not applied, e.g. object not found or other reasons
           items:
-            type: integer
-            format: int64
+            type: string
       description: Message container in case of successfull operations
     Processor:
       type: object
@@ -877,172 +597,38 @@ components:
           - DATATAKE
           - L0_SLICE
           description: group to aggregate similar processors. Grouping is oriented on main-input product type, so processors of the same group can operate on same kind of data.
-    Processing: # a Processing is implemented by esa.s1pdgs.cpoc.appcatalog.server.mqi.db.MqiMessage
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: id of the processing
-        processingType:
-          type: string
-          description: type of processing (ProcessingType is equivalent to "topic" of KAFKA Queue??)
-        processingStatus:
-          type: string
-          description: status of processing
-          enum:
-          - READ
-          - SEND
-          - ACK_OK
-          - ACK_KO
-          - ACK_WARN
-        productCategory:
-          type: string
-          description: Category of the product
-          enum:
-          - AUXILIARY_FILES
-          - EDRS_SESSIONS
-          - LEVEL_JOBS
-          - LEVEL_PRODUCTS
-          - LEVEL_REPORTS
-          - LEVEL_SEGMENTS
-        partition:
-          type: string
-          description: KAFKA-Partition number (for debug information only)
-        offset:
-          type: integer
-          description: KAFKA-Offset of the Processing (for debug information only)
-          format: int64
-        group:
-          type: string
-          description: KAFKA Consumer Group of the Processing (for debug information only)
-        assignedPod:
-          type: string
-          description: K8s-Pod that performs the Processing
-        lastAssignmentDate:
-          type: string
-          description: Date when the `assignedPod` was assigned to the Processing
-          format: date-time
-        sendingPod:
-          type: string
-          description: K8s-Pod who send the Processing
-        lastSendDate:
-          type: string
-          description: Date when the `sendingPod` last send the Processing
-          format: date-time
-        lastAckDate:
-          type: string
-          description: Date when the Processing was last acknowledged
-          format: date-time
-        nbRetries:
-          type: string
-          description: Number of automated retries of the Processing
-        creationDate:
-          type: string
-          description: Creation date of the Processing
-          format: date-time
-        processingDetails:
-          #processingDetails is very generic and there probably will be some refinement in later versions of this API to be more precise on potential content
-          type: object
-          description: "`dto` object from MqiMessage"
-          oneOf:
-            - $ref: '#/components/schemas/IngestionJobDto'
-            - $ref: '#/components/schemas/CatalogJobDto'
-            - $ref: '#/components/schemas/IpfPreparationJobDto'
-            - $ref: '#/components/schemas/IpfExecutionJobDto'
-            - $ref: '#/components/schemas/CompressionJobDto'
-            - $ref: '#/components/schemas/PripJobDto'
-        predecessorDto:
-          #predecessorDto is very generic and there probably will be some refinement in later versions of this API to be more precise on potential content
-          type: object
-          description: "`predecessorDto` object from MqiMessage, which is used for reevaluation of jobs"
-          oneOf:
-            - $ref: '#/components/schemas/IngestionEventDto'
-            - $ref: '#/components/schemas/CatalogEventDto'
-            - $ref: '#/components/schemas/ProductionEventDto'
-            - $ref: '#/components/schemas/CompressionEventDto'
-            - $ref: '#/components/schemas/IngestionJobDto'
-            - $ref: '#/components/schemas/CatalogJobDto'
-            - $ref: '#/components/schemas/IpfPreparationJobDto'
-            - $ref: '#/components/schemas/IpfExecutionJobDto'
-            - $ref: '#/components/schemas/CompressionJobDto'
-            - $ref: '#/components/schemas/PripJobDto'
     FailedProcessing:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
           description: id of the failed processing
-        processingType:
-          # ProcessingType is equivalent to "topic" of KAFKA Queue
+        topic:
           type: string
-          description: type of failed processing
-        processingStatus:
+          description: kafka topic of the failed processing
+        missionId:
           type: string
-          description: status of failed processing
+          description: sentinel mission id
+        errorLevel:
+          type: string
           enum:
-          - READ
-          - SEND
-          - ACK_OK
-          - ACK_KO
-          - ACK_WARN
-        productCategory:
-          type: string
-          description: Category of the product
-          enum:
-          - AUXILIARY_FILES
-          - EDRS_SESSIONS
-          - LEVEL_JOBS
-          - LEVEL_PRODUCTS
-          - LEVEL_REPORTS
-          - LEVEL_SEGMENTS
-        partition:
-          type: string
-          description: KAFKA-Partition number (for debug information only)
-        offset:
-          type: integer
-          description: KAFKA-Offset of the Processing (for debug information only)
-          format: int64
-        group:
-          type: string
-          description: KAFKA Consumer Group of the Processing (for debug information only)
-        failedPod:
-          type: string
-          description: K8s-Pod who failed to perform the Processing
-        lastAssignmentDate:
-          type: string
-          description: Date when the `failedPod` was last assigned to the Processing
-          format: date-time
-        sendingPod:
-          type: string
-          description: K8s-Pod who send the Processing
-        lastSendDate:
-          type: string
-          description: Date when the `sendingPod` last send the Processing
-          format: date-time
-        lastAckDate:
-          type: string
-          description: Date when the Processing was last acknowledged
-          format: date-time
-        nbRetries:
-          type: string
-          description: Number of automatic retries of the Processing until it failed finaly
-        creationDate:
-          type: string
-          description: Creation date of the Processing
-          format: date-time
+            - ERROR
+            - WARNING
+            - NOT_DEFINED
         failureDate:
           type: string
-          description: date when the Processing failed
+          description: date when the processing failed
           format: date-time
         failureMessage:
           type: string
           description: error message explaining the failure
-        processingDetails:
+        stacktrace:
+          type: string
+          description: application stack trace
+        message:
           #processingDetails is very generic and there probably will be some refinement in later versions of this API to be more precise on potential content
           type: object
-          description: "`dto` object from MqiMessage"
+          description: "`dto` object from kafka message"
           oneOf:
             - $ref: '#/components/schemas/IngestionEventDto'
             - $ref: '#/components/schemas/CatalogEventDto'
@@ -1054,21 +640,10 @@ components:
             - $ref: '#/components/schemas/IpfExecutionJobDto'
             - $ref: '#/components/schemas/CompressionJobDto'
             - $ref: '#/components/schemas/PripJobDto'
-        predecessorDto:
-          #predecessorDto is very generic and there probably will be some refinement in later versions of this API to be more precise on potential content
-          type: object
-          description: "`predecessorDto` object from MqiMessage, which is used for reevaluation of jobs"
-          oneOf:
-            - $ref: '#/components/schemas/IngestionEventDto'
-            - $ref: '#/components/schemas/CatalogEventDto'
-            - $ref: '#/components/schemas/ProductionEventDto'
-            - $ref: '#/components/schemas/CompressionEventDto'
-            - $ref: '#/components/schemas/IngestionJobDto'
-            - $ref: '#/components/schemas/CatalogJobDto'
-            - $ref: '#/components/schemas/IpfPreparationJobDto'
-            - $ref: '#/components/schemas/IpfExecutionJobDto'
-            - $ref: '#/components/schemas/CompressionJobDto'
-            - $ref: '#/components/schemas/PripJobDto'
+        retryCounter:
+          type: integer
+          format: int64
+          description: number of times that processing has been restarted
     AbstractDto:
       description: base object for all DTO objects on failedProcessings
       type: object
@@ -1095,11 +670,9 @@ components:
           items:
             type: string
             enum:
-              - RESBUMIT
               - RESTART
-              - REEVALUATE
               - NO_ACTION
-          example: [RESTART, REEVALUATE]
+          example: [RESTART]
         debug:
           type: boolean
           default: false
@@ -1116,7 +689,7 @@ components:
           example: 'EXTERNAL_DEMAND'
         retryCounter:
           type: integer
-          description: retry counter for explicit restarts or reevaluations via REST
+          description: retry counter for explicit restarts via REST
           example: 1
     AbstractEventDto:
       description: data transfer object for events
