@@ -242,6 +242,9 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			output.setTimelinessName(S2_L2);
 			output.setTimelinessValueSeconds(timelinessConfig.get(S2_L2));
 			break;
+		case S3_L0:
+		case S3_GRANULES:
+		case S3_CAL:
 		case S3_L1_NRT:
 		case S3_L2_NRT:
 			output.setTimelinessName(S3_NRT);
