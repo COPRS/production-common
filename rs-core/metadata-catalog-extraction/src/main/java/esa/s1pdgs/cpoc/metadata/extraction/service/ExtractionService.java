@@ -267,12 +267,12 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 					output.setTimelinessName(S1_SESSION);
 					output.setTimelinessValueSeconds(timelinessConfig.get(S1_SESSION));
 				} else {
-					String t = catalogEvent.getTimeliness();
+					Object t = catalogEvent.getMetadata().get("timeliness");
 					if (t == null) {
 						LOG.warn("Timeliness in CatalogEvent is null");
 						break;
 					}
-					switch (t) {
+					switch ((String) t) {
 					case NRT:
 						output.setTimelinessName(S1_NRT);
 						output.setTimelinessValueSeconds(timelinessConfig.get(S1_NRT));
