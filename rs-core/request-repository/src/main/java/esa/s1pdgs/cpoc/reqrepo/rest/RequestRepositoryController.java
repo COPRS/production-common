@@ -40,7 +40,7 @@ public class RequestRepositoryController {
 	public RequestRepositoryController(final RequestRepository requestRepository,
 			final ApiConfiguration apiConfiguration) {
 		this.requestRepository = requestRepository;
-		apiKey = apiConfiguration.getApiKey();
+		apiKey = apiConfiguration.getKey();
 		LOGGER.info("API key: {}", apiKey);
 	}
 	

@@ -9,14 +9,14 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "api")
 public class ApiConfiguration {
 
-	private String apiKey;
+	private String key;
 
-	public String getApiKey() {
-		return apiKey;
+	public String getKey() {
+		return key;
 	}
 
-	public void setApiKey(String apiKey) {
-		this.apiKey = apiKey;
+	public void setKey(String key) {
+		this.key = key;
 	}
 	
 }
