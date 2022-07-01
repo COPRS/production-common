@@ -89,7 +89,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [compression-worker, data-lifecycle-worker, ddip-frontend, distribution-worker, dlq-manager, eviction-management-worker, execution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, preparation-worker, prip-frontend]
+        component: [compression-worker, data-lifecycle-worker, ddip-frontend, distribution-worker, dlq-manager, eviction-management-worker, execution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, preparation-worker, prip-frontend, request-repository]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
