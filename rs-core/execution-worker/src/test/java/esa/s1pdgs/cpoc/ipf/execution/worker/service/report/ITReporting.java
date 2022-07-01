@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.service.report;
 
+import java.util.Date;
+
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -18,8 +20,9 @@ public final class ITReporting {
 		
 		uut.begin(new ReportingMessage("test message"));	
 		uut.end(new IpfFilenameReportingOutput(
-				new ReportingFilenameEntries(new ReportingFilenameEntry(ProductFamily.L0_SEGMENT, "S1A_RF_RAW__0SHV_20200120T123137_20200120T123138_030884_038B5A_FCFB.SAFE")), true), 
-				new ReportingMessage(230000000L,"test message")
+				new ReportingFilenameEntries(new ReportingFilenameEntry(ProductFamily.L0_SEGMENT, "S1A_RF_RAW__0SHV_20200120T123137_20200120T123138_030884_038B5A_FCFB.SAFE")), true,
+				new Date()), 
+				new ReportingMessage(230000000L,"test message")				
 		);
 
 	}
