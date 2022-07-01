@@ -13,4 +13,5 @@ public interface FailedProcessingRepo extends MongoRepository<FailedProcessing, 
 	public Optional<FailedProcessing> findById(String id);
 
 	public void deleteById(String id);
+
 }
