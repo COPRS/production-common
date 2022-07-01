@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import java.net.URI;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ public class ITXbipClient {
 		System.out.println(config);
 	}
 	
+	@Ignore
 	@Test
 	public final void testFoo() throws Exception {
 		final XbipClientConfiguration c = new XbipClientConfiguration(config);		

@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.StreamUtils;
 
@@ -36,6 +37,7 @@ import esa.s1pdgs.cpoc.common.utils.Streams;
 import esa.s1pdgs.cpoc.ebip.client.apacheftp.ApacheFtpEdipClient;
 import esa.s1pdgs.cpoc.ebip.client.config.EdipClientConfigurationProperties.EdipHostConfiguration;
 
+@Ignore
 public class ITEdipClient {
 	private static final String CONTENT_RAW = "uhu";
 	private static final String CONTENT_DSIB = "Bli Bla Blubb";
