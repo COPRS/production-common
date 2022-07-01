@@ -44,6 +44,11 @@ spec:
           value: {{ .Values.resources.javaOpts.xms }}
         - name: JAVA_XMX
           value: {{ .Values.resources.javaOpts.xmx }}
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: apikey
+              key: apikey
         - name: MONGODB_USERNAME
           valueFrom:
             secretKeyRef:

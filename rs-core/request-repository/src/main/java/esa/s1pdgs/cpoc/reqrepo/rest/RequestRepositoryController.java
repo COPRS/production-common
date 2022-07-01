@@ -20,14 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import esa.s1pdgs.cpoc.common.MessageState;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
+import esa.s1pdgs.cpoc.reqrepo.config.ApiConfiguration;
 import esa.s1pdgs.cpoc.reqrepo.rest.model.IdListDto;
 import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 
 @RestController
 @RequestMapping("api/v1")
 public class RequestRepositoryController {	
-	// TODO: put api_key in a crypted place
-	public static final String API_KEY = "LdbEo2020tffcEGS";
 	
 	public static final Pattern MONGODB_ID_PATTERN = Pattern.compile("[0-9a-f]{24}");
 
@@ -35,9 +34,14 @@ public class RequestRepositoryController {
 
 	private final RequestRepository requestRepository;
 		
+	private final String apiKey;
+
 	@Autowired 
-	public RequestRepositoryController(final RequestRepository requestRepository) {
+	public RequestRepositoryController(final RequestRepository requestRepository,
+			final ApiConfiguration apiConfiguration) {
 		this.requestRepository = requestRepository;
+		apiKey = apiConfiguration.getApiKey();
+		LOGGER.info("API key: {}", apiKey);
 	}
 	
 	/**
@@ -254,8 +258,8 @@ public class RequestRepositoryController {
 		}
 	}
 
-	static final void assertValidApiKey(final String apiKey) throws RequestRepositoryControllerException {
-		if (!API_KEY.equals(apiKey)) {
+	final void assertValidApiKey(final String apiKey) throws RequestRepositoryControllerException {
+		if (!this.apiKey.equals(apiKey)) {
 			throw new RequestRepositoryControllerException(
 					"invalid API key supplied",
 					HttpStatus.FORBIDDEN

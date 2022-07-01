@@ -151,12 +151,21 @@ Prerequisites:
 
 As a frontend to the COPRS DLQ sub system, the Request Repository needs to access the failed processings, that are stored by the DLQ component in a MongoDB database. Thus it is required to have a MongoDB instance available and setup. For further general information regarding the creation of a secret for the  MongoDB instance, please see [COPRS MongoDB](/processing-common/doc/secrets.md)
 
-The default configuration provided is expecting a secret "mongorequestrepository" in the namespace "processing" containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
+The default configuration provided is expecting a secret `mongorequestrepository` in the namespace `processing` containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
+
+In order to generate the secret, you can use the following commands:
+``kubectl create secret generic mongorequestrepository --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
 
 Please note that further initialization might be required. For the Request Repository component please execute the following commands in the MongoDB in order to create the credentials for the secret:
 ``
 db.createUser({user: "<USER>", pwd: "<PASSWORD>", roles: [{role: "readWrite", db: "coprs"}]})
 ``
+
+Clients accessing the frontend web service, have to provide an API KEY in the request headers. This API KEY shall be stored in a field `apikey` of a secret `apikey` on the cluster.
+
+In order to generate the secret, you can use the following commands:
+`kubectl create secret generic apikey --from-literal=apikey=<API_KEY>`
+
 
 The following command can be used in order to deploy the Request Repository:
 

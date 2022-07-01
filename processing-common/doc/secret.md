@@ -51,6 +51,5 @@ In order to generate a secrets for the components, you can use the following com
 ``kubectl create secret generic mongodlq --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
 ``kubectl create secret generic mongoingestion --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
 ``kubectl create secret generic mongopreparation --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
-``kubectl create secret generic mongorequestrepository --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
 
 Be aware that it might be required to generate the user and set its password with MongoDB after the database had been generated. Please consult the documentation for the components for further information.

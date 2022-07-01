@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.reqrepo.service.RequestRepository;
 @WebMvcTest(RequestRepositoryController.class)
 public class RequestRepositoryControllerTest {
 	
-	private static final String API_KEY = RequestRepositoryController.API_KEY;
+	private static final String API_KEY = "TestApiKey";
 
 	@MockBean
 	private FailedProcessingRepo failedProcessingRepo;
