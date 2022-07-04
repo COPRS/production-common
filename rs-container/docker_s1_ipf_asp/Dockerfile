@@ -7,6 +7,14 @@ ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
 
+# create user
+ARG USER=rsuser
+ARG UID=1001
+ARG GID=1001
+
+RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
+      chpasswd
+
 WORKDIR /app
 
 RUN echo "${VERSION}" >> VERSION
@@ -24,7 +32,7 @@ RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
 RUN mkdir -p /data/oqcWD
-RUN chown s1pdgs:s1pdgs /data/oqcWD
+RUN chown rsuser:rsuser /data/oqcWD
 
 USER rsuser:rsuser
 

@@ -15,6 +15,14 @@ USER root
 
 RUN yum install -y libgomp java-1.8.0-openjdk
 
+# create user
+ARG USER=rsuser
+ARG UID=1001
+ARG GID=1001
+
+RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
+      chpasswd
+
 WORKDIR /tmp
 
 RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/S3-IPF-COTS.tgz"

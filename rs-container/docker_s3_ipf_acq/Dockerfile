@@ -18,6 +18,14 @@ RUN yum install -y java-1.8.0-openjdk boost-date-time boost-thread boost-devel t
 # Creating symbolic link to match expectation from IPF
 RUN ln -s /usr/lib64/libboost_date_time.so.1.53.0 /usr/lib64/libboost_date_time.so.5
 
+# create user
+ARG USER=rsuser
+ARG UID=1001
+ARG GID=1001
+
+RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
+      chpasswd
+
 WORKDIR /tmp
 
 # DDC
