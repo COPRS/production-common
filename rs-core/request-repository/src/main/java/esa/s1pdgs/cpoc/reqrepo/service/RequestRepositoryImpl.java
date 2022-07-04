@@ -28,7 +28,7 @@ public class RequestRepositoryImpl implements RequestRepository {
 	
 	@Override
 	public List<FailedProcessing> getFailedProcessings() {
-		return failedProcessingRepo.findAll(Sort.by(Direction.ASC, "creationTime"));
+		return failedProcessingRepo.findAll(Sort.by(Direction.ASC, "failureDate"));
 	}
 	
 	@Override

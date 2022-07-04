@@ -22,7 +22,7 @@ import org.springframework.messaging.support.MessageBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import esa.s1pdgs.cpoc.dlq.manager.model.mapping.JsonMapping;
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperties;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
@@ -130,7 +130,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			String s = mapper.writeValueAsString(failedProcessingDto);
+			String s = mapper.addMixIn(FailedProcessing.class, JsonMapping.class).writeValueAsString(failedProcessingDto); // omit id field here, MongoDB will create it on insert
 			return MessageBuilder.withPayload(s.getBytes(StandardCharsets.UTF_8))
 					.setHeader(X_ROUTE_TO, parkingLotTopic).build();
 		} catch (JsonProcessingException e) {

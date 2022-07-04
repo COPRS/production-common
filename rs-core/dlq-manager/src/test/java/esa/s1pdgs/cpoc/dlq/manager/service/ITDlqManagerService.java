@@ -2,7 +2,8 @@ package esa.s1pdgs.cpoc.dlq.manager.service;
 
 import static esa.s1pdgs.cpoc.dlq.manager.service.DlqManagerService.X_ROUTE_TO;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_MESSAGE;
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_EXCEPTION_STACKTRACE;
 import static org.springframework.cloud.stream.binder.kafka.KafkaMessageChannelBinder.X_ORIGINAL_TIMESTAMP;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.dlq.manager.config.TestConfig;
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerServiceConfiguration;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
 @RunWith(SpringRunner.class)
@@ -109,6 +111,7 @@ public class ITDlqManagerService {
 		assertEquals(2, actualJson3.get("retryCounter").asInt());
 		
 		assertEquals("t-pdgs-parking-lot", (String)actual3.get(0).getHeaders().get(X_ROUTE_TO));
+		System.out.println(actualJson3.toString());
 	}
 	
 	@Test
@@ -116,6 +119,7 @@ public class ITDlqManagerService {
 		dlqManagerService = dlqManagerServiceConfiguration.route();
 		
 		CatalogJob catalogJob = new CatalogJob("foo", "foo", ProductFamily.AUXILIARY_FILE);
+		catalogJob.setMissionId(MissionId.S1.name());
 		assertEquals(0, catalogJob.getRetryCounter());
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -132,6 +136,8 @@ public class ITDlqManagerService {
 
 		JsonNode actualJson = mapper.readTree(new String(actual.get(0).getPayload()));
 		assertEquals(1, actualJson.get("retryCounter").asInt());
+		assertEquals(MissionId.S1.name(), actualJson.get("missionId").asText());
+		assertFalse(actualJson.has("id")); // no id until mongodb creates it
 
 		catalogJob.increaseRetryCounter();
 		JsonNode expectedJson = mapper.readTree(mapper.writeValueAsString(catalogJob));
@@ -195,5 +201,5 @@ public class ITDlqManagerService {
 		byte[] bytesNeg = ByteBuffer.allocate(Long.BYTES).putLong(0xFEDCBA9876543210L).array();
 		assertEquals(0xFEDCBA9876543210L, DlqManagerService.bytesToLong(bytesNeg));
 	}
-	
+
 }
