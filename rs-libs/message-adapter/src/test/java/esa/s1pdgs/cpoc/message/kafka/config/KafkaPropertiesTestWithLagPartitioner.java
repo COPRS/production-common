@@ -36,11 +36,5 @@ public class KafkaPropertiesTestWithLagPartitioner {
 
         // Producer
         assertEquals(10, properties.getProducer().getMaxRetries());
-        assertEquals(new Integer(180), properties.getProducer().getLagBasedPartitioner().getDelaySeconds());
-        assertEquals("compression-worker", properties.getProducer().getLagBasedPartitioner().getConsumerGroup());
-
-        assertEquals(new Integer(10), properties.getProducer().getLagBasedPartitioner().getTopicsWithPriority().get("t-pdgs-compression-jobs-nrt"));
-        assertEquals(new Integer(5), properties.getProducer().getLagBasedPartitioner().getTopicsWithPriority().get("t-pdgs-compression-jobs-fast"));
-        assertEquals(new Integer(20), properties.getProducer().getLagBasedPartitioner().getTopicsWithPriority().get("t-pdgs-compression-jobs-pt"));
     }
 }

@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.message.kafka.config;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +37,6 @@ public class KafkaPropertiesTest {
 
         // Producer
         assertEquals(10, properties.getProducer().getMaxRetries());
-        assertNull(properties.getProducer().getLagBasedPartitioner());
     }
 
     /**
