@@ -21,10 +21,9 @@ USER root:root
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
 
 RUN useradd -u 1001 rsuser
 
 USER rsuser:rsuser
 
-ENTRYPOINT ["/app/start.sh"]
+ENTRYPOINT ["/tini", "--", "/app/start.sh"]

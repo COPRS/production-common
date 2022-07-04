@@ -100,11 +100,10 @@ USER root:root
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
 
 RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
 USER rsuser:rsuser
 
-ENTRYPOINT ["/app/start.sh"]
+ENTRYPOINT ["/tini", "--", "/app/start.sh"]
