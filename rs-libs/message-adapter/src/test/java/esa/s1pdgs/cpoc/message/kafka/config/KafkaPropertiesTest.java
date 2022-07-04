@@ -36,18 +36,6 @@ public class KafkaPropertiesTest {
         assertEquals("mqi-server", properties.getClientId());
         assertEquals("t-pdgs-errors", properties.getErrorTopic());
 
-        // Consumer
-        assertEquals("wrappers", properties.getConsumer().getGroupId());
-        assertEquals(3000, properties.getConsumer().getHeartbeatIntvMs());
-        assertEquals(3600000, properties.getConsumer().getMaxPollIntervalMs());
-        assertEquals(1, properties.getConsumer().getMaxPollRecords());
-        assertEquals(10000, properties.getConsumer().getSessionTimeoutMs());
-        assertEquals("latest", properties.getConsumer().getAutoOffsetReset());
-        assertEquals(-2, properties.getConsumer().getOffsetDftMode());
-
-        // Listener
-        assertEquals(500, properties.getListener().getPollTimeoutMs());
-
         // Producer
         assertEquals(10, properties.getProducer().getMaxRetries());
         assertNull(properties.getProducer().getLagBasedPartitioner());
@@ -60,20 +48,8 @@ public class KafkaPropertiesTest {
     public void testSetters() {
         final KafkaProperties.KafkaProducerProperties producer = new KafkaProperties.KafkaProducerProperties();
         producer.setMaxRetries(5);
-        final KafkaProperties.KafkaListenerProperties listener = new KafkaProperties.KafkaListenerProperties();
-        listener.setPollTimeoutMs(50);
-        final KafkaProperties.KafkaConsumerProperties consumer = new KafkaProperties.KafkaConsumerProperties();
-        consumer.setGroupId("group-id");
-        consumer.setHeartbeatIntvMs(1);
-        consumer.setMaxPollIntervalMs(2);
-        consumer.setMaxPollRecords(3);
-        consumer.setSessionTimeoutMs(4);
-        consumer.setAutoOffsetReset("earliest");
-        consumer.setOffsetDftMode(-1);
 
-        properties.setListener(listener);
         properties.setProducer(producer);
-        properties.setConsumer(consumer);
         properties.setBootstrapServers("url:port");
         properties.setErrorTopic("test-error-topic");
         properties.setClientId("client-id");
@@ -84,18 +60,6 @@ public class KafkaPropertiesTest {
         assertEquals("client-id", properties.getClientId());
         assertEquals("host-test", properties.getHostname());
         assertEquals("test-error-topic", properties.getErrorTopic());
-
-        // Consumer
-        assertEquals("group-id", properties.getConsumer().getGroupId());
-        assertEquals(1, properties.getConsumer().getHeartbeatIntvMs());
-        assertEquals(2, properties.getConsumer().getMaxPollIntervalMs());
-        assertEquals(3, properties.getConsumer().getMaxPollRecords());
-        assertEquals(4, properties.getConsumer().getSessionTimeoutMs());
-        assertEquals("earliest", properties.getConsumer().getAutoOffsetReset());
-        assertEquals(-1, properties.getConsumer().getOffsetDftMode());
-
-        // Listener
-        assertEquals(50, properties.getListener().getPollTimeoutMs());
 
         // Producer
         assertEquals(5, properties.getProducer().getMaxRetries());
