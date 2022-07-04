@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.reqrepo.config.RequestRepositoryConfiguration;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 
@@ -18,14 +19,17 @@ import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 public class RequestRepositoryImpl implements RequestRepository {
 	private final FailedProcessingRepo failedProcessingRepo;
 	private final RequestRepositoryConfiguration config;
+	final MessageProducer<Object> messageProducer;
 
 	@Autowired
 	public RequestRepositoryImpl(
 			final FailedProcessingRepo failedProcessingRepo,
-			final RequestRepositoryConfiguration config
+			final RequestRepositoryConfiguration config,
+			final MessageProducer<Object> messageProducer
 	) {
 		this.failedProcessingRepo = failedProcessingRepo;
 		this.config = config;
+		this.messageProducer = messageProducer;
 	}
 	
 	@Override
@@ -72,20 +76,19 @@ public class RequestRepositoryImpl implements RequestRepository {
 		Map<String, Object> map = json.toMap();
 		map.put("retryCounter", (int)map.get("retryCounter") + 1);
 		
-// FIXME
-//		try {
-//			messageProducer.send(topic, message);
-//		} catch (final Exception e) {
-//			throw new RuntimeException(
-//					String.format(
-//							"Error restarting failedRequest '%s' on topic '%s': %s",
-//							id,
-//							topic,
-//							e
-//					),
-//					e
-//			);
-//		}
+		try {
+			messageProducer.send(topic, message);
+		} catch (final Exception e) {
+			throw new RuntimeException(
+					String.format(
+							"Error restarting failedRequest '%s' on topic '%s': %s",
+							id,
+							topic,
+							e
+					),
+					e
+			);
+		}
 	}
 
 	static void assertNotEmpty(final String name, final Optional<FailedProcessing> failedProcessing, final String id)

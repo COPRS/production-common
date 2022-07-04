@@ -11,17 +11,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Sort;
 
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
-import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.reqrepo.config.RequestRepositoryConfiguration;
 import esa.s1pdgs.cpoc.reqrepo.repo.FailedProcessingRepo;
 
@@ -33,7 +30,9 @@ public class RequestRepositoryTest {
 	
 	@Mock
 	private FailedProcessingRepo failedProcessingRepo;
-
+	
+	@Mock
+	private MessageProducer<Object> messageProducer;
 	
 	private RequestRepository uut;
 		
@@ -43,7 +42,8 @@ public class RequestRepositoryTest {
 		MockitoAnnotations.initMocks(this);
 		this.uut = new RequestRepositoryImpl(
 				failedProcessingRepo,
-				config
+				config,
+				messageProducer
 		);
 	}
 
@@ -102,11 +102,9 @@ public class RequestRepositoryTest {
 		uut.deleteFailedProcessing("456");
 	}
 
-	// FIXME: Remove @Ignore
-	@Ignore
 	@Test
 	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRequest_ShallResubmitAndDelete() {	
-		final FailedProcessing fp = newFailedProcessing("123", new CatalogJob("f","b", ProductFamily.AUXILIARY_FILE)); 
+		final FailedProcessing fp = newFailedProcessing("123"); 
 		doReturn(Optional.of(fp))
 			.when(failedProcessingRepo)
 			.findById("123");
@@ -115,14 +113,12 @@ public class RequestRepositoryTest {
 		
 		verify(failedProcessingRepo, times(1)).findById("123");
 		verify(failedProcessingRepo, times(1)).deleteById("123");
-		
-		// FIXME: Update when replacement for messageProducer is available
-		//verify(messageProducer, times(1)).send(fp.getTopic(), fp.getDto());
+		verify(messageProducer, times(1)).send(fp.getTopic(), fp.getMessage());
 	}
 
 	@Test(expected = RuntimeException.class)
 	public void testRestartAndDeleteFailedProcessing_OnTopicNull_ShallThrowException() {		
-		final FailedProcessing fp = newFailedProcessing("456", new CatalogJob("f","b", ProductFamily.AUXILIARY_FILE));
+		final FailedProcessing fp = newFailedProcessing("456");
 		fp.setTopic(null);
 
 		doReturn(Optional.of(fp))
@@ -147,13 +143,13 @@ public class RequestRepositoryTest {
 	}
 	
 	private FailedProcessing newFailedProcessing(final String id) {
-		return newFailedProcessing(id, new CatalogJob());
+		return newFailedProcessing(id, "{\"foo\":\"bar\",\"retryCounter\":0}");
 	}
 	
-	private FailedProcessing newFailedProcessing(final String id, final AbstractMessage mess) {
+	private FailedProcessing newFailedProcessing(final String id, final String mess) {
 		final FailedProcessing failedProcessing = new FailedProcessing();
 		failedProcessing.setId(id);
-		failedProcessing.setMessage("foobar");
+		failedProcessing.setMessage(mess);
 		failedProcessing.setTopic("myTopic");
 		return failedProcessing;
 	}
