@@ -32,7 +32,7 @@ public class FailedProcessing {
 	private MissionId missionId;
 	private String failureMessage;
 	private String topic;
-	private Object message;
+	private String message;
 	private String stacktrace;
 	private String errorLevel;
 	private int retryCounter;
@@ -41,7 +41,7 @@ public class FailedProcessing {
 	}
 
 	public FailedProcessing(final String topic, final Date failureDate,
-			final MissionId missionId, final String errorLevel, final Object message,
+			final MissionId missionId, final String errorLevel, final String message,
 			final String failureMessage, final String stacktrace, final int retryCounter) {
 		this.topic = topic;
 		this.failureDate = failureDate;
@@ -94,11 +94,11 @@ public class FailedProcessing {
 		this.topic = topic;
 	}
 
-	public Object getMessage() {
+	public String getMessage() {
 		return message;
 	}
 
-	public void setMessage(Object message) {
+	public void setMessage(String message) {
 		this.message = message;
 	}
 

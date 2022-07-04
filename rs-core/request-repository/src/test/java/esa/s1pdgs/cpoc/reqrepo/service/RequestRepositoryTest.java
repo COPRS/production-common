@@ -153,7 +153,7 @@ public class RequestRepositoryTest {
 	private FailedProcessing newFailedProcessing(final String id, final AbstractMessage mess) {
 		final FailedProcessing failedProcessing = new FailedProcessing();
 		failedProcessing.setId(id);
-		failedProcessing.setMessage(mess);
+		failedProcessing.setMessage("foobar");
 		failedProcessing.setTopic("myTopic");
 		return failedProcessing;
 	}

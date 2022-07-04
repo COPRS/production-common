@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.reqrepo.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -48,13 +50,9 @@ public class RequestRepositoryImpl implements RequestRepository {
 		final Optional<FailedProcessing> failedProcessing = failedProcessingRepo.findById(id);
 		assertNotEmpty("failed request", failedProcessing, id);
 		assertDtoDefined(id, failedProcessing.get());
-		assertTopicDefined(id, failedProcessing.get());
-		// TODO: is not possible to alter the retry counter here because the object being returned
-		// by Jackson is not a AbstractMessage its LinkedHashMap
-		// ((AbstractMessage) failedProcessing.getDto()).increaseControlRetryCounter();
-		
-		///resubmit(id, failedProcessing.getTopic(), failedProcessing.getDto());
-		///failedProcessingRepo.deleteById(id);
+		assertTopicDefined(id, failedProcessing.get());	
+		restart(id, failedProcessing.get().getTopic(), failedProcessing.get().getMessage());
+		failedProcessingRepo.deleteById(id);
 	}
 	
 	@Override
@@ -69,19 +67,20 @@ public class RequestRepositoryImpl implements RequestRepository {
 		return config.getKafkaTopicList();
 	}
 
-	private void resubmit(final long id, final String predecessorTopic, final Object predecessorDto) {
-
-// FIXME: Instead of the removed messageProducer use e.g. StreamBridge or similar
+	private void restart(final String id, final String topic, final String message) {
+		final JSONObject json = new JSONObject(message);
+		Map<String, Object> map = json.toMap();
+		map.put("retryCounter", (int)map.get("retryCounter") + 1);
 		
+// FIXME
 //		try {
-//			messageProducer.send(predecessorTopic, predecessorDto);
+//			messageProducer.send(topic, message);
 //		} catch (final Exception e) {
-//			status.getStatus().setFatalError();
 //			throw new RuntimeException(
 //					String.format(
 //							"Error restarting failedRequest '%s' on topic '%s': %s",
 //							id,
-//							predecessorTopic,
+//							topic,
 //							e
 //					),
 //					e
