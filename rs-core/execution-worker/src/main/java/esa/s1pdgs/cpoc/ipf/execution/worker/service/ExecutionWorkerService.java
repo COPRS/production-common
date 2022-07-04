@@ -383,8 +383,6 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		}
 	}
 
-	/**
-	 */
 	protected void cleanJobProcessing(final IpfExecutionJob job, final boolean poolProcessing,
 			final ExecutorService procExecutorSrv) {
 		if (poolProcessing) {
