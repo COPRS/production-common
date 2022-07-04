@@ -19,12 +19,7 @@ RUN yum install -y java-1.8.0-openjdk boost-date-time boost-thread boost-devel t
 RUN ln -s /usr/lib64/libboost_date_time.so.1.53.0 /usr/lib64/libboost_date_time.so.5
 
 # create user
-ARG USER=rsuser
-ARG UID=1001
-ARG GID=1001
-
-RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
-      chpasswd
+RUN useradd -u 1001 rsuser
 
 WORKDIR /tmp
 
@@ -107,8 +102,8 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-RUN mkdir -p /data/localWD && chown ops3pdgs:ops3pdgs /data/localWD
-RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
+RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
+RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
 USER rsuser:rsuser
 

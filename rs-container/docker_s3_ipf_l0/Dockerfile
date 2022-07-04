@@ -15,13 +15,7 @@ USER root
 
 RUN yum install -y libgomp java-1.8.0-openjdk
 
-# create user
-ARG USER=rsuser
-ARG UID=1001
-ARG GID=1001
-
-RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
-      chpasswd
+RUN useradd -u 1001 rsuser
 
 WORKDIR /tmp
 
