@@ -124,13 +124,13 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		final String errorLevel = !originalMessageHeader.containsKey("errorLevel")
 				? "NOT_DEFINED" : (String)originalMessageHeader.get("errorLevel");
 		
-		FailedProcessing failedProcessingDto = new FailedProcessing(originalTopic, originalTimestamp,
-				missionId, errorLevel, payload.toMap(), exceptionMessage, exceptionStacktrace,
+		FailedProcessing failedProcessing = new FailedProcessing(originalTopic, originalTimestamp,
+				missionId, errorLevel, payload.toString(), exceptionMessage, exceptionStacktrace,
 				payload.getInt("retryCounter"));
 		
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			String s = mapper.addMixIn(FailedProcessing.class, JsonMapping.class).writeValueAsString(failedProcessingDto); // omit id field here, MongoDB will create it on insert
+			String s = mapper.addMixIn(FailedProcessing.class, JsonMapping.class).writeValueAsString(failedProcessing); // omit id field here, MongoDB will create it on insert
 			return MessageBuilder.withPayload(s.getBytes(StandardCharsets.UTF_8))
 					.setHeader(X_ROUTE_TO, parkingLotTopic).build();
 		} catch (JsonProcessingException e) {
