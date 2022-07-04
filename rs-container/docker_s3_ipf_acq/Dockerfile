@@ -18,14 +18,6 @@ RUN yum install -y java-1.8.0-openjdk boost-date-time boost-thread boost-devel t
 # Creating symbolic link to match expectation from IPF
 RUN ln -s /usr/lib64/libboost_date_time.so.1.53.0 /usr/lib64/libboost_date_time.so.5
 
-# create user
-ARG USER=ops3pdgs
-ARG UID=1000
-ARG GID=1000
-
-RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
-      chpasswd
-
 WORKDIR /tmp
 
 # DDC
@@ -83,9 +75,9 @@ RUN cd /tmp/s3-cgs1-l0postproc; chmod a+x ./s3-cgs1-l0postproc.sh && ./s3-cgs1-l
 ### End of Base-Image  
 WORKDIR /app
 
-RUN mkdir -p /app && chown ops3pdgs:ops3pdgs /app
+RUN mkdir -p /app && chown rsuser:rsuser /app
 
-USER ops3pdgs:ops3pdgs
+USER rsuser:rsuser
 
 
 # Adding Version information
@@ -94,7 +86,7 @@ RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
 # Adding execution worker
-COPY --from=build /app/s1pdgs-ipf-execution-worker.jar s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY --from=build /app/start.sh /app/start.sh
 
 # Adding ACQ wrapper scripts
@@ -110,6 +102,6 @@ ENTRYPOINT ["/tini", "--"]
 RUN mkdir -p /data/localWD && chown ops3pdgs:ops3pdgs /data/localWD
 RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
 
-USER ops3pdgs:ops3pdgs
+USER rsuser:rsuser
 
-CMD ["/app/start.sh"]
+ENTRYPOINT ["/app/start.sh"]

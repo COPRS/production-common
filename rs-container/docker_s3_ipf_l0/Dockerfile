@@ -15,14 +15,6 @@ USER root
 
 RUN yum install -y libgomp java-1.8.0-openjdk
 
-# create user
-ARG USER=ops3pdgs
-ARG UID=1000
-ARG GID=1000
-
-RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
-      chpasswd
-
 WORKDIR /tmp
 
 RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0/S3-IPF-COTS.tgz"
@@ -39,9 +31,9 @@ RUN rm -f S3IPF-L0_06.12.rpm blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_
 ### End of Base-Image  
 WORKDIR /app
 
-RUN mkdir -p /app && chown ops3pdgs:ops3pdgs /app
+RUN mkdir -p /app && chown rsuser:rsuser /app
 
-USER ops3pdgs:ops3pdgs
+USER rsuser:rsuser
 
 
 # Adding Version information
@@ -50,7 +42,7 @@ RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
 # Adding execution worker
-COPY --from=build /app/s1pdgs-ipf-execution-worker.jar s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY --from=build /app/start.sh /app/start.sh
 
 # Add Tini as entry point
@@ -60,9 +52,9 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
-RUN mkdir -p /data/localWD && chown ops3pdgs:ops3pdgs /data/localWD
-RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
+RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
+RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
-USER ops3pdgs:ops3pdgs
+USER rsuser:rsuser
 
-CMD ["/app/start.sh"]
+ENTRYPOINT ["/app/start.sh"]

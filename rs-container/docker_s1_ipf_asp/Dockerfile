@@ -13,7 +13,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/s1pdgs-ipf-execution-worker.jar s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY --from=build /app/start.sh /app/start.sh
 
 # Add Tini as entry point
@@ -26,6 +26,6 @@ ENTRYPOINT ["/tini", "--"]
 RUN mkdir -p /data/oqcWD
 RUN chown s1pdgs:s1pdgs /data/oqcWD
 
-USER s1pdgs:s1pdgs
+USER rsuser:rsuser
 
-CMD ["/app/start.sh"]
+ENTRYPOINT ["/app/start.sh"]
