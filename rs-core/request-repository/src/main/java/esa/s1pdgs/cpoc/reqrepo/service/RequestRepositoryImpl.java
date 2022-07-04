@@ -73,11 +73,11 @@ public class RequestRepositoryImpl implements RequestRepository {
 
 	private void restart(final String id, final String topic, final String message) {
 		final JSONObject json = new JSONObject(message);
-		Map<String, Object> map = json.toMap();
+		final Map<String, Object> map = json.toMap();
 		map.put("retryCounter", (int)map.get("retryCounter") + 1);
 		
 		try {
-			messageProducer.send(topic, message);
+			messageProducer.send(topic, map);
 		} catch (final Exception e) {
 			throw new RuntimeException(
 					String.format(
