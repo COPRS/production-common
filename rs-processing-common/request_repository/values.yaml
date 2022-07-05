@@ -26,6 +26,12 @@ mongodb:
   port: 27017
   database: coprs
 
+kafka:
+  bootstrapServers: kafka-cluster-kafka-bootstrap.infra.svc.cluster.local:9092
+  errorTopic: error-warning
+  clientId: request-repository
+  maxRetries: 10
+
 resources:
   cpu:
     request: "100m"

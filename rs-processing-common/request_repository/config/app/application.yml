@@ -29,3 +29,14 @@ mongodb:
   host: {{ .Values.mongodb.host }}
   port: {{ .Values.mongodb.port }}
   database: {{ .Values.mongodb.database }}
+
+# Kafka
+kafka:
+  # host:port to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: {{ .Values.kafka.bootstrapServers }}
+  # Hostname
+  hostname: ${HOSTNAME}
+  # Topic name for the errors
+  error-topic: {{ .Values.kafka.errorTopic }}
+  # When greater than zero, enables retrying of failed sends.
+  max-retries: {{ .Values.kafka.maxRetries }}
