@@ -7,9 +7,6 @@ ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
 
-# Install java 11
-RUN yum install -y java-11-openjdk 
-
 WORKDIR /app
 
 RUN echo "${VERSION}" >> VERSION
@@ -19,8 +16,12 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY --from=build /app/start.sh /app/start.sh
 
-# Add Tini as entry point
 USER root:root
+
+# Install java 11
+RUN yum install -y java-11-openjdk 
+
+# Add Tini as entry point
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
