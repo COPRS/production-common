@@ -27,8 +27,6 @@ import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.SessionProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxAdapterFactory;
-import esa.s1pdgs.cpoc.message.MessageProducer;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 @Component
 public class InboxFactory {

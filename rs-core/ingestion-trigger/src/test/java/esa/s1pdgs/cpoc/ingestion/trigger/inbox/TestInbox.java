@@ -37,7 +37,6 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox.InboxReturnValue;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
-import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class TestInbox {
