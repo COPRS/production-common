@@ -50,7 +50,7 @@ COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY --from=build /app/start.sh /app/start.sh
 COPY --from=base /log/log4j2.yml /log/log4j2.yml
 
-USER root:root
+USER root:root 
 
 # Install java 11
 RUN yum install -y java-11-openjdk

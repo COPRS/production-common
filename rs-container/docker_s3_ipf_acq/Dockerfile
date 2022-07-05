@@ -98,7 +98,7 @@ COPY --from=base /log/log4j2.yml /log/log4j2.yml
 COPY files /opt
 
 # Add Tini as entry point
-USER root:root
+USER root:root 
 
 # Install java 11
 RUN update-alternatives --set java /usr/lib/jvm/java-11-openjdk11.0.15.0.9-2.el7_9.x86_64/bin/java
