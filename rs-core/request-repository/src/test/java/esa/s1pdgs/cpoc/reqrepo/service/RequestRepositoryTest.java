@@ -8,8 +8,10 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -113,7 +115,9 @@ public class RequestRepositoryTest {
 		
 		verify(failedProcessingRepo, times(1)).findById("123");
 		verify(failedProcessingRepo, times(1)).deleteById("123");
-		verify(messageProducer, times(1)).send(fp.getTopic(), fp.getMessage());
+		Map<String, Object> newMessage = new JSONObject(fp.getMessage()).toMap();
+		newMessage.put("retryCounter", 1);
+		verify(messageProducer, times(1)).send(fp.getTopic(), newMessage);
 	}
 
 	@Test(expected = RuntimeException.class)
