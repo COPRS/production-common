@@ -2,6 +2,8 @@ ARG BRANCH
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app
 
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH} as base
+
 FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/l0_aio:integration-032
 ARG VERSION
 ARG COMMIT_ID
@@ -15,6 +17,7 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY --from=build /app/start.sh /app/start.sh
+COPY --from=base /log/* /log
 
 USER root:root
 
