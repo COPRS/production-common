@@ -17,7 +17,7 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY --from=build /app/start.sh /app/start.sh
-COPY --from=base /log/* /log
+COPY --from=base /log/log4j2.yaml /log/log4j2.yaml
 
 USER root:root
 
