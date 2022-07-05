@@ -15,7 +15,7 @@ ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory
 ### Reconstruction of the base image provided by the agency
 USER root
 
-RUN yum install -y java-1.8.0-openjdk boost-date-time boost-thread boost-devel tar
+RUN yum install -y java-1.8.0-openjdk java-11-openjdk boost-date-time boost-thread boost-devel tar
 
 # Creating symbolic link to match expectation from IPF
 RUN ln -s /usr/lib64/libboost_date_time.so.1.53.0 /usr/lib64/libboost_date_time.so.5
@@ -99,6 +99,10 @@ COPY files /opt
 
 # Add Tini as entry point
 USER root:root
+
+# Install java 11
+RUN update-alternatives --set java /usr/lib/jvm/java-11-openjdk11.0.15.0.9-2.el7_9.x86_64/bin/java
+
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
