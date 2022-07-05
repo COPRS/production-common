@@ -20,6 +20,7 @@ USER root:root
 
 # Install java 11
 RUN yum install -y java-11-openjdk 
+RUN update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.4.11-0.el7_6.x86_64/bin/java
 
 # Add Tini as entry point
 ENV TINI_VERSION v0.18.0
