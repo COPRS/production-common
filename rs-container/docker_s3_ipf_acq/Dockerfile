@@ -101,7 +101,7 @@ COPY files /opt
 USER root:root 
 
 # Install java 11
-RUN update-alternatives --set java /usr/lib/jvm/java-11-openjdk11.0.15.0.9-2.el7_9.x86_64/bin/java
+RUN update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.15.0.9-2.el7_9.x86_64/bin/java
 
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
