@@ -8,7 +8,7 @@ ARG COMMIT_ID
 ARG BRANCH_TEXT
 
 # Install java 11
-RUN yum install -y java-11-openjdk
+RUN yum install -y java-11-openjdk 
 
 WORKDIR /app
 
