@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0-rc1] - 2022-07-06
+
+### Added
+RS-248: Update JobProcessing traces
+RS-313: Develop "DLQ" as RS core component
+RS-314: Develop DLQ Manager application
+RS-386: Migration of Execution Worker to SCDF Application
+RS-407: Update MetadataExtraction traces
+RS-422: Request the AUX GIP_VIEDIR on rs-metadata-catalog-searchcontroller-svc by band
+
+### Changed
+RS-402: Missing documentation for mongodb
+RS-425: S2 HKTM and AUX_SAD metadata extraction fails with bad regex
+RS-409: Remove affinity from pro-common Helm chart
+
+### Removed
+N/A
+
+
 ## [1.2.0-rc1] - 2022-06-08
 
 ### Added
