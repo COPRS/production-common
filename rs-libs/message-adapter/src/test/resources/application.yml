@@ -14,18 +14,7 @@ kafka:
   hostname: mqi-0
   client-id: mqi-server
   error-topic: t-pdgs-errors
-  consumer:
-    group-id: wrappers
-    max-poll-interval-ms: 3600000
-    max-poll-records: 1
-    session-timeout-ms: 10000
-    heartbeat-intv-ms: 3000
-    auto-offset-reset: latest
-    offset-dft-mode: -2
-  listener:
-    poll-timeout-ms: 500
-  producer:
-    max-retries: 10
+  max-retries: 10
 
 application:
   hostname: wrapper-0

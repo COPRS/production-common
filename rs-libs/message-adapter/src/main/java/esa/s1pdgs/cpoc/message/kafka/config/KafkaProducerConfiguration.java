@@ -55,7 +55,7 @@ public class KafkaProducerConfiguration<M> {
                 JsonSerializer.class);
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         props.put(ProducerConfig.RETRIES_CONFIG,
-                properties.getProducer().getMaxRetries());
+                properties.getMaxRetries());
 
         if (producerConfigurationFactory != null) {
             props.putAll(producerConfigurationFactory.producerConfiguration());

@@ -36,7 +36,7 @@ public class KafkaPropertiesTest {
         assertEquals("t-pdgs-errors", properties.getErrorTopic());
 
         // Producer
-        assertEquals(10, properties.getProducer().getMaxRetries());
+        assertEquals(10, properties.getMaxRetries());
     }
 
     /**
@@ -44,14 +44,11 @@ public class KafkaPropertiesTest {
      */
     @Test
     public void testSetters() {
-        final KafkaProperties.KafkaProducerProperties producer = new KafkaProperties.KafkaProducerProperties();
-        producer.setMaxRetries(5);
-
-        properties.setProducer(producer);
         properties.setBootstrapServers("url:port");
         properties.setErrorTopic("test-error-topic");
         properties.setClientId("client-id");
         properties.setHostname("host-test");
+        properties.setMaxRetries(5);
 
         // General
         assertEquals("url:port", properties.getBootstrapServers());
@@ -60,6 +57,6 @@ public class KafkaPropertiesTest {
         assertEquals("test-error-topic", properties.getErrorTopic());
 
         // Producer
-        assertEquals(5, properties.getProducer().getMaxRetries());
+        assertEquals(5, properties.getMaxRetries());
     }
 }

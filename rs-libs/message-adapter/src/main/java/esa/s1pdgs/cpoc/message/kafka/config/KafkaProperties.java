@@ -37,9 +37,9 @@ public class KafkaProperties {
     private String clientId;
 
     /**
-     * Producer properties
+     * When greater than zero, enables retrying of failed sends.
      */
-    private KafkaProducerProperties producer;
+    private int maxRetries = 0;
 
     /**
      * Default constructor
@@ -111,18 +111,18 @@ public class KafkaProperties {
     }
 
     /**
-     * @return the producer
+     * @return the maxRetries
      */
-    public KafkaProducerProperties getProducer() {
-        return producer;
+    public int getMaxRetries() {
+        return maxRetries;
     }
 
     /**
-     * @param producer
-     *            the producer to set
+     * @param maxRetries
+     *            the maxRetries to set
      */
-    public void setProducer(final KafkaProducerProperties producer) {
-        this.producer = producer;
+    public void setMaxRetries(final int maxRetries) {
+        this.maxRetries = maxRetries;
     }
     
     
@@ -130,48 +130,7 @@ public class KafkaProperties {
     @Override
 	public String toString() {
 		return "KafkaProperties [bootstrapServers=" + bootstrapServers + ", errorTopic=" + errorTopic + ", hostname="
-				+ hostname + ", clientId=" + clientId + ", producer=" + producer + "]";
+				+ hostname + ", clientId=" + clientId + ", maxRetries=" + maxRetries + "]";
 	}
-
-    /**
-     * Properties of a KAFKA producer
-     * 
-     * @author Viveris Technologies
-     */
-    public static class KafkaProducerProperties {
-
-        /**
-         * When greater than zero, enables retrying of failed sends.
-         */
-        private int maxRetries;
-
-        /**
-         * Default constructor
-         */
-        public KafkaProducerProperties() {
-            super();
-            this.maxRetries = 0;
-        }
-
-        /**
-         * @return the maxRetries
-         */
-        public int getMaxRetries() {
-            return maxRetries;
-        }
-
-        /**
-         * @param maxRetries
-         *            the maxRetries to set
-         */
-        public void setMaxRetries(final int maxRetries) {
-            this.maxRetries = maxRetries;
-        }
-
-        @Override
-		public String toString() {
-			return "KafkaProducerProperties [maxRetries=" + maxRetries + "]";
-		}
-    }
 
 }
