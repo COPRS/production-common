@@ -138,7 +138,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [ddip_frontend, metadata_search_controller, native_api, prip_frontend, request_repository, user_web_client, eviction-manager]
+        component: [ddip_frontend, metadata_search_controller, native_api, prip_frontend, request_repository, user_web_client, eviction_manager]
     steps:
     - uses: actions/checkout@v2
     - uses: ./.github/actions/helm-charts
