@@ -202,6 +202,9 @@ public class EsServices {
 					fixed = true;
 				}
 				
+				LOGGER.warn("RS-436: family: {}", family);
+				LOGGER.warn("RS-436: result: {}", result);
+				
 				if (family == ProductFamily.S3_L0 && result.contains("Self-intersection at or near point")) {
 					warningMessage = "Invalid self-intersecting footprint detected, dropping it as a workaround for #RS-436";
 					LOGGER.warn(warningMessage);
