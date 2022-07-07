@@ -201,6 +201,13 @@ public class EsServices {
 					product.remove("segmentCoordinates");
 					fixed = true;
 				}
+				
+				if (family == ProductFamily.S3_L0 && result.contains("Self-intersection at or near point")) {
+					warningMessage = "Invalid self-intersecting footprint detected, dropping it as a workaround for #RS-436";
+					LOGGER.warn(warningMessage);
+					product.remove("sliceCoordinates");
+					fixed = true;
+				}
 
 				if (!fixed) {
 					throw e;
