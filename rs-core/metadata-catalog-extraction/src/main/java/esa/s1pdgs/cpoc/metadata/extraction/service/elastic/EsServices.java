@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.search.TotalHits.Relation;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.get.GetRequest;
@@ -174,7 +175,7 @@ public class EsServices {
 			IndexResponse response;
 			try {
 				response = elasticsearchDAO.index(request);
-			} catch (final ElasticsearchStatusException e) {
+			} catch (final ElasticsearchException e) {
 				/*
 				 * S1PRO-783: This is a temporary work around for the WV footprint issue that
 				 * occurs for WV products when the footprint does cross the date line border. As
