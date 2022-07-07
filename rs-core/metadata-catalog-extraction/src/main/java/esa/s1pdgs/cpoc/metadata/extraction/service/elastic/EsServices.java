@@ -175,7 +175,7 @@ public class EsServices {
 			IndexResponse response;
 			try {
 				response = elasticsearchDAO.index(request);
-			} catch (final ElasticsearchException e) {
+			} catch (final ElasticsearchStatusException e) {
 				/*
 				 * S1PRO-783: This is a temporary work around for the WV footprint issue that
 				 * occurs for WV products when the footprint does cross the date line border. As
