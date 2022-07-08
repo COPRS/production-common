@@ -6,10 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1-rc1] - 2022-07-08
 ### Added
-- N/A
+- Add OBS download properties with their default values for Metadata Catalog Worker
 
 ### Changed
-- RS-436, RS-429 : Workaround for dropping self-intersecting footprints while metadata extraction for Sentinel-3 L0 products 
+- RS-436, RS-429 : Workaround for dropping self-intersecting footprints while metadata extraction for Sentinel-3 L0 products
+- RS-369: Set numObsDownloadRetries = 10 for Metadata Catalog Worker
+- RS-351: More restrictive matchRegex (MPL_ to MPL_ORB) in AUXIP Ingestion Trigger
 
 ### Removed
 - N/A
