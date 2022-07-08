@@ -7,18 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.0-rc1] - 2022-07-06
 
 ### Added
-RS-248: Update JobProcessing traces
-RS-313: Develop "DLQ" as RS core component
-RS-314: Develop DLQ Manager application
-RS-315: Move ParkingLot from RequestRepository to RS Core DLQ restart
-RS-386: Migration of Execution Worker to SCDF Application
-RS-407: Update MetadataExtraction traces
-RS-422: Request the AUX GIP_VIEDIR on rs-metadata-catalog-searchcontroller-svc by band
+- RS-248: Update JobProcessing traces
+- RS-313: Develop "DLQ" as RS core component
+- RS-314: Develop DLQ Manager application
+- RS-315: Move ParkingLot from RequestRepository to RS Core DLQ restart
+- RS-386: Migration of Execution Worker to SCDF Application
+- RS-407: Update MetadataExtraction traces
+- RS-422: Request the AUX GIP_VIEDIR on rs-metadata-catalog-searchcontroller-svc by band
 
 ### Changed
-RS-402: Missing documentation for mongodb
-RS-425: S2 HKTM and AUX_SAD metadata extraction fails with bad regex
-RS-409: Remove affinity from pro-common Helm chart
+- RS-402: Missing documentation for mongodb
+- RS-425: S2 HKTM and AUX_SAD metadata extraction fails with bad regex
+- RS-409: Remove affinity from pro-common Helm chart
 
 ### Removed
 N/A
