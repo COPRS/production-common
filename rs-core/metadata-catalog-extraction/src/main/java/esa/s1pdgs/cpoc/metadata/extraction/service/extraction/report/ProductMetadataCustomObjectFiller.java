@@ -41,7 +41,6 @@ public class ProductMetadataCustomObjectFiller {
 			fillwithKeyMapping("processor_name_string", "processorName");
 			fillwithKeyMapping("processor_version_string", "processorVersion");
 			fillwithKeyMapping("product_type_string", "productType");
-			fillwithKeyMapping("coordinates_object", "coordinates");
 
 		} else if ((catalogEvent.getProductFamily() == ProductFamily.S2_L0_DS) || 
 					(catalogEvent.getProductFamily() == ProductFamily.S2_L0_GR)) {
@@ -56,7 +55,6 @@ public class ProductMetadataCustomObjectFiller {
 			fillwithKeyMapping("processor_version_string", "processorVersion");
 			fillwithKeyMapping("quality_status_integer", "qualityStatus");
 			fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
-			fillwithKeyMapping("coordinates_object", "coordinates");
 			
 		} else if (catalogEvent.getProductFamily() == ProductFamily.S3_L0) {
 			fillwithKeyMapping("beginning_date_time_date", "startTime");
@@ -70,7 +68,6 @@ public class ProductMetadataCustomObjectFiller {
 			fillwithKeyMapping("cycle_number_integer", "cycleNumber");
 			fillwithKeyMapping("processor_name_string", "procName");
 			fillwithKeyMapping("processor_version_string", "procVersion");
-			fillwithKeyMapping("coordinates_object", "sliceCoordinates");
 		}
 	}
 	
