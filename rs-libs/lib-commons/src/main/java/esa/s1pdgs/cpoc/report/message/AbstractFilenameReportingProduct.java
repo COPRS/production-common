@@ -18,13 +18,13 @@ public abstract class AbstractFilenameReportingProduct {
 	}
 
 	@JsonAnyGetter
-	public final Map<String, List<String>> getFilenames() {
+	public final Map<String, Object> getFilenames() {
 		if (filenames == null || filenames.size() == 0) {
 			return null;
-		} else if (filenames.size() > 1) {
-			return Collections.singletonMap("filename_strings", filenames);
+		} else if (filenames.size() == 1) {
+			return Collections.singletonMap("filename_string", filenames.get(0));
 		} else {
-			return Collections.singletonMap("filename_string", filenames);
+			return Collections.singletonMap("filename_strings", filenames);
 		}
 	}
 }
