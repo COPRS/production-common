@@ -107,22 +107,6 @@ The following instance specific configurations are available for the Search Cont
 | `elasticsearch.connect-timeout-ms` | Timeout in milliseconds of connection to the cluster | `2000` |
 | `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
 
-## User Web Client
-
-The User Web Client is using the interface to the DDIP in order to provide the user a graphical interface to explore the products stored within the Reference System.
-
-The following command can be used in order to deploy the User Web Client:
-``helm install rs-helm/rs-user-web-client --version 1.0.1``
-
-| Name                              | Description                                              | Default |
-| ----------------------------------|----------------------------------------------------------|---------|
-| `env.apiUrl` | The URL to the endpoint that shall be used as backend to query the products | `http://coprs.werum.de/prip/odata/v1/Products`|
-| `env.mapBackground` | Allows to define as JSON the different background layers that shall be used | `"[{\"name\":\"TESTING\",\"layers\":[{\"url\":\"testing_url\",\"layerName\":\"LayerName\"}]}]"` |
-| `baseHref` | Defines the HRef used within the baseHref used by the UWC | `/uwc/` |
-| `keycloak` | Allows setting the information about the keycloak endpoint, realm and clientid that shall be used by the UWC | `"{\"url\":\"http://localhost:8080/auth\",\"realm\":\"master\",\"clientId\": \"user-web-client\"}` |
-
-For further information regarding the User Web Client, please consult [https://github.com/COPRS/user-web-client].
-
 ## Eviction Manager
 
 The part of DLM responsible for eviction is provided by the Eviction Manager service that is running independently. It works with a scheduler that runs periodically and checks for expired files and removes them from the Object Store, Metadata Catalog and Prip index accordingly.
