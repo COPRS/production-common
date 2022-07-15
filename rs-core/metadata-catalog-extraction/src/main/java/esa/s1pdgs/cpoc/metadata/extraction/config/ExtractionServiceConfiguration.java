@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.metadata.extraction.service.ExtractionService;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.MetadataExtractorFactory;
@@ -14,6 +15,9 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
 @Configuration
 public class ExtractionServiceConfiguration {
+	
+	@Autowired
+	private CommonConfigurationProperties commonProperties;
 
 	@Autowired
 	private EsServices esServices;
@@ -29,6 +33,6 @@ public class ExtractionServiceConfiguration {
 	
 	@Bean
 	public Function<CatalogJob, CatalogEvent> extractMetadata() {
-		return new ExtractionService(esServices, properties, factory, timelinessConfig);
+		return new ExtractionService(commonProperties, esServices, properties, factory, timelinessConfig);
 	}
 }
