@@ -232,7 +232,15 @@ public class WVFootPrintExtension {
 		geoShape.put("type", "Polygon");
 		geoShape.put("orientation", "counterclockwise");
 		geoShape.put("coordinates", new JSONArray().put(coordinates));
-
+		
+		// FIXME: Need kind of this here instead:
+//		geoShape.put("orientation", ExtractMetadata.polygonOrientation(
+//				Double.parseDouble(aLongitude),
+//				Double.parseDouble(bLongitude),
+//				Double.parseDouble(cLongitude),
+//				Double.parseDouble(dLongitude)
+//		));
+		
 		LOGGER.debug(String.format("geo shape: %s", geoShape));
 
 		return geoShape;

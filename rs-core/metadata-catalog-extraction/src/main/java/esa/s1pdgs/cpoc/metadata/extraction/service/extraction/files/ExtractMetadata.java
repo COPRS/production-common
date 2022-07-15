@@ -730,14 +730,16 @@ public class ExtractMetadata {
 		final JSONArray geoShapeCoordinates = new JSONArray();
 		geoShape.put("type", "polygon");
 		
+		List<Double> longitudes = new ArrayList<>();
 		for (int i = 0; i < coords.length; i = i + 2) {
 			final String aLatitude = coords[i];
 			final String aLongitude = coords[i + 1];
+			longitudes.add(Double.parseDouble(aLongitude));
 			geoShapeCoordinates.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
 		}
 		
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
-		geoShape.put("orientation", "counterclockwise");
+		geoShape.put("orientation", polygonOrientation(longitudes.toArray(new Double[0])));
 		return geoShape;
 	}
 
@@ -1113,111 +1115,12 @@ public class ExtractMetadata {
 	}
 
 	/**
-	 * Workaround for Elastic Search to be able to find a date line crossing polygon
-	 * by an intersecting polygon:
-	 * If maximum longitudal width is larger than 180° it is assumed that the polygon is crossing the date line. 
-	 * Then if all but one of the longitude values are negative, the positive value is shifted by -360° or 
-	 * if all but one of the longitude values are positive, the negative value is shifted by +360°.
-	 * 
-	 * @param rawCoordinatesFromManifest
-	 * @return improved raw coordinates
-	 */
-	protected String improveRawCoordinatesIfDateLineCrossing(final String rawCoordinatesFromManifest) {
-
-		String improvedRawCoordinatesFromManifest = rawCoordinatesFromManifest;
-		boolean modified = false;
-
-		String[] points = rawCoordinatesFromManifest.split(" ");
-
-		if (points.length == 5 && points[0].equals(points[4])) {
-			points = Arrays.copyOf(points, 4);
-		}
-
-		if (points.length != 4) {
-			throw new IllegalArgumentException("4 coordinates are expected");
-		} else {
-			final String[] aPoint = points[0].split(",");
-			Double aLongitude = Double.valueOf(aPoint[1]);
-
-			final String[] bPoint = points[1].split(",");
-			Double bLongitude = Double.valueOf(bPoint[1]);
-
-			final String[] cPoint = points[2].split(",");
-			Double cLongitude = Double.valueOf(cPoint[1]);
-
-			final String[] dPoint = points[3].split(",");
-			Double dLongitude = Double.valueOf(dPoint[1]);
-
-			final int offset = 360;
-
-			final Double maxLongitudeDiff = calculateMaxDifference(new Double[] {aLongitude, bLongitude, cLongitude, dLongitude});
-			
-			// Shifting coordinates only if crossing date line but not when crossing 0° meridian
-			if (maxLongitudeDiff > 180.0) {
-				// All negative but one -> decrease one by offset
-				if (aLongitude >= 0 && bLongitude < 0 && cLongitude < 0 && dLongitude < 0) {
-					aLongitude = aLongitude - offset;
-					aPoint[1] = aLongitude.toString();
-					points[0] = String.join(",", aPoint);
-					modified = true;
-				} else if (bLongitude >= 0 && aLongitude < 0 && cLongitude < 0 && dLongitude < 0) {
-					bLongitude = bLongitude - offset;
-					bPoint[1] = bLongitude.toString();
-					points[1] = String.join(",", bPoint);
-					modified = true;
-				} else if (cLongitude >= 0 && aLongitude < 0 && bLongitude < 0 && dLongitude < 0) {
-					cLongitude = cLongitude - offset;
-					cPoint[1] = cLongitude.toString();
-					points[2] = String.join(",", cPoint);
-					modified = true;
-				} else if (dLongitude >= 0 && aLongitude < 0 && bLongitude < 0 && cLongitude < 0) {
-					dLongitude = dLongitude - offset;
-					dPoint[1] = dLongitude.toString();
-					points[3] = String.join(",", dPoint);
-					modified = true;
-				}
-
-				// All positive but one -> increase one by offset
-				if (aLongitude <= 0 && bLongitude > 0 && cLongitude > 0 && dLongitude > 0) {
-					aLongitude = aLongitude + offset;
-					aPoint[1] = aLongitude.toString();
-					points[0] = String.join(",", aPoint);
-					modified = true;
-				} else if (bLongitude <= 0 && aLongitude > 0 && cLongitude > 0 && dLongitude > 0) {
-					bLongitude = bLongitude + offset;
-					bPoint[1] = bLongitude.toString();
-					points[1] = String.join(",", bPoint);
-					modified = true;
-				} else if (cLongitude <= 0 && aLongitude > 0 && bLongitude > 0 && dLongitude > 0) {
-					cLongitude = cLongitude + offset;
-					cPoint[1] = cLongitude.toString();
-					points[2] = String.join(",", cPoint);
-					modified = true;
-				} else if (dLongitude <= 0 && aLongitude > 0 && bLongitude > 0 && cLongitude > 0) {
-					dLongitude = dLongitude + offset;
-					dPoint[1] = dLongitude.toString();
-					points[3] = String.join(",", dPoint);
-					modified = true;
-				}
-				improvedRawCoordinatesFromManifest = String.join(" ", points);
-			}
-			
-			if (modified) {
-				LOGGER.info("Maximum longitudal width is " + maxLongitudeDiff + "° -> Assuming that the polygon is crossing the date line -> Shifting from {} to {} ", rawCoordinatesFromManifest,
-						improvedRawCoordinatesFromManifest);
-			}
-		}
-
-		return improvedRawCoordinatesFromManifest;
-	}
-
-	/**
 	 * Calculate maximm difference of an array of values.
 	 * 
 	 * @param values
 	 * @return maxDifference
 	 */
-	protected Double calculateMaxDifference(final Double[] values) {
+	static Double calculateMaxDifference(final Double[] values) {
 		Double max = 0.0;
 		for (int i = 0; i < values.length - 1; i++) {
 			Double d = Math.abs(values[i] - values[i + 1]);
@@ -1262,7 +1165,7 @@ public class ExtractMetadata {
 		// 12.378114,48.279240 12.829241,50.603844 11.081389,50.958828
 		// 10.625828,48.649940
 
-		String[] points = improveRawCoordinatesIfDateLineCrossing(rawCoordinatesFromManifest).split(" ");
+		String[] points = rawCoordinatesFromManifest.split(" ");
 
 		if (points.length == 5 && points[0].equals(points[4])) {
 			points = Arrays.copyOf(points, 4);
@@ -1301,9 +1204,27 @@ public class ExtractMetadata {
 		geoShapeCoordinates.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
 
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
-		geoShape.put("orientation", "counterclockwise");
+		geoShape.put("orientation", polygonOrientation(
+				Double.parseDouble(aLongitude),
+				Double.parseDouble(bLongitude),
+				Double.parseDouble(cLongitude),
+				Double.parseDouble(dLongitude)
+		));
 
 		return geoShape;
+	}
+	
+	static String polygonOrientation(Double... longitudes) {
+		// Elasticsearch checks whether the polygon’s document-level orientation differs from the
+		// default orientation. If the orientation differs, Elasticsearch considers the polygon
+		// to cross the international dateline and splits the polygon at the dateline.
+		// NOTE: While the elasticsearch documentation is about the document-level field 'orientation',
+		// this goes hand in hand with the actual order of the points. So it's possible to either
+		// reverse the 'orientation' field or the actual order, but not both at the same time,
+		// as this would nullify.
+		// See: https://www.elastic.co/guide/en/elasticsearch/reference/7.16/geo-shape.html#polygon-orientation
+		//   or https://www.elastic.co/guide/en/elasticsearch/reference/8.0/geo-shape.html#polygon-orientation
+		return (calculateMaxDifference(longitudes) >= 180.0) ? "clockwise" : "counterclockwise";
 	}
 
 	private JSONObject processCoordinatesAsIS(final String rawCoordinatesFromManifest) {
@@ -1311,7 +1232,7 @@ public class ExtractMetadata {
 		// 36.7787,86.8273 38.7338,86.4312 38.4629,83.6235 36.5091,84.0935
 		// 36.7787,86.8273
 		LOGGER.debug("l0 coords: {} ", rawCoordinatesFromManifest);
-		String[] points = improveRawCoordinatesIfDateLineCrossing(rawCoordinatesFromManifest).split(" ");
+		String[] points = rawCoordinatesFromManifest.split(" ");
 
 		if (points.length == 5 && points[0].equals(points[4])) {
 			points = Arrays.copyOf(points, 4);
@@ -1350,7 +1271,12 @@ public class ExtractMetadata {
 		geoShapeCoordinates.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
 
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
-		geoShape.put("orientation", "counterclockwise");
+		geoShape.put("orientation", polygonOrientation(
+				Double.parseDouble(aLongitude),
+				Double.parseDouble(bLongitude),
+				Double.parseDouble(cLongitude),
+				Double.parseDouble(dLongitude)
+		));
 
 		return geoShape;
 	}
