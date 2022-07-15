@@ -33,6 +33,9 @@ public final class ReportAdapter implements Reporting {
 		
 		private MissionId mission;
 		
+		private String rsChainName;
+		private String rsChainVersion;
+		
 		public Builder(final ReportAppender appender, final MissionId mission) {			
 			this.appender = appender;
 			this.uid = UUID.randomUUID();
@@ -62,7 +65,19 @@ public final class ReportAdapter implements Reporting {
 			tags.addAll(tags);
 			return this;
 		}
-
+		
+		@Override
+		public Reporting.Builder rsChainName(final String rsChainName) {
+			this.rsChainName = rsChainName;
+			return this;
+		}
+		
+		@Override
+		public Reporting.Builder rsChainVersion(final String rsChainVersion) {
+			this.rsChainVersion = rsChainVersion;
+			return this;
+		}
+		
 		@Override
 		public Reporting newReporting(final String task) {
 			taskName = task;
@@ -86,6 +101,8 @@ public final class ReportAdapter implements Reporting {
 	private final UUID parentUid;
 	private final UUID uid;
 	private final MissionId mission;
+	private final String rsChainName;
+	private final String rsChainVersion;
 	
 	private long actionStart;
 	private ReportingInput input = ReportingInput.NULL;
@@ -101,6 +118,8 @@ public final class ReportAdapter implements Reporting {
 		mission         = builder.mission;
 		actionStart    	= 0L;	
 		input			= ReportingInput.NULL;
+		rsChainName     = builder.rsChainName;
+		rsChainVersion  = builder.rsChainVersion;
 	}
 	
 	final String toString(final ReportingMessage mess) {
@@ -126,9 +145,14 @@ public final class ReportAdapter implements Reporting {
 		}
 		if (parentUid != null) {
 			task.setChildOfTask(parentUid.toString());
-		}		
+		}
+		
+		Header header = new Header(Level.INFO, mission);
+		header.setRsChainName(rsChainName);
+		header.setRsChainVersion(rsChainVersion);
+		
 		appender.report(new JacksonReportEntry(
-				new Header(Level.INFO, mission), 
+				header, 
 				new Message(toString(reportingMessage)),
 				task
 		));	
@@ -167,8 +191,13 @@ public final class ReportAdapter implements Reporting {
 		if (!quality.isEmpty()) {
 			endTask.setQuality(quality);
 		}
+		
+		Header header = new Header(level, mission);
+		header.setRsChainName(rsChainName);
+		header.setRsChainVersion(rsChainVersion);
+		
 		appender.report(new JacksonReportEntry(		
-				new Header(level, mission), 
+				header, 
 				new Message(toString(reportingMessage)),
 				endTask
 		));
@@ -187,8 +216,13 @@ public final class ReportAdapter implements Reporting {
 				ReportingOutput.NULL,
 				input
 		);
+		
+		Header header = new Header(Level.ERROR, mission);
+		header.setRsChainName(rsChainName);
+		header.setRsChainVersion(rsChainVersion);
+		
 		appender.report(new JacksonReportEntry(		
-				new Header(Level.ERROR, mission), 
+				header, 
 				new Message(toString(reportingMessage)),
 				endTask
 		));

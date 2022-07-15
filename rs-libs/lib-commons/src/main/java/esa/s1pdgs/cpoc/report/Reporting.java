@@ -17,6 +17,8 @@ public interface Reporting extends ReportingFactory {
 			return addTags(Collections.singleton(tag));
 		}
 		Builder addTags(Collection<String> tags);
+		Builder rsChainName(String rsChainName);
+		Builder rsChainVersion(String rsChainVersion);
 	}
 	
 	enum Event {

@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -45,15 +46,17 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 	public static final String QUALITY_CORRUPTED_ELEMENT_COUNT = "corrupted_element_count_long";
 	public static final String QUALITY_MISSING_ELEMENT_COUNT = "missing_element_count_long";
 
-
+	private final CommonConfigurationProperties commonProperties;
 	private final EsServices esServices;
 	private final MdcWorkerConfigurationProperties properties;
 	private final MetadataExtractorFactory extractorFactory;
 	private final TimelinessConfiguration timelinessConfig;
 
 	@Autowired
-	public ExtractionService(final EsServices esServices, final MdcWorkerConfigurationProperties properties,
+	public ExtractionService(final CommonConfigurationProperties commonProperties,
+			final EsServices esServices, final MdcWorkerConfigurationProperties properties,
 			final MetadataExtractorFactory extractorFactory, final TimelinessConfiguration timelinessConfig) {
+		this.commonProperties = commonProperties;
 		this.esServices = esServices;
 		this.properties = properties;
 		this.extractorFactory = extractorFactory;
@@ -73,7 +76,10 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			mission = MissionId.fromFileName(catalogJob.getKeyObjectStorage());
 		}
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(catalogJob.getUid())
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(catalogJob.getUid())
 				.newReporting("MetadataExtraction");
 
 		reporting.begin(
