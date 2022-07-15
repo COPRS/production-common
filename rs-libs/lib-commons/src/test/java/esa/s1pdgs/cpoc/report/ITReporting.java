@@ -107,7 +107,7 @@ public final class ITReporting {
 	
 	@Test
 	public final void testNoRfiReporting() {
-		final Reporting uut = ReportingUtils.newReportingBuilder(MissionId.S3).newReporting("RfiMitigation");
+		final Reporting uut = ReportingUtils.newReportingBuilder(MissionId.S3).rsChainName("metadata").rsChainVersion("1.0.0").newReporting("RfiMitigation");
 		uut.begin( 
 				new ReportingMessage("Start extraction of RFI metadata from product <PRODUCT_NAME>")
 		);		

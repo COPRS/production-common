@@ -23,6 +23,10 @@ public class Header {
 	private Boolean debug;
 	@JsonProperty("tag_list")
 	private List<String> tags;
+	@JsonProperty("rs_chain_name")
+	private String rsChainName;
+	@JsonProperty("rs_chain_version")
+	private String rsChainVersion;
 	
 	public Header() {
 
@@ -84,4 +88,21 @@ public class Header {
 	public void setTags(final List<String> tags) {
 		this.tags = tags;
 	}
+
+	public String getRsChainName() {
+		return rsChainName;
+	}
+
+	public void setRsChainName(final String rsChainName) {
+		this.rsChainName = rsChainName;
+	}
+
+	public String getRsChainVersion() {
+		return rsChainVersion;
+	}
+
+	public void setRsChainVersion(final String rsChainVersion) {
+		this.rsChainVersion = rsChainVersion;
+	}
+	
 }
