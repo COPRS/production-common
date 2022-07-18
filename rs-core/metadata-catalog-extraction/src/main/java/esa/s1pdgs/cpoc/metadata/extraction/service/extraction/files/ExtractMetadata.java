@@ -38,6 +38,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.FootprintUtil;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFile;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
@@ -739,7 +740,10 @@ public class ExtractMetadata {
 		}
 		
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
-		geoShape.put("orientation", polygonOrientation(longitudes.toArray(new Double[0])));
+
+		// RS-280: Use Elasticsearch Dateline Support
+		geoShape.put("orientation", FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0])));
+		
 		return geoShape;
 	}
 
@@ -1114,22 +1118,6 @@ public class ExtractMetadata {
 		return elements[0].equals(elements[elements.length - 1]) ? rawCoordinates : rawCoordinates + " " + elements[0];
 	}
 
-	/**
-	 * Calculate maximm difference of an array of values.
-	 * 
-	 * @param values
-	 * @return maxDifference
-	 */
-	static Double calculateMaxDifference(final Double[] values) {
-		Double max = 0.0;
-		for (int i = 0; i < values.length - 1; i++) {
-			Double d = Math.abs(values[i] - values[i + 1]);
-			if (d > max)
-				max = d;
-		}
-		return max;
-	}
-
 	private JSONObject processCoordinatesforWVL0(final String rawCoordinatesFromManifest) {
 		// Snippet from manifest
 		// -74.8571,-120.3411 -75.4484,-121.9204
@@ -1204,7 +1192,9 @@ public class ExtractMetadata {
 		geoShapeCoordinates.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
 
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
-		geoShape.put("orientation", polygonOrientation(
+		
+		// RS-280: Use Elasticsearch Dateline Support
+		geoShape.put("orientation", FootprintUtil.elasticsearchPolygonOrientation(
 				Double.parseDouble(aLongitude),
 				Double.parseDouble(bLongitude),
 				Double.parseDouble(cLongitude),
@@ -1214,19 +1204,6 @@ public class ExtractMetadata {
 		return geoShape;
 	}
 	
-	static String polygonOrientation(Double... longitudes) {
-		// Elasticsearch checks whether the polygon’s document-level orientation differs from the
-		// default orientation. If the orientation differs, Elasticsearch considers the polygon
-		// to cross the international dateline and splits the polygon at the dateline.
-		// NOTE: While the elasticsearch documentation is about the document-level field 'orientation',
-		// this goes hand in hand with the actual order of the points. So it's possible to either
-		// reverse the 'orientation' field or the actual order, but not both at the same time,
-		// as this would nullify.
-		// See: https://www.elastic.co/guide/en/elasticsearch/reference/7.16/geo-shape.html#polygon-orientation
-		//   or https://www.elastic.co/guide/en/elasticsearch/reference/8.0/geo-shape.html#polygon-orientation
-		return (calculateMaxDifference(longitudes) >= 180.0) ? "clockwise" : "counterclockwise";
-	}
-
 	private JSONObject processCoordinatesAsIS(final String rawCoordinatesFromManifest) {
 		// Snippet from manifest
 		// 36.7787,86.8273 38.7338,86.4312 38.4629,83.6235 36.5091,84.0935
@@ -1271,7 +1248,9 @@ public class ExtractMetadata {
 		geoShapeCoordinates.put(new JSONArray("[" + aLongitude + "," + aLatitude + "]"));
 
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
-		geoShape.put("orientation", polygonOrientation(
+		
+		// RS-280: Use Elasticsearch Dateline Support
+		geoShape.put("orientation", FootprintUtil.elasticsearchPolygonOrientation(
 				Double.parseDouble(aLongitude),
 				Double.parseDouble(bLongitude),
 				Double.parseDouble(cLongitude),

@@ -1297,84 +1297,7 @@ public class ExtractMetadataTest {
 
 		assertEquals(1, extractor.totalNumberOfSlice(startTime, stopTime, sliceType));
 	}
-
-	/**
-	 * One longitude values positive and three negative or three positive and one
-	 * negative -> false Maximum logitude difference larger than 180° -> false
-	 * 
-	 * -> No date line crossing, do nothing
-	 */
-	@Test
-	public void testDoNothing() {
-		String rawCoordinatesInput = "70.0,170.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
-		String rawCoordinatesExpectedResult = "70.0,170.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
-
-		assertTrue(rawCoordinatesExpectedResult.equals(
-				extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput)));
-	}
-
-	/**
-	 * Test case from S1PRO-2301
-	 * 
-	 * One longitude values positive and three negative or three positive and one
-	 * negative -> true Maximum logitude difference larger than 180° -> false
-	 * 
-	 * -> No date line crossing, do nothing
-	 */
-	@Test
-	public void testDoNothing2() {
-		String rawCoordinatesInput = "56.1535,2.2002 64.8859,-0.5619 55.8374,-1.7321 56.1535,2.2002";
-		String rawCoordinatesExpectedResult = "56.1535,2.2002 64.8859,-0.5619 55.8374,-1.7321 56.1535,2.2002";
-
-		assertTrue(rawCoordinatesExpectedResult.equals(
-				extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput)));
-	}
-
-	/**
-	 * One longitude values positive and three negative or three positive and one
-	 * negative -> true Maximum logitude difference larger than 180° -> true
-	 * 
-	 * -> Date line crossing, shift the one negative value by +360°
-	 */
-	@Test
-	public void testIncreaseOne() {
-		String rawCoordinatesInput = "70.0,-170.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
-		String rawCoordinatesExpectedResult = "70.0,190.0 70.0,170.0 -70.0,150.0 -70.0,170.0";
-
-		assertTrue(rawCoordinatesExpectedResult.equals(
-				extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput)));
-	}
-
-	/**
-	 * One longitude values positive and three negative or three positive and one
-	 * negative -> true Maximum logitude difference larger than 180° -> false
-	 * 
-	 * -> Date line crossing, shift the one positive value by -360°
-	 */
-	@Test
-	public void testDecreaseOne() {
-		String rawCoordinatesInput = "70.0,-170.0 70.0,-170.0 -70.0,150.0 -70.0,-170.0";
-		String rawCoordinatesExpectedResult = "70.0,-170.0 70.0,-170.0 -70.0,-210.0 -70.0,-170.0";
-
-		assertTrue(rawCoordinatesExpectedResult.equals(
-				extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput)));
-	}
-
-	/**
-	 * One longitude values positive and three negative or three positive and one
-	 * negative -> true Maximum logitude difference larger than 180° -> true
-	 * 
-	 * -> No date line crossing, do nothing
-	 */
-	@Test
-	public void testDoNothing3() {
-		String rawCoordinatesInput = "12.378114,48.279240 12.829241,50.603844 11.081389,-50.958828 10.625828,48.649940";
-		String rawCoordinatesExpectedResult = "12.378114,48.279240 12.829241,50.603844 11.081389,-50.958828 10.625828,48.649940";
-
-		assertTrue(rawCoordinatesExpectedResult.equals(
-				extractor.improveRawCoordinatesIfDateLineCrossing(rawCoordinatesInput)));
-	}
-
+	
 	@Test
 	public void testConvertCoordinatesToClosedForm_whenNotClosedShallClose() {
 		String input = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955";
@@ -1387,12 +1310,6 @@ public class ExtractMetadataTest {
 		String input = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955 81.3179,-81.9895";
 		String expected = "81.3179,-81.9895 56.5997,-97.7338 56.0243,-91.2164 79.6240,-62.0955 81.3179,-81.9895";
 		assertTrue(expected.equals(ExtractMetadata.convertCoordinatesToClosedForm(input)));
-	}
-
-	public void testCalculateMaxDifference() {
-		Double[] input = new Double[] { 2.2, 22.5, -180.0, 70.0, -180.0, -180.0, 180.5 };
-		Double expected = 360.5;
-		assertEquals(expected, extractor.calculateMaxDifference(input));
 	}
 
 	@Test
