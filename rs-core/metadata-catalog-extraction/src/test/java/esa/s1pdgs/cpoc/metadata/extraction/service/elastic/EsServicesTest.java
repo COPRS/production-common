@@ -36,6 +36,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.internal.InternalSearchResponse;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -1441,21 +1442,35 @@ public class EsServicesTest{
     }
     
 	@Test
-    public final void createMaskFootprintData() throws IOException, JSONException {
+    public final void createMaskFootprintData_whenNotCrossingDateline_shallHaveCounterclockwiseOrientation() throws IOException, JSONException {
+		final JSONObject feature = new JSONObject("{\"geometry\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[8.85,47.52],[8.44,47.52],[8.44,47.27],[8.85,47.27],[8.85,47.52]]],\"type\":\"Polygon\"}}");
     	
     	final IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
     	this.mockIndexRequest(response);
 
-		final JSONObject product = new JSONObject();
-		product.put("productName", "name");
-		product.put("productType", "type");
-		product.put("productFamily", "L0_SLICE");
-
 		try {
-			esServices.createMaskFootprintData(MaskType.EW_SLC, product, "id");
+			esServices.createMaskFootprintData(MaskType.EW_SLC, feature, "S1__OPER_MSK_EW_SLC_V20150101T000000_G20210124T220718.EOF/feature/0");
 		} catch (final Exception e) {
 			fail("Exception occurred: " + e.getMessage());
 		}
+		
+		assertEquals("counterclockwise", feature.getJSONObject("geometry").getString("orientation")); // input not modified
+    }
+	
+	@Test
+    public final void createMaskFootprintData_whenCrossingDateline_ShallHaveClockwiseOrientation() throws IOException, JSONException {
+		final JSONObject feature = new JSONObject("{\"geometry\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[-179.85,47.52],[8.44,47.52],[8.44,47.27],[8.85,47.27],[-179.85,47.52]]],\"type\":\"Polygon\"}}");
+    	
+    	final IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
+    	this.mockIndexRequest(response);
+
+		try {
+			esServices.createMaskFootprintData(MaskType.EW_SLC, feature, "S1__OPER_MSK_EW_SLC_V20150101T000000_G20210124T220718.EOF/feature/0");
+		} catch (final Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+		
+		assertEquals("clockwise", feature.getJSONObject("geometry").getString("orientation")); // input modified
     }
 	
 	@Test

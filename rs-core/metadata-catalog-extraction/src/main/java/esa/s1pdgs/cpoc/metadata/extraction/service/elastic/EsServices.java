@@ -250,12 +250,12 @@ public class EsServices {
 		JSONObject geometry = feature.getJSONObject("geometry");
 		if ("Polygon".equals(geometry.getString("type"))) {
 			List<Double> longitudes = new ArrayList<>();
-			JSONArray exteriorRing = feature.getJSONArray("coordinates").getJSONArray(0);
+			JSONArray exteriorRing = geometry.getJSONArray("coordinates").getJSONArray(0);
 			for (int idx = 0; idx < exteriorRing.length(); idx++) {
 				longitudes.add(exteriorRing.getJSONArray(idx).getDouble(0));
 			}
 			String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
-			feature.put("orientation", orientation);
+			geometry.put("orientation", orientation);
 		}
 		
 		try {
