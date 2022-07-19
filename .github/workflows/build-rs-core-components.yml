@@ -5,6 +5,7 @@ on:
     paths:
       - 'processing-common/**'
       - '.github/workflows/build-rs-core-components.yml'
+      - '.github/actions/build-core-components/action.yaml'
     branches:
       - '!main'
       - 'release/**'
