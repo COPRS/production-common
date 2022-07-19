@@ -247,14 +247,14 @@ public class EsServices {
 		}
 
 		// RS-280: Use Elasticsearch Dateline Support
-		JSONObject geometry = feature.getJSONObject("geometry");
+		final JSONObject geometry = feature.getJSONObject("geometry");
 		if ("Polygon".equals(geometry.getString("type"))) {
-			List<Double> longitudes = new ArrayList<>();
-			JSONArray exteriorRing = geometry.getJSONArray("coordinates").getJSONArray(0);
+			final List<Double> longitudes = new ArrayList<>();
+			final JSONArray exteriorRing = geometry.getJSONArray("coordinates").getJSONArray(0);
 			for (int idx = 0; idx < exteriorRing.length(); idx++) {
 				longitudes.add(exteriorRing.getJSONArray(idx).getDouble(0));
 			}
-			String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
+			final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
 			geometry.put("orientation", orientation);
 		}
 		
