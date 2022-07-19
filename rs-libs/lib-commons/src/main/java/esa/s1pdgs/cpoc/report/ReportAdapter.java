@@ -236,6 +236,8 @@ public final class ReportAdapter implements Reporting {
 				.root(rootUid)
 				.parent(uid)				
 				.addTags(tags)
+				.rsChainName(rsChainName)
+				.rsChainVersion(rsChainVersion)
 				.newReporting(taskName);	
 	}
 
