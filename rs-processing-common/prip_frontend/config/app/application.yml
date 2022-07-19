@@ -22,7 +22,7 @@ elasticsearch:
 # Common Configuration Properties
 common:
   rsChainName: {{ .Values.image.name }}
-  rsChainVersion: {{ .Va.ues.image.tag }}
+  rsChainVersion: {{ .Values.image.tag }}
 
 # PRIP Frontend config
 prip-frontend:
