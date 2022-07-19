@@ -19,6 +19,11 @@ elasticsearch:
   # Timeout in milliseconds of the socket to the cluster
   socket-timeout-ms: {{ .Values.elasticsearch.timeout.socket }}
   
+# Common Configuration Properties
+common:
+  rsChainName: {{ .Values.image.name }}
+  rsChainVersion: {{ .Va.ues.image.tag }}
+
 # PRIP Frontend config
 prip-frontend:
   # Time in seconds until a download URL expires
