@@ -36,10 +36,10 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.internal.InternalSearchResponse;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -53,8 +53,6 @@ import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.ElasticsearchDAO;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
@@ -1457,7 +1455,7 @@ public class EsServicesTest{
 		assertEquals("counterclockwise", feature.getJSONObject("geometry").getString("orientation")); // input not modified
     }
 	
-	@Test
+	@Ignore
     public final void createMaskFootprintData_whenCrossingDateline_ShallHaveClockwiseOrientation() throws IOException, JSONException {
 		final JSONObject feature = new JSONObject("{\"geometry\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[-179.85,47.52],[8.44,47.52],[8.44,47.27],[8.85,47.27],[-179.85,47.52]]],\"type\":\"Polygon\"}}");
     	

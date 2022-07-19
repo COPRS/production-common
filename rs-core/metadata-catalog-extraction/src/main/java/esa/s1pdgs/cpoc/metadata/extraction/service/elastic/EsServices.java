@@ -246,17 +246,17 @@ public class EsServices {
 			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
 		}
 
-		// RS-280: Use Elasticsearch Dateline Support
-		final JSONObject geometry = feature.getJSONObject("geometry");
-		if ("Polygon".equals(geometry.getString("type"))) {
-			final List<Double> longitudes = new ArrayList<>();
-			final JSONArray exteriorRing = geometry.getJSONArray("coordinates").getJSONArray(0);
-			for (int idx = 0; idx < exteriorRing.length(); idx++) {
-				longitudes.add(exteriorRing.getJSONArray(idx).getDouble(0));
-			}
-			final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
-			geometry.put("orientation", orientation);
-		}
+//		// RS-280: Use Elasticsearch Dateline Support
+//		final JSONObject geometry = feature.getJSONObject("geometry");
+//		if ("Polygon".equals(geometry.getString("type"))) {
+//			final List<Double> longitudes = new ArrayList<>();
+//			final JSONArray exteriorRing = geometry.getJSONArray("coordinates").getJSONArray(0);
+//			for (int idx = 0; idx < exteriorRing.length(); idx++) {
+//				longitudes.add(exteriorRing.getJSONArray(idx).getDouble(0));
+//			}
+//			final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
+//			geometry.put("orientation", orientation);
+//		}
 		
 		try {
 			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(feature.toString(),
