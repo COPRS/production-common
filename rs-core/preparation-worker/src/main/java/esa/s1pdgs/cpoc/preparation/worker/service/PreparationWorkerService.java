@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGeneration;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -40,7 +41,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class PreparationWorkerService implements Function<CatalogEvent, List<Message<IpfExecutionJob>>> {
 
 	static final Logger LOGGER = LogManager.getLogger(PreparationWorkerService.class);
-
+	
 	private TaskTableMapperService taskTableService;
 
 	private ProductTypeAdapter typeAdapter;
@@ -54,11 +55,13 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 	private InputSearchService inputSearchService;
 
 	private JobCreationService jobCreationService;
+	
+	private final CommonConfigurationProperties commonProperties;
 
 	public PreparationWorkerService(final TaskTableMapperService taskTableService, final ProductTypeAdapter typeAdapter,
 			final ProcessProperties properties, final AppCatJobService appCat,
 			final Map<String, TaskTableAdapter> taskTableAdapters, final InputSearchService inputSearchService,
-			final JobCreationService jobCreationService) {
+			final JobCreationService jobCreationService, final CommonConfigurationProperties commonProperties) {
 		this.taskTableService = taskTableService;
 		this.typeAdapter = typeAdapter;
 		this.processProperties = properties;
@@ -66,6 +69,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		this.taskTableAdapters = taskTableAdapters;
 		this.inputSearchService = inputSearchService;
 		this.jobCreationService = jobCreationService;
+		this.commonProperties = commonProperties;
 	}
 
 	@Override
@@ -73,7 +77,10 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		final Reporting reporting = ReportingUtils
 				.newReportingBuilder(MissionId
 						.valueOf((String) catalogEvent.getMetadata().get(MissionId.FIELD_NAME)))
-				.predecessor(catalogEvent.getUid()).newReporting("PreparationWorkerService");
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(catalogEvent.getUid())
+				.newReporting("PreparationWorkerService");
 
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(catalogEvent.getProductFamily(),
@@ -118,7 +125,10 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		MissionId mission = MissionId
 				.valueOf((String) preparationJob.getCatalogEvent().getMetadata().get(MissionId.FIELD_NAME));
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(preparationJob.getUid())
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(preparationJob.getUid())
 				.newReporting("TaskTableLookup");
 
 		final List<AppDataJob> jobs = typeAdapter.createAppDataJobs(preparationJob);

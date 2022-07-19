@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.errors.SardineRuntimeException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
@@ -34,11 +35,13 @@ import esa.s1pdgs.cpoc.report.message.input.InboxReportingInput;
 public class IngestionWorkerService implements Function<IngestionJob, List<Message<CatalogJob>>> {
 	static final Logger LOG = LogManager.getLogger(IngestionWorkerService.class);
 
+	private final CommonConfigurationProperties commonProperties;
 	private final ProductService productService;
 	private final InboxAdapterManager inboxAdapterManager;
 
 	@Autowired
-	public IngestionWorkerService(final ProductService productService, final InboxAdapterManager inboxAdapterManager) {
+	public IngestionWorkerService(final CommonConfigurationProperties commonProperties, final ProductService productService, final InboxAdapterManager inboxAdapterManager) {
+		this.commonProperties = commonProperties;
 		this.productService = productService;
 		this.inboxAdapterManager = inboxAdapterManager;
 	}
@@ -54,7 +57,10 @@ public class IngestionWorkerService implements Function<IngestionJob, List<Messa
 
 		MissionId mission = MissionId.valueOf(ingestion.getMissionId());
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(ingestion.getUid())
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(ingestion.getUid())
 				.newReporting("IngestionWorker");
 
 		LOG.debug("received Ingestion: {}", productName);

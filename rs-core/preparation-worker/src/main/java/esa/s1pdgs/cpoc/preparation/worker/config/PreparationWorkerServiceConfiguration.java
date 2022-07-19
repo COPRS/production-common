@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
@@ -24,6 +25,9 @@ import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
  */
 @Configuration
 public class PreparationWorkerServiceConfiguration {
+	
+	@Autowired
+	private CommonConfigurationProperties commonProperties;
 
 	@Autowired
 	private ProcessProperties processProperties;
@@ -49,6 +53,6 @@ public class PreparationWorkerServiceConfiguration {
 	@Bean
 	public Function<CatalogEvent, List<Message<IpfExecutionJob>>> prepareExecutionJobs() {
 		return new PreparationWorkerService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
-				taskTableAdapters, inputSearchService, publisher);
+				taskTableAdapters, inputSearchService, publisher, commonProperties);
 	}
 }

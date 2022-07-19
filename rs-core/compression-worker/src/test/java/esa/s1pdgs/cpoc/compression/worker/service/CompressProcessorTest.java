@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
@@ -21,6 +22,9 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 public class CompressProcessorTest {
 
 	private CompressProcessor uut;
+	
+	@Mock
+	CommonConfigurationProperties commonProps;
 
 	@Mock
 	private AppStatus appStatus;
@@ -39,7 +43,7 @@ public class CompressProcessorTest {
 //		properties.setSizeBatchDownload(1000);
 		properties.setCompressionTimeout(5);
 		properties.setCompressionCommand("echo");
-		uut = new CompressProcessor(appStatus, properties, obsClient);
+		uut = new CompressProcessor(commonProps, appStatus, properties, obsClient);
 	}
 
 	@Test

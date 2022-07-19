@@ -23,6 +23,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import esa.s1pdgs.cpoc.dlq.manager.model.mapping.JsonMapping;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.dlq.manager.configuration.DlqManagerConfigurationProperties;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.Rule;
@@ -39,13 +40,17 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 
 	private static final Logger LOGGER = LogManager.getLogger(DlqManagerService.class);
 	
+	private final CommonConfigurationProperties commonProperties;
+	
 	public static String X_ROUTE_TO = "x-route-to";
 	
 	private final RoutingTable routingTable;
 	private final String parkingLotTopic;
 	
-	public DlqManagerService(final RoutingTable routingTable,
+	public DlqManagerService(final CommonConfigurationProperties commonProperties,
+			final RoutingTable routingTable,
 			final DlqManagerConfigurationProperties properties) {
+		this.commonProperties = commonProperties;
 		this.routingTable = routingTable;
 		this.parkingLotTopic = properties.getParkingLotTopic();
 	}
@@ -70,7 +75,9 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 		int retryCounter = json.getInt("retryCounter");
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder(missionId)
-              .predecessor(uid).newReporting("DlqManagement");
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(uid).newReporting("DlqManagement");
 		
 		reporting.begin(DlqReportingInput.newInstance(originalTopic, retryCounter),
 				new ReportingMessage("Start routing"));		

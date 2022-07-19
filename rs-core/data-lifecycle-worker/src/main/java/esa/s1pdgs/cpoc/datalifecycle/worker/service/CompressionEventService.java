@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
@@ -20,14 +21,16 @@ public class CompressionEventService implements Consumer<CompressionEvent> {
 
 	private static final Logger LOG = LogManager.getLogger(CompressionEventService.class);
 	
+	private final CommonConfigurationProperties commonProperties;
 	private final DataLifecycleWorkerConfigurationProperties configurationProperties;
 	private final DataLifecycleMetadataRepository metadataRepo;
 	private final DataLifecycleUpdater updater;
 	
 	@Autowired
-	public CompressionEventService(final DataLifecycleWorkerConfigurationProperties configurationProperties,
+	public CompressionEventService(final CommonConfigurationProperties commonProperties,
+			final DataLifecycleWorkerConfigurationProperties configurationProperties,
 			final DataLifecycleMetadataRepository metadataRepo) {
-		
+		this.commonProperties = commonProperties;
 		this.configurationProperties = configurationProperties;
 		this.metadataRepo = metadataRepo;
 		this.updater = new DataLifecycleUpdater(this.configurationProperties.getRetentionPolicies().values(),
@@ -41,7 +44,10 @@ public class CompressionEventService implements Consumer<CompressionEvent> {
 		
 		final MissionId mission = MissionId.fromFileName(compressionEvent.getKeyObjectStorage());
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(compressionEvent.getUid())
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(compressionEvent.getUid())
 				.newReporting("DataLifecycleWorker");
 		
 		reporting.begin(

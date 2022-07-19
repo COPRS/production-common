@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.RecoverableDataAccessException;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
@@ -51,6 +52,7 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductEntityProcessor.class);
 	
+	private final CommonConfigurationProperties commonProperties;
 	private OData odata;
 	private ServiceMetadata serviceMetadata;
 	private final PripMetadataRepository pripMetadataRepository;
@@ -58,9 +60,10 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 	private final long downloadUrlExpirationTimeInSeconds;
 	private final String username;
 
-	public ProductEntityProcessor(final PripMetadataRepository pripMetadataRepository,
-			final ObsClient obsClient, final long downloadUrlExpirationTimeInSeconds,
-			final String username) {
+	public ProductEntityProcessor(final CommonConfigurationProperties commonProperties,
+			final PripMetadataRepository pripMetadataRepository, final ObsClient obsClient,
+			final long downloadUrlExpirationTimeInSeconds, final String username) {
+		this.commonProperties = commonProperties;
 		this.pripMetadataRepository = pripMetadataRepository;
 		this.obsClient = obsClient;
 		this.downloadUrlExpirationTimeInSeconds = downloadUrlExpirationTimeInSeconds;
@@ -128,6 +131,8 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 				if (null != foundPripMetadata) {		
 					final Reporting reporting = ReportingUtils
 							.newReportingBuilder(MissionId.fromFileName(foundPripMetadata.getObsKey()))
+							.rsChainName(commonProperties.getRsChainName())
+							.rsChainVersion(commonProperties.getRsChainVersion())
 							.newReporting("PripTempDownloadUrl");
 					
 					reporting.begin(

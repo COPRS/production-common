@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepository;
 import esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence.DataLifecycleMetadataRepositoryException;
@@ -20,13 +21,17 @@ public class CatalogEventService implements Consumer<CatalogEvent> {
 
 	private static final Logger LOG = LogManager.getLogger(CatalogEventService.class);
 
+	private final CommonConfigurationProperties commonProperties;
 	private final DataLifecycleWorkerConfigurationProperties configurationProperties;
 	private final DataLifecycleMetadataRepository metadataRepo;
 	private final DataLifecycleUpdater updater;
 
 	@Autowired
-	public CatalogEventService(final DataLifecycleWorkerConfigurationProperties configurationProperties,
+	public CatalogEventService(
+			final CommonConfigurationProperties commonProperties,
+			final DataLifecycleWorkerConfigurationProperties configurationProperties,
 			final DataLifecycleMetadataRepository metadataRepo) {
+		this.commonProperties = commonProperties;
 		this.configurationProperties = configurationProperties;
 		this.metadataRepo = metadataRepo;
 		this.updater = new DataLifecycleUpdater(this.configurationProperties.getRetentionPolicies().values(),
@@ -40,7 +45,10 @@ public class CatalogEventService implements Consumer<CatalogEvent> {
 		
 		final MissionId mission = MissionId.valueOf((String) catalogEvent.getMetadata().get(MissionId.FIELD_NAME));
 		
-		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(catalogEvent.getUid())
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(catalogEvent.getUid())
 				.newReporting("DataLifecycleWorker");
 		
 		reporting.begin(

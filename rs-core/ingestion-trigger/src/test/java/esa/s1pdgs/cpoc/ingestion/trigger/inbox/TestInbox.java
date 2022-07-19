@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
@@ -52,6 +53,9 @@ public class TestInbox {
 
     @Mock
     ProcessConfiguration processConfiguration;
+    
+    @Mock
+    CommonConfigurationProperties commonConfigurationProperties;
 
     @Before
     public void initMocks() {
@@ -80,7 +84,8 @@ public class TestInbox {
                 "NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         uut.poll();
 
@@ -114,7 +119,8 @@ public class TestInbox {
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         uut.poll();
 
@@ -152,7 +158,8 @@ public class TestInbox {
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         uut.poll();
 
@@ -179,7 +186,8 @@ public class TestInbox {
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         
         // old entry shall be ignored
@@ -212,7 +220,8 @@ public class TestInbox {
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         assertEquals(expected, uut.absolutePathOf(entry));
     }

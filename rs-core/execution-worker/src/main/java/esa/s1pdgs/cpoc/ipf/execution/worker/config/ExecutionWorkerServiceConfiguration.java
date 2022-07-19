@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.ExecutionWorkerService;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -16,6 +17,9 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Configuration
 public class ExecutionWorkerServiceConfiguration {
+	
+	@Autowired
+	private CommonConfigurationProperties commonProperties;
 	
 	@Autowired
 	private AppStatus appStatus;
@@ -31,6 +35,6 @@ public class ExecutionWorkerServiceConfiguration {
 	
 	@Bean
 	public Function<IpfExecutionJob, List<Message<CatalogJob>>> executeJob() {
-		return new ExecutionWorkerService(appStatus, applicationProperties, devProperties, obsClient);
+		return new ExecutionWorkerService(commonProperties, appStatus, applicationProperties, devProperties, obsClient);
 	}
 }

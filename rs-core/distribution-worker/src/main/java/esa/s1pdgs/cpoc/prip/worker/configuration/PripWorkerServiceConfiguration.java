@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CompressionEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -14,6 +15,9 @@ import esa.s1pdgs.cpoc.prip.worker.service.PripPublishingService;
 
 @Configuration
 public class PripWorkerServiceConfiguration {
+	
+	@Autowired
+	private CommonConfigurationProperties commonProperties;
 	
 	@Autowired
 	private ObsClient obsClient;
@@ -29,7 +33,7 @@ public class PripWorkerServiceConfiguration {
 	
 	@Bean
 	public Consumer<CompressionEvent> publish() {
-		return new PripPublishingService(obsClient, metadataClient, pripMetadataRepo, props);
+		return new PripPublishingService(commonProperties, obsClient, metadataClient, pripMetadataRepo, props);
 	}
 
 }

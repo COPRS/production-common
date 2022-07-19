@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessTimeoutException;
@@ -50,6 +51,9 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
  */
 public class ExecutionWorkerServiceTest extends MockPropertiesTest {
 
+	@Mock
+	private CommonConfigurationProperties commonProperties;
+	
     /**
      * Output processsor
      */
@@ -113,7 +117,7 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
             workingDir.mkdir();
         }
         mockWorkingdirProperties(workingDir.toPath());
-        processor = new ExecutionWorkerService(appStatus, properties, devProperties,
+        processor = new ExecutionWorkerService(commonProperties, appStatus, properties, devProperties,
                 obsClient);
         procExecutorSrv = Executors.newSingleThreadExecutor();
         procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);

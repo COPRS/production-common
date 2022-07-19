@@ -13,6 +13,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.compression.worker.file.FileDownloader;
@@ -30,11 +31,14 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class CompressProcessor extends AbstractProcessor implements Function<CatalogEvent, Message<CompressionEvent>> {
 	private static final Logger LOGGER = LogManager.getLogger(CompressProcessor.class);
+	
+	private final CommonConfigurationProperties commonProperties;
 
 	@Autowired
-	public CompressProcessor(final AppStatus appStatus, final CompressionWorkerConfigurationProperties properties,
+	public CompressProcessor(final CommonConfigurationProperties commonProperties, final AppStatus appStatus, final CompressionWorkerConfigurationProperties properties,
 			final ObsClient obsClient) {
 		super(appStatus, properties, obsClient);
+		this.commonProperties = commonProperties;
 	}
 
 	@Override
@@ -42,6 +46,8 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 		final String workDir = properties.getWorkingDirectory();
 
 		final Reporting report = ReportingUtils.newReportingBuilder(MissionId.fromFileName(event.getKeyObjectStorage()))
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(event.getUid()).newReporting("CompressionProcessing");
 
 		// Initialize the pool processor executor

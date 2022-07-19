@@ -44,6 +44,7 @@ import org.w3c.dom.Node;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -92,6 +93,8 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(ExecutionWorkerService.class);
 
+	private final CommonConfigurationProperties commonProperties;
+	
 	/**
 	 * AppStatus
 	 */
@@ -111,12 +114,13 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	 * Output processsor
 	 */
 	private final ObsClient obsClient;
-
+	
 	/**
 	 */
 	@Autowired
-	public ExecutionWorkerService(final AppStatus appStatus, final ApplicationProperties properties,
+	public ExecutionWorkerService(final CommonConfigurationProperties commonProperties, final AppStatus appStatus, final ApplicationProperties properties,
 			final DevProperties devProperties, final ObsClient obsClient) {
+		this.commonProperties = commonProperties;
 		this.appStatus = appStatus;
 		this.devProperties = devProperties;
 		this.properties = properties;
@@ -134,6 +138,8 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				.getMetadata().get(MissionId.FIELD_NAME));
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(job.getUid())
 				.newReporting("JobProcessing");		
 		
