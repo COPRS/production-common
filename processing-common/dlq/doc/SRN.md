@@ -17,11 +17,11 @@ The DLQ Manager polls the configured dead letter queue topic for failed processi
 - Delete: Ignore the message (the error will be deleted)
 - NoAction: Disable rule without deleting the error message
 
-**TargetTopic**: The target topic for restart. If not set, the original topic is used.
+**TargetTopic**: The target topic for restart. If not set, the original topic is used (optional).
 
 **MaxRetry**: Maximum retry for error.
 
-**Comment**: Description and further notes about an error.
+**Comment**: Description and further notes about an error (optional).
 
 **Priority**: For the case when several rules match the same errorID, the rule with the highest priority is applied.
 
@@ -30,17 +30,17 @@ Example rule table configuration:
 app.dlq-manager.dlq-manager.routing.es.errorTitle=Elasticsearch issues
 app.dlq-manager.dlq-manager.routing.es.errorID=.*Elasticsearch.*
 app.dlq-manager.dlq-manager.routing.es.actionType=Restart
-app.dlq-manager.dlq-manager.routing.es.targetTopic=
+app.dlq-manager.dlq-manager.routing.es.targetTopic=topic-example
 app.dlq-manager.dlq-manager.routing.es.maxRetry=1
 app.dlq-manager.dlq-manager.routing.es.priority=100
-app.dlq-manager.dlq-manager.routing.es.comment=
+app.dlq-manager.dlq-manager.routing.es.comment=Explaination of Elasticsearch issues
 app.dlq-manager.dlq-manager.routing.timeout.errorTitle=Any Timeout
 app.dlq-manager.dlq-manager.routing.timeout.errorID=.*(?i:timeout).*
 app.dlq-manager.dlq-manager.routing.timeout.actionType=Restart
-app.dlq-manager.dlq-manager.routing.timeout.targetTopic=
+#app.dlq-manager.dlq-manager.routing.timeout.targetTopic=
 app.dlq-manager.dlq-manager.routing.timeout.maxRetry=1
 app.dlq-manager.dlq-manager.routing.timeout.priority=50
-app.dlq-manager.dlq-manager.routing.timeout.comment=
+#app.dlq-manager.dlq-manager.routing.timeout.comment=
 ```
 
 ## Requirements
