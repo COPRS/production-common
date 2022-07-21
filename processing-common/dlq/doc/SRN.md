@@ -8,34 +8,40 @@ The RS Core component Dead Letter Queue is responsible for automated restarting 
 
 The DLQ Manager polls the configured dead letter queue topic for failed processing messages. The messages are then routed according to a set of routing rules. A rule consists of the following attributes.
 
-ErrorTitle: Title of the error type
-ErrorID: Regex to identify an error
-ActionType:
+**ErrorTitle**: Title of the error type.
+
+**ErrorID**: Regex to identify an error.
+
+**ActionType**:
 - Restart: Republish message in error message while MaxRetry is not reached, else move it to the Parking Lot
 - Delete: Ignore the message (the error will be deleted)
 - NoAction: Disable rule without deleting the error message
-TargetTopic: The target topic for restart. If not set, the original topic is used.
-MaxRetry: Maximum retry for error
-Comment: Description and further notes about an error
-Priority: For the case when several rules match the same errorID, the rule with the highest priority is applied
+
+**TargetTopic**: The target topic for restart. If not set, the original topic is used (optional).
+
+**MaxRetry**: Maximum retry for error.
+
+**Comment**: Description and further notes about an error (optional).
+
+**Priority**: For the case when several rules match the same errorID, the rule with the highest priority is applied.
 
 Example rule table configuration:
-
+```Bash
 app.dlq-manager.dlq-manager.routing.es.errorTitle=Elasticsearch issues
 app.dlq-manager.dlq-manager.routing.es.errorID=.*Elasticsearch.*
 app.dlq-manager.dlq-manager.routing.es.actionType=Restart
-&#35;app.dlq-manager.dlq-manager.routing.es.targetTopic=
+app.dlq-manager.dlq-manager.routing.es.targetTopic=topic-example
 app.dlq-manager.dlq-manager.routing.es.maxRetry=1
 app.dlq-manager.dlq-manager.routing.es.priority=100
-&#35;app.dlq-manager.dlq-manager.routing.es.comment=
+app.dlq-manager.dlq-manager.routing.es.comment=Explaination of Elasticsearch issues
 app.dlq-manager.dlq-manager.routing.timeout.errorTitle=Any Timeout
 app.dlq-manager.dlq-manager.routing.timeout.errorID=.*(?i:timeout).*
 app.dlq-manager.dlq-manager.routing.timeout.actionType=Restart
-&#35;app.dlq-manager.dlq-manager.routing.timeout.targetTopic=
+#app.dlq-manager.dlq-manager.routing.timeout.targetTopic=
 app.dlq-manager.dlq-manager.routing.timeout.maxRetry=1
 app.dlq-manager.dlq-manager.routing.timeout.priority=50
-&#35;app.dlq-manager.dlq-manager.routing.timeout.comment=
-
+#app.dlq-manager.dlq-manager.routing.timeout.comment=
+```
 
 ## Requirements
 
