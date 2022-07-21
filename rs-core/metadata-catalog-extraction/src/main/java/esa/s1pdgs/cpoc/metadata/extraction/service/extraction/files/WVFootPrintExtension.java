@@ -234,12 +234,16 @@ public class WVFootPrintExtension {
 		geoShape.put("coordinates", new JSONArray().put(coordinates));
 		
 		// RS-280: Use Elasticsearch Dateline Support
-		geoShape.put("orientation", FootprintUtil.elasticsearchPolygonOrientation(
+		final String orientation = FootprintUtil.elasticsearchPolygonOrientation(
 				boundingPolygon.get(0).getLon(),
 				boundingPolygon.get(1).getLon(),
 				boundingPolygon.get(2).getLon(),
 				boundingPolygon.get(3).getLon()
-		));
+		);
+		geoShape.put("orientation", orientation);
+		if ("clockwise".equals(orientation)) {
+			LOGGER.info("Adding dateline crossing marker");
+		}
 		
 		LOGGER.debug(String.format("geo shape: %s", geoShape));
 

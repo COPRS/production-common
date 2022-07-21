@@ -742,7 +742,11 @@ public class ExtractMetadata {
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
 
 		// RS-280: Use Elasticsearch Dateline Support
-		geoShape.put("orientation", FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0])));
+		final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
+		geoShape.put("orientation", orientation);
+		if ("clockwise".equals(orientation)) {
+			LOGGER.info("Adding dateline crossing marker");
+		}
 		
 		return geoShape;
 	}
@@ -1194,12 +1198,16 @@ public class ExtractMetadata {
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
 		
 		// RS-280: Use Elasticsearch Dateline Support
-		geoShape.put("orientation", FootprintUtil.elasticsearchPolygonOrientation(
+		final String orientation = FootprintUtil.elasticsearchPolygonOrientation(
 				Double.parseDouble(aLongitude),
 				Double.parseDouble(bLongitude),
 				Double.parseDouble(cLongitude),
 				Double.parseDouble(dLongitude)
-		));
+		);
+		geoShape.put("orientation", orientation);
+		if ("clockwise".equals(orientation)) {
+			LOGGER.info("Adding dateline crossing marker");
+		}
 
 		return geoShape;
 	}
@@ -1250,12 +1258,16 @@ public class ExtractMetadata {
 		geoShape.put("coordinates", new JSONArray().put(geoShapeCoordinates));
 		
 		// RS-280: Use Elasticsearch Dateline Support
-		geoShape.put("orientation", FootprintUtil.elasticsearchPolygonOrientation(
+		final String orientation = FootprintUtil.elasticsearchPolygonOrientation(
 				Double.parseDouble(aLongitude),
 				Double.parseDouble(bLongitude),
 				Double.parseDouble(cLongitude),
 				Double.parseDouble(dLongitude)
-		));
+		);
+		geoShape.put("orientation", orientation);
+		if ("clockwise".equals(orientation)) {
+			LOGGER.info("Adding dateline crossing marker");
+		}
 
 		return geoShape;
 	}

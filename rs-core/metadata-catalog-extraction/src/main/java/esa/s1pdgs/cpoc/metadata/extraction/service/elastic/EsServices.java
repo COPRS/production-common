@@ -256,6 +256,9 @@ public class EsServices {
 			}
 			final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
 			geometry.put("orientation", orientation);
+			if ("clockwise".equals(orientation)) {
+				LOGGER.info("Adding dateline crossing marker for {}", id);
+			}
 		}
 		
 		try {
