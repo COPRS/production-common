@@ -214,6 +214,10 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		
 		// RS-407
 		new ProductMetadataCustomObjectFiller(catalogEvent, output).fillCustomObject();
+		
+		// RS-444
+		output.setEndToEndProduct(catalogEvent.getProductFamily().isEndToEndFamily());
+		
 		fillTimelinessValues(catalogEvent, mission, output);
 
 		return output.build();
