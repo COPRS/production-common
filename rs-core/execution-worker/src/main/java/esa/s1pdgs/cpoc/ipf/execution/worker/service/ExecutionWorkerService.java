@@ -14,7 +14,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -65,8 +64,6 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.UnrecoverableErrorAwareObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
@@ -262,22 +259,20 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			throws Exception {
 		boolean poolProcessing = false;
 		final List<Message<CatalogJob>> catalogJobs = new ArrayList<>();
-
+		
 		try {
 			LOGGER.info("{} Starting process executor", getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));
 			final Future<?> submittedFuture = procCompletionSrv.submit(procExecutor);
 			poolProcessing = true;
 
-			final List<ObsDownloadObject> downloadToBatch;
 			if (devProperties.getStepsActivation().get("download")) {
 				checkThreadInterrupted();
 				LOGGER.info("{} Preparing local working directory",
 						getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
-				downloadToBatch = inputDownloader.processInputs(reporting);
+				inputDownloader.processInputs(reporting);
 			} else {
 				LOGGER.info("{} Preparing local working directory bypassed",
 						getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
-				downloadToBatch = Collections.emptyList();
 			}
 			waitForPoolProcessesEnding(getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job), submittedFuture,
 					procCompletionSrv, properties.getTmProcAllTasksS() * 1000L);
@@ -291,28 +286,34 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				LOGGER.info("{} Processing l0 outputs bypasssed", getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
 			}
 
-			// If there was a missing chunk, we submit a warning in order to deal with the
-			// missing chunk and operator needs to decide, whether to restart it or delete
-			// it.
 
-			final List<String> missingChunks = downloadToBatch.stream()
-					.filter(o -> o.getFamily() == ProductFamily.INVALID).map(ObsObject::getKey)
-					.collect(Collectors.toList());
+			/* 
+			 * This code is not used any more in the SCDF context:
+			 */
+			
+			//          // If there was a missing chunk, we submit a warning in order to deal with the
+			//          // missing chunk and operator needs to decide, whether to restart it or delete
+			//           s// it.
 
-			final String warningMessage;
-			if (!missingChunks.isEmpty()) {
-				warningMessage = String.format(
-						"Missing RAWs detected for successful production %s: %s. "
-								+ "Restart if chunks become available or delete this request if they are lost",
-						job.getUid().toString(), missingChunks);
-			} else if (job.isTimedOut()) {
-				warningMessage = String.format(
-						"JobGeneration timed out before successful production %s. "
-								+ "Restart if missing inputs become available or delete this request if they are lost",
-								job.getUid().toString());
-			} else {
-				warningMessage = "";
-			}
+			
+			//			final List<String> missingChunks = downloadToBatch.stream()
+			//					.filter(o -> o.getFamily() == ProductFamily.INVALID).map(ObsObject::getKey)
+			//					.collect(Collectors.toList());
+			//
+			//			final String warningMessage;
+			//			if (!missingChunks.isEmpty()) {
+			//				warningMessage = String.format(
+			//						"Missing RAWs detected for successful production %s: %s. "
+			//								+ "Restart if chunks become available or delete this request if they are lost",
+			//						job.getUid().toString(), missingChunks);
+			//			} else if (job.isTimedOut()) {
+			//				warningMessage = String.format(
+			//						"JobGeneration timed out before successful production %s. "
+			//								+ "Restart if missing inputs become available or delete this request if they are lost",
+			//								job.getUid().toString());
+			//			} else {
+			//				warningMessage = "";
+			//			}
 			
 			return catalogJobs;
 		} catch (Exception e) {
