@@ -63,15 +63,6 @@ public class OutputProcessor {
 	 */
 	protected static final String NOT_KEY_OBS = "IT_IS_NOT_A_KEY";
 
-	/**
-	 * ISIP extension
-	 */
-	protected static final String EXT_ISIP = "ISIP";
-
-	/**
-	 * ISIP extension
-	 */
-	protected static final String EXT_SAFE = "SAFE";
 
 	/**
 	 * OBS service
@@ -176,7 +167,7 @@ public class OutputProcessor {
 		this.properties = properties;
 		this.debugMode = debugMode;
 		
-		this.outputUtils = new OutputUtils(prefixMonitorLogs);
+		this.outputUtils = new OutputUtils(properties, prefixMonitorLogs);
 	}
 	
 	/**
@@ -199,7 +190,7 @@ public class OutputProcessor {
 
 			// Extract the product name, the complete filepath, job output and
 			// the mode
-			final String productName = getProductName(line);
+			final String productName = outputUtils.getProductName(line);
 			final String filePath = getFilePath(line, productName);
 			final LevelJobOutputDto matchOutput = getMatchOutput(productName);
 
@@ -455,25 +446,6 @@ public class OutputProcessor {
 
 		// This should not happen other than enum was modified
 		throw new IllegalArgumentException("Unknown polarisation provided");
-	}
-
-	/**
-	 * Extract the product name from the line of the result file
-	 * 
-	 */
-	private String getProductName(final String line) {
-		// Extract the product name and the complete filepath
-		// First, remove the first directory (NRT or REPORT)
-		String productName = line;
-		final int index = line.indexOf('/');
-		if (index != -1) {
-			productName = line.substring(index + 1);
-		}
-		// Second: if file ISIP, retrieve only .SAFE
-		if (properties.isChangeIsipToSafe() && productName.toUpperCase().endsWith(EXT_ISIP)) {
-			productName = productName.substring(0, productName.length() - EXT_ISIP.length()) + EXT_SAFE;
-		}
-		return productName;
 	}
 
 	/**

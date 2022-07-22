@@ -206,7 +206,7 @@ public class OutputProcessorTest {
             SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, InternalErrorException {
     	
-    	OutputUtils outputUtils = new OutputUtils("");
+    	OutputUtils outputUtils = new OutputUtils(properties, "");
         final List<String> result = outputUtils.extractFiles(PATH_DIRECTORY_TEST + "/outputs.list", inputMessage.getWorkDirectory());
     	
         assertEquals(9, result.size());
@@ -238,7 +238,7 @@ public class OutputProcessorTest {
             SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, InternalErrorException {
         
-        OutputUtils outputUtils = new OutputUtils("");
+        OutputUtils outputUtils = new OutputUtils(properties, "");
         final List<String> result = outputUtils.extractFiles("*.list", inputMessage.getWorkDirectory());
         
         
@@ -268,22 +268,21 @@ public class OutputProcessorTest {
     public void testGetProductName() throws NoSuchMethodException,
             SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException {
-        final Method method = processor.getClass().getDeclaredMethod("getProductName",
-                String.class);
-        method.setAccessible(true);
+        
+        OutputUtils outputUtils = new OutputUtils(properties, "");
 
-        String str = (String) method.invoke(processor, "NRT/file.xml");
+        String str = outputUtils.getProductName("NRT/file.xml");
         assertEquals("file.xml", str);
 
-        str = (String) method.invoke(processor, "file2.xml");
+        str = outputUtils.getProductName("file2.xml");
         assertEquals("file2.xml", str);
 
-        str = (String) method.invoke(processor, "NRT/DIR/file2.xml");
+        str = outputUtils.getProductName("NRT/DIR/file2.xml");
         assertEquals("DIR/file2.xml", str);
 
-        str = (String) method.invoke(processor,
-                "NRT/file2." + OutputProcessor.EXT_ISIP.toLowerCase());
-        assertEquals("file2." + OutputProcessor.EXT_SAFE, str);
+        str = outputUtils.getProductName(
+                "NRT/file2." + OutputUtils.EXT_ISIP.toLowerCase());
+        assertEquals("file2." + OutputUtils.EXT_SAFE, str);
     }
 
     /**
@@ -311,11 +310,11 @@ public class OutputProcessorTest {
         assertEquals(PATH_DIRECTORY_TEST + "file2.xml", str);
 
         str = (String) method.invoke(processor,
-                "NRT/file2." + OutputProcessor.EXT_ISIP,
-                "file2." + OutputProcessor.EXT_SAFE);
+                "NRT/file2." + OutputUtils.EXT_ISIP,
+                "file2." + OutputUtils.EXT_SAFE);
         assertEquals(
-                PATH_DIRECTORY_TEST + "NRT/file2." + OutputProcessor.EXT_ISIP
-                        + File.separator + "file2." + OutputProcessor.EXT_SAFE,
+                PATH_DIRECTORY_TEST + "NRT/file2." + OutputUtils.EXT_ISIP
+                        + File.separator + "file2." + OutputUtils.EXT_SAFE,
                 str);
     }
 

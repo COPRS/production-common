@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 
 /**
@@ -26,9 +27,16 @@ public class OutputUtils {
 	
 	private static final Logger LOGGER = LogManager.getLogger(OutputUtils.class);
 	
+	protected static final String EXT_ISIP = "ISIP";
+
+	protected static final String EXT_SAFE = "SAFE";
+	
 	private final String prefixMonitorLogs;
 	
-	public OutputUtils(final String prefixMonitorLogs) {
+	private final ApplicationProperties properties;
+	
+	public OutputUtils(final ApplicationProperties properties, final String prefixMonitorLogs) {
+		this.properties = properties;
 		this.prefixMonitorLogs = prefixMonitorLogs;
 	}
 	
@@ -75,6 +83,25 @@ public class OutputUtils {
 		}
 		return null;
 		
+	}
+	
+	/**
+	 * Extract the product name from the line of the result file
+	 * 
+	 */
+	public String getProductName(final String line) {
+		// Extract the product name and the complete filepath
+		// First, remove the first directory (NRT or REPORT)
+		String productName = line;
+		final int index = line.indexOf('/');
+		if (index != -1) {
+			productName = line.substring(index + 1);
+		}
+		// Second: if file ISIP, retrieve only .SAFE
+		if (properties.isChangeIsipToSafe() && productName.toUpperCase().endsWith(EXT_ISIP)) {
+			productName = productName.substring(0, productName.length() - EXT_ISIP.length()) + EXT_SAFE;
+		}
+		return productName;
 	}
 
 }
