@@ -29,6 +29,7 @@ import org.springframework.util.StreamUtils;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.mqi.MqiPublicationError;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.common.utils.Streams;
@@ -197,16 +198,17 @@ public class OutputProcessorTest {
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
+     * @throws InternalErrorException 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testExtractFiles() throws NoSuchMethodException,
             SecurityException, IllegalAccessException, IllegalArgumentException,
-            InvocationTargetException {
-        final Method method = processor.getClass().getDeclaredMethod("extractFiles");
-        method.setAccessible(true);
-
-        final List<String> result = (List) method.invoke(processor);
+            InvocationTargetException, InternalErrorException {
+    	
+    	OutputUtils outputUtils = new OutputUtils("");
+        final List<String> result = outputUtils.extractFiles(PATH_DIRECTORY_TEST + "/outputs.list", inputMessage.getWorkDirectory());
+    	
         assertEquals(9, result.size());
         assertEquals(
                 "NRT/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP",
@@ -228,16 +230,18 @@ public class OutputProcessorTest {
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
+     * @throws InternalErrorException 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testExtractFilesWithWildcard() throws NoSuchMethodException,
             SecurityException, IllegalAccessException, IllegalArgumentException,
-            InvocationTargetException {
-        final Method method = processorWithWildcardList.getClass().getDeclaredMethod("extractFiles");
-        method.setAccessible(true);
-
-        final List<String> result = (List) method.invoke(processorWithWildcardList);
+            InvocationTargetException, InternalErrorException {
+        
+        OutputUtils outputUtils = new OutputUtils("");
+        final List<String> result = outputUtils.extractFiles("*.list", inputMessage.getWorkDirectory());
+        
+        
         assertEquals(9, result.size());
         assertEquals(
                 "NRT/S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.ISIP",

@@ -65,6 +65,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.UnrecoverableErrorAwareObsClient;
+import esa.s1pdgs.cpoc.report.MissingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
@@ -239,14 +240,15 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		);
 		
 		List<Message<CatalogJob>> result = new ArrayList<>();
+		List<MissingOutput> missingOutputs = new ArrayList<>();
 		try {
-			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting, missingOutputs);
 		} catch (Exception e) {
-			reporting.error(errorReportMessage(e));
+			reporting.error(errorReportMessage(e), missingOutputs);
 			throw new RuntimeException(e);
 		}
 		
-		reporting.end(toReportingOutput(result, job.isDebug(), job.getT0_pdgs_date()), new ReportingMessage("End job processing"));
+		reporting.end(toReportingOutput(result, job.isDebug(), job.getT0_pdgs_date()), new ReportingMessage("End job processing"), missingOutputs);
 		return result;
 	}
 
@@ -255,7 +257,8 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			final OutputProcessor outputProcessor,
 			final ExecutorService procExecutorSrv, final ExecutorCompletionService<Void> procCompletionSrv,
 			final PoolExecutorCallable procExecutor,
-			final Reporting reporting /* TODO: Refactor to not expect an already begun reporting... */)
+			final Reporting reporting, /* TODO: Refactor to not expect an already begun reporting... */
+			final List<MissingOutput> missingOutputs)
 			throws Exception {
 		boolean poolProcessing = false;
 		final List<Message<CatalogJob>> catalogJobs = new ArrayList<>();

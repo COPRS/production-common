@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -91,6 +93,9 @@ public class ApplicationProperties {
 	 * Turn off workaround for S1 regarding ISIPs
 	 */
 	private boolean changeIsipToSafe = true;
+	
+	
+	private Map<String, Integer> productTypeEstimatedCount = new HashMap<>();
 
 	/**
      * Default constructor
@@ -337,4 +342,13 @@ public class ApplicationProperties {
 	public void setChangeIsipToSafe(boolean changeIsipToSafe) {
 		this.changeIsipToSafe = changeIsipToSafe;
 	}
+
+	public Map<String, Integer> getProductTypeEstimatedCount() {
+		return productTypeEstimatedCount;
+	}
+
+	public void setProductTypeEstimatedCount(Map<String, Integer> productTypeEstimatedCount) {
+		this.productTypeEstimatedCount = productTypeEstimatedCount;
+	}
+	
 }

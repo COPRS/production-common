@@ -149,5 +149,42 @@ public enum ProductFamily {
 	public boolean isSessionFamily() {
 		return (this == EDRS_SESSION || this == SESSION_RETRANSFER);
 	}
+	
+	public boolean isEndToEndFamily() {
+		return (this != AUXILIARY_FILE
+				&& this != AUXILIARY_FILE_ZIP
+				&& this != EDRS_SESSION 
+				&& this != SESSION_RETRANSFER 
+				&& this != L0_SEGMENT
+				&& this != L0_SEGMENT_ZIP
+				&& this != PLAN_AND_REPORT
+				&& this != PLAN_AND_REPORT_ZIP
+				&& this != SPP_MBU
+				&& this != BLANK 
+				&& this != INVALID 
+				&& this != GHOST 
+				&& this != JOB_ORDER 
+				&& this != DEBUG
+				&& this != FAILED_WORKDIR
+				&& this != L0_BLANK
+				&& this != L0_BLANK_ZIP
+				&& this != L0_JOB
+				&& this != L0_SEGMENT_JOB
+				&& this != L1_JOB
+				&& this != L2_JOB
+				&& this != L1_ETAD_JOB
+				&& this != SPP_MBU_JOB
+				&& this != SPP_OBS_JOB
+				&& this != L0_REPORT
+				&& this != L0_SEGMENT_REPORT
+				&& this != L1_REPORT
+				&& this != L2_REPORT
+				&& this != S2_AUX
+				&& this != S2_AUX_ZIP
+				&& this != S3_AUX
+				&& this != S3_AUX_ZIP);
+		
+	}
     
+	
 }

@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.report;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -58,10 +59,16 @@ public interface Reporting extends ReportingFactory {
 		public void end(ReportingOutput output, ReportingMessage reportingMessage, Map<String, String> quality) {}
 
 		@Override
+		public void end(final ReportingOutput output, final ReportingMessage reportingMessage, final List<MissingOutput> missingOutputs) {}
+		
+		@Override
 		public void warning(final ReportingOutput output, final ReportingMessage reportingMessage) {}
 
 		@Override
 		public void error(final ReportingMessage reportingMessage) {}
+		
+		@Override
+		public void error(final ReportingMessage reportingMessage, final List<MissingOutput> missingOutputs) {}
 
 		@Override
 		public Reporting newReporting(final String taskName) {
@@ -83,6 +90,8 @@ public interface Reporting extends ReportingFactory {
 	void begin(ReportingInput input, ReportingMessage reportingMessage);
 	void end(ReportingOutput output, ReportingMessage reportingMessage);
 	void end(ReportingOutput output, ReportingMessage reportingMessage, Map<String, String> quality);
+	void end(ReportingOutput output, ReportingMessage reportingMessage, List<MissingOutput> missingOutputs);
 	void warning(ReportingOutput output, ReportingMessage reportingMessage);
 	void error(ReportingMessage reportingMessage);
+	void error(ReportingMessage reportingMessage, List<MissingOutput> missingOutputs);
 }

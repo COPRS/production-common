@@ -1,26 +1,21 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.Message;
@@ -128,6 +123,8 @@ public class OutputProcessor {
 	public enum AcquisitionMode {
 		EW, IW, SM, WV, RF
 	}
+	
+	private final OutputUtils outputUtils;
 
 	/**
 	 * FIXME replace legacy constructor
@@ -178,45 +175,8 @@ public class OutputProcessor {
 		this.appLevel = appLevel;
 		this.properties = properties;
 		this.debugMode = debugMode;
-	}
-
-	/**
-	 * Extract the list of outputs from a file
-	 * 
-	 * @throws InternalErrorException when file cannot be read
-	 */
-	private List<String> extractFiles() throws InternalErrorException {
-		LOGGER.info("{} 1 - Extracting list of outputs", prefixMonitorLogs);
-		try {
-			// Allow wildcard * for List-File, searching for *.LIST
-			if (listFile.contains("*")) {
-				File dir = new File(workDirectory);
-				FileFilter fileFilter = new WildcardFileFilter(listFile);
-				List<File> files = Arrays.asList(dir.listFiles(fileFilter));
-
-				if (files.size() != 1) {
-					LOGGER.error("Found an unexpected number of LIST-files. Expected 1 found {}.", files.size());
-					throw new InternalErrorException(
-							"Found an unexpected number of LIST-files. Expected 1 found " + files.size() + ".");
-				}
-
-				return Files.lines(files.get(0).toPath()).collect(Collectors.toList());
-			} else {
-				return Files.lines(Paths.get(listFile)).collect(Collectors.toList());
-			}
-		} catch (final IOException | NullPointerException ioe) {
-			LOGGER.error("Cannot parse result list file {}: {}", listFile, ioe.getMessage());
-			throw new InternalErrorException("Cannot parse result list file " + listFile + ": " + ioe.getMessage(),
-					ioe);
-		}
-	}
-
-	private ProductFamily familyOf(final LevelJobOutputDto output) {
-		final ProductFamily family = ProductFamily.fromValue(output.getFamily());
-		if (family == ProductFamily.L0_SLICE && appLevel == ApplicationLevel.L0){			
-			return ProductFamily.L0_SEGMENT;
-		}
-		return family;
+		
+		this.outputUtils = new OutputUtils(prefixMonitorLogs);
 	}
 	
 	/**
@@ -247,7 +207,7 @@ public class OutputProcessor {
 			if (matchOutput == null) {
 				LOGGER.warn("Output {} ignored because no found matching regular expression", productName);
 			} else {
-				final ProductFamily family = familyOf(matchOutput);
+				final ProductFamily family = outputUtils.familyOf(matchOutput, appLevel);
 
 				final File file = new File(filePath);
 				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
@@ -726,7 +686,7 @@ public class OutputProcessor {
 		}
 
 		// Extract files
-		final List<String> lines = extractFiles();
+		final List<String> lines = outputUtils.extractFiles(listFile, workDirectory);
 		
 		sortOutputs(lines, uploadBatch, outputToPublish, reportToPublish, reportingFactory);
 	

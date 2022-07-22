@@ -246,7 +246,7 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
         mockAllStep(false);
         
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -278,7 +278,7 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
         mockDevProperties(false, true, true, true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -309,7 +309,7 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
         mockDevProperties(true, true, false, true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -337,7 +337,7 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
         mockDevProperties(true, true, true, false);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -370,7 +370,7 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
         mockAllStep(true);
 
         processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
 
         // Check step 3
         verify(procExecutor, times(1)).call();
