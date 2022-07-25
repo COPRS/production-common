@@ -18,6 +18,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -45,14 +46,16 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableInputOrigin;
 public class JobCreationService {
 	private static final Logger LOGGER = LogManager.getLogger(JobCreationService.class);
 
+	private final CommonConfigurationProperties commonProperties;
 	private final PreparationWorkerProperties prepperSettings;
 	private final ProcessProperties settings;
 	private final JobOrderAdapter.Factory jobOrderFactory;
 	private final ProductTypeAdapter typeAdapter;
 
-	public JobCreationService(final PreparationWorkerProperties prepperSettings, final ProcessProperties settings,
-			final JobOrderAdapter.Factory jobOrderFactory,
-			final ProductTypeAdapter typeAdapter) {
+	public JobCreationService(final CommonConfigurationProperties commonProperties,
+			final PreparationWorkerProperties prepperSettings, final ProcessProperties settings,
+			final JobOrderAdapter.Factory jobOrderFactory, final ProductTypeAdapter typeAdapter) {
+		this.commonProperties = commonProperties;
 		this.prepperSettings = prepperSettings;
 		this.settings = settings;
 		this.jobOrderFactory = jobOrderFactory;
@@ -63,7 +66,10 @@ public class JobCreationService {
 
 		MissionId mission = MissionId.valueOf((String) job.getProduct().getMetadata().get(MissionId.FIELD_NAME));
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder(mission).predecessor(job.getReportingId())
+		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(job.getReportingId())
 				.newReporting("JobGenerator");
 
 		reporting.begin(new ReportingMessage("Start job generation"));

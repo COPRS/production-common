@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.preparation.worker.db.AppDataJobRepository;
 import esa.s1pdgs.cpoc.preparation.worker.db.SequenceDao;
@@ -95,14 +96,14 @@ public class ServiceConfiguration {
 
 	@Bean
 	@Autowired
-	public JobCreationService publisher(final PreparationWorkerProperties settings,
-			final ProcessProperties processSettings, final ProductTypeAdapter typeAdapter,
-			final ElementMapper elementMapper, final XmlConverter xmlConverter) {
+	public JobCreationService publisher(final CommonConfigurationProperties commonProperties,
+			final PreparationWorkerProperties settings, final ProcessProperties processSettings,
+			final ProductTypeAdapter typeAdapter, final ElementMapper elementMapper, final XmlConverter xmlConverter) {
 		final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
 				(tasktableAdapter) -> tasktableAdapter.newJobOrder(processSettings, settings.getProductMode()),
 				typeAdapter, elementMapper, xmlConverter);
 
-		return new JobCreationService(settings, processSettings, jobOrderFactory, typeAdapter);
+		return new JobCreationService(commonProperties, settings, processSettings, jobOrderFactory, typeAdapter);
 	}
 
 }

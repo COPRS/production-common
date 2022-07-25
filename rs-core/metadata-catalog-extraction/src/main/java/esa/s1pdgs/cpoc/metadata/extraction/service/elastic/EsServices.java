@@ -45,6 +45,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataNotPresentException;
 import esa.s1pdgs.cpoc.common.time.TimeInterval;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.FootprintUtil;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties;
@@ -234,7 +236,7 @@ public class EsServices {
 		return warningMessage;
 	}
 
-	public void createMaskFootprintData(final MaskType maskType, final JSONObject product, final String id) throws Exception {
+	public void createMaskFootprintData(final MaskType maskType, final JSONObject feature, final String id) throws Exception {
 		final String footprintIndexName;
 		switch (maskType) {
 			case EW_SLC: footprintIndexName = EW_SLC_MASK_FOOTPRINT_INDEX_NAME; break;
@@ -243,8 +245,24 @@ public class EsServices {
 			case OVERPASS: footprintIndexName = OVERPASS_MASK_FOOTPRINT_INDEX_NAME; break;
 			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
 		}
+
+		// RS-280: Use Elasticsearch Dateline Support
+		final JSONObject geometry = feature.getJSONObject("geometry");
+		if ("Polygon".equals(geometry.getString("type"))) {
+			final List<Double> longitudes = new ArrayList<>();
+			final JSONArray exteriorRing = geometry.getJSONArray("coordinates").getJSONArray(0);
+			for (int idx = 0; idx < exteriorRing.length(); idx++) {
+				longitudes.add(exteriorRing.getJSONArray(idx).getDouble(0));
+			}
+			final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
+			geometry.put("orientation", orientation);
+			if ("clockwise".equals(orientation)) {
+				LOGGER.info("Adding dateline crossing marker for {}", id);
+			}
+		}
+		
 		try {
-			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(product.toString(),
+			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(feature.toString(),
 					XContentType.JSON).setRefreshPolicy(RefreshPolicy.WAIT_UNTIL);
 
 			final IndexResponse response = elasticsearchDAO.index(request);

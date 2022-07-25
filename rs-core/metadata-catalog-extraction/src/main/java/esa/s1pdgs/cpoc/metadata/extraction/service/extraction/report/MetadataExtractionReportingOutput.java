@@ -75,6 +75,9 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	@JsonProperty("product_metadata_custom_object")
 	private Map<String, Object> productMetadataCustomObject = new HashMap<>(); // RS-407
 	
+	@JsonProperty("end_to_end_product_boolean")
+	private boolean endToEndProduct; // RS-444
+	
 	// --------------------------------------------------------------------------
 	
 	public MetadataExtractionReportingOutput() {
@@ -217,5 +220,15 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	public void setProductMetadataCustomObject(Map<String, Object> productMetadataCustomObject) {
 		this.productMetadataCustomObject = productMetadataCustomObject;
 	}
+
+	public boolean isEndToEndProduct() {
+		return endToEndProduct;
+	}
+
+	public void setEndToEndProduct(boolean endToEndProduct) {
+		this.endToEndProduct = endToEndProduct;
+	}
+	
+	
 	
 }

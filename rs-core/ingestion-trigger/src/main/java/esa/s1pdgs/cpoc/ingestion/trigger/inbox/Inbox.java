@@ -15,6 +15,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -46,6 +47,7 @@ public final class Inbox {
 	private final ProductNameEvaluator nameEvaluator;
 	private final int stationRetentionTime;
     private final PathMetadataExtractor pathMetadataExtractor;
+    private final CommonConfigurationProperties commonProperties;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
@@ -58,7 +60,8 @@ public final class Inbox {
 			final String mode,
 			final String timeliness,
 			final ProductNameEvaluator nameEvaluator,
-			final PathMetadataExtractor pathMetadataExtractor
+			final PathMetadataExtractor pathMetadataExtractor,
+			final CommonConfigurationProperties commonProperties
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
@@ -72,6 +75,7 @@ public final class Inbox {
 		this.nameEvaluator = nameEvaluator;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 		this.pathMetadataExtractor = pathMetadataExtractor;
+		this.commonProperties = commonProperties;
 	}
 	
 	public final List<IngestionJob> poll() {
@@ -154,6 +158,8 @@ public final class Inbox {
 		}
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
 				.newReporting("IngestionTrigger");
 
 		final String productName;

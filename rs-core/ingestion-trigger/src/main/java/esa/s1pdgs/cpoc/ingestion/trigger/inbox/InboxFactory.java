@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractorImpl;
@@ -35,6 +36,7 @@ public class InboxFactory {
 	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
 	private final AuxipInboxAdapterFactory auxipInboxAdapterFactory;
 	private final EdipInboxAdapterFactory edipInboxAdapterFactory;
+	private final CommonConfigurationProperties commonProperties;
 
 	@Autowired
 	public InboxFactory(
@@ -42,13 +44,15 @@ public class InboxFactory {
 			final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory,
 			final XbipInboxAdapterFactory xbipInboxAdapterFactory,
 			final AuxipInboxAdapterFactory auxipInboxAdapterFactory,
-			final EdipInboxAdapterFactory edipInboxAdapterFactory
+			final EdipInboxAdapterFactory edipInboxAdapterFactory,
+			final CommonConfigurationProperties commonProperties
 	) {
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
 		this.fileSystemInboxAdapterFactory = fileSystemInboxAdapterFactory;
 		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
 		this.auxipInboxAdapterFactory = auxipInboxAdapterFactory;
 		this.edipInboxAdapterFactory = edipInboxAdapterFactory;
+		this.commonProperties = commonProperties;
 	}
 	
 	static final Date ignoreFilesBeforeDateFor(final InboxConfiguration config, final Date now) {
@@ -78,7 +82,8 @@ public class InboxFactory {
 				config.getMode(),
 				config.getTimeliness(),
 				newProductNameEvaluatorFor(config),
-				newPathMetadataExtractor(config)
+				newPathMetadataExtractor(config),
+				commonProperties
 		);
 	}
 	

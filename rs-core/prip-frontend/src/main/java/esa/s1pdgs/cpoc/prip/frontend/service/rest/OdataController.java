@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductActionProcessor;
@@ -30,6 +31,9 @@ import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 public class OdataController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(OdataController.class);
+	
+	@Autowired
+	private CommonConfigurationProperties commonProperties;
 
 	@Autowired
 	private EdmProvider edmProvider;
@@ -56,7 +60,7 @@ public class OdataController {
 		OData odata = OData.newInstance();
 		ServiceMetadata serviceMetadata = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(serviceMetadata);
-		handler.register(new ProductEntityProcessor(pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds, username));
+		handler.register(new ProductEntityProcessor(commonProperties, pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds, username));
 		handler.register(new ProductEntityCollectionProcessor(pripMetadataRepository));
 		handler.register(new ProductActionProcessor(pripMetadataRepository));
 		

@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
@@ -55,6 +56,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 	private static final String PATTERN_STR = "^S1[AB]_OPER_AUX_QCSTDB_.*$";
 	private static final Pattern PATTERN_NO_MDC = Pattern.compile(PATTERN_STR, Pattern.CASE_INSENSITIVE);
 
+	private final CommonConfigurationProperties commonProperties;
 	private final ObsClient obsClient;
 	private final MetadataClient metadataClient;
 	private final PripMetadataRepository pripMetadataRepo;
@@ -63,11 +65,13 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 	
 	@Autowired
 	public PripPublishingService(
+			final CommonConfigurationProperties commonProperties,
 			final ObsClient obsClient,
 			final MetadataClient metadataClient,
 			final PripMetadataRepository pripMetadataRepo,
 			final PripWorkerConfigurationProperties props
 	) {
+		this.commonProperties = commonProperties;
 		this.obsClient = obsClient;
 		this.metadataClient = metadataClient;
 		this.pripMetadataRepo = pripMetadataRepo;
@@ -84,6 +88,8 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 
 		final Reporting reporting = ReportingUtils
 				.newReportingBuilder(MissionId.fromFileName(compressionEvent.getKeyObjectStorage()))
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(compressionEvent.getUid()).newReporting("PripWorker");
 
 		final String name = CompressionEventUtil.removeZipFromKeyObjectStorage(compressionEvent.getKeyObjectStorage());

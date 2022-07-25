@@ -23,6 +23,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import esa.s1pdgs.cpoc.common.utils.FootprintUtil;
+
 class FootPrint {
 	private Point p1 = null;
 	private Point p2 = null;
@@ -113,6 +115,7 @@ public class WVFootPrintExtension {
 
 		JSONObject geoShape = new JSONObject();
 		JSONArray coordinates = new JSONArray();
+		ArrayList<Point> boundingPolygon = new ArrayList<Point>();
 
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -127,7 +130,6 @@ public class WVFootPrintExtension {
 
 			// System.out.println("#List: " + nodeFootprints.getLength());
 
-			ArrayList<Point> boundingPolygon = new ArrayList<Point>();
 			int footPrintScenario = 0; // 0 : start left side and number of footPrints is even
 										// 1 : start left side and number of footPrints is odd
 										// 2 : start right side and number of footPrints is even
@@ -199,8 +201,6 @@ public class WVFootPrintExtension {
 			boundingPolygon.add(pointC);
 			boundingPolygon.add(pointD);
 
-			;
-
 			for (Point p : boundingPolygon) {
 
 				// coordinates.put(new JSONArray("[" + String.format ("%f", p.getLat()) + "," +
@@ -232,11 +232,22 @@ public class WVFootPrintExtension {
 		geoShape.put("type", "Polygon");
 		geoShape.put("orientation", "counterclockwise");
 		geoShape.put("coordinates", new JSONArray().put(coordinates));
-
+		
+		// RS-280: Use Elasticsearch Dateline Support
+		final String orientation = FootprintUtil.elasticsearchPolygonOrientation(
+				boundingPolygon.get(0).getLon(),
+				boundingPolygon.get(1).getLon(),
+				boundingPolygon.get(2).getLon(),
+				boundingPolygon.get(3).getLon()
+		);
+		geoShape.put("orientation", orientation);
+		if ("clockwise".equals(orientation)) {
+			LOGGER.info("Adding dateline crossing marker");
+		}
+		
 		LOGGER.debug(String.format("geo shape: %s", geoShape));
 
 		return geoShape;
-		// return boundingPolygonAsString.toString();
 	}
 
 	private static boolean footPrintStartsLeftSide(FootPrint footPrint, FootPrint secondFootPrint) {

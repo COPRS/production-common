@@ -1,12 +1,15 @@
 package esa.s1pdgs.cpoc.report.message;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import esa.s1pdgs.cpoc.report.MissingOutput;
 import esa.s1pdgs.cpoc.report.Reporting.Event;
 import esa.s1pdgs.cpoc.report.Reporting.Status;
 import esa.s1pdgs.cpoc.report.ReportingInput;
@@ -32,6 +35,9 @@ public class EndTask extends Task {
 	private ReportingOutput output = ReportingOutput.NULL;
 	
 	private ReportingInput input = ReportingInput.NULL;
+	
+	@JsonProperty("missing_output")
+	private List<MissingOutput> missingOutputs = new ArrayList<>();
 	
 	// default: empty
 	private Map<String,String> quality = new LinkedHashMap<>();
@@ -88,6 +94,14 @@ public class EndTask extends Task {
 		this.output = output;
 	}
 	
+	public List<MissingOutput> getMissingOutputs() {
+		return missingOutputs;
+	}
+
+	public void setMissingOutputs(List<MissingOutput> missingOutputs) {
+		this.missingOutputs = missingOutputs;
+	}
+
 	public ReportingInput getInput() {
 		return input;
 	}

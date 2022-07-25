@@ -160,20 +160,35 @@ public final class ReportAdapter implements Reporting {
 	
 	@Override
 	public final void end(final ReportingOutput out, final ReportingMessage reportingMessage) {
-		end(Level.INFO, out, reportingMessage, Collections.emptyMap());
+		end(Level.INFO, out, reportingMessage, Collections.emptyMap(), Collections.emptyList());
 	}
 	
 	@Override
 	public void end(final ReportingOutput out, final ReportingMessage reportingMessage, final Map<String, String> quality) {
-		end(Level.INFO, out, reportingMessage, quality);
-	}	
+		end(Level.INFO, out, reportingMessage, quality, Collections.emptyList());
+	}
+	
+	@Override
+	public final void end(final ReportingOutput out, final ReportingMessage reportingMessage, final List<MissingOutput> missingOutputs) {
+		end(Level.INFO, out, reportingMessage, Collections.emptyMap(), missingOutputs);
+	}
 
 	@Override
 	public final void warning(final ReportingOutput out, final ReportingMessage reportingMessage) {
-		end(Level.WARNING, out, reportingMessage, Collections.emptyMap());
+		end(Level.WARNING, out, reportingMessage, Collections.emptyMap(), Collections.emptyList());
 	}
 	
-	private final void end(final Level level, final ReportingOutput out, final ReportingMessage reportingMessage, final Map<String, String> quality) {
+	@Override
+	public final void error(final ReportingMessage reportingMessage) {
+		errorEndTask(reportingMessage, Collections.emptyList());
+	}
+	
+	@Override
+	public final void error(final ReportingMessage reportingMessage, final List<MissingOutput> missingOutputs) {
+		errorEndTask(reportingMessage, missingOutputs);
+	}
+	
+	private final void end(final Level level, final ReportingOutput out, final ReportingMessage reportingMessage, final Map<String, String> quality, final List<MissingOutput> missingOutputs) {
 		final long deltaTMillis = getDeltaMillis();
 		final long transferAmount = reportingMessage.getTransferAmount();
 		final EndTask endTask = new EndTask(
@@ -191,6 +206,9 @@ public final class ReportAdapter implements Reporting {
 		if (!quality.isEmpty()) {
 			endTask.setQuality(quality);
 		}
+		if (!missingOutputs.isEmpty()) {
+			endTask.setMissingOutputs(missingOutputs);
+		}
 		
 		Header header = new Header(level, mission);
 		header.setRsChainName(rsChainName);
@@ -205,10 +223,9 @@ public final class ReportAdapter implements Reporting {
 		input = ReportingInput.NULL;
 	}
 
-	@Override
-	public final void error(final ReportingMessage reportingMessage) {
+	private final void errorEndTask(final ReportingMessage reportingMessage, final List<MissingOutput> missingOutputs) {
 		final long deltaTMillis = getDeltaMillis();
-		final Task endTask = new EndTask(
+		final EndTask endTask = new EndTask(
 				uid.toString(), 
 				taskName, 
 				Status.NOK, 
@@ -216,6 +233,10 @@ public final class ReportAdapter implements Reporting {
 				ReportingOutput.NULL,
 				input
 		);
+		
+		if (!missingOutputs.isEmpty()) {
+			endTask.setMissingOutputs(missingOutputs);
+		}
 		
 		Header header = new Header(Level.ERROR, mission);
 		header.setRsChainName(rsChainName);
@@ -236,6 +257,8 @@ public final class ReportAdapter implements Reporting {
 				.root(rootUid)
 				.parent(uid)				
 				.addTags(tags)
+				.rsChainName(rsChainName)
+				.rsChainVersion(rsChainVersion)
 				.newReporting(taskName);	
 	}
 

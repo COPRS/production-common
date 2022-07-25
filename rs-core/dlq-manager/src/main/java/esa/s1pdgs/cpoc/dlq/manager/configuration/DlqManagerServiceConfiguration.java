@@ -8,12 +8,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.dlq.manager.model.routing.RoutingTable;
 import esa.s1pdgs.cpoc.dlq.manager.service.DlqManagerService;
 
 @Configuration
 public class DlqManagerServiceConfiguration {
 
+	@Autowired
+	private CommonConfigurationProperties commonProperties;
+	
 	@Autowired
 	private RoutingTable routingTable;
 
@@ -22,6 +26,6 @@ public class DlqManagerServiceConfiguration {
 	
 	@Bean
 	public Function<Message<byte[]>, List<Message<byte[]>>> route() {
-		return new DlqManagerService(routingTable, dlqManagerConfigurationProperties);
+		return new DlqManagerService(commonProperties, routingTable, dlqManagerConfigurationProperties);
 	}
 }

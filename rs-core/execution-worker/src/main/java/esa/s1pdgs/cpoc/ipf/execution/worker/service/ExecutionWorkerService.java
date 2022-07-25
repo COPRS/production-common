@@ -14,7 +14,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -44,6 +43,7 @@ import org.w3c.dom.Node;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -64,9 +64,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobInputDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.UnrecoverableErrorAwareObsClient;
+import esa.s1pdgs.cpoc.report.MissingOutput;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntries;
 import esa.s1pdgs.cpoc.report.ReportingFilenameEntry;
@@ -92,6 +91,8 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(ExecutionWorkerService.class);
 
+	private final CommonConfigurationProperties commonProperties;
+	
 	/**
 	 * AppStatus
 	 */
@@ -111,12 +112,13 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	 * Output processsor
 	 */
 	private final ObsClient obsClient;
-
+	
 	/**
 	 */
 	@Autowired
-	public ExecutionWorkerService(final AppStatus appStatus, final ApplicationProperties properties,
+	public ExecutionWorkerService(final CommonConfigurationProperties commonProperties, final AppStatus appStatus, final ApplicationProperties properties,
 			final DevProperties devProperties, final ObsClient obsClient) {
+		this.commonProperties = commonProperties;
 		this.appStatus = appStatus;
 		this.devProperties = devProperties;
 		this.properties = properties;
@@ -134,6 +136,8 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				.getMetadata().get(MissionId.FIELD_NAME));
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(job.getUid())
 				.newReporting("JobProcessing");		
 		
@@ -236,14 +240,15 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		);
 		
 		List<Message<CatalogJob>> result = new ArrayList<>();
+		List<MissingOutput> missingOutputs = new ArrayList<>();
 		try {
-			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting, missingOutputs);
 		} catch (Exception e) {
-			reporting.error(errorReportMessage(e));
+			reporting.error(errorReportMessage(e), missingOutputs);
 			throw new RuntimeException(e);
 		}
 		
-		reporting.end(toReportingOutput(result, job.isDebug(), job.getT0_pdgs_date()), new ReportingMessage("End job processing"));
+		reporting.end(toReportingOutput(result, job.isDebug(), job.getT0_pdgs_date()), new ReportingMessage("End job processing"), missingOutputs);
 		return result;
 	}
 
@@ -252,26 +257,25 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			final OutputProcessor outputProcessor,
 			final ExecutorService procExecutorSrv, final ExecutorCompletionService<Void> procCompletionSrv,
 			final PoolExecutorCallable procExecutor,
-			final Reporting reporting /* TODO: Refactor to not expect an already begun reporting... */)
+			final Reporting reporting, /* TODO: Refactor to not expect an already begun reporting... */
+			final List<MissingOutput> missingOutputs)
 			throws Exception {
 		boolean poolProcessing = false;
 		final List<Message<CatalogJob>> catalogJobs = new ArrayList<>();
-
+		
 		try {
 			LOGGER.info("{} Starting process executor", getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));
 			final Future<?> submittedFuture = procCompletionSrv.submit(procExecutor);
 			poolProcessing = true;
 
-			final List<ObsDownloadObject> downloadToBatch;
 			if (devProperties.getStepsActivation().get("download")) {
 				checkThreadInterrupted();
 				LOGGER.info("{} Preparing local working directory",
 						getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
-				downloadToBatch = inputDownloader.processInputs(reporting);
+				inputDownloader.processInputs(reporting);
 			} else {
 				LOGGER.info("{} Preparing local working directory bypassed",
 						getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job));
-				downloadToBatch = Collections.emptyList();
 			}
 			waitForPoolProcessesEnding(getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job), submittedFuture,
 					procCompletionSrv, properties.getTmProcAllTasksS() * 1000L);
@@ -285,28 +289,34 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				LOGGER.info("{} Processing l0 outputs bypasssed", getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
 			}
 
-			// If there was a missing chunk, we submit a warning in order to deal with the
-			// missing chunk and operator needs to decide, whether to restart it or delete
-			// it.
 
-			final List<String> missingChunks = downloadToBatch.stream()
-					.filter(o -> o.getFamily() == ProductFamily.INVALID).map(ObsObject::getKey)
-					.collect(Collectors.toList());
+			/* 
+			 * This code is not used any more in the SCDF context:
+			 */
+			
+			//          // If there was a missing chunk, we submit a warning in order to deal with the
+			//          // missing chunk and operator needs to decide, whether to restart it or delete
+			//           s// it.
 
-			final String warningMessage;
-			if (!missingChunks.isEmpty()) {
-				warningMessage = String.format(
-						"Missing RAWs detected for successful production %s: %s. "
-								+ "Restart if chunks become available or delete this request if they are lost",
-						job.getUid().toString(), missingChunks);
-			} else if (job.isTimedOut()) {
-				warningMessage = String.format(
-						"JobGeneration timed out before successful production %s. "
-								+ "Restart if missing inputs become available or delete this request if they are lost",
-								job.getUid().toString());
-			} else {
-				warningMessage = "";
-			}
+			
+			//			final List<String> missingChunks = downloadToBatch.stream()
+			//					.filter(o -> o.getFamily() == ProductFamily.INVALID).map(ObsObject::getKey)
+			//					.collect(Collectors.toList());
+			//
+			//			final String warningMessage;
+			//			if (!missingChunks.isEmpty()) {
+			//				warningMessage = String.format(
+			//						"Missing RAWs detected for successful production %s: %s. "
+			//								+ "Restart if chunks become available or delete this request if they are lost",
+			//						job.getUid().toString(), missingChunks);
+			//			} else if (job.isTimedOut()) {
+			//				warningMessage = String.format(
+			//						"JobGeneration timed out before successful production %s. "
+			//								+ "Restart if missing inputs become available or delete this request if they are lost",
+			//								job.getUid().toString());
+			//			} else {
+			//				warningMessage = "";
+			//			}
 			
 			return catalogJobs;
 		} catch (Exception e) {
