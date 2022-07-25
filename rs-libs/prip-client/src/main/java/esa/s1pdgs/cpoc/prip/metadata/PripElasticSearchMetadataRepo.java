@@ -28,6 +28,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.common.geo.GeoShapeType;
+import org.elasticsearch.common.geo.Orientation;
 import org.elasticsearch.common.geo.builders.CoordinatesBuilder;
 import org.elasticsearch.common.geo.builders.LineStringBuilder;
 import org.elasticsearch.common.geo.builders.PointBuilder;
@@ -54,6 +55,7 @@ import org.springframework.stereotype.Service;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.FootprintUtil;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
@@ -550,10 +552,15 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
 		if (input instanceof Polygon) {
 			final Polygon polygon = (Polygon) input;
+			final List<Double> longitudes = new ArrayList<>();
 			final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
-			CollectionUtil.toList(polygon.getCoordinates()).forEach(coordinate -> coordBuilder.coordinate(coordinate.x, coordinate.y));
-
-			return new PolygonBuilder(coordBuilder).buildGeometry();
+			CollectionUtil.toList(polygon.getCoordinates()).forEach(coordinate -> {
+				coordBuilder.coordinate(coordinate.x, coordinate.y);
+				longitudes.add(coordinate.x);
+			});
+			final Orientation orientation = Orientation.fromString(
+					FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0])));
+			return new PolygonBuilder(coordBuilder, orientation).buildGeometry();
 
 		} else if (input instanceof LineString) {
 			final LineString lineString = (LineString) input;
