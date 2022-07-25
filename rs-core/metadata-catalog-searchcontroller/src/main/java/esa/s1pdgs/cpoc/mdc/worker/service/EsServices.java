@@ -385,7 +385,7 @@ public class EsServices {
 		
 		//RS-422: Allowing to use optional parameter bandIndexId on latestValCover query
 		if (bandIndexId != null) {
-			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("bandIndexId", bandIndexId));
+			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("bandIndexId.keyword", bandIndexId));
 		}
 		
 		LOGGER.debug("query composed is {}", queryBuilder);
