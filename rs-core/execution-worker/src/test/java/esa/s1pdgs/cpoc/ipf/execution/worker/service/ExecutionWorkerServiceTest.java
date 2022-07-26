@@ -35,6 +35,7 @@ import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfExecutionWorkerProcessTimeoutException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.TestUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
+import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputEstimation;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.test.MockPropertiesTest;
@@ -80,6 +81,9 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
 
     @Mock
     private OutputProcessor outputProcessor;
+    
+    @Mock
+    private OutputEstimation outputEstimation;
 
     @Mock
     private ExecutorService procExecutorSrv;
@@ -245,8 +249,8 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
     public void testCall() throws Exception {
         mockAllStep(false);
         
-        processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
+        processor.processJob(inputMessage, inputDownloader, outputProcessor, outputEstimation,
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -277,8 +281,8 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
         mockAllStep(false);
         mockDevProperties(false, true, true, true);
 
-        processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
+        processor.processJob(inputMessage, inputDownloader, outputProcessor, outputEstimation,
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -308,8 +312,8 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
         mockAllStep(false);
         mockDevProperties(true, true, false, true);
 
-        processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
+        processor.processJob(inputMessage, inputDownloader, outputProcessor, outputEstimation,
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -336,8 +340,8 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
         mockAllStep(false);
         mockDevProperties(true, true, true, false);
 
-        processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
+        processor.processJob(inputMessage, inputDownloader, outputProcessor, outputEstimation,
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();
@@ -369,8 +373,8 @@ public class ExecutionWorkerServiceTest extends MockPropertiesTest {
     public void testCallWhenException() throws Exception {
         mockAllStep(true);
 
-        processor.processJob(inputMessage, inputDownloader, outputProcessor,
-                procExecutorSrv, procCompletionSrv, procExecutor, reporting, Collections.emptyList());
+        processor.processJob(inputMessage, inputDownloader, outputProcessor, outputEstimation,
+                procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 
         // Check step 3
         verify(procExecutor, times(1)).call();

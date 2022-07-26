@@ -40,6 +40,24 @@ public class OutputUtils {
 		this.prefixMonitorLogs = prefixMonitorLogs;
 	}
 	
+	public boolean listFileExists(final String listFile, final String workDirectory) {
+		
+		if (listFile.contains("*")) {
+			File dir = new File(workDirectory);
+			FileFilter fileFilter = new WildcardFileFilter(listFile);
+			List<File> files = Arrays.asList(dir.listFiles(fileFilter));
+
+			if (files.size() != 1) {
+				return false;
+			} else {
+				return true;
+			}
+			
+		} else {
+			return Paths.get(listFile).toFile().exists();
+		}
+	}
+	
 	public List<String> extractFiles(final String listFile, final String workDirectory) throws InternalErrorException {
 		LOGGER.info("{} 1 - Extracting list of outputs", prefixMonitorLogs);
 		try {

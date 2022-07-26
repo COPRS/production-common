@@ -1,19 +1,19 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.metadata.model.MissionId;
-import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.report.MissingOutput;
 
@@ -23,136 +23,170 @@ public class OutputEstimation {
 
 	private final ApplicationProperties properties;
 
-	private final List<LevelJobOutputDto> authorizedOutputs;
+	private final IpfExecutionJob job;
 
 	private final String prefixMonitorLogs;
 
 	private final OutputUtils outputUtils;
 
-	public OutputEstimation(final ApplicationProperties properties, List<LevelJobOutputDto> authorizedOutputs,
-			final String prefixMonitorLogs) {
+	private final String listFile;
+
+	List<MissingOutput> missingOutputs;
+
+	public OutputEstimation(final ApplicationProperties properties, final IpfExecutionJob job,
+			final String prefixMonitorLogs, final String listFile, final List<MissingOutput> missingOutputs) {
 		this.properties = properties;
-		this.authorizedOutputs = authorizedOutputs;
+		this.job = job;
 		this.prefixMonitorLogs = prefixMonitorLogs;
+		this.listFile = listFile;
+		this.missingOutputs = missingOutputs;
 
 		this.outputUtils = new OutputUtils(this.properties, this.prefixMonitorLogs);
 	}
 
-	public List<MissingOutput> getMissingTypes(final String listFile, final String workDir, final MissionId missionId,
-			final ApplicationLevel appLevel, final CatalogEvent catalogEvent) throws InternalErrorException {
+	public void estimateWithoutError() throws InternalErrorException {
 
-		List<MissingOutput> missingOutputs = new ArrayList<>();
+		ProductFamily inputProductFamily = job.getPreparationJob().getCatalogEvent().getProductFamily();
 
-		for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
-
-			List<String> productsInWorkDir = outputUtils.extractFiles(listFile, workDir);
-
-			int productTypeCount = 0;
-
-			for (final String line : productsInWorkDir) {
-				
-				String productName = outputUtils.getProductName(line);
-				if(productName.contains(productType)) {
-					productTypeCount++;
-				}
+		if (inputProductFamily == ProductFamily.EDRS_SESSION) {
+			for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
+				int estimatedCount = properties.getProductTypeEstimatedCount().get(productType);
+				findMissingType(productType, estimatedCount);
 			}
-			
-			int estimatedCount = properties.getProductTypeEstimatedCount().get(productType);
+		} else {
 
-			if (productTypeCount < estimatedCount) {
-
-				LevelJobOutputDto levelJobOutputDto = outputUtils.levelJobOutputDtoOfProductType(productType,
-						authorizedOutputs);
-				if (levelJobOutputDto == null) {
-					LOGGER.warn("product type {} is not in joborder, skipping");
-					continue;
-				}
-
-				ProductFamily productFamily = outputUtils.familyOf(levelJobOutputDto, appLevel);
-
-				MissingOutput missingOutput = new MissingOutput();
-				missingOutput.setProductMetadataCustomObject(
-						productMetadataCustomObjectFor(missionId, productFamily, productType, catalogEvent));
-				missingOutput.setEstimatedCountInteger(estimatedCount);
-				missingOutput.setEndToEndProductBoolean(productFamily.isEndToEndFamily());
-
-				missingOutputs.add(missingOutput);
-
+			if (inputProductFamily == ProductFamily.S3_GRANULES) {
+				findMissingType(outputProductTypeFor(inputProductFamily), 1);
 			}
 		}
-		return missingOutputs;
 	}
 
-	public List<MissingOutput> getAllEstimatedTypes(final MissionId missionId, final ApplicationLevel appLevel,
-			final CatalogEvent catalogEvent) {
+	public void estimateWithError() {
 
-		List<MissingOutput> missingOutputs = new ArrayList<>();
+		ProductFamily inputProductFamily = job.getPreparationJob().getCatalogEvent().getProductFamily();
 
-		for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
-
-			LevelJobOutputDto levelJobOutputDto = outputUtils.levelJobOutputDtoOfProductType(productType,
-					authorizedOutputs);
-			if (levelJobOutputDto == null) {
-				LOGGER.warn("product type {} is not in joborder, skipping");
-				continue;
+		if (inputProductFamily == ProductFamily.EDRS_SESSION) {
+			for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
+				int estimatedCount = properties.getProductTypeEstimatedCount().get(productType);
+				addMissingOutput(productType, estimatedCount);
 			}
 
-			ProductFamily productFamily = outputUtils.familyOf(levelJobOutputDto, appLevel);
-
-			MissingOutput missingOutput = new MissingOutput();
-			missingOutput.setProductMetadataCustomObject(
-					productMetadataCustomObjectFor(missionId, productFamily, productType, catalogEvent));
-			missingOutput.setEstimatedCountInteger(properties.getProductTypeEstimatedCount().get(productType));
-			missingOutput.setEndToEndProductBoolean(productFamily.isEndToEndFamily());
-
-			missingOutputs.add(missingOutput);
+		} else {
+			if (inputProductFamily == ProductFamily.S3_GRANULES) {
+				addMissingOutput(outputProductTypeFor(inputProductFamily), 1);
+			}
 		}
-		return missingOutputs;
 	}
 
-	private Map<String, Object> productMetadataCustomObjectFor(final MissionId missionId,
-			final ProductFamily productFamily, final String productType, final CatalogEvent catalogEvent) {
+	private void findMissingType(final String productType, final int estimatedCount) throws InternalErrorException {
+
+		List<String> productsInWorkDir = null;
+
+		if (outputUtils.listFileExists(listFile, job.getWorkDirectory())) {
+			productsInWorkDir = outputUtils.extractFiles(listFile, job.getWorkDirectory());
+		} else {
+			File dir = new File(job.getWorkDirectory());
+			productsInWorkDir = Arrays.asList(dir.listFiles()).stream().map(f -> f.getName())
+					.collect(Collectors.toList());
+		}
+
+		int productTypeCount = 0;
+
+		for (final String line : productsInWorkDir) {
+
+			String productName = outputUtils.getProductName(line);
+			if (productName.contains(productType)) {
+				productTypeCount++;
+			}
+		}
+
+		if (productTypeCount < estimatedCount) {
+
+			addMissingOutput(productType, estimatedCount);
+		}
+	}
+
+	private void addMissingOutput(final String productType, final int estimatedCount) {
+		ProductFamily productFamily = familyFor(productType);
+
+		if (productFamily == null) {
+			LOGGER.warn("product type {} is not in joborder, skipping");
+			return;
+		}
+
+		MissingOutput missingOutput = new MissingOutput();
+		missingOutput.setProductMetadataCustomObject(productMetadataCustomObjectFor(productFamily, productType));
+		missingOutput.setEstimatedCountInteger(estimatedCount);
+		missingOutput.setEndToEndProductBoolean(productFamily.isEndToEndFamily());
+
+		missingOutputs.add(missingOutput);
+	}
+
+	private String outputProductTypeFor(final ProductFamily inputProductFamily) {
+
+		String inputProductType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("productType");
+
+		if (inputProductFamily == ProductFamily.S3_GRANULES) {
+			return inputProductType.replace("G", "_");
+		}
+
+		return null;
+	}
+
+	private ProductFamily familyFor(final String productType) {
+		LevelJobOutputDto levelJobOutputDto = outputUtils.levelJobOutputDtoOfProductType(productType, job.getOutputs());
+		if (levelJobOutputDto == null) {
+			return null;
+		}
+
+		return outputUtils.familyOf(levelJobOutputDto, properties.getLevel());
+	}
+
+	private Map<String, Object> productMetadataCustomObjectFor(final ProductFamily productFamily,
+			final String productType) {
 
 		Map<String, Object> customObject = new HashMap<>();
 
 		customObject.put("product_type_string", productType);
-		customObject.put("platform_serial_identifier_string", catalogEvent.getSatelliteId());
-		switch (missionId) {
-		case S1:
+		customObject.put("platform_serial_identifier_string",
+				job.getPreparationJob().getCatalogEvent().getSatelliteId());
+
+		if (productFamily == ProductFamily.L0_SEGMENT) {
+
 			customObject.put("platform_short_name_string", "SENTINEL-1");
-			if (productFamily == ProductFamily.L0_SEGMENT) {
+			customObject.put("product_class_string", productClassOf(productType));
+			customObject.put("slice_product_flag_boolean", false);
+			customObject.put("processing_level_integer", 0);
 
-				customObject.put("product_class_string", productClassOf(productType));
-				customObject.put("slice_product_flag_boolean", false);
-				customObject.put("processing_level_integer", 0);
+		} else if (productFamily == ProductFamily.L0_SLICE || productFamily == ProductFamily.L0_ACN) {
 
-			} else if (productFamily == ProductFamily.L0_SLICE || productFamily == ProductFamily.L0_ACN) {
+			customObject.put("platform_short_name_string", "SENTINEL-1");
+			customObject.put("product_class_string", productClassOf(productType));
+			customObject.put("slice_product_flag_boolean", true);
+			customObject.put("processing_level_integer", 0);
+			customObject.put("operational_mode_string", null);// TODO
+			customObject.put("datatake_id_integer", null);// TODO
+			customObject.put("polarisation_channels_string", null);// TODO
+			customObject.put("swath_identifier_integer", null);
 
-				customObject.put("product_class_string", productClassOf(productType));
-				customObject.put("slice_product_flag_boolean", true);
-				customObject.put("processing_level_integer", 0);
-				customObject.put("operational_mode_string", null);// TODO
-				customObject.put("datatake_id_integer", null);// TODO
-				customObject.put("polarisation_channels_string", null);// TODO
-				customObject.put("swath_identifier_integer", null);
-			}
-			break;
-		case S3:
+		} else if (productFamily == ProductFamily.S3_GRANULES) {
+
 			customObject.put("platform_short_name_string", "SENTINEL-3");
-			if (productFamily == ProductFamily.S3_GRANULES || productFamily == ProductFamily.S3_L0) {
+			customObject.put("processing_level_integer", 0);
 
-				customObject.put("instrument_short_name_string", null); // TODO
-				customObject.put("processing_level_integer", 0);
-			}
-			break;
-		default:
-			break;
+		} else if (productFamily == ProductFamily.S3_L0) {
+
+			customObject.put("platform_short_name_string", "SENTINEL-3");
+			customObject.put("instrument_short_name_string",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("instrumentName"));
+			customObject.put("processing_level_integer", 0);
+
 		}
 
 		return customObject;
 	}
 
-	private String productClassOf(String productType) {
+	private String productClassOf(final String productType) {
 		return productType.substring(productType.length() - 1);
 	}
 

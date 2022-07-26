@@ -55,6 +55,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.config.DevProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.MonitorLogUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.WorkingDirectoryUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.InputDownloader;
+import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputEstimation;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.file.OutputProcessor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.process.PoolExecutorCallable;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.IpfFilenameReportingOutput;
@@ -241,8 +242,14 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		
 		List<Message<CatalogJob>> result = new ArrayList<>();
 		List<MissingOutput> missingOutputs = new ArrayList<>();
+		OutputEstimation outputEstimation = new OutputEstimation(
+				properties, 
+				job,
+				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), 
+				outputListFile, 
+				missingOutputs);
 		try {
-			result = processJob(job, inputDownloader, outputProcessor, procExecutorSrv, procCompletionSrv, procExecutor, reporting, missingOutputs);
+			result = processJob(job, inputDownloader, outputProcessor, outputEstimation, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
 		} catch (Exception e) {
 			reporting.error(errorReportMessage(e), missingOutputs);
 			throw new RuntimeException(e);
@@ -255,10 +262,10 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	protected List<Message<CatalogJob>> processJob(final IpfExecutionJob job,
 			final InputDownloader inputDownloader,
 			final OutputProcessor outputProcessor,
+			final OutputEstimation outputEstimation,
 			final ExecutorService procExecutorSrv, final ExecutorCompletionService<Void> procCompletionSrv,
 			final PoolExecutorCallable procExecutor,
-			final Reporting reporting, /* TODO: Refactor to not expect an already begun reporting... */
-			final List<MissingOutput> missingOutputs)
+			final Reporting reporting) /* TODO: Refactor to not expect an already begun reporting... */
 			throws Exception {
 		boolean poolProcessing = false;
 		final List<Message<CatalogJob>> catalogJobs = new ArrayList<>();
@@ -280,7 +287,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			waitForPoolProcessesEnding(getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job), submittedFuture,
 					procCompletionSrv, properties.getTmProcAllTasksS() * 1000L);
 			poolProcessing = false;
-
+			
 			if (devProperties.getStepsActivation().get("upload")) {
 				checkThreadInterrupted();
 				LOGGER.info("{} Processing l0 outputs", getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
@@ -288,8 +295,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			} else {
 				LOGGER.info("{} Processing l0 outputs bypasssed", getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
 			}
-
-
+			
 			/* 
 			 * This code is not used any more in the SCDF context:
 			 */
@@ -318,8 +324,16 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			//				warningMessage = "";
 			//			}
 			
+			
+			if (properties.isProductTypeEstimationEnabled()) {
+				outputEstimation.estimateWithoutError();
+			}
+			
 			return catalogJobs;
 		} catch (Exception e) {
+			if (properties.isProductTypeEstimationEnabled()) {
+				outputEstimation.estimateWithError();
+			}
 			WorkingDirectoryUtils workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());
 			workingDirUtils.copyWorkingDirectory(reporting, reporting.getUid(), job, ProductFamily.FAILED_WORKDIR);
 			throw e;

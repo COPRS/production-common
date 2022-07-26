@@ -94,6 +94,7 @@ public class ApplicationProperties {
 	 */
 	private boolean changeIsipToSafe = true;
 	
+	private boolean productTypeEstimationEnabled = false;
 	
 	private Map<String, Integer> productTypeEstimatedCount = new HashMap<>();
 
@@ -350,5 +351,14 @@ public class ApplicationProperties {
 	public void setProductTypeEstimatedCount(Map<String, Integer> productTypeEstimatedCount) {
 		this.productTypeEstimatedCount = productTypeEstimatedCount;
 	}
+
+	public boolean isProductTypeEstimationEnabled() {
+		return productTypeEstimationEnabled;
+	}
+
+	public void setProductTypeEstimationEnabled(boolean productTypeEstimationEnabled) {
+		this.productTypeEstimationEnabled = productTypeEstimationEnabled;
+	}
+	
 	
 }
