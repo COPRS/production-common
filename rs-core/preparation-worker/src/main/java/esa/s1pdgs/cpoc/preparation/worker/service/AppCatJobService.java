@@ -8,10 +8,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.db.AppDataJobRepository;
 import esa.s1pdgs.cpoc.preparation.worker.db.SequenceDao;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.AppCatJobUpdateFailedException;
@@ -25,10 +24,13 @@ public class AppCatJobService {
 
 	private final AppDataJobRepository appDataJobRepository;
 	private final SequenceDao sequenceDao;
+	
+	private ProcessProperties processProperties;
 
-	public AppCatJobService(final AppDataJobRepository appDataJobDao, final SequenceDao sequenceDao) {
+	public AppCatJobService(final AppDataJobRepository appDataJobDao, final SequenceDao sequenceDao, final ProcessProperties processProperties) {
 		this.appDataJobRepository = appDataJobDao;
 		this.sequenceDao = sequenceDao;
+		this.processProperties = processProperties;
 	}
 
 	public AppDataJob newJob(final AppDataJob newJob) {
@@ -44,22 +46,17 @@ public class AppCatJobService {
 		return appDataJobRepository.findById(identifier)
 				.orElseThrow(() -> new AppCatalogJobNotFoundException(identifier));
 	}
-
-	public List<AppDataJob> findByStateAndLastUpdateDateLessThan(final AppDataJobState state,
-			final ApplicationLevel level, final Date lastUpdateDate) {
-		return appDataJobRepository.findByStateAndLevelAndLastUpdateDateLessThan(state, level, lastUpdateDate);
-	}
-
+	
 	public List<AppDataJob> findByCatalogEventsUid(final UUID uid) {
-		return appDataJobRepository.findByCatalogEventsUid(uid.toString());
+		return appDataJobRepository.findByCatalogEventsUid(uid.toString(), processProperties.getLevel().toString());
 	}
 
 	public List<AppDataJob> findByProductType(final String productType) {
-		return appDataJobRepository.findByProductType(productType);
+		return appDataJobRepository.findByProductType(productType, processProperties.getLevel().toString());
 	}
 	
 	public List<AppDataJob> findByTriggerProduct(final String productType) {
-		return appDataJobRepository.findByTriggerProduct(productType);
+		return appDataJobRepository.findByTriggerProduct(productType, processProperties.getLevel().toString());
 	}
 
 	public List<AppDataJob> findByProductSessionId(final String sessionId) {
@@ -72,10 +69,6 @@ public class AppCatJobService {
 			return appDataJobRepository.findByProductDataTakeId_Rfc(dataTakeId);
 		}
 		return appDataJobRepository.findByProductDataTakeId_NonRfc(dataTakeId);
-	}
-
-	public List<AppDataJob> findJobInStateGenerating(final String taskTable) {
-		return appDataJobRepository.findJobInStateGenerating(taskTable);
 	}
 
 	public void appendCatalogEvent(final long id, final CatalogEvent event) throws AppCatJobUpdateFailedException {

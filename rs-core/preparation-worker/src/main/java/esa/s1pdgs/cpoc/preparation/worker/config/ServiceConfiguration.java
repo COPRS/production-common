@@ -52,9 +52,9 @@ public class ServiceConfiguration {
 
 	@Bean
 	@Autowired
-	public AppCatJobService appCatJobService(final AppDataJobRepository repository, final SequenceDao sequenceDao) {
+	public AppCatJobService appCatJobService(final AppDataJobRepository repository, final SequenceDao sequenceDao, final ProcessProperties processSettings) {
 		LOG.info("Create new AppCatJobService with {} and {}", repository.toString(), sequenceDao.toString());
-		return new AppCatJobService(repository, sequenceDao);
+		return new AppCatJobService(repository, sequenceDao, processSettings);
 	}
 
 	@Bean
