@@ -141,7 +141,7 @@ public class OutputEstimation {
 		String inputProductType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("productType");
 
 		if (inputProductFamily == ProductFamily.S3_GRANULES) {
-			return inputProductType.replace("G", "_");
+			return inputProductType.substring(0, inputProductType.length()-1) + "_";
 		}
 
 		return null;
