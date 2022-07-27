@@ -59,8 +59,15 @@ public class AuxQuery {
 
 	public final List<AppDataJobTaskInputs> queryAux() throws DiscardedException {
 		LOGGER.debug("Searching required AUX for job {} (product: {})", job.getId(), job.getProductName());
+		LOGGER.debug("job: {}", job);
+		LOGGER.debug("taskTableAdapter: {}", taskTableAdapter);
+		LOGGER.debug("mode: {}", mode);
+		List<AppDataJobInput> inputsWithoutResult = inputsWithoutResultsOf(job);
+		LOGGER.debug("inputsWithoutResult: {}", inputsWithoutResult);
+		List<TaskTableInputAlternative> alternatives = QueryUtils.alternativesOf(inputsWithoutResult, taskTableAdapter, mode);
+		LOGGER.debug("alternatives: {}", alternatives);
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> results = performAuxQueriesFor(
-				QueryUtils.alternativesOf(inputsWithoutResultsOf(job), taskTableAdapter, mode));
+				alternatives);
 		LOGGER.info("Distributing required AUX for job {} (product: {})", job.getId(), job.getProductName());
 		return distributeResults(results);
 	}
@@ -155,12 +162,13 @@ public class AuxQuery {
 			final List<TaskTableInputAlternative> alternatives) {
 		final Map<TaskTableInputAlternative.TaskTableInputAltKey, SearchMetadataResult> queries = toQueries(
 				queryTemplatesFor(alternatives));
-
+		LOGGER.debug("Query inputs for queries {}", queries);
 		for (final SearchMetadataResult result : queries.values()) {
 			if (result.hasResult()) {
 				continue;
 			}
 
+			LOGGER.debug("Get query from result {}", result);
 			final SearchMetadataQuery query = result.getQuery();
 			try {
 				LOGGER.debug("Querying input product of type {}, AppJobId {}: {}", query.getProductType(), job.getId(),

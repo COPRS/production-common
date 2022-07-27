@@ -52,14 +52,14 @@ public class QueryUtils {
 	 */
 	public static List<TaskTableInputAlternative> alternativesOf(final List<AppDataJobInput> inputs,
 			final TaskTableAdapter taskTableAdapter, final ProductMode mode) {
-
+		LOG.debug("Collecting alernatives");
 		final List<String> inputReferences = inputs.stream().map(AppDataJobInput::getTaskTableInputReference)
 				.collect(toList());
-
+		
 		final Map<String, List<TaskTableInputAlternative>> taskTableAlternativesMappedToReferences = inputsMappedTo(
 				(reference, input) -> singletonMap(reference, input.getAlternatives()), taskTableAdapter).stream()
 						.flatMap(map -> map.entrySet().stream()).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-
+		
 		return taskTableAlternativesMappedToReferences.entrySet().stream()
 				.filter(entry -> inputReferences.contains(entry.getKey())).flatMap(entry -> entry.getValue().stream())
 				.filter(alt -> alt.getOrigin() == TaskTableInputOrigin.DB).distinct().collect(toList());
