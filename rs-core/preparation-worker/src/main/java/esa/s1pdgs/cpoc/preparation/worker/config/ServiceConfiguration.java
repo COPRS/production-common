@@ -71,6 +71,7 @@ public class ServiceConfiguration {
 		Map<String, TaskTableAdapter> ttAdapters = new HashMap<>();
 
 		for (File taskTableFile : ttManager.tasktables()) {
+			LOG.debug("Loading tasktable {}",taskTableFile.getAbsolutePath());
 			ttAdapters.put(taskTableFile.getName(),
 					new TaskTableAdapter(taskTableFile,
 							taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), elementMapper,
