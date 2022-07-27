@@ -54,7 +54,6 @@ public class OutputEstimation {
 				findMissingType(productType, estimatedCount);
 			}
 		} else {
-
 			if (inputProductFamily == ProductFamily.S3_GRANULES) {
 				findMissingType(outputProductTypeFor(inputProductFamily), 1);
 			}
@@ -80,11 +79,15 @@ public class OutputEstimation {
 
 	private void findMissingType(final String productType, final int estimatedCount) throws InternalErrorException {
 
+		LOGGER.debug("finding type {}", productType);
+		
 		List<String> productsInWorkDir = null;
 
 		if (outputUtils.listFileExists(listFile, job.getWorkDirectory())) {
+			LOGGER.debug("listfile exists");
 			productsInWorkDir = outputUtils.extractFiles(listFile, job.getWorkDirectory());
 		} else {
+			LOGGER.debug("missing listfile");
 			File dir = new File(job.getWorkDirectory());
 			productsInWorkDir = Arrays.asList(dir.listFiles()).stream().map(f -> f.getName())
 					.collect(Collectors.toList());
@@ -92,6 +95,8 @@ public class OutputEstimation {
 
 		int productTypeCount = 0;
 
+		LOGGER.debug("products in workdir: {}", productsInWorkDir);
+		
 		for (final String line : productsInWorkDir) {
 
 			String productName = outputUtils.getProductName(line);
@@ -107,6 +112,9 @@ public class OutputEstimation {
 	}
 
 	private void addMissingOutput(final String productType, final int estimatedCount) {
+		
+		LOGGER.debug("adding type {} as missing, estimated count is {}", productType, estimatedCount);
+		
 		ProductFamily productFamily = familyFor(productType);
 
 		if (productFamily == null) {
