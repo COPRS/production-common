@@ -63,10 +63,15 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	public final Product mainInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter) 
 			throws IpfPrepWorkerInputsMissingException {		
 		final LevelSliceProduct product = LevelSliceProduct.of(job);
+		LOGGER.debug("job: {}", job);
+		LOGGER.debug("taskTableAdapter: {}", taskTableAdapter);
 		
 		// Retrieve instrument configuration id and slice number
 		try {
+			LOGGER.debug("product: {}", product);
+			LOGGER.debug("product name: {}", product.getProductName());
 			final L0SliceMetadata file = metadataClient.getL0Slice(product.getProductName());
+			LOGGER.debug("file: {}", file);
 			product.setInsConfId(file.getInstrumentConfigurationId());
 			product.setNumberSlice(file.getNumberSlice());
 			product.setDataTakeId(file.getDatatakeId());

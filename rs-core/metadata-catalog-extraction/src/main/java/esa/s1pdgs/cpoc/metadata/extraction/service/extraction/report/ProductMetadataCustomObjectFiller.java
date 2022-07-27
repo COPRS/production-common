@@ -68,6 +68,15 @@ public class ProductMetadataCustomObjectFiller {
 			fillwithKeyMapping("cycle_number_integer", "cycleNumber");
 			fillwithKeyMapping("processor_name_string", "procName");
 			fillwithKeyMapping("processor_version_string", "procVersion");
+		} else if ((catalogEvent.getProductFamily() == ProductFamily.AUXILIARY_FILE) ||
+					(catalogEvent.getProductFamily() == ProductFamily.S2_AUX ||
+					(catalogEvent.getProductFamily() == ProductFamily.S3_AUX))) {
+			
+			fillwithKeyMapping("satellite_string", "satelliteId");
+			fillwithKeyMapping("product_class_string", "productClass");
+			fillwithKeyMapping("validity_start_date", "validityStartTime");
+			fillwithKeyMapping("validity_stop_date", "validityStopTime");
+			fillwithKeyMapping("product_type_string","productType");
 		}
 	}
 	
