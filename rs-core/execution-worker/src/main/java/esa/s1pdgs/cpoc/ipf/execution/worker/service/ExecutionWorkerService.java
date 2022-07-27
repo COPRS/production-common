@@ -324,14 +324,15 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			//				warningMessage = "";
 			//			}
 			
-			
 			if (properties.isProductTypeEstimationEnabled()) {
+				LOGGER.debug("output product type estimation enabled");
 				outputEstimation.estimateWithoutError();
 			}
 			
 			return catalogJobs;
 		} catch (Exception e) {
 			if (properties.isProductTypeEstimationEnabled()) {
+				LOGGER.debug("output product type estimation enabled");
 				outputEstimation.estimateWithError();
 			}
 			WorkingDirectoryUtils workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());

@@ -47,6 +47,8 @@ public class OutputEstimation {
 	public void estimateWithoutError() throws InternalErrorException {
 
 		ProductFamily inputProductFamily = job.getPreparationJob().getCatalogEvent().getProductFamily();
+		
+		LOGGER.debug("output estimation for input family {} without error", inputProductFamily);
 
 		if (inputProductFamily == ProductFamily.EDRS_SESSION) {
 			for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
@@ -63,6 +65,8 @@ public class OutputEstimation {
 	public void estimateWithError() {
 
 		ProductFamily inputProductFamily = job.getPreparationJob().getCatalogEvent().getProductFamily();
+		
+		LOGGER.debug("output estimation for input family {} with error", inputProductFamily);
 
 		if (inputProductFamily == ProductFamily.EDRS_SESSION) {
 			for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
