@@ -49,15 +49,29 @@ public class OutputEstimation {
 		ProductFamily inputProductFamily = job.getPreparationJob().getCatalogEvent().getProductFamily();
 		
 		LOGGER.debug("output estimation for input family {} without error", inputProductFamily);
+		
+		List<String> productsInWorkDir = null;
+
+		if (outputUtils.listFileExists(listFile, job.getWorkDirectory())) {
+			LOGGER.debug("listfile exists");
+			productsInWorkDir = outputUtils.extractFiles(listFile, job.getWorkDirectory());
+		} else {
+			LOGGER.debug("missing listfile");
+			File dir = new File(job.getWorkDirectory());
+			productsInWorkDir = Arrays.asList(dir.listFiles()).stream().map(f -> f.getName())
+					.collect(Collectors.toList());
+		}
+
+		LOGGER.trace("products in workdir: {}", productsInWorkDir);
 
 		if (inputProductFamily == ProductFamily.EDRS_SESSION) {
 			for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
 				int estimatedCount = properties.getProductTypeEstimatedCount().get(productType);
-				findMissingType(productType, estimatedCount);
+				findMissingType(productType, productsInWorkDir, estimatedCount);
 			}
 		} else {
 			if (inputProductFamily == ProductFamily.S3_GRANULES) {
-				findMissingType(outputProductTypeFor(inputProductFamily), 1);
+				findMissingType(outputProductTypeFor(inputProductFamily), productsInWorkDir, 1);
 			}
 		}
 	}
@@ -81,25 +95,11 @@ public class OutputEstimation {
 		}
 	}
 
-	private void findMissingType(final String productType, final int estimatedCount) throws InternalErrorException {
+	private void findMissingType(final String productType, final List<String> productsInWorkDir, final int estimatedCount) throws InternalErrorException {
 
 		LOGGER.debug("finding type {}", productType);
 		
-		List<String> productsInWorkDir = null;
-
-		if (outputUtils.listFileExists(listFile, job.getWorkDirectory())) {
-			LOGGER.debug("listfile exists");
-			productsInWorkDir = outputUtils.extractFiles(listFile, job.getWorkDirectory());
-		} else {
-			LOGGER.debug("missing listfile");
-			File dir = new File(job.getWorkDirectory());
-			productsInWorkDir = Arrays.asList(dir.listFiles()).stream().map(f -> f.getName())
-					.collect(Collectors.toList());
-		}
-
 		int productTypeCount = 0;
-
-		LOGGER.debug("products in workdir: {}", productsInWorkDir);
 		
 		for (final String line : productsInWorkDir) {
 
@@ -108,6 +108,8 @@ public class OutputEstimation {
 				productTypeCount++;
 			}
 		}
+		
+		LOGGER.debug("count is {} for type {}, estimated {}", productTypeCount, productType, estimatedCount);
 
 		if (productTypeCount < estimatedCount) {
 
