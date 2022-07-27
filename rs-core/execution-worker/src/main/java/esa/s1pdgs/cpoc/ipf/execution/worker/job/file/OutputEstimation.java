@@ -184,13 +184,13 @@ public class OutputEstimation {
 		} else if (productFamily == ProductFamily.S3_GRANULES) {
 
 			customObject.put("platform_short_name_string", "SENTINEL-3");
+			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
 			customObject.put("processing_level_integer", 0);
 
 		} else if (productFamily == ProductFamily.S3_L0) {
 
 			customObject.put("platform_short_name_string", "SENTINEL-3");
-			customObject.put("instrument_short_name_string",
-					job.getPreparationJob().getCatalogEvent().getMetadata().get("instrumentName"));
+			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
 			customObject.put("processing_level_integer", 0);
 
 		}
@@ -200,6 +200,10 @@ public class OutputEstimation {
 
 	private String productClassOf(final String productType) {
 		return productType.substring(productType.length() - 1);
+	}
+	
+	private String instrumentShortNameOf(final String productType) {
+		return productType.substring(0, 2);
 	}
 
 }
