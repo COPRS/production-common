@@ -327,6 +327,8 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			if (properties.isProductTypeEstimationEnabled()) {
 				LOGGER.debug("output product type estimation enabled");
 				outputEstimation.estimateWithoutError();
+			} else {
+				LOGGER.debug("output product type estimation disabled");
 			}
 			
 			return catalogJobs;
@@ -334,6 +336,8 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			if (properties.isProductTypeEstimationEnabled()) {
 				LOGGER.debug("output product type estimation enabled");
 				outputEstimation.estimateWithError();
+			} else {
+				LOGGER.debug("output product type estimation disabled");
 			}
 			WorkingDirectoryUtils workingDirUtils = new WorkingDirectoryUtils(obsClient, properties.getHostname());
 			workingDirUtils.copyWorkingDirectory(reporting, reporting.getUid(), job, ProductFamily.FAILED_WORKDIR);
