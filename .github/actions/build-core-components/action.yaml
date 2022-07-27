@@ -36,9 +36,8 @@ runs:
       sed -i 's/<VERSION>/${{ steps.extract_branch.outputs.branch }}/' ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-application-list.properties
       cat ${{ env.RS_CORE_FOLDER }}/obs-stream-parameters.properties >> ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-parameters.properties
       cat ${{ env.RS_CORE_FOLDER }}/common-parameters.properties >> ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-parameters.properties
-      chain_name=${{ matrix.component }}
-      chain_name_upper=${chain_name^^}
-      sed -i "s/<CHAIN_NAME>/$chain_name_upper/" ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-parameters.properties
+      corecomp=${{ matrix.component }}
+      sed -i "s/<CHAIN_NAME>/${corecomp^^}/" ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-parameters.properties
       sed -i 's/<CHAIN_VERSION>/${{ steps.extract_branch.outputs.branch }}/' ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/stream-parameters.properties
       cp -r ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/content/* ${{ steps.gen_filename.outputs.filename }}/${{ steps.gen_filename.outputs.filename }}_Executables
       if [[ -e ${{ env.RS_CORE_FOLDER }}/${{ matrix.component }}/additional_resources ]] 
