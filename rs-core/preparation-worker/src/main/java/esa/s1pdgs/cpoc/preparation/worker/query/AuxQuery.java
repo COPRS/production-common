@@ -108,10 +108,15 @@ public class AuxQuery {
 //					LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...", inputDescription);
 //					timedOutInputs.add(missingInput);
 //				} else {
-					LOGGER.info("Waiting for Non-Mandatory Input {} ...", inputDescription);
 
-					missingMetadata.put(inputDescription + " is missing", taskTableInput.toLogMessage());
-//				}
+					// TODO: UNCOMMENT WHEN WAITING LOGIC IS IMPLEMENTED (CURRENTLY WAIT == WAIT FOREVER)
+				    // **********************************************************************************
+				    // LOGGER.info("Waiting for Non-Mandatory Input {} ...", inputDescription);
+					// missingMetadata.put(inputDescription + " is missing", taskTableInput.toLogMessage());
+				    //
+				    // MEANWHILE LOG A WARNING:
+		    		LOGGER.warn("Cannot wait for missing Non-Mandatory Input {} ... (wait not implemented)", inputDescription);
+//
 			}
 		}
 
