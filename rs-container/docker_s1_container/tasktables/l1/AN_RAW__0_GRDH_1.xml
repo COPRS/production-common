@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Ipf_Task_Table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TaskTable_S1.xsd">
   <Processor_Name>AN_RAW__0_GRDH_1</Processor_Name>
-  <Version>3.40</Version>
+  <Version>3.52</Version>
   <Test>No</Test>
   <Min_Disk_Space units="MB">41000</Min_Disk_Space>
   <Max_Time>0</Max_Time>
   <!--no time limit for execution-->
   <List_of_Cfg_Files>
     <Cfg_Files>
-      <Version>3.40</Version>
+      <Version>3.52</Version>
       <File_Name>/usr/local/components/S1IPF/etc/processorConfiguration.xml</File_Name>
     </Cfg_Files>
   </List_of_Cfg_Files>
@@ -67,7 +67,7 @@
       <List_of_Tasks count="1">
         <Task>
           <Name>PSC</Name>
-          <Version>3.40</Version>
+          <Version>3.52</Version>
           <Critical>true</Critical>
           <Criticality_Level>2</Criticality_Level>
           <File_Name>/usr/local/components/S1IPF/bin/PSC_PreprocMain</File_Name>
@@ -275,7 +275,7 @@
       <List_of_Tasks count="1">
         <Task>
           <Name>SDC</Name>
-          <Version>3.40</Version>
+          <Version>3.52</Version>
           <Critical>true</Critical>
           <Criticality_Level>2</Criticality_Level>
           <File_Name>/usr/local/components/S1IPF/bin/SDC_SingleSwathDopMain</File_Name>
@@ -305,7 +305,7 @@
       <List_of_Tasks count="1">
         <Task>
           <Name>SBE</Name>
-          <Version>3.40</Version>
+          <Version>3.52</Version>
           <Critical>true</Critical>
           <Criticality_Level>2</Criticality_Level>
           <File_Name>/usr/local/components/S1IPF/bin/SBE_CntSceMain</File_Name>
@@ -335,7 +335,7 @@
       <List_of_Tasks count="1">
         <Task>
           <Name>LPC1</Name>
-          <Version>3.40</Version>
+          <Version>3.52</Version>
           <Critical>true</Critical>
           <Criticality_Level>2</Criticality_Level>
           <File_Name>/usr/local/components/S1IPF/bin/LPC1_ProcMain.sh</File_Name>
