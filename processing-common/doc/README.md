@@ -7,3 +7,4 @@ This folder contains information regarding common configuration shared by all RS
  - [Elasticsearch Configuration](indices.md)
  - [Scaling of applications](scaling.md)
  - [Secret configuration](secrets.md)
+ - [Handling of long-running applications](long-running.md)
