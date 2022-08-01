@@ -1,4 +1,4 @@
-# Secret configuration for RS Core Components
+# RS-Core - Secret configuration
 
 Especially when tackle with sensible information as user credentials it is not recommended to use these information directly in the property file "stream-parameters.properties". Instead it is recommended to create a secret within Kubernetes and make it available in the property file using variables.
 
