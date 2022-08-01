@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.ipf.execution.worker.job.file;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties.TypeEstimationMapping;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -32,7 +35,7 @@ public class OutputEstimation {
 	private final String listFile;
 
 	List<MissingOutput> missingOutputs;
-
+	
 	public OutputEstimation(final ApplicationProperties properties, final IpfExecutionJob job,
 			final String prefixMonitorLogs, final String listFile, final List<MissingOutput> missingOutputs) {
 		this.properties = properties;
@@ -144,8 +147,10 @@ public class OutputEstimation {
 	private void findMissingTypesForASP(final String inputProductType, final List<String> productsInWorkDir)
 			throws InternalErrorException {
 
-		findMissingType(inputProductType, ProductFamily.L0_SLICE, productsInWorkDir,
-				determineCountForASPType(inputProductType));
+		String inputSwathType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("swathtype");
+
+		findMissingType(inputProductType, ProductFamily.L0_SLICE, productsInWorkDir, determineCountForASPType(
+				inputSwathType, job.getPreparationJob().getStartTime(), job.getPreparationJob().getStopTime()));
 		findMissingType(inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN,
 				productsInWorkDir, 1);
 		findMissingType(inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN,
@@ -156,19 +161,55 @@ public class OutputEstimation {
 
 	private void addMissingOutputForASP(final String inputProductType) {
 
-		addMissingOutput(inputProductType, ProductFamily.L0_SLICE, determineCountForASPType(inputProductType));
+		String inputSwathType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("swathtype");
+
+		addMissingOutput(inputProductType, ProductFamily.L0_SLICE, determineCountForASPType(inputSwathType,
+				job.getPreparationJob().getStartTime(), job.getPreparationJob().getStopTime()));
 		addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN, 1);
 		addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN, 1);
 		addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN, 1);
 	}
 
-	private int determineCountForASPType(String inputProductType) {
+	private int determineCountForASPType(final String inputSwathType, final String inputStartTime, final String inputStopTime) {
 
-		if ("RF_RAW__0S".equals(inputProductType) || "WV_RAW__0S".equals(inputProductType)) {
-			return 1;
+		int estimatedCount = 1;
+
+		if ("RF".equals(inputSwathType) || "WV".equals(inputSwathType)) {
+			estimatedCount = 1;
+
 		} else {
-			return 1; // TODO
+
+			LocalDateTime startTime = DateUtils.parse(inputStartTime);
+			LocalDateTime stopTime = DateUtils.parse(inputStopTime);
+			Duration duration = Duration.between(startTime, stopTime);
+
+			int sliceLength = 0;
+			int sliceOverlap = 0;
+
+			if ("SM".equals(inputSwathType)) {
+				sliceLength = 25000;
+				sliceOverlap = 7700;
+			} else if ("IW".equals(inputSwathType)) {
+				sliceLength = 25000;
+				sliceOverlap = 7400;
+			} else if ("EW".equals(inputSwathType)) {
+				sliceLength = 60000;
+				sliceOverlap = 8200;
+			}
+
+			double c = (duration.toMillis() - sliceOverlap) / sliceLength;
+
+			if (((c % 1) * sliceLength) < sliceOverlap) {
+				estimatedCount = Math.max(1, (int) Math.floor(c));
+			} else {
+				estimatedCount = Math.max(1, (int) Math.ceil(c));
+			}
+
 		}
+
+		LOGGER.info("estimated count for swathtype {} calculated to be: {}", inputSwathType, estimatedCount);
+
+		return estimatedCount;
 
 	}
 
