@@ -121,6 +121,11 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 			appDataJob.getTriggerProducts().add("RAW");
 		}
 		
+		// Add productType SESSION, as it is not included in the TaskTable
+		if (!appDataJob.getTriggerProducts().contains("SESSION")) {
+			appDataJob.getTriggerProducts().add("SESSION");
+		}
+		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);				
 		final EdrsSessionProduct product = EdrsSessionProduct.of(appDataJob);		
 		// IMPORTANT workaround!!! Allows to get the session identifier in exec-worker
