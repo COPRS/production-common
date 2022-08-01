@@ -1,6 +1,10 @@
-# RS-Core - Error Management 
+# RS Core / RS add-on  - Automated error Management 
 
-One important common topic in the Reference System is the handling of errors within the system. This feature is common within all RS core chains and RS addon chains. 
+One important common topic in the Reference System is the handling of errors within the system. Indeed, a processing chain is composed of multiple microservices bounded by Kafka bus. There are cases that are not always working as expected and generate countless errors.
+
+The production-common repository provides to Reference Systems workflows two features to manage automatically errors. 
+
+These features are common within all RS core chains and RS add-on chains. 
 
 ## Message retry with Spring Cloud Dataflow (SCDF)
 
@@ -19,6 +23,6 @@ When forwarding a message to the DLQ the Kafka message headers are enriched with
 
 ## Dead-Letter-Queue mechanism (DLQ)
 
-In the Reference System once a message landed in the DLQ an application called "DLQ manager" is handling the further processing of the different messages. It is using a configurable ruleset to determine whether a message should be reprocessed, retried or sent to the "parking lot" for further manual handling by an operator.
+In the Reference System once a message landed in the RS Core DLQ an application called "DLQ manager" is handling the further processing of the different messages. It is using a configurable ruleset to determine whether a message should be reprocessed, retried or sent to the "parking lot" for further manual handling by an operator.
 
-The configuration for the DLQ manager can be found [here](../dlq/doc/SRN.md).
+The configuration for the RS Core DLQ can be found [here](../dlq/doc/SRN.md).
