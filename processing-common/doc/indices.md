@@ -55,7 +55,7 @@ aux_att
 ```
 
 ```
-{"mappings":{"properties":{"creationTime":{"type":"date"},"insertionTime":{"type":"date"},"instrumentConfigurationId":{"type":"long"},"missionId":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"productFamily":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"productName":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"productType":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"satelliteId":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"site":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"url":{"type":"text","fields":{"keyword":{"type":"keyword","ignore_above":256}}},"validityStartTime":{"type":"date"},"validityStopTime":{"type":"date"}}}}
+{"mappings":{"properties":{"creationTime":{"type":"date"},"insertionTime":{"type":"date"},"instrumentConfigurationId":{"type":"long"},"missionId":{"type":"keyword"},"productFamily":{"type":"keyword"},"productName":{"type":"keyword"},"productType":{"type":"keyword"},"satelliteId":{"type":"keyword"},"site":{"type":"keyword"},"url":{"type":"keyword"},"validityStartTime":{"type":"date"},"validityStopTime":{"type":"date"}}}}
 ```
 
 -------------------
