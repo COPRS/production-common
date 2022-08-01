@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 
 /**
  * Application properties
@@ -21,6 +22,26 @@ import esa.s1pdgs.cpoc.common.ApplicationLevel;
 @ConfigurationProperties(prefix = "process")
 public class ApplicationProperties {
 
+	public static class TypeEstimationMapping {
+		
+		private String regexp;
+		private int count;
+		
+		
+		public String getRegexp() {
+			return regexp;
+		}
+		public void setRegexp(String regexp) {
+			this.regexp = regexp;
+		}
+		public int getCount() {
+			return count;
+		}
+		public void setCount(int count) {
+			this.count = count;
+		}
+	}
+	
     /**
      * Application level
      */
@@ -96,7 +117,10 @@ public class ApplicationProperties {
 	
 	private boolean productTypeEstimationEnabled = false;
 	
-	private Map<String, Integer> productTypeEstimatedCount = new HashMap<>();
+	private ProductFamily productTypeEstimationOutputFamily;
+	
+	private Map<String, TypeEstimationMapping> productTypeEstimatedCount = new HashMap<>();
+	
 
 	/**
      * Default constructor
@@ -344,11 +368,11 @@ public class ApplicationProperties {
 		this.changeIsipToSafe = changeIsipToSafe;
 	}
 
-	public Map<String, Integer> getProductTypeEstimatedCount() {
+	public Map<String, TypeEstimationMapping> getProductTypeEstimatedCount() {
 		return productTypeEstimatedCount;
 	}
 
-	public void setProductTypeEstimatedCount(Map<String, Integer> productTypeEstimatedCount) {
+	public void setProductTypeEstimatedCount(Map<String, TypeEstimationMapping> productTypeEstimatedCount) {
 		this.productTypeEstimatedCount = productTypeEstimatedCount;
 	}
 
@@ -359,6 +383,13 @@ public class ApplicationProperties {
 	public void setProductTypeEstimationEnabled(boolean productTypeEstimationEnabled) {
 		this.productTypeEstimationEnabled = productTypeEstimationEnabled;
 	}
-	
+
+	public ProductFamily getProductTypeEstimationOutputFamily() {
+		return productTypeEstimationOutputFamily;
+	}
+
+	public void setProductTypeEstimationOutputFamily(ProductFamily productTypeEstimationOutputFamily) {
+		this.productTypeEstimationOutputFamily = productTypeEstimationOutputFamily;
+	}
 	
 }
