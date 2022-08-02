@@ -174,7 +174,7 @@ public class OutputEstimation {
 
 		int estimatedCount = 1;
 
-		if ("RF".equals(inputSwathType) || "WV".equals(inputSwathType)) {
+		if (!"SM".equals(inputSwathType) && !"IW".equals(inputSwathType) && !"EW".equals(inputSwathType)) {
 			estimatedCount = 1;
 
 		} else {
