@@ -197,7 +197,7 @@ public class OutputEstimation {
 				sliceOverlap = 8200;
 			}
 
-			double c = (duration.toMillis() - sliceOverlap) / sliceLength;
+			double c = (duration.toMillis() - sliceOverlap) * 1f / sliceLength;
 
 			if (((c % 1) * sliceLength) < sliceOverlap) {
 				estimatedCount = Math.max(1, (int) Math.floor(c));
