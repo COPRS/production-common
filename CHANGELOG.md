@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0-rc1] - 2022-08-03
+
+### Added
+
+- RS-231: [SCDF] Implementation of a solution for "dead letter queue mechanism"
+- RS-280: [BUG] PRIP does not return expected products when geographical request crosses antimeridian
+- RS-344: [SCDF] Implementation long running processing feature
+- RS-408: [PI] Update header traces with rs_chain_name_string & rs_chain_version_string
+- RS-444: [PI] Add output to MetadataExtraction END OK trace
+- RS-445: [PI] Update JobProcessing END traces with ICD Traces tailored
+
+
+
+### Changed
+
+- RS-429 / RS-436: Implement workaround to ignore S3 intersection error
+- RS-449: Move from “filename_strings” to “filename_string” when single element
+- RS-465: [BUG] bandIndexId 8A does not return result in the metadata catalog searchcontroller
+
+### Removed
+- RS-435: Move UWC helm chart CI to UWC repository
+
 ## [1.3.0-rc1] - 2022-07-06
 
 ### Added
