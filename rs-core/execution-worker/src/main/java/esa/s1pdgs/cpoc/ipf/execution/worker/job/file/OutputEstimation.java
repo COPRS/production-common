@@ -35,7 +35,7 @@ public class OutputEstimation {
 	private final String listFile;
 
 	List<MissingOutput> missingOutputs;
-	
+
 	public OutputEstimation(final ApplicationProperties properties, final IpfExecutionJob job,
 			final String prefixMonitorLogs, final String listFile, final List<MissingOutput> missingOutputs) {
 		this.properties = properties;
@@ -76,8 +76,7 @@ public class OutputEstimation {
 						productsInWorkDir, typeEstimationMapping.getCount());
 			}
 		} else if (inputProductFamily == ProductFamily.S3_GRANULES) {
-			findMissingType(inputProductType.substring(0, inputProductType.length() - 1) + "_", ProductFamily.S3_L0,
-					productsInWorkDir, 1);
+			findMissingType(s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, productsInWorkDir, 1);
 
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
 			findMissingTypesForASP(inputProductType, productsInWorkDir);
@@ -100,8 +99,7 @@ public class OutputEstimation {
 			}
 
 		} else if (inputProductFamily == ProductFamily.S3_GRANULES) {
-			addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "_", ProductFamily.S3_L0,
-					1);
+			addMissingOutput(s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, 1);
 
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
 			addMissingOutputForASP(inputProductType);
@@ -169,8 +167,23 @@ public class OutputEstimation {
 		addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN, 1);
 		addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN, 1);
 	}
+	
+	private String s3L0TypeFromGranulesType(final String inputProductType) {
 
-	private int determineCountForASPType(final String inputSwathType, final String inputStartTime, final String inputStopTime) {
+		String outputS3L0Type = null;
+
+		if ("OL_0_CR___G".equals(inputProductType)) {
+
+			outputS3L0Type = "OL_0_CR[01]___";
+
+		} else {
+			outputS3L0Type = inputProductType.substring(0, inputProductType.length() - 1) + "_";
+		}
+		return outputS3L0Type;
+	}
+
+	private int determineCountForASPType(final String inputSwathType, final String inputStartTime,
+			final String inputStopTime) {
 
 		int estimatedCount = 1;
 
