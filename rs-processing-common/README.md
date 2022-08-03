@@ -9,8 +9,9 @@ These services are:
 - Eviction Manager
 - Native API
 - RSAPI Frontend (PRIP / DDIP Frontend)
-- User Web Client
 - Request Repository
+
+Additionally the User Web Client that can be used as web frontend for the COPRS can be deployed also as a standalone service. It can be found in this [repository](https://github.com/COPRS/user-web-client).
 
 # General
 
