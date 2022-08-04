@@ -1,14 +1,17 @@
 package esa.s1pdgs.cpoc.reqrepo.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import esa.s1pdgs.cpoc.message.MessageProducer;
@@ -71,12 +74,11 @@ public class RequestRepositoryImpl implements RequestRepository {
 		return config.getKafkaTopicList();
 	}
 
-	private void restart(final String id, final String topic, final String message) {
-		final JSONObject json = new JSONObject(message);
-		final Map<String, Object> map = json.toMap();
-		map.put("retryCounter", (int)map.get("retryCounter") + 1);
-		
+	private void restart(final String id, final String topic, final String message) {		
 		try {
+			final Map<String, Object> map = new ObjectMapper().readValue(
+					message, new TypeReference<HashMap<String, Object>>(){});
+			map.put("retryCounter", (int)map.get("retryCounter") + 1);
 			messageProducer.send(topic, map);
 		} catch (final Exception e) {
 			throw new RuntimeException(
