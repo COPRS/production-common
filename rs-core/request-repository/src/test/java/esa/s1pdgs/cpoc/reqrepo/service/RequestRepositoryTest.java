@@ -7,17 +7,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Sort;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import esa.s1pdgs.cpoc.message.MessageProducer;
@@ -105,7 +110,7 @@ public class RequestRepositoryTest {
 	}
 
 	@Test
-	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRequest_ShallResubmitAndDelete() {	
+	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRequest_ShallResubmitAndDelete() throws JsonMappingException, JsonProcessingException {	
 		final FailedProcessing fp = newFailedProcessing("123"); 
 		doReturn(Optional.of(fp))
 			.when(failedProcessingRepo)
@@ -115,7 +120,8 @@ public class RequestRepositoryTest {
 		
 		verify(failedProcessingRepo, times(1)).findById("123");
 		verify(failedProcessingRepo, times(1)).deleteById("123");
-		Map<String, Object> newMessage = new JSONObject(fp.getMessage()).toMap();
+		final Map<String, Object> newMessage = new ObjectMapper().readValue(
+				fp.getMessage(), new TypeReference<HashMap<String, Object>>(){});
 		newMessage.put("retryCounter", 1);
 		verify(messageProducer, times(1)).send(fp.getTopic(), newMessage);
 	}

@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +47,7 @@ public class ITDlqManagerService {
 	Function<Message<byte[]>, List<Message<byte[]>>> dlqManagerService;
 
 	@Test
-	public void testSameTopicRetryTwiceThenParkingLot() throws JsonProcessingException, JSONException {
+	public void testSameTopicRetryTwiceThenParkingLot() throws JsonProcessingException {
 		dlqManagerService = dlqManagerServiceConfiguration.route();
 		
 		// first retry
@@ -115,7 +113,7 @@ public class ITDlqManagerService {
 	}
 	
 	@Test
-	public void testDifferentTopicRetry() throws JsonProcessingException, JSONException {
+	public void testDifferentTopicRetry() throws JsonProcessingException {
 		dlqManagerService = dlqManagerServiceConfiguration.route();
 		
 		CatalogJob catalogJob = new CatalogJob("foo", "foo", ProductFamily.AUXILIARY_FILE);
@@ -145,7 +143,7 @@ public class ITDlqManagerService {
 	}
 	
 	@Test
-	public void testNoActionShallRouteToParkingLot() throws JsonProcessingException, JSONException {
+	public void testNoActionShallRouteToParkingLot() throws JsonProcessingException {
 		dlqManagerService = dlqManagerServiceConfiguration.route();
 		
 		CatalogJob catalogJob = new CatalogJob("foo", "foo", ProductFamily.AUXILIARY_FILE);
@@ -163,19 +161,19 @@ public class ITDlqManagerService {
 		
 		assertEquals("t-pdgs-parking-lot", (String)actual.get(0).getHeaders().get(X_ROUTE_TO));
 		
-		JSONObject actualJson = new JSONObject(new String(actual.get(0).getPayload()));
-		assertEquals(0, actualJson.getInt("retryCounter")); // this is not a retry
-		assertEquals("t-pdgs-origin", actualJson.get("topic"));
-		assertEquals("IOException", actualJson.get("failureMessage"));
-		assertEquals("stacktrace", actualJson.get("stacktrace"));
+		JsonNode actualJson = mapper.readTree(new String(actual.get(0).getPayload()));
+		assertEquals(0, actualJson.get("retryCounter").asInt()); // this is not a retry
+		assertEquals("t-pdgs-origin", actualJson.get("topic").asText());
+		assertEquals("IOException", actualJson.get("failureMessage").asText());
+		assertEquals("stacktrace", actualJson.get("stacktrace").asText());
 
-		JsonNode expectedJson = mapper.readTree(mapper.writeValueAsString(catalogJob));
-		JsonNode actualAsJsonNode = mapper.readTree(actualJson.get("message").toString());
-		assertTrue(expectedJson.equals(actualAsJsonNode));
+		JsonNode expectedMessage = mapper.readTree(mapper.writeValueAsString(catalogJob));
+		JsonNode actualMessage = mapper.readTree(actualJson.get("message").asText());
+		assertTrue(expectedMessage.equals(actualMessage));
 	}
 	
 	@Test
-	public void testDeleteShallBeIgnored() throws JsonProcessingException, JSONException {
+	public void testDeleteShallBeIgnored() throws JsonProcessingException {
 		dlqManagerService = dlqManagerServiceConfiguration.route();
 		
 		CatalogJob catalogJob = new CatalogJob("foo", "foo", ProductFamily.AUXILIARY_FILE);

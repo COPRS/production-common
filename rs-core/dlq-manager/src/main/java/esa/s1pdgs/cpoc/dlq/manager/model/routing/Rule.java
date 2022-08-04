@@ -1,8 +1,10 @@
 package esa.s1pdgs.cpoc.dlq.manager.model.routing;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 public class Rule {
 	
@@ -75,21 +77,17 @@ public class Rule {
 		this.comment = comment;
 	}
 
-	public JSONObject toJSON() {
-		JSONObject json = new JSONObject();
-		json.put(PROPERTY_NAME_ERROR_TITLE, errorTitle);
-		json.put(PROPERTY_NAME_ERROR_ID, errorId);
-		json.put(PROPERTY_NAME_ACTION_TYPE, actionType);
-		json.put(PROPERTY_NAME_TARGET_TOPIC, targetTopic);
-		json.put(PROPERTY_NAME_MAX_RETRY, maxRetry);
-		json.put(PROPERTY_NAME_PRIORITY, comment);
-		json.put(PROPERTY_NAME_COMMENT, regexPattern);
-		return json;
-	}
-	
 	@Override
 	public String toString() {
-		return toJSON().toString();
+		Map<String, Object> map = new HashMap<>();
+		map.put(PROPERTY_NAME_ERROR_TITLE, errorTitle);
+		map.put(PROPERTY_NAME_ERROR_ID, errorId);
+		map.put(PROPERTY_NAME_ACTION_TYPE, actionType);
+		map.put(PROPERTY_NAME_TARGET_TOPIC, targetTopic);
+		map.put(PROPERTY_NAME_MAX_RETRY, maxRetry);
+		map.put(PROPERTY_NAME_PRIORITY, comment);
+		map.put(PROPERTY_NAME_COMMENT, regexPattern);
+		return new Gson().toJson(map);
 	}
 
 }
