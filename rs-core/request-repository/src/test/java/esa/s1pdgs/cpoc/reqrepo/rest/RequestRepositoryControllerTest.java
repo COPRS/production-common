@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.reqrepo.rest;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -23,6 +24,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
@@ -74,12 +79,17 @@ public class RequestRepositoryControllerTest {
 		
 		final String jsonContent = "[{\"id\":\"000000000000000000000001\",\"failureDate\":\"2019-06-18T11:09:03.805Z\",\"missionId\": \"S1\",\"failureMessage\":\"dummyMessage\",\"topic\":\"dummyProcessingType\",\"message\":\"{\\\"foo\\\": \\\"bar\\\"}\",\"stacktrace\": \"...\",\"errorLevel\": \"ERROR\",\"retryCounter\":0}]";
 		
-		uut.perform(get("/api/v1/failedProcessings")
+		MvcResult result = uut.perform(get("/api/v1/failedProcessings")
 			      .contentType(MediaType.APPLICATION_JSON)
 			      .header("ApiKey", API_KEY)
         ).andExpect(status().isOk())
 		.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-		.andExpect(content().json(jsonContent));
+		.andReturn();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode expected = mapper.readTree(jsonContent);
+		JsonNode actual = mapper.readTree(result.getResponse().getContentAsString());
+		assertEquals(expected, actual);
 	}
 	
 	@Test
@@ -104,11 +114,16 @@ public class RequestRepositoryControllerTest {
 		
 		final String jsonContent = "{\"id\":\"000000000000000000000001\",\"failureDate\":\"2019-06-18T11:09:03.805Z\",\"missionId\": \"S1\",\"failureMessage\":\"dummyMessage\",\"topic\":\"dummyProcessingType\",\"message\":\"{\\\"foo\\\": \\\"bar\\\"}\",\"stacktrace\": \"...\",\"errorLevel\": \"ERROR\",\"retryCounter\":0}";
 		
-		uut.perform(get("/api/v1/failedProcessings/000000000000000000000001")
+		MvcResult result = uut.perform(get("/api/v1/failedProcessings/000000000000000000000001")
 			      .contentType(MediaType.APPLICATION_JSON)
 			      .header("ApiKey", API_KEY)
         ).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-		.andExpect(content().json(jsonContent));
+		.andReturn();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode expected = mapper.readTree(jsonContent);
+		JsonNode actual = mapper.readTree(result.getResponse().getContentAsString());
+		assertEquals(expected, actual);
 	}
 
 	@Test
