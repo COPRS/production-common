@@ -55,6 +55,11 @@ public class AppDataJob {
 	 * Date of the last modification done on the job
 	 */
 	private Date lastUpdateDate;
+	
+	/**
+	 * Date when the Job will be timeout
+	 */
+	private Date timeoutDate;
 
 	/**
 	 * Catalog Events linked to this job
@@ -230,6 +235,20 @@ public class AppDataJob {
 	}
 
 	/**
+	 * @return date, when the job will be timed out
+	 */
+	public Date getTimeoutDate() {
+		return timeoutDate;
+	}
+
+	/**
+	 * @param timeoutDate new timeout date for the job
+	 */
+	public void setTimeoutDate(Date timeoutDate) {
+		this.timeoutDate = timeoutDate;
+	}
+
+	/**
 	 * @return the catalogEvents
 	 */
 	public List<CatalogEvent> getCatalogEvents() {
@@ -375,14 +394,14 @@ public class AppDataJob {
 				+ catalogEvents + ", product=" + product + ", additionalInputs=" + additionalInputs + ", generation="
 				+ generation + ", reportingId=" + reportingId + ", prepJob=" + prepJob + ", processingGroup="
 				+ processingGroup + ", timedOut=" + timedOut + ", preselectedInputs=" + preselectedInputs
-				+ ", triggerProducts=" + triggerProducts + "]";
+				+ ", triggerProducts=" + triggerProducts + ", timeoutDate=" + timeoutDate + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(additionalInputs, creationDate, generation, id, lastUpdateDate, level, catalogEvents, pod,
 				prepJob, processingGroup, product, productName, reportingId, startTime, state, stopTime, taskTableName,
-				timedOut, preselectedInputs, triggerProducts);
+				timedOut, preselectedInputs, triggerProducts, timeoutDate);
 	}
 
 	@Override
@@ -404,6 +423,7 @@ public class AppDataJob {
 				&& Objects.equals(startTime, other.startTime) && state == other.state
 				&& Objects.equals(stopTime, other.stopTime) && Objects.equals(taskTableName, other.taskTableName)
 				&& Objects.equals(preselectedInputs, other.preselectedInputs)
-				&& Objects.equals(triggerProducts, other.triggerProducts);
+				&& Objects.equals(triggerProducts, other.triggerProducts)
+				&& Objects.equals(timeoutDate, other.timeoutDate);
 	}
 }

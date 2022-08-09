@@ -56,6 +56,41 @@ public final class AspPropertiesAdapter {
 		return !this.disableTimeout && this.checkTimeoutReached(job, sensingEndTime, now);
 	}
 	
+	/**
+	 * Calculates when a given job will timeout
+	 */
+	public Date calculateTimeout(final AppDataJob job) {
+		final L0SegmentProduct product = L0SegmentProduct.of(job);
+		final String sensingEndTimeStr = product.getStopTime();
+		
+		final AppDataJobProduct jobProduct = job.getProduct();
+    	final String timeliness = (String) jobProduct.getMetadata().get("timeliness");
+
+    	Long minimalTimeout = null;
+    	Long nominalTimeout = null;
+		if ("PT".equals(timeliness) || "NRT".equals(timeliness)) {
+			minimalTimeout = (long) this.waitingTimeHoursMinimalNrtPt;
+			nominalTimeout = (long) this.waitingTimeHoursNominalNrtPt;
+		} else if ("FAST24".equals(timeliness)) {
+			minimalTimeout = (long) this.waitingTimeHoursMinimalFast;
+			nominalTimeout = (long) this.waitingTimeHoursNominalFast;
+		}
+		
+		if (null != minimalTimeout) {
+			final LocalDateTime sensingStopTime = DateUtils.parse(sensingEndTimeStr);
+			final Date jobCreationDate = job.getCreationDate();
+			final LocalDateTime jobCreationDateTime = LocalDateTime.ofInstant(jobCreationDate.toInstant(), ZoneId.of("UTC"));
+
+
+			// wait at least jobCreation + minimal but no longer than sensing stop + nominal
+			final LocalDateTime timeoutThreshold = max(sensingStopTime.plusHours(nominalTimeout), jobCreationDateTime.plusHours(minimalTimeout));
+			
+			return Date.from(timeoutThreshold.atZone(ZoneId.systemDefault()).toInstant());
+		}
+
+		return null;
+	}
+	
 	private boolean checkTimeoutReached(final AppDataJob job, final String sensingEndTimeStr,final LocalDateTime now) {
 		// S1PRO-1797 / S1PRO-1905: timeout for L0ASP in PT/NRT/FAST mode
 		final L0SegmentProduct product = L0SegmentProduct.of(job);

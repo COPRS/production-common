@@ -156,6 +156,8 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 			appDataJob.setStopTime(eventAdapter.stopTime());
 		}
 		
+		appDataJob.setTimeoutDate(aiopAdapter.calculateTimeout(appDataJob));
+		
 		return Collections.singletonList(appDataJob);
 	}
 	

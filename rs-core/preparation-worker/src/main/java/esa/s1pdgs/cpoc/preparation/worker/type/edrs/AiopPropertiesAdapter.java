@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.preparation.worker.type.edrs;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -125,6 +126,32 @@ public final class AiopPropertiesAdapter {
     	aiopParams.put("NRTOutputPath", nrtOutputPath.replace("%WORKING_DIR_NUMBER%", Long.toString(job.getId())));
     	aiopParams.put("PTOutputPath", ptOutputPath.replace("%WORKING_DIR_NUMBER%", Long.toString(job.getId())));
     	return aiopParams;
+	}
+	
+	public Date calculateTimeout(final AppDataJob job) {
+		final EdrsSessionProduct product = EdrsSessionProduct.of(job);
+
+		final String stationCode = product.getStationCode();
+		final Map<String, String> propForStationCode = aiopProperties.get(stationCode);
+		if (propForStationCode == null) {
+			LOGGER.warn("no configuration found for station code -> not timeout check");
+			return null;
+		}
+		final long timeoutForDownlinkStationMs = Long.valueOf(propForStationCode.get("TimeoutSec")) * 1000;
+		final long minimalWaitingTimeMs = this.minimalWaitingTimeSec * 1000;
+
+		// the creation date of the job is used for the start of waiting
+		final long startToWaitMs = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
+
+		// the "stop time" of the product (DSIB) is the downlink-end time
+		final String downlinkEndTimeUTC = product.getStopTime();
+
+		final long downlinkEndTimeMs = DateUtils.parse(downlinkEndTimeUTC).toInstant(ZoneOffset.UTC).toEpochMilli();
+
+		final long timeoutEndTimestampMs = Math.max(startToWaitMs + minimalWaitingTimeMs,
+				downlinkEndTimeMs + timeoutForDownlinkStationMs);
+		
+		return new Date(timeoutEndTimestampMs);
 	}
 	
     
