@@ -61,8 +61,10 @@ public final class AspPropertiesAdapter {
 	 */
 	public Date calculateTimeout(final AppDataJob job) {
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
-		final String sensingEndTimeStr = product.getStopTime();
-		
+		return calculateTimeout(job, product.getStopTime());
+	}
+	
+	private Date calculateTimeout(final AppDataJob job, String sensingEndTimeStr) {
 		final AppDataJobProduct jobProduct = job.getProduct();
     	final String timeliness = (String) jobProduct.getMetadata().get("timeliness");
 
@@ -81,7 +83,6 @@ public final class AspPropertiesAdapter {
 			final Date jobCreationDate = job.getCreationDate();
 			final LocalDateTime jobCreationDateTime = LocalDateTime.ofInstant(jobCreationDate.toInstant(), ZoneId.of("UTC"));
 
-
 			// wait at least jobCreation + minimal but no longer than sensing stop + nominal
 			final LocalDateTime timeoutThreshold = max(sensingStopTime.plusHours(nominalTimeout), jobCreationDateTime.plusHours(minimalTimeout));
 			
@@ -94,34 +95,17 @@ public final class AspPropertiesAdapter {
 	private boolean checkTimeoutReached(final AppDataJob job, final String sensingEndTimeStr,final LocalDateTime now) {
 		// S1PRO-1797 / S1PRO-1905: timeout for L0ASP in PT/NRT/FAST mode
 		final L0SegmentProduct product = L0SegmentProduct.of(job);
-    	final AppDataJobProduct jobProduct = job.getProduct();
-    	final String timeliness = (String) jobProduct.getMetadata().get("timeliness");
-
-    	Long minimalTimeout = null;
-    	Long nominalTimeout = null;
-		if ("PT".equals(timeliness) || "NRT".equals(timeliness)) {
-			minimalTimeout = (long) this.waitingTimeHoursMinimalNrtPt;
-			nominalTimeout = (long) this.waitingTimeHoursNominalNrtPt;
-		} else if ("FAST24".equals(timeliness)) {
-			minimalTimeout = (long) this.waitingTimeHoursMinimalFast;
-			nominalTimeout = (long) this.waitingTimeHoursNominalFast;
-		}
+    	final Date timeoutDate = calculateTimeout(job, sensingEndTimeStr);
 		
-		if (null != minimalTimeout) {
-			final LocalDateTime sensingStopTime = DateUtils.parse(sensingEndTimeStr);
-			final Date jobCreationDate = job.getCreationDate();
-			final LocalDateTime jobCreationDateTime = LocalDateTime.ofInstant(jobCreationDate.toInstant(), ZoneId.of("UTC"));
-
-
-			// wait at least jobCreation + minimal but no longer than sensing stop + nominal
-			final LocalDateTime timeoutThreshold = max(sensingStopTime.plusHours(nominalTimeout), jobCreationDateTime.plusHours(minimalTimeout));
-
-			if(now.isAfter(timeoutThreshold)) {
+		if (null != timeoutDate) {
+			final LocalDateTime timeoutLocalDateTime = LocalDateTime.ofInstant(timeoutDate.toInstant(), ZoneId.of("UTC"));
+			
+			if(now.isAfter(timeoutLocalDateTime)) {
 				LOGGER.warn("Timeout reached for product {}", product.getProductName());
 				return true;
-			}else {
+			} else {
 				LOGGER.debug("product {} has not yet reached timout at {}", product.getProductName(),
-						DateUtils.formatToMetadataDateTimeFormat(timeoutThreshold));
+						DateUtils.formatToMetadataDateTimeFormat(timeoutLocalDateTime));
 			}
 		}
 

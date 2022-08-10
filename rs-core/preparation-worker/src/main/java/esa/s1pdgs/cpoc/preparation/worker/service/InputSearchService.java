@@ -58,6 +58,8 @@ public class InputSearchService {
 			}, "validating availability of input products for " + job.getProductName());
 			newState = AppDataJobGenerationState.PRIMARY_CHECK;
 		} finally {
+			// The mainInputSearch may change the timeout value -> update it here for future house keeping
+			typeAdapter.updateTimeout(job);
 			updateJobMainInputSearch(job, queried, newState);
 		}
 

@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.preparation.worker.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -57,8 +58,8 @@ public class HousekeepingService implements Supplier<List<Message<IpfExecutionJo
 		
 		
 		// Calculate Timeout-Date based on configuration
-		List<AppDataJob> timeoutJobs = appCatJobService.findTimeoutJobs(null)
+		List<AppDataJob> timeoutJobs = appCatJobService.findTimeoutJobs(new Date());	
 		
-		
+		return null;
 	}
 }

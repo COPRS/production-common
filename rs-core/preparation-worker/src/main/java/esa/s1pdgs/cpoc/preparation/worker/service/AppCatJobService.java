@@ -62,6 +62,10 @@ public class AppCatJobService {
 	public List<AppDataJob> findByProductSessionId(final String sessionId) {
 		return appDataJobRepository.findByProductSessionId(sessionId);
 	}
+	
+	public List<AppDataJob> findTimeoutJobs(final Date timeoutThreshhold) {
+		return appDataJobRepository.findTimeoutJobs(timeoutThreshhold, processProperties.getHostname());
+	}
 
 	public List<AppDataJob> findByProductDataTakeId(final String productType, final String dataTakeId) {
 		// sorry, dirty workaround to identify RFC jobs
