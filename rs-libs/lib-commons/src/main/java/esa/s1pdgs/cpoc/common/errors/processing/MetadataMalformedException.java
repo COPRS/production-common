@@ -18,15 +18,23 @@ public class MetadataMalformedException extends AbstractCodedException {
     private static final String MESSAGE = "Metadata malformed";
 
     /**
-     * Nalme of missing field
+     * Name of missing field
      */
     private final String missingField;
 
     /**
-     * @param productName
+     * @param missingField
      */
     public MetadataMalformedException(final String missingField) {
         super(ErrorCode.METADATA_MALFORMED_ERROR, MESSAGE);
+        this.missingField = missingField;
+    }
+    
+    /**
+     * @param missingField, message
+     */
+    public MetadataMalformedException(final String missingField, final String message) {
+        super(ErrorCode.METADATA_MALFORMED_ERROR, message);
         this.missingField = missingField;
     }
 

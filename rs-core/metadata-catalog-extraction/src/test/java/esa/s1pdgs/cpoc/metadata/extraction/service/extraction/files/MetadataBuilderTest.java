@@ -6,8 +6,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +23,7 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 
 public class MetadataBuilderTest {
@@ -45,7 +44,7 @@ public class MetadataBuilderTest {
 	
 	
 	@Test
-	public void testBuildConfigFileMetadataXml() throws JSONException, MetadataExtractionException, MetadataMalformedException {
+	public void testBuildConfigFileMetadataXml() throws MetadataExtractionException, MetadataMalformedException {
 		
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.XML);
@@ -58,7 +57,7 @@ public class MetadataBuilderTest {
 		descriptor.setProductType("AUX_OBMEMC");
 		descriptor.setRelativePath("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml");
 
-		final JSONObject expectedResult = new JSONObject("{\"productName\": \"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\"}");
+		final ProductMetadata expectedResult = ProductMetadata.ofJson("{\"productName\": \"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml\"}");
 
 		Mockito.doAnswer(i ->expectedResult)
 			.when(extractor).processXMLFile(Mockito.any(AuxDescriptor.class), Mockito.any(File.class));
@@ -67,17 +66,17 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
+			final ProductMetadata metadata = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataEOF() throws JSONException, MetadataExtractionException, MetadataMalformedException {
+	public void testBuildConfigFileMetadataEOF() throws MetadataExtractionException, MetadataMalformedException {
 
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -90,7 +89,7 @@ public class MetadataBuilderTest {
 		descriptor.setProductType("MPL_ORBSCT");
 		descriptor.setRelativePath("S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF");
 
-		final JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-01-23T16:38:09\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-04-03T22:46:09\",\"version\":\"0020\",\"productName\":\"S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF\",\"productType\":\"MPL_ORBSCT\"}");
+		final ProductMetadata expectedResult = ProductMetadata.ofJson("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-01-23T16:38:09\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2014-04-03T22:46:09\",\"version\":\"0020\",\"productName\":\"S1A_OPER_MPL_ORBSCT_20140507T150704_99999999T999999_0020.EOF\",\"productType\":\"MPL_ORBSCT\"}");
 		
 		Mockito.doAnswer(i -> expectedResult)
 			.when(extractor).processEOFFile(Mockito.any(AuxDescriptor.class), Mockito.any(File.class));
@@ -99,16 +98,16 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			final ProductMetadata metadata = metadataBuilder.buildConfigFileMetadata(descriptor, file);
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataAUXRESORB() throws JSONException, MetadataExtractionException, MetadataMalformedException {
+	public void testBuildConfigFileMetadataAUXRESORB() throws MetadataExtractionException, MetadataMalformedException {
 
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.EOF);
@@ -121,7 +120,7 @@ public class MetadataBuilderTest {
 		descriptor.setProductType("AUX_RESORB");
 		descriptor.setRelativePath("S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF");
 
-		final JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"2017-12-13T13:45:07\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-13T10:27:37\",\"version\":\"0001\",\"productType\":\"AUX_RESORB\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\"}");
+		final ProductMetadata expectedResult = ProductMetadata.ofJson("{\"validityStopTime\":\"2017-12-13T13:45:07\",\"productClass\":\"OPER\",\"missionid\":\"S1\",\"creationTime\":\"2017-12-13T14:38:38\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"validityStartTime\":\"2017-12-13T10:27:37\",\"version\":\"0001\",\"productType\":\"AUX_RESORB\",\"productName\":\"S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF\"}");
 
 		Mockito.doAnswer(i -> expectedResult)
 			.when(extractor).processEOFFileWithoutNamespace(Mockito.any(AuxDescriptor.class),Mockito.any(File.class));
@@ -130,17 +129,17 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
+			final ProductMetadata metadata = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 			
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	@Test
-	public void testBuildConfigFileMetadataSAFE() throws JSONException, MetadataExtractionException, MetadataMalformedException {
+	public void testBuildConfigFileMetadataSAFE() throws MetadataExtractionException, MetadataMalformedException {
 
 		final AuxDescriptor descriptor = new AuxDescriptor();
 		descriptor.setExtension(FileExtension.SAFE);
@@ -153,7 +152,7 @@ public class MetadataBuilderTest {
 		descriptor.setProductType("AUX_INS");
 		descriptor.setRelativePath("S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE");
 
-		final JSONObject expectedResult = new JSONObject("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:16.000000\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000\",\"productName\":\"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE\",\"productType\":\"AUX_INS\"}");
+		final ProductMetadata expectedResult = ProductMetadata.ofJson("{\"validityStopTime\":\"9999-12-31T23:59:59\",\"site\":\"CLS-Brest\",\"missionid\":\"S1\",\"creationTime\":\"2017-10-13T10:12:16.000000\",\"insertionTime\":\"2018-05-30T11:40:06\",\"satelliteid\":\"A\",\"instrumentConfigurationId\":\"6\",\"validityStartTime\":\"2017-10-17T08:00:00.000000\",\"productName\":\"S1A_AUX_INS_V20171017T080000_G20171013T101216.SAFE\",\"productType\":\"AUX_INS\"}");
 
 		Mockito.doAnswer(i -> expectedResult)
 			.when(extractor).processSAFEFile(Mockito.any(AuxDescriptor.class), Mockito.any(File.class));
@@ -163,10 +162,10 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildConfigFileMetadata(descriptor, file);
+			final ProductMetadata metadata = metadataBuilder.buildConfigFileMetadata(descriptor, file);
 
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
@@ -229,9 +228,9 @@ public class MetadataBuilderTest {
 	}
 
 	@Test
-	public void testBuildSessionMetadataRaw() throws JSONException, MetadataExtractionException {
+	public void testBuildSessionMetadataRaw() throws MetadataExtractionException {
 		// Mock the extractor
-		final JSONObject expectedResult = new JSONObject(
+		final ProductMetadata expectedResult = ProductMetadata.ofJson(
 				"{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"707000180\",\"productName\":\"DCS_02_L20171109175634707000180_ch1_DSDB_00001.raw\",\"satelliteId\":\"A\",\"productType\":\"RAW\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\"}");
 		
 		Mockito.doAnswer(i ->expectedResult)
@@ -252,19 +251,19 @@ public class MetadataBuilderTest {
 		
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildEdrsSessionFileRaw(descriptor);
+			final ProductMetadata metadata = metadataBuilder.buildEdrsSessionFileRaw(descriptor);
 
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	@Test
-	public void testBuildSessionMetadataSession() throws JSONException, MetadataExtractionException {
+	public void testBuildSessionMetadataSession() throws MetadataExtractionException {
 		// Mock the extractor
-		final JSONObject expectedResult = new JSONObject(
+		final ProductMetadata expectedResult = ProductMetadata.ofJson(
 				"{\"insertionTime\":\"2018-02-07T13:26:12\",\"missionId\":\"S1\",\"sessionId\":\"SESSION1\",\"productName\":\"DCS_02_SESSION1_ch1_DSIB.xml\",\"satelliteId\":\"A\",\"productType\":\"SESSION\",\"url\":\"SESSION1/DCS_02_SESSION1_ch1_DSIB.xml\"}");
 		
 		Mockito.doAnswer(i -> expectedResult)
@@ -285,19 +284,19 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildEdrsSessionFileMetadata(descriptor, new File("/dev/null/foobar"));
+			final ProductMetadata metadata = metadataBuilder.buildEdrsSessionFileMetadata(descriptor, new File("/dev/null/foobar"));
 
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	@Test
-	public void testbuildL0SliceOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
+	public void testbuildL0SliceOutputFileMetadata() throws MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
-		final JSONObject expectedResult = new JSONObject(
+		final ProductMetadata expectedResult = ProductMetadata.ofJson(
 				"{\"missionDataTakeId\":\"137013\",\"theoreticalSliceLength\":\"25\",\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"sliceNumber\":\"13\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"sliceOverlap\":\"7.4\",\"startTimeANX\":\"596091.6080\"}");
 		
 		Mockito.doAnswer(i -> expectedResult)
@@ -326,19 +325,19 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, job);
+			final ProductMetadata metadata = metadataBuilder.buildOutputFileMetadata(descriptor, file, job);
 
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	@Test
-	public void testbuildL0ACNOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
+	public void testbuildL0ACNOutputFileMetadata() throws MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
-		final JSONObject expectedResult = new JSONObject(
+		final ProductMetadata expectedResult = ProductMetadata.ofJson(
 				"{\"missionDataTakeId\":\"137013\",\"totalNumberOfSlice\":20.159704,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"startTimeANX\":\"296088.9120\"}");
 		
 		Mockito.doAnswer(i -> expectedResult)
@@ -366,19 +365,19 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, job);
+			final ProductMetadata metadata = metadataBuilder.buildOutputFileMetadata(descriptor, file, job);
 
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	@Test
-	public void testbuildL1SliceOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
+	public void testbuildL1SliceOutputFileMetadata() throws MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
-		final JSONObject expectedResult = new JSONObject(
+		final ProductMetadata expectedResult = ProductMetadata.ofJson(
 				"{\"missionDataTakeId\":\"137013\",\"theoreticalSliceLength\":\"25\",\"sliceCoordinates\":{\"coordinates\":[[[86.8273,36.7787],[86.4312,38.7338],[83.6235,38.4629],[84.0935,36.5091],[86.8273,36.7787]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"sliceNumber\":\"13\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"SLICE\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:16:23.685188Z\",\"stopTime\":\"2017-12-13T12:16:56.085136Z\",\"productType\":\"IW_RAW__0S\",\"productClass\":\"S\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":628491.556,\"sliceOverlap\":\"7.4\",\"startTimeANX\":\"596091.6080\"}");
 		
 		Mockito.doAnswer(i -> expectedResult)
@@ -407,19 +406,19 @@ public class MetadataBuilderTest {
 		job.setProductFamily(ProductFamily.L1_SLICE);
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, job);
+			final ProductMetadata metadata = metadataBuilder.buildOutputFileMetadata(descriptor, file, job);
 
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}
 	}
 	
 	@Test
-	public void testbuildL1ACNOutputFileMetadata() throws JSONException, MetadataExtractionException, MetadataMalformedException {
+	public void testbuildL1ACNOutputFileMetadata() throws MetadataExtractionException, MetadataMalformedException {
 		// Mock the extractor
-		final JSONObject expectedResult = new JSONObject(
+		final ProductMetadata expectedResult = ProductMetadata.ofJson(
 				"{\"missionDataTakeId\":\"137013\",\"totalNumberOfSlice\":20.159704,\"sliceCoordinates\":{\"coordinates\":[[[90.3636,18.6541],[84.2062,49.0506],[80.8613,48.7621],[88.0584,18.3765],[90.3636,18.6541]]],\"type\":\"Polygon\"},\"insertionTime\":\"2018-05-30T14:27:43\",\"polarisation\":\"DV\",\"absoluteStopOrbit\":\"19684\",\"resolution\":\"_\",\"circulationFlag\":\"13\",\"productName\":\"S1A_IW_RAW__0ADV_20171213T121123_20171213T121947_019684_021735_51B1.SAFE\",\"dataTakeId\":\"021735\",\"productConsolidation\":\"FULL\",\"absoluteStartOrbit\":\"19684\",\"instrumentConfigurationId\":\"6\",\"relativeStopOrbit\":\"12\",\"relativeStartOrbit\":\"12\",\"startTime\":\"2017-12-13T12:11:23.682488Z\",\"stopTime\":\"2017-12-13T12:19:47.264351Z\",\"productType\":\"IW_RAW__0A\",\"productClass\":\"A\",\"missionId\":\"S1\",\"swathtype\":\"IW\",\"pass\":\"ASCENDING\",\"satelliteId\":\"A\",\"stopTimeANX\":799670.769,\"startTimeANX\":\"296088.9120\"}");
 		
 		Mockito.doAnswer(i -> expectedResult)
@@ -449,10 +448,10 @@ public class MetadataBuilderTest {
 
 		try {
 			final MetadataBuilder metadataBuilder = new MetadataBuilder(extractor);
-			final JSONObject dto = metadataBuilder.buildOutputFileMetadata(descriptor, file, job);
+			final ProductMetadata metadata = metadataBuilder.buildOutputFileMetadata(descriptor, file, job);
 
-			assertNotNull("Metadata should not be null", dto);
-			assertEquals("Metadata are not equals", expectedResult.toString(), dto.toString());
+			assertNotNull("Metadata should not be null", metadata);
+			assertEquals("Metadata are not equals", expectedResult.toString(), metadata.toString());
 		} catch (final AbstractCodedException fe) {
 			fail("Exception occurred: " + fe.getMessage());
 		}

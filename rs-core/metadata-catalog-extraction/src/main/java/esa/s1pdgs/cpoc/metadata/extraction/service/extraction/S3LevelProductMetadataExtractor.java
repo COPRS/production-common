@@ -2,14 +2,13 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import java.io.File;
 
-import org.json.JSONObject;
-
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -24,7 +23,7 @@ public class S3LevelProductMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob job) throws AbstractCodedException {
+	public ProductMetadata extract(ReportingFactory reportingFactory, CatalogJob job) throws AbstractCodedException {
 		final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, job.getProductFamily(),
 				job.getKeyObjectStorage());
 		try {
@@ -32,9 +31,8 @@ public class S3LevelProductMetadataExtractor extends AbstractMetadataExtractor {
 					job.getProductFamily());
 
 			// Build metadata from file and extracted
-			final JSONObject obj = mdBuilder.buildS3LevelProductFileMetadata(descriptor, metadataFile, job);
-
-			return obj;
+			final ProductMetadata metadata = mdBuilder.buildS3LevelProductFileMetadata(descriptor, metadataFile, job);
+			return metadata;
 		} finally {
 			FileUtils.delete(metadataFile.getPath());
 		}

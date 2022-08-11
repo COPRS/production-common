@@ -2,11 +2,11 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.json.JSONObject;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 
 public class TestS2ProductNameUtil {
 	
@@ -15,8 +15,8 @@ public class TestS2ProductNameUtil {
 		
 		// synthetic file name with all optional attributes (granule producttype here because then _S is for sensing here instead of validity start)
 		
-		final JSONObject m1 = S2ProductNameUtil.extractMetadata("S2A_OPER_MSI_L1A_GR_MTI__20200101T125959_S20130401T123000_O123456_123457_V20091210T235134_20091210T235224_D05_A123456_R123_T15SWC_N01.01_B8A_WP_LD");
-		System.out.println(m1.toString(4));
+		final ProductMetadata m1 = S2ProductNameUtil.extractMetadata("S2A_OPER_MSI_L1A_GR_MTI__20200101T125959_S20130401T123000_O123456_123457_V20091210T235134_20091210T235224_D05_A123456_R123_T15SWC_N01.01_B8A_WP_LD");
+		System.out.println(m1.prettyPrint());
 		assertEquals("S2A_OPER_MSI_L1A_GR_MTI__20200101T125959_S20130401T123000_O123456_123457_V20091210T235134_20091210T235224_D05_A123456_R123_T15SWC_N01.01_B8A_WP_LD", m1.getString("productName"));
 		assertEquals("S2", m1.getString("missionId"));
 		assertEquals("A", m1.getString("satelliteId"));
@@ -40,8 +40,8 @@ public class TestS2ProductNameUtil {
 		
 		// synthetic file name for AUX
 		
-		final JSONObject m2 = S2ProductNameUtil.extractMetadata("S2B_TEST_AUX_DUMMY_______20200101T125959_S20130401T123000_O123456_123457_D05_A823456_R123_T15SWC_N01.01_B8A_WF_LN");
-		System.out.println(m2.toString(4));
+		final ProductMetadata m2 = S2ProductNameUtil.extractMetadata("S2B_TEST_AUX_DUMMY_______20200101T125959_S20130401T123000_O123456_123457_D05_A823456_R123_T15SWC_N01.01_B8A_WF_LN");
+		System.out.println(m2.prettyPrint());
 		assertEquals("S2", m2.getString("missionId"));
 		assertEquals("B", m2.getString("satelliteId"));
 		assertEquals("TEST", m2.getString("productClass"));
@@ -63,8 +63,8 @@ public class TestS2ProductNameUtil {
 		
 		// from existing file names	
 		
-		final JSONObject m3 = S2ProductNameUtil.extractMetadata("S2A_OPER_AUX_PREORB_OPOD_20170617T092226_V20170617T110120_20170617T142243.EOF");		
-		System.out.println(m3.toString(4));
+		final ProductMetadata m3 = S2ProductNameUtil.extractMetadata("S2A_OPER_AUX_PREORB_OPOD_20170617T092226_V20170617T110120_20170617T142243.EOF");		
+		System.out.println(m3.prettyPrint());
 		assertEquals("S2A_OPER_AUX_PREORB_OPOD_20170617T092226_V20170617T110120_20170617T142243.EOF", m3.getString("productName"));
 		assertEquals("S2", m3.getString("missionId"));
 		assertEquals("A", m3.getString("satelliteId"));
@@ -75,8 +75,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2017-06-17T14:22:43.000000Z", m3.getString("validityStopTime"));		
 		assertEquals(8, m3.length());
 
-		final JSONObject m4 = S2ProductNameUtil.extractMetadata("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.zip");
-		System.out.println(m4.toString(4));
+		final ProductMetadata m4 = S2ProductNameUtil.extractMetadata("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.zip");
+		System.out.println(m4.prettyPrint());
 		assertEquals("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.zip", m4.getString("productName"));
 		assertEquals("S2", m4.getString("missionId"));
 		assertEquals("A", m4.getString("satelliteId"));
@@ -90,8 +90,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("N", m4.getString("degradationId"));
 		assertEquals(11, m4.length());
 		
-		final JSONObject m5 = S2ProductNameUtil.extractMetadata("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.tar");
-		System.out.println(m5.toString(4));
+		final ProductMetadata m5 = S2ProductNameUtil.extractMetadata("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.tar");
+		System.out.println(m5.prettyPrint());
 		assertEquals("S2", m5.getString("missionId"));
 		assertEquals("A", m5.getString("satelliteId"));		
 		assertEquals("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.tar", m5.getString("productName"));
@@ -105,8 +105,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("N", m5.getString("degradationId"));
 		assertEquals(11, m5.length());
 		
-		final JSONObject m6 = S2ProductNameUtil.extractMetadata("S2B_OPER_AUX_RESORB_OPOD_20181016T014456_V20181015T211347_20181016T003717.EOF");
-		System.out.println(m6.toString(4));
+		final ProductMetadata m6 = S2ProductNameUtil.extractMetadata("S2B_OPER_AUX_RESORB_OPOD_20181016T014456_V20181015T211347_20181016T003717.EOF");
+		System.out.println(m6.prettyPrint());
 		assertEquals("S2B_OPER_AUX_RESORB_OPOD_20181016T014456_V20181015T211347_20181016T003717.EOF", m6.getString("productName"));
 		assertEquals("S2", m6.getString("missionId"));
 		assertEquals("B", m6.getString("satelliteId"));
@@ -117,8 +117,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2018-10-16T00:37:17.000000Z", m6.getString("validityStopTime"));
 		assertEquals(8, m6.length());
 		
-		final JSONObject m7 = S2ProductNameUtil.extractMetadata("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ");
-		System.out.println(m7.toString(4));
+		final ProductMetadata m7 = S2ProductNameUtil.extractMetadata("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ");
+		System.out.println(m7.prettyPrint());
 		assertEquals("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ", m7.getString("productName"));
 		assertEquals("S2", m7.getString("missionId"));
 		assertEquals("B", m7.getString("satelliteId"));
@@ -130,8 +130,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("8A", m7.getString("bandIndexId"));
 		assertEquals(9, m7.length());
 		
-		final JSONObject m8 = S2ProductNameUtil.extractMetadata("S2__OPER_AUX_ECMWFD_PDMC_20190216T120000_V20190217T090000_20190217T210000.TGZ");
-		System.out.println(m8.toString(4));
+		final ProductMetadata m8 = S2ProductNameUtil.extractMetadata("S2__OPER_AUX_ECMWFD_PDMC_20190216T120000_V20190217T090000_20190217T210000.TGZ");
+		System.out.println(m8.prettyPrint());
 		assertEquals("S2__OPER_AUX_ECMWFD_PDMC_20190216T120000_V20190217T090000_20190217T210000.TGZ", m8.getString("productName"));
 		assertEquals("S2", m8.getString("missionId"));
 		assertEquals("_", m8.getString("satelliteId"));
@@ -142,8 +142,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2019-02-17T21:00:00.000000Z", m8.getString("validityStopTime"));
 		assertEquals(8, m8.length());
 		
-		final JSONObject m9 = S2ProductNameUtil.extractMetadata("S2__OPER_AUX_UT1UTC_PDMC_20191024T000000_V20191025T000000_20201024T000000.TGZ");
-		System.out.println(m9.toString(4));
+		final ProductMetadata m9 = S2ProductNameUtil.extractMetadata("S2__OPER_AUX_UT1UTC_PDMC_20191024T000000_V20191025T000000_20201024T000000.TGZ");
+		System.out.println(m9.prettyPrint());
 		assertEquals("S2__OPER_AUX_UT1UTC_PDMC_20191024T000000_V20191025T000000_20201024T000000.TGZ", m9.getString("productName"));
 		assertEquals("S2", m9.getString("missionId"));
 		assertEquals("_", m9.getString("satelliteId"));
@@ -154,8 +154,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2020-10-24T00:00:00.000000Z", m9.getString("validityStopTime"));
 		assertEquals(8, m9.length());
 		
-		final JSONObject m10 = S2ProductNameUtil.extractMetadata("S2A_OPER_MSI_L1A_GR_MTI__20141104T134012_S20141104T134012_D03_N01.12");
-		System.out.println(m10.toString(4));
+		final ProductMetadata m10 = S2ProductNameUtil.extractMetadata("S2A_OPER_MSI_L1A_GR_MTI__20141104T134012_S20141104T134012_D03_N01.12");
+		System.out.println(m10.prettyPrint());
 		assertEquals("S2A_OPER_MSI_L1A_GR_MTI__20141104T134012_S20141104T134012_D03_N01.12", m10.getString("productName"));
 		assertEquals("S2", m10.getString("missionId"));
 		assertEquals("A", m10.getString("satelliteId"));
@@ -167,8 +167,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("01.12", m10.getString("processingBaselineNumber"));
 		assertEquals(9, m10.length());
 		
-		final JSONObject m11 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1A_GR_EPAE_20200114T014601_S20200114T002121_D12_N02.08.tar");
-		System.out.println(m11.toString(4));
+		final ProductMetadata m11 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1A_GR_EPAE_20200114T014601_S20200114T002121_D12_N02.08.tar");
+		System.out.println(m11.prettyPrint());
 		assertEquals("S2B_OPER_MSI_L1A_GR_EPAE_20200114T014601_S20200114T002121_D12_N02.08.tar", m11.getString("productName"));
 		assertEquals("S2", m11.getString("missionId"));
 		assertEquals("B", m11.getString("satelliteId"));
@@ -180,8 +180,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("02.08", m11.getString("processingBaselineNumber"));
 		assertEquals(9, m11.length());
 		
-		final JSONObject m12 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1C_DS_MTI__20200226T105549_S20200226T070436_N02.09.tar");
-		System.out.println(m12.toString(4));
+		final ProductMetadata m12 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1C_DS_MTI__20200226T105549_S20200226T070436_N02.09.tar");
+		System.out.println(m12.prettyPrint());
 		assertEquals("S2B_OPER_MSI_L1C_DS_MTI__20200226T105549_S20200226T070436_N02.09.tar", m12.getString("productName"));
 		assertEquals("S2", m12.getString("missionId"));
 		assertEquals("B", m12.getString("satelliteId"));
@@ -192,8 +192,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("02.09", m12.getString("processingBaselineNumber"));
 		assertEquals(8, m12.length());
 		
-		final JSONObject m13 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1C_TC_EPAE_20191001T102654_A013417_T39UWP_N02.08.jp2");
-		System.out.println(m13.toString(4));
+		final ProductMetadata m13 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1C_TC_EPAE_20191001T102654_A013417_T39UWP_N02.08.jp2");
+		System.out.println(m13.prettyPrint());
 		assertEquals("S2B_OPER_MSI_L1C_TC_EPAE_20191001T102654_A013417_T39UWP_N02.08.jp2", m13.getString("productName"));
 		assertEquals("S2", m13.getString("missionId"));
 		assertEquals("B", m13.getString("satelliteId"));
@@ -207,8 +207,8 @@ public class TestS2ProductNameUtil {
 		
 		// HKTM
 		
-		final JSONObject m14 = S2ProductNameUtil.extractMetadata("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar");
-		System.out.println(m14.toString(4));
+		final ProductMetadata m14 = S2ProductNameUtil.extractMetadata("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar");
+		System.out.println(m14.prettyPrint());
 		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar", m14.getString("productName"));
 		assertEquals("S2", m14.getString("missionId"));
 		assertEquals("A", m14.getString("satelliteId"));
@@ -220,8 +220,8 @@ public class TestS2ProductNameUtil {
 		
 		// Level-1C User Product tree defined using the Standard Naming Convention
 		
-		final JSONObject m15 = S2ProductNameUtil.extractMetadata("S2A_OPER_PRD_MSIL1C_PDMC_20160615T141550_R121_V20160615T082012_20160615T083135.SAFE");
-		System.out.println(m15.toString(4));
+		final ProductMetadata m15 = S2ProductNameUtil.extractMetadata("S2A_OPER_PRD_MSIL1C_PDMC_20160615T141550_R121_V20160615T082012_20160615T083135.SAFE");
+		System.out.println(m15.prettyPrint());
 		assertEquals("S2A_OPER_PRD_MSIL1C_PDMC_20160615T141550_R121_V20160615T082012_20160615T083135.SAFE", m15.getString("productName"));
 		assertEquals("S2", m15.getString("missionId"));
 		assertEquals("A", m15.getString("satelliteId"));
@@ -234,8 +234,8 @@ public class TestS2ProductNameUtil {
 		
 		// Level-1C User Product tree defined using the Compact Naming Convention
 		
-		final JSONObject m16 = S2ProductNameUtil.extractMetadata("S2A_MSIL1C_20150802T105414_N0102_R008_20150803T124046.SAFE.tar.gz");
-		System.out.println(m16.toString(4));
+		final ProductMetadata m16 = S2ProductNameUtil.extractMetadata("S2A_MSIL1C_20150802T105414_N0102_R008_20150803T124046.SAFE.tar.gz");
+		System.out.println(m16.prettyPrint());
 		assertEquals("S2A_MSIL1C_20150802T105414_N0102_R008_20150803T124046.SAFE.tar.gz", m16.getString("productName"));
 		assertEquals("S2", m16.getString("missionId"));
 		assertEquals("A", m16.getString("satelliteId"));
@@ -248,8 +248,8 @@ public class TestS2ProductNameUtil {
 		
 		// Single Title Naming Convention. Example S2 L2A single tile product main directory
 		
-		final JSONObject m17 = S2ProductNameUtil.extractMetadata("S2A_MSIL2A_20171103T102201_N0206_R065_T32TNS_20171106T195236.SAFE.tar.gz");
-		System.out.println(m17.toString(4));
+		final ProductMetadata m17 = S2ProductNameUtil.extractMetadata("S2A_MSIL2A_20171103T102201_N0206_R065_T32TNS_20171106T195236.SAFE.tar.gz");
+		System.out.println(m17.prettyPrint());
 		assertEquals("S2A_MSIL2A_20171103T102201_N0206_R065_T32TNS_20171106T195236.SAFE.tar.gz", m17.getString("productName"));
 		assertEquals("S2", m17.getString("missionId"));
 		assertEquals("A", m17.getString("satelliteId"));

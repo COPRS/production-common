@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -33,6 +31,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetad
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -122,7 +121,7 @@ public class TestAuxMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataAuxOBMEMC() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testExtractMetadataAuxOBMEMC() throws MetadataExtractionException, AbstractCodedException {
 		final String fileName = "S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml";
 		final CatalogJob inputMessageAux = Utils.newCatalogJob("S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml",
 				"S1A_OPER_AUX_OBMEMC_PDMC_20140201T000000.xml", ProductFamily.AUXILIARY_FILE);
@@ -130,7 +129,7 @@ public class TestAuxMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataAuxWAV() throws AbstractCodedException, JSONException {
+	public void testExtractMetadataAuxWAV() throws AbstractCodedException {
 
 		final String fileName = "S1__AUX_WAV_V20110801T000000_G20111026T141850.SAFE";
 
@@ -141,7 +140,7 @@ public class TestAuxMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataAuxICE() throws AbstractCodedException, JSONException {
+	public void testExtractMetadataAuxICE() throws AbstractCodedException {
 
 		final String fileName = "S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE";
 		final CatalogJob inputMessageAuxICE = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE);
@@ -151,7 +150,7 @@ public class TestAuxMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataAuxWND() throws AbstractCodedException, JSONException {
+	public void testExtractMetadataAuxWND() throws AbstractCodedException {
 
 		final String fileName = "S1__AUX_WND_V20160423T120000_G20160422T060059.SAFE";
 
@@ -163,7 +162,7 @@ public class TestAuxMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataAuxPP2() throws AbstractCodedException, JSONException {
+	public void testExtractMetadataAuxPP2() throws AbstractCodedException {
 
 		final String fileName = "S1A_AUX_PP2_V20171017T080000_G20171013T101254.SAFE";
 
@@ -179,7 +178,7 @@ public class TestAuxMetadataExtractor {
 		final String fileName = "S1__AUX_TEC_V20190805T000000_20190805T235959_G20200210T102615.SAFE";
 		final CatalogJob inputMessage = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE);
 		
-		JSONObject result = testExtractMetadata(inputMessage, fileName, fileName + File.separator + "manifest.safe",
+		ProductMetadata result = testExtractMetadata(inputMessage, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_TEC");
 		assertEquals("2019-08-05T00:00:00.000000Z", result.get("validityStartTime"));
 		assertEquals("2019-08-05T23:59:59.000000Z", result.get("validityStopTime"));
@@ -191,17 +190,17 @@ public class TestAuxMetadataExtractor {
 		final String fileName = "S1__AUX_TRO_V20190805T180000_20190805T235959_G20200518T084534.SAFE";
 		final CatalogJob inputMessage = Utils.newCatalogJob(fileName, fileName, ProductFamily.AUXILIARY_FILE);
 		
-		JSONObject result = testExtractMetadata(inputMessage, fileName, fileName + File.separator + "manifest.safe",
+		ProductMetadata result = testExtractMetadata(inputMessage, fileName, fileName + File.separator + "manifest.safe",
 				FileExtension.SAFE, "S1", "_", null, "AUX_TRO");
 		assertEquals("2019-08-05T18:00:00.000000Z", result.get("validityStartTime"));
 		assertEquals("2019-08-05T23:59:59.000000Z", result.get("validityStopTime"));
 		assertEquals("2020-05-18T08:45:34.000000Z", result.get("creationTime"));
 	}	
 
-	private JSONObject testExtractMetadata(final CatalogJob inputMessage, final String productFileName,
+	private ProductMetadata testExtractMetadata(final CatalogJob inputMessage, final String productFileName,
 			final String metadataFile, final FileExtension fileExtension, final String missionId,
 			final String satelliteId, final String productClass, final String productType)
-			throws AbstractCodedException, JSONException {
+			throws AbstractCodedException {
 		final List<File> files = Arrays.asList(new File(testDir, metadataFile));
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.valueOf(missionId))
@@ -221,11 +220,10 @@ public class TestAuxMetadataExtractor {
 		expectedDescriptor.setProductFamily(ProductFamily.AUXILIARY_FILE);
 		expectedDescriptor.setRelativePath(productFileName);
 
-		final JSONObject expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, files.get(0));
-		final JSONObject result = extractor.extract(reporting, inputMessage);
+		final ProductMetadata expected = extractor.mdBuilder.buildConfigFileMetadata(expectedDescriptor, files.get(0));
+		final ProductMetadata result = extractor.extract(reporting, inputMessage);
 		
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"insertionTime".equals(key)) {

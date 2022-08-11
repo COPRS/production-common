@@ -2,9 +2,11 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -14,18 +16,18 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-public class MaskExtractor {
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-	public List<JSONObject> extract(File eofFile)
+public class MaskExtractor {
+	
+	public List<Map<String, Object>> extract(File eofFile)
 			throws ParserConfigurationException, SAXException, IOException, XPathExpressionException {
 
-		List<JSONObject> result = new ArrayList<>();
+		List<Map<String, Object>> result = new ArrayList<>();
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -36,17 +38,17 @@ public class MaskExtractor {
 
 		String json = (String) xpath.evaluate("/Earth_Explorer_File/Data_Block", xml, XPathConstants.STRING);
 
-		StringReader reader = new StringReader(json);
-		JSONTokener tokener = new JSONTokener(reader);
-		JSONObject root = new JSONObject(tokener);
+		Type type = new TypeToken<Map<String, Object>>(){}.getType();
+		Map<String, Object> root = new Gson().newBuilder().create().fromJson(json, type);
 
-		JSONArray jsonArray = root.getJSONArray("features");
-
-		for (int i = 0; i < jsonArray.length(); ++i) {
-			JSONObject obj = new JSONObject();
-			JSONObject currentFeature = jsonArray.getJSONObject(i);
-			obj.put("geometry", currentFeature.getJSONObject("geometry"));
-			result.add(obj);
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> features = (List<Map<String, Object>>)root.get("features");
+		for (Map<String, Object> feature : features) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> geometry = (Map<String, Object>)feature.get("geometry");
+			Map<String, Object> strippedDownFeature = new HashMap<>();
+			strippedDownFeature.put("geometry", geometry);
+			result.add(strippedDownFeature);
 		}
 
 		return result;

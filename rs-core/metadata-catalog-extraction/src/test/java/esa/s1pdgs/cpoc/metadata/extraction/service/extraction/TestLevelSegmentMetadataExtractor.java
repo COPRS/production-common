@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -35,6 +33,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetad
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -158,7 +157,7 @@ public class TestLevelSegmentMetadataExtractor {
 
 	@Test
 	public void testExtractMetadataL0Segment()
-			throws MetadataExtractionException, AbstractCodedException, JSONException {
+			throws MetadataExtractionException, AbstractCodedException {
 
 		final List<File> files = Arrays
 				.asList(new File(testDir, "S1A_WV_RAW__0SSV_20180913T214325_20180913T214422_023685_0294F4_41D5.SAFE"
@@ -188,13 +187,12 @@ public class TestLevelSegmentMetadataExtractor {
 		descriptor.setProductFamily(ProductFamily.L0_SEGMENT);
 		descriptor.setMode("FAST");
 
-		final JSONObject expected = extractor.mdBuilder.buildL0SegmentOutputFileMetadata(descriptor, files.get(0),
+		final ProductMetadata expected = extractor.mdBuilder.buildL0SegmentOutputFileMetadata(descriptor, files.get(0),
 				ReportingFactory.NULL);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final ProductMetadata result = extractor.extract(reporting, inputMessageSafe);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();;
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "segmentCoordinates".equals(key) || "creationTime".equals(key))) {

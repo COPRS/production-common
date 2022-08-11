@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -30,6 +28,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
@@ -97,7 +96,7 @@ public class TestS3AuxMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadata() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testExtractMetadata() throws MetadataExtractionException, AbstractCodedException {
 		// Prepare OBS returnValue
 		final List<File> files = Arrays.asList(new File(testDir,
 				"S3A_AX___BA__AX_20040702T223000_20040704T042158_20171130T082116___________________WER_D_AL____.SEN3"
@@ -135,12 +134,11 @@ public class TestS3AuxMetadataExtractor {
 
 		// Use MetadataBuilder. The method creating the JSON-Object is tested in
 		// ExtractMetadataTest
-		final JSONObject expected = extractor.mdBuilder.buildS3AuxFileMetadata(expectedDescriptor, files.get(0),
+		final ProductMetadata expected = extractor.mdBuilder.buildS3AuxFileMetadata(expectedDescriptor, files.get(0),
 				message);
-		final JSONObject result = extractor.extract(reporting, message);
+		final ProductMetadata result = extractor.extract(reporting, message);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("timeliness".equals(key))) {

@@ -3,7 +3,9 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,8 +18,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -111,10 +111,10 @@ public class WVFootPrintExtension {
 
 	private static final Logger LOGGER = LogManager.getLogger(WVFootPrintExtension.class);
 
-	public static JSONObject getBoundingPolygon(String _manifestFile) {
+	public static Map<String, Object> getBoundingPolygon(String _manifestFile) {
 
-		JSONObject geoShape = new JSONObject();
-		JSONArray coordinates = new JSONArray();
+		final Map<String, Object> geoShape = new HashMap<>();
+		final List<List<Double>> geoShapeCoordinates = new ArrayList<>();
 		ArrayList<Point> boundingPolygon = new ArrayList<Point>();
 
 		try {
@@ -202,17 +202,7 @@ public class WVFootPrintExtension {
 			boundingPolygon.add(pointD);
 
 			for (Point p : boundingPolygon) {
-
-				// coordinates.put(new JSONArray("[" + String.format ("%f", p.getLat()) + "," +
-				// String.format ("%f", p.getLon()) + "]"));
-				coordinates.put(new JSONArray("[" + String.format(Locale.ROOT, "%f", p.getLon()) + ","
-						+ String.format(Locale.ROOT, "%f", p.getLat()) + "]"));
-				// boundingPolygonAsString.append("<point>\n");
-				// boundingPolygonAsString.append("\t<latitude>" + String.format ("%f",
-				// p.getLat()) + "</latitude>\n");
-				// boundingPolygonAsString.append("\t<longitude>" + String.format ("%f",
-				// p.getLon()) + "</longitude>\n");
-				// boundingPolygonAsString.append("</point>\n");
+				geoShapeCoordinates.add(List.of(p.getLon(), p.getLat()));
 
 				if (p.getLat() > 90 || p.getLat() < -90) {
 					LOGGER.error("Error Latitude is not in the range (-90|90): {}", p.getLat());
@@ -228,10 +218,10 @@ public class WVFootPrintExtension {
 			return null;
 		} 
 		//add the last one again
-		coordinates.put(coordinates.get(0));
+		geoShapeCoordinates.add(geoShapeCoordinates.get(0));
 		geoShape.put("type", "Polygon");
 		geoShape.put("orientation", "counterclockwise");
-		geoShape.put("coordinates", new JSONArray().put(coordinates));
+		geoShape.put("coordinates", List.of(geoShapeCoordinates));
 		
 		// RS-280: Use Elasticsearch Dateline Support
 		final String orientation = FootprintUtil.elasticsearchPolygonOrientation(

@@ -2,13 +2,13 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.util.S2ProductNameUtil;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -29,10 +29,10 @@ public class S2AuxMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob catalogJob) throws AbstractCodedException {
+	public ProductMetadata extract(ReportingFactory reportingFactory, CatalogJob catalogJob) throws AbstractCodedException {
 		if (enableExtractionFromProductName) {
 			LOG.trace("Extracting metadata from product name: {}", catalogJob.getProductName());
-			JSONObject metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
+			ProductMetadata metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
 			metadata.put("productFamily", catalogJob.getProductFamily().name());
 			metadata.put("url", catalogJob.getKeyObjectStorage());
 			return metadata;
