@@ -1,7 +1,7 @@
 package esa.s1pdgs.cpoc.dlq.manager.model.routing;
 
 public enum ActionType {
-	RESTART, DELETE, NO_ACTION;
+	RESTART, DROP, NO_ACTION;
 	
 	public static ActionType fromValue(final String value) {
 		try {

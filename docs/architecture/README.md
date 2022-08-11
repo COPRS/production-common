@@ -511,7 +511,7 @@ In this case the message will be rerouted back into the kafka topic of the appli
 If retry limit exceeded or no rule found, the message will be send to a mission specific parking lot.
 
 #### Parking Lot
-Messages from the parking lot will be processed by the parking lot application that will push the message into a mongo database to persist it. A rest interface is exposed and allows the operator to decide how to handle with this message (delete it, restart or resubmit etc).
+Messages from the parking lot will be processed by the parking lot application that will push the message into a mongo database to persist it. A rest interface is exposed and allows the operator to decide how to handle with this message (drop it, restart or resubmit etc).
 
 ![DLQ_Manager.png](media/DLQ_Manager.png)
 

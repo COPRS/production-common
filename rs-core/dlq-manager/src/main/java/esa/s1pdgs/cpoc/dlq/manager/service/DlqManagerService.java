@@ -107,7 +107,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 			Rule rule = optRule.get();
 			LOGGER.info("Found rule {}: {}", rule.getActionType().name(), rule.getErrorTitle());
 			switch(rule.getActionType()) {
-				case DELETE:
+				case DROP:
 					LOGGER.info("Ignoring message");
 					reporting.end(DlqReportingOutput.newInstance(rule.getErrorTitle(), rule.getActionType(), null),
 							new ReportingMessage("Finished routing"));

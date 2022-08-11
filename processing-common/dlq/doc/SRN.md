@@ -14,7 +14,7 @@ The DLQ Manager polls the configured dead letter queue topic for failed processi
 
 **ActionType**:
 - Restart: Republish message in error message while MaxRetry is not reached, else move it to the Parking Lot
-- Delete: Ignore the message (the error will be deleted)
+- Drop: Ignore the message (the error will be dropped)
 - NoAction: Disable rule without deleting the error message
 
 **TargetTopic**: The target topic for restart. If not set, the original topic is used (optional).
