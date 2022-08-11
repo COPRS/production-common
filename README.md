@@ -12,6 +12,10 @@ For example, if you deploy the XBIP ingestion chain into your cluster, you are a
 
 While the RS Addons are usually event driven workflows, there are Standalone services that are deployed via helm in order to install them into the cluster. They are running independendly from SCDF and providing certain services that are supposed to be running all the time. For example, the Native API is not triggered by an event, but exposing its API to the user, so he can contact it any time for searching or adding products into the system.
 
+## Installation Requirements
+
+In order to use the software correctly within your cluster, it needs some dependencies to be operated successful. Before you deploy any software, please ensure that the COPRS infrastructure is installed correctly on your cluster. Further information on the infrastructure and how to deploy it, can be found [here](https://github.com/COPRS/infrastructure)
+
 ## Structure of the Repository
 
 ### processing-common
@@ -67,3 +71,8 @@ This folder contains a set of extra components that are not supposed to be used 
 For example, you can mock the ingestion systems like the XBIP or EDIP with a local instance in order to place your own products locally into the inbox.
 
 Some additional helm charts that can be used to mock systems. 
+
+## Documentation
+
+### Architecture Design Document
+In order to get an overview about the architecture of the overall design of COPRS and the software components, please consult the Architecture design document that can be found [here](./docs/architecture)
