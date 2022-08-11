@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -17,6 +16,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.util.S2ProductNameUtil;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -39,12 +39,12 @@ public class S2ProductMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob catalogJob) throws AbstractCodedException {		
+	public ProductMetadata extract(ReportingFactory reportingFactory, CatalogJob catalogJob) throws AbstractCodedException {		
 
 		// When HKTM, skip download and extract metadata from filename
 		if (enableExtractionFromProductName && ProductFamily.S2_HKTM.equals(catalogJob.getProductFamily())) {
 			LOG.trace("Extracting metadata from product name: {}", catalogJob.getProductName());
-			JSONObject metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
+			final ProductMetadata metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
 			metadata.put("productFamily", catalogJob.getProductFamily().name());
 			metadata.put("url", catalogJob.getKeyObjectStorage());
 			return metadata;
@@ -70,9 +70,8 @@ public class S2ProductMetadataExtractor extends AbstractMetadataExtractor {
 			final S2FileDescriptor descriptor = fileDescriptorBuilder.buildS2FileDescriptor(catalogJob);
 
 			// Build metadata from file and extracted
-			final JSONObject obj = mdBuilder.buildS2ProductFileMetadata(descriptor, safeMetadataFile, inventoryMetadataFile, catalogJob);
-
-			return obj;
+			final ProductMetadata metadata = mdBuilder.buildS2ProductFileMetadata(descriptor, safeMetadataFile, inventoryMetadataFile, catalogJob);
+			return metadata;
 		} finally {
 			FileUtils.delete(safeMetadataFile.getPath());
 			FileUtils.delete(inventoryMetadataFile.getPath());

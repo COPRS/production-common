@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -31,6 +29,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetad
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -114,7 +113,7 @@ public class TestEdrsMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadata() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testExtractMetadata() throws MetadataExtractionException, AbstractCodedException {
 		final EdrsSessionFileDescriptor expectedDescriptor = new EdrsSessionFileDescriptor();
 
 		expectedDescriptor.setFilename("D_123_ch01_DSDB.RAW");
@@ -133,11 +132,10 @@ public class TestEdrsMetadataExtractor {
 		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1)
 				.newReporting("TestMetadataExtraction");
 
-		final JSONObject expected = extractor.mdBuilder.buildEdrsSessionFileRaw(expectedDescriptor);
-		final JSONObject result = extractor.extract(reporting, inputMessage);
+		final ProductMetadata expected = extractor.mdBuilder.buildEdrsSessionFileRaw(expectedDescriptor);
+		final ProductMetadata result = extractor.extract(reporting, inputMessage);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"insertionTime".equals(key)) {

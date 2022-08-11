@@ -3,11 +3,10 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
-
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 
 public class S2ProductNameUtil {
 
@@ -16,8 +15,8 @@ public class S2ProductNameUtil {
 	final public static Pattern COMPACT_PRODUCT_NAME_PATTERN = Pattern.compile("^([A-Z][0-9A-Z])([0-9A-Z_])_([0-9A-Z_]{6})_([0-9]{8}T[0-9]{6})(.*)");
 	final public static Pattern AUX_PRODUCT_TYPE_PATTERN = Pattern.compile("^(AUX|DEM|GIP)_.*");
 
-	public static JSONObject extractMetadata(String productName) throws MetadataExtractionException, MetadataMalformedException {
-		final JSONObject metadata = new JSONObject();
+	public static ProductMetadata extractMetadata(String productName) throws MetadataExtractionException, MetadataMalformedException {
+		final ProductMetadata metadata = new ProductMetadata();
 
 		// HKTM PRODUCT NAMES
 		

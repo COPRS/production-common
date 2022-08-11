@@ -1,6 +1,20 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service;
 
-import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.*;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.FAST24;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.FILE_PATTERN_S1_GP_HK;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.NRT;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.PT;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S1_FAST24;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S1_NRT;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S1_PT;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S1_SESSION;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S2_L0;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S2_L1;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S2_L2;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S2_SESSION;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S3_NRT;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S3_NTC;
+import static esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration.S3_STC;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -12,14 +26,13 @@ import java.util.regex.Matcher;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
@@ -28,6 +41,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.config.TimelinessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.MetadataExtractor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.MetadataExtractorFactory;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.MetadataExtractionReportingOutput;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.MetadataExtractionReportingOutput.EffectiveDownlink;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.ProductMetadataCustomObjectFiller;
@@ -119,7 +133,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 
 		final MetadataExtractor extractor = extractorFactory.newMetadataExtractorFor(category,
 				properties.getProductCategories().get(category));
-		final JSONObject metadata = extractor.extract(reporting, catJob);
+		final ProductMetadata metadata = extractor.extract(reporting, catJob);
 
 		// TODO move to extractor
 		if (null != catJob.getTimeliness() && !metadata.has("timeliness")) {
@@ -139,7 +153,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
 
-		String warningMessage = esServices.createMetadataWithRetries(metadata, productName,
+		esServices.createMetadataWithRetries(metadata, productName,
 				properties.getProductInsertion().getMaxRetries(), properties.getProductInsertion().getTempoRetryMs());
 
 		final CatalogEvent event = toCatalogEvent(catJob, metadata);
@@ -147,16 +161,17 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		return event;
 	}
 
-	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final JSONObject metadata) {
+	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final ProductMetadata metadata)
+				throws MetadataMalformedException {
 		final CatalogEvent catEvent = new CatalogEvent();
 		String satelliteId;
 		try {
 			satelliteId = metadata.getString("satelliteId");
-		} catch (JSONException e) {
+		} catch (MetadataMalformedException e) {
 			satelliteId = catJob.getSatelliteId();
 		}
 
-		catEvent.setMetadata(metadata.toMap());
+		catEvent.setMetadata(metadata.asMap());
 		catEvent.setMissionId(catJob.getMissionId());
 		catEvent.setSatelliteId(satelliteId);
 		catEvent.setMetadataProductName(catJob.getProductName());

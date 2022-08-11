@@ -3,16 +3,16 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -29,37 +29,37 @@ public class SppMbuProductMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob catJob) throws AbstractCodedException {
-		return putMetadataToJSON(catJob.getProductName(), fileDescriptorBuilder.getPattern());
+	public ProductMetadata extract(ReportingFactory reportingFactory, CatalogJob catJob) throws AbstractCodedException {
+		return newProductMetadataFromProductName(catJob.getProductName(), fileDescriptorBuilder.getPattern());
 	}
 
-	static JSONObject putMetadataToJSON(String productName, Pattern fileNamePattern)
-			throws MetadataExtractionException {
+	static ProductMetadata newProductMetadataFromProductName(String productName, Pattern fileNamePattern)
+			throws MetadataExtractionException, MetadataMalformedException {
 
-		JSONObject metadataJSON = new JSONObject();
+		ProductMetadata metadata = new ProductMetadata();
 
 		Matcher m = fileNamePattern.matcher(productName);
 
 		if (m.matches()) {
-			metadataJSON.put("productFamily", ProductFamily.SPP_MBU.name());
-			metadataJSON.put("productName", productName);
-			metadataJSON.put(MissionId.FIELD_NAME, m.group(1).toUpperCase());
-			metadataJSON.put("satelliteId", m.group(2).toUpperCase());
-			metadataJSON.put("mode", m.group(3).toUpperCase());
-			metadataJSON.put("columnId", m.group(4).toUpperCase());
-			metadataJSON.put("productType", SPP_MBU_PRODUCT_TYPE);
-			metadataJSON.put("polarisation", m.group(8).toUpperCase());
-			metadataJSON.put("startTime", DateUtils.convertToMetadataDateTimeFormat(m.group(9).toUpperCase()));
-			metadataJSON.put("stopTime", DateUtils.convertToMetadataDateTimeFormat(m.group(10).toUpperCase()));
-			metadataJSON.put("absoluteOrbitNumber", m.group(11));
-			metadataJSON.put("missionDataTakeId", m.group(12).toUpperCase());
-			metadataJSON.put("idInColumn", m.group(13).toUpperCase());
-			metadataJSON.put("url", productName);
+			metadata.put("productFamily", ProductFamily.SPP_MBU.name());
+			metadata.put("productName", productName);
+			metadata.put(MissionId.FIELD_NAME, m.group(1).toUpperCase());
+			metadata.put("satelliteId", m.group(2).toUpperCase());
+			metadata.put("mode", m.group(3).toUpperCase());
+			metadata.put("columnId", m.group(4).toUpperCase());
+			metadata.put("productType", SPP_MBU_PRODUCT_TYPE);
+			metadata.put("polarisation", m.group(8).toUpperCase());
+			metadata.put("startTime", DateUtils.convertToMetadataDateTimeFormat(m.group(9).toUpperCase()));
+			metadata.put("stopTime", DateUtils.convertToMetadataDateTimeFormat(m.group(10).toUpperCase()));
+			metadata.put("absoluteOrbitNumber", m.group(11));
+			metadata.put("missionDataTakeId", m.group(12).toUpperCase());
+			metadata.put("idInColumn", m.group(13).toUpperCase());
+			metadata.put("url", productName);
 		} else {
 			throw new MetadataExtractionException(
 					new Exception("metadata could not be extracted from productname: " + productName));
 		}
-		return metadataJSON;
+		return metadata;
 	}
 
 }

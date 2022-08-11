@@ -4,13 +4,13 @@ import java.io.File;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -53,12 +53,12 @@ public class MetadataBuilder {
 	 * @param descriptor
 	 * @param file
 	 * 
-	 * @return the JSONObject containing the metadata to index
+	 * @return the ProductMetadata containing the metadata to index
 	 * 
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
 	 */
-	public JSONObject buildConfigFileMetadata(final AuxDescriptor descriptor, final File file)
+	public ProductMetadata buildConfigFileMetadata(final AuxDescriptor descriptor, final File file)
 			throws MetadataExtractionException, MetadataMalformedException {
 		switch (descriptor.getExtension()) {
 			case EOF:
@@ -82,16 +82,16 @@ public class MetadataBuilder {
 	 * @param descriptor
 	 * @param file
 	 * 
-	 * @return the JSONObject containing the metadata to index
+	 * @return the ProductMetadata containing the metadata to index
 	 * 
 	 * @throws MetadataExtractionException
 	 */
-	public JSONObject buildEdrsSessionFileMetadata(final EdrsSessionFileDescriptor descriptor, final File dsib)
+	public ProductMetadata buildEdrsSessionFileMetadata(final EdrsSessionFileDescriptor descriptor, final File dsib)
 			throws MetadataExtractionException {
 		return extractor.processSESSIONFile(descriptor, dsib);
 	}
 	
-	public JSONObject buildEdrsSessionFileRaw(final EdrsSessionFileDescriptor descriptor) 
+	public ProductMetadata buildEdrsSessionFileRaw(final EdrsSessionFileDescriptor descriptor) 
 			throws MetadataExtractionException
 	{
 		return extractor.processRAWFile(descriptor);
@@ -105,14 +105,14 @@ public class MetadataBuilder {
      * @param descriptor
      * @param file
      * 
-     * @return the JSONObject containing the metadata to index
+     * @return the ProductMetadata containing the metadata to index
      * 
      * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
      */
-    public JSONObject buildL0SegmentOutputFileMetadata(final OutputFileDescriptor descriptor, final File file,
+    public ProductMetadata buildL0SegmentOutputFileMetadata(final OutputFileDescriptor descriptor, final File file,
     		final ReportingFactory reportingFactory) throws MetadataExtractionException, MetadataMalformedException {
-        final JSONObject metadataToIndex = extractor.processL0Segment(descriptor, file, reportingFactory);        
+        final ProductMetadata metadataToIndex = extractor.processL0Segment(descriptor, file, reportingFactory);        
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
         return metadataToIndex;
     }
@@ -125,14 +125,14 @@ public class MetadataBuilder {
      * @param file
      * @param productFamily
      * 
-     * @return the JSONObject containing the metadata to index
+     * @return the ProductMetadata containing the metadata to index
      * 
      * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException 
      */
-    public JSONObject buildOutputFileMetadata(final OutputFileDescriptor descriptor, final File file, final CatalogJob job)
+    public ProductMetadata buildOutputFileMetadata(final OutputFileDescriptor descriptor, final File file, final CatalogJob job)
             throws MetadataExtractionException, MetadataMalformedException {
-        final JSONObject metadataToIndex = extractor.processProduct(descriptor, job.getProductFamily(), file);
+        final ProductMetadata metadataToIndex = extractor.processProduct(descriptor, job.getProductFamily(), file);
         // Adding fields that are directly used from the DTO
         metadataToIndex.put("oqcFlag", job.getOqcFlag());
         LOGGER.debug("JSON OBJECT:{}",metadataToIndex.toString());
@@ -145,14 +145,14 @@ public class MetadataBuilder {
 	 * @param descriptor file descriptor of the product
 	 * @param file       file to extract metadata from
 	 * 
-	 * @return the JSONObject containing the metadata to index
+	 * @return the ProductMetadata containing the metadata to index
 	 * 
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject buildS2ProductFileMetadata(final S2FileDescriptor descriptor, final File safeMetadataFile, final File inventoryMetadataFile, final CatalogJob job)
+	public ProductMetadata buildS2ProductFileMetadata(final S2FileDescriptor descriptor, final File safeMetadataFile, final File inventoryMetadataFile, final CatalogJob job)
 			throws MetadataExtractionException, MetadataMalformedException {
-		JSONObject metadataToIndex = extractor.processS2Metadata(descriptor, safeMetadataFile, inventoryMetadataFile);
+		ProductMetadata metadataToIndex = extractor.processS2Metadata(descriptor, safeMetadataFile, inventoryMetadataFile);
 		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
 		return metadataToIndex;
 	}
@@ -163,14 +163,14 @@ public class MetadataBuilder {
 	 * @param descriptor file descriptor of the product
 	 * @param file       file to extract metadata from
 	 * 
-	 * @return the JSONObject containing the metadata to index
+	 * @return the ProductMetadata containing the metadata to index
 	 * 
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject buildS3AuxFileMetadata(final S3FileDescriptor descriptor, final File file, final CatalogJob job)
+	public ProductMetadata buildS3AuxFileMetadata(final S3FileDescriptor descriptor, final File file, final CatalogJob job)
 			throws MetadataExtractionException, MetadataMalformedException {
-		final JSONObject metadataToIndex = extractor.processAuxXFDUFile(descriptor, file);
+		final ProductMetadata metadataToIndex = extractor.processAuxXFDUFile(descriptor, file);
 
 		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
 		return metadataToIndex;
@@ -182,14 +182,14 @@ public class MetadataBuilder {
 	 * @param descriptor file descriptor of the product
 	 * @param file       file to extract metadata from
 	 * 
-	 * @return the JSONObject containing the metadata to index
+	 * @return the ProductMetadata containing the metadata to index
 	 * 
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public JSONObject buildS3LevelProductFileMetadata(final S3FileDescriptor descriptor, final File file, final CatalogJob job)
+	public ProductMetadata buildS3LevelProductFileMetadata(final S3FileDescriptor descriptor, final File file, final CatalogJob job)
 			throws MetadataExtractionException, MetadataMalformedException {
-		JSONObject metadataToIndex;
+		ProductMetadata metadataToIndex;
 		
 		switch (descriptor.getExtension()) {
 			case ISIP:

@@ -45,9 +45,6 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +63,7 @@ import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties.CategoryConfig;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.AuxFilenameMetadataExtractor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
@@ -114,7 +112,7 @@ public class EsServices {
 	 * Check if a given metadata already exist
 	 * 
 	 */
-	public boolean isMetadataExist(final JSONObject product) throws Exception {
+	public boolean isMetadataExist(final ProductMetadata product) throws Exception {
 		try {
 			final String productType;
 			if (ProductFamily.AUXILIARY_FILE.equals(ProductFamily.valueOf(product.getString("productFamily")))
@@ -132,12 +130,12 @@ public class EsServices {
 			LOGGER.debug("Product {} response from ES {}", productName, response);
 
 			return response.isExists();
-		} catch (final JSONException | IOException je) {
-			throw new Exception(je.getMessage());
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 
-	public String createMetadataWithRetries(final JSONObject product, final String productName, final int numRetries,
+	public String createMetadataWithRetries(final ProductMetadata product, final String productName, final int numRetries,
 			final long retrySleep) throws InterruptedException {
 		return Retries.performWithRetries(() -> {
 			if (!isMetadataExist(product)) {
@@ -155,7 +153,7 @@ public class EsServices {
 	 * index named [productType] with id [productName]
 	 * 
 	 */
-	String createMetadata(final JSONObject product) throws Exception {
+	String createMetadata(final ProductMetadata product) throws Exception {
 		
 		String warningMessage = "";
 		
@@ -230,13 +228,13 @@ public class EsServices {
 				}
 
 			}
-		} catch (JSONException | IOException e) {
+		} catch (IOException e) {
 			throw new Exception(e);
 		}
 		return warningMessage;
 	}
 
-	public void createMaskFootprintData(final MaskType maskType, final JSONObject feature, final String id) throws Exception {
+	public void createMaskFootprintData(final MaskType maskType, final Map<String, Object> feature, final String id) throws Exception {
 		final String footprintIndexName;
 		switch (maskType) {
 			case EW_SLC: footprintIndexName = EW_SLC_MASK_FOOTPRINT_INDEX_NAME; break;
@@ -247,12 +245,15 @@ public class EsServices {
 		}
 
 		// RS-280: Use Elasticsearch Dateline Support
-		final JSONObject geometry = feature.getJSONObject("geometry");
-		if ("Polygon".equals(geometry.getString("type"))) {
+		@SuppressWarnings("unchecked")
+		final Map<String, Object> geometry = (Map<String, Object>)feature.get("geometry");
+		if ("Polygon".equals(geometry.get("type"))) {
 			final List<Double> longitudes = new ArrayList<>();
-			final JSONArray exteriorRing = geometry.getJSONArray("coordinates").getJSONArray(0);
-			for (int idx = 0; idx < exteriorRing.length(); idx++) {
-				longitudes.add(exteriorRing.getJSONArray(idx).getDouble(0));
+			@SuppressWarnings("unchecked")
+			List<List<List<Double>>> coordinates = (List<List<List<Double>>>)geometry.get("coordinates");
+			final List<List<Double>> exteriorRing = (List<List<Double>>)coordinates.get(0);
+			for (int idx = 0; idx < exteriorRing.size(); idx++) {
+				longitudes.add(exteriorRing.get(idx).get(0));
 			}
 			final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
 			geometry.put("orientation", orientation);
@@ -271,7 +272,7 @@ public class EsServices {
 				throw new MetadataCreationException(id, response.status().toString(),
 						response.getResult().toString());
 			}
-		} catch (JSONException | IOException e) {
+		} catch (IOException e) {
 			throw new Exception(e);
 		}
 	}

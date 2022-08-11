@@ -2,8 +2,6 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import java.io.File;
 
-import org.json.JSONObject;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
@@ -12,6 +10,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -30,7 +29,7 @@ public final class LevelSegmentMetadataExtractor extends AbstractMetadataExtract
 	}
 
 	@Override
-	public final JSONObject extract(final ReportingFactory reportingFactory, final CatalogJob job)
+	public final ProductMetadata extract(final ReportingFactory reportingFactory, final CatalogJob job)
 			throws AbstractCodedException {   
         final String productName = job.getProductName();
         final ProductFamily family = job.getProductFamily();

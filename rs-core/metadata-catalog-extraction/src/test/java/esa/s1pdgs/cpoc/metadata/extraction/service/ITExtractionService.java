@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -19,8 +20,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.get.GetResult;
 import org.elasticsearch.index.seqno.SequenceNumbers;
 import org.elasticsearch.index.shard.ShardId;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,10 +36,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.Utils;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.ElasticsearchDAO;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
@@ -113,8 +114,8 @@ public class ITExtractionService {
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
-		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
-		System.out.println(metadata.toString(4));
+		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString());
 		
 		assertEquals("S1A_OPER_AUX_RESORB_OPOD_20171213T143838_V20171213T102737_20171213T134507.EOF",
 				indexRequest.id());
@@ -158,8 +159,8 @@ public class ITExtractionService {
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
-		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
-		System.out.println(metadata.toString(4));
+		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString());
 		
 		assertEquals("DCS_02_SESSION1_ch1_DSIB.xml", indexRequest.id());
 		
@@ -177,9 +178,9 @@ public class ITExtractionService {
 		assertEquals("SESSION", metadata.getString("productType"));
 		for (int i=0; i < 35; i++) {
 			assertEquals(String.format("DCS_02_L20171109175634707000125_ch1_DSDB_%05d.raw", i+1),
-					metadata.getJSONArray("rawNames").get(i));
+					((List<?>)metadata.get("rawNames")).get(i));
 		}
-		assertEquals(35, metadata.getJSONArray("rawNames").length());
+		assertEquals(35, ((List<?>)metadata.get("rawNames")).size());
 		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
 		assertEquals(14, metadata.length());
@@ -200,8 +201,8 @@ public class ITExtractionService {
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
-		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
-		System.out.println(metadata.toString(4));
+		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString());
 		
 		assertEquals("S1A_IW_RAW__0SVH_20200120T124746_20200120T125111_030884_038B5E_9470.SAFE",
 				indexRequest.id());
@@ -238,24 +239,26 @@ public class ITExtractionService {
 		assertEquals(2466932.111, metadata.getDouble("startTimeANX"));
 		assertEquals("2020-01-20T12:47:46.019051Z", metadata.getString("validityStartTime"));
 		assertEquals("NOMINAL", metadata.getString("processMode"));
-		JSONObject segmentCoordinates = metadata.getJSONObject("segmentCoordinates");
-		assertEquals(3, segmentCoordinates.length());
-		assertEquals("counterclockwise", segmentCoordinates.getString("orientation"));
-		assertEquals("polygon", segmentCoordinates.getString("type"));
-		JSONArray coordinates = segmentCoordinates.getJSONArray("coordinates");
-		assertEquals(1, coordinates.length());
-		JSONArray points = (JSONArray)coordinates.get(0);
-		assertEquals(5, points.length());
-		assertEquals(-103.1979, ((JSONArray)points.get(0)).getDouble(0));
-		assertEquals(30.4307, ((JSONArray)points.get(0)).getDouble(1));
-		assertEquals(-105.6059, ((JSONArray)points.get(1)).getDouble(0));
-		assertEquals(17.9991, ((JSONArray)points.get(1)).getDouble(1));
-		assertEquals(-103.3109, ((JSONArray)points.get(2)).getDouble(0));
-		assertEquals(17.7208, ((JSONArray)points.get(2)).getDouble(1));
-		assertEquals(-100.6624, ((JSONArray)points.get(3)).getDouble(0));
-		assertEquals(30.1622, ((JSONArray)points.get(3)).getDouble(1));
-		assertEquals(-103.1979, ((JSONArray)points.get(4)).getDouble(0));
-		assertEquals(30.4307, ((JSONArray)points.get(4)).getDouble(1));
+		@SuppressWarnings("unchecked")
+		Map<String,Object> segmentCoordinates = (Map<String,Object>)metadata.get("segmentCoordinates");
+		assertEquals(3, segmentCoordinates.size());
+		assertEquals("counterclockwise", segmentCoordinates.get("orientation"));
+		assertEquals("polygon", segmentCoordinates.get("type"));
+		@SuppressWarnings("unchecked")
+		List<List<List<Double>>> coordinates = (List<List<List<Double>>>)segmentCoordinates.get("coordinates");
+		assertEquals(1, coordinates.size());
+		List<List<Double>> points = coordinates.get(0);
+		assertEquals(5, points.size());
+		assertEquals(-103.1979, points.get(0).get(0));
+		assertEquals(30.4307, points.get(0).get(1));
+		assertEquals(-105.6059, points.get(1).get(0));
+		assertEquals(17.9991, points.get(1).get(1));
+		assertEquals(-103.3109, points.get(2).get(0));
+		assertEquals(17.7208, points.get(2).get(1));
+		assertEquals(-100.6624, points.get(3).get(0));
+		assertEquals(30.1622, points.get(3).get(1));
+		assertEquals(-103.1979, points.get(4).get(0));
+		assertEquals(30.4307, points.get(4).get(1));
 		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
 		assertEquals(34, metadata.length());
@@ -276,8 +279,8 @@ public class ITExtractionService {
 		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
-		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
-		System.out.println(metadata.toString(4));
+		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString());
 		
 		assertEquals("S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE",
 				indexRequest.id());
@@ -288,24 +291,26 @@ public class ITExtractionService {
 		assertEquals(false, metadata.getBoolean("sliceProductFlag"));
 		assertEquals("measurementData", metadata.getString("qualityDataObjectID"));
 		assertEquals("", metadata.getString("theoreticalSliceLength"));
-		JSONObject sliceCoordinates = metadata.getJSONObject("sliceCoordinates");
-		assertEquals(3, sliceCoordinates.length());
-		assertEquals("counterclockwise", sliceCoordinates.getString("orientation"));
-		assertEquals("polygon", sliceCoordinates.getString("type"));
-		JSONArray coordinates = sliceCoordinates.getJSONArray("coordinates");
-		assertEquals(1, coordinates.length());
-		JSONArray points = (JSONArray)coordinates.get(0);
-		assertEquals(5, points.length());
-		assertEquals(-94.8783, ((JSONArray)points.get(0)).getDouble(0));
-		assertEquals(73.8984, ((JSONArray)points.get(0)).getDouble(1));
-		assertEquals(-98.2395, ((JSONArray)points.get(1)).getDouble(0));
-		assertEquals(67.6029, ((JSONArray)points.get(1)).getDouble(1));
-		assertEquals(-88.9623, ((JSONArray)points.get(2)).getDouble(0));
-		assertEquals(66.8368, ((JSONArray)points.get(2)).getDouble(1));
-		assertEquals(-82.486, ((JSONArray)points.get(3)).getDouble(0));
-		assertEquals(72.8925, ((JSONArray)points.get(3)).getDouble(1));
-		assertEquals(-94.8783, ((JSONArray)points.get(4)).getDouble(0));
-		assertEquals(73.8984, ((JSONArray)points.get(4)).getDouble(1));
+		@SuppressWarnings("unchecked")
+		Map<String,Object> sliceCoordinates = (Map<String,Object>)metadata.get("sliceCoordinates");
+		assertEquals(3, sliceCoordinates.size());
+		assertEquals("counterclockwise", sliceCoordinates.get("orientation"));
+		assertEquals("polygon", sliceCoordinates.get("type"));
+		@SuppressWarnings("unchecked")
+		List<List<List<Double>>> coordinates = (List<List<List<Double>>>)sliceCoordinates.get("coordinates");
+		assertEquals(1, coordinates.size());
+		List<List<Double>> points = coordinates.get(0);
+		assertEquals(5, points.size());
+		assertEquals(-94.8783, points.get(0).get(0));
+		assertEquals(73.8984, points.get(0).get(1));
+		assertEquals(-98.2395, points.get(1).get(0));
+		assertEquals(67.6029, points.get(1).get(1));
+		assertEquals(-88.9623, points.get(2).get(0));
+		assertEquals(66.8368, points.get(2).get(1));
+		assertEquals(-82.486, points.get(3).get(0));
+		assertEquals(72.8925, points.get(3).get(1));
+		assertEquals(-94.8783, points.get(4).get(0));
+		assertEquals(73.8984, points.get(4).get(1));
 		assertEquals("2018-09-17T14:47:54.825363Z", metadata.getString("creationTime"));
 		assertEquals("SAR", metadata.getString("instrumentShortName"));
 		assertEquals("DV", metadata.getString("polarisation"));
@@ -333,7 +338,7 @@ public class ITExtractionService {
 		assertEquals("DESCENDING", metadata.getString("pass"));
 		assertEquals("B", metadata.getString("satelliteId"));
 		assertEquals(1849446.881, metadata.getDouble("stopTimeANX"));
-		assertEquals("HV", metadata.getJSONArray("polarisationChannels").get(0));
+		assertEquals("HV", ((List<?>)metadata.get("polarisationChannels")).get(0));
 		assertEquals("73.8984,-94.8783 67.6029,-98.2395 66.8368,-88.9623 72.8925,-82.4860 73.8984,-94.8783", metadata.getString("coordinates"));
 		assertEquals("S1B_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DS.SAFE", metadata.getString("url"));
 		assertEquals("B", metadata.getString("platformSerialIdentifier"));
@@ -364,8 +369,8 @@ public class ITExtractionService {
 		verify(mockObsClient, times(0)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
-		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
-		System.out.println(metadata.toString(4));
+		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString());
 
 		assertEquals("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.zip",
 				indexRequest.id());
@@ -392,7 +397,7 @@ public class ITExtractionService {
 	}
 	
 	@Test
-	public void testExtractionService_onS2GIP_shallPersistValidRecord() throws IOException {
+	public void testExtractionService_onS2GIP_shallPersistValidRecord() throws IOException, MetadataMalformedException {
 		doReturn(newGetResponse_withExistsFalse()).when(mockElasticsearchDAO).get(Mockito.any(GetRequest.class));
 		doReturn(newIndexResponse_withCreatedTrue()).when(mockElasticsearchDAO).index(Mockito.any(IndexRequest.class));
 		ArgumentCaptor<IndexRequest> argumentCaptor = ArgumentCaptor.forClass(IndexRequest.class);
@@ -403,8 +408,8 @@ public class ITExtractionService {
 		
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
-		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
-		System.out.println(metadata.toString(4));
+		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString());
 
 		assertEquals("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ",
 				indexRequest.id());
@@ -441,8 +446,8 @@ public class ITExtractionService {
 		verify(mockObsClient, times(0)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
-		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
-		System.out.println(metadata.toString(4));
+		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString());
 
 		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar",
 				indexRequest.id());
@@ -478,8 +483,8 @@ public class ITExtractionService {
 		verify(mockObsClient, times(2)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
-		JSONObject metadata = new JSONObject(indexRequest.source().utf8ToString());
-		System.out.println(metadata.toString(4));
+		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
+		System.out.println(metadata.toString());
 		
 		assertEquals("S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08",
 				indexRequest.id());
@@ -499,7 +504,7 @@ public class ITExtractionService {
 	    assertEquals("S2", metadata.getString("missionId"));
 	    assertEquals("A", metadata.getString("satelliteId"));
 	    assertEquals("", metadata.getString("relativeOrbitNumber"));
-	    assertEquals("2.08", metadata.getString("processorVersion"));
+	    assertEquals("02.08", metadata.getString("processorVersion"));
 	    assertEquals("S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08", metadata.getString("url"));
 	    assertEquals("S2A", metadata.getString("platformSerialIdentifier"));
 	    assertEquals("", metadata.getString("operationalMode"));
@@ -507,23 +512,26 @@ public class ITExtractionService {
 	    assertEquals("NRT", metadata.getString("timeliness"));
 	    assertEquals("", metadata.getString("platfomShortName"));
 	    assertEquals("NOMINAL", metadata.getString("processMode"));
-	    JSONObject coordinates = metadata.getJSONObject("coordinates");
-		assertEquals(3, coordinates.length());
-		assertEquals("counterclockwise", coordinates.getString("orientation"));
-		assertEquals("polygon", coordinates.getString("type"));
-		assertEquals(1, coordinates.getJSONArray("coordinates").length());
-		JSONArray points = (JSONArray)coordinates.getJSONArray("coordinates").get(0);
-		assertEquals(5, points.length());
-		assertEquals(36.012719203864, ((JSONArray)points.get(0)).getDouble(0));
-		assertEquals(48.4255437011909, ((JSONArray)points.get(0)).getDouble(1));
-		assertEquals(35.8754856182544, ((JSONArray)points.get(1)).getDouble(0));
-		assertEquals(48.0615335354928, ((JSONArray)points.get(1)).getDouble(1));
-		assertEquals(36.2301956943322, ((JSONArray)points.get(2)).getDouble(0));
-		assertEquals(48.0129223197342, ((JSONArray)points.get(2)).getDouble(1));
-		assertEquals(36.3680125728466, ((JSONArray)points.get(3)).getDouble(0));
-		assertEquals(48.3755327752305, ((JSONArray)points.get(3)).getDouble(1));
-		assertEquals(36.012719203864, ((JSONArray)points.get(4)).getDouble(0));
-		assertEquals(48.4255437011909, ((JSONArray)points.get(4)).getDouble(1));
+	    @SuppressWarnings("unchecked")
+		Map<String,Object> coordinates = (Map<String,Object>)metadata.get("coordinates");
+		assertEquals(3, coordinates.size());
+		assertEquals("counterclockwise", coordinates.get("orientation"));
+		assertEquals("polygon", coordinates.get("type"));
+		@SuppressWarnings("unchecked")
+		List<List<List<Double>>> coordinates2 = (List<List<List<Double>>>)coordinates.get("coordinates");
+		assertEquals(1, coordinates2.size());
+		List<List<Double>> points = coordinates2.get(0);
+		assertEquals(5, points.size());
+		assertEquals(36.012719203864, points.get(0).get(0));
+		assertEquals(48.4255437011909, points.get(0).get(1));
+		assertEquals(35.8754856182544, points.get(1).get(0));
+		assertEquals(48.0615335354928, points.get(1).get(1));
+		assertEquals(36.2301956943322, points.get(2).get(0));
+		assertEquals(48.0129223197342, points.get(2).get(1));
+		assertEquals(36.3680125728466, points.get(3).get(0));
+		assertEquals(48.3755327752305, points.get(3).get(1));
+		assertEquals(36.012719203864, points.get(4).get(0));
+		assertEquals(48.4255437011909, points.get(4).get(1));
 	    assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
 		assertEquals(25, metadata.length());

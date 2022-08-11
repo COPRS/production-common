@@ -1,8 +1,8 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
 
 import java.io.File;
 import java.util.Arrays;
@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +30,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
@@ -135,13 +135,12 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setProductFamily(ProductFamily.S2_L0_DS);
 		expectedDescriptor.setMode("NRT");
 
-		final JSONObject expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
+		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
 				safeMetadataFile.get(0), inventoryMetadataFile.get(0), message);
 
-		final JSONObject result = extractor.extract(reporting, message);
+		final ProductMetadata result = extractor.extract(reporting, message);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();;
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"coordinates".equals(key)) {
@@ -188,13 +187,12 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setProductFamily(ProductFamily.S2_L0_GR);
 		expectedDescriptor.setMode("NRT");
 
-		final JSONObject expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
+		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
 				safeMetadataFile.get(0), inventoryMetadataFile.get(0), message);
 
-		final JSONObject result = extractor.extract(reporting, message);
+		final ProductMetadata result = extractor.extract(reporting, message);
 		
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();;
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"coordinates".equals(key)) {

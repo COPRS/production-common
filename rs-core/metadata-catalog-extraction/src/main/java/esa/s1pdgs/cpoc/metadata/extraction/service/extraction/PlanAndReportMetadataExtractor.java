@@ -4,14 +4,13 @@ import java.time.ZoneId;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.JSONObject;
-
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -33,9 +32,9 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(ReportingFactory reportingFactory, CatalogJob message)
+	public ProductMetadata extract(ReportingFactory reportingFactory, CatalogJob message)
 			throws AbstractCodedException {
-		JSONObject metadata = new JSONObject();		
+		ProductMetadata metadata = new ProductMetadata();		
 		metadata.put("productFamily", message.getProductFamily().name());
 		metadata.put("productName", message.getProductName());
 		metadata.put("productType", message.getProductFamily().name());

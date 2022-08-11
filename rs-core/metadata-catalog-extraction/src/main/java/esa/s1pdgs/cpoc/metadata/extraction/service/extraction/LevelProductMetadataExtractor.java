@@ -2,8 +2,6 @@ package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import java.io.File;
 
-import org.json.JSONObject;
-
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
@@ -13,6 +11,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.rfi.RfiAnnotationExtractor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -35,13 +34,13 @@ public final class LevelProductMetadataExtractor extends AbstractMetadataExtract
 	}
 
 	@Override
-	public final JSONObject extract(final ReportingFactory reportingFactory, final CatalogJob job)
+	public final ProductMetadata extract(final ReportingFactory reportingFactory, final CatalogJob job)
 			throws AbstractCodedException {
 		final ProductFamily family = job.getProductFamily();
 
 		final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, family,
 				job.getKeyObjectStorage());
-		final JSONObject metadata;
+		final ProductMetadata metadata;
 		try {
 			final OutputFileDescriptor descriptor = fileDescriptorBuilder.buildOutputFileDescriptor(metadataFile, job,
 					family);

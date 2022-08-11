@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -30,11 +28,11 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -98,7 +96,7 @@ public class TestS3LevelProductMetadataExtractor {
 	}
 
 	@Test
-	public void testS3GranuleExtractMetadata() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testS3GranuleExtractMetadata() throws MetadataExtractionException, AbstractCodedException {
 		// Prepare OBS returnValue
 		final List<File> files = Arrays.asList(new File(testDir,
 				"S3A_SL_0_SLT__G_20040702T235915_20040703T000415_20150424T160530___________________WER_D_______.ISIP"
@@ -135,12 +133,11 @@ public class TestS3LevelProductMetadataExtractor {
 
 		// Use MetadataBuilder. The method creating the JSON-Object is tested in
 		// ExtractMetadataTest
-		final JSONObject expected = extractor.mdBuilder.buildS3LevelProductFileMetadata(expectedDescriptor, files.get(0),
+		final ProductMetadata expected = extractor.mdBuilder.buildS3LevelProductFileMetadata(expectedDescriptor, files.get(0),
 				message);
-		final JSONObject result = extractor.extract(reporting, message);
+		final ProductMetadata result = extractor.extract(reporting, message);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("timeliness".equals(key))) {
@@ -150,7 +147,7 @@ public class TestS3LevelProductMetadataExtractor {
 	}
 	
 	@Test
-	public void testS3IntermediateExtractMetadata() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testS3IntermediateExtractMetadata() throws MetadataExtractionException, AbstractCodedException {
 		// Prepare OBS returnValue
 		final List<File> files = Arrays.asList(new File(testDir,
 				"S3B_OL_1_EFR____20040703T003000_20040703T003200_20160204T070933_DDDD_001_002_FFFF_WER_D_NR_NNN.SEN3"
@@ -187,12 +184,11 @@ public class TestS3LevelProductMetadataExtractor {
 
 		// Use MetadataBuilder. The method creating the JSON-Object is tested in
 		// ExtractMetadataTest
-		final JSONObject expected = extractor.mdBuilder.buildS3LevelProductFileMetadata(expectedDescriptor, files.get(0),
+		final ProductMetadata expected = extractor.mdBuilder.buildS3LevelProductFileMetadata(expectedDescriptor, files.get(0),
 				message);
-		final JSONObject result = extractor.extract(reporting, message);
+		final ProductMetadata result = extractor.extract(reporting, message);
 		
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"timeliness".equals(key) && !"sliceCoordinates".equals(key)) {

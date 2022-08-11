@@ -14,9 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -37,6 +34,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetad
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -128,7 +126,7 @@ public class TestLevelProductMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataL0Slice() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testExtractMetadataL0Slice() throws MetadataExtractionException, AbstractCodedException {
 		final List<File> files = Arrays.asList(new File(testDir,
 				"S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE/manifest.safe"));
 		final CatalogJob inputMessageSafe = Utils.newCatalogJob(
@@ -156,20 +154,19 @@ public class TestLevelProductMetadataExtractor {
 		final CatalogJob job = new CatalogJob();
 		job.setProductFamily(ProductFamily.L0_SLICE);
 
-		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
+		final ProductMetadata expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final ProductMetadata result = extractor.extract(reporting, inputMessageSafe);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				if (expected.get(key) instanceof JSONArray) {
-					JSONArray a = (JSONArray) expected.get(key);
-					JSONArray b = (JSONArray) result.get(key);
-					assertEquals(a.length(), b.length());
-					for (int i=0; i< a.length(); i++)
+				if (expected.get(key) instanceof List) {
+					List<?> a = (List<?>) expected.get(key);
+					List<?> b = (List<?>) result.get(key);
+					assertEquals(a.size(), b.size());
+					for (int i=0; i< a.size(); i++)
 					{
 						assertEquals(a.get(i), b.get(i));
 					}
@@ -184,7 +181,7 @@ public class TestLevelProductMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataL0Acn() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testExtractMetadataL0Acn() throws MetadataExtractionException, AbstractCodedException {
 
 		final List<File> files = Arrays
 				.asList(new File(testDir, "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE"
@@ -215,20 +212,19 @@ public class TestLevelProductMetadataExtractor {
 		final CatalogJob job = new CatalogJob();
 		job.setProductFamily(ProductFamily.L0_ACN);
 
-		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
+		final ProductMetadata expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final ProductMetadata result = extractor.extract(reporting, inputMessageSafe);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				if (expected.get(key) instanceof JSONArray) {
-					JSONArray a = (JSONArray) expected.get(key);
-					JSONArray b = (JSONArray) result.get(key);
-					assertEquals(a.length(), b.length());
-					for (int i=0; i< a.length(); i++)
+				if (expected.get(key) instanceof List) {
+					List<?> a = (List<?>) expected.get(key);
+					List<?> b = (List<?>) result.get(key);
+					assertEquals(a.size(), b.size());
+					for (int i=0; i< a.size(); i++)
 					{
 						assertEquals(a.get(i), b.get(i));
 					}
@@ -243,7 +239,7 @@ public class TestLevelProductMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataL1Slice() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testExtractMetadataL1Slice() throws MetadataExtractionException, AbstractCodedException {
 
 		final List<File> files = Arrays
 				.asList(new File(testDir, "S1A_IW_RAW__0SDV_20171213T121623_20171213T121656_019684_021735_C6DB.SAFE"
@@ -275,20 +271,19 @@ public class TestLevelProductMetadataExtractor {
 		final CatalogJob job = new CatalogJob();
 		job.setProductFamily(ProductFamily.L1_SLICE);
 
-		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
+		final ProductMetadata expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final ProductMetadata result = extractor.extract(reporting, inputMessageSafe);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				if (expected.get(key) instanceof JSONArray) {
-					JSONArray a = (JSONArray) expected.get(key);
-					JSONArray b = (JSONArray) result.get(key);
-					assertEquals(a.length(), b.length());
-					for (int i=0; i< a.length(); i++)
+				if (expected.get(key) instanceof List) {
+					List<?> a = (List<?>) expected.get(key);
+					List<?> b = (List<?>) result.get(key);
+					assertEquals(a.size(), b.size());
+					for (int i=0; i< a.size(); i++)
 					{
 						assertEquals(a.get(i), b.get(i));
 					}
@@ -303,7 +298,7 @@ public class TestLevelProductMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataL1Acn() throws MetadataExtractionException, AbstractCodedException, JSONException {
+	public void testExtractMetadataL1Acn() throws MetadataExtractionException, AbstractCodedException {
 
 		final String l1acnName = "S1A_IW_GRDH_1ADV_20180227T145413_20180227T145438_020794_023A69_632A.SAFE";
 
@@ -334,20 +329,19 @@ public class TestLevelProductMetadataExtractor {
 		final CatalogJob job = new CatalogJob();
 		job.setProductFamily(ProductFamily.L1_ACN);
 
-		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
+		final ProductMetadata expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final ProductMetadata result = extractor.extract(reporting, inputMessageSafe);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				if (expected.get(key) instanceof JSONArray) {
-					JSONArray a = (JSONArray) expected.get(key);
-					JSONArray b = (JSONArray) result.get(key);
-					assertEquals(a.length(), b.length());
-					for (int i=0; i< a.length(); i++)
+				if (expected.get(key) instanceof List) {
+					List<?> a = (List<?>) expected.get(key);
+					List<?> b = (List<?>) result.get(key);
+					assertEquals(a.size(), b.size());
+					for (int i=0; i< a.size(); i++)
 					{
 						assertEquals(a.get(i), b.get(i));
 					}
@@ -362,7 +356,7 @@ public class TestLevelProductMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataL2Slice() throws AbstractCodedException, JSONException {
+	public void testExtractMetadataL2Slice() throws AbstractCodedException {
 
 		final String l2SliceName = "S1A_WV_OCN__2SSV_20190518T160559_20190518T161434_027284_0313A0_46F2.SAFE";
 
@@ -392,20 +386,19 @@ public class TestLevelProductMetadataExtractor {
 		final CatalogJob job = new CatalogJob();
 		job.setProductFamily(ProductFamily.L2_SLICE);
 
-		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
+		final ProductMetadata expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final ProductMetadata result = extractor.extract(reporting, inputMessageSafe);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it =  expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				if (expected.get(key) instanceof JSONArray) {
-					JSONArray a = (JSONArray) expected.get(key);
-					JSONArray b = (JSONArray) result.get(key);
-					assertEquals(a.length(), b.length());
-					for (int i=0; i< a.length(); i++)
+				if (expected.get(key) instanceof List) {
+					List<?> a = (List<?>) expected.get(key);
+					List<?> b = (List<?>) result.get(key);
+					assertEquals(a.size(), b.size());
+					for (int i=0; i< a.size(); i++)
 					{
 						assertEquals(a.get(i), b.get(i));
 					}
@@ -420,7 +413,7 @@ public class TestLevelProductMetadataExtractor {
 	}
 
 	@Test
-	public void testExtractMetadataL2Acn() throws AbstractCodedException, JSONException {
+	public void testExtractMetadataL2Acn() throws AbstractCodedException {
 
 		final String l2acnName = "S1A_WV_OCN__2ASV_20190518T160559_20190518T161434_027284_0313A0_2960.SAFE";
 
@@ -450,20 +443,19 @@ public class TestLevelProductMetadataExtractor {
 		final CatalogJob job = new CatalogJob();
 		job.setProductFamily(ProductFamily.L2_ACN);
 
-		final JSONObject expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
+		final ProductMetadata expected = extractor.mdBuilder.buildOutputFileMetadata(descriptor, files.get(0), job);
 
-		final JSONObject result = extractor.extract(reporting, inputMessageSafe);
+		final ProductMetadata result = extractor.extract(reporting, inputMessageSafe);
 
-		@SuppressWarnings("unchecked")
-		Iterator<String> it = (Iterator<String>) expected.keys();
+		Iterator<String> it = expected.keys().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!("insertionTime".equals(key) || "sliceCoordinates".equals(key) || "creationTime".equals(key))) {
-				if (expected.get(key) instanceof JSONArray) {
-					JSONArray a = (JSONArray) expected.get(key);
-					JSONArray b = (JSONArray) result.get(key);
-					assertEquals(a.length(), b.length());
-					for (int i=0; i< a.length(); i++)
+				if (expected.get(key) instanceof List) {
+					List<?> a = (List<?>) expected.get(key);
+					List<?> b = (List<?>) result.get(key);
+					assertEquals(a.size(), b.size());
+					for (int i=0; i< a.size(); i++)
 					{
 						assertEquals(a.get(i), b.get(i));
 					}
