@@ -1,11 +1,12 @@
 package esa.s1pdgs.cpoc.prip.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.elasticsearch.common.geo.GeoShapeType;
-import org.json.JSONObject;
 
 /**
  * Java representation of the elasticsearch geo_shape type.
@@ -45,13 +46,8 @@ public class PripGeoShape {
 
 	// --------------------------------------------------------------------------
 
-	@Override
-	public String toString() {
-		return toJson().toString();
-	}
-
-	public JSONObject toJson() {
-		final JSONObject json = new JSONObject();
+	public Map<String, Object> asMap() {
+		final Map<String, Object> map = new HashMap<>();
 
 		List<List<List<Double>>> coordExportOuterList = new ArrayList<>();
 		List<List<Double>> coordExportInnerList = new ArrayList<>();
@@ -63,14 +59,14 @@ public class PripGeoShape {
 			coordExportInnerList.add(p);
 		}
 
-		json.put(FIELD_NAMES.TYPE.fieldName, this.type.shapeName());
+		map.put(FIELD_NAMES.TYPE.fieldName, this.type.shapeName());
 
 		if (GeoShapeType.LINESTRING.equals(this.type)) {
-			json.put(FIELD_NAMES.COORDINATES.fieldName, coordExportInnerList);
+			map.put(FIELD_NAMES.COORDINATES.fieldName, coordExportInnerList);
 		} else if (GeoShapeType.POLYGON.equals(this.type)) {
-			json.put(FIELD_NAMES.COORDINATES.fieldName, coordExportOuterList);
+			map.put(FIELD_NAMES.COORDINATES.fieldName, coordExportOuterList);
 		}
-		return json;
+		return map;
 	}
 
 	@Override

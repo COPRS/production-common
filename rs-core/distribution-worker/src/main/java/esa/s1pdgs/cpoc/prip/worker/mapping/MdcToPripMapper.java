@@ -2,14 +2,18 @@ package esa.s1pdgs.cpoc.prip.worker.mapping;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.ToNumberPolicy;
+import com.google.gson.reflect.TypeToken;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.prip.worker.configuration.PripWorkerConfigurationProperties.MetadataMapping;
@@ -18,6 +22,9 @@ import esa.s1pdgs.cpoc.prip.worker.service.PripPublishingService;
 public class MdcToPripMapper {	
 
 	private static final Logger LOGGER = LogManager.getLogger(PripPublishingService.class);
+	
+	public static final Gson GSON = new Gson().newBuilder().setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+			.create();
 	
 	private final Map<Pattern,Map<String,PripAttribute>> mappingConfiguration;
 
@@ -100,9 +107,9 @@ public class MdcToPripMapper {
 					switch (type) {
 						case STRING:
 							try {
-								JSONArray jsonArray = new JSONArray(inputValue);
-								attributeValue = jsonArray.join(",").replace("\"", "");
-							} catch (JSONException e) {
+								List<String> items = GSON.fromJson(inputValue, new TypeToken<List<String>>(){}.getType());
+								attributeValue = String.join(",", items).replace("\"", "");
+							} catch (JsonSyntaxException e) {
 								attributeValue = inputValue;
 							}
 							break;
