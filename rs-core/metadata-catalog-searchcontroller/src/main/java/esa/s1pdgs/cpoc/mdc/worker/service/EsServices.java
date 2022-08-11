@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import javax.json.JsonObject;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.search.TotalHits;
@@ -48,8 +50,6 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -116,7 +116,7 @@ public class EsServices {
 	 * Check if a given metadata already exist
 	 * 
 	 */
-	public boolean isMetadataExist(final JSONObject product) throws Exception {
+	public boolean isMetadataExist(final JsonObject product) throws Exception {
 		try {
 			final String productType;
 			if (ProductFamily.AUXILIARY_FILE.equals(ProductFamily.valueOf(product.getString("productFamily")))
@@ -134,12 +134,12 @@ public class EsServices {
 			LOGGER.debug("Product {} response from ES {}", productName, response);
 
 			return response.isExists();
-		} catch (final JSONException | IOException je) {
-			throw new Exception(je.getMessage());
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
 		}
 	}
 
-	public String createMetadataWithRetries(final JSONObject product, final String productName, final int numRetries,
+	public String createMetadataWithRetries(final JsonObject product, final String productName, final int numRetries,
 			final long retrySleep) throws InterruptedException {
 		return Retries.performWithRetries(() -> {
 			if (!isMetadataExist(product)) {
@@ -157,7 +157,7 @@ public class EsServices {
 	 * index named [productType] with id [productName]
 	 * 
 	 */
-	String createMetadata(final JSONObject product) throws Exception {
+	String createMetadata(final JsonObject product) throws Exception {
 		
 		String warningMessage = "";
 		
@@ -225,13 +225,13 @@ public class EsServices {
 				}
 
 			}
-		} catch (JSONException | IOException e) {
+		} catch (IOException e) {
 			throw new Exception(e);
 		}
 		return warningMessage;
 	}
 
-	public void createMaskFootprintData(final MaskType maskType, final JSONObject product, final String id) throws Exception {
+	public void createMaskFootprintData(final MaskType maskType, final JsonObject product, final String id) throws Exception {
 		final String footprintIndexName;
 		switch (maskType) {
 			case EW_SLC: footprintIndexName = EW_SLC_MASK_FOOTPRINT_INDEX_NAME; break;
@@ -250,7 +250,7 @@ public class EsServices {
 				throw new MetadataCreationException(id, response.status().toString(),
 						response.getResult().toString());
 			}
-		} catch (JSONException | IOException e) {
+		} catch (IOException e) {
 			throw new Exception(e);
 		}
 	}

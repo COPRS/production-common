@@ -25,9 +25,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
+		    <groupId>com.google.code.gson</groupId>
+		    <artifactId>gson</artifactId>
+ 		</dependency>
 
 		<dependency>
 			<groupId>javax.annotation</groupId>

@@ -37,6 +37,7 @@
 		<pmd.failOnViolation>false</pmd.failOnViolation>
 		<odata.version>4.8.0</odata.version>
 		<log4j.version>2.17.1</log4j.version>
+		<glassfish.version>1.1.4</glassfish.version>
 	</properties>
 
 	<!-- TODO: check if this is still required -->

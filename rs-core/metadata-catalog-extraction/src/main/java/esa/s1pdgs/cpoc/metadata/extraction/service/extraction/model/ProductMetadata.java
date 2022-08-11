@@ -194,7 +194,7 @@ public class ProductMetadata {
 
 	@Override
 	public String toString() {
-		return toJson().toString();
+		return toJson();
 	}
 
 }

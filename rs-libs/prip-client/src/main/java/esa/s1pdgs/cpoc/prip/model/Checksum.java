@@ -1,8 +1,8 @@
 package esa.s1pdgs.cpoc.prip.model;
 
 import java.time.LocalDateTime;
-
-import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.Map;
 
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
@@ -52,19 +52,14 @@ public class Checksum {
 		this.date = date;
 	}
 	
-	public JSONObject toJson() {
-		final JSONObject json = new JSONObject();
-		json.put(FIELD_NAMES.ALGORITHM.fieldName, algorithm);
-		json.put(FIELD_NAMES.VALUE.fieldName, value);
+	public Map<String, Object> asMap() {
+		final Map<String, Object> map = new HashMap<>();
+		map.put(FIELD_NAMES.ALGORITHM.fieldName, algorithm);
+		map.put(FIELD_NAMES.VALUE.fieldName, value);
 		if (null != date) {
-			json.put(FIELD_NAMES.DATE.fieldName, DateUtils.formatToOdataDateTimeFormat(date));
+			map.put(FIELD_NAMES.DATE.fieldName, DateUtils.formatToOdataDateTimeFormat(date));
 		}
-		return json;
-	}
-
-	@Override
-	public String toString() {
-		return toJson().toString();
+		return map;
 	}
 
 	@Override

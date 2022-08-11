@@ -15,6 +15,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.search.TotalHits.Relation;
 import org.elasticsearch.action.get.GetRequest;
@@ -36,7 +39,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.internal.InternalSearchResponse;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -101,10 +103,11 @@ public class EsServicesTest{
 	@Test
 	public void isMetadataExistTrueTest() throws IOException {
 		// Product
-		final JSONObject product = new JSONObject();
-		product.put("productName", "name");
-		product.put("productType", "type");
-		product.put("productFamily", "AUXILIARY_FILE");
+		final JsonObject product = Json.createObjectBuilder()
+	            .add("productName", "name")
+	            .add("productType", "type")
+	            .add("productFamily", "AUXILIARY_FILE")
+	            .build();
 		
 		//Result with boolean at true for isExist
 		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, true, null, null, null);
@@ -124,10 +127,11 @@ public class EsServicesTest{
 	@Test
 	public void isMetadataExistFalseTest() throws IOException {
 		// Product
-		final JSONObject product = new JSONObject();
-		product.put("productName", "name");
-		product.put("productType", "type");
-        product.put("productFamily", "L0_SLICE");
+		final JsonObject product = Json.createObjectBuilder()
+	            .add("productName", "name")
+	            .add("productType", "type")
+	            .add("productFamily", "L0_SLICE")
+	            .build();
 		
 		//Result with boolean at false for isExist
 		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, null, null, null);
@@ -147,9 +151,10 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void isMetadataExistBadProductTest() throws Exception {
 		// Product
-		final JSONObject product = new JSONObject();
-		product.put("productname", "name");
-		product.put("productType", "type");
+		final JsonObject product = Json.createObjectBuilder()
+	            .add("productName", "name")
+	            .add("productType", "type")
+	            .build();
 		
 		//Result with boolean at false for isExist
 		final GetResult getResult = new GetResult("index", "type", "id", SequenceNumbers.UNASSIGNED_SEQ_NO, SequenceNumbers.UNASSIGNED_PRIMARY_TERM, 0L, false, null, null, null);
@@ -164,9 +169,10 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void isMetadataExistIOExceptionTest() throws Exception {
 		// Product
-		final JSONObject product = new JSONObject();
-		product.put("productName", "name");
-		product.put("productType", "type");
+		final JsonObject product = Json.createObjectBuilder()
+	            .add("productName", "name")
+	            .add("productType", "type")
+	            .build();
 		
 		//Mocking the get Request
 		this.mockGetRequestThrowIOException();
@@ -177,10 +183,11 @@ public class EsServicesTest{
 	@Test
 	public void createMetadataTest() throws IOException {
 		// Product
-		final JSONObject product = new JSONObject();
-		product.put("productName", "name");
-		product.put("productType", "type");
-		product.put("productFamily", "L0_SLICE");
+		final JsonObject product = Json.createObjectBuilder()
+	            .add("productName", "name")
+	            .add("productType", "type")
+	            .add("productFamily", "L0_SLICE")
+	            .build();
 		
 		//Result
 		final IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
@@ -199,9 +206,10 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void createMetadataBadProductTest() throws Exception {
 		// Product
-		final JSONObject product = new JSONObject();
-		product.put("productname", "name");
-		product.put("productType", "type");
+		final JsonObject product = Json.createObjectBuilder()
+	            .add("productName", "name")
+	            .add("productType", "type")
+	            .build();
 		
 		//Result
 		final IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
@@ -215,9 +223,10 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void createMetadataIOExceptionTest() throws Exception {
 		// Product
-		final JSONObject product = new JSONObject();
-		product.put("productName", "name");
-		product.put("productType", "type");
+		final JsonObject product = Json.createObjectBuilder()
+	            .add("productName", "name")
+	            .add("productType", "type")
+	            .build();
 		
 		//Mocking the get Request
 		this.mockIndexRequestThrowIOException();
@@ -1453,10 +1462,11 @@ public class EsServicesTest{
     	final IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
     	this.mockIndexRequest(response);
 
-		final JSONObject product = new JSONObject();
-		product.put("productName", "name");
-		product.put("productType", "type");
-		product.put("productFamily", "L0_SLICE");
+    	final JsonObject product = Json.createObjectBuilder()
+	            .add("productName", "name")
+	            .add("productType", "type")
+	            .add("productFamily", "L0_SLICE")
+	            .build();
 
 		try {
 			esServices.createMaskFootprintData(MaskType.EW_SLC, product, "id");

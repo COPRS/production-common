@@ -1,7 +1,9 @@
 package esa.s1pdgs.cpoc.prip.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,8 +11,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.CollectionUtil;
@@ -20,6 +21,7 @@ public class PripMetadata {
 
 	public static final String DEFAULT_CONTENTTYPE = "application/octet-stream";
 	public static final int DEFAULT_EVICTION_DAYS = 7;
+	public static final Gson GSON = new Gson().newBuilder().serializeNulls().create();
 
 	public enum FIELD_NAMES {
 		ID("id", PripMetadata::getId),
@@ -238,24 +240,23 @@ public class PripMetadata {
 		this.attributes = attributes;
 	}
 
-	public JSONObject toJson() {
-		final JSONObject json = new JSONObject();
+	public String toJson() {
+		final Map<String, Object> map = new HashMap<>();
 
 		Arrays.stream(FIELD_NAMES.values()).forEach(field -> {
-			// FIXME: Find a generic solution to support both String and JSON sub elements
 			if (field.fieldName.equals(FIELD_NAMES.FOOTPRINT.fieldName)) {
 				if (null != getFootprint()) {
 					PripGeoShape footprint = (PripGeoShape)field.toJsonAccessor().apply(this);
-					json.put(field.fieldName(), footprint.toJson());
+					map.put(field.fieldName(), footprint.asMap());
 				} else {
-					json.put(field.fieldName(), (JSONObject)null);
+					map.put(field.fieldName(), null);
 				}
 			} else if (FIELD_NAMES.CHECKSUM.fieldName.equals(field.fieldName)) {
-				final JSONArray checksumArray = new JSONArray();
-				CollectionUtil.nullToEmpty(this.checksums).forEach(checksum -> checksumArray.put(checksum.toJson()));
-				json.put(field.fieldName(), checksumArray);
+				final List<Map<String,Object>> checksums = new ArrayList<>();
+				CollectionUtil.nullToEmpty(this.checksums).forEach(checksum -> checksums.add(checksum.asMap()));
+				map.put(field.fieldName(), checksums);
 			} else {
-				json.put(field.fieldName(), field.toJsonAccessor().apply(this));
+				map.put(field.fieldName(), field.toJsonAccessor().apply(this));
 			}
 		});
 		
@@ -264,14 +265,14 @@ public class PripMetadata {
 				String name = attribute.getKey();
 				Object value = attribute.getValue();				
 				if (value instanceof LocalDateTime) {
-					json.put(name, DateUtils.formatToOdataDateTimeFormat((LocalDateTime)value));					
+					map.put(name, DateUtils.formatToOdataDateTimeFormat((LocalDateTime)value));					
 				} else {
-					json.put(name, value);
+					map.put(name, value);
 				}
 			}
 		}
 
-		return json;
+		return GSON.toJson(map);
 	}
 
 	@Override

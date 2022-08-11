@@ -3,10 +3,12 @@ package esa.s1pdgs.cpoc.datalifecycle.client.domain.model;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -15,6 +17,8 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
  * Data lifecycle metadata class.
  */
 public class DataLifecycleMetadata {
+	
+	public static final Gson GSON = new Gson().newBuilder().serializeNulls().create();
 
 	public static enum FIELD_NAME {
 		PRODUCT_NAME("ProductName", FIELD_TYPE.TEXT, DataLifecycleMetadata::getProductName), //
@@ -197,20 +201,19 @@ public class DataLifecycleMetadata {
 	
 	@Override
 	public String toString() {
-		return this.toJson().toString();
+		return toJson();
 	}
 	
 	// --------------------------------------------------------------------------
 	
-	public JSONObject toJson() {
-		final JSONObject json = new JSONObject();
-
+	public String toJson() {
+		Map<String, Object> map = new HashMap<>();
 		Arrays.stream(FIELD_NAME.values()).forEach(field -> {
 			final Object value = field.toJsonAccessor().apply(this);
-			json.put(field.fieldName(), null != value ? value : JSONObject.NULL);
+			map.put(field.fieldName(), value);
 		});
 
-		return json;
+		return GSON.toJson(map);
 	}
 
 	// --------------------------------------------------------------------------
