@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -29,10 +28,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
-import esa.s1pdgs.cpoc.preparation.worker.model.exception.AppCatalogJobNotFoundException;
-import esa.s1pdgs.cpoc.preparation.worker.model.exception.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.preparation.worker.report.TaskTableLookupReportingOutput;
-import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -41,7 +37,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class PreparationWorkerService implements Function<CatalogEvent, List<Message<IpfExecutionJob>>> {
 
 	static final Logger LOGGER = LogManager.getLogger(PreparationWorkerService.class);
-	
+
 	private TaskTableMapperService taskTableService;
 
 	private ProductTypeAdapter typeAdapter;
@@ -50,37 +46,27 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 
 	private AppCatJobService appCatJobService;
 
-	private Map<String, TaskTableAdapter> taskTableAdapters;
-
 	private InputSearchService inputSearchService;
 
-	private JobCreationService jobCreationService;
-	
 	private final CommonConfigurationProperties commonProperties;
 
 	public PreparationWorkerService(final TaskTableMapperService taskTableService, final ProductTypeAdapter typeAdapter,
 			final ProcessProperties properties, final AppCatJobService appCat,
-			final Map<String, TaskTableAdapter> taskTableAdapters, final InputSearchService inputSearchService,
-			final JobCreationService jobCreationService, final CommonConfigurationProperties commonProperties) {
+			final InputSearchService inputSearchService, final CommonConfigurationProperties commonProperties) {
 		this.taskTableService = taskTableService;
 		this.typeAdapter = typeAdapter;
 		this.processProperties = properties;
 		this.appCatJobService = appCat;
-		this.taskTableAdapters = taskTableAdapters;
 		this.inputSearchService = inputSearchService;
-		this.jobCreationService = jobCreationService;
 		this.commonProperties = commonProperties;
 	}
 
 	@Override
 	public List<Message<IpfExecutionJob>> apply(CatalogEvent catalogEvent) {
 		final Reporting reporting = ReportingUtils
-				.newReportingBuilder(MissionId
-						.valueOf((String) catalogEvent.getMetadata().get(MissionId.FIELD_NAME)))
-				.rsChainName(commonProperties.getRsChainName())
-				.rsChainVersion(commonProperties.getRsChainVersion())
-				.predecessor(catalogEvent.getUid())
-				.newReporting("PreparationWorkerService");
+				.newReportingBuilder(MissionId.valueOf((String) catalogEvent.getMetadata().get(MissionId.FIELD_NAME)))
+				.rsChainName(commonProperties.getRsChainName()).rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(catalogEvent.getUid()).newReporting("PreparationWorkerService");
 
 		reporting.begin(
 				ReportingUtils.newFilenameReportingInputFor(catalogEvent.getProductFamily(),
@@ -102,7 +88,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 			List<AppDataJob> appDataJobs = appCatJobService.findByTriggerProduct(catalogEvent.getMetadataProductType());
 
 			// Check if jobs are ready
-			result = checkIfJobsAreReady(appDataJobs);
+			result = inputSearchService.checkIfJobsAreReady(appDataJobs);
 
 		} catch (Exception e) {
 			reporting.error(new ReportingMessage("Preparation worker failed: %s", LogUtils.toString(e)));
@@ -115,7 +101,8 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		if (result.isEmpty()) {
 			return null;
 		} else {
-			// Wrap each ExecutionJob into a KafkaMessage so they are sent individually to execution workers
+			// Wrap each ExecutionJob into a KafkaMessage so they are sent individually to
+			// execution workers
 			return result.stream().map(job -> MessageBuilder.withPayload(job).build()).collect(Collectors.toList());
 		}
 	}
@@ -126,10 +113,8 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 				.valueOf((String) preparationJob.getCatalogEvent().getMetadata().get(MissionId.FIELD_NAME));
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
-				.rsChainName(commonProperties.getRsChainName())
-				.rsChainVersion(commonProperties.getRsChainVersion())
-				.predecessor(preparationJob.getUid())
-				.newReporting("TaskTableLookup");
+				.rsChainName(commonProperties.getRsChainName()).rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(preparationJob.getUid()).newReporting("TaskTableLookup");
 
 		final List<AppDataJob> jobs = typeAdapter.createAppDataJobs(preparationJob);
 
@@ -218,61 +203,6 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		}
 
 		return dispatchedJobs;
-	}
-
-	public synchronized List<IpfExecutionJob> checkIfJobsAreReady(List<AppDataJob> appDataJobs) {
-		
-		List<IpfExecutionJob> executionJobs = new ArrayList<>();
-		
-		for (AppDataJob job : appDataJobs) {
-			if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
-				try {
-					LOGGER.info("Start main input search for AppDataJob {}", job.getId());
-					job = inputSearchService.mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
-				}
-			}
-
-			if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
-				try {
-					LOGGER.info("Start aux input search for AppDataJob {}", job.getId());
-					job = inputSearchService.auxInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Aux input search did not complete successfully: {}", e.getMessage());
-				}
-			}
-
-			if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
-				try {
-					LOGGER.info("Start generating IpfExecutionJob for AppDataJob {}", job.getId());
-					
-					IpfExecutionJob executionJob = jobCreationService.createExecutionJob(job, taskTableAdapters.get(job.getTaskTableName()));
-					if (executionJob != null) {
-						executionJobs.add(executionJob);
-					} else {
-						// TODO: Improve Error Handling
-						LOGGER.error("Could not generate ExecutionJob for AppDataJob {}", job.getId());
-					}
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Generation of IpfExecutionJob did not complete successfully: {}", e.getMessage());
-				}
-			}
-
-			if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
-				// TODO: This step was mandatory before to make sure no duplicate jobs are created. Is this still necessary?
-//				terminate();
-			}
-
-			// Update Job in Mongo
-			try {
-				appCatJobService.updateJob(job);
-			} catch (AppCatalogJobNotFoundException e) {
-				LOGGER.error("Error while saving new state of AppDataJob {}: {}", job.getId(), e.getMessage());
-			}
-		}
-
-		return executionJobs;
 	}
 
 	/**

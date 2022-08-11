@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.preparation.worker.type.pdu.generator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -34,7 +35,7 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 	}
 
 	@Override
-	public List<AppDataJob> generateAppDataJobs(final IpfPreparationJob job) throws MetadataQueryException {
+	public List<AppDataJob> generateAppDataJobs(final IpfPreparationJob job, final int primaryCheckMaxTimelifeS) throws MetadataQueryException {
 		final S3Metadata metadata = getMetadataForJobProduct(this.mdClient, job);
 
 		// Check if this product is the first of its orbit
@@ -69,6 +70,14 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 
 				if (processSettings.getProcessingGroup() != null) {
 					appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
+				}
+				
+				// Calculate, when the Job will be timed out
+				if (primaryCheckMaxTimelifeS != 0) {
+					final Date creationDate = appDataJob.getGeneration().getCreationDate();
+					final Date timeoutDate = new Date(
+							creationDate.toInstant().toEpochMilli() + (primaryCheckMaxTimelifeS * 1000));
+					appDataJob.setTimeoutDate(timeoutDate);
 				}
 
 				jobs.add(appDataJob);

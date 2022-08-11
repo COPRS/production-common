@@ -157,6 +157,11 @@ public class PreparationWorkerProperties {
 	private int jobgenfixedrate;
 
 	/**
+	 * Maximum lifespan for the primary check before continuing
+	 */
+	private int primaryCheckMaxTimelifeS;
+	
+	/**
 	 * Default family of products
 	 */
 	private String defaultfamily;
@@ -314,6 +319,20 @@ public class PreparationWorkerProperties {
 	}
 
 	/**
+	 * @return the maximum time a job should be in primary check
+	 */
+	public int getPrimaryCheckMaxTimelifeS() {
+		return primaryCheckMaxTimelifeS;
+	}
+
+	/**
+	 * @param primaryCheckMaxTimelifeS how long a job should be in primary check
+	 */
+	public void setPrimaryCheckMaxTimelifeS(int primaryCheckMaxTimelifeS) {
+		this.primaryCheckMaxTimelifeS = primaryCheckMaxTimelifeS;
+	}
+
+	/**
 	 * @return the defaultfamily
 	 */
 	public String getDefaultfamily() {
@@ -452,11 +471,11 @@ public class PreparationWorkerProperties {
 	@Override
 	public String toString() {
 		return "{maxnumberofjobs: " + maxnumberofjobs + "\", diroftasktables: \"" + diroftasktables
-				+ "\", jobgenfixedrate: " + jobgenfixedrate + ", defaultfamily: \"" + defaultfamily
-				+ "\", outputfamiliesstr: \"" + outputfamiliesstr + "\", outputfamilies: \"" + outputfamilies
-				+ "\", typeOverlap: \"" + typeOverlap + "\", typeSliceLength: \"" + typeSliceLength
-				+ "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \"" + oqcCheck + "\", productMode: \""
-				+ productMode + "\", inputWaiting: \"" + inputWaiting + "\", joborderTimelinessCategoryMapping="
-				+ joborderTimelinessCategoryMapping + "}";
+				+ "\", jobgenfixedrate: " + jobgenfixedrate + ", primaryCheckMaxTimelifeS:" + primaryCheckMaxTimelifeS
+				+ ", defaultfamily: \"" + defaultfamily + "\", outputfamiliesstr: \"" + outputfamiliesstr
+				+ "\", outputfamilies: \"" + outputfamilies + "\", typeOverlap: \"" + typeOverlap
+				+ "\", typeSliceLength: \"" + typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \""
+				+ oqcCheck + "\", productMode: \"" + productMode + "\", inputWaiting: \"" + inputWaiting
+				+ "\", joborderTimelinessCategoryMapping=" + joborderTimelinessCategoryMapping + "}";
 	}
 }
