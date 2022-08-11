@@ -1,10 +1,8 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
-
-import org.json.JSONObject;
+import java.util.Map;
 
 import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -19,12 +17,12 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescript
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MaskExtractor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.AuxDescriptor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
-	private static final List<String> AUX_ECE_TYPES = Arrays.asList("AMV_ERRMAT", "AMH_ERRMAT");
 
 	public AuxMetadataExtractor(final EsServices esServices, final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, final String localDirectory,
@@ -33,7 +31,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-	public JSONObject extract(final ReportingFactory reportingFactory, final CatalogJob job)
+	public ProductMetadata extract(final ReportingFactory reportingFactory, final CatalogJob job)
 			throws AbstractCodedException {
 		final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, ProductFamily.AUXILIARY_FILE,
 				job.getKeyObjectStorage());
@@ -41,7 +39,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 			final AuxDescriptor configFileDesc = fileDescriptorBuilder.buildAuxDescriptor(metadataFile);
 
 			// Build metadata from file and extracted
-			final JSONObject obj = mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile);
+			final ProductMetadata metadata = mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile);
 
 			/*
 			 * In case we are having a land mask file, we are uploading the geo shape
@@ -54,10 +52,10 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 				// the auxiliary file might be a mask file
 				final MaskType maskType = MaskType.of(configFileDesc.getProductType());
 				try {
-					final List<JSONObject> featureCollection = new MaskExtractor().extract(metadataFile);
+					final List<Map<String, Object>> featureCollection = new MaskExtractor().extract(metadataFile);
 					logger.info("Uploading {} {} polygons", featureCollection.size(), maskType.toString());
 					int featureNumber = 0;
-					for (final JSONObject feature : featureCollection) {
+					for (final Map<String, Object> feature : featureCollection) {
 						String id = configFileDesc.getProductName() + "/features/" + featureNumber;
 						logger.debug("Uploading {} {}", maskType, id);
 						logger.trace("{} json: {}", maskType, feature.toString());
@@ -72,7 +70,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 			} catch (final Exception e) {
 				// the auxiliary file is not a mask file
 			}
-			return obj;
+			return metadata;
 		} finally {
 			FileUtils.delete(metadataFile.getPath());
 		}

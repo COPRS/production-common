@@ -11,14 +11,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
-import esa.s1pdgs.cpoc.metadata.extraction.Application;
 import esa.s1pdgs.cpoc.metadata.extraction.config.RfiConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.RfiMitigationPerformed;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;

@@ -9,11 +9,13 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.search.TotalHits.Relation;
@@ -36,9 +38,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.internal.InternalSearchResponse;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -48,13 +47,15 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.ElasticsearchDAO;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
 import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
 import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
@@ -102,9 +103,9 @@ public class EsServicesTest{
 	}
 	
 	@Test
-	public void isMetadataExistTrueTest() throws IOException, JSONException {
+	public void isMetadataExistTrueTest() throws IOException, MetadataMalformedException {
 		// Product
-		final JSONObject product = new JSONObject();
+		final ProductMetadata product = new ProductMetadata();
 		product.put("productName", "name");
 		product.put("productType", "type");
 		product.put("productFamily", "AUXILIARY_FILE");
@@ -125,9 +126,9 @@ public class EsServicesTest{
 	}
 	
 	@Test
-	public void isMetadataExistFalseTest() throws IOException, JSONException {
+	public void isMetadataExistFalseTest() throws IOException, MetadataMalformedException {
 		// Product
-		final JSONObject product = new JSONObject();
+		final ProductMetadata product = new ProductMetadata();
 		product.put("productName", "name");
 		product.put("productType", "type");
         product.put("productFamily", "L0_SLICE");
@@ -150,7 +151,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void isMetadataExistBadProductTest() throws Exception {
 		// Product
-		final JSONObject product = new JSONObject();
+		final ProductMetadata product = new ProductMetadata();
 		product.put("productname", "name");
 		product.put("productType", "type");
 		
@@ -167,7 +168,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void isMetadataExistIOExceptionTest() throws Exception {
 		// Product
-		final JSONObject product = new JSONObject();
+		final ProductMetadata product = new ProductMetadata();
 		product.put("productName", "name");
 		product.put("productType", "type");
 		
@@ -178,9 +179,9 @@ public class EsServicesTest{
 	}
 	
 	@Test
-	public void createMetadataTest() throws IOException, JSONException {
+	public void createMetadataTest() throws IOException, MetadataMalformedException {
 		// Product
-		final JSONObject product = new JSONObject();
+		final ProductMetadata product = new ProductMetadata();
 		product.put("productName", "name");
 		product.put("productType", "type");
 		product.put("productFamily", "L0_SLICE");
@@ -202,7 +203,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void createMetadataBadProductTest() throws Exception {
 		// Product
-		final JSONObject product = new JSONObject();
+		final ProductMetadata product = new ProductMetadata();
 		product.put("productname", "name");
 		product.put("productType", "type");
 		
@@ -218,7 +219,7 @@ public class EsServicesTest{
 	@Test(expected = Exception.class)
 	public void createMetadataIOExceptionTest() throws Exception {
 		// Product
-		final JSONObject product = new JSONObject();
+		final ProductMetadata product = new ProductMetadata();
 		product.put("productName", "name");
 		product.put("productType", "type");
 		
@@ -1442,27 +1443,35 @@ public class EsServicesTest{
     }
     
 	@Test
-    public final void createMaskFootprintData_whenNotCrossingDateline_shallHaveCounterclockwiseOrientation() throws IOException, JSONException {
-		final JSONObject feature = new JSONObject("{\"geometry\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[8.85,47.52],[8.44,47.52],[8.44,47.27],[8.85,47.27],[8.85,47.52]]],\"type\":\"Polygon\"}}");
+    public final void createMaskFootprintData_whenNotCrossingDateline_shallHaveCounterclockwiseOrientation() throws IOException {
+		final String json = "{\"geometry\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[8.85,47.52],[8.44,47.52],[8.44,47.27],[8.85,47.27],[8.85,47.52]]],\"type\":\"Polygon\"}}";
     	
     	final IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
     	this.mockIndexRequest(response);
 
+    	Type type = new TypeToken<Map<String, Object>>(){}.getType();
+		Map<String, Object> feature = new Gson().newBuilder().create().fromJson(json, type);
+		
 		try {
 			esServices.createMaskFootprintData(MaskType.EW_SLC, feature, "S1__OPER_MSK_EW_SLC_V20150101T000000_G20210124T220718.EOF/feature/0");
 		} catch (final Exception e) {
 			fail("Exception occurred: " + e.getMessage());
 		}
 		
-		assertEquals("counterclockwise", feature.getJSONObject("geometry").getString("orientation")); // input not modified
+		@SuppressWarnings("unchecked")
+		Map<String, Object> geometry = (Map<String, Object>)feature.get("geometry");
+		assertEquals("counterclockwise", geometry.get("orientation")); // input not modified
     }
 	
 	@Test
-    public final void createMaskFootprintData_whenCrossingDateline_ShallHaveClockwiseOrientation() throws IOException, JSONException {
-		final JSONObject feature = new JSONObject("{\"geometry\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[-179.85,47.52],[8.44,47.52],[8.44,47.27],[8.85,47.27],[-179.85,47.52]]],\"type\":\"Polygon\"}}");
+    public final void createMaskFootprintData_whenCrossingDateline_ShallHaveClockwiseOrientation() throws IOException {
+		final String json = "{\"geometry\":{\"orientation\":\"counterclockwise\",\"coordinates\":[[[-179.85,47.52],[8.44,47.52],[8.44,47.27],[8.85,47.27],[-179.85,47.52]]],\"type\":\"Polygon\"}}";
     	
     	final IndexResponse response = new IndexResponse(new ShardId(new Index("name", "uuid"),5), "type", "id", 0, 0, 0, true);
     	this.mockIndexRequest(response);
+    	
+    	Type type = new TypeToken<Map<String, Object>>(){}.getType();
+		Map<String, Object> feature = new Gson().newBuilder().create().fromJson(json, type);
 
 		try {
 			esServices.createMaskFootprintData(MaskType.EW_SLC, feature, "S1__OPER_MSK_EW_SLC_V20150101T000000_G20210124T220718.EOF/feature/0");
@@ -1470,7 +1479,9 @@ public class EsServicesTest{
 			fail("Exception occurred: " + e.getMessage());
 		}
 		
-		assertEquals("clockwise", feature.getJSONObject("geometry").getString("orientation")); // input modified
+		@SuppressWarnings("unchecked")
+		Map<String, Object> geometry = (Map<String, Object>)feature.get("geometry");
+		assertEquals("clockwise", geometry.get("orientation")); // input modified
     }
 	
 	@Test

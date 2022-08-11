@@ -18,7 +18,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -29,6 +28,7 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.config.RfiConfiguration;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.RfiAnnotation;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.RfiDetectionFromNoiseReport;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.RfiMitigationPerformed;
@@ -60,7 +60,7 @@ public class RfiAnnotationExtractor {
 	}
 
 	public void addRfiMetadata(final ReportingFactory reportingFactory, final String keyObjectStorage,
-			final ProductFamily family, final String localDirectory, final JSONObject metadata)
+			final ProductFamily family, final String localDirectory, final ProductMetadata metadata)
 			throws MetadataExtractionException {
 
 		if (family == ProductFamily.L1_SLICE) {
@@ -139,7 +139,7 @@ public class RfiAnnotationExtractor {
 				rfiReporting.error(new ReportingMessage("Error extraction of RFI metadata from product %s: %s",
 						keyObjectStorage, LogUtils.toString(e)));
 
-				throw e;
+				throw new MetadataExtractionException(e);
 			}
 		}
 	}

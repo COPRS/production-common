@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -36,6 +34,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -177,10 +176,10 @@ public class TestPlanAndReportMetadataExtractor {
     }
     
     @Test
-    public void testExtraction() throws MetadataExtractionException, AbstractCodedException, JSONException {
+    public void testExtraction() throws MetadataExtractionException, AbstractCodedException {
     	doReturn(Collections.emptyList()).when(obsClient).download(Mockito.anyList(), Mockito.any());
     	
-    	final JSONObject result = extractor.extract(reporting, inputMessage);
+    	final ProductMetadata result = extractor.extract(reporting, inputMessage);
     	
     	String expectedInsertionTime = DateUtils.formatToMetadataDateTimeFormat(
     			inputMessage.getCreationDate().toInstant().atZone(ZoneId.of("UTC")).toLocalDateTime());

@@ -24,6 +24,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
@@ -43,6 +44,8 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class DlqManagerService implements Function<Message<byte[]>, List<Message<byte[]>>> {
 
 	private static final Logger LOGGER = LogManager.getLogger(DlqManagerService.class);
+	
+	private static final Gson GSON = new GsonBuilder().serializeNulls().create();
 	
 	private final CommonConfigurationProperties commonProperties;
 	
@@ -114,7 +117,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 					if (retryCounter < rule.getMaxRetry()) {
 						payloadMap.put("retryCounter", ++retryCounter);
 						LOGGER.info("Route to {} (retry {}/{})", targetTopic, retryCounter, rule.getMaxRetry());
-						result.add(MessageBuilder.withPayload(new GsonBuilder().serializeNulls().create().toJson(payloadMap)
+						result.add(MessageBuilder.withPayload(GSON.toJson(payloadMap)
 								.getBytes(StandardCharsets.UTF_8)).setHeader(X_ROUTE_TO, targetTopic).build());
 						reporting.end(DlqReportingOutput.newInstance(rule.getErrorTitle(), rule.getActionType(), targetTopic),
 								new ReportingMessage("Finished routing"));
@@ -143,7 +146,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 				? "NOT_DEFINED" : (String)originalMessageHeader.get("errorLevel");
 		
 		FailedProcessing failedProcessing = new FailedProcessing(originalTopic, originalTimestamp,
-				missionId, errorLevel, new GsonBuilder().serializeNulls().create().toJson(payloadMap), exceptionMessage,
+				missionId, errorLevel, GSON.toJson(payloadMap), exceptionMessage,
 				exceptionStacktrace, (Integer)payloadMap.get("retryCounter"));
 		
 		try {
