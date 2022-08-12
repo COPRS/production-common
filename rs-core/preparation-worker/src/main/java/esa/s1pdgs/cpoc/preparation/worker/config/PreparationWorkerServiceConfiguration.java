@@ -43,6 +43,9 @@ public class PreparationWorkerServiceConfiguration {
 	@Autowired
 	private InputSearchService inputSearchService;
 
+	@Autowired
+	private PreparationWorkerProperties preparationWorkerProperties;
+	
 	@Bean
 	public Function<CatalogEvent, List<Message<IpfExecutionJob>>> prepareExecutionJobs() {
 		return new PreparationWorkerService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
@@ -52,6 +55,6 @@ public class PreparationWorkerServiceConfiguration {
 	@Bean
 	public Supplier<List<Message<IpfExecutionJob>>> houseKeepAppDataJobs() {
 		return new HousekeepingService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
-				inputSearchService, commonProperties);
+				inputSearchService, preparationWorkerProperties, commonProperties);
 	}
 }

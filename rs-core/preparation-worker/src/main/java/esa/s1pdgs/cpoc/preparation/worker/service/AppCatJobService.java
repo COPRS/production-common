@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
@@ -73,6 +74,10 @@ public class AppCatJobService {
 			return appDataJobRepository.findByProductDataTakeId_Rfc(dataTakeId);
 		}
 		return appDataJobRepository.findByProductDataTakeId_NonRfc(dataTakeId);
+	}
+	
+	public List<AppDataJob> findByStateAndLastUpdateDateLessThan(final AppDataJobState state, final Date lastUpdatedDate) {
+		return appDataJobRepository.findByStateAndLastUpdateDateLessThan(state, processProperties.getHostname(), lastUpdatedDate);
 	}
 
 	public void appendCatalogEvent(final long id, final CatalogEvent event) throws AppCatJobUpdateFailedException {

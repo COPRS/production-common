@@ -211,6 +211,11 @@ public class PreparationWorkerProperties {
 	 * Mode of the process
 	 */
 	private ProductMode productMode = ProductMode.SLICING;
+	
+	/**
+     * Maximal job age per status
+     */
+    private Map<String, Long> maxAgeJobMs;
 
 	/**
 	 * Initialization function:
@@ -465,6 +470,14 @@ public class PreparationWorkerProperties {
 		this.lateTopicActive = lateTopicActive;
 	}
 	
+	public Map<String, Long> getMaxAgeJobMs() {
+		return maxAgeJobMs;
+	}
+
+	public void setMaxAgeJobMs(Map<String, Long> maxAgeJobMs) {
+		this.maxAgeJobMs = maxAgeJobMs;
+	}
+
 	/**
 	 * Display object in JSON format
 	 */
@@ -476,6 +489,7 @@ public class PreparationWorkerProperties {
 				+ "\", outputfamilies: \"" + outputfamilies + "\", typeOverlap: \"" + typeOverlap
 				+ "\", typeSliceLength: \"" + typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \""
 				+ oqcCheck + "\", productMode: \"" + productMode + "\", inputWaiting: \"" + inputWaiting
-				+ "\", joborderTimelinessCategoryMapping=" + joborderTimelinessCategoryMapping + "}";
+				+ "\", joborderTimelinessCategoryMapping:" + joborderTimelinessCategoryMapping + "\", maxAgeJobMs:"
+				+ maxAgeJobMs + "\"}";
 	}
 }

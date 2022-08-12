@@ -12,8 +12,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 
@@ -31,30 +33,60 @@ public class HousekeepingService implements Supplier<List<Message<IpfExecutionJo
 
 	private InputSearchService inputSearchService;
 
+	private final PreparationWorkerProperties prepProperties;
+
 	private final CommonConfigurationProperties commonProperties;
 
 	public HousekeepingService(final TaskTableMapperService taskTableService, final ProductTypeAdapter typeAdapter,
 			final ProcessProperties properties, final AppCatJobService appCat,
-			final InputSearchService inputSearchService, final CommonConfigurationProperties commonProperties) {
+			final InputSearchService inputSearchService, final PreparationWorkerProperties prepProperties,
+			CommonConfigurationProperties commonProperties) {
 		this.taskTableService = taskTableService;
 		this.typeAdapter = typeAdapter;
 		this.processProperties = properties;
 		this.appCatJobService = appCat;
 		this.inputSearchService = inputSearchService;
+		this.prepProperties = prepProperties;
 		this.commonProperties = commonProperties;
 	}
 
 	@Override
 	public List<Message<IpfExecutionJob>> get() {
-		// Stuff todo:
-		// - Check if any currently pending AppDataJobs are still waiting for input,
-		// even though they reached a configured timeout
 		// - Delete finished AppDataJob that reached a maximum keeping time
+		deleteOldFinishedJobs();
 
-		// Calculate Timeout-Date based on configuration
+		// - Continue jobs, that ran into an timeout and did not receive all products
+		return continueTimeoutJobs();
+	}
+
+	private void deleteOldFinishedJobs() {
+		// Calculate time, based on configuration
+		cleanJobsByState(AppDataJobState.DISPATCHING);
+		cleanJobsByState(AppDataJobState.GENERATING);
+		cleanJobsByState(AppDataJobState.WAITING);
+		cleanJobsByState(AppDataJobState.TERMINATED);
+	}
+
+	private void cleanJobsByState(final AppDataJobState state) {
+		final long maxAgeMs = prepProperties.getMaxAgeJobMs().get(state.name().toLowerCase());
+
+		final Date oldJobsDate = new Date(System.currentTimeMillis() - maxAgeMs);
+		final List<AppDataJob> oldJobs = appCatJobService.findByStateAndLastUpdateDateLessThan(state, oldJobsDate);
+
+		for (final AppDataJob oldJob : oldJobs) {
+			final String logMessage = String.format("Remove %s job %s (%s) for enough time", oldJob.getLevel(),
+					oldJob.getId(), state);
+
+			LOGGER.info(logMessage);
+			
+			appCatJobService.deleteJob(oldJob.getId());
+		}
+	}
+
+	private List<Message<IpfExecutionJob>> continueTimeoutJobs() {
 		List<AppDataJob> timedoutJobs = appCatJobService.findTimeoutJobs(new Date());
 		List<IpfExecutionJob> result = new ArrayList<>();
-		
+
 		// Flag jobs, that they are timed out
 		for (AppDataJob timedoutJob : timedoutJobs) {
 			timedoutJob.setTimedOut(true);
@@ -71,4 +103,5 @@ public class HousekeepingService implements Supplier<List<Message<IpfExecutionJo
 			return result.stream().map(job -> MessageBuilder.withPayload(job).build()).collect(Collectors.toList());
 		}
 	}
+
 }

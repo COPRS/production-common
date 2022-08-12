@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 
 /**
  * Access class to AppDataJob in mongo DB
@@ -36,4 +37,7 @@ public interface AppDataJobRepository extends MongoRepository<AppDataJob, Long> 
 
 	@Query(value = "{ 'pod': ?1, 'timeoutDate' : { $lt: ?0 } ")
 	List<AppDataJob> findTimeoutJobs(final Date timeoutThreshhold, final String podName);
+	
+	@Query(value = "{ 'state': ?0, 'pod': ?1, 'lastUpdateDate': { $lt: ?2 }")
+	List<AppDataJob> findByStateAndLastUpdateDateLessThan(final AppDataJobState state, final String podName, final Date lastUpdated);
 }
