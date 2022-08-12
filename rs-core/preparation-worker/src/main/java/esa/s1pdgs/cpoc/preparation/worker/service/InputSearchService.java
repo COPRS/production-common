@@ -1,10 +1,15 @@
 package esa.s1pdgs.cpoc.preparation.worker.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
@@ -13,7 +18,9 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
+import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.AppCatJobUpdateFailed;
+import esa.s1pdgs.cpoc.preparation.worker.model.exception.AppCatalogJobNotFoundException;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.JobStateTransistionFailed;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.TimedOutException;
@@ -26,15 +33,85 @@ import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 
 public class InputSearchService {
 
+	static final Logger LOGGER = LogManager.getLogger(InputSearchService.class);
+
 	private ProductTypeAdapter typeAdapter;
-	
+
 	private AuxQueryHandler auxQueryHandler;
-	
-	public InputSearchService(final ProductTypeAdapter typeAdapter, final AuxQueryHandler auxQueryHandler) {
+
+	private Map<String, TaskTableAdapter> taskTableAdapters;
+
+	private AppCatJobService appCatJobService;
+
+	private JobCreationService jobCreationService;
+
+	public InputSearchService(final ProductTypeAdapter typeAdapter, final AuxQueryHandler auxQueryHandler,
+			final Map<String, TaskTableAdapter> taskTableAdapters, final AppCatJobService appCatJobService,
+			final JobCreationService jobCreationService) {
 		this.typeAdapter = typeAdapter;
 		this.auxQueryHandler = auxQueryHandler;
+		this.taskTableAdapters = taskTableAdapters;
+		this.appCatJobService = appCatJobService;
+		this.jobCreationService = jobCreationService;
 	}
-	
+
+	public synchronized List<IpfExecutionJob> checkIfJobsAreReady(List<AppDataJob> appDataJobs) {
+
+		List<IpfExecutionJob> executionJobs = new ArrayList<>();
+
+		for (AppDataJob job : appDataJobs) {
+			if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
+				try {
+					LOGGER.info("Start main input search for AppDataJob {}", job.getId());
+					job = mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+				} catch (JobStateTransistionFailed e) {
+					LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
+				}
+			}
+
+			if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
+				try {
+					LOGGER.info("Start aux input search for AppDataJob {}", job.getId());
+					job = auxInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+				} catch (JobStateTransistionFailed e) {
+					LOGGER.info("Aux input search did not complete successfully: {}", e.getMessage());
+				}
+			}
+
+			if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
+				try {
+					LOGGER.info("Start generating IpfExecutionJob for AppDataJob {}", job.getId());
+
+					IpfExecutionJob executionJob = jobCreationService.createExecutionJob(job,
+							taskTableAdapters.get(job.getTaskTableName()));
+					if (executionJob != null) {
+						executionJobs.add(executionJob);
+					} else {
+						// TODO: Improve Error Handling
+						LOGGER.error("Could not generate ExecutionJob for AppDataJob {}", job.getId());
+					}
+				} catch (JobStateTransistionFailed e) {
+					LOGGER.info("Generation of IpfExecutionJob did not complete successfully: {}", e.getMessage());
+				}
+			}
+
+			if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
+				// TODO: This step was mandatory before to make sure no duplicate jobs are
+				// created. Is this still necessary?
+//				terminate();
+			}
+
+			// Update Job in Mongo
+			try {
+				appCatJobService.updateJob(job);
+			} catch (AppCatalogJobNotFoundException e) {
+				LOGGER.error("Error while saving new state of AppDataJob {}: {}", job.getId(), e.getMessage());
+			}
+		}
+
+		return executionJobs;
+	}
+
 	public AppDataJob mainInputSearch(AppDataJob job, TaskTableAdapter taskTableAdapter)
 			throws JobStateTransistionFailed {
 		AppDataJobGenerationState newState = job.getGeneration().getState();
@@ -50,14 +127,20 @@ public class InputSearchService {
 			// validate by modifying
 			// the start stop time for segments
 			performVoid(() -> {
-				try {
-					typeAdapter.validateInputSearch(job, taskTableAdapter);
-				} catch (final TimedOutException e) {
-					timeout.set(true);
+				// When job is already timed out -> skip validation 
+				if (!job.getTimedOut()) {
+					try {
+						typeAdapter.validateInputSearch(job, taskTableAdapter);
+					} catch (final TimedOutException e) {
+						timeout.set(true);
+					}
 				}
 			}, "validating availability of input products for " + job.getProductName());
 			newState = AppDataJobGenerationState.PRIMARY_CHECK;
 		} finally {
+			// The mainInputSearch may change the timeout value -> update it here for future
+			// house keeping
+			typeAdapter.updateTimeout(job);
 			updateJobMainInputSearch(job, queried, newState);
 		}
 
@@ -82,7 +165,7 @@ public class InputSearchService {
 
 		return job;
 	}
-	
+
 	private final void performVoid(final ThrowingRunnable command, final String name) throws JobStateTransistionFailed {
 		perform(() -> {
 			command.run();
@@ -163,5 +246,5 @@ public class InputSearchService {
 			job.setLastUpdateDate(new Date());
 		}
 	}
-	
+
 }

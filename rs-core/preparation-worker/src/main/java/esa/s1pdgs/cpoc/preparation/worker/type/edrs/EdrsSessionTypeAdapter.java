@@ -105,12 +105,19 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}	
 
 	@Override
-	public final void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {       	
-        // S1PRO-1101: if timeout for primary search is reached -> just start the job 
+	public final void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {       			
+		// S1PRO-1101: if timeout for primary search is reached -> just start the job 
     	if (aiopAdapter.isTimedOut(job)) {	        		
     		throw new TimedOutException();
     	}
        	validator.assertIsComplete(EdrsSessionProduct.of(job));
+	}
+	
+	@Override
+	public final void updateTimeout(AppDataJob job) {
+		// Use logic of AIOP Property Adapter to update timeout
+		// The same logic is applied before to check if a job is timeout
+		job.setTimeoutDate(aiopAdapter.calculateTimeout(job));
 	}
 
 	@Override
@@ -155,6 +162,8 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 			appDataJob.setStartTime(eventAdapter.startTime());
 			appDataJob.setStopTime(eventAdapter.stopTime());
 		}
+		
+		appDataJob.setTimeoutDate(aiopAdapter.calculateTimeout(appDataJob));
 		
 		return Collections.singletonList(appDataJob);
 	}

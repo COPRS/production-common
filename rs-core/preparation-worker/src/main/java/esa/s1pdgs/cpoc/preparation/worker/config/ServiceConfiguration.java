@@ -52,7 +52,8 @@ public class ServiceConfiguration {
 
 	@Bean
 	@Autowired
-	public AppCatJobService appCatJobService(final AppDataJobRepository repository, final SequenceDao sequenceDao, final ProcessProperties processSettings) {
+	public AppCatJobService appCatJobService(final AppDataJobRepository repository, final SequenceDao sequenceDao,
+			final ProcessProperties processSettings) {
 		LOG.info("Create new AppCatJobService with {} and {}", repository.toString(), sequenceDao.toString());
 		return new AppCatJobService(repository, sequenceDao, processSettings);
 	}
@@ -71,7 +72,7 @@ public class ServiceConfiguration {
 		Map<String, TaskTableAdapter> ttAdapters = new HashMap<>();
 
 		for (File taskTableFile : ttManager.tasktables()) {
-			LOG.debug("Loading tasktable {}",taskTableFile.getAbsolutePath());
+			LOG.debug("Loading tasktable {}", taskTableFile.getAbsolutePath());
 			ttAdapters.put(taskTableFile.getName(),
 					new TaskTableAdapter(taskTableFile,
 							taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), elementMapper,
@@ -91,8 +92,10 @@ public class ServiceConfiguration {
 	@Bean
 	@Autowired
 	public InputSearchService inputSearchService(final ProductTypeAdapter typeAdapter,
-			final AuxQueryHandler auxQueryHandler) {
-		return new InputSearchService(typeAdapter, auxQueryHandler);
+			final AuxQueryHandler auxQueryHandler, final Map<String, TaskTableAdapter> taskTableAdapters,
+			final AppCatJobService appCatJobService, final JobCreationService jobCreationService) {
+		return new InputSearchService(typeAdapter, auxQueryHandler, taskTableAdapters, appCatJobService,
+				jobCreationService);
 	}
 
 	@Bean

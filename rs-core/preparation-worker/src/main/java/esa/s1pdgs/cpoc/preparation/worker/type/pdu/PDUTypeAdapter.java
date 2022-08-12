@@ -74,7 +74,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 		if (typeSettings != null) {
 			PDUGenerator jobGenerator = PDUGenerator.getPDUGenerator(processSettings, typeSettings, metadataClient);
 			if (jobGenerator != null) {
-				return jobGenerator.generateAppDataJobs(job);
+				return jobGenerator.generateAppDataJobs(job, workerSettings.getPrimaryCheckMaxTimelifeS());
 			}
 		}
 

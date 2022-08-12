@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.preparation.worker.type.edrs;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -127,15 +128,14 @@ public final class AiopPropertiesAdapter {
     	return aiopParams;
 	}
 	
-    
-	private boolean checkTimeoutReached(final AppDataJob job) {
-    	final EdrsSessionProduct product = EdrsSessionProduct.of(job);
+	public Date calculateTimeout(final AppDataJob job) {
+		final EdrsSessionProduct product = EdrsSessionProduct.of(job);
 
 		final String stationCode = product.getStationCode();
 		final Map<String, String> propForStationCode = aiopProperties.get(stationCode);
 		if (propForStationCode == null) {
 			LOGGER.warn("no configuration found for station code -> not timeout check");
-			return false;
+			return null;
 		}
 		final long timeoutForDownlinkStationMs = Long.valueOf(propForStationCode.get("TimeoutSec")) * 1000;
 		final long minimalWaitingTimeMs = this.minimalWaitingTimeSec * 1000;
@@ -145,37 +145,18 @@ public final class AiopPropertiesAdapter {
 
 		// the "stop time" of the product (DSIB) is the downlink-end time
 		final String downlinkEndTimeUTC = product.getStopTime();
-		final long currentTimeMs = System.currentTimeMillis();
-
-		if (timeoutReachedForPrimarySearch(downlinkEndTimeUTC, currentTimeMs, startToWaitMs, minimalWaitingTimeMs,
-				timeoutForDownlinkStationMs)) {
-			LOGGER.warn("Timeout reached for stationCode {} and product {}", product.getStationCode(),
-					product.getProductName());
-			return true;
-		}
-		return false;
-	}
-
-	boolean timeoutReachedForPrimarySearch(final String downlinkEndTimeUTC, final long currentTimeMs, final long startToWaitMs,
-			final long minimalWaitingTimeMs, final long timeoutForDownlinkStationMs) {
-
-		boolean timeout = false;
 
 		final long downlinkEndTimeMs = DateUtils.parse(downlinkEndTimeUTC).toInstant(ZoneOffset.UTC).toEpochMilli();
 
 		final long timeoutEndTimestampMs = Math.max(startToWaitMs + minimalWaitingTimeMs,
 				downlinkEndTimeMs + timeoutForDownlinkStationMs);
-
-		final String timeoutEndTimestampUTC = DateUtils.formatToMetadataDateTimeFormat(
-				Instant.ofEpochMilli(timeoutEndTimestampMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
-
-		final String currentTimeUTC = DateUtils.formatToMetadataDateTimeFormat(
-				Instant.ofEpochMilli(currentTimeMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
-
+		
 		if (LOGGER.isTraceEnabled()) {
-
 			final String startToWaitUTC = DateUtils.formatToMetadataDateTimeFormat(
 					Instant.ofEpochMilli(startToWaitMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
+			
+			final String timeoutEndTimestampUTC = DateUtils.formatToMetadataDateTimeFormat(
+					Instant.ofEpochMilli(timeoutEndTimestampMs).atOffset(ZoneOffset.UTC).toLocalDateTime());
 
 			LOGGER.trace("downlink-end time: {}", downlinkEndTimeUTC);
 			LOGGER.trace("starting-to-wait time: {}", startToWaitUTC);
@@ -183,10 +164,25 @@ public final class AiopPropertiesAdapter {
 			LOGGER.trace("timeout for downlink station in millis: {}", timeoutForDownlinkStationMs);
 			LOGGER.trace("timeout-end timestamp in epoch millis MAX({} + {}, {} + {}) = {}", startToWaitUTC,
 					minimalWaitingTimeMs, downlinkEndTimeUTC, timeoutForDownlinkStationMs, timeoutEndTimestampUTC);
-
 		}
-
-		if (currentTimeMs > timeoutEndTimestampMs) {
+		
+		return new Date(timeoutEndTimestampMs);
+	}
+	
+	private boolean checkTimeoutReached(final AppDataJob job) {
+		boolean timeout = false;
+		
+		final Date timeoutDate = calculateTimeout(job);
+		final Date currentDate = new Date();
+		
+		// Formatting for debug output
+		final String currentTimeUTC = DateUtils.formatToMetadataDateTimeFormat(
+				currentDate.toInstant().atOffset(ZoneOffset.UTC).toLocalDateTime());
+		
+		final String timeoutEndTimestampUTC = DateUtils.formatToMetadataDateTimeFormat(
+				timeoutDate.toInstant().atOffset(ZoneOffset.UTC).toLocalDateTime());
+		
+		if (currentDate.after(timeoutDate)) {
 			LOGGER.debug("current time {} is greater than timeout-end timestamp {}", currentTimeUTC,
 					timeoutEndTimestampUTC);
 			timeout = true;
