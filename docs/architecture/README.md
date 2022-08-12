@@ -94,8 +94,7 @@ All RSPRO components are based on widely used and well supported COTS and standa
 ## 3 Software Architecture Design
 3.1 [Overall Architecture](#overall-architecture)
 3.2 [Software Data Model](#software-data-model)
-3.3 [Software Behaviour](#software-behaviour)
-3.4 [Software Trade-offs](#software-trade-offs)
+3.3 [Software Trade-offs](#software-trade-offs)
 ***
 ### Overall Architecture
 The diagram below depicts architectural overview of RS Processing sub-system
@@ -116,6 +115,7 @@ Worker
 Frontend components
 - Provide REST interfaces for access to persistence (e.g. queries)
 - Scaling-needs: low
+
 ## Software Data Model
 
 #### Product categories and families
