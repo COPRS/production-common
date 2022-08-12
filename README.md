@@ -18,7 +18,7 @@ In order to use the software correctly within your cluster, it needs some depend
 
 ## How to deploy
 
-Please consult the [Installation Manual](./docs/installation_manuals/) for further information on how to deploy the software of this repository.
+Please consult the [Installation Manual](./docs/install_manuals/) for further information on how to deploy the software of this repository.
 
 ## Structure of the Repository
 
