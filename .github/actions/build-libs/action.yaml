@@ -45,7 +45,7 @@ runs:
     shell: bash
     run: |
       cd rs-libs/${{ inputs.COMPONENT }}
-      mvn sonar:sonar -Dsonar.projectKey=${{github.repository}} -Dsonar.host.url=${{ inputs.SONARQUBE_HOST }} -Dsonar.login=${{ inputs.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
+      mvn sonar:sonar -Dsonar.projectKey=${{ inputs.COMPONENT }} -Dsonar.host.url=${{ inputs.SONARQUBE_HOST }} -Dsonar.login=${{ inputs.SONARQUBE_TOKEN }} -Dsonar.branch.name=${{ env.GIT_BRANCH }}
       
 
   - name: Push to Artifactory
