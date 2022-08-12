@@ -12,7 +12,8 @@ import esa.s1pdgs.cpoc.preparation.worker.model.pdu.PDUType;
 
 public interface PDUGenerator {
 
-	public List<AppDataJob> generateAppDataJobs(final IpfPreparationJob job) throws MetadataQueryException;
+	public List<AppDataJob> generateAppDataJobs(final IpfPreparationJob job, final int primaryCheckMaxTimelifeS)
+			throws MetadataQueryException;
 
 	/**
 	 * Create a suitable instance of PDUGenerator for the given settings

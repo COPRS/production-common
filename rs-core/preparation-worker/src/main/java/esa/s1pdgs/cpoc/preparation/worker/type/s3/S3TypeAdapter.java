@@ -5,6 +5,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +109,14 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			} catch (MetadataQueryException e) {
 				LOGGER.error("Error while determining viscal range, skip changing interval for AppDataJob", e);
 			}
+		}
+		
+		// Calculate, when the Job will be timed out
+		if (workerSettings.getPrimaryCheckMaxTimelifeS() != 0) {
+			final Date creationDate = appDataJob.getGeneration().getCreationDate();
+			final Date timeoutDate = new Date(
+					creationDate.toInstant().toEpochMilli() + (workerSettings.getPrimaryCheckMaxTimelifeS() * 1000));
+			appDataJob.setTimeoutDate(timeoutDate);
 		}
 
 		// Default case
