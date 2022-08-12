@@ -16,6 +16,10 @@ While the RS Addons are usually event driven workflows, there are Standalone ser
 
 In order to use the software correctly within your cluster, it needs some dependencies to be operated successful. Before you deploy any software, please ensure that the COPRS infrastructure is installed correctly on your cluster. Further information on the infrastructure and how to deploy it, can be found [here](https://github.com/COPRS/infrastructure)
 
+## How to deploy
+
+Please consult the [Installation Manual](./docs/installation_manuals/) for further information on how to deploy the software of this repository.
+
 ## Structure of the Repository
 
 ### processing-common
