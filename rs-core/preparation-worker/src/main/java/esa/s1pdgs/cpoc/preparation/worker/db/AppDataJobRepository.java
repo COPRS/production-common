@@ -35,9 +35,9 @@ public interface AppDataJobRepository extends MongoRepository<AppDataJob, Long> 
 	@Query(value = "{ 'product.metadata.sessionId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
 	List<AppDataJob> findByProductSessionId(final String sessionId);
 
-	@Query(value = "{ 'pod': ?1, 'timeoutDate' : { $lt: ?0 } ")
+	@Query(value = "{ 'pod': ?1, 'timeoutDate' : { $lt: ?0 } }")
 	List<AppDataJob> findTimeoutJobs(final Date timeoutThreshhold, final String podName);
 	
-	@Query(value = "{ 'state': ?0, 'pod': ?1, 'lastUpdateDate': { $lt: ?2 }")
+	@Query(value = "{ 'state': ?0, 'pod': ?1, 'lastUpdateDate': { $lt: ?2 } }")
 	List<AppDataJob> findByStateAndLastUpdateDateLessThan(final String state, final String podName, final Date lastUpdated);
 }
