@@ -54,7 +54,7 @@ public class PreparationWorkerServiceConfiguration {
 	}
 
 	@PollableBean
-	public Supplier<List<Message<IpfExecutionJob>>> houseKeepAppDataJobs() {
+	public Supplier<List<IpfExecutionJob>> houseKeepAppDataJobs() {
 		return new HousekeepingService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
 				inputSearchService, preparationWorkerProperties, commonProperties);
 	}

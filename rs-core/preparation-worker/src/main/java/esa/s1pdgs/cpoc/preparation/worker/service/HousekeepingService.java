@@ -19,7 +19,7 @@ import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 
-public class HousekeepingService implements Supplier<List<Message<IpfExecutionJob>>> {
+public class HousekeepingService implements Supplier<List<IpfExecutionJob>> {
 
 	static final Logger LOGGER = LogManager.getLogger(HousekeepingService.class);
 
@@ -51,7 +51,7 @@ public class HousekeepingService implements Supplier<List<Message<IpfExecutionJo
 	}
 
 	@Override
-	public List<Message<IpfExecutionJob>> get() {
+	public List<IpfExecutionJob> get() {
 		LOGGER.debug("Start deleting old jobs");
 		
 		// - Delete finished AppDataJob that reached a maximum keeping time
