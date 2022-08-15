@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.function.context.PollableBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -52,7 +53,7 @@ public class PreparationWorkerServiceConfiguration {
 				inputSearchService, commonProperties);
 	}
 
-	@Bean
+	@PollableBean
 	public Supplier<List<Message<IpfExecutionJob>>> houseKeepAppDataJobs() {
 		return new HousekeepingService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
 				inputSearchService, preparationWorkerProperties, commonProperties);

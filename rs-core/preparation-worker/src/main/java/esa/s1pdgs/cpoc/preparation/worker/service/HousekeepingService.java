@@ -52,9 +52,12 @@ public class HousekeepingService implements Supplier<List<Message<IpfExecutionJo
 
 	@Override
 	public List<Message<IpfExecutionJob>> get() {
+		LOGGER.debug("Start deleting old jobs");
+		
 		// - Delete finished AppDataJob that reached a maximum keeping time
 		deleteOldFinishedJobs();
 
+		LOGGER.debug("Start searching for timeout jobs");
 		// - Continue jobs, that ran into an timeout and did not receive all products
 		return continueTimeoutJobs();
 	}
@@ -83,7 +86,7 @@ public class HousekeepingService implements Supplier<List<Message<IpfExecutionJo
 		}
 	}
 
-	private List<Message<IpfExecutionJob>> continueTimeoutJobs() {
+	private List<IpfExecutionJob> continueTimeoutJobs() {
 		List<AppDataJob> timedoutJobs = appCatJobService.findTimeoutJobs(new Date());
 		List<IpfExecutionJob> result = new ArrayList<>();
 
@@ -98,9 +101,7 @@ public class HousekeepingService implements Supplier<List<Message<IpfExecutionJo
 		if (result.isEmpty()) {
 			return null;
 		} else {
-			// Wrap each ExecutionJob into a KafkaMessage so they are sent individually to
-			// execution workers
-			return result.stream().map(job -> MessageBuilder.withPayload(job).build()).collect(Collectors.toList());
+			return result;
 		}
 	}
 
