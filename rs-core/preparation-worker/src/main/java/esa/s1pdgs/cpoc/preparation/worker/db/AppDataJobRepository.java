@@ -39,5 +39,5 @@ public interface AppDataJobRepository extends MongoRepository<AppDataJob, Long> 
 	List<AppDataJob> findTimeoutJobs(final Date timeoutThreshhold, final String podName);
 	
 	@Query(value = "{ 'state': ?0, 'pod': ?1, 'lastUpdateDate': { $lt: ?2 }")
-	List<AppDataJob> findByStateAndLastUpdateDateLessThan(final AppDataJobState state, final String podName, final Date lastUpdated);
+	List<AppDataJob> findByStateAndLastUpdateDateLessThan(final String state, final String podName, final Date lastUpdated);
 }

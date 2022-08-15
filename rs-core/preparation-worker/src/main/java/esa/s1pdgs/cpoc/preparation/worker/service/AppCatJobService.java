@@ -77,7 +77,7 @@ public class AppCatJobService {
 	}
 	
 	public List<AppDataJob> findByStateAndLastUpdateDateLessThan(final AppDataJobState state, final Date lastUpdatedDate) {
-		return appDataJobRepository.findByStateAndLastUpdateDateLessThan(state, processProperties.getHostname(), lastUpdatedDate);
+		return appDataJobRepository.findByStateAndLastUpdateDateLessThan(state.name(), processProperties.getHostname(), lastUpdatedDate);
 	}
 
 	public void appendCatalogEvent(final long id, final CatalogEvent event) throws AppCatJobUpdateFailedException {
