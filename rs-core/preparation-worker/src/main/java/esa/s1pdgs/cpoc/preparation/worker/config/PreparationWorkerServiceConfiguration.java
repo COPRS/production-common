@@ -46,16 +46,16 @@ public class PreparationWorkerServiceConfiguration {
 
 	@Autowired
 	private PreparationWorkerProperties preparationWorkerProperties;
-	
+
 	@Bean
 	public Function<CatalogEvent, List<Message<IpfExecutionJob>>> prepareExecutionJobs() {
 		return new PreparationWorkerService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
 				inputSearchService, commonProperties);
 	}
 
-	@PollableBean
-	public Supplier<List<IpfExecutionJob>> houseKeepAppDataJobs() {
-		return new HousekeepingService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
-				inputSearchService, preparationWorkerProperties, commonProperties);
+	@Bean
+	public Function<Message<?>, List<Message<IpfExecutionJob>>> houseKeepAppDataJobs() {
+		return new HousekeepingService(appCatJobService, inputSearchService, preparationWorkerProperties,
+				commonProperties);
 	}
 }
