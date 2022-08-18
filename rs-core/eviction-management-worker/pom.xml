@@ -95,11 +95,6 @@
 			<artifactId>s1pro-core-lib-commons</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
 		
 		<dependency>
 			<groupId>de.werum.s1pdgs</groupId>

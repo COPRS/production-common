@@ -89,11 +89,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
 
 		<dependency>
 			<!-- Import dependency management from Spring Boot -->

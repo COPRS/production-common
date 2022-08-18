@@ -128,6 +128,13 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		}
 	}
 	
+	@Override
+	public void updateTimeout(AppDataJob job) {
+		// As the main Input search is updating the product stop time we need to update
+		// the timeout as well, in case it changes
+		job.setTimeoutDate(aspPropertiesAdapter.calculateTimeout(job));
+	}
+
 	// S1PRO-1851: Handling of RFC product 
 	private void handleRfcSegments(final L0SegmentProduct product, final TaskTableAdapter taskTableAdapter) {
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
@@ -398,6 +405,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	@Override
 	public List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) {
 		final AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
+		appDataJob.setTimeoutDate(aspPropertiesAdapter.calculateTimeout(appDataJob));
 		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);
 		final L0SegmentProduct product = L0SegmentProduct.of(appDataJob);

@@ -157,6 +157,11 @@ public class PreparationWorkerProperties {
 	private int jobgenfixedrate;
 
 	/**
+	 * Maximum lifespan for the primary check before continuing
+	 */
+	private int primaryCheckMaxTimelifeS;
+	
+	/**
 	 * Default family of products
 	 */
 	private String defaultfamily;
@@ -206,6 +211,11 @@ public class PreparationWorkerProperties {
 	 * Mode of the process
 	 */
 	private ProductMode productMode = ProductMode.SLICING;
+	
+	/**
+     * Maximal job age per status
+     */
+    private Map<String, Long> maxAgeJobMs = new HashMap<>();
 
 	/**
 	 * Initialization function:
@@ -311,6 +321,20 @@ public class PreparationWorkerProperties {
 	 */
 	public void setJobgenfixedrate(final int jobgenfixedrate) {
 		this.jobgenfixedrate = jobgenfixedrate;
+	}
+
+	/**
+	 * @return the maximum time a job should be in primary check
+	 */
+	public int getPrimaryCheckMaxTimelifeS() {
+		return primaryCheckMaxTimelifeS;
+	}
+
+	/**
+	 * @param primaryCheckMaxTimelifeS how long a job should be in primary check
+	 */
+	public void setPrimaryCheckMaxTimelifeS(int primaryCheckMaxTimelifeS) {
+		this.primaryCheckMaxTimelifeS = primaryCheckMaxTimelifeS;
 	}
 
 	/**
@@ -446,17 +470,26 @@ public class PreparationWorkerProperties {
 		this.lateTopicActive = lateTopicActive;
 	}
 	
+	public Map<String, Long> getMaxAgeJobMs() {
+		return maxAgeJobMs;
+	}
+
+	public void setMaxAgeJobMs(Map<String, Long> maxAgeJobMs) {
+		this.maxAgeJobMs = maxAgeJobMs;
+	}
+
 	/**
 	 * Display object in JSON format
 	 */
 	@Override
 	public String toString() {
 		return "{maxnumberofjobs: " + maxnumberofjobs + "\", diroftasktables: \"" + diroftasktables
-				+ "\", jobgenfixedrate: " + jobgenfixedrate + ", defaultfamily: \"" + defaultfamily
-				+ "\", outputfamiliesstr: \"" + outputfamiliesstr + "\", outputfamilies: \"" + outputfamilies
-				+ "\", typeOverlap: \"" + typeOverlap + "\", typeSliceLength: \"" + typeSliceLength
-				+ "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \"" + oqcCheck + "\", productMode: \""
-				+ productMode + "\", inputWaiting: \"" + inputWaiting + "\", joborderTimelinessCategoryMapping="
-				+ joborderTimelinessCategoryMapping + "}";
+				+ "\", jobgenfixedrate: " + jobgenfixedrate + ", primaryCheckMaxTimelifeS:" + primaryCheckMaxTimelifeS
+				+ ", defaultfamily: \"" + defaultfamily + "\", outputfamiliesstr: \"" + outputfamiliesstr
+				+ "\", outputfamilies: \"" + outputfamilies + "\", typeOverlap: \"" + typeOverlap
+				+ "\", typeSliceLength: \"" + typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \""
+				+ oqcCheck + "\", productMode: \"" + productMode + "\", inputWaiting: \"" + inputWaiting
+				+ "\", joborderTimelinessCategoryMapping:" + joborderTimelinessCategoryMapping + "\", maxAgeJobMs:"
+				+ maxAgeJobMs + "\"}";
 	}
 }
