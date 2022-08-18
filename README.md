@@ -83,3 +83,6 @@ In order to get an overview about the architecture of the overall design of COPR
 
 ### Installation Manual
 For further information on deploying the RS Core Components or RS Standalone Components, please consult the Installation Manual, that can be found [here](./docs/installation_manuals)
+
+### Reports
+The build pipe of this project is automatically generating Sonarcube reports for each module when it is build. This allows an easy overview about the status of the project. You can check the reports of the project [here](https://sonarqube.coprs.esa-copernicus.eu/projects) 
