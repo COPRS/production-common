@@ -215,7 +215,7 @@ public class PreparationWorkerProperties {
 	/**
      * Maximal job age per status
      */
-    private Map<String, Long> maxAgeJobMs;
+    private Map<String, Long> maxAgeJobMs = new HashMap<>();
 
 	/**
 	 * Initialization function:

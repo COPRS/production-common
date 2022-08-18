@@ -73,16 +73,20 @@ public class HousekeepingService implements Function<Message<?>, List<Message<Ip
 	private void cleanJobsByState(final AppDataJobState state) {
 		final long maxAgeMs = prepProperties.getMaxAgeJobMs().get(state.name().toLowerCase());
 
-		final Date oldJobsDate = new Date(System.currentTimeMillis() - maxAgeMs);
-		final List<AppDataJob> oldJobs = appCatJobService.findByStateAndLastUpdateDateLessThan(state, oldJobsDate);
-
-		for (final AppDataJob oldJob : oldJobs) {
-			final String logMessage = String.format("Remove %s job %s (%s) for enough time", oldJob.getLevel(),
-					oldJob.getId(), state);
-
-			LOGGER.info(logMessage);
-
-			appCatJobService.deleteJob(oldJob.getId());
+		if (maxAgeMs != 0) {
+			final Date oldJobsDate = new Date(System.currentTimeMillis() - maxAgeMs);
+			final List<AppDataJob> oldJobs = appCatJobService.findByStateAndLastUpdateDateLessThan(state, oldJobsDate);
+	
+			for (final AppDataJob oldJob : oldJobs) {
+				final String logMessage = String.format("Remove %s job %s (%s) for enough time", oldJob.getLevel(),
+						oldJob.getId(), state);
+	
+				LOGGER.info(logMessage);
+	
+				appCatJobService.deleteJob(oldJob.getId());
+			}
+		} else {
+			LOGGER.warn("Could not find configuration for maxAgeJobMs -> state \"{}\"", state.name().toLowerCase());
 		}
 	}
 
