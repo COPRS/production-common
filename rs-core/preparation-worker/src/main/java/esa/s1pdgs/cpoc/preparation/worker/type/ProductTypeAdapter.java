@@ -29,7 +29,7 @@ public interface ProductTypeAdapter {
 		// default implementation: don't validate
 	}
 	
-	default void updateTimeout(AppDataJob job) {
+	default void updateTimeout(AppDataJob job, final TaskTableAdapter taskTableAdapter) {
 		// default implementation: timeout is already at the correct value
 	}
 	

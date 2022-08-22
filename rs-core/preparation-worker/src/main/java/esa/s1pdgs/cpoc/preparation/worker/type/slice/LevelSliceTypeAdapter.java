@@ -1,5 +1,7 @@
 package esa.s1pdgs.cpoc.preparation.worker.type.slice;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -266,6 +268,26 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 		}
 		// if both are there, job creation can proceed
 		LOGGER.info("Found slice {} and ACN {}", product.getSlices(), product.getAcns());
+	}
+	
+	@Override
+	public void updateTimeout(AppDataJob job, TaskTableAdapter taskTableAdapter) {
+		// Additional input based timeout for orbit auxiliary		
+		final Optional<TaskTableInputAdapter> opt = taskTableAdapter.firstInputContainingOneOf(AUX_ORB_TYPES);
+		
+		if (opt.isPresent()) {						
+			final TaskTableInputAdapter ttInput = opt.get();
+			final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(taskTableAdapter.taskTable());	
+			
+			final LocalDateTime inputTimeoutLocalDateTime = timeoutChecker.timeoutFor(job, ttInput.getInput());
+			Date inputTimeoutDate = null;
+			
+			if (inputTimeoutLocalDateTime != null) {
+				inputTimeoutDate = Date.from(inputTimeoutLocalDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			}
+			
+			job.setTimeoutDate(inputTimeoutDate);
+		}
 	}
 
 	@Override

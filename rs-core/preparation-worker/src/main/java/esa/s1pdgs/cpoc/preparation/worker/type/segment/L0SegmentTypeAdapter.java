@@ -129,7 +129,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}
 	
 	@Override
-	public void updateTimeout(AppDataJob job) {
+	public void updateTimeout(AppDataJob job, final TaskTableAdapter taskTableAdapter) {
 		// As the main Input search is updating the product stop time we need to update
 		// the timeout as well, in case it changes
 		job.setTimeoutDate(aspPropertiesAdapter.calculateTimeout(job));

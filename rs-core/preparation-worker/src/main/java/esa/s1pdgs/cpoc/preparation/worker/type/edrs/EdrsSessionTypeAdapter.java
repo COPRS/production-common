@@ -114,7 +114,7 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}
 	
 	@Override
-	public final void updateTimeout(AppDataJob job) {
+	public final void updateTimeout(AppDataJob job, final TaskTableAdapter taskTableAdapter) {
 		// Use logic of AIOP Property Adapter to update timeout
 		// The same logic is applied before to check if a job is timeout
 		job.setTimeoutDate(aiopAdapter.calculateTimeout(job));

@@ -141,7 +141,7 @@ public class InputSearchService {
 			// The mainInputSearch may change the timeout value -> update it here for future
 			// house keeping
 			if (newState != AppDataJobGenerationState.PRIMARY_CHECK) {
-				typeAdapter.updateTimeout(job);
+				typeAdapter.updateTimeout(job, taskTableAdapter);
 			} else {
 				// Set timeoutDate to null -> new timeout (if necessary for aux)
 				job.setTimeoutDate(null);
