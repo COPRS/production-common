@@ -140,7 +140,7 @@ public class AuxQuery {
 	 * @param job AppDataJob, will get its timeoutDate updated in this method
 	 * @param taskTableAdapter responsible taskTableAdapter for the job
 	 */
-	public void calculateTimeout(AppDataJob job, TaskTableAdapter taskTableAdapter) {
+	public void updateTimeout(AppDataJob job, TaskTableAdapter taskTableAdapter) {
 		final List<AppDataJobInput> missingInputs = inputsWithoutResultsOf(job);
 		final Map<String, TaskTableInput> taskTableInputs = taskTableAdapter.taskTableInputs();
 		
