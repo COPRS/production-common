@@ -140,7 +140,13 @@ public class InputSearchService {
 		} finally {
 			// The mainInputSearch may change the timeout value -> update it here for future
 			// house keeping
-			typeAdapter.updateTimeout(job);
+			if (newState != AppDataJobGenerationState.PRIMARY_CHECK) {
+				typeAdapter.updateTimeout(job);
+			} else {
+				// Set timeoutDate to null -> new timeout (if necessary for aux)
+				job.setTimeoutDate(null);
+				job.setTimedOut(false);
+			}
 			updateJobMainInputSearch(job, queried, newState);
 		}
 
@@ -160,6 +166,10 @@ public class InputSearchService {
 			performVoid(() -> auxQuery.validate(job), "validating availability of AUX for " + job.getProductName());
 			newState = AppDataJobGenerationState.READY;
 		} finally {
+			if (newState != AppDataJobGenerationState.READY) {
+				auxQuery.updateTimeout(job, taskTableAdapter);
+			}
+			
 			updateJobAuxSearch(job, queried, newState);
 		}
 

@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 
 /**
  * Access class to AppDataJob in mongo DB
