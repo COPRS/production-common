@@ -15,7 +15,7 @@ on:
 env:
   RS_CORE_FOLDER: processing-common
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT_COMMON: rs-docker
+  ARTIFACTORY_PROJECT_COMMON: rs-zip
   ARTIFACTORY_CORE_PROJECT: rs-core
   
 jobs:

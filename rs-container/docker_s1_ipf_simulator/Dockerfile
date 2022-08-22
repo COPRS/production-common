@@ -1,8 +1,8 @@
 ARG BRANCH
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-execution-worker:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app
 
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-container-s1-ipf-simulator:${BRANCH}
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker-private/rs-container-s1-ipf-simulator:${BRANCH}
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT

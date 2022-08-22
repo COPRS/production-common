@@ -1,8 +1,8 @@
 ARG BRANCH
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-execution-worker:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app
 
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH} as base
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as base
 
 FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/s1_l12:3.5.2
 
