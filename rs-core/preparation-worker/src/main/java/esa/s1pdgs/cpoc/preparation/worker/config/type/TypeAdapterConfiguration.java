@@ -87,7 +87,6 @@ public class TypeAdapterConfiguration {
 						AspPropertiesAdapter.of(aspProperties)
 				);
 			case L1: case L2:
-				// TODO: Add Timeout mechanic back for V2
 				return new LevelSliceTypeAdapter(
 						metadataClient, 
 						settings.getTypeOverlap(), 
