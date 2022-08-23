@@ -57,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
 		);
 		
 		// RS-248: We are using the t0PdgsDate from the ingestion event
-		dto.setT0PdgsDate(ingestion.getT0PdgsDate());
+		dto.getAdditionalFields().put("t0PdgsDate", (String) ingestion.getAdditionalFields().get("t0PdgsDate"));
 
 		// S1OPS-971: This is a workaround for MDC to allow access of additional metadata
 		if (null != ingestion.getAdditionalMetadata() && !ingestion.getAdditionalMetadata().isEmpty()) {

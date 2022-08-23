@@ -53,7 +53,7 @@ public class IngestionJob extends AbstractMessage {
 	public IngestionJob(final ProductFamily family, final String productName, final String pickupBaseURL,
 			final String relativePath, final long productSizeByte, final Date lastModified, final UUID uuid,
 			final String missionId, final String stationName, final String mode, final String timeliness,
-			final String inboxType, final Map<String, String> additionalMetadata) {
+			final String inboxType, final Map<String, String> additionalMetadata, final String t0PdgsDate) {
 		super(family, productName);
 		this.pickupBaseURL = pickupBaseURL;
 		this.relativePath = relativePath;
@@ -67,7 +67,7 @@ public class IngestionJob extends AbstractMessage {
 		this.timeliness = timeliness;
 		this.inboxType = inboxType;
 		this.additionalMetadata = additionalMetadata;
-		this.t0PdgsDate = lastModified; // Last Modification date is used as availability time
+		this.getAdditionalFields().put("t0PdgsDate", t0PdgsDate); // Last Modification date is used as availability time
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 

@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -151,7 +153,11 @@ public class JobCreationService {
 					}
 				}
 			}
-			execJob.setT0PdgsDate(t0);
+			
+			if (t0 != null) {
+				execJob.getAdditionalFields().put("t0PdgsDate", DateUtils.formatToMetadataDateTimeFormat(
+						t0.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+			}
 
 			typeAdapter.customJobDto(job, execJob);
 			return execJob;

@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
@@ -195,6 +197,8 @@ public final class Inbox {
 			
 			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
 			
+			String t0PdgsDate =  DateUtils.formatToMetadataDateTimeFormat(entry.getLastModified().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+			
 			IngestionJob job = new IngestionJob(
 					family, 
 					publishedName,
@@ -208,7 +212,8 @@ public final class Inbox {
 					mode,
 					timeliness,
 					entry.getInboxType(),
-					pathMetadataExtractor.metadataFrom(absolutePath)
+					pathMetadataExtractor.metadataFrom(absolutePath),
+					t0PdgsDate
 				);
 			
 			reporting.end(

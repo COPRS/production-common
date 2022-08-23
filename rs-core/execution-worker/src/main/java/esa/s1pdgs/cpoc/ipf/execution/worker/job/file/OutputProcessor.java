@@ -10,7 +10,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -485,7 +484,7 @@ public class OutputProcessor {
 			final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid,
-			final Date t0PdgsDate
+			final String t0PdgsDate
 	) throws Exception {
 		// I can't believe this stuff is actually working in any reliable form. It seems to be operating on
 		// 2 indepenent lists associated via the obsKey. This REALLY needs some refactoring since there are
@@ -540,7 +539,7 @@ public class OutputProcessor {
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid,
-			final Date t0_pdgsDate
+			final String t0_pdgsDate
 	) throws Exception {
 		final List<Message<CatalogJob>> result = new ArrayList<>();
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
@@ -565,14 +564,14 @@ public class OutputProcessor {
 	private CatalogJob publish(
 			final UUID uuid, 
 			final ObsQueueMessage msg,
-			final Date t0PdgsDate
+			final String t0PdgsDate
 	) throws Exception {
 		try {
 			LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			final CatalogJob res = new CatalogJob(msg.getProductName(), msg.getKeyObs(), msg.getFamily(),
 					toUppercaseOrNull(msg.getProcessMode()), msg.getOqcFlag(), inputMessage.getTimeliness(), uuid);
-			res.setT0PdgsDate(t0PdgsDate);
+			res.getAdditionalFields().put("t0PdgsDate", t0PdgsDate);
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			return res;
@@ -671,7 +670,7 @@ public class OutputProcessor {
 						uploadBatch,
 						outputToPublish,
 						uuid, 
-						job.getT0PdgsDate());
+						(String) job.getAdditionalFields().get("t0PdgsDate"));
 		// Publish reports
 		processReports(reportToPublish, uuid);	
 		return res;

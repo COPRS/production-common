@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -217,9 +218,13 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
             dto.addInput(newInputForDSIB(product.getDsibForChannel(1), dto.getWorkDirectory(), "ch01"));
             dto.addInput(newInputForDSIB(product.getDsibForChannel(2), dto.getWorkDirectory(), "ch02"));
             
-            // Correct t0PdgsDate
-            if (dto.getT0PdgsDate() == null || dto.getT0PdgsDate().before(t0)) {
-            	dto.setT0PdgsDate(t0);
+            if (t0 != null) {
+	            String t0PdgsDate =  DateUtils.formatToMetadataDateTimeFormat(t0.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+	            
+	            // Correct t0PdgsDate
+	            if (dto.getAdditionalFields().get("t0PdgsDate") == null || DateUtils.toDate((String) dto.getAdditionalFields().get("t0PdgsDate")).before(t0)) {
+	            	dto.getAdditionalFields().put("t0PdgsDate", t0PdgsDate);
+	            }
             }
         }		
 	}

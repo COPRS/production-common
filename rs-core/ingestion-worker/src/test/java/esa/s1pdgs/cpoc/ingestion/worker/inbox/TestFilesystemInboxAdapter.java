@@ -104,7 +104,8 @@ public class TestFilesystemInboxAdapter {
 				"NOMINAL",
                 "FAST24",
 				"file",
-				Collections.emptyMap()
+				Collections.emptyMap(),
+				""
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
@@ -144,7 +145,8 @@ public class TestFilesystemInboxAdapter {
 				"NOMINAL",
                 "FAST24",
 				"file",
-				Collections.emptyMap()
+				Collections.emptyMap(),
+				""
 		);		
 		final URI uri = IngestionJobs.toUri(job);
 		
