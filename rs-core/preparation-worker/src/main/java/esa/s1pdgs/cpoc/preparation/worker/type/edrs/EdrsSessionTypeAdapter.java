@@ -217,9 +217,9 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
             dto.addInput(newInputForDSIB(product.getDsibForChannel(1), dto.getWorkDirectory(), "ch01"));
             dto.addInput(newInputForDSIB(product.getDsibForChannel(2), dto.getWorkDirectory(), "ch02"));
             
-            // Correct t0_pdgs_date
-            if (dto.getT0_pdgs_date() == null || dto.getT0_pdgs_date().before(t0)) {
-            	dto.setT0_pdgs_date(t0);
+            // Correct t0PdgsDate
+            if (dto.getT0PdgsDate() == null || dto.getT0PdgsDate().before(t0)) {
+            	dto.setT0PdgsDate(t0);
             }
         }		
 	}

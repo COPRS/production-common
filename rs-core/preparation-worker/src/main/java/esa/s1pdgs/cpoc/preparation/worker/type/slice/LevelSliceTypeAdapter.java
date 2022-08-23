@@ -106,10 +106,10 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			preselected.setFileType(alt.getFileType());		
 			preselected.setFileNameType(alt.getFileNameType().toString());
 			
-			// Extract t0_pdgs_date if possible to determine when all inputs where ready
+			// Extract t0PdgsDate if possible to determine when all inputs where ready
 			Date t0 = null;
-			if (file.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-				t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0_pdgs_date"));
+			if (file.getAdditionalProperties().containsKey("t0PdgsDate")) {
+				t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0PdgsDate"));
 			}
 			
 			final AppDataJobFile appJobFile = new AppDataJobFile(
@@ -195,10 +195,10 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 						
 						final List<AppDataJobFile> files = new ArrayList<>();
 						for (final SearchMetadata meta : queryResults) {
-							// Extract t0_pdgs_date if possible to determine when all inputs where ready
+							// Extract t0PdgsDate if possible to determine when all inputs where ready
 							Date t0 = null;
-							if (meta.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-								t0 = DateUtils.toDate(meta.getAdditionalProperties().get("t0_pdgs_date"));
+							if (meta.getAdditionalProperties().containsKey("t0PdgsDate")) {
+								t0 = DateUtils.toDate(meta.getAdditionalProperties().get("t0PdgsDate"));
 							}
 							
 							files.add(new AppDataJobFile(

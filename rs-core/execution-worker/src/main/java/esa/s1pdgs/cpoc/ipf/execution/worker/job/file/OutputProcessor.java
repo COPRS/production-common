@@ -485,7 +485,7 @@ public class OutputProcessor {
 			final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid,
-			final Date t0_pdgs_date
+			final Date t0PdgsDate
 	) throws Exception {
 		// I can't believe this stuff is actually working in any reliable form. It seems to be operating on
 		// 2 indepenent lists associated via the obsKey. This REALLY needs some refactoring since there are
@@ -508,7 +508,7 @@ public class OutputProcessor {
 			final List<FileObsUploadObject> sublist = uploadBatch.subList(i * sizeUploadBatch, lastIndex);
 
 			if (i > 0) {
-				res.addAll(publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish, uuid, t0_pdgs_date));
+				res.addAll(publishAccordingUploadFiles(i - 1, sublist.get(0).getKey(), outputToPublish, uuid, t0PdgsDate));
 			}
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InternalErrorException("The current thread as been interrupted");
@@ -518,7 +518,7 @@ public class OutputProcessor {
 		// ok, this seems to be some kind of 'poison pill' pattern here to indicate that upload is done.
 		// as nothing else is done. If there is a remainder in 'outputToPublish', I guess it will be published
 		// but it will not be uploaded. But to be safe, we add it also here...
-		res.addAll(publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid, t0_pdgs_date));
+		res.addAll(publishAccordingUploadFiles(nbPool - 1, NOT_KEY_OBS, outputToPublish, uuid, t0PdgsDate));
 		return res;
 	}
 
@@ -565,14 +565,14 @@ public class OutputProcessor {
 	private CatalogJob publish(
 			final UUID uuid, 
 			final ObsQueueMessage msg,
-			final Date t0_pdgs_date
+			final Date t0PdgsDate
 	) throws Exception {
 		try {
 			LOGGER.info("{} 3 - Publishing KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			final CatalogJob res = new CatalogJob(msg.getProductName(), msg.getKeyObs(), msg.getFamily(),
 					toUppercaseOrNull(msg.getProcessMode()), msg.getOqcFlag(), inputMessage.getTimeliness(), uuid);
-			res.setT0_pdgs_date(t0_pdgs_date);
+			res.setT0PdgsDate(t0PdgsDate);
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			return res;
@@ -671,7 +671,7 @@ public class OutputProcessor {
 						uploadBatch,
 						outputToPublish,
 						uuid, 
-						job.getT0_pdgs_date());
+						job.getT0PdgsDate());
 		// Publish reports
 		processReports(reportToPublish, uuid);	
 		return res;

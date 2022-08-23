@@ -140,7 +140,7 @@ public class JobCreationService {
 				execJob.addPool(poolDto);
 			}
 			
-			// Determine t0_pdgs_date
+			// Determine t0PdgsDate
 			Date t0 = null;
 			for (AppDataJobTaskInputs inputs : job.getAdditionalInputs()) {
 				for (AppDataJobInput input : inputs.getInputs()) {
@@ -151,7 +151,7 @@ public class JobCreationService {
 					}
 				}
 			}
-			execJob.setT0_pdgs_date(t0);
+			execJob.setT0PdgsDate(t0);
 
 			typeAdapter.customJobDto(job, execJob);
 			return execJob;

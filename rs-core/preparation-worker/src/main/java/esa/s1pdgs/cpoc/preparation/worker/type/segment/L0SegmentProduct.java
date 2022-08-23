@@ -93,10 +93,10 @@ public class L0SegmentProduct extends AbstractProduct {
 		}		
 		final List<AppDataJobFile> res = product.getProductsFor(metadata.getPolarisation());
 		
-		// Extract t0_pdgs_date if possible to determine when all inputs where ready
+		// Extract t0PdgsDate if possible to determine when all inputs where ready
 		Date t0 = null;
-		if (metadata.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-			t0 = DateUtils.toDate(metadata.getAdditionalProperties().get("t0_pdgs_date"));
+		if (metadata.getAdditionalProperties().containsKey("t0PdgsDate")) {
+			t0 = DateUtils.toDate(metadata.getAdditionalProperties().get("t0PdgsDate"));
 		}
 		
 		final AppDataJobFile segment = new AppDataJobFile(
