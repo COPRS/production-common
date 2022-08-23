@@ -337,7 +337,7 @@ public class AuxQuery {
 				.collect(toMap(JobOrderInputFile::getFilename, fn -> fn));
 		return new AppDataJobInput(inputReference, input.getFileType(), input.getFileNameType().toString(),
 				TaskTableMandatoryEnum.YES.equals(mandatory), input.getTimeIntervals().stream()
-						.map(ti -> merge(fileNames.get(ti.getFileName()), ti, input.getT0_pdgs_date())).collect(toList()));
+						.map(ti -> merge(fileNames.get(ti.getFileName()), ti, input.getT0PdgsDate())).collect(toList()));
 	}
 
 	private AppDataJobFile merge(final JobOrderInputFile file, final JobOrderTimeInterval interval, final Date t0) {

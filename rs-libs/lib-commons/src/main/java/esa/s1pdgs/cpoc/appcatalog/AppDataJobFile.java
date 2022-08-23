@@ -121,11 +121,11 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
         this.endDate = endDate;
     }
     
-    public Date getT0_pdgs_date() {
+    public Date getT0PdgsDate() {
 		return t0PdgsDate;
 	}
 
-	public void setT0_pdgs_date(Date t0PdgsDate) {
+	public void setT0PdgsDate(Date t0PdgsDate) {
 		this.t0PdgsDate = t0PdgsDate;
 	}
 

@@ -199,16 +199,16 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
                 	AppDataJobFile raw = raws1.get(i);
                     dto.addInput(newInputFor(raw, dto.getWorkDirectory(), "ch01"));
                     
-                    if (raw.getT0_pdgs_date() != null && (t0 == null || t0.before(raw.getT0_pdgs_date()))) {
-                    	t0 = raw.getT0_pdgs_date();
+                    if (raw.getT0PdgsDate() != null && (t0 == null || t0.before(raw.getT0PdgsDate()))) {
+                    	t0 = raw.getT0PdgsDate();
                     }
                 }
                 if (i < raws2.size()) {
                 	AppDataJobFile raw = raws2.get(i);
                     dto.addInput(newInputFor(raw, dto.getWorkDirectory(), "ch02"));
                     
-                    if (raw.getT0_pdgs_date() != null && (t0 == null || t0.before(raw.getT0_pdgs_date()))) {
-                    	t0 = raw.getT0_pdgs_date();
+                    if (raw.getT0PdgsDate() != null && (t0 == null || t0.before(raw.getT0PdgsDate()))) {
+                    	t0 = raw.getT0PdgsDate();
                     }
                 }
             }

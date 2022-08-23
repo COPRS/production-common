@@ -227,11 +227,11 @@ public class JobOrderInput {
 		this.family = family;
 	}
 
-	public Date getT0_pdgs_date() {
+	public Date getT0PdgsDate() {
 		return t0PdgsDate;
 	}
 
-	public void setT0_pdgs_date(Date t0PdgsDate) {
+	public void setT0PdgsDate(Date t0PdgsDate) {
 		this.t0PdgsDate = t0PdgsDate;
 	}
 
