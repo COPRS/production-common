@@ -18,7 +18,7 @@ env:
   VERSION: 3.32.1
   COMMIT_ID: ${{ github.sha }}
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT_DOCKER: werum-docker
+  ARTIFACTORY_PROJECT_DOCKER: rs-docker
   ARTIFACTORY_PROJECT_MAVEN: rs-maven
 
 jobs:   

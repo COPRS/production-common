@@ -140,18 +140,18 @@ public class JobCreationService {
 				execJob.addPool(poolDto);
 			}
 			
-			// Determine t0_pdgs_date
+			// Determine t0PdgsDate
 			Date t0 = null;
 			for (AppDataJobTaskInputs inputs : job.getAdditionalInputs()) {
 				for (AppDataJobInput input : inputs.getInputs()) {
 					for (AppDataJobFile file : input.getFiles()) {
-						if (file.getT0_pdgs_date() != null && (t0 == null || t0.before(file.getT0_pdgs_date()))) {
-							t0 = file.getT0_pdgs_date();
+						if (file.getT0PdgsDate() != null && (t0 == null || t0.before(file.getT0PdgsDate()))) {
+							t0 = file.getT0PdgsDate();
 						}
 					}
 				}
 			}
-			execJob.setT0_pdgs_date(t0);
+			execJob.setT0PdgsDate(t0);
 
 			typeAdapter.customJobDto(job, execJob);
 			return execJob;

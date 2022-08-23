@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<L0P_Order>
+    <List_of_Files count="2">
+        <File>
+            <filename>/data/NRTAP/DICache//S3BISP0000009060C2</filename>
+            <validitystart>2020-10-12 06:22:55.398</validitystart>
+            <validitystop>2020-10-12 06:22:55.398</validitystop>
+            <downlinkorbitnumber>9060</downlinkorbitnumber>
+            <filetype>ISP_C2__0_</filetype>
+            <sensorid>67</sensorid>
+            <acquisitionstationid>2</acquisitionstationid>
+            <processingstationid>2</processingstationid>
+            <satelliteid>42</satelliteid>
+            <mission>1</mission>
+        </File>
+        <File>
+            <filename>/data/NRTAP/DICache//S3BISP0000009060C2_timetags</filename>
+            <validitystart>2020-10-12 06:22:55.398</validitystart>
+            <validitystop>2020-10-12 06:22:55.398</validitystop>
+            <downlinkorbitnumber>9060</downlinkorbitnumber>
+            <filetype>ISP_C2TT0_</filetype>
+            <sensorid>67</sensorid>
+            <acquisitionstationid>2</acquisitionstationid>
+            <processingstationid>2</processingstationid>
+            <satelliteid>42</satelliteid>
+            <mission>1</mission>
+        </File>
+    </List_of_Files>
+</L0P_Order>

@@ -215,11 +215,11 @@ public class TaskTableAdapter {
 						.map(this::newJobOrderTimeIntervalFor)
 						.collect(toList());
 					
-					// FIXME: Dirty workaround to determine t0_pdgs_date
+					// FIXME: Dirty workaround to determine t0PdgsDate
 					Date t0 = null;
 					for (SearchMetadata metadata : queryResults) {
-						if (metadata.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-							Date metT0 = DateUtils.toDate(metadata.getAdditionalProperties().get("t0_pdgs_date"));
+						if (metadata.getAdditionalProperties().containsKey("t0PdgsDate")) {
+							Date metT0 = DateUtils.toDate(metadata.getAdditionalProperties().get("t0PdgsDate"));
 							if (t0 == null || t0.before(metT0)) {
 								t0 = metT0;
 							}

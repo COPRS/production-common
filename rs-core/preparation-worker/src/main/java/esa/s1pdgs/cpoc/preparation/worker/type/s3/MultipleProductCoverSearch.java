@@ -216,10 +216,10 @@ public class MultipleProductCoverSearch {
 		final List<AppDataJobFile> files = new ArrayList<>();
 
 		for (final S3Metadata product : products) {
-			// Extract t0_pdgs_date if possible to determine when all inputs where ready
+			// Extract t0PdgsDate if possible to determine when all inputs where ready
 			Date t0 = null;
-			if (product.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-				t0 = DateUtils.toDate(product.getAdditionalProperties().get("t0_pdgs_date"));
+			if (product.getAdditionalProperties().containsKey("t0PdgsDate")) {
+				t0 = DateUtils.toDate(product.getAdditionalProperties().get("t0PdgsDate"));
 			}
 			
 			files.add(new AppDataJobFile(product.getProductName(), product.getKeyObjectStorage(),

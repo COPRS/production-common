@@ -92,11 +92,11 @@ public class EdrsSessionMetadataAdapter {
     	return names.stream()
     			.map(s -> 
     			{ 
-    				// Save t0_pdgs_date for further computations on AppDataJobFile
+    				// Save t0PdgsDate for further computations on AppDataJobFile
     				Date metT0 = null;
-    				String t0_pdgs_date = raws.getOrDefault(s, NULL).getAdditionalProperties().get("t0_pdgs_date");
-    				if (t0_pdgs_date != null) {
-    					metT0 = DateUtils.toDate(t0_pdgs_date);
+    				String t0PdgsDate = raws.getOrDefault(s, NULL).getAdditionalProperties().get("t0PdgsDate");
+    				if (t0PdgsDate != null) {
+    					metT0 = DateUtils.toDate(t0PdgsDate);
     				}
     				
     				return new AppDataJobFile(s, raws.getOrDefault(s, NULL).getKeyObjectStorage(), metT0);

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.preparation.worker.config.type;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +15,7 @@ import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableFactory;
+import esa.s1pdgs.cpoc.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.edrs.AiopPropertiesAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.edrs.EdrsSessionProductValidator;
@@ -26,6 +28,7 @@ import esa.s1pdgs.cpoc.preparation.worker.type.slice.LevelSliceTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppMbuTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppObsPropertiesAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppObsTypeAdapter;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @Configuration
 public class TypeAdapterConfiguration {
@@ -62,6 +65,9 @@ public class TypeAdapterConfiguration {
 	@Autowired
 	private ElementMapper elementMapper;
 	
+	@Autowired
+	private Function<TaskTable, InputTimeoutChecker> timeoutCheckerF;
+	
 	@Bean
 	@Autowired
 	public ProductTypeAdapter typeAdapter() {
@@ -81,12 +87,12 @@ public class TypeAdapterConfiguration {
 						AspPropertiesAdapter.of(aspProperties)
 				);
 			case L1: case L2:
-				// TODO: Add Timeout mechanic back for V2
 				return new LevelSliceTypeAdapter(
 						metadataClient, 
 						settings.getTypeOverlap(), 
 						settings.getTypeSliceLength(),
-						settings.getJoborderTimelinessCategoryMapping()
+						settings.getJoborderTimelinessCategoryMapping(),
+						timeoutCheckerF
 				);			
 			case S3_L0: case S3_L1: case S3_L2:
 				return new S3TypeAdapter(

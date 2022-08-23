@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'rs-container/docker_acqsimulator/**'
+      - 'rs-container/docker_s3_ipf_acq/S3ACQWrapperScript.sh'
       - '.github/workflows/build-acqsimulator.yaml'
     branches:
       - '!main'
@@ -24,7 +25,7 @@ on:
 
 env:
   REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT: werum-docker
+  ARTIFACTORY_PROJECT: rs-docker-private
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
   
@@ -70,7 +71,11 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images:  ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-core-acqsimulator
-              
+      
+      - name: Copy S3ACQWrapperScript.sh from docker_s3_ipf_acq
+        run: |
+          cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/S3ACQWrapperScript.sh" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/S3ACQWrapperScript.sh"
+
       - name: Build image
         uses: docker/build-push-action@v2
         with:

@@ -133,7 +133,7 @@ public class PreparationWorkerProperties {
 		}
 	}
 
-	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
+	private Map<String, InputWaitingConfig> inputWaiting = new LinkedHashMap<>();
 
 	private List<LatenessConfig> latenessConfig = new ArrayList<>();
 
@@ -273,11 +273,11 @@ public class PreparationWorkerProperties {
 		this.latenessConfig = latenessConfig;
 	}
 
-	public List<InputWaitingConfig> getInputWaiting() {
+	public Map<String, InputWaitingConfig> getInputWaiting() {
 		return inputWaiting;
 	}
 
-	public void setInputWaiting(final List<InputWaitingConfig> inputWaiting) {
+	public void setInputWaiting(final Map<String, InputWaitingConfig> inputWaiting) {
 		this.inputWaiting = inputWaiting;
 	}
 

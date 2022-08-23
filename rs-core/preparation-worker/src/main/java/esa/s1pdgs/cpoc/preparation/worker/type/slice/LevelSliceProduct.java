@@ -95,10 +95,10 @@ public class LevelSliceProduct extends AbstractProduct {
 	public final void addSlice(final L0SliceMetadata file) {
 		final List<AppDataJobFile> slices = product.getProductsFor(SLICE);
 		
-		// Extract t0_pdgs_date if possible to determine when all inputs where ready
+		// Extract t0PdgsDate if possible to determine when all inputs where ready
 		Date t0 = null;
-		if (file.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-			t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0_pdgs_date"));
+		if (file.getAdditionalProperties().containsKey("t0PdgsDate")) {
+			t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0PdgsDate"));
 		}
 		
 		final AppDataJobFile slice = new AppDataJobFile(
@@ -117,10 +117,10 @@ public class LevelSliceProduct extends AbstractProduct {
 	public final void addAcn(final L0AcnMetadata file) {
 		final List<AppDataJobFile> acns = product.getProductsFor(ACN);
 		
-		// Extract t0_pdgs_date if possible to determine when all inputs where ready
+		// Extract t0PdgsDate if possible to determine when all inputs where ready
 		Date t0 = null;
-		if (file.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-			t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0_pdgs_date"));
+		if (file.getAdditionalProperties().containsKey("t0PdgsDate")) {
+			t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0PdgsDate"));
 		}
 		
 		final AppDataJobFile acn = new AppDataJobFile(

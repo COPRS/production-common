@@ -80,7 +80,7 @@ public final class AspPropertiesAdapter {
 		
 		if (null != minimalTimeout) {
 			final LocalDateTime sensingStopTime = DateUtils.parse(sensingEndTimeStr);
-			final Date jobCreationDate = job.getCreationDate();
+			final Date jobCreationDate = job.getGeneration().getCreationDate();
 			final LocalDateTime jobCreationDateTime = LocalDateTime.ofInstant(jobCreationDate.toInstant(), ZoneId.of("UTC"));
 
 			// wait at least jobCreation + minimal but no longer than sensing stop + nominal

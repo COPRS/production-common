@@ -5,6 +5,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import esa.s1pdgs.cpoc.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
 import esa.s1pdgs.cpoc.preparation.worker.model.metadata.SearchMetadataResult;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.preparation.worker.util.QueryUtils;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInput;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderInputFile;
@@ -48,13 +51,15 @@ public class AuxQuery {
 	private final AppDataJob job;
 	private final ProductMode mode;
 	private final TaskTableAdapter taskTableAdapter;
+	private final InputTimeoutChecker timeoutChecker;
 
 	public AuxQuery(final MetadataClient metadataClient, final AppDataJob job, final ProductMode mode,
-			 final TaskTableAdapter ttAdapter) {
+			 final TaskTableAdapter ttAdapter, final InputTimeoutChecker timeoutChecker) {
 		this.metadataClient = metadataClient;
 		this.job = job;
 		this.mode = mode;
 		this.taskTableAdapter = ttAdapter;
+		this.timeoutChecker = timeoutChecker;
 	}
 
 	public final List<AppDataJobTaskInputs> queryAux() throws DiscardedException {
@@ -96,27 +101,19 @@ public class AuxQuery {
 				LOGGER.warn("Mandatory Input {} is not available", inputDescription);
 				missingMetadata.put(ref + " is missing", taskTableInput.toLogMessage());
 			} else {
-
 				// optional input
 
 				// if the timeout is not expired, we want to continue waiting. To do that,
 				// a IpfPrepWorkerInputsMissingException needs to be thrown. Otherwise,
 				// we log that timeout is expired and we continue anyway behaving as if
 				// the input was there
-				// TODO: Implement new timeout mechanism
-//				if (timeoutChecker.isTimeoutExpiredFor(job, taskTableInput)) {
-//					LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...", inputDescription);
-//					timedOutInputs.add(missingInput);
-//				} else {
-
-					// TODO: UNCOMMENT WHEN WAITING LOGIC IS IMPLEMENTED (CURRENTLY WAIT == WAIT FOREVER)
-				    // **********************************************************************************
-				    // LOGGER.info("Waiting for Non-Mandatory Input {} ...", inputDescription);
-					// missingMetadata.put(inputDescription + " is missing", taskTableInput.toLogMessage());
-				    //
-				    // MEANWHILE LOG A WARNING:
-		    		LOGGER.warn("Cannot wait for missing Non-Mandatory Input {} ... (wait not implemented)", inputDescription);
-//
+				if (timeoutChecker.isTimeoutExpiredFor(job, taskTableInput)) {
+					LOGGER.info("Non-Mandatory Input {} is not available. Continue without it...", inputDescription);
+					timedOutInputs.add(missingInput);
+				} else {
+					LOGGER.info("Waiting for Non-Mandatory Input {} ...", inputDescription);
+					missingMetadata.put(inputDescription + " is missing", taskTableInput.toLogMessage());
+				}
 			}
 		}
 
@@ -134,6 +131,39 @@ public class AuxQuery {
 			});
 		}
 
+	}
+
+	/**
+	 * Calculates when the next timeout for a still missing non-mandatory input is
+	 * reached, so we don't wait inifinetly on those.
+	 * 
+	 * @param job AppDataJob, will get its timeoutDate updated in this method
+	 * @param taskTableAdapter responsible taskTableAdapter for the job
+	 */
+	public void updateTimeout(AppDataJob job, TaskTableAdapter taskTableAdapter) {
+		final List<AppDataJobInput> missingInputs = inputsWithoutResultsOf(job);
+		final Map<String, TaskTableInput> taskTableInputs = taskTableAdapter.taskTableInputs();
+		
+		Date nextTimeoutDate = null;
+		
+		for (final AppDataJobInput missingInput : missingInputs) {
+			final String ref = missingInput.getTaskTableInputReference();
+			final TaskTableInput taskTableInput = taskTableInputs.get(ref);
+			
+			// There is no timeout for mandatory products
+			if (!missingInput.isMandatory()) {
+				LocalDateTime inputTimeoutLocalDateTime = timeoutChecker.timeoutFor(job, taskTableInput);
+				if (inputTimeoutLocalDateTime != null) {
+					Date inputTimeoutDate = Date.from(inputTimeoutLocalDateTime.atZone(ZoneId.systemDefault()).toInstant());
+					if (nextTimeoutDate == null || nextTimeoutDate.after(inputTimeoutDate)) {
+						nextTimeoutDate = inputTimeoutDate;
+					}
+				}
+			}
+		}
+		
+		// null means all non-mandatory inputs are already timed out, only mandatory ones remain unfilled
+		job.setTimeoutDate(nextTimeoutDate);
 	}
 
 	private List<AppDataJobInput> inputsWithoutResultsOf(final AppDataJob job) {
@@ -307,7 +337,7 @@ public class AuxQuery {
 				.collect(toMap(JobOrderInputFile::getFilename, fn -> fn));
 		return new AppDataJobInput(inputReference, input.getFileType(), input.getFileNameType().toString(),
 				TaskTableMandatoryEnum.YES.equals(mandatory), input.getTimeIntervals().stream()
-						.map(ti -> merge(fileNames.get(ti.getFileName()), ti, input.getT0_pdgs_date())).collect(toList()));
+						.map(ti -> merge(fileNames.get(ti.getFileName()), ti, input.getT0PdgsDate())).collect(toList()));
 	}
 
 	private AppDataJobFile merge(final JobOrderInputFile file, final JobOrderTimeInterval interval, final Date t0) {

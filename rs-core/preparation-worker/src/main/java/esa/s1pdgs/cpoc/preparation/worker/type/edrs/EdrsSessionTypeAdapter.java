@@ -114,7 +114,7 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}
 	
 	@Override
-	public final void updateTimeout(AppDataJob job) {
+	public final void updateTimeout(AppDataJob job, final TaskTableAdapter taskTableAdapter) {
 		// Use logic of AIOP Property Adapter to update timeout
 		// The same logic is applied before to check if a job is timeout
 		job.setTimeoutDate(aiopAdapter.calculateTimeout(job));
@@ -199,16 +199,16 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
                 	AppDataJobFile raw = raws1.get(i);
                     dto.addInput(newInputFor(raw, dto.getWorkDirectory(), "ch01"));
                     
-                    if (raw.getT0_pdgs_date() != null && (t0 == null || t0.before(raw.getT0_pdgs_date()))) {
-                    	t0 = raw.getT0_pdgs_date();
+                    if (raw.getT0PdgsDate() != null && (t0 == null || t0.before(raw.getT0PdgsDate()))) {
+                    	t0 = raw.getT0PdgsDate();
                     }
                 }
                 if (i < raws2.size()) {
                 	AppDataJobFile raw = raws2.get(i);
                     dto.addInput(newInputFor(raw, dto.getWorkDirectory(), "ch02"));
                     
-                    if (raw.getT0_pdgs_date() != null && (t0 == null || t0.before(raw.getT0_pdgs_date()))) {
-                    	t0 = raw.getT0_pdgs_date();
+                    if (raw.getT0PdgsDate() != null && (t0 == null || t0.before(raw.getT0PdgsDate()))) {
+                    	t0 = raw.getT0PdgsDate();
                     }
                 }
             }
@@ -217,9 +217,9 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
             dto.addInput(newInputForDSIB(product.getDsibForChannel(1), dto.getWorkDirectory(), "ch01"));
             dto.addInput(newInputForDSIB(product.getDsibForChannel(2), dto.getWorkDirectory(), "ch02"));
             
-            // Correct t0_pdgs_date
-            if (dto.getT0_pdgs_date() == null || dto.getT0_pdgs_date().before(t0)) {
-            	dto.setT0_pdgs_date(t0);
+            // Correct t0PdgsDate
+            if (dto.getT0PdgsDate() == null || dto.getT0PdgsDate().before(t0)) {
+            	dto.setT0PdgsDate(t0);
             }
         }		
 	}

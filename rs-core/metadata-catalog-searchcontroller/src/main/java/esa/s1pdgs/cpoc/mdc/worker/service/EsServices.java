@@ -339,7 +339,10 @@ public class EsServices {
 							throw new MetadataMalformedException("validityStopTime");
 						}
 					}
-					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					source.forEach((key, value) -> { 
+						if (value != null)
+							local.addAdditionalProperty(key, value.toString());
+					});
 					r.add(local);
 				}
 				return r;
@@ -421,7 +424,10 @@ public class EsServices {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
-				source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+				source.forEach((key, value) -> {
+					if (value != null)
+						r.addAdditionalProperty(key, value.toString());
+				});
 				return r;
 			}
 		} catch (final IOException e) {
@@ -545,7 +551,10 @@ public class EsServices {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
-				source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+				source.forEach((key, value) -> {
+					if (value != null)
+						r.addAdditionalProperty(key, value.toString());
+				});
 				return r;
 			}
 		} catch (final IOException e) {
@@ -567,7 +576,10 @@ public class EsServices {
 			r.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
 		}
 
-		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+		source.forEach((key, value) -> {
+			if (value != null)
+				r.addAdditionalProperty(key, value.toString());
+		});
 
 		return r;
 	}
@@ -745,7 +757,10 @@ public class EsServices {
 							throw new MetadataMalformedException(fieldNameStop);
 						}
 					}
-					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					source.forEach((key, value) -> {
+						if (value != null)
+							local.addAdditionalProperty(key, value.toString());
+					});
 					r.add(local);
 				}
 				return r;
@@ -801,7 +816,10 @@ public class EsServices {
 						}
 					}
 
-					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					source.forEach((key, value) -> {
+						if (value != null)
+							local.addAdditionalProperty(key, value.toString());
+					});
 
 					r.add(local);
 				}
@@ -885,7 +903,10 @@ public class EsServices {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
-				source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+				source.forEach((key, value) -> {
+					if (value != null) 
+						r.addAdditionalProperty(key, value.toString());
+				});
 				return r;
 			}
 		} catch (final IOException e) {
@@ -1024,7 +1045,10 @@ public class EsServices {
 						throw new MetadataMalformedException("validityStopTime");
 					}
 				}
-				source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+				source.forEach((key, value) -> {
+					if (value != null)
+						r.addAdditionalProperty(key, value.toString());
+				});
 				return r;
 			}
 		} catch (final IOException e) {
@@ -1091,7 +1115,10 @@ public class EsServices {
 								throw new MetadataMalformedException("stopTime");
 							}
 						}
-						source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+						source.forEach((key, value) -> {
+							if (value != null)
+								local.addAdditionalProperty(key, value.toString());
+						});
 						result = local;
 					}
 				}
@@ -1360,7 +1387,10 @@ public class EsServices {
 							throw new MetadataMalformedException("stopTime");
 						}
 					}
-					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					source.forEach((key, value) -> {
+						if (value != null)
+							local.addAdditionalProperty(key, value.toString());
+					});
 					result.add(local);
 				}
 			}
@@ -1428,7 +1458,10 @@ public class EsServices {
 						}
 					}
 					
-					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					source.forEach((key, value) -> {
+						if (value != null)
+							local.addAdditionalProperty(key, value.toString());
+					});
 					
 					r.add(local);
 				}
@@ -1520,7 +1553,11 @@ public class EsServices {
 						local.setSwathtype(firstTwoCharsOfType);
 					}
 					
-					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					source.forEach((key, value) -> {
+						if (value != null)
+							local.addAdditionalProperty(key, value.toString());
+					});
+					
 					if (!local.getAdditionalProperties().containsKey("dataTakeId")) {
 						throw new MetadataMalformedException("dataTakeId");
 					}
@@ -1649,7 +1686,10 @@ public class EsServices {
 		}
 		searchMetadata.setFootprint(footprint);
 
-		source.forEach((key, value) -> searchMetadata.addAdditionalProperty(key, value.toString()));
+		source.forEach((key, value) -> {
+			if (value != null)
+				searchMetadata.addAdditionalProperty(key, value.toString());
+		});
 
 		return searchMetadata;
 	}
@@ -1731,7 +1771,10 @@ public class EsServices {
 							throw new MetadataMalformedException("insertionTime");
 						}
 					}
-					source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+					source.forEach((key, value) -> {
+						if (value != null)
+							local.addAdditionalProperty(key, value.toString());
+					});
 					result.add(local);
 				}				
 			}
@@ -1840,7 +1883,10 @@ public class EsServices {
 		final List<String> rawNames = (List<String>) source.getOrDefault("rawNames", Collections.emptyList());
 		r.setRawNames(rawNames);
 
-		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+		source.forEach((key, value) -> {
+			if (value != null)
+				r.addAdditionalProperty(key, value.toString());
+		});
 
 		return r;
 	}
@@ -1946,7 +1992,10 @@ public class EsServices {
 			throw new MetadataMalformedException("dataTakeId");
 		}
 
-		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+		source.forEach((key, value) -> {
+			if (value != null)
+				r.addAdditionalProperty(key, value.toString());
+		});
 		return r;
 	}
 
@@ -2002,7 +2051,10 @@ public class EsServices {
 			throw new MetadataMalformedException("dataTakeId");
 		}
 		
-		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+		source.forEach((key, value) -> {
+			if (value != null)
+				r.addAdditionalProperty(key, value.toString());
+		});
 		return r;
 	}
 
@@ -2246,7 +2298,10 @@ public class EsServices {
 		}
 		// should always be set in esa.s1pdgs.cpoc.mdc.worker.service.MetadataExtractionService
 		r.setInsertionTime(source.get("insertionTime").toString());
-		source.forEach((key, value) -> r.addAdditionalProperty(key, value.toString()));
+		source.forEach((key, value) -> {
+			if (value != null)
+				r.addAdditionalProperty(key, value.toString());
+		});
 		return r;
 	}
 
@@ -2403,7 +2458,10 @@ public class EsServices {
 				throw new MetadataMalformedException("dumpStart");
 			}
 		}
-		source.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
+		source.forEach((key, value) -> {
+			if (value != null)
+				local.addAdditionalProperty(key, value.toString());
+		});
 		return local;
 	}
 }

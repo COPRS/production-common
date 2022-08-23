@@ -1,0 +1,9 @@
+#! /bin/bash
+
+echo "## SIMULATOR: Running DirectDataCaptureServer Script"
+
+echo "## SIMULATOR: Copying L0Orders from sample folder"
+
+mkdir -p /data/NRTAP/L0Orders
+
+cp -r /opt/sample/S3B/9060/L0Orders /data/NRTAP/

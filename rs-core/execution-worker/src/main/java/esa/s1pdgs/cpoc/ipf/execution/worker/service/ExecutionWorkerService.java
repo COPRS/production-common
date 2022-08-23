@@ -255,7 +255,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			throw new RuntimeException(e);
 		}
 		
-		reporting.end(toReportingOutput(result, job.isDebug(), job.getT0_pdgs_date()), new ReportingMessage("End job processing"), missingOutputs);
+		reporting.end(toReportingOutput(result, job.isDebug(), job.getT0PdgsDate()), new ReportingMessage("End job processing"), missingOutputs);
 		return result;
 	}
 

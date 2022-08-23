@@ -72,7 +72,7 @@ public abstract class AbstractMessage {
 	protected String timeliness = null;
 	
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-	protected Date t0_pdgs_date;
+	protected Date t0PdgsDate;
 	
 	public AbstractMessage() {
 	}
@@ -202,12 +202,12 @@ public abstract class AbstractMessage {
 		this.timeliness = timeliness;
 	}
 
-	public Date getT0_pdgs_date() {
-		return t0_pdgs_date;
+	public Date getT0PdgsDate() {
+		return t0PdgsDate;
 	}
 
-	public void setT0_pdgs_date(Date t0_pdgs_date) {
-		this.t0_pdgs_date = t0_pdgs_date;
+	public void setT0PdgsDate(Date t0PdgsDate) {
+		this.t0PdgsDate = t0PdgsDate;
 	}
 
 	@Override
@@ -229,7 +229,7 @@ public abstract class AbstractMessage {
 		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
 		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
 		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		result = prime * result + ((t0_pdgs_date == null) ? 0 : t0_pdgs_date.hashCode());
+		result = prime * result + ((t0PdgsDate == null) ? 0 : t0PdgsDate.hashCode());
 		return result;
 	}
 
@@ -307,10 +307,10 @@ public abstract class AbstractMessage {
 				return false;
 		} else if (!satelliteId.equals(other.satelliteId))
 			return false;		
-		if (t0_pdgs_date == null) {
-			if (other.t0_pdgs_date != null)
+		if (t0PdgsDate == null) {
+			if (other.t0PdgsDate != null)
 				return false;
-		} else if (!t0_pdgs_date.equals(other.t0_pdgs_date))
+		} else if (!t0PdgsDate.equals(other.t0PdgsDate))
 			return false;
 		
 		return true;
@@ -319,7 +319,7 @@ public abstract class AbstractMessage {
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", t0_pdgs_date=" + t0_pdgs_date + ", podName="
+				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", t0PdgsDate=" + t0PdgsDate + ", podName="
 				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
 				+ retryCounter + ", debug=" + debug + "]";
 	}

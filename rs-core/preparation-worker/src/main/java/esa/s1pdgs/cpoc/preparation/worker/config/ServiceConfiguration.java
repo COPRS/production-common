@@ -1,8 +1,12 @@
 package esa.s1pdgs.cpoc.preparation.worker.config;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties.InputWaitingConfig;
 import esa.s1pdgs.cpoc.preparation.worker.db.AppDataJobRepository;
 import esa.s1pdgs.cpoc.preparation.worker.db.SequenceDao;
 import esa.s1pdgs.cpoc.preparation.worker.model.joborder.JobOrderAdapter;
@@ -27,8 +32,11 @@ import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TasktableManager;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.ConfigurableKeyEvaluator;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.RoutingBasedTasktableMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
+import esa.s1pdgs.cpoc.preparation.worker.timeout.InputTimeoutChecker;
+import esa.s1pdgs.cpoc.preparation.worker.timeout.InputTimeoutCheckerImpl;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @Configuration
 public class ServiceConfiguration {
@@ -85,8 +93,8 @@ public class ServiceConfiguration {
 	@Bean
 	@Autowired
 	public AuxQueryHandler auxQueryHandler(final MetadataClient metadataClient,
-			final PreparationWorkerProperties settings) {
-		return new AuxQueryHandler(metadataClient, settings.getProductMode());
+			final PreparationWorkerProperties settings, final Function<TaskTable, InputTimeoutChecker> timeoutChecker) {
+		return new AuxQueryHandler(metadataClient, settings.getProductMode(), timeoutChecker);
 	}
 
 	@Bean
@@ -109,5 +117,21 @@ public class ServiceConfiguration {
 
 		return new JobCreationService(commonProperties, settings, processSettings, jobOrderFactory, typeAdapter);
 	}
-
+	
+	@Bean
+	@Autowired
+	public Function<TaskTable, InputTimeoutChecker> timeoutCheckerFor(final PreparationWorkerProperties workerProperties) {
+		return (taskTable) -> {
+			final List<InputWaitingConfig> configsForTaskTable = new ArrayList<>();
+			for (final InputWaitingConfig config : workerProperties.getInputWaiting().values()) {
+				if (taskTable.getProcessorName().matches(config.getProcessorNameRegexp()) &&
+					taskTable.getVersion().matches(config.getProcessorVersionRegexp())) 
+				{			
+					configsForTaskTable.add(config);
+				}					
+			}
+			// default: always time out
+			return new InputTimeoutCheckerImpl(configsForTaskTable, LocalDateTime::now);
+		};
+	}
 }

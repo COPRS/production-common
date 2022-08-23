@@ -74,7 +74,7 @@ public class JobOrderInput {
 	/**
 	 * Date, when all inputs where ready for this product
 	 */
-	private Date t0_pdgs_date;
+	private Date t0PdgsDate;
 	
 	/**
 	 * Default constructor
@@ -100,7 +100,7 @@ public class JobOrderInput {
 	 */
 	public JobOrderInput(final String fileType, final JobOrderFileNameType fileNameType,
 			final List<JobOrderInputFile> filenames, final List<JobOrderTimeInterval> timeIntervals,
-			final ProductFamily family, final Date t0_pdgs_date) {
+			final ProductFamily family, final Date t0PdgsDate) {
 		this();
 		this.fileType = fileType;
 		this.fileNameType = fileNameType;
@@ -227,12 +227,12 @@ public class JobOrderInput {
 		this.family = family;
 	}
 
-	public Date getT0_pdgs_date() {
-		return t0_pdgs_date;
+	public Date getT0PdgsDate() {
+		return t0PdgsDate;
 	}
 
-	public void setT0_pdgs_date(Date t0_pdgs_date) {
-		this.t0_pdgs_date = t0_pdgs_date;
+	public void setT0PdgsDate(Date t0PdgsDate) {
+		this.t0PdgsDate = t0PdgsDate;
 	}
 
 	/**
@@ -250,7 +250,7 @@ public class JobOrderInput {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(fileType, fileNameType, filenames, nbFilenames, timeIntervals, nbTimeIntervals, family, t0_pdgs_date);
+		return Objects.hash(fileType, fileNameType, filenames, nbFilenames, timeIntervals, nbTimeIntervals, family, t0PdgsDate);
 	}
 
 	/**
@@ -268,7 +268,7 @@ public class JobOrderInput {
 			ret = Objects.equals(fileType, other.fileType) && Objects.equals(fileNameType, other.fileNameType)
 					&& Objects.equals(filenames, other.filenames) && nbFilenames == other.nbFilenames
 					&& Objects.equals(timeIntervals, other.timeIntervals) && nbTimeIntervals == other.nbTimeIntervals
-					&& Objects.equals(family, other.family) && Objects.equals(t0_pdgs_date, other.t0_pdgs_date);
+					&& Objects.equals(family, other.family) && Objects.equals(t0PdgsDate, other.t0PdgsDate);
 		}
 		return ret;
 	}

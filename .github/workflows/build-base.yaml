@@ -13,7 +13,7 @@ on:
 
 env:
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT_DOCKER: werum-docker
+  ARTIFACTORY_PROJECT_DOCKER: rs-docker
 
 jobs:
   gg-scan:
