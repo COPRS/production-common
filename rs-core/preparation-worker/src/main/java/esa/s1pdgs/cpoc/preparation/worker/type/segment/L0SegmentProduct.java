@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.preparation.worker.type.segment;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -243,6 +244,11 @@ public class L0SegmentProduct extends AbstractProduct {
 		meta.setValidityStart(startMetadataFormat);
 		meta.setValidityStop(stopMetadataFormat);
 		meta.setInsertionTime(file.getMetadata().get(INSERTION_TIME));
+		
+		if (file.getT0PdgsDate() != null) {
+			meta.addAdditionalProperty("t0PdgsDate", DateUtils.formatToMetadataDateTimeFormat(
+					file.getT0PdgsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+		}
 		return meta;	
 	}
 	
