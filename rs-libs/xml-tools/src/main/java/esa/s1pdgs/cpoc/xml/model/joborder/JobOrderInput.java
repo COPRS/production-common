@@ -113,6 +113,7 @@ public class JobOrderInput {
 			timeIntervals.forEach(timeInterval -> this.timeIntervals.add(new JobOrderTimeInterval(timeInterval)));
 			this.nbTimeIntervals = this.timeIntervals.size();
 		}
+		this.t0PdgsDate = t0PdgsDate;
 	}
 
 	/**
