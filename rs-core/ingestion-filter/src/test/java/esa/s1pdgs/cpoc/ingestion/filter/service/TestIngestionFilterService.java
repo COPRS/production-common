@@ -38,7 +38,7 @@ public class TestIngestionFilterService {
 				productName,
 				"pickupBase",
 				"WILE/S3A/7000/DCS_01_S3A_2021112408000009000_dat/ch_1/DCS_01_S3A_2021112408000009000_ch1_DSDB_00001.raw",
-				179, Date.from(DateUtils.parse("2021-11-24T08:00:00").toInstant(ZoneOffset.UTC)), UUID.randomUUID(), "S3", "TEST", null, null, "xbip", null);
+				179, Date.from(DateUtils.parse("2021-11-24T08:00:00").toInstant(ZoneOffset.UTC)), UUID.randomUUID(), "S3", "TEST", null, null, "xbip", null, "2021-11-24T08:00:00");
 		
 		List<IngestionJob> ingestionJobs = new ArrayList<>();
 		ingestionJobs.add(job);
@@ -58,7 +58,7 @@ public class TestIngestionFilterService {
 				productName,
 				"pickupBase",
 				"WILE/S3A/7000/DCS_01_S3A_2021112408000009000_dat/ch_1/DCS_01_S3A_2021112408000009000_ch1_DSDB_00001.raw",
-				179, Date.from(DateUtils.parse("2021-11-24T09:00:00").toInstant(ZoneOffset.UTC)), UUID.randomUUID(), "S3", "TEST", null, null, "xbip", null);
+				179, Date.from(DateUtils.parse("2021-11-24T09:00:00").toInstant(ZoneOffset.UTC)), UUID.randomUUID(), "S3", "TEST", null, null, "xbip", null, "2021-11-24T09:00:00");
 		List<IngestionJob> ingestionJobs = new ArrayList<>();
 		ingestionJobs.add(job);
 		

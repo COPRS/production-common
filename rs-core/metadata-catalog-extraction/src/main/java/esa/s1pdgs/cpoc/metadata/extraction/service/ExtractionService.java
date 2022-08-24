@@ -144,11 +144,10 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		if (!metadata.has("insertionTime")) {
 			metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 		}
-
+		
 		// RS-248: Adding t0PdgsDate into metadata
-		if (catJob.getT0PdgsDate() != null) {
-			metadata.put("t0PdgsDate", DateUtils.formatToMetadataDateTimeFormat(
-					catJob.getT0PdgsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+		if (catJob.getAdditionalFields().get("t0PdgsDate") != null) {
+			metadata.put("t0PdgsDate", (String) catJob.getAdditionalFields().get("t0PdgsDate") );
 		}
 
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
@@ -179,8 +178,8 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		catEvent.setStoragePath(catJob.getStoragePath());
 		catEvent.setProductFamily(catJob.getProductFamily());
 		catEvent.setMetadataProductType(metadata.getString("productType"));
-		if (catJob.getT0PdgsDate() != null) {
-			catEvent.getAdditionalFields().put("t0PdgsDate", catJob.getT0PdgsDate());
+		if (catJob.getAdditionalFields().get("t0PdgsDate") != null) {
+			catEvent.getAdditionalFields().put("t0PdgsDate", (String) metadata.get("t0PdgsDate"));
 		}
 
 		return catEvent;

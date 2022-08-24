@@ -25,7 +25,6 @@ RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 USER 1001
 
 COPY files/* /opt/
-COPY ../docker_s3_ipf_acq/files/S3ACQWrapperScript.sh /opt/S3ACQWrapperScript.sh 
 
 COPY files/DirectDataCaptureServer /usr/local/components/DDC/bin/DirectDataCaptureServer
 COPY files/NOOP.sh /usr/local/components/L0PreProc/bin/S3L0PreProcessor

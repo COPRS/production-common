@@ -9,9 +9,9 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
 
@@ -70,9 +70,6 @@ public abstract class AbstractMessage {
 	protected boolean debug = false;
 		
 	protected String timeliness = null;
-	
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-	protected Date t0PdgsDate;
 	
 	public AbstractMessage() {
 	}
@@ -202,14 +199,6 @@ public abstract class AbstractMessage {
 		this.timeliness = timeliness;
 	}
 
-	public Date getT0PdgsDate() {
-		return t0PdgsDate;
-	}
-
-	public void setT0PdgsDate(Date t0PdgsDate) {
-		this.t0PdgsDate = t0PdgsDate;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -229,7 +218,6 @@ public abstract class AbstractMessage {
 		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
 		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
 		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		result = prime * result + ((t0PdgsDate == null) ? 0 : t0PdgsDate.hashCode());
 		return result;
 	}
 
@@ -307,11 +295,6 @@ public abstract class AbstractMessage {
 				return false;
 		} else if (!satelliteId.equals(other.satelliteId))
 			return false;		
-		if (t0PdgsDate == null) {
-			if (other.t0PdgsDate != null)
-				return false;
-		} else if (!t0PdgsDate.equals(other.t0PdgsDate))
-			return false;
 		
 		return true;
 	}
@@ -319,7 +302,7 @@ public abstract class AbstractMessage {
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", t0PdgsDate=" + t0PdgsDate + ", podName="
+				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
 				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
 				+ retryCounter + ", debug=" + debug + "]";
 	}
