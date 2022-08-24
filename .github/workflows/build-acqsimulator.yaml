@@ -75,6 +75,8 @@ jobs:
       - name: Copy S3ACQWrapperScript.sh from docker_s3_ipf_acq
         run: |
           cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/S3ACQWrapperScript.sh" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/S3ACQWrapperScript.sh"
+          cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/convertL0OrderISP.py" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/convertL0OrderISP.py"
+          cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/convertL0OrderTF.py" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/convertL0OrderTF.py"
 
       - name: Build image
         uses: docker/build-push-action@v2
