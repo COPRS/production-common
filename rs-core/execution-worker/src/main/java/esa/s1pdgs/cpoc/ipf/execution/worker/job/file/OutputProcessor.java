@@ -539,7 +539,7 @@ public class OutputProcessor {
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid,
-			final String t0_pdgsDate
+			final String t0PdgsDate
 	) throws Exception {
 		final List<Message<CatalogJob>> result = new ArrayList<>();
 		LOGGER.info("{} 3 - Publishing KAFKA messages for batch {}", prefixMonitorLogs, nbBatch);
@@ -553,7 +553,7 @@ public class OutputProcessor {
 			if (nextKeyUpload.startsWith(msg.getKeyObs())) {
 				stop = true;
 			} else {
-				result.add(MessageBuilder.withPayload(publish(uuid, msg, t0_pdgsDate)).build());
+				result.add(MessageBuilder.withPayload(publish(uuid, msg, t0PdgsDate)).build());
 				iter.remove();
 			}
 
