@@ -40,6 +40,10 @@ This software does have the following minimal requirements:
 Following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
 
+# Additional resources
+In the scope of the COPRS it is necessary to be able to adjust the configuration of the commonly used kafka topics. As the SCDF server would create the kafka topics itself, when they aren't already present, it is necessary, that the kafka topics ``catalog-job`` and ``catalog-event`` are already created, before the SCDF streams are started.
+
+In case the default COPRS Infrastructure is used, this will be handled by the Strimzi Operator. On deployment of this RS core chain, the deployment script will firstly create the two KafkaTopic objects into the Kubernetes cluster, which will create the topics with the preferred configuration. The configuration can be found in the folder ``additional_resources`` in the files ``catalog-job.yaml`` and ``catalog-event.yaml``.
 
 # Configuration
 ## Application properties
