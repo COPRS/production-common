@@ -2,6 +2,8 @@ ARG BRANCH
 FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app
 
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as base
+
 FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/sentinel3/s3-ol1:3.11
 ARG VERSION
 ARG COMMIT_ID
