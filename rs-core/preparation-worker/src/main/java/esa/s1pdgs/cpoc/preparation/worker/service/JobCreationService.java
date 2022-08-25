@@ -144,6 +144,7 @@ public class JobCreationService {
 			
 			// Determine t0PdgsDate
 			Date t0 = null;
+			
 			for (AppDataJobTaskInputs inputs : job.getAdditionalInputs()) {
 				for (AppDataJobInput input : inputs.getInputs()) {
 					for (AppDataJobFile file : input.getFiles()) {
