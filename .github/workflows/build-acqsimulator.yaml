@@ -72,7 +72,7 @@ jobs:
         with:
           images:  ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-core-acqsimulator
       
-      - name: Copy S3ACQWrapperScript.sh from docker_s3_ipf_acq
+      - name: Copy over scripts from docker_s3_ipf_acq
         run: |
           cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/S3ACQWrapperScript.sh" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/S3ACQWrapperScript.sh"
           cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/convertL0OrderISP.py" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/convertL0OrderISP.py"
