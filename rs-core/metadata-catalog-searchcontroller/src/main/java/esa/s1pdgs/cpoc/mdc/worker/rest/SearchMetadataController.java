@@ -246,12 +246,7 @@ public class SearchMetadataController {
 
 				if (f != null) {
 					LOGGER.debug("Query returned {} results", f.size());
-
-					for (final SearchMetadata m : f) {
-						response.add(new SearchMetadata(m.getProductName(), m.getProductType(), m.getKeyObjectStorage(),
-								m.getValidityStart(), m.getValidityStop(), m.getMissionId(), m.getSatelliteId(),
-								m.getStationCode()));
-					}
+					return new ResponseEntity<>(f, HttpStatus.OK);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestValCover".equals(mode)) {
@@ -262,9 +257,7 @@ public class SearchMetadataController {
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						satellite, insConfId, processMode, bandIndexId);
 				if (f != null) {
-					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
-							f.getStationCode()));
+					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("ValIntersect".equals(mode)) {
@@ -281,12 +274,7 @@ public class SearchMetadataController {
 
 				if (f != null) {
 					LOGGER.debug("Query returned {} results", f.size());
-
-					for (final SearchMetadata m : f) {
-						response.add(new SearchMetadata(m.getProductName(), m.getProductType(), m.getKeyObjectStorage(),
-								m.getValidityStart(), m.getValidityStop(), m.getMissionId(), m.getSatelliteId(),
-								m.getStationCode()));
-					}
+					return new ResponseEntity<>(f, HttpStatus.OK);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("ClosestStartValidity".equals(mode)) {
@@ -299,9 +287,7 @@ public class SearchMetadataController {
 						satellite, insConfId, processMode);
 
 				if (f != null) {
-					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
-							f.getStationCode()));
+					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("ClosestStopValidity".equals(mode)) {
@@ -314,9 +300,7 @@ public class SearchMetadataController {
 						satellite, insConfId, processMode, polarisation);
 
 				if (f != null) {
-					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
-							f.getStationCode()));
+					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestValIntersect".equals(mode)) {
@@ -328,9 +312,7 @@ public class SearchMetadataController {
 						productType, ProductFamily.fromValue(productFamily), satellite);
 
 				if (f != null) {
-					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
-							f.getStationCode()));
+					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestValidity".equals(mode)) {
@@ -342,9 +324,7 @@ public class SearchMetadataController {
 						productType, ProductFamily.fromValue(productFamily), satellite);
 
 				if (f != null) {
-					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
-							f.getStationCode()));
+					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("FullCoverage".equals(mode)) {
@@ -357,12 +337,7 @@ public class SearchMetadataController {
 
 				if (f != null) {
 					LOGGER.debug("Query returned {} results", f.size());
-
-					for (final SearchMetadata m : f) {
-						response.add(new SearchMetadata(m.getProductName(), m.getProductType(), m.getKeyObjectStorage(),
-								m.getValidityStart(), m.getValidityStop(), m.getMissionId(), m.getSatelliteId(),
-								m.getStationCode()));
-					}
+					return new ResponseEntity<>(f, HttpStatus.OK);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestValidityClosest".equals(mode)) {
@@ -374,18 +349,14 @@ public class SearchMetadataController {
 						productType, ProductFamily.fromValue(productFamily), processMode, satellite);
 
 				if (f != null) {
-					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
-							f.getStationCode()));
+					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestStopValidity".equals(mode)) {
 				final SearchMetadata f = esServices.latestStopValidity(productType, ProductFamily.fromValue(productFamily), satellite);
 
 				if (f != null) {
-					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
-							f.getStationCode()));
+					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestValCoverClosest".equals(mode)) {
@@ -397,9 +368,7 @@ public class SearchMetadataController {
 						productType, ProductFamily.fromValue(productFamily), satellite);
 
 				if (f != null) {
-					response.add(new SearchMetadata(f.getProductName(), f.getProductType(), f.getKeyObjectStorage(),
-							f.getValidityStart(), f.getValidityStop(), f.getMissionId(), f.getSatelliteId(),
-							f.getStationCode()));
+					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else {
