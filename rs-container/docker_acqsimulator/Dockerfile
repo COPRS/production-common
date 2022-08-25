@@ -21,12 +21,13 @@ RUN apt-get update && \
 
 #create local WD
 RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
+RUN mkdir -p /opt/sample/S3B9060 && chown rsuser:rsuser /data/localWD
 
 USER 1001
 
 COPY files/* /opt/
 
-COPY files/DirectDataCaptureServer /usr/local/components/DDC/bin/DirectDataCaptureServer
+COPY files/DirectDataCaptureServer.py /usr/local/components/DDC/bin/DirectDataCaptureServer
 COPY files/NOOP.sh /usr/local/components/L0PreProc/bin/S3L0PreProcessor
 COPY files/S3L0PostProcessor.py /usr/local/components/L0PostProc/bin/S3L0PostProcessor
 

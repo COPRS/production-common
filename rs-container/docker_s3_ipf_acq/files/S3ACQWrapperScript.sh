@@ -107,7 +107,7 @@ function start_ddc() {
 	log "Start DirectDataCaptureServer:"
 	log "################################################################################"
 
-	/usr/local/components/DDC/bin/DirectDataCaptureServer 
+	/usr/local/components/DDC/bin/DirectDataCaptureServer
 
 	log "################################################################################"
 
