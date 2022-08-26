@@ -16,8 +16,11 @@ def main():
     inputpath = "/data/NRTAP/CADU"
     outputpath = "/data/NRTAP/L0Orders"
 
+    print("Looking for input data in folder: ", inputpath)
     inputdir = os.listdir(inputpath)
     foldername = inputdir[0]
+    print("Found folders: " + inputdir)
+    print("Using first folder name to build L0JobOrders: ", foldername)
     orbitnumber = foldername[-10:-4].lstrip("0")
     satelliteid = foldername[7:10]
     parsedtime = datetime.datetime.strptime(foldername[11:23], '%Y%m%d%H%M%S')
