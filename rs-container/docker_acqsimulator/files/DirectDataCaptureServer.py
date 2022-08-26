@@ -1,10 +1,10 @@
 #!/usr/bin/env python2
 
-import datetime
-import os
-from generateL0OrderFile import buildNewXML
 import sys
 sys.path.append('/opt')
+from generateL0OrderFile import buildNewXML
+import os
+import datetime
 
 
 def main():
