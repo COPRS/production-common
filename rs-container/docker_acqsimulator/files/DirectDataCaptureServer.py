@@ -2,10 +2,6 @@
 
 import sys
 sys.path.append('/opt')
-from generateL0OrderFile import buildNewXML
-import os
-import datetime
-
 
 
 def main():
@@ -17,7 +13,13 @@ def main():
     outputpath = "/data/NRTAP/L0Orders"
 
     print("Looking for input data in folder: ", inputpath)
-    inputdir = os.listdir(inputpath)
+    if os.path.isdir(os.path.join(inputpath, "S3A")):
+        inputmission = "S3A"
+    elif os.path.isdir(os.path.join(inputpath, "S3B")):
+        inputmission = "S3B"
+    
+    print("Found data for mission: ", inputmission)
+    inputdir = os.listdir(os.path.join(inputpath, inputmission))
     foldername = inputdir[0]
     print("Found folders: ", inputdir)
     print("Using first folder name to build L0JobOrders: ", foldername)
