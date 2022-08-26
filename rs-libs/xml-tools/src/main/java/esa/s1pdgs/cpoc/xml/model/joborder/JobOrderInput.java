@@ -135,6 +135,7 @@ public class JobOrderInput {
 					.map(JobOrderTimeInterval::new).collect(Collectors.toList()));
 			this.nbTimeIntervals = this.timeIntervals.size();
 		}
+		this.t0PdgsDate = obj.getT0PdgsDate();
 	}
 
 	/**
