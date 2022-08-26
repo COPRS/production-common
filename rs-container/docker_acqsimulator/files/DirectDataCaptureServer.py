@@ -1,5 +1,8 @@
 #!/usr/bin/env python2
 
+import datetime
+import os
+from generateL0OrderFile import buildNewXML
 import sys
 sys.path.append('/opt')
 
@@ -17,7 +20,7 @@ def main():
         inputmission = "S3A"
     elif os.path.isdir(os.path.join(inputpath, "S3B")):
         inputmission = "S3B"
-    
+
     print("Found data for mission: ", inputmission)
     inputdir = os.listdir(os.path.join(inputpath, inputmission))
     foldername = inputdir[0]
