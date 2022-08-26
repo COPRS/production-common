@@ -19,7 +19,7 @@ def main():
     print("Looking for input data in folder: ", inputpath)
     inputdir = os.listdir(inputpath)
     foldername = inputdir[0]
-    print("Found folders: " + inputdir)
+    print("Found folders: ", inputdir)
     print("Using first folder name to build L0JobOrders: ", foldername)
     orbitnumber = foldername[-10:-4].lstrip("0")
     satelliteid = foldername[7:10]
