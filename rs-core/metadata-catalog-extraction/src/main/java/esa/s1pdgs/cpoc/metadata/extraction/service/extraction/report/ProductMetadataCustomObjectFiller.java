@@ -1,14 +1,17 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report;
 
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 
 public class ProductMetadataCustomObjectFiller {
 	
 	final CatalogEvent catalogEvent;
+	final MissionId missionId;
 	final MetadataExtractionReportingOutput output;
 	
-	public ProductMetadataCustomObjectFiller(final CatalogEvent catalogEvent, MetadataExtractionReportingOutput output) {
+	public ProductMetadataCustomObjectFiller(final CatalogEvent catalogEvent, final MissionId missionId, MetadataExtractionReportingOutput output) {
 		this.catalogEvent = catalogEvent;
+		this.missionId = missionId;
 		this.output = output;
 	}
 	
@@ -17,8 +20,8 @@ public class ProductMetadataCustomObjectFiller {
 		switch (catalogEvent.getProductFamily()) {
 		    // Session files Custom Object
 			case EDRS_SESSION:
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				output.getProductMetadataCustomObject().put("channel_identifier_integer", (Integer) catalogEvent.getMetadata().get("channelId"));
 				break;
 			// Sentinel-1 Custom Object
@@ -28,8 +31,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("processing_level_integer", 0);
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("operational_mode_string", "operationalMode");
 				fillwithKeyMapping("product_class_string", "productClass");
 				fillwithKeyMapping("product_consolidation_string", "productConsolidation");
@@ -52,8 +55,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("processing_level_integer", 1);
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				fillwithKeyMapping("product_type_string", "productType");
 				break;
@@ -62,8 +65,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("processing_level_integer", 2);
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				fillwithKeyMapping("product_type_string", "productType");
 				break;
@@ -76,8 +79,8 @@ public class ProductMetadataCustomObjectFiller {
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
 				fillwithKeyMapping("orbit_number_integer", "orbitNumber");
 				fillwithKeyMapping("product_type_string", "productType");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
-				fillwithKeyMapping("platform_short_name_string", "platfomShortName");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("processor_version_string", "processorVersion");
 				fillwithKeyMapping("quality_status_integer", "qualityStatus");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
@@ -92,8 +95,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("processing_level_integer", 1);
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				fillwithKeyMapping("product_type_string", "productType");
 				break;
@@ -102,8 +105,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("processing_level_integer", 2);
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				fillwithKeyMapping("product_type_string", "productType");
 				break;
@@ -112,8 +115,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("processing_level_integer", 0);
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentName");
 				fillwithKeyMapping("orbit_number_integer", "orbitNumber");
 				fillwithKeyMapping("product_type_string", "productType");
@@ -127,8 +130,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("processing_level_integer", 1);
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				fillwithKeyMapping("product_type_string", "productType");
 				break;
@@ -138,8 +141,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("processing_level_integer", 2);
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				fillwithKeyMapping("platform_short_name_string", "platformShortName");
-				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				fillwithKeyMapping("product_type_string", "productType");
 				break;
