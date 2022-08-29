@@ -15,6 +15,12 @@ public class ProductMetadataCustomObjectFiller {
 	public void fillCustomObject() {
 		
 		switch (catalogEvent.getProductFamily()) {
+		    // Session files Custom Object
+			case EDRS_SESSION:
+				fillwithKeyMapping("platform_short_name_string", "platformShortName");
+				fillwithKeyMapping("platform_serial_identifier_string", "platformSerialIdentifier");
+				output.getProductMetadataCustomObject().put("channel_identifier_integer", (Integer) catalogEvent.getMetadata().get("channelId"));
+				break;
 			// Sentinel-1 Custom Object
 			case L0_SEGMENT:
 			case L0_SLICE:
