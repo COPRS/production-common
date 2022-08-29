@@ -19,7 +19,7 @@ def parseXML(xmlFile):
     filename = root.find('TelemetryOutput/ListOfOutput/Output/FileName').text
 
     # yield satelliteid
-    yield str(filename[2])
+    yield str(filename[0:2])
 
     # yield time
     yield root.find('Downlink/StartTime').text
