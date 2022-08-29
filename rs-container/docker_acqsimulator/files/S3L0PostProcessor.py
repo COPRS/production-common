@@ -19,7 +19,10 @@ def main():
     satelliteId, time = parseXML(sys.argv[1])
 
     outputdir = "/data/NRTAP/LowPriorityOutBasket"
-    os.makedirs(outputdir)
+
+    if not os.path.exists(outputdir):
+        os.makedirs(outputdir)
+
     generateDummyProducts(time, satelliteId, outputdir)
 
 
