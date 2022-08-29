@@ -20,7 +20,7 @@ public class ProductMetadataCustomObjectFiller {
 		switch (catalogEvent.getProductFamily()) {
 		    // Session files Custom Object
 			case EDRS_SESSION:
-				fillwithKeyMapping("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+				output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
 				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				output.getProductMetadataCustomObject().put("channel_identifier_integer", (Integer) catalogEvent.getMetadata().get("channelId"));
 				break;
