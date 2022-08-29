@@ -6,6 +6,7 @@ sys.path.append('/opt')
 
 from generateDummyProducts import generateDummyProducts
 from parseXML import parseXML
+import os
 
 
 # Main method
@@ -17,8 +18,9 @@ def main():
 
     satelliteId, time = parseXML(sys.argv[1])
 
-    generateDummyProducts(time, satelliteId,
-                          "/data/NRTAP/LowPriorityOutBasket")
+    outputdir = "/data/NRTAP/LowPriorityOutBasket"
+    os.makedirs(outputdir)
+    generateDummyProducts(time, satelliteId, outputdir)
 
 
 if __name__ == "__main__":
