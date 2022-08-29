@@ -181,6 +181,8 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		if (catJob.getAdditionalFields().get("t0PdgsDate") != null) {
 			catEvent.getAdditionalFields().put("t0PdgsDate", (String) metadata.get("t0PdgsDate"));
 		}
+		catEvent.getAdditionalFields().put("productSizeByte", catJob.getProductSizeByte());
+		catEvent.getAdditionalFields().put("stationName", catJob.getStationName());
 
 		return catEvent;
 	}
