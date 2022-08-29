@@ -7,7 +7,6 @@ import os
 import datetime
 
 
-
 def main():
     '''Main Method'''
 
@@ -16,8 +15,17 @@ def main():
     inputpath = "/data/NRTAP/CADU"
     outputpath = "/data/NRTAP/L0Orders"
 
-    inputdir = os.listdir(inputpath)
+    print("Looking for input data in folder: ", inputpath)
+    if os.path.isdir(os.path.join(inputpath, "S3A")):
+        inputmission = "S3A"
+    elif os.path.isdir(os.path.join(inputpath, "S3B")):
+        inputmission = "S3B"
+
+    print("Found data for mission: ", inputmission)
+    inputdir = os.listdir(os.path.join(inputpath, inputmission))
     foldername = inputdir[0]
+    print("Found folders: ", inputdir)
+    print("Using first folder name to build L0JobOrders: ", foldername)
     orbitnumber = foldername[-10:-4].lstrip("0")
     satelliteid = foldername[7:10]
     parsedtime = datetime.datetime.strptime(foldername[11:23], '%Y%m%d%H%M%S')
