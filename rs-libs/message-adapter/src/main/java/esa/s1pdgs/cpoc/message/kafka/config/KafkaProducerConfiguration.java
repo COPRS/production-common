@@ -67,7 +67,7 @@ public class KafkaProducerConfiguration<M> {
             props.putAll(producerConfigurationFactory.producerConfiguration());
         }
         
-        if (properties.getProducer().getLagBasedPartitioner() != null) {
+        if (properties.getProducer() != null && properties.getProducer().getLagBasedPartitioner() != null) {
             LOG.info("using lag based partitioner");
             props.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, LagBasedPartitioner.class);
             props.put(LagBasedPartitioner.KAFKA_PROPERTIES, properties);
@@ -78,7 +78,6 @@ public class KafkaProducerConfiguration<M> {
                 return new PartitionLagFetcher(Admin.create(adminConfig), properties);
             });
         }
-
 
         LOG.info("using producer config {}", props);
 
