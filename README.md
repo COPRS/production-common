@@ -82,7 +82,7 @@ Some additional helm charts that can be used to mock systems.
 In order to get an overview about the architecture of the overall design of COPRS and the software components, please consult the Architecture design document that can be found [here](./docs/architecture)
 
 ### Installation Manual
-For further information on deploying the RS Core Components or RS Standalone Components, please consult the Installation Manual, that can be found [here](./docs/installation_manuals)
+For further information on deploying the RS Core Components or RS Standalone Components, please consult the Installation Manual, that can be found [here](./docs/install_manuals)
 
 ### Reports
 The build pipe of this project is automatically generating Sonarqube reports for each module when it is build. This allows an easy overview about the status of the project. You can check the reports of the project [here](https://sonarqube.coprs.esa-copernicus.eu/projects) 
