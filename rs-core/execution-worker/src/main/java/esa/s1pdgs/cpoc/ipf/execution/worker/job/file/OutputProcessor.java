@@ -174,12 +174,10 @@ public class OutputProcessor {
 	 * according the output define in the job they match
 	 * 
 	 */
-	final long sortOutputs(final List<String> lines, final List<FileObsUploadObject> uploadBatch,
+	final void sortOutputs(final List<String> lines, final List<FileObsUploadObject> uploadBatch,
 			final List<ObsQueueMessage> outputToPublish, final List<FileQueueMessage> reportToPublish, final ReportingFactory reportingFactory)
 			throws AbstractCodedException {
 
-		long productSize = 0;
-		
 		final OQCExecutor executor = new OQCExecutor(properties);
 
 		LOGGER.info("{} 2 - Starting organizing outputs", prefixMonitorLogs);
@@ -201,6 +199,8 @@ public class OutputProcessor {
 
 				final File file = new File(filePath);
 				final OQCFlag oqcFlag = executor.executeOQC(file, family, matchOutput, new OQCDefaultTaskFactory(), reportingFactory);
+				final long productSizeBytes = size(file);
+				
 				LOGGER.info("Result of OQC validation was: {}", oqcFlag);
 
 				switch (family) {		
@@ -213,7 +213,6 @@ public class OutputProcessor {
 					LOGGER.info("Output {} (SEGMENT_REPORT) is considered as belonging to the family {}", productName,
 							matchOutput.getFamily());
 					reportToPublish.add(new FileQueueMessage(family, productName, file));
-					productSize += size(file);
 					break;
 				case L0_SLICE:
 				case L0_SEGMENT:	
@@ -238,7 +237,7 @@ public class OutputProcessor {
 							);
 							uploadBatch.add(newUploadObject(family,productName,file));
 							outputToPublish.add(
-								new ObsQueueMessage(family, productName, productName, inputMessage.getProductProcessMode(),oqcFlag));
+								new ObsQueueMessage(family, productName, productName, inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
 
 						} 
 						else {
@@ -249,15 +248,13 @@ public class OutputProcessor {
 							);
 							uploadBatch.add(newUploadObject(ProductFamily.GHOST,productName, file));
 						}
-						productSize += size(file);
 					}
 					else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());						
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getProductProcessMode(),oqcFlag));
-						productSize += size(file);
+								inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
 					}
 					break;
 					//FIXME There shall not be blanks anymore.
@@ -272,15 +269,13 @@ public class OutputProcessor {
 						LOGGER.warn("Product {} is not expected as output of AIO", productName);
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getProductProcessMode(),oqcFlag));
-						productSize += size(file);
+								inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
 					} else {
 						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
 						uploadBatch.add(newUploadObject(family, productName, file));
 						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getProductProcessMode(),oqcFlag));
-						productSize += size(file);
+								inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
 					}
 					break;
 				case L1_SLICE:
@@ -306,8 +301,7 @@ public class OutputProcessor {
 							matchOutput.getFamily());
 					uploadBatch.add(newUploadObject(family, productName, file));
 					outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-							inputMessage.getProductProcessMode(), oqcFlag));
-					productSize += size(file);
+							inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
 					break;
 				case BLANK:
 					LOGGER.info("Output {} will be ignored", productName);
@@ -318,7 +312,6 @@ public class OutputProcessor {
 			}
 
 		}
-		return productSize;
 	}
 
 	static boolean isPartial(final File file) {		
@@ -572,6 +565,7 @@ public class OutputProcessor {
 			final CatalogJob res = new CatalogJob(msg.getProductName(), msg.getKeyObs(), msg.getFamily(),
 					toUppercaseOrNull(msg.getProcessMode()), msg.getOqcFlag(), inputMessage.getTimeliness(), uuid);
 			res.getAdditionalFields().put("t0PdgsDate", t0PdgsDate);
+			res.setProductSizeByte(msg.getProductSizeBytes());
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			return res;

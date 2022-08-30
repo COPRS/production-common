@@ -22,9 +22,11 @@ public class ObsQueueMessage extends QueueMessage {
     
     private OQCFlag oqcFlag;
     
+    private long productSizeBytes;
+    
     public ObsQueueMessage(final ProductFamily family, final String productName,
             final String keyObs, final String processMode) {
-    	this (family, productName, keyObs, processMode, OQCFlag.NOT_CHECKED);
+    	this (family, productName, keyObs, processMode, OQCFlag.NOT_CHECKED, 0);
     }
 
     /**
@@ -33,11 +35,12 @@ public class ObsQueueMessage extends QueueMessage {
      * @param keyObs
      */
     public ObsQueueMessage(final ProductFamily family, final String productName,
-            final String keyObs, final String processMode, final OQCFlag oqcFlag) {
+            final String keyObs, final String processMode, final OQCFlag oqcFlag, final long productSizeBytes) {
         super(family, productName);
         this.keyObs = keyObs;
         this.processMode = processMode;
         this.oqcFlag = oqcFlag;
+        this.productSizeBytes = productSizeBytes;
     }
 
     /**
@@ -70,14 +73,23 @@ public class ObsQueueMessage extends QueueMessage {
 		this.oqcFlag = oqcFlag;
 	}
 
+	
+	public long getProductSizeBytes() {
+		return productSizeBytes;
+	}
+
+	public void setProductSizeBytes(long productSizeBytes) {
+		this.productSizeBytes = productSizeBytes;
+	}
+
 	/**
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         String superStr = super.toStringForExtendedClasses();
-        return String.format("{%s, keyObs: %s, processMode: %s, ocqFlag: %s}", superStr,
-                keyObs, processMode, oqcFlag);
+        return String.format("{%s, keyObs: %s, processMode: %s, ocqFlag: %s, productSizeBytes: %s}", superStr,
+                keyObs, processMode, oqcFlag, productSizeBytes);
     }
 
     /**
@@ -86,7 +98,7 @@ public class ObsQueueMessage extends QueueMessage {
     @Override
     public int hashCode() {
         int superHash = super.hashCode();
-        return Objects.hash(superHash, keyObs, processMode, oqcFlag);
+        return Objects.hash(superHash, keyObs, processMode, oqcFlag, productSizeBytes);
     }
 
     /**
@@ -103,7 +115,8 @@ public class ObsQueueMessage extends QueueMessage {
             ObsQueueMessage other = (ObsQueueMessage) obj;
             // field comparison
             ret = super.equals(other) && Objects.equals(keyObs, other.keyObs)
-                    && Objects.equals(processMode, other.processMode) && Objects.equals(oqcFlag, other.oqcFlag);
+                    && Objects.equals(processMode, other.processMode) && Objects.equals(oqcFlag, other.oqcFlag)
+                    && productSizeBytes == other.productSizeBytes;
         }
         return ret;
     }
