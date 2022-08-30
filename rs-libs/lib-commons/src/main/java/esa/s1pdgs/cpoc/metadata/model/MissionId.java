@@ -26,5 +26,17 @@ public enum MissionId {
 			throw new IllegalArgumentException("cannot extract mission from filename: " + fileName);
 		}
 	}
+	
+	public static String toPlatformShortName(MissionId missionId) {
+		if (missionId == S1) {
+			return "SENTINEL-1";
+		} else if (missionId == S2) {
+			return "SENTINEL-2";
+		} else if (missionId == S3) {
+			return "SENTINEL-3";
+		} else {
+			return "UNDEFINED";
+		}
+	}
 
 }

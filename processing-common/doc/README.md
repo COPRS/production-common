@@ -8,3 +8,4 @@ This folder contains information regarding common configuration shared by all RS
  - [Scaling of applications](scaling.md)
  - [Secret configuration](secrets.md)
  - [Handling of long-running applications](long-running.md)
+ - [Load balance the lag](load-balance.md)  

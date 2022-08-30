@@ -181,6 +181,10 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		if (catJob.getAdditionalFields().get("t0PdgsDate") != null) {
 			catEvent.getAdditionalFields().put("t0PdgsDate", (String) metadata.get("t0PdgsDate"));
 		}
+		catEvent.getAdditionalFields().put("productSizeByte", catJob.getProductSizeByte());
+		if (catJob.getStationName() != null) {
+			catEvent.getAdditionalFields().put("stationName", catJob.getStationName());
+		}
 
 		return catEvent;
 	}
@@ -229,7 +233,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		}
 		
 		// RS-407
-		new ProductMetadataCustomObjectFiller(catalogEvent, output).fillCustomObject();
+		new ProductMetadataCustomObjectFiller(catalogEvent, mission, output).fillCustomObject();
 		
 		// RS-444
 		output.setEndToEndProduct(catalogEvent.getProductFamily().isEndToEndFamily());
