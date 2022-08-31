@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0-rc1] - 2022-08-31
+
+### Added
+
+RS-498: Adding a house keep service handling timeout scenarios
+
+### Changed
+
+RS-426: Create catalog topics via strimzi
+RS-427: Create catalog topics via strimzi
+RS-448: Make wrapper used by S3 ACQ simulator and real IPF using the same code base
+RS-467: Split Sonarqube reports after production-common CI improvements
+RS-497: Update documentation to be easy to use
+RS-493: Removed JSON Licence library from project and replace it with other libs
+RS-496: Renamed action DELETE by drop in DLQ
+RS-501: Changed location where RS Core Components and images are pushed to
+RS-510: Renamed t0PdgsDate in messages
+RS-511: Moved t0PdgsDate from base message to additionalFields
+
+### Removed
+
+- N/A
+
 ## [1.4.0-rc1] - 2022-08-03
 
 ### Added
