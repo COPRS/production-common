@@ -13,7 +13,7 @@ RS-498: Adding a house keep service handling timeout scenarios
 ### Changed
 
 RS-426: Create catalog topics via strimzi
-RS-427: Create catalog topics via strimzi
+RS-427: Create error-warning topic via strimzi
 RS-448: Make wrapper used by S3 ACQ simulator and real IPF using the same code base
 RS-467: Split Sonarqube reports after production-common CI improvements
 RS-497: Update documentation to be easy to use
