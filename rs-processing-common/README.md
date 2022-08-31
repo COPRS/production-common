@@ -36,7 +36,7 @@ The following global parameters exist per instance and can be used when deployin
 | `service.name` | The name of the service when it is deployed | e.g. `rs-core-metadata-catalog-searchcontroller` |
 | `processing.namespace` | The namespace into that the chart shall be deployed | `processing` |
 | `image.registry` | The registry from that the image shall be pulled | `artifactory.coprs.esa-copernicus.eu` |
-| `image.repository` | The path within the directory from that the image shall be pulled | `werum-docker` |
+| `image.repository` | The path within the directory from that the image shall be pulled | `rs-docker` |
 | `image.tag` | The tag of the docker image that shall be pulled | `develop` |
 | `image.imagePullSecrets` | The secret that will be use to authentificate against the registry | `artifactory` |
 | `resources.cpu.request` | Specifies the amount of CPU that is requested. More information can be found [here](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/]) | Instance specific |

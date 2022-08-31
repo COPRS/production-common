@@ -1,6 +1,6 @@
 ARG BRANCH
 
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH}
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
