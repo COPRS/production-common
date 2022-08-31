@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'rs-container/docker_acqsimulator/**'
-      - 'rs-container/docker_s3_ipf_acq/S3ACQWrapperScript.sh'
+      - 'rs-container/docker_s3_ipf_acq/**'
       - '.github/workflows/build-acqsimulator.yaml'
     branches:
       - '!main'
