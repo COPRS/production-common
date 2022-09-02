@@ -25,6 +25,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
@@ -39,6 +40,8 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -235,9 +238,8 @@ public class OutputProcessor {
 									new GhostHandlingSegmentReportingOutput(false),
 									new ReportingMessage("%s (%s) is not a ghost candidate", productName, family)
 							);
-							uploadBatch.add(newUploadObject(family,productName,file));
-							outputToPublish.add(
-								new ObsQueueMessage(family, productName, productName, inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
+							addToUploadAndPublishIfNotExistsInObs(uploadBatch, outputToPublish, productName, family,
+									file, oqcFlag, productSizeBytes);
 
 						} 
 						else {
@@ -252,9 +254,8 @@ public class OutputProcessor {
 					else {
 						LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());						
-						uploadBatch.add(newUploadObject(family, productName, file));
-						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
+						addToUploadAndPublishIfNotExistsInObs(uploadBatch, outputToPublish, productName, family, file,
+								oqcFlag, productSizeBytes);
 					}
 					break;
 					//FIXME There shall not be blanks anymore.
@@ -267,15 +268,13 @@ public class OutputProcessor {
 					// Specific case of the L0 wrapper
 					if (appLevel == ApplicationLevel.L0) {
 						LOGGER.warn("Product {} is not expected as output of AIO", productName);
-						uploadBatch.add(newUploadObject(family, productName, file));
-						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
+						addToUploadAndPublishIfNotExistsInObs(uploadBatch, outputToPublish, productName, family, file,
+								oqcFlag, productSizeBytes);
 					} else {
 						LOGGER.info("Output {} (ACN, BLANK) is considered as belonging to the family {}", productName,
 								matchOutput.getFamily());
-						uploadBatch.add(newUploadObject(family, productName, file));
-						outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-								inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
+						addToUploadAndPublishIfNotExistsInObs(uploadBatch, outputToPublish, productName, family, file,
+								oqcFlag, productSizeBytes);
 					}
 					break;
 				case L1_SLICE:
@@ -299,9 +298,8 @@ public class OutputProcessor {
 					// upload per batch
 					LOGGER.info("Output {} is considered as belonging to the family {}", productName,
 							matchOutput.getFamily());
-					uploadBatch.add(newUploadObject(family, productName, file));
-					outputToPublish.add(new ObsQueueMessage(family, productName, productName,
-							inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
+					addToUploadAndPublishIfNotExistsInObs(uploadBatch, outputToPublish, productName, family, file,
+							oqcFlag, productSizeBytes);
 					break;
 				case BLANK:
 					LOGGER.info("Output {} will be ignored", productName);
@@ -311,6 +309,27 @@ public class OutputProcessor {
 				}
 			}
 
+		}
+	}
+
+	private void addToUploadAndPublishIfNotExistsInObs(final List<FileObsUploadObject> uploadBatch,
+			final List<ObsQueueMessage> outputToPublish, final String productName, final ProductFamily family,
+			final File file, final OQCFlag oqcFlag, final long productSizeBytes) throws InternalErrorException{
+		
+		try {
+			if (obsClient.existsWithSameSize(new ObsObject(family, productName), productSizeBytes)) {
+				
+				LOGGER.warn("Output {} with family {} already exists in OBS with same size of {} bytes and upload will be skipped",
+						productName, family, productSizeBytes );
+				
+			} else {
+				uploadBatch.add(newUploadObject(family, productName, file));
+				outputToPublish.add(new ObsQueueMessage(family, productName, productName,
+						inputMessage.getProductProcessMode(), oqcFlag, productSizeBytes));
+				
+			}
+		} catch (ObsException | SdkClientException e) {
+			throw new InternalErrorException(e.getMessage(), e);
 		}
 	}
 
