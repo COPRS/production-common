@@ -44,6 +44,18 @@ public interface ObsClient {
      */
     boolean exists(ObsObject object)
             throws SdkClientException, ObsServiceException;
+    
+    /**
+     * Returns true, if OBS object already exists and has same size. 
+     * In case of a directory, the size is determined summing up the sizes of all files contained in the directory recursively.
+     * 
+     * @param obsObject
+     * @param size
+     * @return
+     * @throws SdkClientException
+     * @throws ObsException
+     */
+    boolean existsWithSameSize(ObsObject obsObject, long size) throws SdkClientException, ObsException;
 
     /**
      * @param object

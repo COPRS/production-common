@@ -96,6 +96,11 @@ public class UnrecoverableErrorAwareObsClient implements ObsClient {
     public long size(ObsObject object) throws ObsException {
         return obsClient.size(object);
     }
+    
+	@Override
+	public boolean existsWithSameSize(ObsObject object, long size) throws SdkClientException, ObsException {
+		return obsClient.existsWithSameSize(object, size);
+	}
 
     @Override
     public String getChecksum(ObsObject object) throws ObsException {
