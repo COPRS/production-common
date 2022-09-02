@@ -13,7 +13,7 @@
 		<docker.image.prefix>springio</docker.image.prefix>
 		<project.build.finalName>rs-request-parking-lot</project.build.finalName>
 		<project.artifactId>rs-request-parking-lot</project.artifactId>
-		<start-class>de.werum.coprs.request-parking-lot.Application</start-class>
+		<start-class>de.werum.coprs.requestparkinglot.Application</start-class>
 	</properties>
 	
 	<dependencies>
