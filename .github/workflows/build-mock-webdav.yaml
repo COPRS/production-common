@@ -42,7 +42,7 @@ jobs:
 
       - uses: ./.github/actions/build-container
         with:
-          IMAGE_NAME_SUFFIX: mock_webdav
+          IMAGE_NAME_SUFFIX: mock-webdav
           BUILD_CONTEXT: ./rs-container/docker_mock_webdav
           WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
           WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
