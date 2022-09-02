@@ -125,6 +125,12 @@ public class SwiftObsClient extends AbstractObsClient {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return swiftObsServices.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
+	
+
+	@Override
+	public boolean existsWithSameSize(ObsObject obsObject, long size) throws SdkClientException, ObsException {
+		throw new UnsupportedOperationException("setExpirationTime not implemented for swift");
+	}
 
 	@Override
 	public boolean prefixExists(final ObsObject object) throws SdkClientException, ObsServiceException {
@@ -330,4 +336,5 @@ public class SwiftObsClient extends AbstractObsClient {
 	public String getAbsoluteStoragePath(ProductFamily family, String keyObs) {
 		throw new UnsupportedOperationException("getAbsoluteStoragePath not yet implemented for swift");
 	}
+
 }

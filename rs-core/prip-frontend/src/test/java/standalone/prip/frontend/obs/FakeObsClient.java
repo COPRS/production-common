@@ -32,6 +32,12 @@ public class FakeObsClient implements ObsClient {
 	}
 	
 	@Override
+	public boolean existsWithSameSize(ObsObject obsObject, long size) throws SdkClientException, ObsException {
+		// TODO Auto-generated method stub
+		return false;
+	}	
+	
+	@Override
 	public void uploadStreams(final List<StreamObsUploadObject> objects, final ReportingFactory reportingFactory)
 			throws AbstractCodedException, ObsEmptyFileException {
 		// TODO Auto-generated method stub		
@@ -136,6 +142,6 @@ public class FakeObsClient implements ObsClient {
 	public String getAbsoluteStoragePath(ProductFamily family, String keyObs) {
 		// TODO Auto-generated method stub
 		return null;
-	}	
+	}
 
 }

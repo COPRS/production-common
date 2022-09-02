@@ -158,6 +158,33 @@ public class S3ObsClient extends AbstractObsClient {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return s3Services.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
+	
+	@Override
+	public boolean existsWithSameSize(ObsObject obsObject, long size) throws SdkClientException, ObsException {
+
+		long totalSize = -1;
+
+		// obsObject is a file and exists
+		if (this.exists(obsObject)) {
+			totalSize = this.size(obsObject);
+
+		} else if (this.prefixExists(obsObject)) {
+
+			// obsObject is a directory and exists
+
+			List<String> list = this.list(obsObject.getFamily(), obsObject.getKey());
+			totalSize = 0;
+			for (String key : list) {
+				totalSize += this.size(new ObsObject(obsObject.getFamily(), key));
+			}
+		}
+
+		if (totalSize < 0 || totalSize != size) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	@Override
 	public boolean prefixExists(final ObsObject object) throws SdkClientException {
