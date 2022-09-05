@@ -32,7 +32,7 @@ import de.werum.coprs.requestparkinglot.repo.FailedProcessingRepo;
 public class RequestParkingLotTest {
 	private static final List<String> PROCESSING_TYPES_LIST = Arrays.asList("foo","bar");
 	
-	private final RequestParkingLotConfiguration config = new RequestParkingLotConfiguration("foo bar");
+	private final RequestParkingLotConfiguration config = new RequestParkingLotConfiguration("foo bar", "defResubmitTopic");
 		
 	
 	@Mock
@@ -110,8 +110,8 @@ public class RequestParkingLotTest {
 	}
 
 	@Test
-	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRequest_ShallResubmitAndDelete() throws JsonMappingException, JsonProcessingException {	
-		final FailedProcessing fp = newFailedProcessing("123"); 
+	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRestartableRequest_ShallRestartAndDelete() throws JsonMappingException, JsonProcessingException {	
+		final FailedProcessing fp = newFailedProcessing("123", "{\"foo\":\"bar\",\"retryCounter\":0,\"allowedActions\":[\"RESTART\"]}");
 		doReturn(Optional.of(fp))
 			.when(failedProcessingRepo)
 			.findById("123");
@@ -124,6 +124,64 @@ public class RequestParkingLotTest {
 				fp.getMessage(), new TypeReference<HashMap<String, Object>>(){});
 		newMessage.put("retryCounter", 1);
 		verify(messageProducer, times(1)).send(fp.getTopic(), newMessage);
+	}
+	
+	@Test(expected = RuntimeException.class)
+	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndNonRestartableRequest_ShallThrowException() throws JsonMappingException, JsonProcessingException {	
+		final FailedProcessing fp = newFailedProcessing("123"); 
+		doReturn(Optional.of(fp))
+			.when(failedProcessingRepo)
+			.findById("123");
+
+		uut.restartAndDeleteFailedProcessing("123");
+	}
+	
+	@Test
+	public void testResubmitAndDeleteFailedProcessing_OnDefaultResubmitTopicAndResubmittableRequest_ShallResubmitAndDelete() throws JsonMappingException, JsonProcessingException {	
+		final FailedProcessing fp = newFailedProcessing("123", "{\"foo\":\"bar\",\"retryCounter\":0,\"allowedActions\":[\"RESUBMIT\"],\"additionalFields\":{\"resubmitMessage\":{\"retryCounter\":0}}}");
+		doReturn(Optional.of(fp))
+			.when(failedProcessingRepo)
+			.findById("123");
+
+		uut.resubmitAndDeleteFailedProcessing("123");
+		
+		verify(failedProcessingRepo, times(1)).findById("123");
+		verify(failedProcessingRepo, times(1)).deleteById("123");
+		final Map<String, Object> oldMessage = new ObjectMapper().readValue(
+				fp.getMessage(), new TypeReference<HashMap<String, Object>>(){});
+		@SuppressWarnings("unchecked")
+		final Map<String, Object> newMessage = (Map<String, Object>) ((Map<String, Object>)oldMessage.get("additionalFields")).get("resubmitMessage");
+		newMessage.put("retryCounter", 1);
+		verify(messageProducer, times(1)).send("defResubmitTopic", newMessage);
+	}
+	
+	@Test
+	public void testResubmitAndDeleteFailedProcessing_OnCustomResubmitTopicAndResubmittableRequest_ShallResubmitAndDelete() throws JsonMappingException, JsonProcessingException {	
+		final FailedProcessing fp = newFailedProcessing("123", "{\"foo\":\"bar\",\"retryCounter\":0,\"allowedActions\":[\"RESUBMIT\"],\"additionalFields\":{\"resubmitMessage\":{\"retryCounter\":0},\"resubmitTopic\":\"fooTopic\"}}");
+		doReturn(Optional.of(fp))
+			.when(failedProcessingRepo)
+			.findById("123");
+
+		uut.resubmitAndDeleteFailedProcessing("123");
+		
+		verify(failedProcessingRepo, times(1)).findById("123");
+		verify(failedProcessingRepo, times(1)).deleteById("123");
+		final Map<String, Object> oldMessage = new ObjectMapper().readValue(
+				fp.getMessage(), new TypeReference<HashMap<String, Object>>(){});
+		@SuppressWarnings("unchecked")
+		final Map<String, Object> newMessage = (Map<String, Object>) ((Map<String, Object>)oldMessage.get("additionalFields")).get("resubmitMessage");
+		newMessage.put("retryCounter", 1);
+		verify(messageProducer, times(1)).send("fooTopic", newMessage);
+	}
+	
+	@Test(expected = RuntimeException.class)
+	public void testResubmitAndDeleteFailedProcessing_OnExistingTopicAndNonResubmittableRequest_ShallThrowException() throws JsonMappingException, JsonProcessingException {	
+		final FailedProcessing fp = newFailedProcessing("123"); 
+		doReturn(Optional.of(fp))
+			.when(failedProcessingRepo)
+			.findById("123");
+
+		uut.restartAndDeleteFailedProcessing("123");
 	}
 
 	@Test(expected = RuntimeException.class)
@@ -153,7 +211,7 @@ public class RequestParkingLotTest {
 	}
 	
 	private FailedProcessing newFailedProcessing(final String id) {
-		return newFailedProcessing(id, "{\"foo\":\"bar\",\"retryCounter\":0}");
+		return newFailedProcessing(id, "{\"foo\":\"bar\",\"retryCounter\":0,\"allowedActions\":[]}");
 	}
 	
 	private FailedProcessing newFailedProcessing(final String id, final String mess) {
