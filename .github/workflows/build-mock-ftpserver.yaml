@@ -49,4 +49,4 @@ jobs:
       
       - uses: ./.github/actions/generate-report
         with: 
-          COMPONENT: mock_ftpserver
+          COMPONENT: mock-ftpserver
