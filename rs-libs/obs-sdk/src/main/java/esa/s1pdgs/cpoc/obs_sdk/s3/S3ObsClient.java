@@ -162,21 +162,22 @@ public class S3ObsClient extends AbstractObsClient {
 	@Override
 	public boolean existsWithSameSize(ObsObject obsObject, long size) throws SdkClientException, ObsException {
 
+		
+		LOGGER.debug("checking if OBS object {} exists and has the size {}", obsObject, size);
 		long totalSize = -1;
 
-		// obsObject is a file and exists
 		if (this.exists(obsObject)) {
 			totalSize = this.size(obsObject);
+			LOGGER.debug("OBS object {} is a file and exists with size {}", obsObject, totalSize);
 
 		} else if (this.prefixExists(obsObject)) {
-
-			// obsObject is a directory and exists
 
 			List<String> list = this.list(obsObject.getFamily(), obsObject.getKey());
 			totalSize = 0;
 			for (String key : list) {
 				totalSize += this.size(new ObsObject(obsObject.getFamily(), key));
 			}
+			LOGGER.debug("OBS object {} is a directory and exists with size {}", obsObject, totalSize);
 		}
 
 		if (totalSize < 0 || totalSize != size) {
