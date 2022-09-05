@@ -17,7 +17,9 @@ public interface RequestParkingLot {
 	FailedProcessing getFailedProcessingById(String id);
 
 	void restartAndDeleteFailedProcessing(String id);
-	
+
+	void resubmitAndDeleteFailedProcessing(String id);
+
 	void deleteFailedProcessing(String id);
 
 	long getFailedProcessingsCount();

@@ -127,7 +127,7 @@ public class RequestParkingLotController {
 		assertValidApiKey(apiKey);				
 		assertValidId(id);
 		try {
-			requestParkingLot.restartAndDeleteFailedProcessing(id);
+			requestParkingLot.resubmitAndDeleteFailedProcessing(id);
 		} catch (final IllegalArgumentException e) {
 			assertElementFound("failed processing", null, String.format("%s: %s", id, e));
 		}
@@ -217,7 +217,7 @@ public class RequestParkingLotController {
 		for (final String id : ids.getIds()) {
 			assertValidId(id);
 			try {
-				requestParkingLot.restartAndDeleteFailedProcessing(id);
+				requestParkingLot.resubmitAndDeleteFailedProcessing(id);
 				success.add(id);
 			} catch (final IllegalArgumentException e) {
 				failed.add(id);

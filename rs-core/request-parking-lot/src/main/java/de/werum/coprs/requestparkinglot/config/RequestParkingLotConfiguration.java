@@ -12,9 +12,11 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 @Configuration
 public class RequestParkingLotConfiguration {
 	private final List<String> kafkaTopicList;
+	private final String defaultResubmitTopic;
 
 	public RequestParkingLotConfiguration(
-			@Value("${kafkaTopicList:}") final String kafkaTopicList
+			@Value("${kafkaTopicList:}") final String kafkaTopicList,
+			@Value("${defaultResubmitTopic:catalog-event}") final String defaultResubmitTopic
     ) {
 		if (StringUtil.isEmpty(kafkaTopicList)) {
 			this.kafkaTopicList = Collections.emptyList();
@@ -22,9 +24,14 @@ public class RequestParkingLotConfiguration {
 		else {
 			this.kafkaTopicList = Arrays.asList(kafkaTopicList.split("\\s+"));
 		}
+		this.defaultResubmitTopic = defaultResubmitTopic;
 	}
 
 	public List<String> getKafkaTopicList() {
 		return kafkaTopicList;
+	}
+	
+	public String getDefaultResubmitTopic() {
+		return defaultResubmitTopic;
 	}
 }
