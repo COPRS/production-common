@@ -270,7 +270,7 @@ paths:
     post:
       tags:
       - FailedProcessings
-      summary: delete multiple failed processings in a batch. Ids for not existing failed processings are ignored.
+      summary: delete multiple failed processings in a batch. Ids for not existing or not restartable failed processings are ignored.
       operationId: deleteFailedProcessingsInBatch
       parameters:
       - name: ApiKey
@@ -347,7 +347,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: item not found or no restart available
           content: {}
         500:
           description: Internal Server Error
@@ -435,7 +435,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: item not found or no resubmit available
           content: {}
         500:
           description: Internal Server Error
@@ -447,8 +447,8 @@ paths:
     post:
       tags:
       - FailedProcessings
-      summary: resubmit multiple failed processing events in a batch. This removes the failed processings from
-        the list and resubmit them. Ids for not existing failed processings are ignored.
+      summary:  multiple failed processing events in a batch. This removes the failed processings from
+        the list and resubmit them. Ids for not existing or not resubmittable failed processings are ignored.
       operationId: resubmitFailedProcessingsInBatch
       parameters:
       - name: ApiKey
@@ -1112,5 +1112,3 @@ components:
       type: apiKey
       name: ApiKey
       in: header
-
-      
