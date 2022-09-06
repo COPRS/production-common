@@ -110,7 +110,8 @@ public class RequestParkingLotTest {
 	}
 
 	@Test
-	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRestartableRequest_ShallRestartAndDelete() throws JsonMappingException, JsonProcessingException {	
+	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRestartableRequest_ShallRestartAndDelete()
+			throws JsonMappingException, JsonProcessingException, AllowedActionNotAvailableException {	
 		final FailedProcessing fp = newFailedProcessing("123", "{\"foo\":\"bar\",\"retryCounter\":0,\"allowedActions\":[\"RESTART\"]}");
 		doReturn(Optional.of(fp))
 			.when(failedProcessingRepo)
@@ -126,8 +127,9 @@ public class RequestParkingLotTest {
 		verify(messageProducer, times(1)).send(fp.getTopic(), newMessage);
 	}
 	
-	@Test(expected = RuntimeException.class)
-	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndNonRestartableRequest_ShallThrowException() throws JsonMappingException, JsonProcessingException {	
+	@Test(expected = AllowedActionNotAvailableException.class)
+	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndNonRestartableRequest_ShallThrowException()
+			throws JsonMappingException, JsonProcessingException, AllowedActionNotAvailableException {	
 		final FailedProcessing fp = newFailedProcessing("123"); 
 		doReturn(Optional.of(fp))
 			.when(failedProcessingRepo)
@@ -137,7 +139,8 @@ public class RequestParkingLotTest {
 	}
 	
 	@Test
-	public void testResubmitAndDeleteFailedProcessing_OnDefaultResubmitTopicAndResubmittableRequest_ShallResubmitAndDelete() throws JsonMappingException, JsonProcessingException {	
+	public void testResubmitAndDeleteFailedProcessing_OnDefaultResubmitTopicAndResubmittableRequest_ShallResubmitAndDelete()
+			throws JsonMappingException, JsonProcessingException, AllowedActionNotAvailableException {	
 		final FailedProcessing fp = newFailedProcessing("123", "{\"foo\":\"bar\",\"retryCounter\":0,\"allowedActions\":[\"RESUBMIT\"],\"additionalFields\":{\"resubmitMessage\":{\"retryCounter\":0}}}");
 		doReturn(Optional.of(fp))
 			.when(failedProcessingRepo)
@@ -156,7 +159,8 @@ public class RequestParkingLotTest {
 	}
 	
 	@Test
-	public void testResubmitAndDeleteFailedProcessing_OnCustomResubmitTopicAndResubmittableRequest_ShallResubmitAndDelete() throws JsonMappingException, JsonProcessingException {	
+	public void testResubmitAndDeleteFailedProcessing_OnCustomResubmitTopicAndResubmittableRequest_ShallResubmitAndDelete()
+			throws JsonMappingException, JsonProcessingException, AllowedActionNotAvailableException {	
 		final FailedProcessing fp = newFailedProcessing("123", "{\"foo\":\"bar\",\"retryCounter\":0,\"allowedActions\":[\"RESUBMIT\"],\"additionalFields\":{\"resubmitMessage\":{\"retryCounter\":0},\"resubmitTopic\":\"fooTopic\"}}");
 		doReturn(Optional.of(fp))
 			.when(failedProcessingRepo)
@@ -174,8 +178,9 @@ public class RequestParkingLotTest {
 		verify(messageProducer, times(1)).send("fooTopic", newMessage);
 	}
 	
-	@Test(expected = RuntimeException.class)
-	public void testResubmitAndDeleteFailedProcessing_OnExistingTopicAndNonResubmittableRequest_ShallThrowException() throws JsonMappingException, JsonProcessingException {	
+	@Test(expected = AllowedActionNotAvailableException.class)
+	public void testResubmitAndDeleteFailedProcessing_OnExistingTopicAndNonResubmittableRequest_ShallThrowException()
+			throws JsonMappingException, JsonProcessingException, AllowedActionNotAvailableException {	
 		final FailedProcessing fp = newFailedProcessing("123"); 
 		doReturn(Optional.of(fp))
 			.when(failedProcessingRepo)
@@ -185,7 +190,7 @@ public class RequestParkingLotTest {
 	}
 
 	@Test(expected = RuntimeException.class)
-	public void testRestartAndDeleteFailedProcessing_OnTopicNull_ShallThrowException() {		
+	public void testRestartAndDeleteFailedProcessing_OnTopicNull_ShallThrowException() throws AllowedActionNotAvailableException {		
 		final FailedProcessing fp = newFailedProcessing("456");
 		fp.setTopic(null);
 
@@ -197,7 +202,7 @@ public class RequestParkingLotTest {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public final void testRestartAndDeleteFailedProcessing_OnMissingRequest_ShallThrowException() {
+	public final void testRestartAndDeleteFailedProcessing_OnMissingRequest_ShallThrowException() throws AllowedActionNotAvailableException {
 		doReturn(Optional.empty())
 			.when(failedProcessingRepo)
 			.findById("789");

@@ -347,7 +347,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: item not found, e.g. no restart available
           content: {}
         500:
           description: Internal Server Error
@@ -435,7 +435,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: item not found, e.g. no resubmit available
           content: {}
         500:
           description: Internal Server Error
@@ -447,7 +447,7 @@ paths:
     post:
       tags:
       - FailedProcessings
-      summary: resubmit multiple failed processing events in a batch. This removes the failed processings from
+      summary:  multiple failed processing events in a batch. This removes the failed processings from
         the list and resubmit them. Ids for not existing failed processings are ignored.
       operationId: resubmitFailedProcessingsInBatch
       parameters:

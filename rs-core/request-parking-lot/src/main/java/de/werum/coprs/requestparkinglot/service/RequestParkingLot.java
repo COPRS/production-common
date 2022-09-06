@@ -16,9 +16,9 @@ public interface RequestParkingLot {
 
 	FailedProcessing getFailedProcessingById(String id);
 
-	void restartAndDeleteFailedProcessing(String id);
+	void restartAndDeleteFailedProcessing(String id) throws AllowedActionNotAvailableException;
 
-	void resubmitAndDeleteFailedProcessing(String id);
+	void resubmitAndDeleteFailedProcessing(String id) throws AllowedActionNotAvailableException;
 
 	void deleteFailedProcessing(String id);
 

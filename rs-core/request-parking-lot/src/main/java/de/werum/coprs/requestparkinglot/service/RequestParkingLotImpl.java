@@ -55,7 +55,7 @@ public class RequestParkingLotImpl implements RequestParkingLot {
 	}
 
 	@Override
-	public synchronized void restartAndDeleteFailedProcessing(final String id) {
+	public synchronized void restartAndDeleteFailedProcessing(final String id) throws AllowedActionNotAvailableException {
 		final Optional<FailedProcessing> failedProcessing = failedProcessingRepo.findById(id);
 		assertNotEmpty("failed request", failedProcessing, id);
 		assertDtoDefined(id, failedProcessing.get());
@@ -66,7 +66,7 @@ public class RequestParkingLotImpl implements RequestParkingLot {
 	}
 	
 	@Override
-	public synchronized void resubmitAndDeleteFailedProcessing(final String id) {
+	public synchronized void resubmitAndDeleteFailedProcessing(final String id) throws AllowedActionNotAvailableException {
 		final Optional<FailedProcessing> failedProcessing = failedProcessingRepo.findById(id);
 		assertNotEmpty("failed request", failedProcessing, id);
 		assertDtoDefined(id, failedProcessing.get());
@@ -186,10 +186,10 @@ public class RequestParkingLotImpl implements RequestParkingLot {
 		}
 	}
 	
-	private static void assertRestartable(final String id, final String message) {
+	private static void assertRestartable(final String id, final String message) throws AllowedActionNotAvailableException {
 		final List<String> allowedActions = getAllowedActions(message);
 		if (!allowedActions.contains("RESTART")) {
-			throw new RuntimeException(
+			throw new AllowedActionNotAvailableException(
 					String.format(
 							"Failed to restart request id %s as RESTART is not part of its allowed actions '%s'",
 							id,
@@ -199,10 +199,10 @@ public class RequestParkingLotImpl implements RequestParkingLot {
 		}
 	}
 	
-	private static void assertResubmitable(final String id, final String message) {
+	private static void assertResubmitable(final String id, final String message) throws AllowedActionNotAvailableException {
 		final List<String> allowedActions = getAllowedActions(message);
 		if (!allowedActions.contains("RESUBMIT")) {
-			throw new RuntimeException(
+			throw new AllowedActionNotAvailableException(
 					String.format(
 							"Failed to restart request id %s as RESUBMIT is not part of its allowed actions '%s'",
 							id,

@@ -18,11 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import esa.s1pdgs.cpoc.common.MessageState;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import de.werum.coprs.requestparkinglot.config.ApiConfiguration;
 import de.werum.coprs.requestparkinglot.rest.model.IdListDto;
+import de.werum.coprs.requestparkinglot.service.AllowedActionNotAvailableException;
 import de.werum.coprs.requestparkinglot.service.RequestParkingLot;
+import esa.s1pdgs.cpoc.common.MessageState;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 
 @RestController
 @RequestMapping("api/v1")
@@ -105,8 +106,13 @@ public class RequestParkingLotController {
 		assertValidId(id);
 		try {
 			requestParkingLot.restartAndDeleteFailedProcessing(id);
-		} catch (final IllegalArgumentException e) {
-			assertElementFound("failed processing", null, String.format("%s: %s", id, e));
+		} catch (final AllowedActionNotAvailableException e1) {
+			throw new RequestParkingLotControllerException(
+					String.format("Action RESTART not allowed for id %s", id),
+					HttpStatus.NOT_FOUND
+			);	
+		} catch (final IllegalArgumentException e2) {
+			assertElementFound("failed processing", null, String.format("%s: %s", id, e2));
 		}
 		return new ApiResponse("FailedProcessing", "restart", Collections.singletonList(id), Collections.emptyList());
 	}
@@ -128,6 +134,11 @@ public class RequestParkingLotController {
 		assertValidId(id);
 		try {
 			requestParkingLot.resubmitAndDeleteFailedProcessing(id);
+		} catch (final AllowedActionNotAvailableException e1) {
+			throw new RequestParkingLotControllerException(
+					String.format("Action RESUBMIT not allowed for id %s", id),
+					HttpStatus.NOT_FOUND
+			);
 		} catch (final IllegalArgumentException e) {
 			assertElementFound("failed processing", null, String.format("%s: %s", id, e));
 		}
@@ -196,7 +207,7 @@ public class RequestParkingLotController {
 			try {
 				requestParkingLot.restartAndDeleteFailedProcessing(id);
 				success.add(id);
-			} catch (final IllegalArgumentException e) {
+			} catch (final IllegalArgumentException | AllowedActionNotAvailableException e) {
 				failed.add(id);
 			}
 		}
@@ -219,7 +230,7 @@ public class RequestParkingLotController {
 			try {
 				requestParkingLot.resubmitAndDeleteFailedProcessing(id);
 				success.add(id);
-			} catch (final IllegalArgumentException e) {
+			} catch (final IllegalArgumentException | AllowedActionNotAvailableException e) {
 				failed.add(id);
 			}
 		}

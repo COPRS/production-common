@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import de.werum.coprs.requestparkinglot.repo.FailedProcessingRepo;
+import de.werum.coprs.requestparkinglot.service.AllowedActionNotAvailableException;
 import de.werum.coprs.requestparkinglot.service.RequestParkingLot;
 
 @RunWith(SpringRunner.class)
@@ -213,7 +214,7 @@ public class RequestParkingLotControllerTest {
 	}
 
 	@Test
-	public void test_restartAndDeleteFailedProcessing_404() throws Exception {
+	public void test_restartAndDeleteFailedProcessing_OnIllegalArgument_404() throws Exception {
 
 		doThrow(new IllegalArgumentException()).when(requestParkingLot).restartAndDeleteFailedProcessing("000000000000000000000001");
 		uut.perform(post("/api/v1/failedProcessings/000000000000000000000001/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
@@ -221,10 +222,62 @@ public class RequestParkingLotControllerTest {
 	}
 
 	@Test
+	public void test_restartAndDeleteFailedProcessing_OnAllowedActionNotAvailable_404() throws Exception {
+
+		doThrow(new AllowedActionNotAvailableException("")).when(requestParkingLot).restartAndDeleteFailedProcessing("000000000000000000000001");
+		uut.perform(post("/api/v1/failedProcessings/000000000000000000000001/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isNotFound());
+	}
+	
+	@Test
 	public void test_restartAndDeleteFailedProcessing_500() throws Exception {
 
 		doThrow(new RuntimeException()).when(requestParkingLot).restartAndDeleteFailedProcessing("000000000000000000000001");
 		uut.perform(post("/api/v1/failedProcessings/000000000000000000000001/restart").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isInternalServerError());
+	}
+	
+	@Test
+	public void test_resubmitAndDeleteFailedProcessing_200() throws Exception {
+
+		uut.perform(post("/api/v1/failedProcessings/000000000000000000000001/resubmit").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isOk());
+	}
+
+	@Test
+	public void test_resubmitAndDeleteFailedProcessing_400() throws Exception {
+		uut.perform(post("/api/v1/failedProcessings/invalidParameter/resubmit").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	public void test_resubmitAndDeleteFailedProcessing_403() throws Exception {
+
+		uut.perform(post("/api/v1/failedProcessings/000000000000000000000001/resubmit").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				"wrong key")).andExpect(status().isForbidden());
+	}
+
+	@Test
+	public void test_resubmitAndDeleteFailedProcessing_OnIllegalArgument_404() throws Exception {
+
+		doThrow(new IllegalArgumentException()).when(requestParkingLot).resubmitAndDeleteFailedProcessing("000000000000000000000001");
+		uut.perform(post("/api/v1/failedProcessings/000000000000000000000001/resubmit").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void test_resubmitAndDeleteFailedProcessing_OnAllowedActionNotAvailable_404() throws Exception {
+
+		doThrow(new AllowedActionNotAvailableException("")).when(requestParkingLot).resubmitAndDeleteFailedProcessing("000000000000000000000001");
+		uut.perform(post("/api/v1/failedProcessings/000000000000000000000001/resubmit").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
+				API_KEY)).andExpect(status().isNotFound());
+	}
+	
+	@Test
+	public void test_resubmitAndDeleteFailedProcessing_500() throws Exception {
+
+		doThrow(new RuntimeException()).when(requestParkingLot).resubmitAndDeleteFailedProcessing("000000000000000000000001");
+		uut.perform(post("/api/v1/failedProcessings/000000000000000000000001/resubmit").contentType(MediaType.APPLICATION_JSON).header("ApiKey",
 				API_KEY)).andExpect(status().isInternalServerError());
 	}
 	
