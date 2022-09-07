@@ -19,6 +19,7 @@ import de.werum.coprs.requestparkinglot.config.RequestParkingLotConfiguration;
 import de.werum.coprs.requestparkinglot.repo.FailedProcessingRepo;
 import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 import esa.s1pdgs.cpoc.message.MessageProducer;
+import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 @Component
 public class RequestParkingLotImpl implements RequestParkingLot {
@@ -183,7 +184,7 @@ public class RequestParkingLotImpl implements RequestParkingLot {
 	
 	private static void assertRestartable(final String id, final String message) throws AllowedActionNotAvailableException {
 		final List<String> allowedActions = getAllowedActions(message);
-		if (!allowedActions.contains("RESTART")) {
+		if (!allowedActions.contains(AllowedAction.RESTART.name())) {
 			throw new AllowedActionNotAvailableException(
 					String.format(
 							"Failed to restart request id %s as RESTART is not part of its allowed actions '%s'",
@@ -196,10 +197,10 @@ public class RequestParkingLotImpl implements RequestParkingLot {
 	
 	private static void assertResubmitable(final String id, final String message) throws AllowedActionNotAvailableException {
 		final List<String> allowedActions = getAllowedActions(message);
-		if (!allowedActions.contains("RESUBMIT")) {
+		if (!allowedActions.contains(AllowedAction.RESUBMIT.name())) {
 			throw new AllowedActionNotAvailableException(
 					String.format(
-							"Failed to restart request id %s as RESUBMIT is not part of its allowed actions '%s'",
+							"Failed to resubmit request id %s as RESUBMIT is not part of its allowed actions '%s'",
 							id,
 							String.join(", ", allowedActions)
 					)
