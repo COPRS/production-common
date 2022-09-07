@@ -65,7 +65,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	 */
 	public IpfExecutionJob() {
 		super();
-		setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.REEVALUATE));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.RESUBMIT));
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class IpfExecutionJob extends AbstractMessage {
 		this.jobOrder = jobOrder;
 		this.uid = reportingTaskUID;
 		this.timeliness = timeliness;
-		setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.REEVALUATE));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.RESUBMIT));
 	}
 
 	/**
