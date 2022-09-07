@@ -24,16 +24,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
-import esa.s1pdgs.cpoc.message.MessageProducer;
 import de.werum.coprs.requestparkinglot.config.RequestParkingLotConfiguration;
 import de.werum.coprs.requestparkinglot.repo.FailedProcessingRepo;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
+import esa.s1pdgs.cpoc.message.MessageProducer;
 
 public class RequestParkingLotTest {
-	private static final List<String> PROCESSING_TYPES_LIST = Arrays.asList("foo","bar");
-	
-	private final RequestParkingLotConfiguration config = new RequestParkingLotConfiguration("foo bar", "defResubmitTopic");
-		
+	private final RequestParkingLotConfiguration config = new RequestParkingLotConfiguration("defResubmitTopic");
 	
 	@Mock
 	private FailedProcessingRepo failedProcessingRepo;
@@ -110,7 +107,7 @@ public class RequestParkingLotTest {
 	}
 
 	@Test
-	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndRestartableRequest_ShallRestartAndDelete()
+	public void testRestartAndDeleteFailedProcessing_OnRestartableRequest_ShallRestartAndDelete()
 			throws JsonMappingException, JsonProcessingException, AllowedActionNotAvailableException {	
 		final FailedProcessing fp = newFailedProcessing("123", "{\"foo\":\"bar\",\"retryCounter\":0,\"allowedActions\":[\"RESTART\"]}");
 		doReturn(Optional.of(fp))
@@ -128,7 +125,7 @@ public class RequestParkingLotTest {
 	}
 	
 	@Test(expected = AllowedActionNotAvailableException.class)
-	public void testRestartAndDeleteFailedProcessing_OnExistingTopicAndNonRestartableRequest_ShallThrowException()
+	public void testRestartAndDeleteFailedProcessing_OnNonRestartableRequest_ShallThrowException()
 			throws JsonMappingException, JsonProcessingException, AllowedActionNotAvailableException {	
 		final FailedProcessing fp = newFailedProcessing("123"); 
 		doReturn(Optional.of(fp))
@@ -208,11 +205,6 @@ public class RequestParkingLotTest {
 			.findById("789");
 
 		uut.restartAndDeleteFailedProcessing("789");
-	}
-	
-	@Test
-	public final void testGetProcessingTypes_OnInvocation_ShallReturnProcessingTypes() {
-		assertEquals(PROCESSING_TYPES_LIST, uut.getProcessingTypes());
 	}
 	
 	private FailedProcessing newFailedProcessing(final String id) {

@@ -83,11 +83,6 @@ public class RequestParkingLotImpl implements RequestParkingLot {
 		failedProcessingRepo.deleteById(id);
 	}
 	
-	@Override
-	public List<String> getProcessingTypes() {
-		return config.getKafkaTopicList();
-	}
-
 	private void restart(final String id, final String topic, final String message) {		
 		try {
 			final Map<String, Object> map = new ObjectMapper().readValue(

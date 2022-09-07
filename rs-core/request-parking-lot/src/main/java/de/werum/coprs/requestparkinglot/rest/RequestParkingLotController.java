@@ -236,15 +236,6 @@ public class RequestParkingLotController {
 		}
 		return new ApiResponse("FailedProcessing", "resubmit", success, failed);
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, path = "processingTypes")
-	public List<String> getProcessingTypes(
-			@RequestHeader("ApiKey") final String apiKey
-	) {
-		LOGGER.debug("get the list of processing types");
-		assertValidApiKey(apiKey);
-		return requestParkingLot.getProcessingTypes();
-	}
 
 	static final List<MessageState> toMessageStates(final List<String> processingStatus)
 	{
