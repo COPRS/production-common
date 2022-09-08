@@ -102,12 +102,7 @@ public class HousekeepingService implements Function<Message<?>, List<Message<Ip
 	private List<Message<IpfExecutionJob>> continueTimeoutJobs() {
 		List<AppDataJob> timedoutJobs = appCatJobService.findTimeoutJobs(new Date());
 		List<IpfExecutionJob> result = new ArrayList<>();
-
-		// Flag jobs, that they are timed out
-		for (AppDataJob timedoutJob : timedoutJobs) {
-			timedoutJob.setTimedOut(true);
-		}
-
+		
 		result = inputSearchService.checkIfJobsAreReady(timedoutJobs);
 
 		// Prevent empty array messages on kafka topic
