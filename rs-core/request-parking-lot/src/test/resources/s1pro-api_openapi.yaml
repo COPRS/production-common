@@ -94,7 +94,7 @@ paths:
           type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -128,7 +128,7 @@ paths:
           type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -169,7 +169,7 @@ paths:
           type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -181,7 +181,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: Item not found
           content: {}
         500:
           description: Internal Server Error
@@ -210,7 +210,7 @@ paths:
           type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -222,7 +222,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: Item not found
           content: {}
       security:
       - ApiKey: []
@@ -252,7 +252,7 @@ paths:
                     type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -264,7 +264,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: Item not found
           content: {}
         500:
           description: Internal Server Error
@@ -295,7 +295,7 @@ paths:
           type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -307,7 +307,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found or no restart available
+          description: Item not found or no restart available
           content: {}
         500:
           description: Internal Server Error
@@ -336,13 +336,13 @@ paths:
               type: object
               properties:
                 ids:
-                  description: "array of `id`s of FailedProcessing job to restart"
+                  description: "array of `id`s of FailedProcessing jobs to restart"
                   type: array
                   items:
                     type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -354,7 +354,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: Item not found
           content: {}
         500:
           description: Internal Server Error
@@ -364,7 +364,7 @@ paths:
     post:
       tags:
       - FailedProcessings
-      summary: resubmit a failed processing event. This removes the failed processing from
+      summary: resubmit a failed processing job. This removes the failed processing from
         the list and resubmits it.
       operationId: resubmitFailedProcessing
       parameters:
@@ -376,14 +376,14 @@ paths:
           type: string
       - name: id
         in: path
-        description: "`id` of FailedProcessing event to resubmit"
+        description: "`id` of FailedProcessing job to resubmit"
         required: true
         style: simple
         schema:
           type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -395,7 +395,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found or no resubmit available
+          description: Item not found or no resubmit available
           content: {}
         500:
           description: Internal Server Error
@@ -407,7 +407,7 @@ paths:
     post:
       tags:
       - FailedProcessings
-      summary:  multiple failed processing events in a batch. This removes the failed processings from
+      summary:  multiple failed processing jobs in a batch. This removes the failed processings from
         the list and resubmits them. Ids for not existing or not resubmittable failed processings are ignored.
       operationId: resubmitFailedProcessingsInBatch
       parameters:
@@ -424,13 +424,13 @@ paths:
               type: object
               properties:
                 ids:
-                  description: "array of `id`s of FailedProcessing events to resubmit"
+                  description: "array of `id`s of FailedProcessing jobs to resubmit"
                   type: array
                   items:
                     type: string
       responses:
         200:
-          description: OK
+          description: The request succeeded
           content:
             application/json:
               schema:
@@ -442,7 +442,7 @@ paths:
           description: Forbidden, e.g. Invalid API key supplied
           content: {}
         404:
-          description: item not found
+          description: Item not found
           content: {}
         500:
           description: Internal Server Error
