@@ -224,6 +224,9 @@ paths:
         404:
           description: Item not found
           content: {}
+        500:
+          description: Internal Server Error
+          content: {}
       security:
       - ApiKey: []
   /failedProcessings/delete:
