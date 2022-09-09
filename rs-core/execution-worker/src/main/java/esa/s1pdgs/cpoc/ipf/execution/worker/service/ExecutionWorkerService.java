@@ -440,7 +440,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 					 */
 
 					Files.walkFileTree(workingDir,
-							new HashSet<FileVisitOption>(Arrays.asList(FileVisitOption.FOLLOW_LINKS)),
+							new HashSet<FileVisitOption>(Arrays.asList()),
 							Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
 								@Override
 								public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
