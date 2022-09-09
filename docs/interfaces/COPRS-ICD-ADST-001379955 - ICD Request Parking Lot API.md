@@ -16,7 +16,7 @@ This document describes the Request Parking Lot REST API for managing failed pro
 
 ### API security
 
-The API is protected by a API key. This is a token (string) agreed by server an client and used to authenticate the client. The client needs to provide the (configurable) API key on every request as a HTTP-Header attribute, e.g. `ApiKey: <yourApiKey>`. The server validates the key send by the client and only allows access if the key is known to the server, else a HTTP error 403 is raised.
+The API is protected by a API key. This is a token (string) agreed by server and client and used to authenticate the client. The client needs to provide the (configurable) API key on every request as a HTTP-Header attribute, e.g. `ApiKey: <yourApiKey>`. The server validates the key send by the client and only allows access if the key is known to the server, else a HTTP error 403 is raised.
 
 
 ### View and manage failed processings 
