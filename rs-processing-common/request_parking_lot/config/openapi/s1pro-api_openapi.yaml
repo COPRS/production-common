@@ -11,7 +11,7 @@ info:
       ## Usage Notes
       
       ### API security
-      The API is protected by a API key. This is a token (string) agreed by server an client and used to authenticate the client. The client needs to provide the (configurable) API key on every request as a HTTP-Header attribute, e.g. `ApiKey: <yourApiKey>`. The server validates the key send by the client and only allows access if the key is known to the server, else a HTTP error 403 is raised.
+      The API is protected by a API key. This is a token (string) agreed by server and client and used to authenticate the client. The client needs to provide the (configurable) API key on every request as a HTTP-Header attribute, e.g. `ApiKey: <yourApiKey>`. The server validates the key send by the client and only allows access if the key is known to the server, else a HTTP error 403 is raised.
       
       ### View and manage failed processings 
       To get a list of failed processings call `GET /failedProcessings`. It will return a list of all failed processings. Operators can review the entries and either restart the processing by `POST /failedProcessings/{id}/restart`, resubmit a failed processing by `POST /failedProcessings/{id}/resubmit` or delete a failed processing by `DELETE /failedProcessings/{id}`. In either case the failed processing is no longer present in the list of failed processings. In case of a restart a failed processing is issued again to the queues eventually resulting in a new processing. Whereas in the case of a resubmit the message that preceded the failed processing is reissued.
