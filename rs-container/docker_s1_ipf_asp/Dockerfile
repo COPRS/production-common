@@ -4,8 +4,7 @@ WORKDIR /app
 
 FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as base
 
-FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/s1pro-core-ipf-execution-worker-l0-asp/l0asp:5.1.2
-
+FROM artifactory.coprs.esa-copernicus.eu/cfi/s1pro-core-ipf-execution-worker-l0-asp/l0asp:5.1.2
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
