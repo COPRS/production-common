@@ -260,28 +260,28 @@
 							<Destination>DB</Destination>
 							<Mandatory>No</Mandatory>
 							<Type>SM_RAW__0S</Type>
-							<File_Name_Type>Directory</File_Name_Type>
+							<File_Name_Type>Regexp</File_Name_Type>
 						</Output>
 						<!--Stripmap Mode : Calibration -->
 						<Output>
 							<Destination>DB</Destination>
 							<Mandatory>No</Mandatory>
 							<Type>SM_RAW__0C</Type>
-							<File_Name_Type>Directory</File_Name_Type>
+							<File_Name_Type>Regexp</File_Name_Type>
 						</Output>
 						<!--Stripmap Mode : Noise -->
 						<Output>
 							<Destination>DB</Destination>
 							<Mandatory>No</Mandatory>
 							<Type>SM_RAW__0N</Type>
-							<File_Name_Type>Directory</File_Name_Type>
+							<File_Name_Type>Regexp</File_Name_Type>
 						</Output>
 						<!--Stripmap Mode : Annotation -->
 						<Output>
 							<Destination>DB</Destination>
 							<Mandatory>No</Mandatory>
 							<Type>SM_RAW__0A</Type>
-							<File_Name_Type>Directory</File_Name_Type>
+							<File_Name_Type>Regexp</File_Name_Type>
 						</Output>
 						<!--Interferometric Wide Swath Mode : SAR -->
 						<Output>
