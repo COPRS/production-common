@@ -62,21 +62,27 @@ public class RobustFtpClient {
 	}
 	
 	public List<FTPFile> listFiles(Path path) throws InterruptedException, ExecutionException, IOException {
-		Future<List<FTPFile>> submitted = completionServiceList.submit(listCall(path));
+		completionServiceList.submit(listCall(path));
 		ftpClient.setSoTimeout(timeoutSec * 1000);
 		Future<List<FTPFile>> result = completionServiceList.poll(timeoutSec, TimeUnit.SECONDS);
 		if (result != null) {
-			return result.get();
+			List<FTPFile> collectedFiles = new ArrayList<>();
+			if (!result.isCancelled()) {
+				try {
+					collectedFiles = result.get();
+				} catch (Exception e) {
+					LOG.warn("error while listing {}", path);
+				}
+			}
+			return collectedFiles;
 		} else {
 			LOG.warn("timeout while listing files in path {}", path);
-			submitted.cancel(true);
-			Future<Boolean> submittedAbort = completionServiceAbort.submit(abortCall());
+			completionServiceAbort.submit(abortCall());
 			Future<Boolean> abortResult = completionServiceAbort.poll(timeoutSec, TimeUnit.SECONDS);
 			if (abortResult != null) {
-				LOG.warn("list command aborted: {}", abortResult.get());
+				LOG.warn("list command aborted");
 			} else {
 				LOG.warn("timeout while aborting list command");
-				submittedAbort.cancel(true);
 			}
 			return Collections.emptyList();
 		}
