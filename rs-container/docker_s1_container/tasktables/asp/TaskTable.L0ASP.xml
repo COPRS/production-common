@@ -2,7 +2,7 @@
 <Ipf_Task_Table xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance">
 	<Processor_Name>L0_ASSEMBLY_SLICING_PROC</Processor_Name>
 	<Version>5.1.2</Version>
-	<Test>Yes</Test>
+	<Test>No</Test>
 	<!--Ten gigabytes minimum size required in the working dir-->
 	<Min_Disk_Space units="MB">10240</Min_Disk_Space>
 	<Max_Time units="sec">0</Max_Time>
