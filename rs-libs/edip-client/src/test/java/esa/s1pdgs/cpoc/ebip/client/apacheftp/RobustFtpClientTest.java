@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockftpserver.fake.FakeFtpServer;
 import org.mockftpserver.fake.UserAccount;
@@ -25,6 +26,7 @@ import esa.s1pdgs.cpoc.ebip.client.EdipEntryFilter;
 import esa.s1pdgs.cpoc.ebip.client.apacheftp.util.LogPrintWriter;
 import esa.s1pdgs.cpoc.ebip.client.config.EdipClientConfigurationProperties.EdipHostConfiguration;
 
+@Ignore
 public class RobustFtpClientTest {
 	
 	static final Logger LOG = LogManager.getLogger(RobustFtpClientTest.class);
