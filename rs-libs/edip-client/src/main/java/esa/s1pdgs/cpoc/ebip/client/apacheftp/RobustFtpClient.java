@@ -70,7 +70,6 @@ public class RobustFtpClient extends AbstractApacheFtpClient implements EdipClie
 			result = getIfNotDirectory(client, uriPath).orElse(listRecursively(client, uriPath, filter));
 		}
 
-		shutdownExecution();
 		try {
 			client.logout();
 		} catch (IOException e) {
