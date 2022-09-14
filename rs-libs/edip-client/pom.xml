@@ -38,6 +38,12 @@
 		<scope>test</scope>
 	 </dependency>
      <dependency>
+        <groupId>org.mockftpserver</groupId>
+        <artifactId>MockFtpServer</artifactId>
+        <version>2.8.0</version>
+        <scope>test</scope>
+     </dependency>
+     <dependency>
 		<groupId>org.apache.ftpserver</groupId>
 		<artifactId>ftpserver</artifactId>
 		<version>1.0.5</version>

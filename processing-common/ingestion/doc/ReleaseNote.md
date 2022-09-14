@@ -209,7 +209,9 @@ EDIP Client module is used by both EDIP triggers and workers.
 |``app.ingestion-edip-trigger.edip.host-configs.host1.keyManagerKeyStorePassword``|Password for `keyManagerKeyStorePassword`. Default: ``changeit``|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.trustManagerKeyStore``|The truststore keeps all trusted Certificate Authorities (CA) and certificates. It is necessary to import the CA or certificate for the trusted FTPS servers. Default: ``app/ssl/truststore.jks``|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.trustManagerKeyStorePassword``|Password for `trustManagerKeyStorePassword`. Default: ``changeit``|
-
+|``app.ingestion-edip-trigger.edip.host-configs.host1.listingTimeoutSec``|Timeout in seconds for the robust EDIP client (if enabled) while listing directories. Default: `180`|
+|``app.ingestion-edip-trigger.edip.enableRobustFtpClient``|To switch on the robust EDIP client using timeout mechanism for listing directories (#RS-519). Default `true`|
+ 
  #### EDIP Trigger
 
 For EDIP trigger following two two properties need to adjusted. Rest of the properties are similar to other Triggers and needs to be adjusted for the client.
@@ -253,6 +255,11 @@ The configuration for the XBIP contains a set of properties that are grouped by 
 |``app.ingestion-worker.xbip.host-configs.host1.pass``|Password for the user that is allowed on the server. This is a referenced variable here, that shall be configured by creating kubernetes secret. Default  ``${XBIP_PASSWORD}``|
 |``app.ingestion-worker.xbip.host-configs.host1.numRetries``| Maximum number of retries that an ingestion worker will perform to server. Default  ``5``|
 |``app.ingestion-worker.xbip.host-configs.host1.retrySleepMs``| Duration between number of retries that are performed to reach the server.  Default  ``3000``|
+
+If using EDIP client:
+|``app.ingestion-worker.edip.host-configs.host1.listingTimeoutSec``|Timeout in seconds for the robust EDIP client (if enabled) while listing directories. Default: `180`|
+|``app.ingestion-worker.edip.enableRobustFtpClient``|To switch on the robust EDIP client using timeout mechanism for listing directories (#RS-519). Default `true`|
+ 
   
 ## Deployer properties
 

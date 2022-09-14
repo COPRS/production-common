@@ -28,6 +28,7 @@ public class EdipClientConfigurationProperties {
 		private String keyManagerKeyStorePassword = "changeit"; // default JKS password
 		private String trustManagerKeyStore =  "";
 		private String trustManagerKeyStorePassword = "changeit"; // default JKS password
+		private int listingTimeoutSec = 180;
 						
 		public String getServerName() {
 			return serverName;
@@ -155,10 +156,19 @@ public class EdipClientConfigurationProperties {
 		public void setEnableHostnameVerification(boolean enableHostnameVerification) {
 			this.enableHostnameVerification = enableHostnameVerification;
 		}
+
+		public int getListingTimeoutSec() {
+			return listingTimeoutSec;
+		}
+
+		public void setListingTimeoutSec(int listingTimeoutSec) {
+			this.listingTimeoutSec = listingTimeoutSec;
+		}
 	}
 	
 	private String proxyHost;
 	private int proxyPort = 80;
+	private boolean enableRobustFtpClient = true;
 
 	private Map<String, EdipHostConfiguration> hostConfigs = new HashMap<>();
 
@@ -185,10 +195,18 @@ public class EdipClientConfigurationProperties {
 	public void setProxyPort(final int proxyPort) {
 		this.proxyPort = proxyPort;
 	}
+	
+	public boolean isEnableRobustFtpClient() {
+		return enableRobustFtpClient;
+	}
+
+	public void setEnableRobustFtpClient(boolean enableRobustFtpClient) {
+		this.enableRobustFtpClient = enableRobustFtpClient;
+	}
 
 	@Override
 	public String toString() {
 		return "EdipClientConfigurationProperties [proxyHost=" + proxyHost + ", proxyPort=" + proxyPort
-				+ ", hostConfigs=" + hostConfigs + "]";
+				+ ", hostConfigs=" + hostConfigs + ", enableRobustFtpClient=" + enableRobustFtpClient + "]";
 	}
 }
