@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
+import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
 import esa.s1pdgs.cpoc.common.errors.processing.IpfPrepWorkerInputsMissingException;
@@ -66,6 +67,10 @@ public class InputSearchService {
 					job = mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
 				} catch (JobStateTransistionFailed e) {
 					LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
+				} catch (DiscardedException e) {
+					// Terminate Job
+					job.setState(AppDataJobState.TERMINATED);
+					job.setTimeoutDate(null);
 				}
 			}
 
@@ -95,12 +100,6 @@ public class InputSearchService {
 				}
 			}
 
-			if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
-				// TODO: This step was mandatory before to make sure no duplicate jobs are
-				// created. Is this still necessary?
-//				terminate();
-			}
-
 			// Update Job in Mongo
 			try {
 				appCatJobService.updateJob(job);
@@ -127,7 +126,7 @@ public class InputSearchService {
 			// validate by modifying
 			// the start stop time for segments
 			performVoid(() -> {
-				// When job is already timed out -> skip validation 
+				// When job is already timed out -> skip validation
 				if (!job.getTimedOut()) {
 					try {
 						typeAdapter.validateInputSearch(job, taskTableAdapter);
@@ -169,7 +168,7 @@ public class InputSearchService {
 			if (newState != AppDataJobGenerationState.READY) {
 				auxQuery.updateTimeout(job, taskTableAdapter);
 			}
-			
+
 			updateJobAuxSearch(job, queried, newState);
 		}
 
