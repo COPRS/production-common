@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.preparation.worker.type.pdu;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -217,11 +218,9 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter)
 			throws IpfPrepWorkerInputsMissingException {
 		// Check if timeout is reached -> start job with current input
-		// TODO: Remove Timeout logic
-		/*
-		if (workerSettings.getWaitprimarycheck().getMaxTimelifeS() != 0) {
+		if (workerSettings.getPrimaryCheckMaxTimelifeS() != 0) {
 			final long startTime = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
-			final long timeoutTime = startTime + (workerSettings.getWaitprimarycheck().getMaxTimelifeS() * 1000);
+			final long timeoutTime = startTime + (workerSettings.getPrimaryCheckMaxTimelifeS() * 1000);
 
 			if (Instant.now().toEpochMilli() > timeoutTime) {
 				// Timeout reached
@@ -231,7 +230,6 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 				return;
 			}
 		}
-		*/
 
 		// Extract a list of all inputs from the tasks
 		final List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
@@ -244,7 +242,6 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 		// Check if there is an alternative which should have been filled by additional
 		// logic
-
 		final Map<String, String> missingAlternatives = new HashMap<>();
 		for (final TaskTableInputAlternative alternative : alternatives) {
 			PDUTypeProperties typeSettings = settings.getConfig().get(alternative.getFileType());
