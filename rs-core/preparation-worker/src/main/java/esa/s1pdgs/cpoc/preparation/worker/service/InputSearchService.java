@@ -69,6 +69,7 @@ public class InputSearchService {
 					LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
 				} catch (DiscardedException e) {
 					// Terminate Job
+					LOGGER.info("Received signal to discard job {}: {}", job.getId(), e.getMessage());
 					job.setState(AppDataJobState.TERMINATED);
 					job.setTimeoutDate(null);
 				}
