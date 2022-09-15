@@ -97,7 +97,7 @@ For an example configuration for an EDIP endpoint, please have a look at the [ex
 |---------------------------------------------------------------|---------------|
 |``app.ingestion-trigger.application.name``|The name of the ingestion trigger application|
 |``app.ingestion-trigger.process.hostname``|The hostname of the ingestion trigger. This is recommend to be set to a static string (e.g. `ingestion-trigger-0`). |
-|``app.ingestion-trigger.ingestion-trigger.polling-interval-ms``|The polling interval on the inbox from the trigger in milliseconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.|
+|``app.ingestion-trigger.spring.integration.poller.fixed-delay``|The polling interval on the inbox from the trigger in seconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.|
 
 
 ### Inboxes
@@ -171,7 +171,7 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-``app.ingestion-auxip-trigger.ingestion-trigger.polling-interval-ms`` |Polling interval between two tries to the AUXIP server in milliseconds. Default:``10000``|
+``app.ingestion-auxip-trigger.spring.integration.poller.fixed-delay`` |Polling interval between two tries to the AUXIP server in seconds. Default:``20s``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.directory``|The polling directory/url of the AUXIP server.DefaultDefault:``https://aux1.s1pdgs.eu/odata/v1``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.matchRegex``|Pattern that the trigger service shall be matching against the filenames on the AUXIP server in order to create a job. The pattern shall be adjusted in the associated trigger configruation in order to  match the filenames of Sentinel-2 and Sentinel-3 auxiliaries. Default:``^S1.*(AUX_\|AMH_\|AMV_\|MPL_).*$``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.ignoreRegex``Pattern for the filenames that are configured to ignored on the AUXIP server.Default:``(^\\..*\|.*\\.tmp$\|db.*\|^lost\+found$)``|
