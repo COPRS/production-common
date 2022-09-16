@@ -129,7 +129,7 @@ public class LagBasedPartitioner implements Partitioner {
     @Override
     @SuppressWarnings("unchecked")
     public void configure(Map<String, ?> configs) {
-        LOG.debug("configure: {}", configs);
+        LOG.info("configure: {}", configs);
         backupPartitioner.configure(configs);
 
         if (kafkaProperties == null) {
