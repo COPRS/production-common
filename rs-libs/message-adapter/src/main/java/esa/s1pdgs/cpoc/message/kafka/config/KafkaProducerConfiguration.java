@@ -52,6 +52,8 @@ public class KafkaProducerConfiguration<M> {
      * Producer configuration
      */
     private Map<String, Object> producerConfigs() {
+    	LOG.info("producerConfigs: {}", properties);
+    	
         final Map<String, Object> props = new ConcurrentHashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 properties.getBootstrapServers());
