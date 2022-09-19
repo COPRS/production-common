@@ -482,5 +482,11 @@ public class KafkaProperties {
 		public void setDelaySeconds(Integer delaySeconds) {
 			this.delaySeconds = delaySeconds;
 		}
+
+		@Override
+		public String toString() {
+			return "KafkaLagBasedPartitionerProperties [consumerGroup=" + consumerGroup + ", delaySeconds="
+					+ delaySeconds + ", topicsWithPriority=" + topicsWithPriority + "]";
+		}
 	}
 }
