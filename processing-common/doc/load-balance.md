@@ -20,9 +20,9 @@ For any of the above mentioned applications to use the custom implementation of 
 
 ```
 app.<application-name>.spring.cloud.stream.kafka.bindings.input.producer.configuration.partitioner.class=esa.s1pdgs.cpoc.message.kafka.LagBasedPartitioner
-app.<application-name>.kafka.producer.lag-based-partitioner.delay-seconds=<integer-value>
-app.<application-name>.kafka.producer.lag-based-partitioner.consumer-group=<string-value>
-app.<application-name>.kafka.producer.lag-based-partitioner.topics-with-priority.<topic-name>=<integer-value>
+app.<application-name>.spring.cloud.stream.kafka.binder.producerProperties.lag-based-partitioner.delay-seconds=<integer-value>
+app.<application-name>.spring.cloud.stream.kafka.binder.producerProperties.lag-based-partitioner.consumer-group=<string-value>
+app.<application-name>.spring.cloud.stream.kafka.binder.producerProperties.lag-based-partitioner.topics-with-priority.<topic-name>=<integer-value>
 ```
 
 The property `delay-seconds` defines in which interval the PartitionLagFetcher analyses the lag of the configured topics.

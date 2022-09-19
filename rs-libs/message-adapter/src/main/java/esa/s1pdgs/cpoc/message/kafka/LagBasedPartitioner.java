@@ -124,6 +124,28 @@ public class LagBasedPartitioner implements Partitioner {
                 .map(Map.Entry::getKey)
                 .collect(toList());
     }
+    
+    private KafkaLagBasedPartitionerProperties createLagBasedConfiguration(Map<String, ?> configs) {
+    	KafkaLagBasedPartitionerProperties properties = new KafkaLagBasedPartitionerProperties();
+    	
+    	if (configs.containsKey(KAFKA_PROPERTIES + ".delay-seconds")) {
+    		properties.setDelaySeconds(Integer.valueOf((String) configs.get(KAFKA_PROPERTIES + ".delay-seconds")));
+    	}
+    	
+    	if (configs.containsKey(KAFKA_PROPERTIES + ".consumer-group")) {
+    		properties.setConsumerGroup((String) configs.get(KAFKA_PROPERTIES + ".delay-seconds"));
+    	}
+    	
+    	properties.setTopicsWithPriority(new HashMap<>());
+    	configs.forEach((key, value) -> {
+    		if (key.startsWith(KAFKA_PROPERTIES + ".topics-with-priority")) {
+    			properties.getTopicsWithPriority().put(key.replace(KAFKA_PROPERTIES + ".topics-with-priority.", ""), Integer.valueOf((String) value));
+    		}
+    	});
+    	
+    	LOG.debug("lag-based-properties: {}", properties);
+    	return properties;
+    }
 
     @Override
     public void close() {
@@ -134,13 +156,12 @@ public class LagBasedPartitioner implements Partitioner {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void configure(Map<String, ?> configs) {
-        LOG.info("configure: {}", configs);
+        LOG.debug("configure: {}", configs);
         backupPartitioner.configure(configs);
 
         if (kafkaProperties == null) {
-            kafkaProperties = (KafkaLagBasedPartitionerProperties) configs.get(LagBasedPartitioner.KAFKA_PROPERTIES);
+            kafkaProperties = createLagBasedConfiguration(configs);
         }
 
         if (lagAnalyzer == null) {
