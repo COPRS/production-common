@@ -31,20 +31,21 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.message.kafka.config.KafkaConsumerClientId;
 import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties.KafkaLagBasedPartitionerProperties;
 
 public class PartitionLagFetcher implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(PartitionLagFetcher.class);
 
     private final Admin adminClient;
-    private final KafkaProperties properties;
+    private final KafkaLagBasedPartitionerProperties properties;
 
     private volatile ScheduledExecutorService executor;
 
     private final Map<String, List<ConsumerLag>> consumerLags = new ConcurrentHashMap<>();
     private final Map<TopicPartition, AtomicLong> interimPublications = new ConcurrentHashMap<>();
 
-    public PartitionLagFetcher(final Admin adminClient, final KafkaProperties properties) {
+    public PartitionLagFetcher(final Admin adminClient, final KafkaLagBasedPartitionerProperties properties) {
         this.adminClient = adminClient;
         this.properties = properties;
     }
@@ -53,7 +54,7 @@ public class PartitionLagFetcher implements Runnable {
 
     @Override
     public void run() {
-        LOG.debug("running lag kafka lag analyzing for consumer-group {}", properties.getProducer().getLagBasedPartitioner().getConsumerGroup());
+        LOG.debug("running lag kafka lag analyzing for consumer-group {}", properties.getConsumerGroup());
         try {
             consumerLags.clear();
             interimPublications.clear();
@@ -81,7 +82,7 @@ public class PartitionLagFetcher implements Runnable {
 
     private Map<String, List<ConsumerLag>> fetch() throws InterruptedException, ExecutionException, TimeoutException {
 
-        final Set<String> topics = properties.getProducer().getLagBasedPartitioner().getTopicsWithPriority().keySet();
+        final Set<String> topics = properties.getTopicsWithPriority().keySet();
         final Map<String, TopicDescription> topicDescriptions = adminClient.describeTopics(topics).all().get(TIMEOUT_SEC, TimeUnit.SECONDS);
 
         final List<TopicPartition> partitions = new ArrayList<>();
@@ -97,19 +98,19 @@ public class PartitionLagFetcher implements Runnable {
 
         final Map<String, ConsumerGroupDescription> groupDescriptions
                 = adminClient.describeConsumerGroups(
-                singletonList(properties.getProducer().getLagBasedPartitioner().getConsumerGroup()))
+                singletonList(properties.getConsumerGroup()))
                 .all().get(TIMEOUT_SEC, TimeUnit.SECONDS);
 
         final Map<TopicPartition, OffsetAndMetadata> consumerOffsets
                 = adminClient.listConsumerGroupOffsets(
-                properties.getProducer().getLagBasedPartitioner().getConsumerGroup(),
+                properties.getConsumerGroup(),
                 new ListConsumerGroupOffsetsOptions().topicPartitions(partitions))
                 .partitionsToOffsetAndMetadata().get(TIMEOUT_SEC, TimeUnit.SECONDS);
 
         final Map<String, List<ConsumerLag>> consumerLags = new HashMap<>();
         topics.forEach(topic -> consumerLags.put(topic, new ArrayList<>()));
 
-        final ConsumerGroupDescription consumerGroupDescription = groupDescriptions.get(properties.getProducer().getLagBasedPartitioner().getConsumerGroup());
+        final ConsumerGroupDescription consumerGroupDescription = groupDescriptions.get(properties.getConsumerGroup());
         consumerGroupDescription.members().forEach(groupMember -> {
             final String clientId = groupMember.clientId();
             final String hostName = groupMember.host();
@@ -135,7 +136,7 @@ public class PartitionLagFetcher implements Runnable {
 
     public void start() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        final long delay = properties.getProducer().getLagBasedPartitioner().getDelaySeconds();
+        final long delay = properties.getDelaySeconds();
         executor.scheduleWithFixedDelay(this, delay, delay, TimeUnit.SECONDS);
         LOG.info("started {} with delay {} seconds", this, delay);
     }
@@ -149,7 +150,7 @@ public class PartitionLagFetcher implements Runnable {
 
     @Override
     public String toString() {
-        KafkaProperties.KafkaLagBasedPartitionerProperties config = properties.getProducer().getLagBasedPartitioner();
+        KafkaProperties.KafkaLagBasedPartitionerProperties config = properties;
         return String.format(
                 "PartitionLagFetcher { consumer-group: %s partitions: %s delay: %s}",
                 config.getConsumerGroup(),

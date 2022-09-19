@@ -1,16 +1,23 @@
 package esa.s1pdgs.cpoc.message.kafka;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparingLong;
 import static java.util.Map.Entry.comparingByValue;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.summingLong;
+import static java.util.stream.Collectors.toList;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
 import org.apache.kafka.common.Cluster;
@@ -18,18 +25,18 @@ import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties;
+import esa.s1pdgs.cpoc.message.kafka.config.KafkaProperties.KafkaLagBasedPartitionerProperties;
 
 public class LagBasedPartitioner implements Partitioner {
 
-    public static final String KAFKA_PROPERTIES = LagBasedPartitioner.class.getSimpleName() + ".properties";
+    public static final String KAFKA_PROPERTIES = "lag-based-partitioner";
     public static final String PARTITION_LAG_FETCHER_SUPPLIER = LagBasedPartitioner.class + "fetcher.supplier";
 
     private static final Logger LOG = LoggerFactory.getLogger(LagBasedPartitioner.class);
 
     private final Partitioner backupPartitioner = new DefaultPartitioner();
     private volatile PartitionLagFetcher lagAnalyzer = null;
-    private volatile KafkaProperties kafkaProperties = null;
+    private volatile KafkaLagBasedPartitionerProperties kafkaProperties = null;
 
 
     @Override
@@ -109,7 +116,7 @@ public class LagBasedPartitioner implements Partitioner {
     }
 
     private List<String> higherOrEqualTopicsThan(String topic) {
-        Map<String, Integer> topicsWithPriority = kafkaProperties.getProducer().getLagBasedPartitioner().getTopicsWithPriority();
+        Map<String, Integer> topicsWithPriority = kafkaProperties.getTopicsWithPriority();
         Integer thisPriority = topicsWithPriority.getOrDefault(topic, Integer.MAX_VALUE);
 
         return topicsWithPriority.entrySet().stream()
@@ -133,11 +140,13 @@ public class LagBasedPartitioner implements Partitioner {
         backupPartitioner.configure(configs);
 
         if (kafkaProperties == null) {
-            kafkaProperties = (KafkaProperties) configs.get(LagBasedPartitioner.KAFKA_PROPERTIES);
+            kafkaProperties = (KafkaLagBasedPartitionerProperties) configs.get(LagBasedPartitioner.KAFKA_PROPERTIES);
         }
 
         if (lagAnalyzer == null) {
-            lagAnalyzer = ((Supplier<PartitionLagFetcher>) configs.get(PARTITION_LAG_FETCHER_SUPPLIER)).get();
+        	Map<String, Object> adminConfig = new HashMap<>();
+            adminConfig.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, configs.get("bootstrap.servers"));
+            lagAnalyzer = new PartitionLagFetcher(Admin.create(adminConfig), kafkaProperties);
             lagAnalyzer.start();
         }
 
