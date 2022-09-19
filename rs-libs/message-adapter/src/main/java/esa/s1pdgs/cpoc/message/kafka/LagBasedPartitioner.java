@@ -129,7 +129,7 @@ public class LagBasedPartitioner implements Partitioner {
     	KafkaLagBasedPartitionerProperties properties = new KafkaLagBasedPartitionerProperties();
     	
     	if (configs.containsKey(KAFKA_PROPERTIES + ".delay-seconds")) {
-    		properties.setDelaySeconds((Integer) configs.get(KAFKA_PROPERTIES + ".delay-seconds"));
+    		properties.setDelaySeconds(Integer.valueOf((String) configs.get(KAFKA_PROPERTIES + ".delay-seconds")));
     	}
     	
     	if (configs.containsKey(KAFKA_PROPERTIES + ".consumer-group")) {
@@ -139,7 +139,7 @@ public class LagBasedPartitioner implements Partitioner {
     	properties.setTopicsWithPriority(new HashMap<>());
     	configs.forEach((key, value) -> {
     		if (key.startsWith(KAFKA_PROPERTIES + ".topics-with-priority")) {
-    			properties.getTopicsWithPriority().put(key.replace(KAFKA_PROPERTIES + ".topics-with-priority.", ""), (Integer) value);
+    			properties.getTopicsWithPriority().put(key.replace(KAFKA_PROPERTIES + ".topics-with-priority.", ""), Integer.valueOf((String) value));
     		}
     	});
     	
