@@ -143,7 +143,7 @@ public class LagBasedPartitioner implements Partitioner {
     		}
     	});
     	
-    	LOG.info("lag-based-properties: {}", properties);
+    	LOG.debug("lag-based-properties: {}", properties);
     	return properties;
     }
 
@@ -157,7 +157,7 @@ public class LagBasedPartitioner implements Partitioner {
 
     @Override
     public void configure(Map<String, ?> configs) {
-        LOG.info("configure: {}", configs);
+        LOG.debug("configure: {}", configs);
         backupPartitioner.configure(configs);
 
         if (kafkaProperties == null) {
