@@ -393,7 +393,7 @@ public class ITExtractionService {
 		assertEquals("NRT", metadata.getString("timeliness"));
 		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
-		assertEquals(15, metadata.length());
+		assertEquals(16, metadata.length());
 	}
 	
 	@Test
@@ -430,7 +430,7 @@ public class ITExtractionService {
 		assertEquals("NRT", metadata.getString("timeliness"));
 		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
-		assertEquals(13, metadata.length());
+		assertEquals(14, metadata.length());
 	}
 	
 	@Test
@@ -469,9 +469,8 @@ public class ITExtractionService {
 	
 	@Test
 	public void testExtractionService_onS2L0C_shallPersistValidRecord() throws IOException, AbstractCodedException {
-		List<File> files1 = List.of(new File(testDir, "S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08/manifest.safe"));
-		List<File> files2 = List.of(new File(testDir, "S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08/Inventory_Metadata.xml"));
-		doReturn(files1, files2).when(mockObsClient).download(Mockito.any(), Mockito.any());
+		List<File> files1 = List.of(new File(testDir, "S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08/S2A_OPER_MTD_L0__GR_SGS__20191001T101733_S20191001T083650_D01.xml"));
+		doReturn(files1).when(mockObsClient).download(Mockito.any(), Mockito.any());
 		doReturn(newGetResponse_withExistsFalse()).when(mockElasticsearchDAO).get(Mockito.any(GetRequest.class));
 		doReturn(newIndexResponse_withCreatedTrue()).when(mockElasticsearchDAO).index(Mockito.any(IndexRequest.class));
 		ArgumentCaptor<IndexRequest> argumentCaptor = ArgumentCaptor.forClass(IndexRequest.class);
@@ -480,7 +479,7 @@ public class ITExtractionService {
 				"S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08",
 				NOT_DEFINED, ProductFamily.S2_L0_GR, "NRT", null)); // timeliness will only be persisted if not null
 		
-		verify(mockObsClient, times(2)).download(Mockito.any(), Mockito.any());
+		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
 		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
@@ -492,25 +491,24 @@ public class ITExtractionService {
 	    assertEquals(ProductFamily.S2_L0_GR.name(), metadata.getString("productFamily"));
 	    assertEquals("2019-10-01T10:17:33.000000Z", metadata.getString("creationTime"));
 	    assertEquals("MSI", metadata.getString("instrumentShortName"));
-	    assertEquals("GS2A_20191001T082741_022326_N02.08", metadata.getString("productGroupId"));
+	    assertEquals("S2A_OPER_MSI_L0__DS_SGS__20191001T101733_S20191001T083647_N02.08", metadata.getString("productGroupId"));
 	    assertEquals("S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08", metadata.getString("productName"));
-	    assertEquals("022326", metadata.getString("orbitNumber"));
-	    assertEquals(100, metadata.getInt("qualityInfo"));
-	    assertEquals(100, metadata.getInt("qualityStatus"));
-	    assertEquals("2019-10-01T08:36:50.000000Z", metadata.getString("startTime"));
-	    assertEquals("2019-10-01T08:36:50.000000Z", metadata.getString("stopTime"));
+	    assertEquals("", metadata.getString("orbitNumber"));
+	    assertEquals(0, metadata.getInt("qualityInfo"));
+	    assertEquals("NOMINAL", metadata.getString("qualityStatus"));
+	    assertEquals("2019-10-01T08:36:50.840000Z", metadata.getString("startTime"));
+	    assertEquals("2019-10-01T08:36:50.840000Z", metadata.getString("stopTime"));
 	    assertEquals("MSI_L0__GR", metadata.getString("productType"));
 	    assertEquals("OPER", metadata.getString("productClass"));
 	    assertEquals("S2", metadata.getString("missionId"));
 	    assertEquals("A", metadata.getString("satelliteId"));
 	    assertEquals("", metadata.getString("relativeOrbitNumber"));
-	    assertEquals("02.08", metadata.getString("processorVersion"));
+	    assertEquals("", metadata.getString("processorVersion"));
 	    assertEquals("S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08", metadata.getString("url"));
 	    assertEquals("S2A", metadata.getString("platformSerialIdentifier"));
 	    assertEquals("", metadata.getString("operationalMode"));
-	    assertEquals("SGS_", metadata.getString("processingCenter"));
+	    assertEquals("RS", metadata.getString("processingCenter"));
 	    assertEquals("NRT", metadata.getString("timeliness"));
-	    assertEquals("", metadata.getString("platfomShortName"));
 	    assertEquals("NOMINAL", metadata.getString("processMode"));
 	    @SuppressWarnings("unchecked")
 		Map<String,Object> coordinates = (Map<String,Object>)metadata.get("coordinates");

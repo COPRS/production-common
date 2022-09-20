@@ -47,6 +47,7 @@ public class S2ProductNameUtil {
 			metadata.put("productClass", standardMatcher.group(3));
 			metadata.put("productType", standardMatcher.group(4)); // Category+Semantic
 			metadata.put("creationTime", DateUtils.formatToMetadataDateTimeFormat(DateUtils.parse(standardMatcher.group(5))));
+			metadata.put("platformSerialIdentifier", standardMatcher.group(1) + standardMatcher.group(2));
 			variablePart = standardMatcher.group(6);
 		} else if (compactMatcher.matches()) {
 			isCompact = true;
@@ -55,6 +56,7 @@ public class S2ProductNameUtil {
 			metadata.put("satelliteId", compactMatcher.group(2));
 			metadata.put("productType", compactMatcher.group(3));
 			metadata.put("startTime", DateUtils.formatToMetadataDateTimeFormat(DateUtils.parse(compactMatcher.group(4))));
+			metadata.put("platformSerialIdentifier", standardMatcher.group(1) + standardMatcher.group(2));
 			variablePart = compactMatcher.group(5);
 		} else {
 			throw new MetadataExtractionException(
