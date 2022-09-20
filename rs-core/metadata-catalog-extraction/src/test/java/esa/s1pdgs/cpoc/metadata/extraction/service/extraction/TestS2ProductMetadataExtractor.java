@@ -42,7 +42,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestS2ProductMetadataExtractor {
 
-	private static final String PATTERN = "^(S2)(A|B|_)_([A-Z0-9]{4})_(MSI_(L0_|L1A|L1B|L1C)_(GR|DS|TL|TC))_\\w{4}_(\\d{8}T\\d{6})(.*)$";
+	private static final String PATTERN = "^(S2)(A|B|_)_([A-Z0-9]{4})_((MSI)_(L0_|L1A|L1B|L1C)_(GR|DS|TL|TC))_\\w{4}_(\\d{8}T\\d{6})(.*)$";
 
 	@Mock
 	private EsServices esServices;
@@ -127,6 +127,7 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setSatelliteId("A");
 		expectedDescriptor.setProductFamily(ProductFamily.S2_L0_DS);
 		expectedDescriptor.setMode("NRT");
+		expectedDescriptor.setInstrumentShortName("MSI");
 
 		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
 				metadataFiles.get(0), message);
@@ -174,6 +175,7 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setSatelliteId("A");
 		expectedDescriptor.setProductFamily(ProductFamily.S2_L0_GR);
 		expectedDescriptor.setMode("NRT");
+		expectedDescriptor.setInstrumentShortName("MSI");
 
 		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
 				metadataFiles.get(0), message);
