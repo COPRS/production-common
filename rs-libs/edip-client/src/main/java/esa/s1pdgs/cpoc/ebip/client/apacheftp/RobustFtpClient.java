@@ -172,7 +172,6 @@ public class RobustFtpClient extends AbstractApacheFtpClient implements EdipClie
 
 		try {
 			completionServiceList.submit(listCall(ftpClient, path));
-			ftpClient.setSoTimeout(timeoutSec * 1000);
 			Future<List<FTPFile>> result = completionServiceList.poll(timeoutSec, TimeUnit.SECONDS);
 			if (result != null) {
 				if (!result.isCancelled()) {
@@ -192,10 +191,6 @@ public class RobustFtpClient extends AbstractApacheFtpClient implements EdipClie
 			LOG.warn("Error while listing {}: {}", path, e.getMessage());
 		}
 		return collectedFiles;
-	}
-
-	private void shutdownExecution() {
-		executor.shutdownNow();
 	}
 
 	private Callable<List<FTPFile>> listCall(final FTPClient ftpClient, final Path path) {
