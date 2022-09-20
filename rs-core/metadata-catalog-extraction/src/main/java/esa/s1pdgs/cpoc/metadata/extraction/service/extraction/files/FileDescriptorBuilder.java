@@ -275,7 +275,7 @@ public class FileDescriptorBuilder {
 			descriptor.setSatelliteId(m.group(2));
 			descriptor.setProductFamily(catalogJob.getProductFamily());
 			descriptor.setMode(catalogJob.getMetadataMode());
-
+			descriptor.setInstrumentShortName(m.group(5));
 		} else {
 			throw new MetadataFilePathException(catalogJob.getKeyObjectStorage(), catalogJob.getProductFamily().name(),
 					String.format("File %s does not match the configuration file pattern %s", catalogJob.getKeyObjectStorage(), pattern));

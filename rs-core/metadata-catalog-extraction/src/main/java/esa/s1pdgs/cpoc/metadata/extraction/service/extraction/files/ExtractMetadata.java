@@ -1000,6 +1000,10 @@ public class ExtractMetadata {
 			if (!metadata.has("productType") || "".equals((String) metadata.get("productType"))) {
 				metadata.put("productType", descriptor.getProductType());
 			}
+			
+			if (!metadata.has("instrumentShortName") || "".equals((String) metadata.get("instrumentShortName"))) {
+				metadata.put("instrumentShortName", descriptor.getInstrumentShortName());
+			}
 
 			metadata.put(MissionId.FIELD_NAME, descriptor.getMissionId());
 			metadata.put("satelliteId", descriptor.getSatelliteId());
