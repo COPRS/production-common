@@ -84,8 +84,7 @@ public class TestS2ProductMetadataExtractor {
 
 		ProcessConfiguration processConfig = new ProcessConfiguration();
 		Map<String, String> manifestMap = new HashMap<>();
-		manifestMap.put("safe", "manifest.safe");
-		manifestMap.put("inventory", "Inventory_Metadata.xml");
+		manifestMap.put("s2", "[S2PRODUCTNAME].xml");
 		processConfig.setManifestFilenames(manifestMap);
 
 		extractor = new S2ProductMetadataExtractor(esServices, mdBuilder, fileDescriptorBuilder, testDir.getPath(),
@@ -101,23 +100,17 @@ public class TestS2ProductMetadataExtractor {
 	public void extract_S2_L0_DS_Metadata() throws AbstractCodedException {
 
 		final String keyObs = "S2A_OPER_MSI_L0__DS_SGS__20200420T205828_S20200322T173347_N02.08";
-		
+
 		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S2)
 				.newReporting("TestMetadataExtraction");
 
 		// Prepare OBS returnValues
-		final String inventoryMetadataPath = keyObs + File.separator + "Inventory_Metadata.xml";
-		final List<File> inventoryMetadataFile = Arrays.asList(new File(testDir, inventoryMetadataPath));
-		doReturn(inventoryMetadataFile).when(obsClient)
-				.download(eq(Collections.singletonList(
-						new ObsDownloadObject(ProductFamily.S2_L0_DS, inventoryMetadataPath, testDir.getPath()))),
-						Mockito.any());
-
-		final String safeMetadataPath = keyObs + File.separator + "manifest.safe";
-		final List<File> safeMetadataFile = Arrays.asList(new File(testDir, safeMetadataPath));
-		doReturn(safeMetadataFile).when(obsClient).download(
-				eq(Collections.singletonList(
-						new ObsDownloadObject(ProductFamily.S2_L0_DS, safeMetadataPath, testDir.getPath()))),
+		final String metadataPath = keyObs + File.separator
+				+ "S2A_OPER_MTD_L0__DS_SGS__20200420T205828_S20200322T173347.xml";
+		final List<File> metadataFiles = Arrays.asList(new File(testDir, metadataPath));
+		doReturn(metadataFiles).when(obsClient).download(
+				eq(Collections
+						.singletonList(new ObsDownloadObject(ProductFamily.S2_L0_DS, metadataPath, testDir.getPath()))),
 				Mockito.any());
 
 		// Prepare message
@@ -136,11 +129,12 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setMode("NRT");
 
 		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
-				safeMetadataFile.get(0), inventoryMetadataFile.get(0), message);
+				metadataFiles.get(0), message);
 
 		final ProductMetadata result = extractor.extract(reporting, message);
 
-		Iterator<String> it = expected.keys().iterator();;
+		Iterator<String> it = expected.keys().iterator();
+		
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"coordinates".equals(key)) {
@@ -148,28 +142,22 @@ public class TestS2ProductMetadataExtractor {
 			}
 		}
 	}
-	
+
 	@Test
 	public void extract_S2_L0_GR_Metadata() throws AbstractCodedException {
 
 		final String keyObs = "S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_N02.08";
-		
+
 		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S2)
 				.newReporting("TestMetadataExtraction");
 
 		// Prepare OBS returnValues
-		final String inventoryMetadataPath = keyObs + File.separator + "Inventory_Metadata.xml";
-		final List<File> inventoryMetadataFile = Arrays.asList(new File(testDir, inventoryMetadataPath));
-		doReturn(inventoryMetadataFile).when(obsClient)
-				.download(eq(Collections.singletonList(
-						new ObsDownloadObject(ProductFamily.S2_L0_GR, inventoryMetadataPath, testDir.getPath()))),
-						Mockito.any());
-
-		final String safeMetadataPath = keyObs + File.separator + "manifest.safe";
-		final List<File> safeMetadataFile = Arrays.asList(new File(testDir, safeMetadataPath));
-		doReturn(safeMetadataFile).when(obsClient).download(
-				eq(Collections.singletonList(
-						new ObsDownloadObject(ProductFamily.S2_L0_GR, safeMetadataPath, testDir.getPath()))),
+		final String metadataPath = keyObs + File.separator
+				+ "S2A_OPER_MTD_L0__GR_SGS__20200420T205828_S20200322T173347_D01.xml";
+		final List<File> metadataFiles = Arrays.asList(new File(testDir, metadataPath));
+		doReturn(metadataFiles).when(obsClient).download(
+				eq(Collections
+						.singletonList(new ObsDownloadObject(ProductFamily.S2_L0_GR, metadataPath, testDir.getPath()))),
 				Mockito.any());
 
 		// Prepare message
@@ -188,11 +176,12 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setMode("NRT");
 
 		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
-				safeMetadataFile.get(0), inventoryMetadataFile.get(0), message);
+				metadataFiles.get(0), message);
 
 		final ProductMetadata result = extractor.extract(reporting, message);
+
+		Iterator<String> it = expected.keys().iterator();
 		
-		Iterator<String> it = expected.keys().iterator();;
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"coordinates".equals(key)) {

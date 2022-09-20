@@ -31,6 +31,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
+import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -44,6 +46,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescri
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S3FileDescriptor;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.TimelinessReportingInput;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.report.TimelinessReportingOutput;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.util.S2ProductNameUtil;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -65,11 +68,11 @@ public class ExtractMetadata {
 	private static final String XSLT_L1_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
 	private static final String XSLT_ETAD_MANIFEST = "XSLT_L1_MANIFEST.xslt";
-	private static final String XSLT_S2_MANIFEST = "XSLT_S2_MANIFEST.xslt";
-	private static final String XSLT_S2_INVENTORY = "XSLT_S2_INVENTORY.xslt";
 	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
+	private static final String XSLT_FILE_PREFIX = "XSLT_";
+	private static final String XSLT_FILE_SUFFIX = ".xslt";
 	
 	// S1OPS-937: Filename based extraction of Validity Start / Stop and Generation Time
 	private static final List<String> TYPES_WITH_PRODUCTNAME_BASED_VALIDITY_TIME_EXTRACTION = Arrays.asList("AUX_TEC", "AUX_TRO");
@@ -397,16 +400,20 @@ public class ExtractMetadata {
 		}
 	}
 
-	public ProductMetadata processS2Metadata(S2FileDescriptor descriptor, File safeMetadataFile, File inventoryMetadataFile)
+	public ProductMetadata processS2Metadata(S2FileDescriptor descriptor, File metadataFile, ProductFamily family, String productName)
 			throws MetadataExtractionException, MetadataMalformedException {
-		ProductMetadata safeMetadata = transformXMLWithXSLTToJSON(safeMetadataFile,
-				new File(this.xsltDirectory + XSLT_S2_MANIFEST));
-		ProductMetadata inventoryMetadata = transformXMLWithXSLTToJSON(inventoryMetadataFile,
-				new File(this.xsltDirectory + XSLT_S2_INVENTORY));
+
+		File xsltFile = new File(this.xsltDirectory + XSLT_FILE_PREFIX + family.toString() + XSLT_FILE_SUFFIX);
 		
-		ProductMetadata metadata = mergeMetadata(safeMetadata, inventoryMetadata);
-		metadata = checkS2Metadata(metadata);
-		metadata = processS2Coordinates(metadata);
+		if (!xsltFile.exists()) {
+			throw new MetadataExtractionException("Unable to find S2 XSLT file for family " + family.toString());
+		}
+		
+		ProductMetadata metadata = transformXMLWithXSLTToJSON(metadataFile,	xsltFile);
+		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
+		
+		metadata = checkS2Metadata(metadata, additionalMetadata);
+		metadata = processS2Coordinates(metadata, family);
 		metadata = putS2FileMetadataToJSON(metadata, descriptor);
 		
 		LOGGER.debug("composed Json: {} ", metadata);
@@ -553,9 +560,21 @@ public class ExtractMetadata {
 		}
 	}
 
-	private ProductMetadata checkS2Metadata(final ProductMetadata metadata) throws MetadataExtractionException {
+	private ProductMetadata checkS2Metadata(final ProductMetadata metadata, final ProductMetadata additionalMetadata) 
+			throws MetadataExtractionException {
 		try {
-
+			// Add additional metadata
+			if (!metadata.has("productType") && additionalMetadata.has("productType")) {
+				metadata.put("productType", additionalMetadata.get("productType"));
+			}
+			if (!metadata.has("creationTime") && additionalMetadata.has("creationTime")) {
+				metadata.put("creationTime", additionalMetadata.get("creationTime"));
+			}
+			if (!metadata.has("platformSerialIdentifier") && additionalMetadata.has("platformSerialIdentifier")) {
+				metadata.put("platformSerialIdentifier", additionalMetadata.get("platformSerialIdentifier"));
+			}
+			
+			// Fix format of timestamps
 			if (metadata.has("startTime")) {
 				try {
 					metadata.put("startTime",
@@ -686,10 +705,16 @@ public class ExtractMetadata {
 		}
 	}
 	
-	ProductMetadata processS2Coordinates(ProductMetadata metadata)
+	ProductMetadata processS2Coordinates(ProductMetadata metadata, ProductFamily family)
 			throws MetadataMalformedException {
 		if (metadata.has("coordinates")) {
-			final String rawCoords = metadata.getString("coordinates");
+			String rawCoords = metadata.getString("coordinates");
+			
+			// On L0 Granules, the coordinates contain the height as additional information
+			if (family == ProductFamily.S2_L0_GR) {
+				rawCoords = removeHeightInformationFromCoords(rawCoords);
+			}
+			
 			if (!rawCoords.trim().isEmpty()) {
 				metadata.put("coordinates", transformFromOpengis(rawCoords));
 			} else {
@@ -1364,16 +1389,16 @@ public class ExtractMetadata {
 		return totalNumberOfSlices;
 	}
 	
-	private ProductMetadata mergeMetadata(ProductMetadata metadata1, ProductMetadata metadata2)
-			throws MetadataMalformedException {
-		final ProductMetadata merged = new ProductMetadata();
-		for(final String key : metadata1.keys()) {
-			merged.put(key, metadata1.get(key));
+	private String removeHeightInformationFromCoords(String coords) {
+		String[] list = coords.split(" ");
+		String newCoords = "";
+		for (int i = 0; i < list.length; i++) {
+			if (i % 3 != 2) {
+				newCoords = newCoords + " " + list[i];
+			}
 		}
-		for(final String key : metadata2.keys()) {
-			merged.put(key, metadata2.get(key));
-		}		
-		return merged;
+		
+		return newCoords.trim();
 	}
 
 }

@@ -18,6 +18,13 @@ public class MetadataExtractionException extends AbstractCodedException {
     public MetadataExtractionException(final Throwable cause) {
         super(ErrorCode.METADATA_EXTRACTION_ERROR, cause.getMessage(), cause);
     }
+    
+    /**
+     * @param message
+     */
+    public MetadataExtractionException(final String message) {
+    	super(ErrorCode.METADATA_EXTRACTION_ERROR, message);
+    }
 
     /**
      * 
