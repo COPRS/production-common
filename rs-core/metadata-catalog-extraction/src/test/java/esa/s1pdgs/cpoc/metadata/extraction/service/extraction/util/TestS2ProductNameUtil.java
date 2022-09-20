@@ -36,7 +36,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("8A", m1.getString("bandIndexId"));
 		assertEquals("P", m1.getString("completenessId"));
 		assertEquals("D", m1.getString("degradationId"));
-		assertEquals(19, m1.length());
+		assertEquals("S2A", m1.getString("platformSerialIdentifier"));
+		assertEquals(20, m1.length());
 		
 		// synthetic file name for AUX
 		
@@ -59,7 +60,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("8A", m2.getString("bandIndexId"));
 		assertEquals("F", m2.getString("completenessId"));
 		assertEquals("N", m2.getString("degradationId"));
-		assertEquals(18, m2.length());
+		assertEquals("S2B", m2.getString("platformSerialIdentifier"));
+		assertEquals(19, m2.length());
 		
 		// from existing file names	
 		
@@ -72,8 +74,9 @@ public class TestS2ProductNameUtil {
 		assertEquals("AUX_PREORB", m3.getString("productType"));
 		assertEquals("2017-06-17T09:22:26.000000Z", m3.getString("creationTime"));
 		assertEquals("2017-06-17T11:01:20.000000Z", m3.getString("validityStartTime"));
-		assertEquals("2017-06-17T14:22:43.000000Z", m3.getString("validityStopTime"));		
-		assertEquals(8, m3.length());
+		assertEquals("2017-06-17T14:22:43.000000Z", m3.getString("validityStopTime"));	
+		assertEquals("S2A", m3.getString("platformSerialIdentifier"));
+		assertEquals(9, m3.length());
 
 		final ProductMetadata m4 = S2ProductNameUtil.extractMetadata("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.zip");
 		System.out.println(m4.prettyPrint());
@@ -88,7 +91,8 @@ public class TestS2ProductNameUtil {
 		assertEquals(19158, m4.getInt("absolutOrbit"));
 		assertEquals("F", m4.getString("completenessId"));
 		assertEquals("N", m4.getString("degradationId"));
-		assertEquals(11, m4.length());
+		assertEquals("S2A", m4.getString("platformSerialIdentifier"));
+		assertEquals(12, m4.length());
 		
 		final ProductMetadata m5 = S2ProductNameUtil.extractMetadata("S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN.tar");
 		System.out.println(m5.prettyPrint());
@@ -103,7 +107,8 @@ public class TestS2ProductNameUtil {
 		assertEquals(19158, m5.getInt("absolutOrbit"));
 		assertEquals("F", m5.getString("completenessId"));
 		assertEquals("N", m5.getString("degradationId"));
-		assertEquals(11, m5.length());
+		assertEquals("S2A", m5.getString("platformSerialIdentifier"));
+		assertEquals(12, m5.length());
 		
 		final ProductMetadata m6 = S2ProductNameUtil.extractMetadata("S2B_OPER_AUX_RESORB_OPOD_20181016T014456_V20181015T211347_20181016T003717.EOF");
 		System.out.println(m6.prettyPrint());
@@ -115,7 +120,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2018-10-16T01:44:56.000000Z", m6.getString("creationTime"));
 		assertEquals("2018-10-15T21:13:47.000000Z", m6.getString("validityStartTime"));
 		assertEquals("2018-10-16T00:37:17.000000Z", m6.getString("validityStopTime"));
-		assertEquals(8, m6.length());
+		assertEquals("S2B", m6.getString("platformSerialIdentifier"));
+		assertEquals(9, m6.length());
 		
 		final ProductMetadata m7 = S2ProductNameUtil.extractMetadata("S2B_OPER_GIP_R2DEFI_MPC__20170206T103039_V20170101T000000_21000101T000000_B8A.TGZ");
 		System.out.println(m7.prettyPrint());
@@ -128,7 +134,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2017-01-01T00:00:00.000000Z", m7.getString("validityStartTime"));
 		assertEquals("2100-01-01T00:00:00.000000Z", m7.getString("validityStopTime"));
 		assertEquals("8A", m7.getString("bandIndexId"));
-		assertEquals(9, m7.length());
+		assertEquals("S2B", m7.getString("platformSerialIdentifier"));
+		assertEquals(10, m7.length());
 		
 		final ProductMetadata m8 = S2ProductNameUtil.extractMetadata("S2__OPER_AUX_ECMWFD_PDMC_20190216T120000_V20190217T090000_20190217T210000.TGZ");
 		System.out.println(m8.prettyPrint());
@@ -140,7 +147,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2019-02-16T12:00:00.000000Z", m8.getString("creationTime"));
 		assertEquals("2019-02-17T09:00:00.000000Z", m8.getString("validityStartTime"));
 		assertEquals("2019-02-17T21:00:00.000000Z", m8.getString("validityStopTime"));
-		assertEquals(8, m8.length());
+		assertEquals("S2_", m8.getString("platformSerialIdentifier"));
+		assertEquals(9, m8.length());
 		
 		final ProductMetadata m9 = S2ProductNameUtil.extractMetadata("S2__OPER_AUX_UT1UTC_PDMC_20191024T000000_V20191025T000000_20201024T000000.TGZ");
 		System.out.println(m9.prettyPrint());
@@ -152,7 +160,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2019-10-24T00:00:00.000000Z", m9.getString("creationTime"));
 		assertEquals("2019-10-25T00:00:00.000000Z", m9.getString("validityStartTime"));
 		assertEquals("2020-10-24T00:00:00.000000Z", m9.getString("validityStopTime"));
-		assertEquals(8, m9.length());
+		assertEquals("S2_", m9.getString("platformSerialIdentifier"));
+		assertEquals(9, m9.length());
 		
 		final ProductMetadata m10 = S2ProductNameUtil.extractMetadata("S2A_OPER_MSI_L1A_GR_MTI__20141104T134012_S20141104T134012_D03_N01.12");
 		System.out.println(m10.prettyPrint());
@@ -165,7 +174,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2014-11-04T13:40:12.000000Z", m10.getString("sensingTime"));
 		assertEquals(3, m10.getInt("detectorId"));
 		assertEquals("01.12", m10.getString("processingBaselineNumber"));
-		assertEquals(9, m10.length());
+		assertEquals("S2A", m10.getString("platformSerialIdentifier"));
+		assertEquals(10, m10.length());
 		
 		final ProductMetadata m11 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1A_GR_EPAE_20200114T014601_S20200114T002121_D12_N02.08.tar");
 		System.out.println(m11.prettyPrint());
@@ -178,7 +188,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2020-01-14T00:21:21.000000Z", m11.getString("sensingTime"));
 		assertEquals(12, m11.getInt("detectorId"));
 		assertEquals("02.08", m11.getString("processingBaselineNumber"));
-		assertEquals(9, m11.length());
+		assertEquals("S2B", m11.getString("platformSerialIdentifier"));
+		assertEquals(10, m11.length());
 		
 		final ProductMetadata m12 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1C_DS_MTI__20200226T105549_S20200226T070436_N02.09.tar");
 		System.out.println(m12.prettyPrint());
@@ -190,7 +201,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("2020-02-26T10:55:49.000000Z", m12.getString("creationTime"));
 		assertEquals("2020-02-26T07:04:36.000000Z", m12.getString("sensingTime"));
 		assertEquals("02.09", m12.getString("processingBaselineNumber"));
-		assertEquals(8, m12.length());
+		assertEquals("S2B", m12.getString("platformSerialIdentifier"));
+		assertEquals(9, m12.length());
 		
 		final ProductMetadata m13 = S2ProductNameUtil.extractMetadata("S2B_OPER_MSI_L1C_TC_EPAE_20191001T102654_A013417_T39UWP_N02.08.jp2");
 		System.out.println(m13.prettyPrint());
@@ -203,7 +215,8 @@ public class TestS2ProductNameUtil {
 		assertEquals(13417, m13.getInt("absolutOrbit"));
 		assertEquals("39UWP", m13.getString("tileNumber"));
 		assertEquals("02.08", m13.getString("processingBaselineNumber"));
-		assertEquals(9, m13.length());
+		assertEquals("S2B", m13.getString("platformSerialIdentifier"));
+		assertEquals(10, m13.length());
 		
 		// HKTM
 		
@@ -230,7 +243,8 @@ public class TestS2ProductNameUtil {
 		assertEquals(121, m15.getInt("relativeOrbit"));
 		assertEquals("2016-06-15T08:20:12.000000Z", m15.getString("startTime"));
 		assertEquals("2016-06-15T08:31:35.000000Z", m15.getString("stopTime"));
-		assertEquals(9, m15.length());
+		assertEquals("S2A", m15.getString("platformSerialIdentifier"));
+		assertEquals(10, m15.length());
 		
 		// Level-1C User Product tree defined using the Compact Naming Convention
 		
@@ -244,7 +258,8 @@ public class TestS2ProductNameUtil {
 		assertEquals("01.02", m16.getString("processingBaselineNumber"));
 		assertEquals(8, m16.getInt("relativeOrbit"));
 		assertEquals("2015-08-03T12:40:46.000000Z", m16.getString("productDiscriminator"));
-		assertEquals(8, m16.length());
+		assertEquals("S2A", m16.getString("platformSerialIdentifier"));
+		assertEquals(9, m16.length());
 		
 		// Single Title Naming Convention. Example S2 L2A single tile product main directory
 		
@@ -259,7 +274,8 @@ public class TestS2ProductNameUtil {
 		assertEquals(65, m17.getInt("relativeOrbit"));
 		assertEquals("32TNS", m17.getString("tileNumber"));
 		assertEquals("2017-11-06T19:52:36.000000Z", m17.getString("productDiscriminator"));
-		assertEquals(9, m17.length());
+		assertEquals("S2A", m17.getString("platformSerialIdentifier"));
+		assertEquals(10, m17.length());
 	}
 
 }
