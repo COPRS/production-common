@@ -56,7 +56,7 @@ public class S2ProductNameUtil {
 			metadata.put("satelliteId", compactMatcher.group(2));
 			metadata.put("productType", compactMatcher.group(3));
 			metadata.put("startTime", DateUtils.formatToMetadataDateTimeFormat(DateUtils.parse(compactMatcher.group(4))));
-			metadata.put("platformSerialIdentifier", standardMatcher.group(1) + standardMatcher.group(2));
+			metadata.put("platformSerialIdentifier", compactMatcher.group(1) + compactMatcher.group(2));
 			variablePart = compactMatcher.group(5);
 		} else {
 			throw new MetadataExtractionException(
