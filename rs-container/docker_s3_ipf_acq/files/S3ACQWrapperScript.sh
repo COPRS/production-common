@@ -326,6 +326,8 @@ cat <<EOF > /data/ACQ/conf/$(hostname).xml
 </root>
 EOF
 
+# RS-512: Make sure the environment is clean, so no old unfinished processing intervenes with the current one
+clean_acq_working_dirs
 
 link_inputs
 
