@@ -9,7 +9,7 @@ These services are:
 - Eviction Manager
 - Native API
 - RSAPI Frontend (PRIP / DDIP Frontend)
-- Request Repository
+- Request Parking Lot
 
 Additionally the User Web Client that can be used as web frontend for the COPRS can be deployed also as a standalone service. It can be found in this [repository](https://github.com/COPRS/user-web-client).
 
@@ -36,7 +36,7 @@ The following global parameters exist per instance and can be used when deployin
 | `service.name` | The name of the service when it is deployed | e.g. `rs-core-metadata-catalog-searchcontroller` |
 | `processing.namespace` | The namespace into that the chart shall be deployed | `processing` |
 | `image.registry` | The registry from that the image shall be pulled | `artifactory.coprs.esa-copernicus.eu` |
-| `image.repository` | The path within the directory from that the image shall be pulled | `werum-docker` |
+| `image.repository` | The path within the directory from that the image shall be pulled | `rs-docker` |
 | `image.tag` | The tag of the docker image that shall be pulled | `develop` |
 | `image.imagePullSecrets` | The secret that will be use to authentificate against the registry | `artifactory` |
 | `resources.cpu.request` | Specifies the amount of CPU that is requested. More information can be found [here](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/]) | Instance specific |
@@ -128,20 +128,20 @@ The following command can be used in order to deploy the Eviction Manager:
 | `elasticsearch.search-result-limit` | Limitation of search result when searching for evictable files in the DLM index. Only this amount of files will be handled in one iteration | `1000` |
 | `eviction-management-worker.eviction-interval-ms` | Specifies the interval in milliseconds between invocations of the Eviction routine for searching and deleting evictable files from OBS/MDC/Prip | `600000` |
 
-## Request Repository
+## Request Parking Lot
 
 The component provides an interface to list and restart failed processings.
 
 Prerequisites:
 
-As a frontend to the COPRS DLQ sub system, the Request Repository needs to access the failed processings, that are stored by the DLQ component in a MongoDB database. Thus it is required to have a MongoDB instance available and setup. For further general information regarding the creation of a secret for the  MongoDB instance, please see [COPRS MongoDB](/processing-common/doc/secrets.md)
+As a frontend to the COPRS DLQ sub system, the Request Parking Lot needs to access the failed processings, that are stored by the DLQ component in a MongoDB database. Thus it is required to have a MongoDB instance available and setup. For further general information regarding the creation of a secret for the  MongoDB instance, please see [COPRS MongoDB](/processing-common/doc/secrets.md)
 
-The default configuration provided is expecting a secret `mongorequestrepository` in the namespace `processing` containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
+The default configuration provided is expecting a secret `mongorequestparkinglot` in the namespace `processing` containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
 
 In order to generate the secret, you can use the following commands:
-``kubectl create secret generic mongorequestrepository --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
+``kubectl create secret generic mongorequestparkinglot --from-literal=USERNAME=<MONGO_USER> --from-literal=PASSWORD=<MONGO_PASSWORD>``
 
-Please note that further initialization might be required. For the Request Repository component please execute the following commands in the MongoDB in order to create the credentials for the secret:
+Please note that further initialization might be required. For the Request Parking Lot component please execute the following commands in the MongoDB in order to create the credentials for the secret:
 ``
 db.createUser({user: "<USER>", pwd: "<PASSWORD>", roles: [{role: "readWrite", db: "coprs"}]})
 ``
@@ -152,9 +152,9 @@ In order to generate the secret, you can use the following commands:
 `kubectl create secret generic apikey --from-literal=apikey=<API_KEY>`
 
 
-The following command can be used in order to deploy the Request Repository:
+The following command can be used in order to deploy the Request Parking Lot:
 
-`helm install rs-helm/rs-request-repository --version 1.0.1`
+`helm install rs-helm/rs-request-parking-lot --version 1.0.1`
 
 | Name | Description | Default |
 | -|-|-|
