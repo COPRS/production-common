@@ -14,9 +14,16 @@ ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory
 ### Reconstruction of the base image provided by the agency
 USER root
 
-RUN yum install -y libgomp java-1.8.0-openjdk
+#RUN yum install -y libgomp java-1.8.0-openjdk
 
 RUN useradd -u 1001 rsuser
+
+# Deploy AdoptJDK workaround
+
+WORKDIR /opt 
+
+RUN wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.16.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz
+RUN tar -xf OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz && rm OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz
 
 #WORKDIR /tmp
 
@@ -62,6 +69,9 @@ RUN chmod +x /tini
 
 RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
+
+# Install java 11 - workaround for AdoptJDK
+RUN sed -i '1 a\export PATH=$PATH:/opt/jdk-11.0.16.1+1/bin' /app/start.sh
 
 USER rsuser:rsuser
 
