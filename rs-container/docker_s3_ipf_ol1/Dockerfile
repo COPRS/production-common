@@ -41,9 +41,6 @@ COPY --from=base /log/log4j2.yml /log/log4j2.yml
 
 USER root:root 
 
-# Install java 11
-RUN PATH=$PATH:/opt/jdk-11.0.16.1+1/bin
-
 # Add Tini as entry point
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
@@ -51,6 +48,9 @@ RUN chmod +x /tini
 
 RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
+
+# Install java 11 - workaround for AdoptJDK
+RUN sed -i '1 a\export PATH=$PATH:/opt/jdk-11.0.16.1+1/bin' /app/start.sh
 
 USER rsuser:rsuser
 
