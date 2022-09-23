@@ -12,6 +12,8 @@ ARG BRANCH_TEXT
 ### Reconstruction of the base image provided by the agency
 USER root
 
+RUN yum install wget -y
+
 RUN useradd -u 1001 rsuser
 
 # Deploy AdoptJDK workaround
