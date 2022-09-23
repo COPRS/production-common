@@ -52,6 +52,6 @@ RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 USER rsuser:rsuser
 
 # Install java 11 - workaround for AdoptJDK
-RUN PATH=$PATH:/opt/jdk-11.0.16.1+1/bin
+RUN echo "PATH=$PATH:/opt/jdk-11.0.16.1+1/bin" >> /app/start.sh
 
 ENTRYPOINT ["/tini", "--", "/app/start.sh"]
