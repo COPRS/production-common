@@ -18,7 +18,7 @@ RUN yum install wget -y
 
 RUN useradd -u 1001 rsuser
 
-WORKDIR /opt 
+WORKDIR /opt
 
 RUN wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.16.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz
 RUN tar -xf OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz && rm OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz
