@@ -79,7 +79,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           load: true
-          context: ./rs-container/docker_s3_ipf_ol1
+          context: ./rs-container/docker_s3_ipf_pug
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
