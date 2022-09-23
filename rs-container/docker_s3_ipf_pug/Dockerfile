@@ -50,7 +50,7 @@ RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
 # Install java 11 - workaround for AdoptJDK
-RUN sed '1 a\export PATH=$PATH:/opt/jdk-11.0.16.1+1/bin' /app/start.sh
+RUN sed -i '1 a\export PATH=$PATH:/opt/jdk-11.0.16.1+1/bin' /app/start.sh
 
 USER rsuser:rsuser
 
