@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -305,11 +306,9 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter)
 			throws IpfPrepWorkerInputsMissingException {
 		// Check if timeout is reached -> start job with current input
-		// TODO: Remove timeout logic
-		/*
-		if (workerSettings.getWaitprimarycheck().getMaxTimelifeS() != 0) {
+		if (workerSettings.getPrimaryCheckMaxTimelifeS() != 0) {
 			final long startTime = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
-			final long timeoutTime = startTime + (workerSettings.getWaitprimarycheck().getMaxTimelifeS() * 1000);
+			final long timeoutTime = startTime + (workerSettings.getPrimaryCheckMaxTimelifeS() * 1000);
 
 			if (Instant.now().toEpochMilli() > timeoutTime) {
 				// Timeout reached
@@ -318,7 +317,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				return;
 			}
 		}
-		*/
+		
 
 		// Extract a list of all inputs from the tasks
 		final List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
