@@ -14,6 +14,8 @@ ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory
 ### Reconstruction of the base image provided by the agency
 USER root
 
+RUN yum install wget -y
+
 #RUN yum install -y libgomp java-1.8.0-openjdk
 
 RUN useradd -u 1001 rsuser
