@@ -49,9 +49,9 @@ RUN chmod +x /tini
 RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
-USER rsuser:rsuser
-
 # Install java 11 - workaround for AdoptJDK
-RUN echo "PATH=$PATH:/opt/jdk-11.0.16.1+1/bin" >> /app/start.sh
+RUN echo 'PATH=$PATH:/opt/jdk-11.0.16.1+1/bin' >> /app/start.sh
+
+USER rsuser:rsuser
 
 ENTRYPOINT ["/tini", "--", "/app/start.sh"]
