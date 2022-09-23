@@ -44,7 +44,7 @@ USER root:root
 # Add Tini as entry point
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
+RUN chmod +x /tini 
 
 RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
