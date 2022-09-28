@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0-rc1] - 2022-09-29
+
+### Added
+
+RS-157: Build CFI PUG S3 container
+RS-239: Implementation of a solution for "load balance the lag" mechanism
+RS-512: Script "S3ACQWrapperScript.sh" failed
+RS-518: Implementation of RequestParkingLot API from S1PRO-RequestRepository
+RS-520: Check on overwriting existing product in OBS
+RS-528: Create S3_SR1 processor as RS add-on
+RS-530: Create S3_MW1 processor as RS add-on
+RS-532: Create S3_SL1 processor as RS add-on
+RS-533: Create S3_SL2 processor as RS add-on
+RS-560: Inventory_Metadata.xml must not be mandatory for Metadata Extraction
+
+### Changed
+
+RS-337: [S1] [L0] L0ASP execution worker fails.
+RS-517: Too many loops due to symbolic links on S3 ACQ execution worker
+RS-519: RS PRO: Make EDIP trigger robust
+RS-527: Create compression topic
+RS-552: Remove affinity from pro-common Helm chart (mocks only)
+
+### Removed
+
+- N/A
+
+
 ## [1.5.0-rc1] - 2022-08-31
 
 ### Added
@@ -26,6 +54,18 @@ RS-511: Moved t0PdgsDate from base message to additionalFields
 ### Removed
 
 - N/A
+
+## [1.4.1-rc1] - 2022-09-22
+
+### Added
+N/A
+
+### Changed
+- RS-XX: Backport documentation from develop to branch 1.4
+- RS-560: Inventory_Metadata.xml must not be mandatory for Metadata Extraction
+
+### Removed
+N/A
 
 ## [1.4.0-rc1] - 2022-08-03
 
