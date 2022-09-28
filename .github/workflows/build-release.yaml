@@ -204,21 +204,21 @@ jobs:
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
-  build-s1-l1:
-    needs: [build-all-core]
-    uses: ./.github/workflows/build-ipf-s1-l1.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+  # build-s1-l1:
+  #   needs: [build-all-core]
+  #   uses: ./.github/workflows/build-ipf-s1-l1.yaml
+  #   secrets:
+  #     WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+  #     WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+  #     GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
-  build-s1-l2:
-    needs: [build-all-core]
-    uses: ./.github/workflows/build-ipf-s1-l2.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+  # build-s1-l2:
+  #   needs: [build-all-core]
+  #   uses: ./.github/workflows/build-ipf-s1-l2.yaml
+  #   secrets:
+  #     WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+  #     WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+  #     GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
   build-s3-acq:
     needs: [build-all-core]
