@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.RecoverableDataAccessException;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
@@ -51,17 +52,22 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductEntityProcessor.class);
 	
+	private final CommonConfigurationProperties commonProperties;
 	private OData odata;
 	private ServiceMetadata serviceMetadata;
-	private PripMetadataRepository pripMetadataRepository;
-	private ObsClient obsClient;
-	private long downloadUrlExpirationTimeInSeconds;
+	private final PripMetadataRepository pripMetadataRepository;
+	private final ObsClient obsClient;
+	private final long downloadUrlExpirationTimeInSeconds;
+	private final String username;
 
-	public ProductEntityProcessor(final PripMetadataRepository pripMetadataRepository,
-			final ObsClient obsClient, final long downloadUrlExpirationTimeInSeconds) {
+	public ProductEntityProcessor(final CommonConfigurationProperties commonProperties,
+			final PripMetadataRepository pripMetadataRepository, final ObsClient obsClient,
+			final long downloadUrlExpirationTimeInSeconds, final String username) {
+		this.commonProperties = commonProperties;
 		this.pripMetadataRepository = pripMetadataRepository;
 		this.obsClient = obsClient;
 		this.downloadUrlExpirationTimeInSeconds = downloadUrlExpirationTimeInSeconds;
+		this.username = username;
 	}
 	
 	@Override
@@ -125,9 +131,9 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 				if (null != foundPripMetadata) {		
 					final Reporting reporting = ReportingUtils
 							.newReportingBuilder(MissionId.fromFileName(foundPripMetadata.getObsKey()))
+							.rsChainName(commonProperties.getRsChainName())
+							.rsChainVersion(commonProperties.getRsChainVersion())
 							.newReporting("PripTempDownloadUrl");
-					// currently used username
-					final String username = "not defined";
 					
 					reporting.begin(
 							PripReportingInput.newInstance(

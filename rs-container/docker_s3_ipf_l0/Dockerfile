@@ -1,6 +1,8 @@
 ARG BRANCH
-FROM ghcr.io/coprs/rs-core:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app
+
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH} as base
 
 #FROM artifactory.coprs.esa-copernicus.eu/cfi/sentinel3/s3-ipf0:06.12
 FROM centos:7
@@ -15,13 +17,7 @@ USER root
 
 RUN yum install -y libgomp java-1.8.0-openjdk
 
-# create user
-ARG USER=ops3pdgs
-ARG UID=1000
-ARG GID=1000
-
-RUN useradd -m ${USER} --uid=${UID} && echo "${USER}:${PW}" | \
-      chpasswd
+RUN useradd -u 1001 rsuser
 
 WORKDIR /tmp
 
@@ -39,9 +35,9 @@ RUN rm -f S3IPF-L0_06.12.rpm blas-3.2.1-4.el6.x86_64.rpm lapack-3.2.1-4.el6.x86_
 ### End of Base-Image  
 WORKDIR /app
 
-RUN mkdir -p /app && chown ops3pdgs:ops3pdgs /app
+RUN mkdir -p /app && chown rsuser:rsuser /app
 
-USER ops3pdgs:ops3pdgs
+USER rsuser:rsuser
 
 
 # Adding Version information
@@ -50,20 +46,24 @@ RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
 # Adding execution worker
-COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
-COPY --from=build /app/ipf-execution-worker/config/start.sh /app/start.sh
+COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
+COPY --from=build /app/start.sh /app/start.sh
+COPY --from=base /log/log4j2.yml /log/log4j2.yml
+
+USER root:root 
+
+# Install java 11
+RUN yum install -y java-11-openjdk
+RUN alternatives --set java java-11-openjdk.x86_64
 
 # Add Tini as entry point
-USER root:root
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
 
-RUN mkdir -p /data/localWD && chown ops3pdgs:ops3pdgs /data/localWD
-RUN mkdir -p /data/oqcWD && chown ops3pdgs:ops3pdgs /data/oqcWD
+RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
+RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
-USER ops3pdgs:ops3pdgs
+USER rsuser:rsuser
 
-CMD ["/app/start.sh"]
- 
+ENTRYPOINT ["/tini", "--", "/app/start.sh"]

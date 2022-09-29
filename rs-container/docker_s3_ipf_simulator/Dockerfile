@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM ghcr.io/coprs/rs-core:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app
 
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
@@ -22,12 +22,12 @@ RUN ln -s /usr/local/conf/IPFSimulator/bin/Processor_wrapper.sh S3IPF.sh
 
 # link task table binaries
 # rsync required for ipf-sim-for-tc25
-RUN apk add rsync
+RUN apt-get update && apt-get install rsync -y
 
 ADD files/linkBin.sh /app/linkBin.sh
 RUN /app/linkBin.sh
 
-COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar /app/s1pdgs-ipf-execution-worker.jar
+COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 ADD files/start.sh /app/start.sh
 
 ADD files/ipf-sim-for-tc25.sh /usr/local/components/S3IPF_L0_05.02/bin/OL_0_CR_.bin
@@ -35,4 +35,5 @@ ADD files/ipf-sim-for-tc25.sh /usr/local/components/S3IPF_L0_05.02/bin/OL_0_CR_.
 # Create folder for IPFSimulator
 RUN mkdir -p /data/ipf-s3
 
-CMD ["/app/start.sh"]
+ENTRYPOINT ["/app/start.sh"]
+ 

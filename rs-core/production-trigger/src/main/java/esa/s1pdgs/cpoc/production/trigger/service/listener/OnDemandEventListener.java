@@ -58,12 +58,12 @@ public final class OnDemandEventListener extends AbstractMqiListener<OnDemandEve
     	final OnDemandEvent onDemandEvent = mess.getBody();
     	
     	final CatalogEvent catEvent = new CatalogEvent();
-		catEvent.setProductName(onDemandEvent.getProductName());
+    	final Map<String, Object> metadata = onDemandEvent.getMetadata();
+    	catEvent.setMetadata(metadata);	
+		catEvent.setMetadataProductName(onDemandEvent.getProductName());
 		catEvent.setKeyObjectStorage(onDemandEvent.getKeyObjectStorage());
 		catEvent.setProductFamily(onDemandEvent.getProductFamily());
-		final Map<String, Object> metadata = onDemandEvent.getMetadata();
-		catEvent.setProductType(metadata.get("productType").toString());
-		catEvent.setMetadata(metadata);		
+		catEvent.setMetadataProductType(metadata.get("productType").toString());	
 		
     	catEvent.setAllowedActions(onDemandEvent.getAllowedActions());
     	catEvent.setDebug(onDemandEvent.isDebug());

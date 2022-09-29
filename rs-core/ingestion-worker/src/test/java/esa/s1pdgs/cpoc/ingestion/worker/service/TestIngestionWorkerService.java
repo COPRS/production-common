@@ -5,17 +5,12 @@ import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
 import esa.s1pdgs.cpoc.ingestion.worker.product.ProductService;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public final class TestIngestionWorkerService {
-	
-	@Mock
-	GenericMqiClient mqiClient;
 
 	Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S1).newReporting("Test");
 	
@@ -24,9 +19,6 @@ public final class TestIngestionWorkerService {
 	
 	@Mock
 	ProductService productService;
-	
-	@Mock
-	ErrorRepoAppender errorRepoAppender;
 	
 	@Before
 	public final void setup() {

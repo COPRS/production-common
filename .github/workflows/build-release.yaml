@@ -1,0 +1,221 @@
+name: Release Build Pipeline production-common
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+-rc[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+env:
+  IMAGE_NAME: rs-core
+  RS_CORE_FOLDER: processing-common
+  RS_EXAMPLES_FOLDER: rs-core-examples
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_DOCKER: werum-docker
+  ARTIFACTORY_PROJECT_MAVEN: rs-maven
+  ARTIFACTORY_PROJECT_HELM: rs-helm
+  ARTIFACTORY_PROJECT_COMMON: rs-docker
+  ARTIFACTORY_CORE_PROJECT: rs-core
+  ARTIFACTORY_EXAMPLES_PROJECT: rs-core-examples
+
+jobs:
+  gg-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: GitGuardian scan
+      uses: GitGuardian/gg-shield-action@master
+      env:
+        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
+
+  build-base:
+    needs: [gg-scan] 
+    runs-on: ubuntu-latest    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - uses: ./.github/actions/build-container
+        with:
+          IMAGE_NAME_SUFFIX: base
+          BUILD_CONTEXT: ./rs-container/docker_base
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      - uses: ./.github/actions/generate-report
+        with: 
+          COMPONENT: base
+
+  deploy-parent-poms:
+    needs: [gg-scan] 
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pom: [rs-libs, rs-core]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/deploy-pom
+      with:
+        POM: ${{ matrix.pom }}
+        ARTIFACTORY_BASE: ${{ env.ARTIFACTORY_BASE}}
+        ARTIFACTORY_PROJECT: ${{ env.ARTIFACTORY_PROJECT_MAVEN}}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+
+  build-libs:
+    needs: [gg-scan]
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        component: [lib-commons, app-status, message-adapter, xml-tools, error-repo-client, obs-sdk, metadata-client, prip-client, auxip-client, xbip-client, edip-client, data-lifecycle-client, jacoco-report] 
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-libs
+      with:
+        COMPONENT: ${{ matrix.component }}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+  
+  build-all-core:
+    needs: [build-base, build-libs]
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [compression-worker, distribution-worker, dlq-manager, eviction-management-worker, execution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, data-lifecycle-worker, prip-frontend, ddip-frontend, preparation-worker, request-repository]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-docker
+      with:
+        COMPONENT: ${{ matrix.component }}
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+    - uses: ./.github/actions/generate-report
+      with:
+        COMPONENT: ${{ matrix.component }}
+
+  build-core-components:
+    needs: [gg-scan] 
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [ingestion, metadata, compression, distribution, datalifecycle, dlq]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-core-components
+      with:
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+
+  build-core-examples:
+    needs: [gg-scan] 
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [ingestion-auxip, ingestion-edip, ingestion-xbip, ingestion-mock-auxip, ingestion-contingency]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-core-examples
+      with:
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+  
+  helm-charts:
+    needs: [gg-scan]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [ddip_frontend, metadata_search_controller, native_api, prip_frontend, request_repository, eviction_manager]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/helm-charts
+      with:
+        COMPONENT: ${{ matrix.component}}
+        CHART_FOLDER: rs-processing-common
+        ARTIFACTORY_HELM_PROJECT: processing
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+
+  helm-mocks:
+    needs: [gg-scan]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [mock_webdav, mock_ftp]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/helm-charts
+      with:
+        COMPONENT: ${{ matrix.component}}
+        CHART_FOLDER: rs-testing
+        ARTIFACTORY_HELM_PROJECT: testing
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+
+  build-containers:
+    needs: [gg-scan, build-base] 
+    runs-on: ubuntu-latest    
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [mock_webdav, mock_ftpserver]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - uses: ./.github/actions/build-container
+        with:
+          IMAGE_NAME_SUFFIX: ${{ matrix.component }} 
+          BUILD_CONTEXT: ./rs-container/docker_${{ matrix.component }} 
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      
+      - uses: ./.github/actions/generate-report
+        with: 
+          COMPONENT: ${{ matrix.component }} 
+
+  build-s1-aiop:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s1-aio.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s1-asp:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s1-asp.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-acq:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-acq.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-l0:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-l0.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}

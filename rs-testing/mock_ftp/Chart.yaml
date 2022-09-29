@@ -1,0 +1,8 @@
+apiVersion: v1
+appVersion: "{{CHART_VERSION}}"
+description: RS Mock EDIP
+name: rs-mock-edip
+version: {{CHART_VERSION}}
+maintainers:
+  - name: Werum Software & Systems
+   

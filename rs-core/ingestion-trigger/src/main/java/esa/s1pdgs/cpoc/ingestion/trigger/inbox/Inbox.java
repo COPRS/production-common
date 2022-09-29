@@ -4,7 +4,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,11 +15,10 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
-import esa.s1pdgs.cpoc.common.utils.Exceptions;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.PositiveFileSizeFilter;
@@ -24,7 +26,6 @@ import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingInput;
 import esa.s1pdgs.cpoc.ingestion.trigger.report.IngestionTriggerReportingOutput;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
-import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -38,8 +39,6 @@ public final class Inbox {
 	private final InboxAdapter inboxAdapter;
 	private final InboxFilter filter;
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
-	private final MessageProducer<IngestionJob> messageProducer;
-	private final String topic;
 	private final ProductFamily family;
 	private final String missionId;
 	private final String stationName;
@@ -47,16 +46,13 @@ public final class Inbox {
 	private final String timeliness;
 	private final ProductNameEvaluator nameEvaluator;
 	private final int stationRetentionTime;
-	private final int publishMaxRetries;
-    private final long publishTempoRetryMs;
     private final PathMetadataExtractor pathMetadataExtractor;
+    private final CommonConfigurationProperties commonProperties;
 
 	Inbox(
 			final InboxAdapter inboxAdapter, 
 			final InboxFilter filter,
 			final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional,
-			final MessageProducer<IngestionJob> messageProducer,
-			final String topic,
 			final ProductFamily family,
 			final String missionId,
 			final String stationName,
@@ -64,15 +60,12 @@ public final class Inbox {
 			final String mode,
 			final String timeliness,
 			final ProductNameEvaluator nameEvaluator,
-			final int publishMaxRetries,
-			final long publishTempoRetryMs,
-			final PathMetadataExtractor pathMetadataExtractor
+			final PathMetadataExtractor pathMetadataExtractor,
+			final CommonConfigurationProperties commonProperties
 	) {
 		this.inboxAdapter = inboxAdapter;
 		this.filter = filter;
 		this.ingestionTriggerServiceTransactional = ingestionTriggerServiceTransactional;
-		this.messageProducer = messageProducer;
-		this.topic = topic;
 		this.family = family;
 		this.missionId = missionId;
 		this.stationName = stationName;
@@ -80,13 +73,12 @@ public final class Inbox {
 		this.mode = mode;
 		this.timeliness = timeliness;
 		this.nameEvaluator = nameEvaluator;
-		this.publishMaxRetries = publishMaxRetries;
-		this.publishTempoRetryMs = publishTempoRetryMs;
 		this.log = LoggerFactory.getLogger(String.format("%s (%s) for %s", getClass().getName(), stationName, family));
 		this.pathMetadataExtractor = pathMetadataExtractor;
+		this.commonProperties = commonProperties;
 	}
 	
-	public final void poll() {
+	public final List<IngestionJob> poll() {
 		try {
 			//This is a dirty workaround to support backwards compatibility because product family is new and
 			//existing InboxEntries for xbip etc. (excl. auxip) do not have product family yet
@@ -110,21 +102,29 @@ public final class Inbox {
 			ingestionTriggerServiceTransactional.removeFinished(pollingRun.finishedElements());
 			
 			final Set<InboxEntry> handledElements = new HashSet<>();
+			final List<IngestionJob> jobs = new ArrayList<>();
 
 			for (final InboxEntry newEntry : pollingRun.newElements()) {
 				// omit files in subdirectories of already matched products
 				if (!isChildOf(newEntry, handledElements)) {
-					handleEntry(newEntry).
-							ifPresent(handledElements::add);
+					Optional<InboxReturnValue> returnValue = handleEntry(newEntry);
+					if (returnValue.isPresent()) {
+						handledElements.add(returnValue.get().getEntry());
+						jobs.add(returnValue.get().getJob());
+					}
 				}
 				persist(newEntry);
 			}
+			
 			inboxAdapter.advanceAfterPublish();
 			pollingRun.dumpTo(handledElements, log);
 			log.trace(pollingRun.toString());
+			
+			return jobs;
 		} catch (final Exception e) {			
 			// thrown on error reading the Inbox. No real retry here as it will be retried on next polling attempt anyway	
 			log.error(String.format("Error on polling %s", description()), e);
+			return Collections.emptyList();
 		}
 	}
 	public final String description() {
@@ -133,7 +133,7 @@ public final class Inbox {
 
 	@Override
 	public final String toString() {
-		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + ", messageProducer=" + messageProducer + "]";
+		return "Inbox [inboxAdapter=" + inboxAdapter + ", filter=" + filter + "]";
 	}
 
 	private boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
@@ -148,7 +148,7 @@ public final class Inbox {
 		return false;
 	}
 
-	final Optional<InboxEntry> handleEntry(final InboxEntry entry) {
+	final Optional<InboxReturnValue> handleEntry(final InboxEntry entry) {
 		MissionId mission = null;
 		
 		if (this.missionId == null) {
@@ -158,6 +158,8 @@ public final class Inbox {
 		}
 		
 		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName())
+				.rsChainVersion(commonProperties.getRsChainVersion())
 				.newReporting("IngestionTrigger");
 
 		final String productName;
@@ -190,30 +192,30 @@ public final class Inbox {
 
 			// S1OPS-971: Use the entire path element for the rule evaluation
 			final String absolutePath = absolutePathOf(entry);
-
+			
 			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
-			publishWithRetries(
-					new IngestionJob(
-						family, 
-						publishedName,
-						entry.getPickupURL(), 
-						entry.getRelativePath(), 
-						entry.getSize(),
-						entry.getLastModified(),
-						reporting.getUid(),
-						mission.name(),
-						stationName,
-						mode,
-						timeliness,
-						entry.getInboxType(),
-						pathMetadataExtractor.metadataFrom(absolutePath)
-					)
-			);
+			
+			IngestionJob job = new IngestionJob(
+					family, 
+					publishedName,
+					entry.getPickupURL(), 
+					entry.getRelativePath(), 
+					entry.getSize(),
+					entry.getLastModified(),
+					reporting.getUid(),
+					mission.name(),
+					stationName,
+					mode,
+					timeliness,
+					entry.getInboxType(),
+					pathMetadataExtractor.metadataFrom(absolutePath)
+				);
+			
 			reporting.end(
 					new IngestionTriggerReportingOutput(entry.getPickupURL() + "/" + entry.getRelativePath()), 
 					new ReportingMessage("File %s created IngestionJob", productName)
 			);
-			return Optional.of(entry);
+			return Optional.of(new InboxReturnValue(entry, job));
 		} catch (final Exception e) {
 			reporting.error(new ReportingMessage("File %s could not be handled: %s", productName, LogUtils.toString(e)));
 			log.error(String.format("Error on handling %s in %s: %s", entry, description(), LogUtils.toString(e)));
@@ -227,35 +229,33 @@ public final class Inbox {
 				.toAbsolutePath();		
 		return absolutePath.toString();
 	}
-	
-	private void publishWithRetries(final IngestionJob ingestionJob) throws InterruptedException {
-		Retries.performWithRetries(
-				() -> {	this.publish(ingestionJob); return null;}, 
-    			"Publishing of IngestionJob for " + ingestionJob.getProductName(),
-    			publishMaxRetries,
-    			publishTempoRetryMs
-		);
-	}
-
-	private void publish(final IngestionJob ingestionJob) {
-		try {
-			messageProducer.send(topic, ingestionJob);
-		} catch (final Exception e) {
-			throw new RuntimeException(
-					String.format(
-							"Error on publishing IngestionJob for %s to %s: %s",
-							ingestionJob.getProductName(),
-							topic,
-							Exceptions.messageOf(e)
-					),
-					e
-			);
-		}
-	}
 
 	private InboxEntry persist(final InboxEntry toBePersisted) {
 		final InboxEntry persisted = ingestionTriggerServiceTransactional.add(toBePersisted);
 		log.trace("Added {} to persistence", persisted);
 		return persisted;
+	}
+	
+	/*
+	 * Composite class for Inbox-Entry and Ingestion Job 
+	 */
+	public static final class InboxReturnValue {
+		
+		private final InboxEntry entry;
+		private final IngestionJob job;
+		
+		public InboxReturnValue(InboxEntry entry, IngestionJob job) {
+			super();
+			this.entry = entry;
+			this.job = job;
+		}
+
+		public InboxEntry getEntry() {
+			return entry;
+		}
+
+		public IngestionJob getJob() {
+			return job;
+		}
 	}
 }

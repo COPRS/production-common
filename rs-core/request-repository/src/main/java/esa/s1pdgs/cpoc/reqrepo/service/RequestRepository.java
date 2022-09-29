@@ -3,10 +3,8 @@ package esa.s1pdgs.cpoc.reqrepo.service;
 import java.util.Arrays;
 import java.util.List;
 
-import esa.s1pdgs.cpoc.appcatalog.common.FailedProcessing;
-import esa.s1pdgs.cpoc.appcatalog.common.Processing;
 import esa.s1pdgs.cpoc.common.MessageState;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
+import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 
 public interface RequestRepository {	
 
@@ -14,23 +12,13 @@ public interface RequestRepository {
 	
 	List<String> getProcessingTypes();
 	
-	List<Processing> getProcessings(Integer pageSize, Integer pageNumber, List<String> processingType, List<MessageState> processingStatus);
-	
-	long getProcessingsCount(List<String> processingType, List<MessageState> processingStatus);
-
-	Processing getProcessing(long id);
-
-	void saveFailedProcessing(FailedProcessingDto failedProcessing);
-
 	List<FailedProcessing> getFailedProcessings();
 
-	FailedProcessing getFailedProcessingById(long id);
+	FailedProcessing getFailedProcessingById(String id);
 
-	void restartAndDeleteFailedProcessing(long id);
+	void restartAndDeleteFailedProcessing(String id);
 	
-	void reevaluateAndDeleteFailedProcessing(long id);
-
-	void deleteFailedProcessing(long id);
+	void deleteFailedProcessing(String id);
 
 	long getFailedProcessingsCount();
 }

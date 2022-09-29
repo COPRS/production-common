@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractorImpl;
@@ -21,37 +22,37 @@ import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.WhitelistRegexRelativePathInboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.fs.FilesystemInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.AuxipProductNameEvaluator;
+import esa.s1pdgs.cpoc.ingestion.trigger.name.DirectoryProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.ProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.SessionProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
 import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxAdapterFactory;
-import esa.s1pdgs.cpoc.message.MessageProducer;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 @Component
 public class InboxFactory {
-	private final MessageProducer<IngestionJob> messageProducer;
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 	private final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory;
 	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
 	private final AuxipInboxAdapterFactory auxipInboxAdapterFactory;
 	private final EdipInboxAdapterFactory edipInboxAdapterFactory;
+	private final CommonConfigurationProperties commonProperties;
 
 	@Autowired
 	public InboxFactory(
-			final MessageProducer<IngestionJob> messageProducer, final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
+			final IngestionTriggerServiceTransactional inboxPollingServiceTransactional,
 			final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory,
 			final XbipInboxAdapterFactory xbipInboxAdapterFactory,
 			final AuxipInboxAdapterFactory auxipInboxAdapterFactory,
-			final EdipInboxAdapterFactory edipInboxAdapterFactory
+			final EdipInboxAdapterFactory edipInboxAdapterFactory,
+			final CommonConfigurationProperties commonProperties
 	) {
-		this.messageProducer = messageProducer;
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
 		this.fileSystemInboxAdapterFactory = fileSystemInboxAdapterFactory;
 		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
 		this.auxipInboxAdapterFactory = auxipInboxAdapterFactory;
 		this.edipInboxAdapterFactory = edipInboxAdapterFactory;
+		this.commonProperties = commonProperties;
 	}
 	
 	static final Date ignoreFilesBeforeDateFor(final InboxConfiguration config, final Date now) {
@@ -65,7 +66,7 @@ public class InboxFactory {
 		return ignoreFilesBeforeDate;				
 	}
 	
-	public Inbox newInbox(final InboxConfiguration config, final int publishMaxRetries, final long publishTempoRetryMs) throws URISyntaxException {
+	public Inbox newInbox(final InboxConfiguration config) throws URISyntaxException {
 		return new Inbox(
 				newInboxAdapter(config),
 				new JoinedFilter(
@@ -74,8 +75,6 @@ public class InboxFactory {
 						new MinimumModificationDateFilter(ignoreFilesBeforeDateFor(config, new Date()))
 				),
 				ingestionTriggerServiceTransactional, 
-				messageProducer,
-				config.getTopic(),
 				config.getFamily(),
 				config.getMissionId(),
 				config.getStationName(),
@@ -83,9 +82,8 @@ public class InboxFactory {
 				config.getMode(),
 				config.getTimeliness(),
 				newProductNameEvaluatorFor(config),
-				publishMaxRetries,
-				publishTempoRetryMs,
-				newPathMetadataExtractor(config)
+				newPathMetadataExtractor(config),
+				commonProperties
 		);
 	}
 	
@@ -142,7 +140,10 @@ public class InboxFactory {
 	}
 	
 	final ProductNameEvaluator newProductNameEvaluatorFor(final InboxConfiguration config) {
-		if("prip".equals(config.getType())) {
+		if ("directory".equals(config.getType())) {
+			return new DirectoryProductNameEvaluator();
+		}
+		if ("prip".equals(config.getType())) {
 			return new AuxipProductNameEvaluator();
 		}
 		if (config.getFamily() == ProductFamily.EDRS_SESSION 

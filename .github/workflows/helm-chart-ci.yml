@@ -1,0 +1,77 @@
+name: Helm Chart CI
+
+on: 
+  push:
+    paths:
+      - 'rs-processing-common/**'
+      - '.github/workflows/helm-chart-ci.yml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
+  workflow_dispatch:
+  
+env:
+  CHART_FOLDER: rs-processing-common
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_HELM: rs-helm
+  ARTIFACTORY_HELM_PROJECT: processing
+
+jobs:
+
+  helm-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.filter.outputs.changes }}
+    steps:
+    - name: Extract image tag name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
+      id: extract_branch
+    - uses: actions/checkout@v2
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        base: ${{ steps.extract_branch.outputs.branch }}
+        filters: |
+          ddip_frontend: '${{ env.CHART_FOLDER }}/ddip_frontend/**'
+          eviction_manager: '${{ env.CHART_FOLDER }}/eviction_manager/**'
+          metadata_search_controller: '${{ env.CHART_FOLDER }}/metadata_search_controller/**'
+          native_api: '${{ env.CHART_FOLDER }}/native_api/**'
+          prip_frontend: '${{ env.CHART_FOLDER }}/prip_frontend/**'
+          request_repository: '${{ env.CHART_FOLDER }}/request_repository/**'
+          user_web_client: '${{ env.CHART_FOLDER }}/user_web_client/**'
+  
+  gg-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: GitGuardian scan
+      uses: GitGuardian/gg-shield-action@master
+      env:
+        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
+
+  release:
+    needs: [gg-scan, helm-changes]
+    if: ${{ needs.helm-changes.outputs.packages != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJSON(needs.helm-changes.outputs.packages) }}    
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/helm-charts
+      with:
+        COMPONENT: ${{ matrix.component}}
+        CHART_FOLDER: ${{ env.CHART_FOLDER }}
+        ARTIFACTORY_HELM_PROJECT: ${{ env.ARTIFACTORY_HELM_PROJECT }}  
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}

@@ -1,0 +1,85 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+   <xfdu:XFDU version="esa/safe/sentinel-1.0/sentinel-1/auxiliary/sar/wav" xmlns:safe="http://www.esa.int/safe/sentinel-1.0" xmlns:xfdu="urn:ccsds:schema:xfdu:1" xmlns:s1auxsar="http://www.esa.int/safe/sentinel-1.0/sentinel-1/auxiliary/sar" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:ccsds:schema:xfdu:1 xsd/int/esa/safe/sentinel-1.0/sentinel-1/auxiliary/sar/wav/xfdu.xsd">
+
+   <informationPackageMap>
+      <xfdu:contentUnit unitType="SAFE Archive Information Package Map" textInfo="Sentinel-1 L2 WAVEWATCH III model"  dmdID="platform generalProductInformation" pdiID="processing">
+         <xfdu:contentUnit unitType="Measurement Data Unit" repID="auxSchema">
+            <dataObjectPointer dataObjectID="auxData"/>
+         </xfdu:contentUnit>
+      </xfdu:contentUnit>
+   </informationPackageMap>
+   <metadataSection>
+      
+      
+      
+      <metadataObject ID="processing" classification="PROVENANCE" category="PDI">
+         <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="Processing">
+            <xmlData>
+               <processing name="AUX_WAV Generation" start="2011-12-05T12:00:00.000000" stop="2011-12-05T12:00:00.000000" xmlns="http://www.esa.int/safe/1.2">
+                  <facility country="Italy" name="ESRIN" site="Frascati"/>
+               </processing>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>      
+      
+      
+      
+      <metadataObject ID="platform" classification="DESCRIPTION" category="DMD">
+         <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="Platform Description">
+            <xmlData>
+               <platform xmlns="http://www.esa.int/safe/1.2">
+                  <nssdcIdentifier>2002-009A</nssdcIdentifier>
+                  <familyName>SENTINEL-1</familyName>
+                  <number>1</number>
+                  <instrument>
+                     <familyName abbreviation="SAR">Synthetic Aperture Radar</familyName>
+                  </instrument>
+                  <timeReference>
+                     <utc>0000-00-00T00:00:00.000000Z</utc>
+                     <clock>0</clock>
+                     <clockStep>0</clockStep>
+                  </timeReference>
+               </platform>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+      
+      
+            
+      <metadataObject ID="generalProductInformation" classification="DESCRIPTION" category="DMD">
+         <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="General Product Information">
+            <xmlData>
+               <s1auxsar:standAloneProductInformation>
+               		<s1auxsar:auxProductType>AUX_WAV</s1auxsar:auxProductType>
+               		<s1auxsar:validity>2011-08-01T00:00:00.000000</s1auxsar:validity>
+               		<s1auxsar:generation>2011-10-26T14:18:50.000000</s1auxsar:generation>
+               		<s1auxsar:instrumentConfigurationId>1</s1auxsar:instrumentConfigurationId>
+              </s1auxsar:standAloneProductInformation>
+            </xmlData>
+         </metadataWrap>
+      </metadataObject>
+ 
+      
+      
+      
+      
+      <metadataObject ID="auxSchema" classification="SYNTAX" category="REP">
+         <metadataReference mimeType="text/xml" locatorType="URL" href="./support/s1-aux-wav.xsd"/>
+      </metadataObject>
+      
+      <metadataObject ID="s1ObjectTypesSchema" classification="SYNTAX" category="REP">
+         <metadataReference mimeType="text/xml" locatorType="URL" href="./support/s1-object-types.xsd"/>
+      </metadataObject>
+      
+   </metadataSection>
+   <dataObjectSection>
+            <dataObject ID="auxData" repID="auxSchema">
+               <byteStream mimeType="application/netcdf" size="1377300">
+                  <fileLocation locatorType="URL" href="./data/ifremer-ww3-glob-30min-20110801t00z-uss.nc"/>
+                  <checksum checksumName="MD5">22e35792b758a390b0e9854e8c81acf7</checksum>
+         </byteStream>
+      </dataObject>
+   </dataObjectSection>
+      
+      
+</xfdu:XFDU>

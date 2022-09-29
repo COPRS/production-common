@@ -35,6 +35,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.RecoverableDataAccessException;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -47,6 +48,9 @@ public class TestProductEntityProcessor {
 	
 	ProductEntityProcessor uut;
 
+	@Mock
+	CommonConfigurationProperties commonConfigurationProperties;
+	
 	@Mock
 	PripMetadataRepository pripMetadataRepositoryMock;
 
@@ -81,7 +85,7 @@ public class TestProductEntityProcessor {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		final int downloadUrlExpirationTimeInSeconds = 0;
-		uut = new ProductEntityProcessor(pripMetadataRepositoryMock, obsClientMock, downloadUrlExpirationTimeInSeconds);
+		uut = new ProductEntityProcessor(commonConfigurationProperties, pripMetadataRepositoryMock, obsClientMock, downloadUrlExpirationTimeInSeconds, "username");
 		uut.init(odataMock, null);
 	}
 

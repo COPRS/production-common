@@ -1,0 +1,32 @@
+spring:
+  main:
+    # Disable spring boot banner
+    banner-mode: "off"
+  application:
+    # Application name
+    name: {{ .Values.service.name }}
+
+# REST controller
+server:
+  # Port used for publishing REST API
+  port: {{ .Values.service.port }}
+      
+# Logging
+logging:
+  # Log configuration file
+  config: {{ .Values.logConfig }}
+    
+# Elastic Search
+elasticsearch:
+  # Host of Elasticsearch cluster
+  host: {{ .Values.elasticsearch.host }}
+  # Port of Elasticsearch cluster                                
+  port: {{ .Values.elasticsearch.port }}
+  # Timeout in milliseconds of connection to the cluster                                        
+  connect-timeout-ms: {{ .Values.elasticsearch.timeout.connection }}
+  # Timeout in milliseconds of the socket to the cluster                        
+  socket-timeout-ms: {{ .Values.elasticsearch.timeout.socket }}
+
+# Search Controller configuration
+searchcontroller:
+  aux-pattern-config: ^([0-9a-z][0-9a-z])([0-9a-z_])(_(OPER|TEST))?_(AMH_ERRMAT|AMV_ERRMAT|AM__ERRMAT|AUX_CAL|AUX_ICE|AUX_INS|AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_POEORB|AUX_PREORB|AUX_RESORB|AUX_SCS|AUX_WAV|AUX_WND|MPL_ORBPRE|MPL_ORBRES|MPL_ORBSCT|MSK_EW_SLC|MSK__LAND_|MSK_OCEAN_|MSK_OVRPAS)_\w{1,}\.(XML|EOF|SAFE)(/.*)?$

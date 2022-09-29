@@ -4,6 +4,132 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1-rc1] - 2022-09-22
+
+### Added
+N/A
+
+### Changed
+- RS-XX: Backport documentation from develop to branch 1.4
+- RS-560: Inventory_Metadata.xml must not be mandatory for Metadata Extraction
+
+### Removed
+N/A
+
+## [1.4.0-rc1] - 2022-08-03
+
+### Added
+
+- RS-231: [SCDF] Implementation of a solution for "dead letter queue mechanism"
+- RS-280: [BUG] PRIP does not return expected products when geographical request crosses antimeridian
+- RS-344: [SCDF] Implementation long running processing feature
+- RS-408: [PI] Update header traces with rs_chain_name_string & rs_chain_version_string
+- RS-444: [PI] Add output to MetadataExtraction END OK trace
+- RS-445: [PI] Update JobProcessing END traces with ICD Traces tailored
+
+
+
+### Changed
+
+- RS-429 / RS-436: Implement workaround to ignore S3 intersection error
+- RS-449: Move from “filename_strings” to “filename_string” when single element
+- RS-465: [BUG] bandIndexId 8A does not return result in the metadata catalog searchcontroller
+
+### Removed
+- RS-435: Move UWC helm chart CI to UWC repository
+
+## [1.3.0-rc1] - 2022-07-06
+
+### Added
+- RS-248: Update JobProcessing traces
+- RS-313: Develop "DLQ" as RS core component
+- RS-314: Develop DLQ Manager application
+- RS-315: Move ParkingLot from RequestRepository to RS Core DLQ restart
+- RS-386: Migration of Execution Worker to SCDF Application
+- RS-407: Update MetadataExtraction traces
+- RS-422: Request the AUX GIP_VIEDIR on rs-metadata-catalog-searchcontroller-svc by band
+
+### Changed
+- RS-402: Missing documentation for mongodb
+- RS-425: S2 HKTM and AUX_SAD metadata extraction fails with bad regex
+- RS-409: Remove affinity from pro-common Helm chart
+
+### Removed
+N/A
+
+
+## [1.2.0-rc1] - 2022-06-08
+
+### Added
+- RS-387: Migration of Preparation Worker to SCDF Application
+- RS-207: Develop "DATALIFECYCLE" as a RS-core component
+
+### Changed
+- RS-388: Request Chunks and DSIB through Search Metadata Controller
+- RS-373: RS-Addon: ingestion and metadata add-ons have multiple wrong deployment variables
+- RS-391: Update RS Core to be in line with ICD RS Core release V5.0
+- RS-372: Documents, code and ICD dont form a coherent whole for RS Core Catalog
+- RS-392: Update RS Core to be in line with ICD Message Format ICD V3.0
+
+## Removed
+- N/A
+
+## [1.1.2-rc1] - 2022-05-30
+
+### Added
+- N/A
+
+### Changed
+- RS-397: Fix: compression-worker: one of two s2 auxiliary directory format is not taken into account
+- RS-398: Fix: Nullpointer exception when query S2_AUX via SearchMetadata Controller
+
+### Removed
+- N/A
+
+## [1.1.1-rc1] - 2022-05-20
+
+### Added
+- N/A
+
+### Changed
+- RS-396: Fix: Metadata extraction for EDRS session fails with NumberFormatException
+
+### Removed
+- N/A
+
+## [1.1.0-rc1] - 2022-05-13
+
+### Added
+- RS-206: RS Core component "Distribution" was added
+- RS-214: RS Core component "Compression" was added
+
+### Changed
+- Fixed RS Core component ingestion pushing to wrong named destination. Using "catalog jobs" instead to be in line with examples.
+- RS-240: Improving configuration and documentation on how to set JVM XMX argument to RS Core components 
+- RS-351: PRIP and metadata-catalog-worker errors for OPER_MPL_TLEPRE files
+- RS-364: User web client statefulset template has no keycloak parameter
+- RS-384: Ingestion jobs do not trigger the metadata catalog
+
+### Removed
+- N/A
+
+## [1.0.1-rc1] - 2022-04-28
+
+This version is the first delivery for V1.1 and contains migrated components for SCDF workflows for Ingestion and Metadata Extraction.
+
+### Added
+- RS-212: Develop "Catalog" as RS-Core component
+- RS-321: Split MDC Worker into extraction workflow and standalone query interface
+- RS-330: Create factory ingestion trigger app
+- RS-331: Create factory ingestion filter app
+- RS-332: Create factory ingestion worker app
+
+### Changed
+- N/A
+
+### Removed
+- N/A
+
 ## [0.3.0-rc14] - 2022-03-16
 ### Added
 - N/A

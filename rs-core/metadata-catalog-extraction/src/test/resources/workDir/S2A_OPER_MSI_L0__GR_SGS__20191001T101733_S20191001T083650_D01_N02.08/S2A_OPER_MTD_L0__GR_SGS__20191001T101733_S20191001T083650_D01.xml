@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<n1:Level-0_Granule_ID xmlns:n1="https://psd-14.sentinel2.eo.esa.int/PSD/S2_PDI_Level-0_Granule_Metadata.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://psd-14.sentinel2.eo.esa.int/PSD/S2_PDI_Level-0_Granule_Metadata.xsd /dpc/app/s2ipf/FORMAT_METADATA_GR_L0C/02.15.00/scripts/../../../schemas/02.15.00/PSD/S2_PDI_Level-0_Granule_Metadata.xsd">
+
+  <n1:General_Info>
+    <GRANULE_ID metadataLevel="Brief">S2A_OPER_MSI_L0__GR_SGS__20191001T101733_S20191001T083650_D01_N02.08</GRANULE_ID>
+    <DETECTOR_ID metadataLevel="Brief">01</DETECTOR_ID>
+    <DATASTRIP_ID metadataLevel="Brief">S2A_OPER_MSI_L0__DS_SGS__20191001T101733_S20191001T083647_N02.08</DATASTRIP_ID>
+    <DOWNLINK_PRIORITY metadataLevel="Standard">NOMINAL</DOWNLINK_PRIORITY>
+    <SENSING_TIME metadataLevel="Standard">2019-10-01T08:36:50.840Z</SENSING_TIME>
+    <Archiving_Info metadataLevel="Expertise">
+      <ARCHIVING_CENTRE>SGS_</ARCHIVING_CENTRE>
+      <ARCHIVING_TIME>2019-10-01T10:24:07.600736Z</ARCHIVING_TIME>
+    </Archiving_Info>
+    <Processing_Specific_Parameters metadataLevel="Expertise">
+      <PROCESSING_SPECIFIC_PARAMETERS>DATABLOCK=DB1</PROCESSING_SPECIFIC_PARAMETERS>
+    </Processing_Specific_Parameters>
+  </n1:General_Info>
+
+  <n1:Geometric_Info>
+    <Granule_Footprint metadataLevel="Brief">
+      <Granule_Footprint>
+        <Footprint>
+          <EXT_POS_LIST>48.4255437011909 36.012719203864 91.9275659154926 48.0615335354928 35.8754856182544 134.386051656119 48.0129223197342 36.2301956943322 113.572351359498 48.3755327752305 36.3680125728466 80.5873466566382 48.4255437011909 36.012719203864 91.9275659154926</EXT_POS_LIST>
+          <INT_POS_LIST>0.418810330952498 85.0607747903092 0.335852483620407 156.874309683151 79.9661996747365 157.026695919728 79.9740397264753 85.1897999768096 0.418810330952498 85.0607747903092</INT_POS_LIST>
+        </Footprint>
+      </Granule_Footprint>
+      <RASTER_CS_TYPE>POINT</RASTER_CS_TYPE>
+      <PIXEL_ORIGIN>1</PIXEL_ORIGIN>
+    </Granule_Footprint>
+    <Granule_Position metadataLevel="Standard">
+      <POSITION>2305</POSITION>
+      <Geometric_Header>
+        <GROUND_CENTER>48.2185331553616 36.1217490955505 117.507286453684</GROUND_CENTER>
+        <QL_CENTER>121.037895092499 40.1737255539462</QL_CENTER>
+        <Incidence_Angles>
+          <ZENITH_ANGLE unit="deg">10.8574458608277</ZENITH_ANGLE>
+          <AZIMUTH_ANGLE unit="deg">110.059078559486</AZIMUTH_ANGLE>
+        </Incidence_Angles>
+        <Solar_Angles>
+          <ZENITH_ANGLE unit="deg">52.4265143179358</ZENITH_ANGLE>
+          <AZIMUTH_ANGLE unit="deg">164.674081050894</AZIMUTH_ANGLE>
+        </Solar_Angles>
+      </Geometric_Header>
+      <QL_FOOTPRINT>0.418810330952498 85.0607747903092 0.335852483620407 156.874309683151 79.9661996747365 157.026695919728 79.9740397264753 85.1897999768096</QL_FOOTPRINT>
+    </Granule_Position>
+  </n1:Geometric_Info>
+
+  <n1:Quality_Indicators_Info>
+    <Image_Content_QI metadataLevel="Standard">
+      <Common_IMG_QI>
+        <CLOUDY_PIXEL_PERCENTAGE>0</CLOUDY_PIXEL_PERCENTAGE>
+        <DEGRADED_MSI_DATA_PERCENTAGE>0</DEGRADED_MSI_DATA_PERCENTAGE>
+      </Common_IMG_QI>
+      <Source_Packet_description>
+        <Source_Packet_Counters_List>
+          <Source_Packet_Counters bandId="0">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>24</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="1">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>144</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="2">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>144</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="3">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>144</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="4">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>72</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="5">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>72</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="6">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>72</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="7">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>144</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="8">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>72</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="9">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>24</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="10">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>24</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="11">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>72</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+          <Source_Packet_Counters bandId="12">
+            <DATA_STRIP_START>1</DATA_STRIP_START>
+            <SCENE_POSITION>1</SCENE_POSITION>
+            <NB_OF_SOURCE_PACKETS>72</NB_OF_SOURCE_PACKETS>
+          </Source_Packet_Counters>
+        </Source_Packet_Counters_List>
+      </Source_Packet_description>
+    </Image_Content_QI>
+  </n1:Quality_Indicators_Info>
+
+</n1:Level-0_Granule_ID>

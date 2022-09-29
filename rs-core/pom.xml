@@ -6,31 +6,30 @@
 	<artifactId>s1pro-core</artifactId>
 	<version>3.32.1</version>
 	<packaging>pom</packaging>
-
+	
 	<properties>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>	
+		<java.version>11</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
-		<!-- dependency version definitions -->	
-		<spring.boot.version>2.3.12.RELEASE</spring.boot.version>
-		
+
+		<!-- dependency version definitions -->
+		<spring.boot.version>2.6.6</spring.boot.version>
+		<spring-cloud.version>2021.0.1</spring-cloud.version>
+
 		<kafka.version>2.5.0</kafka.version>
-		
+
 		<commons.logging.version>1.2</commons.logging.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
 		<commons.net.version>3.8.0</commons.net.version>
 		<commons.io.version>2.7</commons.io.version>
 		<httpcomponents.version>4.5.1</httpcomponents.version>
 
-		<!-- jacoco.version>0.7.5.201505241946</jacoco.version-->
+		<!-- jacoco.version>0.7.5.201505241946</jacoco.version -->
 		<jacoco.version>0.7.7.201606060606</jacoco.version>
-
 		<json.version>20171018</json.version>
 		<moxy.version>2.5.0</moxy.version>
 		<openapi4j.version>1.0.4</openapi4j.version>
-		<equalsverifier.version>2.4.6</equalsverifier.version>
-		<aws.version>1.11.271</aws.version>		
+		<equalsverifier.version>3.10</equalsverifier.version>
+		<aws.version>1.11.271</aws.version>
 		<jsch.version>0.1.55</jsch.version>
 		<elasticsearch.version>7.14.0</elasticsearch.version>
 		<spatial4j.version>0.7</spatial4j.version>
@@ -38,6 +37,7 @@
 		<pmd.failOnViolation>false</pmd.failOnViolation>
 		<odata.version>4.8.0</odata.version>
 		<log4j.version>2.17.1</log4j.version>
+		<glassfish.version>1.1.4</glassfish.version>
 	</properties>
 
 	<!-- TODO: check if this is still required -->
@@ -54,13 +54,32 @@
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.0</version>
+					<configuration>
+						<release>11</release>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
 					<version>2.5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>2.22.0</version>
+					<configuration>
+						<argLine>
+							--illegal-access=permit
+						</argLine>
+						<includes>
+                        	<include>**/*IT.java</include>
+                        	<include>**/*Test.java</include>
+                        	<include>**/IT*.java</include>
+                        	<include>**/Test*.java</include>
+                    	</includes>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -128,7 +147,7 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -138,43 +157,52 @@
 				<version>${spring.boot.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>		
+			</dependency>
+
 			<dependency>
-			    <groupId>org.apache.kafka</groupId>
-			    <artifactId>kafka-clients</artifactId>
-			    <version>${kafka.version}</version>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>kafka-clients</artifactId>
+				<version>${kafka.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.kafka</groupId>
-			    <artifactId>kafka-clients</artifactId>
-			    <version>${kafka.version}</version>
-			    <classifier>test</classifier>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>kafka-clients</artifactId>
+				<version>${kafka.version}</version>
+				<classifier>test</classifier>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.kafka</groupId>
-			    <artifactId>kafka_2.11</artifactId>
-			    <version>${kafka.version}</version>
-			    <scope>test</scope>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>kafka_2.11</artifactId>
+				<version>${kafka.version}</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.kafka</groupId>
-			    <artifactId>kafka_2.11</artifactId>
-			    <version>${kafka.version}</version>
-			    <classifier>test</classifier>
-			    <scope>test</scope>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>kafka_2.11</artifactId>
+				<version>${kafka.version}</version>
+				<classifier>test</classifier>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.kafka</groupId>
-			    <artifactId>kafka_2.12</artifactId>
-			    <version>${kafka.version}</version>
-			    <scope>test</scope>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>kafka_2.12</artifactId>
+				<version>${kafka.version}</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
-			    <groupId>org.apache.kafka</groupId>
-			    <artifactId>kafka_2.12</artifactId>
-			    <version>${kafka.version}</version>
-			    <classifier>test</classifier>
-			    <scope>test</scope>
+				<groupId>org.apache.kafka</groupId>
+				<artifactId>kafka_2.12</artifactId>
+				<version>${kafka.version}</version>
+				<classifier>test</classifier>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.kafka</groupId>
@@ -182,66 +210,61 @@
 				<version>${kafka.version}</version>
 			</dependency>
 			<!-- Begin of Exploit Mitigation for CVE-2021-45046 -->
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>${log4j.version}</version>
-            </dependency>
-            <!-- End of Exploit Mitigation for CVE-2021-45046 -->
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-core</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+			<!-- End of Exploit Mitigation for CVE-2021-45046 -->
 			<dependency>
 				<groupId>commons-logging</groupId>
 				<artifactId>commons-logging</artifactId>
 				<version>${commons.logging.version}</version>
-			</dependency>	
+			</dependency>
 			<dependency>
 				<groupId>commons-configuration</groupId>
 				<artifactId>commons-configuration</artifactId>
 				<version>${commons.configuration.version}</version>
 			</dependency>
 			<dependency>
-		        <groupId>commons-net</groupId>
-		        <artifactId>commons-net</artifactId>
-		        <version>${commons.net.version}</version>
-	      	</dependency>
-	      	
-	      	<dependency>
-		        <groupId>commons-io</groupId>
-		        <artifactId>commons-io</artifactId>
-		        <version>${commons.io.version}</version>
-	      	</dependency>
+				<groupId>commons-net</groupId>
+				<artifactId>commons-net</artifactId>
+				<version>${commons.net.version}</version>
+			</dependency>
 
-	      	<dependency>
-		        <groupId>org.apache.httpcomponents</groupId>
-		        <artifactId>httpclient</artifactId>
-		        <version>${httpcomponents.version}</version>
-	      	</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons.io.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpcomponents.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>com.github.lookfirst</groupId>
 				<artifactId>sardine</artifactId>
 				<version>5.9</version>
 			</dependency>
-	      			
+
 			<dependency>
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-s3</artifactId>
 				<version>${aws.version}</version>
-			</dependency>		
-			<dependency>
-				<groupId>org.json</groupId>
-				<artifactId>json</artifactId>
-				<version>${json.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.jcraft</groupId>
 				<artifactId>jsch</artifactId>
 				<version>${jsch.version}</version>
-			</dependency>  			
+			</dependency>
 			<dependency>
 				<groupId>io.fabric8</groupId>
 				<artifactId>kubernetes-client</artifactId>
@@ -268,7 +291,7 @@
 				<artifactId>kubernetes-assertions</artifactId>
 				<version>2.2.184</version>
 				<scope>test</scope>
-			</dependency>						
+			</dependency>
 			<dependency>
 				<groupId>org.pacesys</groupId>
 				<artifactId>openstack4j</artifactId>
@@ -280,7 +303,7 @@
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
 				<version>${elasticsearch.version}</version>
 			</dependency>
-				<dependency>
+			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-client</artifactId>
 				<version>${elasticsearch.version}</version>
@@ -300,7 +323,7 @@
 				<artifactId>jts-core</artifactId>
 				<version>${jts.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>org.eclipse.persistence.moxy</artifactId>
@@ -312,8 +335,8 @@
 				<version>${openapi4j.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.openapi4j</groupId>
-    			<artifactId>openapi-operation-servlet</artifactId>
+				<groupId>org.openapi4j</groupId>
+				<artifactId>openapi-operation-servlet</artifactId>
 				<version>${openapi4j.version}</version>
 			</dependency>
 			<dependency>
@@ -326,6 +349,18 @@
 				<artifactId>openapi-parser</artifactId>
 				<version>${openapi4j.version}</version>
 			</dependency>
+			<!-- TODO: Remove, when Spring Cloud got updated release -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-function-context</artifactId>
+				<version>3.2.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-function-core</artifactId>
+				<version>3.2.3</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
@@ -340,58 +375,38 @@
 			</dependency>
 			<dependency>
 				<groupId>org.assertj</groupId>
-			    <artifactId>assertj-core</artifactId>
-			    <version>3.13.2</version>
-			    <scope>test</scope>
+				<artifactId>assertj-core</artifactId>
+				<version>3.13.2</version>
+				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<modules>
-		<module>applicative-catalog</module>
-		<module>app-catalog-client</module>
-		<module>xbip-client</module>
-		<module>auxip-client</module>
-		<module>edip-client</module>
-		<module>error-repo-client</module>
-		<module>app-status</module>
-		<module>archives</module>
-		<module>disseminator</module>
+		<!-- <module>disseminator</module> -->
 		<module>ingestion-trigger</module>
 		<module>ingestion-filter</module>
 		<module>ingestion-worker</module>
-		<module>production-trigger</module>
- 		<module>ipf-preparation-worker</module> 
-		<module>lib-commons</module>
-		<module>message-adapter</module>
-		<module>ipf-execution-worker</module>
-		<module>request-repository</module>
-		<module>queue-watcher</module>
-		<module>on-demand-interface-provider</module>
-		<module>metadata-catalog-timer</module>
-		<module>metadata-catalog-trigger</module>
-		<module>metadata-catalog-worker</module>
-		<module>metadata-client</module>
-		<module>mqi-client</module>
-		<module>mqi-server</module>
-		<module>obs-sdk</module>
-		<module>prip-trigger</module>
-		<module>prip-worker</module>
- 		<module>prip-frontend</module>
-		<module>prip-client</module>
+		<!-- <module>production-trigger</module> -->
+		<module>preparation-worker</module>
+		<module>execution-worker</module>
+		<!-- <module>request-repository</module> -->
+		<!-- <module>on-demand-interface-provider</module> -->
+		<module>metadata-catalog-extraction</module>
+		<!-- <module>metadata-catalog-timer</module> -->
+		<module>metadata-catalog-searchcontroller</module>
+		<module>distribution-worker</module>
+		<module>dlq-manager</module>
+		<module>prip-frontend</module>
 		<module>ddip-frontend</module>
-    	<module>native-api</module>
-		<module>data-lifecycle-trigger</module>
-		<module>data-lifecycle-client</module>
-		<module>data-request-worker</module>
+		<module>native-api</module>
+		<module>data-lifecycle-worker</module>
+		<!-- <module>data-request-worker</module> -->
 		<module>eviction-management-worker</module>
-		<module>validation</module>
-		<module>compression-trigger</module>
+		<!-- <module>validation</module> -->
 		<module>compression-worker</module>
-		<module>xml-tools</module>
-		<module>dissemination-trigger</module>
-    	<module>dissemination-worker</module>
-    	<module>directory-cleaner</module>
-    	<module>jacoco-report</module>
+		<!-- <module>dissemination-trigger</module> -->
+		<!-- <module>dissemination-worker</module> -->
 	</modules>
+
 </project>

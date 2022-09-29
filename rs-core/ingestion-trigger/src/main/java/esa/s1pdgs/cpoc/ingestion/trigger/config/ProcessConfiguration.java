@@ -1,10 +1,12 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
-@Configuration
-@ConfigurationProperties("process")
+@Component
+@Validated
+@ConfigurationProperties(prefix = "process")
 public class ProcessConfiguration {
 	private String hostname;
 	

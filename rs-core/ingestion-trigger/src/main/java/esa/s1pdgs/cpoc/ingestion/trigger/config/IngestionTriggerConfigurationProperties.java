@@ -1,58 +1,30 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.config;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
-@Configuration
-@ConfigurationProperties("ingestion-trigger")
+@Component
+@Validated
+@ConfigurationProperties(prefix = "ingestion-trigger")
 public class IngestionTriggerConfigurationProperties {
 	
-	private int publishMaxRetries = 10;
-    private long publishTempoRetryMs = 10000;
-	
-	private long pollingIntervalMs;
-	
-	private List<InboxConfiguration> polling = new ArrayList<>();
+	private Map<String, InboxConfiguration> polling = new HashMap<>();
 
-	public List<InboxConfiguration> getPolling() {
+	public Map<String, InboxConfiguration> getPolling() {
 		return polling;
 	}
 
-	public void setPolling(List<InboxConfiguration> polling) {
+	public void setPolling(Map<String, InboxConfiguration> polling) {
 		this.polling = polling;
-	}
-	
-	public long getPollingIntervalMs() {
-		return pollingIntervalMs;
-	}
-
-	public void setPollingIntervalMs(long pollingIntervalMs) {
-		this.pollingIntervalMs = pollingIntervalMs;
-	}
-	
-	public int getPublishMaxRetries() {
-		return publishMaxRetries;
-	}
-
-	public void setPublishMaxRetries(int publishMaxRetries) {
-		this.publishMaxRetries = publishMaxRetries;
-	}
-	
-	public long getPublishTempoRetryMs() {
-		return publishTempoRetryMs;
-	}
-
-	public void setPublishTempoRetryMs(long publishTempoRetryMs) {
-		this.publishTempoRetryMs = publishTempoRetryMs;
 	}
 
 	@Override
 	public String toString() {
-		return "InboxPollingConfigurationProperties [publishMaxRetries=" + publishMaxRetries + ", publishTempoRetryMs=" + publishTempoRetryMs
-				+ ", pollingIntervalMs=" + pollingIntervalMs + ", polling=" + polling + "]";
+		return "InboxPollingConfigurationProperties [polling=" + polling + "]";
 	}
 
 }

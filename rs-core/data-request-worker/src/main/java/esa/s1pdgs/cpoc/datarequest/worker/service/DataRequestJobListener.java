@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.datarequest.worker.service;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -20,7 +19,6 @@ import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.datarequest.worker.config.WorkerConfigurationProperties;
 import esa.s1pdgs.cpoc.datarequest.worker.report.DataRequestReportingOutput;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
 import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
@@ -107,9 +105,10 @@ public class DataRequestJobListener implements MqiListener<DataRequestJob> {
 					final String errorMessage = String.format("Error requesting data of %s: %s", dataRequestJob.getKeyObjectStorage(), LogUtils.toString(e));
 					reporting.error(new ReportingMessage(errorMessage));
 					LOG.error(errorMessage);
-					errorAppender.send(
-							new FailedProcessingDto(workerConfig.getHostname(), new Date(), errorMessage, inputMessage)
-							);
+// NOTE: FailedProcessing is no longer compatible
+//					errorAppender.send(
+//							new FailedProcessing(workerConfig.getHostname(), new Date(), errorMessage, inputMessage)
+//							);
 					}
 				)
 				.publishMessageProducer(() -> {

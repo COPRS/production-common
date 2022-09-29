@@ -1,0 +1,35 @@
+name: Build RS core examples
+
+on:
+  push:
+    paths:
+      - 'rs-core-examples/**'
+      - 'processing-common/obs-stream-parameters.properties'
+      - '.github/workflows/build-rs-core-examples.yml'
+      - '.github/actions/build-core-examples/action.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
+  workflow_dispatch:
+      
+env:
+  RS_EXAMPLES_FOLDER: rs-core-examples
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_COMMON: rs-docker
+  ARTIFACTORY_EXAMPLES_PROJECT: rs-core-examples
+  
+jobs:
+  
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [ingestion-auxip, ingestion-edip, ingestion-xbip, ingestion-mock-auxip, ingestion-contingency]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-core-examples
+      with:
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}

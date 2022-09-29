@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>de.werum.s1pdgs</groupId>
+		<artifactId>s1pro-libs</artifactId>
+		<version>3.32.1</version>
+	</parent>
+	
+	<!-- only used for jacoco report creation. artifact name does not start with 's1pro-core'
+	     as this module is only required for report creation and hence, not really part of
+	     s1pro-core. Furthermore, it helps in identifying all other modules in the command 
+	     to gather all dependencies
+	      -->
+	<artifactId>s1pro-jacoco-report</artifactId>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>aggregate-reports-ut</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report-aggregate</goal>
+						</goals>
+						<configuration>
+							<title>S1PRO test coverage report</title>
+							<outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate-ut</outputDirectory>
+							<dataFileExcludes>
+								<!-- exclude coverage data of integration tests -->
+								<dataFileExclude>**/target/jacoco.exec</dataFileExclude>
+							</dataFileExcludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
+	
+	<dependencies>
+	<!-- created with following commands:
+		cd s1pro-core
+		for t in $(find . -name pom.xml -exec grep 's1pro-core-' {} \; | tr -d '\t' | tr -d ' ' | sort -u); do echo "<dependency><groupId>de.werum.s1pdgs</groupId>${t}<version>\${project.version}</version></dependency>"; done
+	 -->	
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-app-status</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-auxip-client</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-data-lifecycle-client</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-edip-client</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-error-repo-client</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-lib-commons</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-message-adapter</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-metadata-client</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-mqi-client</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-obs-sdk</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-prip-client</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-xbip-client</artifactId><version>${project.version}</version></dependency>
+<dependency><groupId>de.werum.s1pdgs</groupId><artifactId>s1pro-core-xml-tools</artifactId><version>${project.version}</version></dependency>
+	</dependencies>
+</project>

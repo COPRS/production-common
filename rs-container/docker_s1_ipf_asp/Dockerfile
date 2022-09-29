@@ -1,6 +1,8 @@
 ARG BRANCH
-FROM ghcr.io/coprs/rs-core:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app
+
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH} as base
 
 FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/l0_asp:integration-032
 ARG VERSION
@@ -13,20 +15,26 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
-COPY --from=build /app/ipf-execution-worker/config/start.sh /app/start.sh
+COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
+COPY --from=build /app/start.sh /app/start.sh
+COPY --from=base /log/log4j2.yml /log/log4j2.yml
+
+USER root:root
+
+# Install java 11
+RUN yum install -y java-11-openjdk 
+RUN update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.4.11-0.el7_6.x86_64/bin/java
 
 # Add Tini as entry point
-USER root:root
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
+
+RUN useradd -u 1001 rsuser
 
 RUN mkdir -p /data/oqcWD
-RUN chown s1pdgs:s1pdgs /data/oqcWD
+RUN chown rsuser:rsuser /data/oqcWD
 
-USER s1pdgs:s1pdgs
+USER rsuser:rsuser
 
-CMD ["/app/start.sh"]
- 
+ENTRYPOINT ["/tini", "--", "/app/start.sh"]

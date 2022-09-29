@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
@@ -34,15 +35,12 @@ import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.JoinedFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.MinimumModificationDateFilter;
+import esa.s1pdgs.cpoc.ingestion.trigger.inbox.Inbox.InboxReturnValue;
 import esa.s1pdgs.cpoc.ingestion.trigger.name.FlatProductNameEvaluator;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerServiceTransactional;
-import esa.s1pdgs.cpoc.message.MessageProducer;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
 public class TestInbox {
-
-    @Mock
-    MessageProducer<IngestionJob> fakeMessageProducer;
 
     @Mock
     InboxAdapter fakeAdapter;
@@ -55,6 +53,9 @@ public class TestInbox {
 
     @Mock
     ProcessConfiguration processConfiguration;
+    
+    @Mock
+    CommonConfigurationProperties commonConfigurationProperties;
 
     @Before
     public void initMocks() {
@@ -76,8 +77,6 @@ public class TestInbox {
                 fakeAdapter,
                 InboxFilter.ALLOW_ALL,
                 new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
-                fakeMessageProducer,
-                "topic",
                 productFamily,
                 "S1",
                 "WILE",
@@ -85,14 +84,12 @@ public class TestInbox {
                 "NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                10,
-                1000,
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         uut.poll();
 
         verify(fakeRepo, times(2)).save(any());
-        verify(fakeMessageProducer, times(2)).send(eq("topic"), any());
     }
 
     @Test
@@ -115,8 +112,6 @@ public class TestInbox {
         		fakeAdapterThatSupportsProductFamily,
                 InboxFilter.ALLOW_ALL,
                 new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
-                fakeMessageProducer,
-                "topic",
                 productFamily,
 				"S1",
                 "WILE",
@@ -124,9 +119,8 @@ public class TestInbox {
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                10,
-                1000,
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         uut.poll();
 
@@ -134,7 +128,6 @@ public class TestInbox {
         verify(fakeRepo, times(1)).findByProcessingPodAndPickupURLAndStationNameAndMissionIdAndProductFamily(anyString(), anyString(), anyString(), anyString(), anyString()); // only called when SupportsProductFamily
         verify(fakeRepo, times(0)).findByProcessingPodAndPickupURLAndStationNameAndMissionId(anyString(), anyString(), anyString(), anyString()); // only called when not SupportsProductFamily
         verify(fakeRepo, times(0)).save(any());
-        verify(fakeMessageProducer, times(0)).send(eq("topic"), any());
     }
     
     @Test
@@ -158,8 +151,6 @@ public class TestInbox {
                 fakeAdapter,
                 InboxFilter.ALLOW_ALL,
                 new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
-                fakeMessageProducer,
-                "topic",
                 productFamily,
                 "S1",
 				"WILE",
@@ -167,9 +158,8 @@ public class TestInbox {
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                10,
-                1000,
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         uut.poll();
 
@@ -177,7 +167,6 @@ public class TestInbox {
         verify(fakeRepo, times(0)).findByProcessingPodAndPickupURLAndStationNameAndMissionIdAndProductFamily(anyString(), anyString(), anyString(), anyString(), anyString()); // only called when SupportsProductFamily
         verify(fakeRepo, times(1)).findByProcessingPodAndPickupURLAndStationNameAndMissionId(anyString(), anyString(), anyString(), anyString()); // only called when not SupportsProductFamily
         verify(fakeRepo, times(0)).save(any());
-        verify(fakeMessageProducer, times(0)).send(eq("topic"), any());
     }
     
     @Test
@@ -190,8 +179,6 @@ public class TestInbox {
                 fakeAdapter,
                 new JoinedFilter(new MinimumModificationDateFilter(new Date(123456))),
                 new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
-                fakeMessageProducer,
-                "topic",
                 productFamily,
                 "S1",
 				"WILE",
@@ -199,17 +186,16 @@ public class TestInbox {
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                10,
-                1000,
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         
         // old entry shall be ignored
-        final Optional<InboxEntry> ignored = uut.handleEntry(
+        final Optional<InboxReturnValue> ignored = uut.handleEntry(
         		new InboxEntry("foo1", "foo1", "/tmp", new Date(0), 1, "ingestor-01", null, productFamily.name(), "WILE", "S1")
         );
         // new entry shall be accepted
-        final Optional<InboxEntry> accepted = uut.handleEntry(
+        final Optional<InboxReturnValue> accepted = uut.handleEntry(
         		new InboxEntry("foo2", "foo2", "/tmp", new Date(), 1, "ingestor-01", null, productFamily.name(), "WILE", "S1")
         );
         assertFalse(ignored.isPresent());
@@ -227,8 +213,6 @@ public class TestInbox {
                 fakeAdapter,
                 new JoinedFilter(new MinimumModificationDateFilter(new Date(123456))),
                 new IngestionTriggerServiceTransactional(fakeRepo, processConfiguration),
-                fakeMessageProducer,
-                "topic",
                 ProductFamily.EDRS_SESSION,
                 "S1",
 				"WILE",
@@ -236,9 +220,8 @@ public class TestInbox {
 				"NOMINAL",
                 "FAST24",
                 new FlatProductNameEvaluator(),
-                10,
-                1000,
-                PathMetadataExtractor.NULL
+                PathMetadataExtractor.NULL,
+                commonConfigurationProperties
         );
         assertEquals(expected, uut.absolutePathOf(entry));
     }

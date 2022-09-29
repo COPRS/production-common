@@ -55,8 +55,13 @@
 		</dependency>
 		
 		<dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
+            <groupId>javax.json</groupId>
+            <artifactId>javax.json-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>${glassfish.version}</version>
         </dependency>
 
 		<dependency>
@@ -131,6 +136,12 @@
 			<!--scope>import</scope -->
 			<scope>compile</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
@@ -173,16 +184,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Low</threshold>
-					<maxRank>15</maxRank>
-					<includeTests>false</includeTests>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

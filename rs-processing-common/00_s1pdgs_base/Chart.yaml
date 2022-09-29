@@ -1,7 +1,0 @@
-apiVersion: v1
-appVersion: "develop"
-description: S1PRO S1PDGS base
-name: s1pro-s1pdgs-base
-version: 3.33.0-SNAPSHOT
-maintainers:
-  - name: Werum Software & Systems

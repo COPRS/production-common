@@ -9,13 +9,13 @@ import java.util.List;
 public class ApiResponse {
 	private String entity;
 	private String action;
-	private List<Long> idsWithSuccess = new ArrayList<>();
-	private List<Long> idsSkipped = new ArrayList<>();
+	private List<String> idsWithSuccess = new ArrayList<>();
+	private List<String> idsSkipped = new ArrayList<>();
 	
 	public ApiResponse() {
 	}
 	
-	public ApiResponse(String entity, String action, List<Long> idsWithSuccess, List<Long> idsSkipped) {
+	public ApiResponse(String entity, String action, List<String> idsWithSuccess, List<String> idsSkipped) {
 		this.entity = entity;
 		this.action = action;
 		this.idsWithSuccess = idsWithSuccess;
@@ -38,19 +38,19 @@ public class ApiResponse {
 		this.action = action;
 	}
 	
-	public List<Long> getIdsWithSuccess() {
+	public List<String> getIdsWithSuccess() {
 		return idsWithSuccess;
 	}
 	
-	public void setIdsWithSuccess(List<Long> idsWithSuccess) {
+	public void setIdsWithSuccess(List<String> idsWithSuccess) {
 		this.idsWithSuccess = idsWithSuccess;
 	}
 	
-	public List<Long> getIdsSkipped() {
+	public List<String> getIdsSkipped() {
 		return idsSkipped;
 	}
 	
-	public void setIdsSkipped(List<Long> idsSkipped) {
+	public void setIdsSkipped(List<String> idsSkipped) {
 		this.idsSkipped = idsSkipped;
 	}
 

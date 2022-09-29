@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "{{CHART_VERSION}}"
+description: RS Mock WebDAV
+name: rs-mock-webdav
+version: {{CHART_VERSION}}
+maintainers:
+  - name: Werum Software & Systems

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.rest;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductActionProcessor;
@@ -29,6 +31,9 @@ import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 public class OdataController {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(OdataController.class);
+	
+	@Autowired
+	private CommonConfigurationProperties commonProperties;
 
 	@Autowired
 	private EdmProvider edmProvider;
@@ -39,6 +44,8 @@ public class OdataController {
 	@Autowired
 	private ObsClient obsClient;
 	
+	@Value("${prip-frontend.header-field-name-username:x-username}")
+	private String headerFieldNameUsername;
 	@Value("${prip-frontend.download-url-expiration-time-in-seconds:600}")
 	private long downloadUrlExpirationTimeInSeconds;
 	
@@ -49,10 +56,11 @@ public class OdataController {
 	public void process(HttpServletRequest request, HttpServletResponse response) {
 		String queryParams = request.getQueryString() == null ? "" : "?" + request.getQueryString();
 		LOGGER.info("Received HTTP request for URL: {}{}", request.getRequestURL().toString(), queryParams);		
+		final String username = Objects.toString(request.getHeader(headerFieldNameUsername), "not defined");
 		OData odata = OData.newInstance();
 		ServiceMetadata serviceMetadata = odata.createServiceMetadata(edmProvider, new ArrayList<EdmxReference>());
 		ODataHttpHandler handler = odata.createHandler(serviceMetadata);
-		handler.register(new ProductEntityProcessor(pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds));
+		handler.register(new ProductEntityProcessor(commonProperties, pripMetadataRepository, obsClient, downloadUrlExpirationTimeInSeconds, username));
 		handler.register(new ProductEntityCollectionProcessor(pripMetadataRepository));
 		handler.register(new ProductActionProcessor(pripMetadataRepository));
 		

@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM ghcr.io/coprs/rs-core:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-execution-worker:${BRANCH} as build
 
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
 ARG VERSION
@@ -12,14 +12,18 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-RUN apk update && apk add python2
-
-COPY files/* /opt/
-
-COPY --from=build /app/ipf-execution-worker/target/s1pro-core-ipf-execution-worker-*.jar s1pdgs-ipf-execution-worker.jar
-COPY /config/start.sh start.sh
+#RUN apk update && apk add python2
+USER root
+RUN apt-get update && apt-get install -y python2
 
 #create local WD
 RUN mkdir -p /data/localWD
 
-CMD ["/app/start.sh"]
+USER 1001
+
+COPY files/* /opt/
+
+COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
+COPY /config/start.sh start.sh
+
+ENTRYPOINT ["/app/start.sh"]

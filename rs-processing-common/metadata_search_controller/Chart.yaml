@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "{{CHART_VERSION}}"
+description: COPRS Metadata Search Controller allowing to search for products in the Metadata Catalog
+name: rs-metadata-catalog-searchcontroller
+version: {{CHART_VERSION}}
+maintainers:
+  - name: Werum Software & Systems

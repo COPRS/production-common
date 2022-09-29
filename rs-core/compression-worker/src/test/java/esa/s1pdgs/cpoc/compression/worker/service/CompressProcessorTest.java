@@ -2,85 +2,63 @@ package esa.s1pdgs.cpoc.compression.worker.service;
 
 import static org.junit.Assert.fail;
 
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.compression.worker.config.ApplicationProperties;
-import esa.s1pdgs.cpoc.compression.worker.mqi.OutputProducerFactory;
-import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.mqi.client.GenericMqiClient;
-import esa.s1pdgs.cpoc.mqi.client.MessageFilter;
-import esa.s1pdgs.cpoc.mqi.client.StatusService;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionDirection;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
+import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class CompressProcessorTest {
 
 	private CompressProcessor uut;
+	
+	@Mock
+	CommonConfigurationProperties commonProps;
 
+	@Mock
 	private AppStatus appStatus;
 
+	@Mock
 	private ObsClient obsClient;
-	private OutputProducerFactory producerFactory;
-	private GenericMqiClient mqiClient;
-	private List<MessageFilter> messageFilter;
-	private ErrorRepoAppender errorAppender;
-	private StatusService mqiStatusService;
 
-	@Before
-	public void init() {
-		MockitoAnnotations.initMocks(this);
-		ApplicationProperties properties = new ApplicationProperties();
-		properties.setWorkingDirectory("workindir");
-		properties.setSizeBatchDownload(1000);
-		properties.setTmProcAllTasksS(5);
-		uut = new CompressProcessor(appStatus, properties, obsClient, producerFactory, mqiClient, messageFilter,
-				errorAppender, mqiStatusService, 0, 0);
-	}
-
-	@Test
-	public final void onMessage_compress() {
-
-		CompressionJob job = new CompressionJob();
-		job.setProductFamily(ProductFamily.L1_SLICE);
-		job.setUid(UUID.randomUUID());
-		job.setKeyObjectStorage("S3l1");
-		job.setOutputKeyObjectStorage("S3l1.zip");
-		job.setOutputProductFamily(ProductFamily.L0_SLICE_ZIP);
-		job.setCompressionDirection(CompressionDirection.COMPRESS);
-		GenericMessageDto<CompressionJob> inputMessage = new GenericMessageDto<>();
-		inputMessage.setBody(job);
-
-		try {
-			uut.onMessage(inputMessage);
-		} catch (Exception e) {
-			fail("Exception occurred: " + e.getMessage());
-		}
-	}
+	private Path tmpWorkdir;
 	
-	@Test
-	public final void onMessage_uncompress() {
+	@Before
+	public void init() throws IOException {
+		MockitoAnnotations.initMocks(this);
+		CompressionWorkerConfigurationProperties properties = new CompressionWorkerConfigurationProperties();
+		tmpWorkdir = Files.createTempDirectory("compressprocessortest");
+		properties.setWorkingDirectory(tmpWorkdir.toAbsolutePath().toString());
+//		properties.setSizeBatchDownload(1000);
+		properties.setCompressionTimeout(5);
+		properties.setCompressionCommand("echo");
+		uut = new CompressProcessor(commonProps, appStatus, properties, obsClient);
+	}
 
-		CompressionJob job = new CompressionJob();
-		job.setProductFamily(ProductFamily.L1_SLICE_ZIP);
-		job.setUid(UUID.randomUUID());
-		job.setKeyObjectStorage("S1l1.zip");
-		job.setOutputKeyObjectStorage("S1l1");
-		job.setOutputProductFamily(ProductFamily.L0_SLICE);
-		job.setCompressionDirection(CompressionDirection.UNCOMPRESS);
-		GenericMessageDto<CompressionJob> inputMessage = new GenericMessageDto<>();
-		inputMessage.setBody(job);
+	@Test
+	public final void onMessage_compress() throws IOException {
+
+		CatalogEvent event = new CatalogEvent();
+		event.setProductFamily(ProductFamily.L1_SLICE);
+		event.setUid(UUID.randomUUID());
+		event.setKeyObjectStorage("S3l1");
+		
+		Path filedir = Files.createDirectory(tmpWorkdir.resolve("S3l1.zip"));
+		Files.createFile(filedir.resolve("S3l1.zip"));
 
 		try {
-			uut.onMessage(inputMessage);
+			uut.apply(event);
 		} catch (Exception e) {
 			fail("Exception occurred: " + e.getMessage());
 		}

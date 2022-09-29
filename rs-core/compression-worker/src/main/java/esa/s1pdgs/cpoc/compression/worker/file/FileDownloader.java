@@ -9,7 +9,8 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
-import esa.s1pdgs.cpoc.mqi.model.queue.CompressionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
+import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -30,17 +31,13 @@ public class FileDownloader {
 	 */
 	private final String localWorkingDir;
 
-	/**
-	 * List of all the inputs
-	 */
-	private final CompressionJob job;
+	private final AbstractMessage event;
 
 
-	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final CompressionJob job,
-			final int sizeDownBatch) {
+	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final AbstractMessage event) {
 		this.obsClient = obsClient;
 		this.localWorkingDir = localWorkingDir;
-		this.job = job;
+		this.event = event;
 	}
 
 	/**
@@ -50,7 +47,7 @@ public class FileDownloader {
 	 */
 	public void processInputs(final ReportingFactory reportingFactory) throws AbstractCodedException {
 		// prepare directory structure
-		LOGGER.info("CompressionProcessor 1 - Creating working directory");
+		LOGGER.info("CompressionProcessor 1 - Creating working directory: {}", this.localWorkingDir);
 		final File workingDir = new File(localWorkingDir);
 		workingDir.mkdirs();
 
@@ -74,13 +71,22 @@ public class FileDownloader {
 	protected ObsDownloadObject buildInput() throws InternalErrorException, UnknownFamilyException {
 		LOGGER.info("CompressionProcessor 3 - Starting organizing inputs");
 		
-		if (job.getKeyObjectStorage() == null) {
+		if (event.getKeyObjectStorage() == null) {
 			throw new InternalErrorException("productName to download cannot be null");
 		}
+		
+		String targetFile = "";
+		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
+			// Compression
+			targetFile = this.localWorkingDir + "/" + CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());	
+		} else {
+			// Uncompression
+			targetFile = this.localWorkingDir + "/" + CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());
+		}
 
-		final String targetFile = this.localWorkingDir+"/"+job.getOutputKeyObjectStorage();
-		LOGGER.info("Input {} will be stored in {}", job.getKeyObjectStorage(), targetFile);
-		return new ObsDownloadObject(job.getProductFamily(), job.getKeyObjectStorage(), targetFile);
+		
+		LOGGER.info("Input {} will be stored in {}", event.getKeyObjectStorage(), targetFile);
+		return new ObsDownloadObject(event.getProductFamily(), event.getKeyObjectStorage(), targetFile);
 
 	}
 }

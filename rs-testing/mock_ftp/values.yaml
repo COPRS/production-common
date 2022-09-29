@@ -1,0 +1,30 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+service:
+  port: 8080
+  
+processing:
+  namespace: processing
+
+image:
+  registry: artifactory.coprs.esa-copernicus.eu
+  repository: werum-docker
+  
+  name: rs-core-mock-ftpserver
+  tag: develop
+  
+  imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
+  
+worker:
+  label:
+    key: node-role.kubernetes.io/worker
+    value: infra
+
+ftp:
+  cpu:
+    request: "100m"
+    limit: "500m"
+  ram:
+    request: "10Mi"
+    limit: "50Mi"

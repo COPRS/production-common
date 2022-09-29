@@ -1,0 +1,33 @@
+name: Build RS core components
+
+on:
+  push:
+    paths:
+      - 'processing-common/**'
+      - '.github/workflows/build-rs-core-components.yml'
+      - '.github/actions/build-core-components/action.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
+  workflow_dispatch:
+      
+env:
+  RS_CORE_FOLDER: processing-common
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_COMMON: rs-docker
+  ARTIFACTORY_CORE_PROJECT: rs-core
+  
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [ingestion, metadata, compression, distribution, datalifecycle, dlq]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/build-core-components
+      with:
+        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}

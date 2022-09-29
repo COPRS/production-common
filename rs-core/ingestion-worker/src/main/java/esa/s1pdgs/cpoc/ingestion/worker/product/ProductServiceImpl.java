@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterResponse;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -33,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public List<Product<IngestionEvent>> ingest(
+	public List<Product<CatalogJob>> ingest(
 			final ProductFamily family, 
 			final InboxAdapter inboxAdapter,
 			final IngestionJob ingestion,
@@ -42,10 +42,12 @@ public class ProductServiceImpl implements ProductService {
 		final URI uri = IngestionJobs.toUri(ingestion);
 		final ObsAdapter obsAdapter = newObsAdapterFor(reportingFactory);
 		final String obsKey = obsKeyFor(ingestion);
-
-		final IngestionEvent dto = new IngestionEvent(
+		final String storagePath = storagePathFor(obsAdapter, family, obsKey);
+		
+		final CatalogJob dto = new CatalogJob(
 				family, 
 				obsKey,
+				storagePath,
 				ingestion.getRelativePath(),
 				ingestion.getProductSizeByte(),
 				ingestion.getMissionId(),
@@ -53,7 +55,16 @@ public class ProductServiceImpl implements ProductService {
 				ingestion.getMode(),
 				ingestion.getTimeliness()
 		);
+		
+		// RS-248: We are using the t0_pdgs_date from the ingestion event
+		dto.setT0_pdgs_date(ingestion.getT0_pdgs_date());
 
+		// S1OPS-971: This is a workaround for MDC to allow access of additional metadata
+		if (null != ingestion.getAdditionalMetadata() && !ingestion.getAdditionalMetadata().isEmpty()) {
+			dto.getMetadata().putAll(ingestion.getAdditionalMetadata());
+			dto.getMetadata().put(CatalogJob.ADDITIONAL_METADATA_FLAG_KEY, true);
+		}
+		
 		checkExistingInObs(obsAdapter, ingestion);
 		upload(obsAdapter, ingestion, family, inboxAdapter, uri, obsKey);
 
@@ -98,6 +109,10 @@ public class ProductServiceImpl implements ProductService {
 		}
 
 		return ingestion.getProductName();
+	}
+	
+	private String storagePathFor(final ObsAdapter adapter, final ProductFamily family, final String keyObs) {
+		return adapter.getAbsoluteStoragePath(family, keyObs);
 	}
 
 	final String toObsKey(final Path relPath) {

@@ -1,8 +1,8 @@
 package esa.s1pdgs.cpoc.ingestion.filter.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.logging.log4j.core.util.CronExpression;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,13 +14,13 @@ public class IngestionFilterConfigurationProperties {
 
 	public static class FilterProperties {		
 		// Cronjob definition for products, that should be processed
-		private CronExpression cronDefinition;
+		private String cronDefinition;
 
-		public CronExpression getCronDefinition() {
+		public String getCronDefinition() {
 			return cronDefinition;
 		}
 
-		public void setCronDefinition(CronExpression cronDefinition) {
+		public void setCronDefinition(String cronDefinition) {
 			this.cronDefinition = cronDefinition;
 		}
 	}
@@ -28,7 +28,7 @@ public class IngestionFilterConfigurationProperties {
 	private long pollingIntervalMs = 1000;
 	private long pollingInitialDelayMs = 5000;
 	
-	private Map<MissionId, FilterProperties> config;
+	private Map<MissionId, FilterProperties> config = new HashMap<>();
 	
 	public long getPollingIntervalMs() {
 		return pollingIntervalMs;

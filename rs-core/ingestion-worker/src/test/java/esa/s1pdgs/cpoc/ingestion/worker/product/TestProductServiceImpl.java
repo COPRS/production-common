@@ -7,7 +7,9 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +22,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.worker.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterResponse;
-import esa.s1pdgs.cpoc.mqi.model.queue.IngestionEvent;
+import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
@@ -82,18 +84,21 @@ public class TestProductServiceImpl {
 		ingestionJob.setProductFamily(family);
 		ingestionJob.setProductName("productName");
 		ingestionJob.setCreationDate(new Date());
-		ingestionJob.setHostname("hostname");
-		final Product<IngestionEvent> product = new Product<>();
+		ingestionJob.setPodName("hostname");
+		Map<String, String> metadata = new HashMap<>();
+		metadata.put("test", "test");
+		final Product<CatalogJob> product = new Product<>();
 		product.setFamily(family);
-		final IngestionEvent expectedProductionEvent = new IngestionEvent();
-		expectedProductionEvent.setProductName("null");
+		final CatalogJob expectedProductionEvent = new CatalogJob();
+		expectedProductionEvent.setMetadataProductName("null");
 		expectedProductionEvent.setKeyObjectStorage("null");
 		expectedProductionEvent.setProductFamily(family);
-		expectedProductionEvent.setHostname("hostname");
+		expectedProductionEvent.setPodName("hostname");
 		expectedProductionEvent.setCreationDate(new Date());
+		expectedProductionEvent.getMetadata().put("test", "test");
 		product.setDto(expectedProductionEvent);
-		final List<Product<IngestionEvent>> expectedResult = Arrays.asList(product);
-		final List<Product<IngestionEvent>> actualResult = uut.ingest(family, inboxAdapter, ingestionJob, ReportingFactory.NULL);
+		final List<Product<CatalogJob>> expectedResult = Arrays.asList(product);
+		final List<Product<CatalogJob>> actualResult = uut.ingest(family, inboxAdapter, ingestionJob, ReportingFactory.NULL);
 		assertEquals(expectedResult.size(), actualResult.size());
 	}
 

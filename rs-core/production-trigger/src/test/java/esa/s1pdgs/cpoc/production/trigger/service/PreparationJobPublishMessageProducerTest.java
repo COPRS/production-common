@@ -51,7 +51,7 @@ public class PreparationJobPublishMessageProducerTest {
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
 		catalogEvent.setKeyObjectStorage("l0slice");
-		catalogEvent.setProductName("l0slice");
+		catalogEvent.setMetadataProductName("l0slice");
 		Map<String,Object> metadata = new HashMap<>();
 		metadata.put("startTime", "2017-12-13T14:59:48.123456Z");
 		metadata.put("stopTime", "2017-12-13T15:17:25.142536Z");
@@ -81,7 +81,7 @@ public class PreparationJobPublishMessageProducerTest {
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
 		catalogEvent.setKeyObjectStorage("oversea");
-		catalogEvent.setProductName("oversea");
+		catalogEvent.setMetadataProductName("oversea");
 		Map<String,Object> metadata = new HashMap<>();
 		metadata.put("startTime", "2017-12-13T14:59:48.123456Z");
 		metadata.put("stopTime", "2017-12-13T15:17:25.142536Z");
@@ -113,7 +113,7 @@ public class PreparationJobPublishMessageProducerTest {
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
 		catalogEvent.setKeyObjectStorage("oversea");
-		catalogEvent.setProductName("oversea");
+		catalogEvent.setMetadataProductName("oversea");
 		Map<String,Object> metadata = new HashMap<>();
 		metadata.put("startTime", "2017-12-13T14:59:48.123456Z");
 		metadata.put("stopTime", "2017-12-13T15:17:25.142536Z");
@@ -145,7 +145,7 @@ public class PreparationJobPublishMessageProducerTest {
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
 		catalogEvent.setKeyObjectStorage("l0ewslc");
-		catalogEvent.setProductName("l0ewslc");
+		catalogEvent.setMetadataProductName("l0ewslc");
 		Map<String,Object> metadata = new HashMap<>();
 		metadata.put("startTime", "2017-12-13T14:59:48.123456Z");
 		metadata.put("stopTime", "2017-12-13T15:17:25.142536Z");
@@ -177,7 +177,7 @@ public class PreparationJobPublishMessageProducerTest {
 		CatalogEvent catalogEvent = new CatalogEvent();
 		catalogEvent.setProductFamily(ProductFamily.L0_SLICE);
 		catalogEvent.setKeyObjectStorage("l0ewslc");
-		catalogEvent.setProductName("l0ewslc");
+		catalogEvent.setMetadataProductName("l0ewslc");
 		Map<String,Object> metadata = new HashMap<>();
 		metadata.put("startTime", "2017-12-13T14:59:48.123456Z");
 		metadata.put("stopTime", "2017-12-13T15:17:25.142536Z");

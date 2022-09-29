@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: {{ .Values.service.name }}
+
+# Logging
+logging:
+  config: {{ .Values.logConfig }}
+
+# DDIP config
+ddip:
+  # major version (used as part of the API base path)
+  major-version: v1
+  # version (to communicate minor changes that are compatible with the major version)
+  version: 1.0
+  # configuration for request dispatching (DDIP -> PRIP)
+  dispatch-prip-protocol: {{ .Values.ddip.dispatch.prip.protocol }}
+  dispatch-prip-host: {{ .Values.ddip.dispatch.prip.host }}
+  dispatch-prip-port: {{ .Values.ddip.dispatch.prip.port }}
+  # defining named collections as OData expressions to narrow product metadata search
+  collections:
+    {{ if .Values.ddip.collections}}
+    {{- toYaml .Values.ddip.collections | nindent 4 }}
+    {{else}}
+    Sentinel1: startswith(Name,'S1')
+    Sentinel3: startswith(Name,'S3')
+    {{end}}
+
+# REST controller
+server:
+  port: {{ .Values.service.port }}

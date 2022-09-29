@@ -1,48 +1,42 @@
 package esa.s1pdgs.cpoc.ingestion.trigger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.IngestionTriggerConfigurationProperties;
+import esa.s1pdgs.cpoc.ingestion.trigger.config.TestConfig;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntryRepository;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.service.IngestionTriggerService;
+import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 
-
-@Ignore // test collides with MongoConfiguration
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-@TestPropertySource(properties = "scheduling.enable=false")
+@ComponentScan("esa.s1pdgs.cpoc")
+@Import(TestConfig.class)
+@PropertySource("classpath:stream-parameters--fs.properties")
 public class TestApplication {
-
-	//	 uncomment, if embedded mongo needs to be updated
-//	{
-//		System.setProperty("http.proxyHost", "proxy.net.werum");
-//		System.setProperty("http.proxyPort", "8080");
-//		System.setProperty("https.proxyHost", "proxy.net.werum");
-//		System.setProperty("https.proxyPort", "8080");
-//	}
-
 	@Autowired
 	private IngestionTriggerService service;
 	
@@ -56,16 +50,16 @@ public class TestApplication {
 	private InboxEntryFactory factory;
 
 	@Test
-	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntriesForInboxStation() throws URISyntaxException {final InboxConfiguration inbConf = props.getPolling().get(0);
-		
-		final URI inboxURL = new URI(inbConf.getDirectory());
+	public void testPollAll_OnEmptyInboxAndPersistedEntries_ShallDeletePersistedEntriesForInboxStation() throws URISyntaxException {	
+		final InboxConfiguration edrsInboxConf = props.getPolling().get("testApplicationInboxForEDRS");
+		final URI inboxURL = new URI(edrsInboxConf.getDirectory());
 		final Path inboxPath = Paths.get(inboxURL.getPath());
 		
 		if (!inboxPath.toFile().exists()) {
 			inboxPath.toFile().mkdirs();
 		}
 
-		final InboxEntry entry1 = factory.newInboxEntry(
+		final InboxEntry edrsEntry = factory.newInboxEntry(
 				inboxURL,
 				inboxPath.resolve("WILE/S1B/L20180724144436762001030/ch01/DCS_02_L20180724144436762001030_ch1_DSIB.xml"),
 				new Date(),
@@ -76,7 +70,7 @@ public class TestApplication {
 				ProductFamily.EDRS_SESSION
 		);
 
-		final InboxEntry entry2 = factory.newInboxEntry(
+		final InboxEntry auxEntry = factory.newInboxEntry(
 				inboxURL,
 				inboxPath.resolve("AUX/S1__AUX_ICE_V20160501T120000_G20160502T043607.SAFE"),
 				new Date(),
@@ -87,19 +81,15 @@ public class TestApplication {
 				ProductFamily.AUXILIARY_FILE
 		);
 
-		repo.save(entry1);
-		repo.save(entry2);
-		assertEquals(2, read().size());
+		repo.save(edrsEntry);
+		repo.save(auxEntry);
+		assertEquals(2, repo.findAll().size());
+		List<IngestionJob> jobs = service.get();
+		assertNull(jobs); // is null when no new job has been created
 
-		service.pollAll();
-
-		final List<InboxEntry> inboxEntries = read();
+		final List<InboxEntry> inboxEntries = repo.findAll();
 		assertEquals(1, inboxEntries.size());
-		assertEquals(entry1, inboxEntries.get(0));
-
+		assertEquals(auxEntry, inboxEntries.get(0));
 	}
 
-	private List<InboxEntry> read() {
-		return new ArrayList<>(repo.findAll());
-	}
 }

@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: "{{CHART_VERSION}}"
+description: COPRS Native API
+name: rs-native-api
+version: {{CHART_VERSION}}
+maintainers:
+  - name: Werum Software & Systems

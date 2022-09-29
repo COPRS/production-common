@@ -1,0 +1,60 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+   <xfdu:XFDU version="esa/safe/sentinel-1.0/sentinel-1/auxiliary/sar/wnd" xmlns:safe="http://www.esa.int/safe/sentinel-1.0" xmlns:xfdu="urn:ccsds:schema:xfdu:1" xmlns:s1auxsar="http://www.esa.int/safe/sentinel-1.0/sentinel-1/auxiliary/sar" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:ccsds:schema:xfdu:1 xsd/int/esa/safe/sentinel-1.0/sentinel-1/auxiliary/sar/wnd/xfdu.xsd">
+      <informationPackageMap>
+         <xfdu:contentUnit unitType="SAFE Archive Information Package Map" textInfo="Sentinel-1 L2 Auxilary Wind Parameters" dmdID="platform generalProductInformation" pdiID="processing">
+            <xfdu:contentUnit unitType="Measurement Data Unit" textInfo="Auxiliary Data" repID="auxSchema">
+               <dataObjectPointer dataObjectID="auxData"/>
+            </xfdu:contentUnit>
+         </xfdu:contentUnit>
+      </informationPackageMap>
+      <metadataSection>
+         <metadataObject ID="generalProductInformation" classification="DESCRIPTION" category="DMD">
+            <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="General Product Information">
+               <xmlData>
+               	<s1auxsar:standAloneProductInformation>
+               		<s1auxsar:auxProductType>AUX_WND</s1auxsar:auxProductType>
+               		<s1auxsar:validity>2016-04-23T12:00:00.000000</s1auxsar:validity>
+               		<s1auxsar:generation>2016-04-22T06:00:59.747123</s1auxsar:generation>
+               		<s1auxsar:instrumentConfigurationId>1</s1auxsar:instrumentConfigurationId>
+               	</s1auxsar:standAloneProductInformation>
+               </xmlData>
+            </metadataWrap>
+         </metadataObject>
+         <metadataObject ID="platform" classification="DESCRIPTION" category="DMD">
+            <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="Platform Description">
+               <xmlData>
+               	<safe:platform>
+               		<safe:nssdcIdentifier>2014-016A</safe:nssdcIdentifier>
+               		<safe:familyName>SENTINEL-1</safe:familyName>
+               		<safe:number>1</safe:number>
+               		<safe:instrument>
+               			<safe:familyName abbreviation="SAR">Synthetic Aperture Radar</safe:familyName>
+               		</safe:instrument>
+               	</safe:platform>
+               </xmlData>
+            </metadataWrap>
+         </metadataObject>
+         <metadataObject ID="processing" classification="PROVENANCE" category="PDI">
+            <metadataWrap mimeType="text/xml" vocabularyName="SAFE" textInfo="Processing">
+               <xmlData>
+               	<safe:processing name="S1_AUX_WND_RFMT" start="2016-04-22T06:00:59.715150" stop="2016-04-22T06:00:59.747123">
+               		<safe:facility name="S1_AUX_WND_RFMT" organisation="ESA" site="PDMC" country="Italy"/>
+               		<safe:resource name="Sentinel-1 IPF Auxiliary Product Specification S1-RS-MDA-52-7443" role="Applicable Document"/>
+               		<safe:resource name="D1D04220000042312001" role="Input file" href="/data_SPEED/ADH-1.0/tld_productions/42842/D1D04220000042312001"/>
+               	</safe:processing>
+               </xmlData>
+            </metadataWrap>
+         </metadataObject>
+         <metadataObject ID="auxSchema" classification="SYNTAX" category="REP">
+            <metadataReference mimeType="text/xml" vocabularyName="SDF" locatorType="URL" href="./support/s1-aux-wnd.xsd"/>
+         </metadataObject>
+      </metadataSection>
+      <dataObjectSection>
+         <dataObject ID="auxData" repID="auxSchema">
+            <byteStream mimeType="application/octetstream" size="12450408">
+               <fileLocation locatorType="URL" textInfo="Auxiliary Data" href="./data/D1D04220000042312001"/>
+               <checksum checksumName="MD5">87402a1d5f7c183d8978a58d34c09cec</checksum>
+            </byteStream>
+         </dataObject>
+      </dataObjectSection>
+   </xfdu:XFDU>

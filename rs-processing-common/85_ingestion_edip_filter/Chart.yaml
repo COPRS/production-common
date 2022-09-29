@@ -1,7 +1,0 @@
-apiVersion: v1
-appVersion: "develop"
-description: S1PRO Inbox EDIP Ingestion Filter
-name: s1pro-ingestion-edip-filter
-version: 3.33.0-SNAPSHOT
-maintainers:
-  - name: Werum Software & Systems

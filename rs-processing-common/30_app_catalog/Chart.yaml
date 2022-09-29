@@ -1,7 +1,0 @@
-apiVersion: v1
-appVersion: "develop"
-description: S1PRO Applicative Data Catalog
-name: s1pro-app-catalog
-version: 3.33.0-SNAPSHOT
-maintainers: # (optional)
-  - name: Werum Software & Systems

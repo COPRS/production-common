@@ -39,4 +39,11 @@ status:
 
 # REST controller
 server:
-  port: 8080 
+  port: 8080
+  
+  
+obs:
+  endpoint: example.org
+  userId: foo
+  userSecret: bar
+ 

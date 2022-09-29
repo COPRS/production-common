@@ -11,7 +11,6 @@ public class InboxConfiguration {
 	private String directory;
 	private String matchRegex;
 	private String ignoreRegex;
-	private String topic;
 	private String missionId;
 	private String stationName;
 	private String mode;
@@ -62,14 +61,6 @@ public class InboxConfiguration {
 
 	public void setIgnoreRegex(final String ignoreRegex) {
 		this.ignoreRegex = ignoreRegex;
-	}
-
-	public String getTopic() {
-		return topic;
-	}
-
-	public void setTopic(final String topic) {
-		this.topic = topic;
 	}
 	
 	public ProductFamily getFamily() {
@@ -171,7 +162,7 @@ public class InboxConfiguration {
 	@Override
 	public String toString() {
 		return "InboxConfiguration [type=" + type + ", directory=" + directory + ", matchRegex=" + matchRegex + ", ignoreRegex="
-				+ ignoreRegex + ", topic=" + topic + ", missionId=" + missionId + ", stationName=" + stationName + ", mode=" + mode + ", timeliness="
+				+ ignoreRegex + ", missionId=" + missionId + ", stationName=" + stationName + ", mode=" + mode + ", timeliness="
 				+ timeliness + ", sessionNamePattern=" + sessionNamePattern + ", sessionNameGroupIndex="
 				+ sessionNameGroupIndex + ", ignoreFilesBeforeDate=" + ignoreFilesBeforeDate + ", family=" + family
 				+ ", stationRetentionTime=" + stationRetentionTime + ", pathPattern=" + pathPattern+ ", pathMetadataElements=" 

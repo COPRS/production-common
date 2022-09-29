@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ipf_Job_Order>
+   <Ipf_Conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="l0JobOrderConf">
+      <Processor_Name>S3A_ACQ</Processor_Name>
+      <Version>00.01</Version>
+      <Stdout_Log_Level>INFO</Stdout_Log_Level>
+      <Stderr_Log_Level>INFO</Stderr_Log_Level>
+      <Test>false</Test>
+      <Breakpoint_Enable>false</Breakpoint_Enable>
+      <Processing_Station>WILE</Processing_Station>
+      <Sensing_Time>
+         <Start>20200928_080939000000</Start>
+         <Stop>20200928_081232000000</Stop>
+      </Sensing_Time>
+      <Config_Files/>
+      <Dynamic_Processing_Parameters>
+         <Processing_Parameter>
+            <Name>TimeoutSec</Name>
+            <Value>7200</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>Mission_Id</Name>
+            <Value>S3B</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>Processing_Mode</Name>
+            <Value>FAST24</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>RSEncode</Name>
+            <Value>yes</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>NRTOutputPath</Name>
+            <Value>/data/localWD/6/NRT</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>Descramble</Name>
+            <Value>yes</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>PTOutputPath</Name>
+            <Value>/data/localWD/6/PT</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>DownlinkTime</Name>
+            <Value>20200928T080939</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>Processing_Station</Name>
+            <Value>S3__</Value>
+         </Processing_Parameter>
+         <Processing_Parameter>
+            <Name>PT_Assembly</Name>
+            <Value>yes</Value>
+         </Processing_Parameter>
+      </Dynamic_Processing_Parameters>
+      <List_of_Dynamic_Processing_Parameters count="10"/>
+   </Ipf_Conf>
+   <List_of_Ipf_Procs count="1">
+      <Ipf_Proc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="standardJobOrderProc">
+         <Task_Name>ACQ</Task_Name>
+         <Task_Version>00.01</Task_Version>
+         <List_of_Inputs count="0"/>
+         <List_of_Outputs count="11">
+            <Output mandatory="true">
+               <File_Type>DO_0_DOP__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>DO_0_NAV__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>GN_0_GNS__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>MW_0_MWR__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>OL_0_CR___G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>OL_0_EFR__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>SL_0_SLT__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>SR_0_SRA__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>TM_0_HKM__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>TM_0_HKM2_G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+            <Output mandatory="true">
+               <File_Type>TM_0_NAT__G</File_Type>
+               <File_Name_Type>Physical</File_Name_Type>
+               <File_Name>/data/localWD/6/</File_Name>
+            </Output>
+         </List_of_Outputs>
+         <Breakpoint xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="standardJobOrderBreakpoint">
+            <List_of_Brk_Files count="0"/>
+            <Enable>OFF</Enable>
+         </Breakpoint>
+      </Ipf_Proc>
+   </List_of_Ipf_Procs>
+</Ipf_Job_Order>

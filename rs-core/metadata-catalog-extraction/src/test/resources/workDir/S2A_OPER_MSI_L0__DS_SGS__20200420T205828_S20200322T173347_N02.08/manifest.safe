@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<xfdu:XFDU xmlns:xfdu="urn:ccsds:schema:xfdu:1" version="esa/safe/sentinel-1.0/sentinel-2/msi/archive_l0_datastrip" xmlns:gml="http://www.opengis.net/gml" xmlns:safe="http://www.esa.int/safe/sentinel-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:ccsds:schema:xfdu:1 /dpc/app/s2ipf/FORMAT_METADATA_GR_L0C/01.09.00/scripts/../../../xmlschemas/SAFE/xsd/int/esa/safe/sentinel-1.0/xfdu.xsd">
+
+  <informationPackageMap>
+    <xfdu:contentUnit dmdID="acquisitionPeriod platform" pdiID="processing" textInfo="SENTINEL-2 MSI Level-0_Datastrip PDI" unitType="Product_Level-0">
+      <xfdu:contentUnit ID="S2_Level-0_Datastrip_Metadata_Unit" repID="S2_Level-0_Datastrip_Schema" unitType="Metadata Unit">
+        <dataObjectPointer dataObjectID="S2_Level-0_Datastrip_Metadata"/>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit ID="IMG_DATA" textInfo="Image Data container">
+      </xfdu:contentUnit>
+      <xfdu:contentUnit ID="QI_DATA" textInfo="Quality control container">
+        <xfdu:contentUnit ID="QLK_L0_Band03_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="QLK_L0_Band03_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="QLK_L0_Band10_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="QLK_L0_Band10_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="QLK_L0_Band04_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="QLK_L0_Band04_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="QLK_L0_Band02_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="QLK_L0_Band02_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="QLK_L0_Band11_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="QLK_L0_Band11_Data"/>
+        </xfdu:contentUnit>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit ID="ANC_DATA" textInfo="Ancilliary datas">
+        <xfdu:contentUnit ID="ANC11105_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11105_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11112_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11112_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11117_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11117_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11108_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11108_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC48227_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC48227_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC48224_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC48224_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11116_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11116_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11115_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11115_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11119_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11119_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11110_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11110_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11111_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11111_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11106_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11106_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC48226_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC48226_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC48218_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC48218_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11113_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11113_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11114_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11114_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11118_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11118_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11124_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11124_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11126_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11126_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC48225_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC48225_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC48223_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC48223_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11109_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11109_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11125_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11125_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11122_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11122_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11121_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11121_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC09123_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC09123_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC37105_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC37105_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC38105_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC38105_Data"/>
+        </xfdu:contentUnit>
+        <xfdu:contentUnit ID="ANC11120_Unit" unitType="Data Unit">
+          <dataObjectPointer dataObjectID="ANC11120_Data"/>
+        </xfdu:contentUnit>
+      </xfdu:contentUnit>
+      <xfdu:contentUnit ID="AUX_DATA" textInfo="Auxilliary datas">
+      </xfdu:contentUnit>
+    </xfdu:contentUnit>
+
+  </informationPackageMap>
+
+  <metadataSection>
+    <metadataObject ID="platform" category="DMD" classification="DESCRIPTION">
+      <metadataWrap>
+        <xmlData>
+          <safe:platform>
+            <safe:nssdcIdentifier>2015-028A</safe:nssdcIdentifier>
+            <safe:familyName>Sentinel</safe:familyName>
+            <safe:number>2A</safe:number>
+            <safe:instrument>
+              <safe:familyName abbreviation="MSI">Multi-Spectral Instrument</safe:familyName>
+              <safe:mode identifier="INS-VIC">Vicarious_Calibration</safe:mode>
+            </safe:instrument>
+          </safe:platform>
+        </xmlData>
+      </metadataWrap>
+
+    </metadataObject>
+    <metadataObject ID="processing" category="PDI" classification="PROVENANCE">
+      <metadataWrap>
+        <xmlData>
+          <safe:processing name="Archiving of PDI Level-0 Granule Product" start="2020-12-16T14:33:10.000000Z">
+            <safe:facility country="unknown" name="unknown" organisation="unknown" site="SGS_"/>
+            <safe:resource name="unknown" role="PDI Level-0 Datastrip Product">
+              <safe:processing name="L0 Processing of Raw Data" start="2020-04-20T20:58:28.000000Z">
+                <safe:facility country="unknown" name="unknown" organisation="unknown" site="SGS_">
+                  <safe:resource name=".//ANC_DATA/" role="Ancillary data"/>
+                  <safe:resource name="S2__OPER_AUX_UT1UTC_PDMC_20191024T000000_V20191025T000000_20201024T000000" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_R2ABCA_MPC__20200310T092737_V20200317T000000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_CLOINV_MPC__20151021T225159_V20150701T225159_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_DATATI_MPC__20151117T131048_V20150703T000000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_ATMIMA_MPC__20150605T094744_V20150622T000000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_ATMSAD_MPC__20160729T000005_V20150703T000000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_LREXTR_MPC__20150605T094736_V20150622T000000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_SPAMOD_MPC__20190416T000023_V20190520T050000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131048_V20150703T000000_21000101T000000_B01" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131049_V20150703T000000_21000101T000000_B02" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131049_V20150703T000000_21000101T000000_B03" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131049_V20150703T000000_21000101T000000_B04" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131050_V20150703T000000_21000101T000000_B05" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131050_V20150703T000000_21000101T000000_B06" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131050_V20150703T000000_21000101T000000_B07" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131050_V20150703T000000_21000101T000000_B08" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131050_V20150703T000000_21000101T000000_B09" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131050_V20150703T000000_21000101T000000_B10" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131050_V20150703T000000_21000101T000000_B11" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131051_V20150703T000000_21000101T000000_B12" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_VIEDIR_MPC__20151117T131050_V20150703T000000_21000101T000000_B8A" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_BLINDP_MPC__20150605T094736_V20150622T000000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_JP2KPA_MPC__20160222T110000_V20150622T000000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_PROBAS_MPC__20200221T000209_V20200225T013000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_INVLOC_MPC__20171206T000000_V20150703T000000_21000101T000000_B00" role="Auxiliary data"/>
+                  <safe:resource name="S2A_OPER_GIP_OLQCPA_MPC__20191004T000021_V20191020T233000_21000101T000000_B00" role="Auxiliary data"/>
+                </safe:facility>
+              </safe:processing>
+            </safe:resource>
+          </safe:processing>
+        </xmlData>
+      </metadataWrap>
+
+    </metadataObject>
+    <metadataObject ID="acquisitionPeriod" category="DMD" classification="DESCRIPTION">
+      <metadataWrap>
+        <xmlData>
+          <safe:acquisitionPeriod startTime="2020-03-22T17:33:47.072000Z"/>
+        </xmlData>
+      </metadataWrap>
+
+    </metadataObject>
+    <metadataObject ID="measurementOrbitReference" category="DMD" classification="DESCRIPTION">
+      <metadataWrap>
+        <xmlData>
+          <safe:orbitReference>
+            <safe:orbitNumber type="start" groundTrackDirection="unknown">GS2A_20200322T173341_024805_N02.08</safe:orbitNumber>
+            <safe:relativeOrbitNumber type="start">69</safe:relativeOrbitNumber>
+          </safe:orbitReference>
+        </xmlData>
+      </metadataWrap>
+
+    </metadataObject>
+    <metadataObject ID="measurementFrameSet" category="DMD" classification="DESCRIPTION">
+
+    </metadataObject>
+    <metadataObject ID="S2_Level-0_Datastrip_Information" category="DMD" classification="DESCRIPTION">
+      <dataObjectPointer dataObjectID="S2_Level-0_Datastrip_Metadata"/>
+    </metadataObject>
+    <metadataObject ID="S2_Level-0_Datastrip_Schema" category="REP" classification="SYNTAX">
+      <metadataReference href="rep_info/S2_Level-0_Datastrip_Metadata.xsd" locatorType="URL" mimeType="text/xml" vocabularyName="SDF"/>
+    </metadataObject>
+    <metadataObject ID="Inventory_Metadata_Schema" category="REP" classification="SYNTAX">
+      <metadataReference href="rep_info/Inventory_Metadata.xsd" locatorType="URL" mimeType="text/xml" vocabularyName="SDF"/>
+    </metadataObject>
+    <metadataObject ID="OLQC_Report_Schema" category="REP" classification="SYNTAX">
+      <metadataReference href="rep_info/OLQC_Report.xsd" locatorType="URL" mimeType="text/xml" vocabularyName="SDF"/>
+    </metadataObject>
+  </metadataSection>
+
+  <dataObjectSection>
+    <dataObject ID="QLK_L0_Band03_Data" >
+      <byteStream mimeType="image/jpeg" size="3543008">
+        <fileLocation href="./QI_DATA/S2A_OPER_QLK_L0__DS_SGS__20200420T205828_S20200322T173347_B03.jp2" locatorType="URL"/>
+        <checksum checksumName="MD5">228f418c5bfe8cda0e1177c83379774d</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="QLK_L0_Band10_Data" >
+      <byteStream mimeType="image/jpeg" size="1237161">
+        <fileLocation href="./QI_DATA/S2A_OPER_QLK_L0__DS_SGS__20200420T205828_S20200322T173347_B10.jp2" locatorType="URL"/>
+        <checksum checksumName="MD5">dba0b210c51e9f23c179903e30a2ebae</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="QLK_L0_Band04_Data" >
+      <byteStream mimeType="image/jpeg" size="3554148">
+        <fileLocation href="./QI_DATA/S2A_OPER_QLK_L0__DS_SGS__20200420T205828_S20200322T173347_B04.jp2" locatorType="URL"/>
+        <checksum checksumName="MD5">775f27ae53597a6725f94a74b411c2a6</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="QLK_L0_Band02_Data" >
+      <byteStream mimeType="image/jpeg" size="3553033">
+        <fileLocation href="./QI_DATA/S2A_OPER_QLK_L0__DS_SGS__20200420T205828_S20200322T173347_B02.jp2" locatorType="URL"/>
+        <checksum checksumName="MD5">fa2ae83af071559fbfb490fed1550b89</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="QLK_L0_Band11_Data" >
+      <byteStream mimeType="image/jpeg" size="3540272">
+        <fileLocation href="./QI_DATA/S2A_OPER_QLK_L0__DS_SGS__20200420T205828_S20200322T173347_B11.jp2" locatorType="URL"/>
+        <checksum checksumName="MD5">7d24d7ea77d0f15a508a43d57c7f85bd</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11105_Data" >
+      <byteStream mimeType="application/octet-stream" size="36897">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11105_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">3b02992ec58a39b2086b662966eba4f5</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11112_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11112_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">283e5fc04cf5f0dd187cc156939d874b</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11117_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11117_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">2ec7eaea680ce175aa8289af49f1ebff</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11108_Data" >
+      <byteStream mimeType="application/octet-stream" size="36897">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11108_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">ea0c76f2934518364103965ae87d7f31</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC48227_Data" >
+      <byteStream mimeType="application/octet-stream" size="9600">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S48227_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">285a1a5500989f4e55010f5bc457bcad</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC48224_Data" >
+      <byteStream mimeType="application/octet-stream" size="6000">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S48224_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">538c1a27fb85869c515ee024f5f9adff</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11116_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11116_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">927973593eb3f48f2705291eba04705d</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11115_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11115_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">e521c0cbeeeb021105607d9f375907ea</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11119_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11119_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">bc246f06fa81018904078290bac0ca8a</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11110_Data" >
+      <byteStream mimeType="application/octet-stream" size="26355">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11110_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">f3becc34c93f62bb8de60893d79fbe7a</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11111_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11111_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">a9d4ccfdb5844f57abddff88585da3d6</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11106_Data" >
+      <byteStream mimeType="application/octet-stream" size="19829">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11106_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">36148fd00cf804813700484ce1ebb6cd</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC48226_Data" >
+      <byteStream mimeType="application/octet-stream" size="4400">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S48226_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">8e5d227896fe4b90a1f21faccf88eef6</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC48218_Data" >
+      <byteStream mimeType="application/octet-stream" size="20080">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S48218_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">7aa8458ad0f2690f37299d95531a83e4</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11113_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11113_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">638483712d24ac4a025e06eb5936bb2a</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11114_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11114_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">040cf12342f627273617745555f67078</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11118_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11118_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">7156d188807d0b63527443ddbdab79fd</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11124_Data" >
+      <byteStream mimeType="application/octet-stream" size="24096">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11124_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">272124ec1c9fb2c7104739b05826b05a</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11126_Data" >
+      <byteStream mimeType="application/octet-stream" size="24096">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11126_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">7d621a1882cedd03f5ff795b4c3cea3a</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC48225_Data" >
+      <byteStream mimeType="application/octet-stream" size="8800">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S48225_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">f1e2d2e1ea110f4eaeb1bcd5689f55c2</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC48223_Data" >
+      <byteStream mimeType="application/octet-stream" size="25800">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S48223_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">fe37b9be8a9a4734019c1e757ff464a7</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11109_Data" >
+      <byteStream mimeType="application/octet-stream" size="19829">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11109_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">f6718e3f9a7c8a0e464d756566e7d3df</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11125_Data" >
+      <byteStream mimeType="application/octet-stream" size="24096">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11125_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">5223809cc268d67d9a35836d6a65e6b7</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11122_Data" >
+      <byteStream mimeType="application/octet-stream" size="31877">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11122_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">8720b14cb91068afd1a7816100a0f303</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11121_Data" >
+      <byteStream mimeType="application/octet-stream" size="162348">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11121_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">f233fc5ca47478baf6291c38663bc092</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC09123_Data" >
+      <byteStream mimeType="application/octet-stream" size="2626">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S09123_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">933f80d85382dcee8497345612630e87</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC37105_Data" >
+      <byteStream mimeType="application/octet-stream" size="198290">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S37105_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">e7ba2807c4a731179e46cb9d0e0c496e</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC38105_Data" >
+      <byteStream mimeType="application/octet-stream" size="198290">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S38105_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">9ac30c1d6b7b1fa7b5aa507259ae8832</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ANC11120_Data" >
+      <byteStream mimeType="application/octet-stream" size="36395">
+        <fileLocation href="./ANC_DATA/S2A_OPER_AUX_S11120_SGS__20200420T205828_V20200322T173341_20200322T173651_A000069_WF_LN.bin" locatorType="URL"/>
+        <checksum checksumName="MD5">2387255fcc4559e74deb9afca3ea2907</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="S2_Level-0_Datastrip_Metadata"  repID="S2_Level-0_Datastrip_Schema">
+      <byteStream mimeType="text/xml" size="6938297">
+        <fileLocation href="./S2A_OPER_MTD_L0__DS_SGS__20200420T205828_S20200322T173347.xml" locatorType="URL"/>
+        <checksum checksumName="MD5">8a9ca9ed5618959756b716dd46be4d2b</checksum>
+      </byteStream>
+    </dataObject>
+
+  </dataObjectSection>
+
+</xfdu:XFDU>

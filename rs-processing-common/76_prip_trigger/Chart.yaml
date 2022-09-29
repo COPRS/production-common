@@ -1,7 +1,0 @@
-apiVersion: v1
-appVersion: "develop"
-description: S1PRO PRIP Trigger
-name: s1pro-prip-trigger
-version: 3.33.0-SNAPSHOT
-maintainers:
-  - name: Werum Software & Systems

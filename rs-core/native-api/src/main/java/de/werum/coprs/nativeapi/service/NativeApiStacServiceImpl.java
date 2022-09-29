@@ -4,6 +4,7 @@ import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.End;
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.Start;
 
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,10 +14,13 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -79,14 +83,16 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 
 			final String responseBody = responseEntity.getBody();
 			if (null != responseBody) {
-				final JSONObject jsonObject = new JSONObject(responseBody);
+				final JsonReader jsonReader = Json.createReader(new StringReader(responseBody));
+			    final JsonObject jsonObject = jsonReader.readObject();
+			    jsonReader.close();
 
-				if (null != jsonObject && !jsonObject.has("value")) {
+				if (null != jsonObject && !jsonObject.containsKey("value")) {
 					throw new NativeApiException("missing 'value' property in PRIP response ", HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 				try {
 					return PripToStacMapper.mapFromPripOdataJson(jsonObject, externalPripUrl, includeAdditionalAttributes);
-				} catch (JSONException | URISyntaxException e) {
+				} catch (JsonException | URISyntaxException e) {
 					throw new NativeApiException("error mapping PRIP response to STAC item collection", e, HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			}

@@ -1,13 +1,17 @@
 ARG BRANCH
 FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
-RUN apk add libxslt rpm wget
+
+# Use user root to use apt-get
+USER root
+RUN apt-get update && \
+    apt-get install xsltproc rpm wget patch -y 
 
 RUN mkdir -p /rpms && mkdir -p /data/localWD
 COPY S1PD-DYN-IPF-SIM-*.rpm /rpms/
 RUN rpm --nodeps -ivh /rpms/S1PD-DYN-IPF-SIM-*.rpm
 RUN rm -rf /rpms/
 
-RUN mkdir -p /usr/local/COTS/pic/java1.8/bin && ln -s /usr/lib/jvm/java-1.8-openjdk/jre/bin/java /usr/local/COTS/pic/java1.8/bin/java
+RUN mkdir -p /usr/local/COTS/pic/java1.8/bin && ln -s /usr/lib/jvm/java-11-openjdk-amd64/bin/java /usr/local/COTS/pic/java1.8/bin/java
 
 # overwrite createSoftLinksForTaskTable.sh from S1PD-DYN-IPF-SIM-*.rpm with a modified version
 COPY createSoftLinksForTaskTable.sh /usr/local/components/IPFSimulator/etc/createSoftLinksForTaskTable.sh
@@ -38,5 +42,6 @@ COPY oqc /usr/local/components/OQCSimulator
 RUN ln -s /usr/local/components/OQCSimulator/bin/oqcSimulator.sh /app/amalfi/bin/IpfJobSubmitter.sh
 RUN ln -s /usr/local/components/OQCSimulator/bin/oqcSimulator.sh /usr/local/components/amalfi/bin/IpfJobSubmitter.sh
 
+USER rsuser
 WORKDIR /data/localWD/
 ENTRYPOINT ["/bin/bash"]

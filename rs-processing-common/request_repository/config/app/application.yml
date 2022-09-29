@@ -1,0 +1,42 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: {{ .Values.service.name }}
+  jackson:
+    serialization:
+      indent_output: true
+    
+# Logging
+logging:
+  config: {{ .Values.logConfig }}
+
+# REST controller
+server:
+  port: {{ .Values.service.port }}
+
+# OpenAPI validator configuration
+openapi:
+  # Dis/Enableds openapi validation
+  disable-validation: true
+  # Path exclusion regexp
+  path-exclusion-regex: ^\/(app\/status|error)$
+  # Path to spec file
+  spec-file: /app/openapi/s1pro-api_openapi.yaml
+
+# MongoDB
+mongodb:
+  host: {{ .Values.mongodb.host }}
+  port: {{ .Values.mongodb.port }}
+  database: {{ .Values.mongodb.database }}
+
+# Kafka
+kafka:
+  # host:port to use for establishing the initial connection to the Kafka cluster
+  bootstrap-servers: {{ .Values.kafka.bootstrapServers }}
+  # Hostname
+  hostname: ${HOSTNAME}
+  # Topic name for the errors
+  error-topic: {{ .Values.kafka.errorTopic }}
+  # When greater than zero, enables retrying of failed sends.
+  max-retries: {{ .Values.kafka.maxRetries }}

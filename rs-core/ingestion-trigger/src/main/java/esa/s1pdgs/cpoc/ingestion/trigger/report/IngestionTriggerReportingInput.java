@@ -56,4 +56,5 @@ public final class IngestionTriggerReportingInput extends AbstractFilenameReport
 	public void setAvailDate(final Date availDate) {
 		this.availDate = availDate;
 	}
+	
 }

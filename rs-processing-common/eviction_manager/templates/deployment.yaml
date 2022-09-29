@@ -1,0 +1,86 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.processing.namespace }}
+  generation: 1
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+      labels:
+        app: {{ .Release.Name }}
+        type: {{ .Values.processing.namespace }}
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      
+      - name: {{ .Release.Name }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: {{ .Values.resources.ram.request }}
+            cpu: {{ .Values.resources.cpu.request }}
+          limits:
+            memory: {{ .Values.resources.ram.limit }}
+            cpu: {{ .Values.resources.cpu.limit }}
+        volumeMounts:
+        - name: logging-config-volume
+          mountPath: /app/log
+        - name: service-config-volume
+          mountPath: /app/config
+        ports:
+        - name: web
+          protocol: TCP
+          containerPort: {{ .Values.service.port }}
+        env:
+        - name: JAVA_XMS
+          value: {{ .Values.resources.javaOpts.xms }}
+        - name: JAVA_XMX
+          value: {{ .Values.resources.javaOpts.xmx }}
+        - name: OBS_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: obs
+              key: USER_ID
+        - name: OBS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: obs
+              key: USER_SECRET
+#        envFrom:
+        securityContext:
+          privileged: false
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+      
+      imagePullSecrets:
+      - name: {{ .Values.image.imagePullSecrets }}
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      subdomain: {{ .Release.Name }}-svc
+      securityContext: {}
+      schedulerName: default-scheduler
+      volumes:
+        - name: logging-config-volume
+          configMap:
+            name: {{ .Release.Name }}-logging-config
+        - name: service-config-volume
+          configMap:
+            name: {{ .Release.Name }}-service-config
+  serviceName: {{ .Release.Name }}-svc
+  revisionHistoryLimit: 10

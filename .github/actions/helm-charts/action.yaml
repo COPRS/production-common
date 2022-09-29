@@ -1,0 +1,47 @@
+name: 'Build Helm charts'
+description: 'Build helm charts'
+inputs:
+  COMPONENT: 
+    description: 'Component to build'
+    required: true
+  CHART_FOLDER: 
+    description: 'Base folder, where charts can be found in repository'
+    required: true
+  ARTIFACTORY_HELM_PROJECT: 
+    description: 'Artifactory project where to push created Helm packages'
+    required: true
+  WERUM_ARTIFACTORY_USER:
+    description: 'Username for Artifactory'
+    required: true
+  WERUM_ARTIFACTORY_PASSWORD:
+    description: 'Password for Artifactory'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+  - name: Install Helm
+    uses: azure/setup-helm@v1
+    with:
+      version: v3.4.0
+      
+  - name: Update version number
+    shell: bash
+    run: |
+      sed -i "s,{{CHART_VERSION}},$([[ ${GITHUB_REF_NAME} =~ [0-9]\.[0-9]\.[0-9] ]] && echo ${GITHUB_REF_NAME} | cut -d "-" -f1 || echo "0.0.1"),g" ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}/Chart.yaml
+      
+  - name: Lint helm
+    shell: bash
+    run: |
+      helm lint ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}
+          
+  - name: Package helm
+    shell: bash
+    run: |
+      helm package ${{ inputs.CHART_FOLDER }}/${{ inputs.COMPONENT }}
+        
+  - name: Push to Artifactory
+    shell: bash
+    run: |
+      curl -u "${{ inputs.WERUM_ARTIFACTORY_USER }}:${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}" -T *.tgz "https://${{ env.ARTIFACTORY_BASE }}/artifactory/${{ env.ARTIFACTORY_PROJECT_HELM }}/${{ inputs.ARTIFACTORY_HELM_PROJECT }}/"
+        

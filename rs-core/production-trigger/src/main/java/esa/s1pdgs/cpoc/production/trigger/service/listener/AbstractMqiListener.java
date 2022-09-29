@@ -1,14 +1,11 @@
 package esa.s1pdgs.cpoc.production.trigger.service.listener;
 
-import java.util.Date;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.ProductCategory;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.errorrepo.ErrorRepoAppender;
-import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessingDto;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.client.MqiListener;
 import esa.s1pdgs.cpoc.mqi.client.MqiMessageEventHandler;
@@ -45,9 +42,10 @@ abstract class AbstractMqiListener<E> implements MqiListener<E> {
 	@Override
 	public final void onTerminalError(final GenericMessageDto<E> message, final Exception error) {
 		log.error(error);
-        errorRepoAppender.send(
-        	new FailedProcessingDto(hostname, new Date(), error.getMessage(), message)
-        );
+// NOTE: FailedProcessing is no longer compatible
+//        errorRepoAppender.send(
+//        	new FailedProcessing(hostname, new Date(), error.getMessage(), message)
+//        );
 	}
 	
 	public final MqiMessageEventHandler onCatalogEvent(

@@ -89,11 +89,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
 
 		<dependency>
 			<!-- Import dependency management from Spring Boot -->
@@ -105,6 +100,12 @@
 			<type>pom</type>
 			<!--scope>import</scope -->
 			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
@@ -149,16 +150,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<configuration>
-					<effort>Max</effort>
-					<threshold>Low</threshold>
-					<maxRank>15</maxRank>
-					<includeTests>false</includeTests>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

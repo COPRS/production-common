@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: {{ .Values.service.name }}
+
+# Logging
+logging:
+  config: {{ .Values.logConfig }}
+
+# REST controller
+server:
+  port: {{ .Values.service.port }}
+
+# Native API config
+native-api:
+  # major version (used as part of the API base path)
+  major-version: v1
+  # version (to communicate minor changes that are compatible with the major version)
+  version: 1.0
+  # configuration for internal interfacing to PRIP
+  prip-protocol: {{ .Values.nativeapi.prip.protocol }}
+  prip-host: {{ .Values.nativeapi.prip.host }}
+  prip-port: {{ .Values.nativeapi.prip.port }}
+  # configuration to create PRIP metadata and download links that are externaly accessible
+  external-prip-protocol: {{ .Values.nativeapi.external.protocol }}
+  external-prip-host: {{ .Values.nativeapi.external.host }}
+  external-prip-port: {{ .Values.nativeapi.external.port }}
+  # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
+  include-additional-attributes: true
