@@ -14,7 +14,7 @@ public class AuxipClientConfigurationProperties {
 	
 	public enum BearerTokenType {
 		AUTHORIZATION,
-		OUTH2_ACCESS_TOKEN
+		OAUTH2_ACCESS_TOKEN
 	}
 
 	public static class AuxipHostConfiguration {
