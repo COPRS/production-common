@@ -28,7 +28,7 @@ Please consult the [Installation Manual](./docs/install_manuals/) for further in
 
 This directory contains the definitions of the default RS Core Components of the Copernicus Reference System. Each sub folder represents a own RS Core Component containing a documentation on how to use and configure the component, a definition of the workflow as well as a factory default configuration that can be used to learn how to configure the software. The factory default configuration for the RS Core components according to the ICD COPRS-ICD-ADST-001139201.
 
-The RS Core components are build automatically when something is commited and generating a zip file that will be uploaded to the COPRS Artifactory instance. If you just want to deploy these instances, you can download the RS Core component archive directly. You can find an overview of the available components are versions [here](https://artifactory.coprs.esa-copernicus.eu/artifactory/rs-zip/).
+The RS Core components are build automatically when something is commited and generating a zip file that will be uploaded to the COPRS Artifactory instance. If you just want to deploy these instances, you can download the RS Core component archive directly. You can find an overview of the available components are versions [here](https://artifactory.coprs.esa-copernicus.eu/artifactory/rs-docker/).
 
 Please note that this directory does not contain the RS Add-ons of the COPRS. They are located in different repositories, but using a similiar structure. You can find them here for:
 * [Sentinel-1](https://github.com/COPRS/processing-sentinel-1)
