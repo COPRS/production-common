@@ -11,11 +11,11 @@ RS Core components are available in Artifactory as zipped contains containing th
 ```
 ansible-playbook deploy-rs-addon.yaml \
     -i inventory/mycluster/hosts.ini \
-    -e rs_addon_location=https://artifactory.coprs.esa-copernicus.eu/artifactory/rs-zip/<RS_ADDON> \
+    -e rs_addon_location=https://artifactory.coprs.esa-copernicus.eu/artifactory/rs-docker/<RS_ADDON> \
     -e stream_name=<STREAM_NAME>
 ```
 
-For a full list of available RS Core Components and versions, please consult [Artifactory](https://artifactory.coprs.esa-copernicus.eu/ui/native/rs-zip/)
+For a full list of available RS Core Components and versions, please consult [Artifactory](https://artifactory.coprs.esa-copernicus.eu/ui/native/rs-docker/)
 
 To study the source code and the factory default configuration of the RS Core components, please have a look [here](../../processing-common/README.md).
 
