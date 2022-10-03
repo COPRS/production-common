@@ -2,4 +2,4 @@
 
 This folder contains the factory default configuration for the RS Core component Dead Letter Queue for automated restarting of failed processings.
 
-For more information please refer to the [Software Release Notes](./doc/SRN.md).
+For more information please refer to the [Software Release Notes](./doc/ReleaseNote.md).
