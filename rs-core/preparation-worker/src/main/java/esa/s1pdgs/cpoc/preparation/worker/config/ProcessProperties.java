@@ -102,6 +102,10 @@ public class ProcessProperties {
 	 * with different settings (ex. timeliness)
 	 */
 	private String processingGroup;
+	
+	private String l0EwSlcMaskFilePath;
+	
+	private String landMaskFilePath;
 
     public ApplicationLevel getLevel() {
         return level;
@@ -246,4 +250,22 @@ public class ProcessProperties {
 	public void setProcessingGroup(String processingGroup) {
 		this.processingGroup = processingGroup;
 	}
+
+	public String getL0EwSlcMaskFilePath() {
+		return l0EwSlcMaskFilePath;
+	}
+
+	public void setL0EwSlcMaskFilePath(String ewSlcMaskFilePath) {
+		this.l0EwSlcMaskFilePath = ewSlcMaskFilePath;
+	}
+
+	public String getLandMaskFilePath() {
+		return landMaskFilePath;
+	}
+
+	public void setLandMaskFilePath(String landMaskFilePath) {
+		this.landMaskFilePath = landMaskFilePath;
+	}
+	
+	
 }

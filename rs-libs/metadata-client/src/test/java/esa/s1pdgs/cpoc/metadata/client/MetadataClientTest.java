@@ -574,60 +574,6 @@ public class MetadataClientTest {
 
 		assertTrue(queryResult.isEmpty());
 	}
-
-	@Test
-	public void testGetSeaCoverage() throws MetadataQueryException {
-
-		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(Integer.valueOf(100), HttpStatus.OK);
-
-		when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null), eq(Integer.class)))
-				.thenReturn(responseEntity);
-
-		final int coverage = this.metadataClient.getSeaCoverage(ProductFamily.AUXILIARY_FILE,
-				"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
-
-		assertEquals(100, coverage);
-
-	}
-
-	@Test
-	public void testGetSeaCoverageNoContent() throws MetadataQueryException {
-
-		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(HttpStatus.NO_CONTENT);
-
-		when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null), eq(Integer.class)))
-				.thenReturn(responseEntity);
-		thrown.expect(MetadataQueryException.class);
-		this.metadataClient.getSeaCoverage(ProductFamily.AUXILIARY_FILE,
-				"S1A_OPER_MPL_ORBPRE_20171208T200309_20171215T200309_0001.EOF");
-	}
-	
-	@Test
-	public void testOverpassCoverage() throws MetadataQueryException {
-
-		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(Integer.valueOf(100), HttpStatus.OK);
-
-		when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null), eq(Integer.class)))
-				.thenReturn(responseEntity);
-
-		final int coverage = this.metadataClient.getOverpassCoverage(ProductFamily.L1_SLICE,
-				"S1A_EW_GRDM_1SDH_20200120T123336_20200120T123440_030884_038B5C_5189.SAFE");
-
-		assertEquals(100, coverage);
-
-	}
-	
-	@Test
-	public void testGetOverpassCoverageNoContent() throws MetadataQueryException {
-
-		final ResponseEntity<Integer> responseEntity = new ResponseEntity<Integer>(HttpStatus.NO_CONTENT);
-
-		when(restTemplate.exchange(Mockito.anyString(), eq(HttpMethod.GET), eq(null), eq(Integer.class)))
-				.thenReturn(responseEntity);
-		thrown.expect(MetadataQueryException.class);
-		this.metadataClient.getOverpassCoverage(ProductFamily.L1_SLICE,
-				"S1A_EW_GRDM_1SDH_20200120T123336_20200120T123440_030884_038B5C_5189.SAFE");
-	}
 	
 	@Test
 	public void testQueryByFamilyAndProductNameOk() throws MetadataQueryException {

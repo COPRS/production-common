@@ -16,7 +16,33 @@
 		<project.build.finalName>rs-preparation-worker</project.build.finalName>
 		<project.artifactId>rs-preparation-worker</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.preparation.worker.Application</start-class>
+        <geotools.version>26-RC</geotools.version>
 	</properties>
+
+  <repositories>
+    <repository>
+      <id>osgeo</id>
+      <name>OSGeo Release Repository</name>
+      <url>https://repo.osgeo.org/repository/release/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>osgeo-snapshot</id>
+      <name>OSGeo Snapshot Repository</name>
+      <url>https://repo.osgeo.org/repository/snapshot/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
+  </repositories>
 
 	<dependencies>
 		<!-- SCDF dependencies -->
@@ -150,6 +176,17 @@
 			<artifactId>equalsverifier</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+        <dependency>
+          <groupId>com.google.code.gson</groupId>
+          <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-shapefile</artifactId>
+          <version>${geotools.version}</version>
+        </dependency>
 	</dependencies>
 
 	<build>

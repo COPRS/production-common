@@ -82,10 +82,6 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 @Service
 public class EsServices {
 
-	private static final String EW_SLC_MASK_FOOTPRINT_INDEX_NAME = "ewslcmask";
-	private static final String LAND_MASK_FOOTPRINT_INDEX_NAME = "landmask";
-	private static final String OCEAN_MASK_FOOTPRINT_INDEX_NAME = "oceanmask";
-	private static final String OVERPASS_MASK_FOOTPRINT_INDEX_NAME = "overpassmask";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
 
@@ -232,49 +228,6 @@ public class EsServices {
 			throw new Exception(e);
 		}
 		return warningMessage;
-	}
-
-	public void createMaskFootprintData(final MaskType maskType, final Map<String, Object> feature, final String id) throws Exception {
-		final String footprintIndexName;
-		switch (maskType) {
-			case EW_SLC: footprintIndexName = EW_SLC_MASK_FOOTPRINT_INDEX_NAME; break;
-			case LAND: footprintIndexName = LAND_MASK_FOOTPRINT_INDEX_NAME; break;
-			case OCEAN:	footprintIndexName = OCEAN_MASK_FOOTPRINT_INDEX_NAME; break;
-			case OVERPASS: footprintIndexName = OVERPASS_MASK_FOOTPRINT_INDEX_NAME; break;
-			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
-		}
-
-		// RS-280: Use Elasticsearch Dateline Support
-		@SuppressWarnings("unchecked")
-		final Map<String, Object> geometry = (Map<String, Object>)feature.get("geometry");
-		if ("Polygon".equals(geometry.get("type"))) {
-			final List<Double> longitudes = new ArrayList<>();
-			@SuppressWarnings("unchecked")
-			List<List<List<Double>>> coordinates = (List<List<List<Double>>>)geometry.get("coordinates");
-			final List<List<Double>> exteriorRing = (List<List<Double>>)coordinates.get(0);
-			for (int idx = 0; idx < exteriorRing.size(); idx++) {
-				longitudes.add(exteriorRing.get(idx).get(0));
-			}
-			final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
-			geometry.put("orientation", orientation);
-			if ("clockwise".equals(orientation)) {
-				LOGGER.info("Adding dateline crossing marker for {}", id);
-			}
-		}
-		
-		try {
-			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(feature.toString(),
-					XContentType.JSON).setRefreshPolicy(RefreshPolicy.WAIT_UNTIL);
-
-			final IndexResponse response = elasticsearchDAO.index(request);
-
-			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(id, response.status().toString(),
-						response.getResult().toString());
-			}
-		} catch (IOException e) {
-			throw new Exception(e);
-		}
 	}
 		
 	/**
@@ -2036,140 +1989,6 @@ public class EsServices {
 			throw new MetadataMalformedException("dataTakeId");
 		}
 		return r;
-	}
-
-	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
-		
-		GetResponse response;
-		try {
-			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to check for sea coverage", e);
-		}
-		if (!response.isExists()) {
-			throw new MetadataNotPresentException(productName);
-		}
-		
-		try {
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
-					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.CONTAINS);
-			LOGGER.debug("Using product {} footprint {} for sea coverage check", productName, queryBuilder);
-			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(SIZE_LIMIT);
-
-			final SearchRequest request = new SearchRequest(LAND_MASK_FOOTPRINT_INDEX_NAME);
-			request.source(sourceBuilder);
-			LOGGER.trace("Using sea coverage search query: {}", request.source().toString());
-
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (isNotEmpty(searchResponse)) {
-				LOGGER.trace("Using product sea coverage {}, response is not Empty  {} ", productName, searchResponse.toString());		
-				return 0; // INFO: the value range is inverse, because the maskfile contains land, not sea
-			}
-			// TODO FIXME implement coverage calculation
-			return 100;
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to check for sea coverage", e);
-		}
-	}
-	
-	public boolean isIntersectingEwSlcMask(final ProductFamily family, final String productName) throws MetadataNotPresentException {
-		
-		GetResponse response;
-		try {
-			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to check for EW SLC mask intersection", e);
-		}
-		
-		if (!response.isExists()) {
-			throw new MetadataNotPresentException(productName);
-		}
-		try {
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
-					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.INTERSECTS);
-			LOGGER.debug("Using {}", queryBuilder);
-			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(SIZE_LIMIT);
-
-			final SearchRequest request = new SearchRequest(EW_SLC_MASK_FOOTPRINT_INDEX_NAME);
-			request.source(sourceBuilder);
-
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			return isNotEmpty(searchResponse);
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to check for EW SLC mask intersection", e);
-		}
-	}
-	
-	public int getOverpassCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
-		
-		GetResponse response;
-		try {
-			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to check for overpass coverage", e);
-		}
-		if (!response.isExists()) {
-			throw new MetadataNotPresentException(productName);
-		}
-
-		try {
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
-					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.INTERSECTS);
-			LOGGER.debug("Using {}", queryBuilder);
-			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(SIZE_LIMIT);
-
-			final SearchRequest request = new SearchRequest(OVERPASS_MASK_FOOTPRINT_INDEX_NAME);
-			request.source(sourceBuilder);
-
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (isNotEmpty(searchResponse)) {
-				// TODO FIXME implement coverage calculation
-				return 100; // INFO: opposite to Sea Coverage check, the value range is not inverse, as the maskfile contains overpasses)
-			}			
-			return 0;
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to check for overpass coverage", e);
-		}
-	}
-	
-	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) throws MetadataNotPresentException {
-		
-		GetResponse response;
-		try {
-			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to check for ocean mask intersection", e);
-		}
-		
-		if (!response.isExists()) {
-			throw new MetadataNotPresentException(productName);
-		}
-		try {
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
-					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.INTERSECTS);
-			LOGGER.debug("Using {}", queryBuilder);
-			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(SIZE_LIMIT);
-
-			final SearchRequest request = new SearchRequest(OCEAN_MASK_FOOTPRINT_INDEX_NAME);
-			request.source(sourceBuilder);
-
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			return isNotEmpty(searchResponse);
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to check for ocean mask intersection", e);
-		}
 	}
 
 	@SuppressWarnings("unchecked")

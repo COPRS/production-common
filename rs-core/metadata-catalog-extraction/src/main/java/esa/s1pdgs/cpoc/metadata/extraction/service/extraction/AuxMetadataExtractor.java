@@ -39,38 +39,7 @@ public final class AuxMetadataExtractor extends AbstractMetadataExtractor {
 			final AuxDescriptor configFileDesc = fileDescriptorBuilder.buildAuxDescriptor(metadataFile);
 
 			// Build metadata from file and extracted
-			final ProductMetadata metadata = mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile);
-
-			/*
-			 * In case we are having a land mask file, we are uploading the geo shape
-			 * information to a dedicated elastic search index
-			 */
-			// TODO: Having this logic in the Auxiliary Extract might not be the best place,
-			// maybe a new one for masks would be better
-
-			try {
-				// the auxiliary file might be a mask file
-				final MaskType maskType = MaskType.of(configFileDesc.getProductType());
-				try {
-					final List<Map<String, Object>> featureCollection = new MaskExtractor().extract(metadataFile);
-					logger.info("Uploading {} {} polygons", featureCollection.size(), maskType.toString());
-					int featureNumber = 0;
-					for (final Map<String, Object> feature : featureCollection) {
-						String id = configFileDesc.getProductName() + "/features/" + featureNumber;
-						logger.debug("Uploading {} {}", maskType, id);
-						logger.trace("{} json: {}", maskType, feature.toString());
-						esServices.createMaskFootprintData(maskType, feature, id);
-						logger.debug("Finished uploading {} {}", maskType, id);
-						featureNumber++;
-					}
-				} catch (final Exception ex) {
-					logger.error("An error occurred while ingesting {} documents: {}", maskType, LogUtils.toString(ex));
-					throw new InternalErrorException(Exceptions.messageOf(ex), ex);
-				}
-			} catch (final Exception e) {
-				// the auxiliary file is not a mask file
-			}
-			return metadata;
+			return mdBuilder.buildConfigFileMetadata(configFileDesc, metadataFile);
 		} finally {
 			FileUtils.delete(metadataFile.getPath());
 		}

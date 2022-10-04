@@ -1,17 +1,23 @@
 package esa.s1pdgs.cpoc.preparation.worker.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.xml.sax.SAXException;
 
+import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -22,6 +28,7 @@ import esa.s1pdgs.cpoc.preparation.worker.report.L0EWSliceMaskCheckReportingOutp
 import esa.s1pdgs.cpoc.preparation.worker.report.SeaCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
+import esa.s1pdgs.cpoc.preparation.worker.util.GeoIntersection;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -33,15 +40,28 @@ public class TaskTableMapperService {
 
 	private TasktableMapper ttMapper;
 	private ProcessProperties processProperties;
-	private MetadataClient metadataClient;
 	private Map<String, TaskTableAdapter> ttAdapters;
+	
+	private GeoIntersection ewSlcMaskIntersection;
+	private GeoIntersection landMaskIntersection;
 
+	
 	public TaskTableMapperService(final TasktableMapper ttMapper, final ProcessProperties processProperties,
-			final MetadataClient metadataClient, final Map<String, TaskTableAdapter> ttAdapters) {
+			final Map<String, TaskTableAdapter> ttAdapters) throws IOException, XPathExpressionException, ParserConfigurationException, SAXException {
 		this.ttMapper = ttMapper;
 		this.processProperties = processProperties;
-		this.metadataClient = metadataClient;
 		this.ttAdapters = ttAdapters;
+		
+		if (processProperties.getL0EwSlcMaskFilePath() != null && !processProperties.getL0EwSlcMaskFilePath().isEmpty()) {
+			ewSlcMaskIntersection = new GeoIntersection(new File(processProperties.getL0EwSlcMaskFilePath()), MaskType.EW_SLC);
+			ewSlcMaskIntersection.loadMaskFile();
+		}
+		
+		if (processProperties.getLandMaskFilePath() != null && !processProperties.getLandMaskFilePath().isEmpty()) {
+			landMaskIntersection = new GeoIntersection(new File(processProperties.getLandMaskFilePath()), MaskType.LAND);
+			landMaskIntersection.loadMaskFile();
+		}
+			
 	}
 
 	/**
@@ -63,12 +83,12 @@ public class TaskTableMapperService {
 		reporting.begin(ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
 				new ReportingMessage("Received CatalogEvent for %s", productName));
 
-		if (isAllowed(productName, family, reporting)) {
+		if (isAllowed(event, productName, family, reporting)) {
 			final List<String> taskTableNames = ttMapper.tasktableFor(event);
 			final List<IpfPreparationJob> preparationJobs = new ArrayList<>(taskTableNames.size());
 
 			for (final String taskTableName : taskTableNames) {
-				if (l0EwSliceMaskCheck(reporting, productName, family, taskTableName)) {
+				if (l0EwSliceMaskCheck(event, productName, family, taskTableName, reporting)) {
 					LOGGER.debug("Tasktable for {} is {}", productName, taskTableName);
 					IpfPreparationJob job = dispatch(event, reporting, taskTableName);
 					
@@ -91,7 +111,7 @@ public class TaskTableMapperService {
 		return Collections.emptyList();
 	}
 
-	private final boolean isAllowed(final String productName, final ProductFamily family,
+	private final boolean isAllowed(final CatalogEvent catalogEvent, final String productName, final ProductFamily family,
 			final ReportingFactory reporting) throws Exception {
 		// S1PRO-483: check for matching products if they are over sea. If not, simply
 		// skip the
@@ -102,7 +122,7 @@ public class TaskTableMapperService {
 			if (seaCoverageCheckPattern.matcher(productName).matches()) {
 				seaReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
 						new ReportingMessage("Checking sea coverage"));
-				if (metadataClient.getSeaCoverage(family, productName) <= processProperties
+				if (landMaskIntersection != null && landMaskIntersection.getCoverage(catalogEvent) <= processProperties
 						.getMinSeaCoveragePercentage()) {
 					seaReport.end(new SeaCoverageCheckReportingOutput(false),
 							new ReportingMessage("Product %s is not over sea", productName));
@@ -120,8 +140,8 @@ public class TaskTableMapperService {
 		return true;
 	}
 
-	private boolean l0EwSliceMaskCheck(final ReportingFactory reporting, final String productName,
-			final ProductFamily family, final String taskTableName) throws Exception {
+	private boolean l0EwSliceMaskCheck(final CatalogEvent catalogEvent, final String productName,
+			final ProductFamily family, final String taskTableName, final ReportingFactory reporting) throws Exception {
 		// S1PRO-2320: check if EW_SLC products matches a specific mask. If not, simply
 		// skip the production
 		final Reporting ewSlcReport = reporting.newReporting("L0EWSliceMaskCheck");
@@ -131,7 +151,7 @@ public class TaskTableMapperService {
 					&& taskTableName.contains(processProperties.getL0EwSlcTaskTableName())) {
 				ewSlcReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
 						new ReportingMessage("Checking if L0 EW slice %s is intersecting mask", productName));
-				if (!metadataClient.isIntersectingEwSlcMask(family, productName)) {
+				if (ewSlcMaskIntersection != null && !ewSlcMaskIntersection.isIntersecting(catalogEvent)) {
 					ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(false),
 							new ReportingMessage("L0 EW slice %s is not intersecting mask", productName));
 					LOGGER.warn("Skipping job generation for product {} because it is not intersecting mask",
