@@ -85,10 +85,6 @@ import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 @Service
 public class EsServices {
 
-	private static final String EW_SLC_MASK_FOOTPRINT_INDEX_NAME = "ewslcmask";
-	private static final String LAND_MASK_FOOTPRINT_INDEX_NAME = "landmask";
-	private static final String OCEAN_MASK_FOOTPRINT_INDEX_NAME = "oceanmask";
-	private static final String OVERPASS_MASK_FOOTPRINT_INDEX_NAME = "overpassmask";
 	private static final String REQUIRED_INSTRUMENT_ID_PATTERN = "(aux_pp1|aux_pp2|aux_cal|aux_ins)";
 	static final String REQUIRED_SATELLITE_ID_PATTERN = "(aux_.*)";
 
@@ -231,30 +227,6 @@ public class EsServices {
 		return warningMessage;
 	}
 
-	public void createMaskFootprintData(final MaskType maskType, final JsonObject product, final String id) throws Exception {
-		final String footprintIndexName;
-		switch (maskType) {
-			case EW_SLC: footprintIndexName = EW_SLC_MASK_FOOTPRINT_INDEX_NAME; break;
-			case LAND: footprintIndexName = LAND_MASK_FOOTPRINT_INDEX_NAME; break;
-			case OCEAN:	footprintIndexName = OCEAN_MASK_FOOTPRINT_INDEX_NAME; break;
-			case OVERPASS: footprintIndexName = OVERPASS_MASK_FOOTPRINT_INDEX_NAME; break;
-			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
-		}
-		try {
-			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(product.toString(),
-					XContentType.JSON).setRefreshPolicy(RefreshPolicy.WAIT_UNTIL);
-
-			final IndexResponse response = elasticsearchDAO.index(request);
-
-			if (response.status() != RestStatus.CREATED) {
-				throw new MetadataCreationException(id, response.status().toString(),
-						response.getResult().toString());
-			}
-		} catch (IOException e) {
-			throw new Exception(e);
-		}
-	}
-		
 	/**
 	 * Refresh the index to ensure new documents can be found. The index is
 	 * extracted from the family and type.
@@ -2057,43 +2029,6 @@ public class EsServices {
 		});
 		return r;
 	}
-
-	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
-		
-		GetResponse response;
-		try {
-			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to check for sea coverage", e);
-		}
-		if (!response.isExists()) {
-			throw new MetadataNotPresentException(productName);
-		}
-		
-		try {
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
-					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.CONTAINS);
-			LOGGER.debug("Using product {} footprint {} for sea coverage check", productName, queryBuilder);
-			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(SIZE_LIMIT);
-
-			final SearchRequest request = new SearchRequest(LAND_MASK_FOOTPRINT_INDEX_NAME);
-			request.source(sourceBuilder);
-			LOGGER.trace("Using sea coverage search query: {}", request.source().toString());
-
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (isNotEmpty(searchResponse)) {
-				LOGGER.trace("Using product sea coverage {}, response is not Empty  {} ", productName, searchResponse.toString());		
-				return 0; // INFO: the value range is inverse, because the maskfile contains land, not sea
-			}
-			// TODO FIXME implement coverage calculation
-			return 100;
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to check for sea coverage", e);
-		}
-	}
 	
 	public boolean deleteProduct(final ProductFamily family, final String productName) throws MetadataNotPresentException {
 		
@@ -2122,126 +2057,6 @@ public class EsServices {
 		} else {			
 			return false;
 		}
-	}
-	
-	public boolean isIntersectingEwSlcMask(final ProductFamily family, final String productName) throws MetadataNotPresentException {
-		
-		GetResponse response;
-		try {
-			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to check for EW SLC mask intersection", e);
-		}
-		
-		if (!response.isExists()) {
-			throw new MetadataNotPresentException(productName);
-		}
-		try {
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
-					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.INTERSECTS);
-			LOGGER.debug("Using {}", queryBuilder);
-			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(SIZE_LIMIT);
-
-			final SearchRequest request = new SearchRequest(EW_SLC_MASK_FOOTPRINT_INDEX_NAME);
-			request.source(sourceBuilder);
-
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			return isNotEmpty(searchResponse);
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to check for EW SLC mask intersection", e);
-		}
-	}
-	
-	public int getOverpassCoverage(final ProductFamily family, final String productName) throws MetadataNotPresentException {
-		
-		GetResponse response;
-		try {
-			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to check for overpass coverage", e);
-		}
-		if (!response.isExists()) {
-			throw new MetadataNotPresentException(productName);
-		}
-
-		try {
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
-					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.INTERSECTS);
-			LOGGER.debug("Using {}", queryBuilder);
-			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(SIZE_LIMIT);
-
-			final SearchRequest request = new SearchRequest(OVERPASS_MASK_FOOTPRINT_INDEX_NAME);
-			request.source(sourceBuilder);
-
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			if (isNotEmpty(searchResponse)) {
-				// TODO FIXME implement coverage calculation
-				return 100; // INFO: opposite to Sea Coverage check, the value range is not inverse, as the maskfile contains overpasses)
-			}			
-			return 0;
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to check for overpass coverage", e);
-		}
-	}
-	
-	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) throws MetadataNotPresentException {
-		
-		GetResponse response;
-		try {
-			response = elasticsearchDAO.get(new GetRequest(family.name().toLowerCase(), productName));
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to check for ocean mask intersection", e);
-		}
-		
-		if (!response.isExists()) {
-			throw new MetadataNotPresentException(productName);
-		}
-		try {
-			final GeoShapeQueryBuilder queryBuilder = QueryBuilders.geoShapeQuery("geometry",
-					extractPolygonFrom(response));
-			queryBuilder.relation(ShapeRelation.INTERSECTS);
-			LOGGER.debug("Using {}", queryBuilder);
-			final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-			sourceBuilder.query(queryBuilder);
-			sourceBuilder.size(SIZE_LIMIT);
-
-			final SearchRequest request = new SearchRequest(OCEAN_MASK_FOOTPRINT_INDEX_NAME);
-			request.source(sourceBuilder);
-
-			final SearchResponse searchResponse = elasticsearchDAO.search(request);
-			return isNotEmpty(searchResponse);
-		} catch (final Exception e) {
-			throw new RuntimeException("Failed to check for ocean mask intersection", e);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Geometry extractPolygonFrom(final GetResponse response) {
-		// TODO FIXME this needs to be fixed to use a proper abstraction
-		final Map<String, Object> sliceCoordinates = (Map<String, Object>) response.getSourceAsMap()
-				.get("sliceCoordinates");
-
-		final String type = (String) sliceCoordinates.get("type");
-		LOGGER.debug("Found sliceCoordinates of type {}", type);
-
-		final List<Object> firstArray = (List<Object>) sliceCoordinates.get("coordinates");
-		final List<Object> secondArray = (List<Object>) firstArray.get(0);
-
-		final CoordinatesBuilder coordBuilder = new CoordinatesBuilder();
-
-		for (final Object arr : secondArray) {
-			final List<Number> coords = (List<Number>) arr;
-			final double lon = coords.get(0).doubleValue();
-			final double lat = coords.get(1).doubleValue();
-			coordBuilder.coordinate(lon, lat);
-		}
-		return new PolygonBuilder(coordBuilder).buildGeometry();
 	}
 
 	private LevelSegmentMetadata toLevelSegmentMetadata(final Map<String, Object> source)

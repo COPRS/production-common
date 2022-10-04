@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.preparation.worker.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,11 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.xml.sax.SAXException;
 
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -53,9 +58,8 @@ public class ServiceConfiguration {
 	@Bean
 	@Autowired
 	public TaskTableMapperService taskTableMapperService(final TasktableMapper ttMapper,
-			final ProcessProperties processProperties, final MetadataClient metadataClient,
-			final Map<String, TaskTableAdapter> ttAdapters) {
-		return new TaskTableMapperService(ttMapper, processProperties, metadataClient, ttAdapters);
+			final ProcessProperties processProperties, final Map<String, TaskTableAdapter> ttAdapters) throws XPathExpressionException, IOException, ParserConfigurationException, SAXException {
+		return new TaskTableMapperService(ttMapper, processProperties, ttAdapters);
 	}
 
 	@Bean
