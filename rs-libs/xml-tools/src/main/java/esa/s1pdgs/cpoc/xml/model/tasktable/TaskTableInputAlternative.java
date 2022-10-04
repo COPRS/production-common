@@ -181,6 +181,7 @@ public class TaskTableInputAlternative {
 			final TaskTableInputAlternative other = (TaskTableInputAlternative) obj;
 			ret = order == other.order && Objects.equals(origin, other.origin)
 					&& Objects.equals(retrievalMode, other.retrievalMode)
+					&& Objects.equals(customClass, other.customClass)
 					&& Objects.equals(deltaTime0, other.deltaTime0) && Objects.equals(deltaTime1, other.deltaTime1)
 					&& Objects.equals(fileType, other.fileType) && Objects.equals(fileNameType, other.fileNameType);
 		}
