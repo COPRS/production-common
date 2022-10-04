@@ -11,7 +11,7 @@ RUN echo "${VERSION}" >> VERSION
 RUN echo "${BRANCH_TEXT}" >> VERSION
 RUN echo "${COMMIT_ID}" >> VERSION
 
-COPY /target/s1pro-core-cronbased-trigger-*.jar s1pdgs-cronbased-trigger.jar
+COPY /target/rs-cronbased-trigger-*.jar rs-cronbased-trigger.jar
 COPY /config/start.sh start.sh
 
 ENTRYPOINT "/app/start.sh"
