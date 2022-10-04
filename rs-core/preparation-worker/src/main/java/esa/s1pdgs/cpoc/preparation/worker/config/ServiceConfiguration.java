@@ -42,6 +42,7 @@ import esa.s1pdgs.cpoc.preparation.worker.timeout.InputTimeoutCheckerImpl;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
 @Configuration
 public class ServiceConfiguration {
@@ -85,10 +86,27 @@ public class ServiceConfiguration {
 
 		for (File taskTableFile : ttManager.tasktables()) {
 			LOG.debug("Loading tasktable {}", taskTableFile.getAbsolutePath());
-			ttAdapters.put(taskTableFile.getName(),
-					new TaskTableAdapter(taskTableFile,
-							taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), elementMapper,
-							settings.getProductMode()));
+			
+			TaskTableAdapter adapter = new TaskTableAdapter(taskTableFile,
+					taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), elementMapper,
+					settings.getProductMode());
+			
+			/* RS-584: Custom selection policy existing in SL1 that is not supported by the software
+			   Thus it will be checked if custom and class matching to com.werum.esa.pfm.selection.policies.PolicyIntersectMinNumber.
+			   If this is true, it will be replaced with ValIntersect
+			*/
+			for (TaskTableInputAlternative alternative: adapter.getAllAlternatives()) {
+				if (alternative.getRetrievalMode().equals("Custom")) {
+					if (alternative.getCustomClass().equals("com.werum.esa.pfm.selection.policies.PolicyIntersectMinNumber")) {
+						alternative.setRetrievalMode("ValIntersect");
+						LOG.info("Found custom selection policy for class 'com.werum.esa.pfm.selection.policies.PolicyIntersectMinNumber', using ValIntersect instead");
+						continue;
+					}
+					
+					throw new IllegalArgumentException("Unsupported custom selection policy: "+alternative.getCustomClass());
+				}
+			}
+			ttAdapters.put(taskTableFile.getName(), adapter);
 		}
 
 		return ttAdapters;
