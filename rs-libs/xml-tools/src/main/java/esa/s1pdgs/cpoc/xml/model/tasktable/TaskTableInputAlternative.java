@@ -37,6 +37,9 @@ public class TaskTableInputAlternative {
 	 */
 	@XmlElement(name = "Retrieval_Mode")
 	private String retrievalMode;
+	
+	@XmlElement(name = "customClass", required = false)
+	private String customClass;
 
 	/**
 	 * 
@@ -114,6 +117,18 @@ public class TaskTableInputAlternative {
 	 */
 	public String getRetrievalMode() {
 		return retrievalMode;
+	}
+	
+	public void setRetrievalMode(String retrievalMode) {
+		this.retrievalMode = retrievalMode;
+	}
+	
+	
+	/**
+	 * @return the custom class or null
+	 */
+	public String getCustomClass() {
+		return customClass;
 	}
 
 	/**
