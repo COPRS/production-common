@@ -164,7 +164,7 @@ public class TaskTableInputAlternative {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(order, origin, retrievalMode, deltaTime0, deltaTime1, fileType, fileNameType);
+		return Objects.hash(order, origin, retrievalMode, customClass, deltaTime0, deltaTime1, fileType, fileNameType);
 	}
 
 	/**
