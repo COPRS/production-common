@@ -382,6 +382,7 @@
 	</dependencyManagement>
 
 	<modules>
+		<module>cronbased-trigger</module>
 		<!-- <module>disseminator</module> -->
 		<module>ingestion-trigger</module>
 		<module>ingestion-filter</module>
@@ -392,7 +393,6 @@
 		<module>request-parking-lot</module>
 		<!-- <module>on-demand-interface-provider</module> -->
 		<module>metadata-catalog-extraction</module>
-		<!-- <module>metadata-catalog-timer</module> -->
 		<module>metadata-catalog-searchcontroller</module>
 		<module>distribution-worker</module>
 		<module>dlq-manager</module>
