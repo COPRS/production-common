@@ -4,6 +4,9 @@ WORKDIR /app
 
 FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as base
 
+# RS-597: Original image contains DEM files, however the resulting image is to big for the build pipe
+# to handle it. A new image without the DEM files are created that will assume the DEM files to be
+# on the shared disk.
 FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/s1_l12:3.5.2-demless
  
 ARG VERSION
@@ -21,6 +24,10 @@ COPY --from=build /app/start.sh /app/start.sh
 COPY --from=base /log/log4j2.yml /log/log4j2.yml
 
 USER root:root
+
+# RS-597: Files from the DEM RPM are installed under IPF_CFG. We are expecting the content in the DEM 
+RUN mkdir -p /usr/local/conf
+RUN ln -s /shared/sentinel1/DEM /usr/local/conf/IPF_CFG
  
 # Install java 11
 RUN yum install -y java-11-openjdk 
