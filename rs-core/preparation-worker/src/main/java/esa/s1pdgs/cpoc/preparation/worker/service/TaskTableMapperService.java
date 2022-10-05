@@ -132,9 +132,8 @@ public class TaskTableMapperService {
 			
 			long coverage = landMaskIntersection.getCoverage(catalogEvent);
 			
-			
-			if (coverage == 0 || coverage < processProperties
-					.getMinSeaCoveragePercentage()) {
+			if (coverage == 0 || (coverage < 100 && coverage < processProperties
+					.getMinSeaCoveragePercentage())) {
 				seaReport.end(new SeaCoverageCheckReportingOutput(false),
 						new ReportingMessage("Product %s is not over sea", productName));
 				LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
