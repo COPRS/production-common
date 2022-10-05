@@ -52,6 +52,9 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 					entry.getKey());
 
 			if (groupShallBeChecked(triggerEntry, new Date(), entry.getValue().getCron())) {
+				LOGGER.info("Start checking for new products of productType {} and productFamily {}", entry.getKey(),
+						entry.getValue().getFamily());
+
 				result.addAll(checkProductGroupForNewMessages(entry.getKey(), entry.getValue(), triggerEntry));
 			}
 		}
@@ -73,13 +76,13 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 		if (triggerEntry == null) {
 			return true;
 		}
-		
+
 		Date lastCheck = triggerEntry.getLastCheckDate();
 		LocalDateTime lastCheckTemporal = lastCheck.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-		
+
 		CronExpression cron = CronExpression.parse(cronExpression);
 		LocalDateTime nextExecution = cron.next(lastCheckTemporal);
-		
+
 		// When now is after or equal to next execution, group shall be checked.
 		return !nextExecution.atZone(ZoneId.systemDefault()).toInstant().isAfter(now.toInstant());
 	}
