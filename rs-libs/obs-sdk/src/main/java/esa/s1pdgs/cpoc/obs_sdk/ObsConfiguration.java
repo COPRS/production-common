@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftObsClient;
 
 @Configuration
 public class ObsConfiguration {	
@@ -31,14 +30,11 @@ public class ObsConfiguration {
 		if (S3ObsClient.BACKEND_NAME.equals(backend)) {			
 			return new S3ObsClient.Factory();
 		}
-		if (SwiftObsClient.BACKEND_NAME.equals(backend)) {			
-			return new S3ObsClient.Factory();
-		}
 		throw new IllegalArgumentException(
 				String.format(
 						"Invalid OBS backend %s. Allowed are: %s", 
 						backend, 
-						Arrays.asList(S3ObsClient.BACKEND_NAME, SwiftObsClient.BACKEND_NAME)
+						Arrays.asList(S3ObsClient.BACKEND_NAME)
 				)
 		);
 	}
