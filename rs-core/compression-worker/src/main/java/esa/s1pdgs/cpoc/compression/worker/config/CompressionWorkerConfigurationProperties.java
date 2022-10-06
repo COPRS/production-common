@@ -19,7 +19,7 @@ public class CompressionWorkerConfigurationProperties {
 	/**
 	 * The command that is performed to invoke the uncompression process
 	 */
-	private String uncompressionCommand;
+	private String uncompressionCommand = "/app/uncompression.sh";
 	
 	private String workingDirectory;
 	
