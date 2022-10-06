@@ -54,28 +54,32 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 */
 	@Override
 	public Void call() throws AbstractCodedException {
-		// We trust in the mission id from the event and use it too look up the configured compression command.
+		String outputPath;
+		String command;		
 		String mission = catalogEvent.getMissionId().toLowerCase();
-		String command = properties.getCompressionCommand().get(mission);
 		
-		// If we didn't get a valid command, we fallback to the default compression that had been used previously.
-		if (command == null) {
-			LOGGER.warn("Unable to determinate compression command for mission {}, assuming normal zip compression");
-			command = "/app/zip-compression.sh";
+		if (!CompressionEventUtil.isCompressed(catalogEvent.getKeyObjectStorage())) {
+			// We trust in the mission id from the event and use it too look up the configured compression command.
+			
+			command = properties.getCompressionCommand().get(mission);
+			
+			// If we didn't get a valid command, we fallback to the default compression that had been used previously.
+			if (command == null) {
+				LOGGER.warn("Unable to determinate compression command for mission {}, assuming normal zip compression");
+				command = "/app/zip-compression.sh";
+			}
+			
+			// Compression
+			outputPath = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
+		} else {			
+			// Uncompression
+			command = properties.getUncompressionCommand();
+			outputPath = CompressionEventUtil.removeZipFromKeyObjectStorage(catalogEvent.getKeyObjectStorage()); 
 		}
 
 		LOGGER.debug("command={}, mission={}, productName={}, workingDirectory={}", command, mission, catalogEvent.getKeyObjectStorage(),
 				properties.getWorkingDirectory());
 
-		String outputPath;
-		if (!CompressionEventUtil.isCompressed(catalogEvent.getKeyObjectStorage())) {
-			// Compression
-			outputPath = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
-		} else {
-			// Uncompression
-			outputPath = CompressionEventUtil.removeZipFromKeyObjectStorage(catalogEvent.getKeyObjectStorage()); 
-		}
-		
 		execute(
 				command, 
 				catalogEvent.getKeyObjectStorage(), 
