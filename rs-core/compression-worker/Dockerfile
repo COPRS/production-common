@@ -18,7 +18,11 @@ USER 1001
 
 COPY /target/rs-compression-worker-*.jar rs-compression-worker.jar
 COPY /config/start.sh start.sh
-COPY /config/compression.sh compression.sh
+
+COPY /config/zip-compression.sh zip-compression.sh
+COPY /config/zip-nocompression.sh zip-nocompression.sh
+COPY /config/tar-compression.sh tar-compression.sh
+
 COPY /config/uncompression.sh uncompression.sh
 
 ENTRYPOINT ["/app/start.sh"]
