@@ -39,7 +39,6 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -70,7 +69,7 @@ public abstract class AbstractObsClient implements ObsClient {
     
     protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsException;
 
-	protected abstract Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
+	protected abstract Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException;
 
     private List<File> downloadObjects(final List<ObsDownloadObject> objects,
 									   final boolean parallel, final ReportingFactory reportingFactory)
@@ -344,7 +343,7 @@ public abstract class AbstractObsClient implements ObsClient {
 		return null;
 	}
 
-	private List<Md5.Entry> uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
+	private List<Md5.Entry> uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException {
 		if (objects.size() > 1 && parallel) {
 			// Upload objects in parallel
 			final ExecutorService workerThread = Executors.newFixedThreadPool(objects.size());
