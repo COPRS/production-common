@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.compression.worker.config;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -11,7 +14,7 @@ public class CompressionWorkerConfigurationProperties {
 	/**
 	 * The command that is performed to invoke the compression process
 	 */
-	private String compressionCommand;
+	private Map<String, String> compressionCommand = new LinkedHashMap<>();
 	
 	private String workingDirectory;
 	
@@ -27,12 +30,12 @@ public class CompressionWorkerConfigurationProperties {
 
     
     private String hostname;
-
-	public String getCompressionCommand() {
+    
+	public Map<String, String> getCompressionCommand() {
 		return compressionCommand;
 	}
-
-	public void setCompressionCommand(String compressionCommand) {
+	
+	public void setCompressionCommand(Map<String, String> compressionCommand) {
 		this.compressionCommand = compressionCommand;
 	}
 

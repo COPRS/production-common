@@ -54,10 +54,17 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 */
 	@Override
 	public Void call() throws AbstractCodedException {
+		// We trust in the mission id from the event and use it too look up the configured compression command.
+		String mission = catalogEvent.getMissionId().toLowerCase();
+		String command = properties.getCompressionCommand().get(mission);
+		
+		// If we didn't get a valid command, we fallback to the default compression that had been used previously.
+		if (command == null) {
+			LOGGER.warn("Unable to determinate compression command for mission {}, assuming normal zip compression");
+			command = "/app/zip-compression.sh";
+		}
 
-		String command = properties.getCompressionCommand();
-
-		LOGGER.debug("command={}, productName={}, workingDirectory={}", command, catalogEvent.getKeyObjectStorage(),
+		LOGGER.debug("command={}, mission={}, productName={}, workingDirectory={}", command, mission, catalogEvent.getKeyObjectStorage(),
 				properties.getWorkingDirectory());
 
 		String outputPath;

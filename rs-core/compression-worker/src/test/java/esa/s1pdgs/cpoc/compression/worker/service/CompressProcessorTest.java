@@ -42,7 +42,10 @@ public class CompressProcessorTest {
 		properties.setWorkingDirectory(tmpWorkdir.toAbsolutePath().toString());
 //		properties.setSizeBatchDownload(1000);
 		properties.setCompressionTimeout(5);
-		properties.setCompressionCommand("echo");
+		properties.getCompressionCommand().put("s1","echo");
+		properties.getCompressionCommand().put("s2","echo");
+		properties.getCompressionCommand().put("s3","echo");
+
 		uut = new CompressProcessor(commonProps, appStatus, properties, obsClient);
 	}
 
@@ -50,6 +53,7 @@ public class CompressProcessorTest {
 	public final void onMessage_compress() throws IOException {
 
 		CatalogEvent event = new CatalogEvent();
+		event.setMissionId("s1");
 		event.setProductFamily(ProductFamily.L1_SLICE);
 		event.setUid(UUID.randomUUID());
 		event.setKeyObjectStorage("S3l1");
