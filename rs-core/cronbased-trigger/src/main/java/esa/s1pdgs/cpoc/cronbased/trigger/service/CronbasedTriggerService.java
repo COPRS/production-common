@@ -52,6 +52,9 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 					entry.getKey());
 
 			if (groupShallBeChecked(triggerEntry, new Date(), entry.getValue().getCron())) {
+				LOGGER.info("Start checking for new products of productType {} and productFamily {}", entry.getKey(),
+						entry.getValue().getFamily());
+
 				result.addAll(checkProductGroupForNewMessages(entry.getKey(), entry.getValue(), triggerEntry));
 			}
 		}
@@ -73,13 +76,13 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 		if (triggerEntry == null) {
 			return true;
 		}
-		
+
 		Date lastCheck = triggerEntry.getLastCheckDate();
 		LocalDateTime lastCheckTemporal = lastCheck.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-		
+
 		CronExpression cron = CronExpression.parse(cronExpression);
 		LocalDateTime nextExecution = cron.next(lastCheckTemporal);
-		
+
 		// When now is after or equal to next execution, group shall be checked.
 		return !nextExecution.atZone(ZoneId.systemDefault()).toInstant().isAfter(now.toInstant());
 	}
@@ -104,14 +107,13 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 		try {
 			LOGGER.debug("Retrieve new products from database");
 			List<SearchMetadata> products = this.metadataClient.searchInterval(timerProperties.getFamily(), productType,
-					intervalStart, intervalStop, timerProperties.getSatelliteId());
+					intervalStart, intervalStop, "");
 
 			String lastInsertionTime = null;
 
 			for (SearchMetadata product : products) {
 				LOGGER.info("Create CatalogEvent for product {}", product.getProductName());
-				CatalogEvent event = toCatalogEvent(timerProperties.getFamily(), productType,
-						timerProperties.getSatelliteId(), product);
+				CatalogEvent event = toCatalogEvent(timerProperties.getFamily(), productType, product);
 				result.add(MessageBuilder.withPayload(event).build());
 
 				lastInsertionTime = product.getInsertionTime();
@@ -159,7 +161,7 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 	 * Convert a product from the elastic search into an catalog event
 	 */
 	private CatalogEvent toCatalogEvent(final ProductFamily productFamily, final String productType,
-			final String satelliteId, final SearchMetadata metadata) {
+			final SearchMetadata metadata) {
 		CatalogEvent event = new CatalogEvent();
 		event.setProductFamily(productFamily);
 		event.setMetadataProductName(metadata.getProductName());
@@ -167,7 +169,7 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 		event.setMetadataProductType(productType);
 		event.setUid(UUID.randomUUID());
 
-		event.getMetadata().put("satelliteId", satelliteId);
+		event.getMetadata().put("satelliteId", metadata.getSatelliteId());
 		event.getMetadata().put(MissionId.FIELD_NAME, metadata.getMissionId());
 		event.getMetadata().put("startTime", metadata.getValidityStart());
 		event.getMetadata().put("stopTime", metadata.getValidityStop());

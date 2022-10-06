@@ -116,57 +116,73 @@ public class TaskTableMapperService {
 		// S1PRO-483: check for matching products if they are over sea. If not, simply
 		// skip the
 		// production
-		final Reporting seaReport = reporting.newReporting("SeaCoverageCheck");
+		
+		if (landMaskIntersection == null) {
+			return true;
+		}
 		Pattern seaCoverageCheckPattern = Pattern.compile(processProperties.getSeaCoverageCheckPattern());
+		if (!seaCoverageCheckPattern.matcher(productName).matches()) {
+			return true;
+		}
+		
+		final Reporting seaReport = reporting.newReporting("SeaCoverageCheck");
 		try {
-			if (seaCoverageCheckPattern.matcher(productName).matches()) {
-				seaReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
-						new ReportingMessage("Checking sea coverage"));
-				if (landMaskIntersection != null && landMaskIntersection.getCoverage(catalogEvent) <= processProperties
-						.getMinSeaCoveragePercentage()) {
-					seaReport.end(new SeaCoverageCheckReportingOutput(false),
-							new ReportingMessage("Product %s is not over sea", productName));
-					LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
-					return false;
-				} else {
-					seaReport.end(new SeaCoverageCheckReportingOutput(true),
-							new ReportingMessage("Product %s is over sea", productName));
-				}
+			seaReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
+					new ReportingMessage("Checking sea coverage"));
+			
+			long coverage = landMaskIntersection.getCoverage(catalogEvent);
+			
+			if (coverage == 0 || (coverage < 100 && coverage < processProperties
+					.getMinSeaCoveragePercentage())) {
+				seaReport.end(new SeaCoverageCheckReportingOutput(false),
+						new ReportingMessage("Product %s is not over sea", productName));
+				LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
+				return false;
+			} else {
+				seaReport.end(new SeaCoverageCheckReportingOutput(true),
+						new ReportingMessage("Product %s is over sea", productName));
+				return true;
 			}
+			
 		} catch (final Exception e) {
 			seaReport.error(new ReportingMessage("SeaCoverage check failed: %s", LogUtils.toString(e)));
 			throw e;
 		}
-		return true;
 	}
 
 	private boolean l0EwSliceMaskCheck(final CatalogEvent catalogEvent, final String productName,
 			final ProductFamily family, final String taskTableName, final ReportingFactory reporting) throws Exception {
 		// S1PRO-2320: check if EW_SLC products matches a specific mask. If not, simply
 		// skip the production
-		final Reporting ewSlcReport = reporting.newReporting("L0EWSliceMaskCheck");
+		if (ewSlcMaskIntersection == null) {
+			return true;
+		}
 		Pattern l0EwSlcCheckPattern = Pattern.compile(processProperties.getL0EwSlcCheckPattern());
+		if (!l0EwSlcCheckPattern.matcher(productName).matches()
+				|| !taskTableName.contains(processProperties.getL0EwSlcTaskTableName())) {
+			return true;
+		}
+		
+		final Reporting ewSlcReport = reporting.newReporting("L0EWSliceMaskCheck");
 		try {
-			if (l0EwSlcCheckPattern.matcher(productName).matches()
-					&& taskTableName.contains(processProperties.getL0EwSlcTaskTableName())) {
-				ewSlcReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
-						new ReportingMessage("Checking if L0 EW slice %s is intersecting mask", productName));
-				if (ewSlcMaskIntersection != null && !ewSlcMaskIntersection.isIntersecting(catalogEvent)) {
-					ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(false),
-							new ReportingMessage("L0 EW slice %s is not intersecting mask", productName));
-					LOGGER.warn("Skipping job generation for product {} because it is not intersecting mask",
-							productName);
-					return false;
-				} else {
-					ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(true),
-							new ReportingMessage("L0 EW slice %s is intersecting mask", productName));
-				}
+			ewSlcReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
+					new ReportingMessage("Checking if L0 EW slice %s is intersecting mask", productName));
+			if (!ewSlcMaskIntersection.isIntersecting(catalogEvent)) {
+				ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(false),
+						new ReportingMessage("L0 EW slice %s is not intersecting mask", productName));
+				LOGGER.warn("Skipping job generation for product {} because it is not intersecting mask",
+						productName);
+				return false;
+			} else {
+				ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(true),
+						new ReportingMessage("L0 EW slice %s is intersecting mask", productName));
+				return true;
 			}
+			
 		} catch (final Exception e) {
 			ewSlcReport.error(new ReportingMessage("L0 EW slice check failed: %s", LogUtils.toString(e)));
 			throw e;
 		}
-		return true;
 	}
 
 	private final IpfPreparationJob dispatch(final CatalogEvent event, final ReportingFactory reportingFactory,

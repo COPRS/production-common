@@ -14,4 +14,4 @@ RUN echo "${COMMIT_ID}" >> VERSION
 COPY /target/rs-cronbased-trigger-*.jar rs-cronbased-trigger.jar
 COPY /config/start.sh start.sh
 
-ENTRYPOINT "/app/start.sh"
+ENTRYPOINT ["/app/start.sh"]
