@@ -65,7 +65,7 @@ public class CompressExecutorCallable implements Callable<Void> {
 			
 			// If we didn't get a valid command, we fallback to the default compression that had been used previously.
 			if (command == null) {
-				LOGGER.warn("Unable to determinate compression command for mission {}, assuming normal zip compression");
+				LOGGER.warn("Unable to determine compression command for mission {}, assuming normal zip compression", mission);
 				command = "/app/zip-compression.sh";
 			}
 			
