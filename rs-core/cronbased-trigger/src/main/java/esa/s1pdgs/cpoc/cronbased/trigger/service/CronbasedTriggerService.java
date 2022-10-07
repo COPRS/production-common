@@ -45,6 +45,7 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 
 	@Override
 	public List<Message<CatalogEvent>> apply(Message<?> t) {
+		LOGGER.debug("Received message. Start checking if configured productTypes are ready.");
 		List<Message<CatalogEvent>> result = new ArrayList<>();
 
 		for (Entry<String, TimerProperties> entry : properties.getConfig().entrySet()) {
