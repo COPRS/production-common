@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.preparation.worker.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -82,10 +81,11 @@ public class TaskTableMapperService {
 
 		reporting.begin(ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
 				new ReportingMessage("Received CatalogEvent for %s", productName));
+		
+		final List<IpfPreparationJob> preparationJobs = new ArrayList<>();
 
 		if (isAllowed(event, productName, family, reporting)) {
 			final List<String> taskTableNames = ttMapper.tasktableFor(event);
-			final List<IpfPreparationJob> preparationJobs = new ArrayList<>(taskTableNames.size());
 
 			for (final String taskTableName : taskTableNames) {
 				if (l0EwSliceMaskCheck(event, productName, family, taskTableName, reporting)) {
@@ -97,18 +97,14 @@ public class TaskTableMapperService {
 					}
 				}
 			}
-			if (preparationJobs.isEmpty()) {
-				reporting.end(
-						new ReportingMessage("Product %s is not intersecting EW slice mask, skipping", productName));
-			}
-			LOGGER.info("Dispatching product {}", productName);
-			return preparationJobs;
-		} else {
-			reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName));
+		} 	
+		
+		if (preparationJobs.isEmpty()) {
 			LOGGER.debug("CatalogEvent for {} is ignored", productName);
+		} else {
+			LOGGER.info("Dispatching product {}", productName);
 		}
-		LOGGER.debug("Done handling consumption of product {}", productName);
-		return Collections.emptyList();
+		return preparationJobs;
 	}
 
 	private final boolean isAllowed(final CatalogEvent catalogEvent, final String productName, final ProductFamily family,
@@ -131,6 +127,8 @@ public class TaskTableMapperService {
 					new ReportingMessage("Checking sea coverage"));
 			
 			long coverage = landMaskIntersection.getCoverage(catalogEvent);
+			
+			LOGGER.info("Got sea coverage {} for product {}", coverage, productName);
 			
 			if (coverage == 0 || (coverage < 100 && coverage < processProperties
 					.getMinSeaCoveragePercentage())) {

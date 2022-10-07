@@ -106,7 +106,7 @@ public class GeoIntersection {
 		
 		String type = (String) geometry.get("type");
 		
-		if (!"Polygon".equals(type)) {
+		if (!"Polygon".equalsIgnoreCase(type)) {
 			LOG.trace("geometry {} is not of type polygon, skipping", type);
 			return Optional.empty();
 		}
