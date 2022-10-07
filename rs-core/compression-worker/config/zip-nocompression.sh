@@ -6,7 +6,7 @@
 INPUT=$1
 OUTPUT=$2
 
-if [[ $# -lt 2 ]]
+if [ $# -lt 2 ]
 then
   echo "Error: Invalid parameter provided! Data not compressed"
   echo "Usage: $0 <INPUT> <OUTPUT>"
