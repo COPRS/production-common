@@ -128,6 +128,8 @@ public class TaskTableMapperService {
 			
 			long coverage = landMaskIntersection.getCoverage(catalogEvent);
 			
+			LOGGER.info("Got sea coverage {} for product {}", coverage, productName);
+			
 			if (coverage == 0 || (coverage < 100 && coverage < processProperties
 					.getMinSeaCoveragePercentage())) {
 				seaReport.end(new SeaCoverageCheckReportingOutput(false),
