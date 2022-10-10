@@ -102,7 +102,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 
 		CatalogEvent result;
 		try {
-			result = handleMessage(catalogJob, reporting);
+			result = handleMessage(mission, catalogJob, reporting);
 		} catch (Exception e) {
 			reporting.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e)));
 			throw new RuntimeException(e);
@@ -126,7 +126,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		return result;
 	}
 
-	private final CatalogEvent handleMessage(final CatalogJob catJob, final Reporting reporting) throws Exception {
+	private final CatalogEvent handleMessage(final MissionId missionId, final CatalogJob catJob, final Reporting reporting) throws Exception {
 		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();
 		final ProductCategory category = ProductCategory.of(family);
@@ -155,12 +155,12 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		esServices.createMetadataWithRetries(metadata, productName,
 				properties.getProductInsertion().getMaxRetries(), properties.getProductInsertion().getTempoRetryMs());
 
-		final CatalogEvent event = toCatalogEvent(catJob, metadata);
+		final CatalogEvent event = toCatalogEvent(missionId, catJob, metadata);
 		event.setUid(reporting.getUid());
 		return event;
 	}
 
-	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final ProductMetadata metadata)
+	private final CatalogEvent toCatalogEvent(final MissionId missionId, final CatalogJob catJob, final ProductMetadata metadata)
 				throws MetadataMalformedException {
 		final CatalogEvent catEvent = new CatalogEvent();
 		String satelliteId;
@@ -171,7 +171,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		}
 
 		catEvent.setMetadata(metadata.asMap());
-		catEvent.setMissionId(catJob.getMissionId());
+		catEvent.setMissionId(missionId.name());
 		catEvent.setSatelliteId(satelliteId);
 		catEvent.setMetadataProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
