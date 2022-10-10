@@ -14,9 +14,11 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 USER root:root
 
-RUN mkdir -p /usr/local/conf
-COPY IPFSimulator.tar.gz /usr/local/conf
-RUN tar -xvzf /usr/local/conf/IPFSimulator.tar.gz -C /usr/local/conf
+#RUN mkdir -p /usr/local/conf
+#COPY IPFSimulator.tar.gz /usr/local/conf
+#RUN tar -xvzf /usr/local/conf/IPFSimulator.tar.gz -C /usr/local/conf
+ADD files/ipf-sim-coprs-1.0.0.rpm /tmp
+RUN rpm -ivh /tmp/ipf-sim-coprs-1.0.0.rpm && rm /tmp/ipf-sim-coprs-1.0.0.rpm
 
 RUN ln -s /usr/local/conf/IPFSimulator/bin/Processor_wrapper.sh S3IPF.sh
 
