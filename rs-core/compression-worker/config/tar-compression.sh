@@ -14,7 +14,7 @@ then
 fi
 
 echo "Using tar on ${INPUT} writing output to ${OUTPUT}"
-7za -mx=0 a -tzip ${OUTPUT} ./${INPUT}
+tar -cf ${OUTPUT} ./${INPUT}
 result=$?
 
 if [ ${result} -eq 0 ]
