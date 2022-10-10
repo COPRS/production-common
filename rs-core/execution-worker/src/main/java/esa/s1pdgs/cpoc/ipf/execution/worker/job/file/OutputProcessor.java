@@ -583,6 +583,7 @@ public class OutputProcessor {
 					msg.getProductName());
 			final CatalogJob res = new CatalogJob(msg.getProductName(), msg.getKeyObs(), msg.getFamily(),
 					toUppercaseOrNull(msg.getProcessMode()), msg.getOqcFlag(), inputMessage.getTimeliness(), uuid);
+			res.setMissionId(inputMessage.getMissionId());
 			res.getAdditionalFields().put("t0PdgsDate", t0PdgsDate);
 			res.setProductSizeByte(msg.getProductSizeBytes());
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,

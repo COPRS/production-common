@@ -83,7 +83,7 @@ public class JobCreationService {
 			final JobOrderAdapter jobOrderAdapter = jobOrderFactory.newJobOrderFor(job, tasktableAdapter);
 
 			// Create the ExecutionJob as output of the PreparationWorker
-			executionJob = createIpfExecutionJob(job, jobOrderAdapter, tasktableAdapter, reporting);
+			executionJob = createIpfExecutionJob(mission, job, jobOrderAdapter, tasktableAdapter, reporting);
 			newState = AppDataJobGenerationState.SENT;
 			
 			final ReportingOutput reportOut = new JobOrderReportingOutput(jobOrderAdapter.getJobOrderName(),
@@ -100,7 +100,7 @@ public class JobCreationService {
 		return executionJob;
 	}
 
-	private IpfExecutionJob createIpfExecutionJob(final AppDataJob job, final JobOrderAdapter jobOrderAdapter,
+	private IpfExecutionJob createIpfExecutionJob(final MissionId missionId, final AppDataJob job, final JobOrderAdapter jobOrderAdapter,
 			final TaskTableAdapter tasktableAdapter, final Reporting reporting) throws InternalErrorException {
 		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.getProduct());
 
@@ -111,11 +111,13 @@ public class JobCreationService {
 				product.getStringValue("timeliness", ""), reporting.getUid());
 		execJob.setCreationDate(new Date());
 		execJob.setPodName(settings.getHostname());
-
+		execJob.setMissionId(missionId.name());
+		
 		final IpfPreparationJob prepJob = job.getPrepJob();
 		execJob.setPreparationJob(prepJob);
 		execJob.setDebug(prepJob.isDebug());
 		execJob.setTimedOut(job.getTimedOut());
+		
 
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)
