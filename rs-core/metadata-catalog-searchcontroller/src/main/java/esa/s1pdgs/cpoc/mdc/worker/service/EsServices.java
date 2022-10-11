@@ -1625,6 +1625,9 @@ public class EsServices {
 			coordinates = (Map<String, Object>) source.get("sliceCoordinates");
 		} else if (source.containsKey("segmentCoordinates")) {
 			coordinates = (Map<String, Object>) source.get("segmentCoordinates");
+		} else if (source.containsKey("coordinates")) {
+			//for Sentinel-2 products 
+			coordinates = (Map<String, Object>) source.get("coordinates");
 		}
 
 		final List<List<Double>> footprint = new ArrayList<>();
