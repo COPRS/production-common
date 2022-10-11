@@ -45,20 +45,22 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 	public final Message<CompressionEvent> apply(final CatalogEvent event) {
 		final String workDir = properties.getWorkingDirectory();
 
-		final Reporting report = ReportingUtils.newReportingBuilder(MissionId.fromFileName(event.getKeyObjectStorage()))
+		final MissionId mission = MissionId.fromFileName(event.getKeyObjectStorage());
+		
+		final Reporting report = ReportingUtils.newReportingBuilder(mission)
 				.rsChainName(commonProperties.getRsChainName())
 				.rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(event.getUid()).newReporting("CompressionProcessing");
 
 		// Initialize the pool processor executor
-		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(event, properties);
+		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(mission, event, properties);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		final FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, event);
+		final FileDownloader fileDownloader = new FileDownloader(mission, obsClient, workDir, event);
 
-		final FileUploader fileUploader = new FileUploader(obsClient, workDir, event,
+		final FileUploader fileUploader = new FileUploader(mission, obsClient, workDir, event,
 				CompressionEventUtil.composeCompressedProductFamily(event.getProductFamily()));
 		report.begin(ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getKeyObjectStorage()),
 				new ReportingMessage("Start compression processing"));
@@ -95,7 +97,7 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 
 		CompressionEvent result = new CompressionEvent(
 				CompressionEventUtil.composeCompressedProductFamily(event.getProductFamily()),
-				CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage()));
+				CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage(), mission));
 		result.setMissionId(event.getMissionId());
 		result.setSatelliteId(event.getSatelliteId());
 		result.setUid(report.getUid());

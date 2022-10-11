@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -32,9 +33,12 @@ public class FileDownloader {
 	private final String localWorkingDir;
 
 	private final AbstractMessage event;
+	
+	private MissionId mission;
 
 
-	public FileDownloader(final ObsClient obsClient, final String localWorkingDir, final AbstractMessage event) {
+	public FileDownloader(final MissionId mission, final ObsClient obsClient, final String localWorkingDir, final AbstractMessage event) {
+		this.mission = mission;
 		this.obsClient = obsClient;
 		this.localWorkingDir = localWorkingDir;
 		this.event = event;
@@ -78,7 +82,7 @@ public class FileDownloader {
 		String targetFile = "";
 		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
 			// Compression
-			targetFile = this.localWorkingDir + "/" + CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());	
+			targetFile = this.localWorkingDir + "/" + CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage(), mission);	
 		} else {
 			// Uncompression
 			targetFile = this.localWorkingDir + "/" + CompressionEventUtil.removeZipFromKeyObjectStorage(event.getKeyObjectStorage());

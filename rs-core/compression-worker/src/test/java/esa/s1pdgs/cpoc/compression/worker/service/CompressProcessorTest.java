@@ -50,16 +50,35 @@ public class CompressProcessorTest {
 	}
 
 	@Test
-	public final void onMessage_compress() throws IOException {
+	public final void onMessage_compress_s3() throws IOException {
 
 		CatalogEvent event = new CatalogEvent();
-		event.setMissionId("s1");
+		event.setMissionId("S3");
 		event.setProductFamily(ProductFamily.L1_SLICE);
 		event.setUid(UUID.randomUUID());
 		event.setKeyObjectStorage("S3l1");
 		
 		Path filedir = Files.createDirectory(tmpWorkdir.resolve("S3l1.zip"));
 		Files.createFile(filedir.resolve("S3l1.zip"));
+
+		try {
+			uut.apply(event);
+		} catch (Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public final void onMessage_compress_s2() throws IOException {
+
+		CatalogEvent event = new CatalogEvent();
+		event.setMissionId("S2");
+		event.setProductFamily(ProductFamily.S2_L0_DS);
+		event.setUid(UUID.randomUUID());
+		event.setKeyObjectStorage("S2l0");
+		
+		Path filedir = Files.createDirectory(tmpWorkdir.resolve("S2l0.tar"));
+		Files.createFile(filedir.resolve("S2l0.tar"));
 
 		try {
 			uut.apply(event);

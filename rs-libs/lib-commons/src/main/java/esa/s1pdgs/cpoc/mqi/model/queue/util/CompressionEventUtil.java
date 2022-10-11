@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.mqi.model.queue.util;
 import java.util.List;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 
 public class CompressionEventUtil {
 	public static final List<String> COMPRESSION_SUFFIXES = List.of(
@@ -14,10 +15,21 @@ public class CompressionEventUtil {
 	
 	public static final String SUFFIX_ZIPPRODUCTFAMILY = "_ZIP";
 	public static final String SUFFIX_ZIPPPRODUCTFILE = ".zip";
+	public static final String SUFFIX_TARPRODUCTFILE = ".tar";
 	
 	
-	public static String composeCompressedKeyObjectStorage(final String inputKeyObjectStorage) {
-		return inputKeyObjectStorage + SUFFIX_ZIPPPRODUCTFILE;
+	public static String composeCompressedKeyObjectStorage(final String inputKeyObjectStorage,
+			final MissionId mission) {
+
+		switch (mission) {
+			case S1:
+			case S3:
+				return inputKeyObjectStorage + SUFFIX_ZIPPPRODUCTFILE;
+			case S2:
+				return inputKeyObjectStorage + SUFFIX_TARPRODUCTFILE;
+			default:
+				throw new IllegalArgumentException("Not applicable mission " + mission);
+		}
 	}
 	
 	public static String removeZipFromKeyObjectStorage(final String inputKeyObjectStorage) {

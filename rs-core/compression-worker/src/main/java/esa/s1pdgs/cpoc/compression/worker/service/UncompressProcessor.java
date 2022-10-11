@@ -46,22 +46,24 @@ public class UncompressProcessor extends AbstractProcessor
 	public Message<CatalogJob> apply(CatalogJob event) {
 		final String workDir = properties.getWorkingDirectory();
 
-		final Reporting report = ReportingUtils.newReportingBuilder(MissionId.fromFileName(event.getKeyObjectStorage()))
+		final MissionId mission = MissionId.fromFileName(event.getKeyObjectStorage());
+		
+		final Reporting report = ReportingUtils.newReportingBuilder(mission)
 				.rsChainName(commonProperties.getRsChainName())
 				.rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(event.getUid()).newReporting("UncompressionProcessing");
 
 		// Initialize the pool processor executor
-		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(event, properties);
+		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(mission, event, properties);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		final FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, event);
+		final FileDownloader fileDownloader = new FileDownloader(mission, obsClient, workDir, event);
 
 		ProductFamily outputProductFamily = CompressionEventUtil.removeZipSuffixFromProductFamily(event.getProductFamily());
 		
-		final FileUploader fileUploader = new FileUploader(obsClient, workDir, event, outputProductFamily);
+		final FileUploader fileUploader = new FileUploader(mission, obsClient, workDir, event, outputProductFamily);
 		report.begin(ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getKeyObjectStorage()),
 				new ReportingMessage("Start uncompression processing"));
 		

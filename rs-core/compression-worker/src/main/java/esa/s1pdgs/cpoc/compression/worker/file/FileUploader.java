@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
@@ -34,6 +35,8 @@ public class FileUploader {
 	private final AbstractMessage event;
 	
 	private final ProductFamily outputProductFamily;
+	
+	private final MissionId mission;
 
 	/**
 	 * OBS service
@@ -41,7 +44,8 @@ public class FileUploader {
 	private final ObsClient obsClient;
 	
 
-	public FileUploader(final ObsClient obsClient, final String workingDir, final AbstractMessage event, ProductFamily outputProductFamily) {
+	public FileUploader(final MissionId mission, final ObsClient obsClient, final String workingDir, final AbstractMessage event, ProductFamily outputProductFamily) {
+		this.mission = mission;
 		this.obsClient = obsClient;
 		this.workingDir = workingDir;
 		this.event = event;
@@ -53,7 +57,7 @@ public class FileUploader {
 		String outputFileName;
 		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
 			// Compression
-			outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
+			outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage(), mission);
 			productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
 		} 
 		else {
