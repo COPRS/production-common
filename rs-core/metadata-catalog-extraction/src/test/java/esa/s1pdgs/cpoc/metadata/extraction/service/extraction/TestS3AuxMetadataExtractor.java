@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.Utils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
@@ -40,12 +39,6 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class TestS3AuxMetadataExtractor {
 
 	private static final String PATTERN = "^([a-zA-Z0-9][a-zA-Z0-9])(\\w{1})_((OL|SL|SR|DO|MW|GN|SY|TM|AX)_(0|1|2|_)_\\w{6})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\d{8}T\\d{6})_(\\w{17})_(\\w{3})_(\\w{8})\\.(\\w{1,4})\\/?(.+)?$";
-
-	/**
-	 * Elasticsearch services
-	 */
-	@Mock
-	protected EsServices esServices;
 
 	/**
 	 * Object Storage Client
@@ -91,7 +84,7 @@ public class TestS3AuxMetadataExtractor {
 				extractorConfig.getTimelinessPriorityFromHighToLow(), extractorConfig.getXsltDirectory(), xmlConverter);
 		final MetadataBuilder mdBuilder = new MetadataBuilder(extract);
 
-		extractor = new S3AuxMetadataExtractor(esServices, mdBuilder, fileDescriptorBuilder, testDir.getPath(),
+		extractor = new S3AuxMetadataExtractor(mdBuilder, fileDescriptorBuilder, testDir.getPath(),
 				new ProcessConfiguration(), obsClient);
 	}
 

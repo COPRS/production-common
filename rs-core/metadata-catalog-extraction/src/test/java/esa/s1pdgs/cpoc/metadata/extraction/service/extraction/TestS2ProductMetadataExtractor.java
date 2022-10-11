@@ -26,7 +26,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.Utils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
@@ -43,9 +42,6 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class TestS2ProductMetadataExtractor {
 
 	private static final String PATTERN = "^(S2)(A|B|_)_([A-Z0-9]{4})_((MSI)_(L0_|L1A|L1B|L1C)_(GR|DS|TL|TC))_\\w{4}_(\\d{8}T\\d{6})(.*)$";
-
-	@Mock
-	private EsServices esServices;
 
 	@Mock
 	private ObsClient obsClient;
@@ -87,7 +83,7 @@ public class TestS2ProductMetadataExtractor {
 		manifestMap.put("s2", "[S2PRODUCTNAME].xml");
 		processConfig.setManifestFilenames(manifestMap);
 
-		extractor = new S2ProductMetadataExtractor(esServices, mdBuilder, fileDescriptorBuilder, testDir.getPath(),
+		extractor = new S2ProductMetadataExtractor(mdBuilder, fileDescriptorBuilder, testDir.getPath(),
 				false, processConfig, obsClient);
 	}
 

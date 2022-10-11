@@ -7,7 +7,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.config.RfiConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.OutputFileDescriptor;
@@ -23,11 +22,11 @@ public final class LevelProductMetadataExtractor extends AbstractMetadataExtract
 	private final RfiAnnotationExtractor rfiAnnotationExtractor;
 	private final RfiConfiguration rfiConfiguration;
 
-	public LevelProductMetadataExtractor(final EsServices esServices, final MetadataBuilder mdBuilder,
+	public LevelProductMetadataExtractor(final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, final String localDirectory,
 			final ProcessConfiguration processConfiguration, final RfiConfiguration rfiConfiguration,
 			final ObsClient obsClient, final XmlConverter xmlConverter) {
-		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
+		super(mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
 		this.rfiConfiguration = rfiConfiguration;
 		this.rfiAnnotationExtractor = new RfiAnnotationExtractor(processConfiguration, rfiConfiguration, obsClient,
 				xmlConverter);

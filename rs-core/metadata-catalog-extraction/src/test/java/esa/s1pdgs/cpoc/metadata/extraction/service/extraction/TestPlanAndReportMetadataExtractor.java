@@ -30,7 +30,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.Utils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
@@ -45,12 +44,6 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class TestPlanAndReportMetadataExtractor {
 	private static final String PATTERN = "^(S1[ABCD_]_OPER_REP_MP_MP__PDMC_|S1[ABCD]_OPER_MPL_SP.{4}_PDMC_|S1[ABCD_]_OPER_MPL_FS.{4}_PDMC_|S1[ABCD]_OPER_REP_PASS_[1-9]_.{4}_|S[12]__OPER_SRA_EDRS_[AC]_PDMC_|EDR_OPER_MPL_RQ[1-9]_O[AC]_|EDR_OPER_MPL_[LM]AS_O[AC]_|EDR_OPER_MPL_CR[1-9]_O[AC]_|EDR_OPER_MPL_SS[1-9]_O[AC]_|EDR_OPER_MPL_ER[1-9]_O[AC]_|EDR_OPER_SER_SR[1-9]_O[AC]_|S1[ABCD]_OPER_MPL_ORBOEM_|EDR_OPER_MPL_GOB_P[AC]_|EDR_OPER_MPL_GOB_R[AC]_|S1[ABCD]_OPER_REP__SUP___|S1[ABCD]_OPER_REP_STNACQ_.{4}_|S1[ABCD_]_OPER_REP_STNUNV_.{4}_|S[123][ABCD_]_OPER_SRA_BANSEG_PDMC_|S1[ABCD]_OPER_TLM__REQ_[A-O]_|S1[ABCD]_OPER_REP__SMPR__|S1[ABCD]_OPER_MPL__SSC___|S1[ABCD]_OPER_TLM__PSCAT_|S1[ABCD]_OPER_MPL_OCMSAR_|S1[ABCD]_OPER_REP__MACP__|S1[ABCD]_OPER_REP__MCSF__|S1[ABCD]_OPER_MPL__NPPF__|S1[ABCD]_OPER_MPL__NPIF__|S1[ABCD]_OPER_REP_NPIFCC_|S[123][ABCD_]_OPER_SRA_GSUNAV_PDMC_|S1[ABCD]_OPER_OBS_MIMG___|S1[ABCD]_OPER_AUX_RDB____MPC__|S1[ABCD]_OPER_MPL_SESDB[ABCD]_|S1[ABCD]_OPER_REP__CHF___|S1[AB]_OPER_REP__FCHF__).*\\.(xml|XML|EOF|TGZ)$";
 	
-    /**
-     * Elasticsearch services
-     */
-    @Mock
-    protected EsServices esServices;
-
     /**
      * Elasticsearch services
      */
@@ -166,7 +159,6 @@ public class TestPlanAndReportMetadataExtractor {
 		final MetadataBuilder mdBuilder = new MetadataBuilder(extract);
 
 	    extractor = new PlanAndReportMetadataExtractor(
-	    			esServices, 
 	    			mdBuilder, 
 	    			fileDescriptorBuilder, 
 	    			testDir.getPath(), 

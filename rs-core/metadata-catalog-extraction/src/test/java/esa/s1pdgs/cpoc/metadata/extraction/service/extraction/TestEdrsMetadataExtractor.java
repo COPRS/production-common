@@ -24,7 +24,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.Utils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
@@ -40,12 +39,6 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class TestEdrsMetadataExtractor {
 
 	private static final String PATTERN = "(WILE|MTI_|SGS_|INU_)/S1(A|B)/([A-Za-z0-9]+)/ch0?(1|2)/(.+DSIB\\.(xml|XML)|.+DSDB.*\\.(raw|RAW|aisp|AISP))";
-
-	/**
-	 * Elasticsearch services
-	 */
-	@Mock
-	protected EsServices esServices;
 
 	/**
 	 * Elasticsearch services
@@ -104,7 +97,7 @@ public class TestEdrsMetadataExtractor {
 		conf.put("sessionId", 4);
 		conf.put("channelId", 5);
 
-		extractor = new EdrsMetadataExtractor(esServices, mdBuilder, fileDescriptorBuilder, testDir.getPath(),
+		extractor = new EdrsMetadataExtractor(mdBuilder, fileDescriptorBuilder, testDir.getPath(),
 				new ProcessConfiguration(), obsClient,
 				new PathMetadataExtractorImpl(
 						Pattern.compile("^([a-z_]{4})/([0-9a-z_]{2})([0-9a-z_]{1})/([0-9a-z_]+)/ch0?([1-2])/.+",

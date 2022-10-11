@@ -26,7 +26,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.Utils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
@@ -42,12 +41,6 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class TestAuxMetadataExtractor {
 
 	private static final String PATTERN = "^([0-9a-z][0-9a-z]){1}([0-9a-z_]){1}(_(OPER|TEST))?_(AMH_ERRMAT|AMV_ERRMAT|AM__ERRMAT|AUX_CAL|AUX_ICE|AUX_INS|AUX_ITC|AUX_OBMEMC|AUX_PP1|AUX_PP2|AUX_POEORB|AUX_PREORB|AUX_RESORB|AUX_SCF|AUX_SCS|AUX_TEC|AUX_TRO|AUX_WAV|AUX_WND|MPL_ORBPRE|MPL_ORBRES|MPL_ORBSCT|MSK_EW_SLC|MSK__LAND_|MSK_OCEAN_|MSK_OVRPAS)_\\w{1,}\\.(XML|EOF|SAFE)(/.*)?$";
-
-	/**
-	 * Elasticsearch services
-	 */
-	@Mock
-	protected EsServices esServices;
 
 	/**
 	 * Elasticsearch services
@@ -116,7 +109,7 @@ public class TestAuxMetadataExtractor {
 
 		final FileDescriptorBuilder fileDescriptorBuilder = new FileDescriptorBuilder(
 				new File(testDir.getAbsolutePath()), Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE));
-		extractor = new AuxMetadataExtractor(esServices, mdBuilder, fileDescriptorBuilder, testDir.getAbsolutePath(),
+		extractor = new AuxMetadataExtractor(mdBuilder, fileDescriptorBuilder, testDir.getAbsolutePath(),
 				new ProcessConfiguration(), obsClient);
 	}
 

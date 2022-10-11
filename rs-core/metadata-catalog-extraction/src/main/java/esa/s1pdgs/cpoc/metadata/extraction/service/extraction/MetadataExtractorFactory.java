@@ -15,7 +15,6 @@ import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperti
 import esa.s1pdgs.cpoc.metadata.extraction.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.config.RfiConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
@@ -24,7 +23,6 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Component
 public class MetadataExtractorFactory {
-	private final EsServices esServices;
 	private final MetadataExtractorConfig extractorConfig;
 	private final XmlConverter xmlConverter;
 	private final ObsClient obsClient;
@@ -32,10 +30,9 @@ public class MetadataExtractorFactory {
 	private final RfiConfiguration rfiConfiguration;
 
 	@Autowired
-	public MetadataExtractorFactory(final EsServices esServices, final MetadataExtractorConfig extractorConfig,
+	public MetadataExtractorFactory(final MetadataExtractorConfig extractorConfig,
 			final XmlConverter xmlConverter, final ObsClient obsClient, final ProcessConfiguration processConfiguration,
 			final MdcWorkerConfigurationProperties properties, final RfiConfiguration rfiConfiguration) {
-		this.esServices = esServices;
 		this.extractorConfig = extractorConfig;
 		this.xmlConverter = xmlConverter;
 		this.obsClient = obsClient;
@@ -64,7 +61,6 @@ public class MetadataExtractorFactory {
 		switch (category){
 		    case AUXILIARY_FILES:
 		    	return new AuxMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
@@ -73,7 +69,6 @@ public class MetadataExtractorFactory {
 		    	);
 		    case EDRS_SESSIONS:
 		    	return new EdrsMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
@@ -83,7 +78,6 @@ public class MetadataExtractorFactory {
 		    	);
 		    case PLANS_AND_REPORTS:
 		    	return new PlanAndReportMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
@@ -92,7 +86,6 @@ public class MetadataExtractorFactory {
 		    	);
 		    case LEVEL_SEGMENTS:
 		    	return new LevelSegmentMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
@@ -101,7 +94,6 @@ public class MetadataExtractorFactory {
 		    	);
 		    case LEVEL_PRODUCTS:
 		    	return new LevelProductMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
@@ -112,7 +104,6 @@ public class MetadataExtractorFactory {
 		    	);
 		    case SPP_PRODUCTS:
 		    	return new SppProductMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
@@ -121,7 +112,6 @@ public class MetadataExtractorFactory {
 		    	);
 		    case SPP_MBU_PRODUCTS:
 		    	return new SppMbuProductMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
@@ -130,7 +120,6 @@ public class MetadataExtractorFactory {
 		    			);
 		    case S2_AUX:
 		    	return new S2AuxMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(),
@@ -139,7 +128,6 @@ public class MetadataExtractorFactory {
 		    			obsClient);
 		    case S2_PRODUCTS:
 		    	return new S2ProductMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 
@@ -148,7 +136,6 @@ public class MetadataExtractorFactory {
 		    			obsClient);
 		    case S3_AUX:
 				return new S3AuxMetadataExtractor(
-						esServices, 
 						mdBuilder, 
 						fileDescriptorBuilder,
 						config.getLocalDirectory(), 
@@ -157,7 +144,6 @@ public class MetadataExtractorFactory {
 				);
 		    case S3_PRODUCTS:
 		    	return new S3LevelProductMetadataExtractor(
-		    			esServices, 
 		    			mdBuilder, 
 		    			fileDescriptorBuilder, 
 		    			config.getLocalDirectory(), 

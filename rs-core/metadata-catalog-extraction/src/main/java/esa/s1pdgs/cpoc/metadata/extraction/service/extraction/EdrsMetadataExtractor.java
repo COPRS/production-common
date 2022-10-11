@@ -11,7 +11,6 @@ import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.EdrsSessionFileDescriptor;
@@ -23,11 +22,11 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public class EdrsMetadataExtractor extends AbstractMetadataExtractor {
 	private final PathMetadataExtractor pathExtractor;
 
-	public EdrsMetadataExtractor(final EsServices esServices, final MetadataBuilder mdBuilder,
+	public EdrsMetadataExtractor(final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, final String localDirectory,
 			final ProcessConfiguration processConfiguration, final ObsClient obsClient,
 			final PathMetadataExtractor pathExtractor) {
-		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
+		super(mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
 		this.pathExtractor = pathExtractor;
 	}
 

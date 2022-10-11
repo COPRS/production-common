@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
@@ -20,11 +19,11 @@ public class S2AuxMetadataExtractor extends AbstractMetadataExtractor {
 
 	private final boolean enableExtractionFromProductName;
 
-	public S2AuxMetadataExtractor(final EsServices esServices, final MetadataBuilder mdBuilder,
+	public S2AuxMetadataExtractor(final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, final String localDirectory,
 			final boolean enableExtractionFromProductName, final ProcessConfiguration processConfiguration,
 			final ObsClient obsClient) {
-		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
+		super(mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
 		this.enableExtractionFromProductName = enableExtractionFromProductName;
 	}
 
