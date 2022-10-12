@@ -1,0 +1,7 @@
+#!/bin/sh
+
+for f in $(find . -iname "THIRD-PARTY.txt")
+do
+  echo $f
+  cat $f | grep asl
+done
