@@ -40,6 +40,7 @@ public class RoutingTable {
 			rule.setMaxRetry(ruleConfiguration.getMaxRetry());
 			rule.setComment(ruleConfiguration.getComment());
 			final int priority = ruleConfiguration.getPriority();
+			rule.setPriority(priority);
 			
 			if (!routingTable.rules.containsKey(priority)) {
 				routingTable.rules.put(priority, new ArrayList<>());				
