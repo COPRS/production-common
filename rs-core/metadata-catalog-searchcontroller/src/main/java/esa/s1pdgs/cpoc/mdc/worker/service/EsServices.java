@@ -52,6 +52,7 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.EdrsSessionFileType;
 import esa.s1pdgs.cpoc.common.MaskType;
@@ -1379,10 +1380,13 @@ public class EsServices {
 	public List<SearchMetadata> intervalTypeQuery(final String startTime, final String stopTime,
 			final ProductFamily productFamily, final String productType, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders
 				.rangeQuery("insertionTime").from(startTime, false).to(stopTime))
-				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+		
+		if (!StringUtils.isEmpty(satelliteId)) {
+			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
+		}
 
 		LOGGER.debug("query composed is {}", queryBuilder);
 
