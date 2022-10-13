@@ -104,6 +104,13 @@ public class ServiceConfiguration {
 					}
 					
 					throw new IllegalArgumentException("Unsupported custom selection policy: "+alternative.getCustomClass());
+				} else if (alternative.getRetrievalMode().equals("ValIntersectWithoutDuplicates")) {
+					/*
+					 * TODO: Check whether or not this should be in the final version. Temporary workaround to test.
+					 */
+					alternative.setRetrievalMode("ValIntersect");
+					LOG.info("Found selection policy 'ValIntersectWithoutDuplicates'. Replace with 'ValIntersect'");
+					continue;
 				}
 			}
 			ttAdapters.put(taskTableFile.getName(), adapter);
