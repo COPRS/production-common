@@ -21,6 +21,8 @@ ADD files/tasktables /usr/local/conf/IPFSimulator/TaskTables
 #COPY IPFSimulator.tar.gz /usr/local/conf
 #RUN tar -xvzf /usr/local/conf/IPFSimulator.tar.gz -C /usr/local/conf
 
+# Patch used java executable in IPF SImulator
+RUN sed -i s,/opt/java1.8/bin/java,java,g /usr/local/conf/IPFSimulator/ipfScripts/Processor_wrapper.sh
 RUN ln -s /usr/local/conf/IPFSimulator/ipfScripts/Processor_wrapper.sh /usr/local/conf/IPFSimulator/bin/ipf-sim.sh
 RUN ln -s /usr/local/conf/IPFSimulator/bin/Processor_wrapper.sh S3IPF.sh
 
