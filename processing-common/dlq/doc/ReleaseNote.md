@@ -23,7 +23,7 @@ The DLQ Manager polls the configured dead letter queue topic for failed processi
 
 **Comment**: Description and further notes about an error (optional).
 
-**Priority**: For the case when several rules match the same errorID, the rule with the highest priority is applied.
+**Priority**: For the case when several rules match the same errorID, the rule with the highest priority is applied (min 0 ; max 2147483647).
 
 Example rule table configuration:
 ```Bash
