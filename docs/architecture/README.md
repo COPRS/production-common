@@ -725,7 +725,7 @@ The Compression worker itself will download the product into a local working dir
 
 At the end of the chain a "Compression Event" will be generated that will be usually consumed by the Distribution chain handling the publication of the product and make it available for the End users.
 
-For futher information on the compression chain, please have a look [here](https://github.com/COPRS/production-common/tree/develop/processing-common/compression)
+For further information on the compression chain, please have a look [here](https://github.com/COPRS/production-common/tree/develop/processing-common/compression)
 
 #### Message Filter
 The message filter is a basic SCDF component that allows to filter out products that are not supposed to be compressed.
@@ -737,11 +737,9 @@ Similiar to the message filter, the priority filter is also a basic SCDF compone
 
 The compression worker is performing the actual compression of the product. It will take the product referenced in the catalog event, download it into a local working directory and execute the configured compression script to perform the compression.
 
-Usually this will be a compression tool from the operating system as zip or 7z. It will be executed in a similiar manner like an IPF.
+The kind of compression that is used is depending on the mission. The compression worker will read the missionId from the Catalog Event. Depending on the mission it is possible to define a compression script that shall be used. By default S1 will use compressed ZIP, S2 will use tar and S3 will use uncompressed ZIP. For further information on the configuration, please consult the parameter configuration for the Compression worker that can be found [here](/processing-common/compression/doc/ReleaseNote.md)
 
 After the compression had been performed successfully the result will be uploaded into the OBS. Please note that it will not be uploaded into the same bucket as the original product. Instead the bucket and product family will add a suffix "-zip" to indicate it actually references a compressed product and to distinguish between these.
-
-
 
 ### Distribution
 
