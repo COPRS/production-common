@@ -77,7 +77,7 @@ s3_pug
 ```
 
 ```
-{"mappings":{"properties":{"creationTime":{"type":"date"},"startTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape"},"oqcFlag":{"type":"text"}}}}
+{"mappings":{"properties":{"creationTime":{"type":"date"},"startTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape"},"oqcFlag":{"type":"text"},"insertionTime":{"type":"date"}}}}
 ```
 
 -------------------
