@@ -107,34 +107,42 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 		LocalDateTime intervalStop = LocalDateTime.now();
 
 		List<String> satelliteIds = new ArrayList<String>(Arrays.asList(timerProperties.getSatelliteIds().split(",")));
-		
+
 		for (String satelliteId : satelliteIds) {
 			try {
 				LOGGER.debug("Retrieve new products from database");
-				List<SearchMetadata> products = this.metadataClient.searchInterval(timerProperties.getFamily(), productType,
-						intervalStart, intervalStop, satelliteId);
-	
+				List<SearchMetadata> products = this.metadataClient.searchInterval(timerProperties.getFamily(),
+						productType, intervalStart, intervalStop, satelliteId);
+
 				String lastInsertionTime = null;
-	
+
 				for (SearchMetadata product : products) {
 					LOGGER.info("Create CatalogEvent for product {}", product.getProductName());
 					CatalogEvent event = toCatalogEvent(timerProperties.getFamily(), productType, product);
 					result.add(MessageBuilder.withPayload(event).build());
-	
+
 					lastInsertionTime = product.getInsertionTime();
 				}
-	
-				// Update database entry, if we produced new events
+
+				// Update database entry, use intervalStop minus two seconds (to account for
+				// index refreshes) or lastInsertionTime, whichever is bigger.
+				LocalDateTime newEntryTime = intervalStop.minusSeconds(2);
+
 				if (lastInsertionTime != null) {
-					if (triggerEntry == null) {
-						triggerEntry = new CronbasedTriggerEntry();
-						triggerEntry.setProductFamily(timerProperties.getFamily());
-						triggerEntry.setProductType(productType);
-					}
-	
-					LOGGER.info("Update database entry for this dispatcher");
-					updateCatalogEventTimerEntry(triggerEntry, DateUtils.parse(lastInsertionTime));
+					LocalDateTime lastInsertion = DateUtils.parse(lastInsertionTime);
+					if (lastInsertion.isAfter(newEntryTime)) 
+						newEntryTime = lastInsertion;
+				} 
+
+				if (triggerEntry == null) {
+					triggerEntry = new CronbasedTriggerEntry();
+					triggerEntry.setProductFamily(timerProperties.getFamily());
+					triggerEntry.setProductType(productType);
 				}
+
+				LOGGER.info("Update database entry for this dispatcher");
+				updateCatalogEventTimerEntry(triggerEntry, newEntryTime);
+
 			} catch (MetadataQueryException e) {
 				LOGGER.warn("An exception occured while fetching new products: ", e);
 			} catch (Exception e) {
