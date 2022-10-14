@@ -19,6 +19,8 @@ public class CronbasedTriggerProperties {
 
 		private ProductFamily family;
 
+		private String satelliteIds;
+		
 		public String getCron() {
 			return cron;
 		}
@@ -33,6 +35,14 @@ public class CronbasedTriggerProperties {
 
 		public void setFamily(ProductFamily family) {
 			this.family = family;
+		}
+
+		public String getSatelliteIds() {
+			return satelliteIds;
+		}
+
+		public void setSatelliteIds(String satelliteIds) {
+			this.satelliteIds = satelliteIds;
 		}
 	}
 

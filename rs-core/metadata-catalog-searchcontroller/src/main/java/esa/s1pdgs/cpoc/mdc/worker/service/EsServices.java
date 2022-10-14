@@ -1382,11 +1382,8 @@ public class EsServices {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders
 				.rangeQuery("insertionTime").from(startTime, false).to(stopTime))
+				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
-		
-		if (!StringUtils.isEmpty(satelliteId)) {
-			queryBuilder = queryBuilder.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId));
-		}
 
 		LOGGER.debug("query composed is {}", queryBuilder);
 
