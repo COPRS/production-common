@@ -225,50 +225,53 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		List<IpfExecutionJob> executionJobs = new ArrayList<>();
 		
 		for (AppDataJob job : appDataJobs) {
-			if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
-				try {
-					LOGGER.info("Start main input search for AppDataJob {}", job.getId());
-					job = inputSearchService.mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
-				}
-			}
-
-			if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
-				try {
-					LOGGER.info("Start aux input search for AppDataJob {}", job.getId());
-					job = inputSearchService.auxInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Aux input search did not complete successfully: {}", e.getMessage());
-				}
-			}
-
-			if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
-				try {
-					LOGGER.info("Start generating IpfExecutionJob for AppDataJob {}", job.getId());
-					
-					IpfExecutionJob executionJob = jobCreationService.createExecutionJob(job, taskTableAdapters.get(job.getTaskTableName()));
-					if (executionJob != null) {
-						executionJobs.add(executionJob);
-					} else {
-						// TODO: Improve Error Handling
-						LOGGER.error("Could not generate ExecutionJob for AppDataJob {}", job.getId());
-					}
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Generation of IpfExecutionJob did not complete successfully: {}", e.getMessage());
-				}
-			}
-
-			if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
-				// TODO: This step was mandatory before to make sure no duplicate jobs are created. Is this still necessary?
-//				terminate();
-			}
-
-			// Update Job in Mongo
+			// Continue to process jobs, when one results in an unexpected error
 			try {
+				if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
+					try {
+						LOGGER.info("Start main input search for AppDataJob {}", job.getId());
+						job = inputSearchService.mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+					} catch (JobStateTransistionFailed e) {
+						LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
+					}
+				}
+	
+				if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
+					try {
+						LOGGER.info("Start aux input search for AppDataJob {}", job.getId());
+						job = inputSearchService.auxInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+					} catch (JobStateTransistionFailed e) {
+						LOGGER.info("Aux input search did not complete successfully: {}", e.getMessage());
+					}
+				}
+	
+				if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
+					try {
+						LOGGER.info("Start generating IpfExecutionJob for AppDataJob {}", job.getId());
+						
+						IpfExecutionJob executionJob = jobCreationService.createExecutionJob(job, taskTableAdapters.get(job.getTaskTableName()));
+						if (executionJob != null) {
+							executionJobs.add(executionJob);
+						} else {
+							// TODO: Improve Error Handling
+							LOGGER.error("Could not generate ExecutionJob for AppDataJob {}", job.getId());
+						}
+					} catch (JobStateTransistionFailed e) {
+						LOGGER.info("Generation of IpfExecutionJob did not complete successfully: {}", e.getMessage());
+					}
+				}
+	
+				if (job.getGeneration().getState() == AppDataJobGenerationState.SENT) {
+					// TODO: This step was mandatory before to make sure no duplicate jobs are created. Is this still necessary?
+	//				terminate();
+				}
+	
+				// Update Job in Mongo
 				appCatJobService.updateJob(job);
 			} catch (AppCatalogJobNotFoundException e) {
 				LOGGER.error("Error while saving new state of AppDataJob {}: {}", job.getId(), e.getMessage());
+			} catch (Exception e) {
+				LOGGER.error("An unexpected exception occured while processing AppDataJob {}: {}", job.getId(), e.getMessage());
 			}
 		}
 
