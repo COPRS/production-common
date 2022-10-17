@@ -48,15 +48,15 @@ public class AppCatJobService {
 	}
 	
 	public List<AppDataJob> findByCatalogEventsUid(final UUID uid) {
-		return appDataJobRepository.findByCatalogEventsUid(uid.toString(), processProperties.getLevel().toString());
+		return appDataJobRepository.findByCatalogEventsUid(uid.toString(), processProperties.getHostname());
 	}
 
 	public List<AppDataJob> findByProductType(final String productType) {
-		return appDataJobRepository.findByProductType(productType, processProperties.getLevel().toString());
+		return appDataJobRepository.findByProductType(productType, processProperties.getHostname());
 	}
 	
 	public List<AppDataJob> findByTriggerProduct(final String productType) {
-		return appDataJobRepository.findByTriggerProduct(productType, processProperties.getLevel().toString());
+		return appDataJobRepository.findByTriggerProduct(productType, processProperties.getHostname());
 	}
 
 	public List<AppDataJob> findByProductSessionId(final String sessionId) {
