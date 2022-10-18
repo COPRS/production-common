@@ -23,8 +23,8 @@ ADD files/tasktables /usr/local/conf/IPFSimulator/TaskTables
 
 # Patch used java executable in IPF SImulator
 #RUN sed -i s,/opt/java1.8/bin/java,java,g /usr/local/conf/IPFSimulator/ipfScripts/Processor_wrapper.sh
-#RUN ln -s /usr/local/conf/IPFSimulator/ipfScripts/Processor_wrapper.sh /usr/local/conf/IPFSimulator/bin/ipf-sim.sh
-#RUN ln -s /usr/local/conf/IPFSimulator/bin/Processor_wrapper.sh S3IPF.sh
+RUN ln -s /usr/local/conf/IPFSimulator/bin/Processor_wrapper.sh /usr/local/conf/IPFSimulator/bin/ipf-sim.sh
+RUN ln -s /usr/local/conf/IPFSimulator/bin/Processor_wrapper.sh S3IPF.sh
 
 # link task table binaries
 # rsync required for ipf-sim-for-tc25
