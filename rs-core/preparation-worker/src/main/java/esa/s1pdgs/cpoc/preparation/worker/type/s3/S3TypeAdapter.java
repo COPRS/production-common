@@ -181,7 +181,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 							mpcSettings.getGapThreshold());
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
 							returnValue.getStartTime(), returnValue.getStopTime(), alternative.getDeltaTime0(),
-							alternative.getDeltaTime1(), workerSettings.getProductMode().toString());
+							alternative.getDeltaTime1());
 				}
 
 				if (settings.isRangeSearchActiveForProductType(tasktableAdapter.taskTable().getProcessorName(),
@@ -191,7 +191,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-							job.getStartTime(), job.getStopTime(), workerSettings.getProductMode().toString());
+							job.getStartTime(), job.getStopTime());
 
 					/*
 					 * In a following step the start and stop time of the job will be set to the

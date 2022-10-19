@@ -60,13 +60,13 @@ public class MultipleProductCoverSearch {
 			final MetadataClient metadataClient, final PreparationWorkerProperties prepSettings) {
 		this(ttAdapter, elementMapper, metadataClient, prepSettings, false, 0.0);
 	}
-	
+
 	public MultipleProductCoverSearch(final TaskTableAdapter ttAdapter, final ElementMapper elementMapper,
 			final MetadataClient metadataClient, final PreparationWorkerProperties prepSettings,
 			final boolean disableFirstLastWaiting) {
 		this(ttAdapter, elementMapper, metadataClient, prepSettings, disableFirstLastWaiting, 0.0);
 	}
-	
+
 	public MultipleProductCoverSearch(final TaskTableAdapter ttAdapter, final ElementMapper elementMapper,
 			final MetadataClient metadataClient, final PreparationWorkerProperties prepSettings,
 			final boolean disableFirstLastWaiting, final double gapThreshold) {
@@ -96,8 +96,8 @@ public class MultipleProductCoverSearch {
 	 */
 	public List<AppDataJobTaskInputs> updateTaskInputs(List<AppDataJobTaskInputs> tasks,
 			final TaskTableInputAlternative alternative, final String satelliteId, final String startTime,
-			final String stopTime, final String timeliness) throws MetadataQueryException {
-		return updateTaskInputs(tasks, alternative, satelliteId, startTime, stopTime, 0.0, 0.0, timeliness);
+			final String stopTime) throws MetadataQueryException {
+		return updateTaskInputs(tasks, alternative, satelliteId, startTime, stopTime, 0.0, 0.0);
 	}
 
 	/**
@@ -122,18 +122,16 @@ public class MultipleProductCoverSearch {
 	 */
 	public List<AppDataJobTaskInputs> updateTaskInputs(List<AppDataJobTaskInputs> tasks,
 			final TaskTableInputAlternative alternative, final String satelliteId, final String startTime,
-			final String stopTime, final double t0, final double t1, final String timeliness)
-			throws MetadataQueryException {
+			final String stopTime, final double t0, final double t1) throws MetadataQueryException {
 		List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
-				elementMapper.inputFamilyOf(alternative.getFileType()), satelliteId, startTime, stopTime, t0, t1,
-				timeliness);
+				elementMapper.inputFamilyOf(alternative.getFileType()), satelliteId, startTime, stopTime, t0, t1);
 
 		// Filter products for duplicates
 		products = DuplicateProductFilter.filterS3Metadata(products);
 
 		// Check coverage
 		if (!products.isEmpty()) {
-			final boolean intervalCovered = checkCoverage(startTime, stopTime, t0, t1, timeliness, products);
+			final boolean intervalCovered = checkCoverage(startTime, stopTime, t0, t1, products);
 
 			// Set results on matching tasks
 			tasks = updateAppDataJobTaskInputs(tasks, products, intervalCovered, alternative,
@@ -190,14 +188,14 @@ public class MultipleProductCoverSearch {
 	 * Check if the given list of products is enough to cover the interval
 	 */
 	private boolean checkCoverage(final String startTime, final String stopTime, final double t0, final double t1,
-			final String timeliness, final List<S3Metadata> products) {
+			final List<S3Metadata> products) {
 		LocalDateTime time = LocalDateTime.parse(startTime,
 				DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		final LocalDateTime coverageMin = time.minusSeconds(Math.round(t0));
 
 		time = LocalDateTime.parse(stopTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'"));
 		final LocalDateTime coverageMax = time.plusSeconds(Math.round(t1));
-		
+
 		if (gapThreshold > 0.0) {
 			ThresholdGapHandler gapHandler = new ThresholdGapHandler(gapThreshold);
 			return gapHandler.isCovered(coverageMin, coverageMax, products);
@@ -221,7 +219,7 @@ public class MultipleProductCoverSearch {
 			if (product.getAdditionalProperties().containsKey("t0PdgsDate")) {
 				t0 = DateUtils.toDate(product.getAdditionalProperties().get("t0PdgsDate"));
 			}
-			
+
 			files.add(new AppDataJobFile(product.getProductName(), product.getKeyObjectStorage(),
 					product.getValidityStart(), product.getValidityStop(), t0));
 		}

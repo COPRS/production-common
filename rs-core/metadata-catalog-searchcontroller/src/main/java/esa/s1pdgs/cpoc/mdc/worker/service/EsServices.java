@@ -1165,13 +1165,12 @@ public class EsServices {
 	 *                   search itself throws an error
 	 */
 	public List<S3Metadata> rangeCoverQuery(final String startTime, final String stopTime, final String productType,
-			final String satelliteId, final String timeliness, final ProductFamily productFamily) throws Exception {
+			final String satelliteId, final ProductFamily productFamily) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(stopTime))
 				.must(QueryBuilders.rangeQuery("stopTime").gt(startTime)).must(satelliteId(satelliteId))
-				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
-				.must(QueryBuilders.termQuery(timeliness, true));
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 
 		LOGGER.debug("query composed is {}", queryBuilder);
 
