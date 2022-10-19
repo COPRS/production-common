@@ -139,6 +139,11 @@
 			<artifactId>s1pro-core-message-adapter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-obs-sdk</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>

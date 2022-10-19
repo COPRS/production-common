@@ -1459,6 +1459,9 @@ public class EsServices {
 					local.setProductType(source.get("productType").toString());
 					local.setMissionId(source.get(MissionId.FIELD_NAME).toString());
 					local.setKeyObjectStorage(source.get("url").toString());
+					if (source.containsKey("satelliteId")) {
+						local.setSatelliteId(source.get("satelliteId").toString());
+					}
 					if (source.containsKey("startTime")) {
 						try {
 							local.setValidityStart(

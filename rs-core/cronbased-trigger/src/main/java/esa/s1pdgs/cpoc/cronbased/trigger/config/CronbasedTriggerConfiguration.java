@@ -12,6 +12,7 @@ import esa.s1pdgs.cpoc.cronbased.trigger.db.CronbasedTriggerEntryRepository;
 import esa.s1pdgs.cpoc.cronbased.trigger.service.CronbasedTriggerService;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 @Configuration
 public class CronbasedTriggerConfiguration {
@@ -24,9 +25,12 @@ public class CronbasedTriggerConfiguration {
 	
 	@Autowired
 	private CronbasedTriggerEntryRepository repository;
+	
+	@Autowired
+	private ObsClient obsClient;
 
 	@Bean
 	public Function<Message<?>, List<Message<CatalogEvent>>> cronbasedTrigger() {
-		return new CronbasedTriggerService(properties, metadataClient, repository);
+		return new CronbasedTriggerService(properties, metadataClient, repository, obsClient);
 	}
 }

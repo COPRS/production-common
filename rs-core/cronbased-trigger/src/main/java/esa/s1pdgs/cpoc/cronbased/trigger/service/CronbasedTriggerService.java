@@ -24,9 +24,9 @@ import esa.s1pdgs.cpoc.cronbased.trigger.config.CronbasedTriggerProperties.Timer
 import esa.s1pdgs.cpoc.cronbased.trigger.db.CronbasedTriggerEntry;
 import esa.s1pdgs.cpoc.cronbased.trigger.db.CronbasedTriggerEntryRepository;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
-import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class CronbasedTriggerService implements Function<Message<?>, List<Message<CatalogEvent>>> {
 
@@ -36,12 +36,14 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 	private CronbasedTriggerProperties properties;
 	private MetadataClient metadataClient;
 	private CronbasedTriggerEntryRepository repository;
+	private ObsClient obsClient;
 
 	public CronbasedTriggerService(final CronbasedTriggerProperties properties, final MetadataClient metadataClient,
-			final CronbasedTriggerEntryRepository repository) {
+			final CronbasedTriggerEntryRepository repository, final ObsClient obsClient) {
 		this.properties = properties;
 		this.metadataClient = metadataClient;
 		this.repository = repository;
+		this.obsClient = obsClient;
 	}
 
 	@Override
@@ -177,17 +179,20 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 	private CatalogEvent toCatalogEvent(final ProductFamily productFamily, final String productType,
 			final SearchMetadata metadata) {
 		CatalogEvent event = new CatalogEvent();
-		event.setProductFamily(productFamily);
+		event.setUid(UUID.randomUUID());
+		
+		for (Entry<String, String> entry : metadata.getAdditionalProperties().entrySet()) {
+			event.getMetadata().put(entry.getKey(), entry.getValue());
+		}
+		
+		event.setMissionId(metadata.getMissionId());
+		event.setSatelliteId(metadata.getSatelliteId());
 		event.setMetadataProductName(metadata.getProductName());
 		event.setKeyObjectStorage(metadata.getKeyObjectStorage());
+		event.setStoragePath(obsClient.getAbsoluteStoragePath(productFamily, metadata.getProductName()));
+		event.setProductFamily(productFamily);
 		event.setMetadataProductType(productType);
-		event.setUid(UUID.randomUUID());
-
-		event.getMetadata().put("satelliteId", metadata.getSatelliteId());
-		event.getMetadata().put(MissionId.FIELD_NAME, metadata.getMissionId());
-		event.getMetadata().put("startTime", metadata.getValidityStart());
-		event.getMetadata().put("stopTime", metadata.getValidityStop());
-
+		
 		return event;
 	}
 
