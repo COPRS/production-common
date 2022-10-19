@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import esa.s1pdgs.cpoc.cronbased.trigger.db.CronbasedTriggerEntry;
 import esa.s1pdgs.cpoc.cronbased.trigger.db.CronbasedTriggerEntryRepository;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 
 public class TestCronbasedTriggerService {
 	
@@ -21,6 +22,9 @@ public class TestCronbasedTriggerService {
 	
 	@Mock
 	private CronbasedTriggerEntryRepository repository;
+	
+	@Mock
+	private ObsClient obsClient;
 	
 	@Before
 	public void init() {
@@ -35,7 +39,7 @@ public class TestCronbasedTriggerService {
 		
 		Date now = new Date(2022, 10, 4, 10, 16, 21);
 		
-		CronbasedTriggerService service = new CronbasedTriggerService(null, metadataClient, repository);
+		CronbasedTriggerService service = new CronbasedTriggerService(null, metadataClient, repository, obsClient);
 		assertTrue(service.groupShallBeChecked(triggerEntry, now, cronExpression));
 	}
 	
@@ -47,7 +51,7 @@ public class TestCronbasedTriggerService {
 		
 		Date now = new Date(2022, 10, 4, 10, 14, 21);
 		
-		CronbasedTriggerService service = new CronbasedTriggerService(null, metadataClient, repository);
+		CronbasedTriggerService service = new CronbasedTriggerService(null, metadataClient, repository, obsClient);
 		assertFalse(service.groupShallBeChecked(triggerEntry, now, cronExpression));
 	}
 	
