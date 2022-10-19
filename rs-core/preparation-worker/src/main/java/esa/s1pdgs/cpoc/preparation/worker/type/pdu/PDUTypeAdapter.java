@@ -167,7 +167,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-							job.getStartTime(), job.getStopTime(), workerSettings.getProductMode().toString());
+							job.getStartTime(), job.getStopTime());
 
 					/*
 					 * In a following step the start and stop time of the job will be set to the
@@ -188,8 +188,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 						// of interval
 						List<S3Metadata> products = metadataClient.getProductsInRange(alternative.getFileType(),
 								elementMapper.inputFamilyOf(alternative.getFileType()), returnValue.getSatelliteId(),
-								job.getStartTime(), job.getStopTime(), 0.0, 0.0,
-								workerSettings.getProductMode().toString());
+								job.getStartTime(), job.getStopTime(), 0.0, 0.0);
 
 						for (S3Metadata product : products) {
 							if (product.getGranulePosition().equals("LAST")) {
@@ -198,8 +197,7 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 								// Update tasks again
 								tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-										job.getStartTime(), product.getValidityStop(),
-										workerSettings.getProductMode().toString());
+										job.getStartTime(), product.getValidityStop());
 								break;
 							}
 						}
