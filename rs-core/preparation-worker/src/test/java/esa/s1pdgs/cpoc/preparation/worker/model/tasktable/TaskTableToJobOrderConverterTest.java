@@ -95,7 +95,7 @@ public class TaskTableToJobOrderConverterTest {
 
 		final XmlConverter xmlConverter = new XmlConfig().xmlConverter();
 		final TaskTable taskTable =
-				new TaskTableFactory(xmlConverter).buildTaskTable(taskTableFile, ApplicationLevel.SPP_OBS);
+				new TaskTableFactory(xmlConverter).buildTaskTable(taskTableFile, ApplicationLevel.SPP_OBS, "");
 
 		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING);
 
@@ -121,8 +121,7 @@ public class TaskTableToJobOrderConverterTest {
 
 		final XmlConverter xmlConverter = new XmlConfig().xmlConverter();
 		final TaskTable taskTable =
-				new TaskTableFactory(xmlConverter).buildTaskTable(taskTableFile, ApplicationLevel.SPP_OBS);
-
+				new TaskTableFactory(xmlConverter).buildTaskTable(taskTableFile, ApplicationLevel.SPP_OBS, ""
 		final TaskTableToJobOrderConverter converter = new TaskTableToJobOrderConverter(ProductMode.SLICING);
 
 		final JobOrder jobOrder = new JobOrder(converter.apply(taskTable), ApplicationLevel.SPP_OBS);

@@ -157,7 +157,7 @@ public class L0SegmentTypeAdapterTest {
 		final File xmlFile = new File("./test/data/l0_segment_config/task_tables/TaskTable.L0ASP.xml");
 
 		taskTableAdapter = new TaskTableAdapter(xmlFile,
-				taskTableFactory.buildTaskTable(xmlFile, ApplicationLevel.L0_SEGMENT), elementMapper,
+				taskTableFactory.buildTaskTable(xmlFile, ApplicationLevel.L0_SEGMENT, ""), elementMapper,
 				ProductMode.SLICING);
 	}
 

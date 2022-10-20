@@ -71,7 +71,7 @@ public class JobOrderAdapterTest {
 
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
                 xmlFile,
-                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
+                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel(), ""),
                 elementMapper,
                 ProductMode.ALWAYS
         );
