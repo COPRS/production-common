@@ -85,7 +85,7 @@ public class AuxQueryTest {
 
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
                 xmlFile,
-                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
+                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel(), ""),
                 elementMapper,
                 ProductMode.ALWAYS
         );
@@ -206,7 +206,7 @@ public class AuxQueryTest {
 
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
                 xmlFile,
-                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
+                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel(), ""),
                 elementMapper,
                 ProductMode.SLICING
         );

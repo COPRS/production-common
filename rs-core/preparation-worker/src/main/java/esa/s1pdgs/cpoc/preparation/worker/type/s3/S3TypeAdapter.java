@@ -111,7 +111,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				LOGGER.error("Error while determining viscal range, skip changing interval for AppDataJob", e);
 			}
 		}
-		
+
 		// Calculate, when the Job will be timed out
 		if (workerSettings.getPrimaryCheckMaxTimelifeS() != 0) {
 			final Date creationDate = appDataJob.getGeneration().getCreationDate();
@@ -317,7 +317,6 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				return;
 			}
 		}
-		
 
 		// Extract a list of all inputs from the tasks
 		final List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
@@ -412,8 +411,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	private TaskTableAdapter getTTAdapterForTaskTableName(final String taskTable) {
 		final File ttFile = new File(workerSettings.getDiroftasktables(), taskTable);
 		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
-				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper,
-				workerSettings.getProductMode());
+				ttFactory.buildTaskTable(ttFile, processSettings.getLevel(), workerSettings.getPathTaskTableXslt()),
+				elementMapper, workerSettings.getProductMode());
 
 		return tasktableAdapter;
 	}

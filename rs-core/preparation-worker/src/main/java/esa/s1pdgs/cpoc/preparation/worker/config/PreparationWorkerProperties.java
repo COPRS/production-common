@@ -217,6 +217,8 @@ public class PreparationWorkerProperties {
      */
     private Map<String, Long> maxAgeJobMs = new HashMap<>();
 
+    private String pathTaskTableXslt = "";
+    
 	/**
 	 * Initialization function:
 	 * <li>Build maps by splitting the corresponding string (note: we cannot map
@@ -478,6 +480,14 @@ public class PreparationWorkerProperties {
 		this.maxAgeJobMs = maxAgeJobMs;
 	}
 
+	public String getPathTaskTableXslt() {
+		return pathTaskTableXslt;
+	}
+
+	public void setPathTaskTableXslt(String pathTaskTableXslt) {
+		this.pathTaskTableXslt = pathTaskTableXslt;
+	}
+
 	/**
 	 * Display object in JSON format
 	 */
@@ -490,6 +500,6 @@ public class PreparationWorkerProperties {
 				+ "\", typeSliceLength: \"" + typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \""
 				+ oqcCheck + "\", productMode: \"" + productMode + "\", inputWaiting: \"" + inputWaiting
 				+ "\", joborderTimelinessCategoryMapping:" + joborderTimelinessCategoryMapping + "\", maxAgeJobMs:"
-				+ maxAgeJobMs + "\"}";
+				+ maxAgeJobMs + "\", pathTaskTableXslt:" + pathTaskTableXslt + "\"}";
 	}
 }
