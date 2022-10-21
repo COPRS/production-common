@@ -39,11 +39,11 @@ public class TaskTableFactory {
 			} else {
 				final TransformerFactory transFactory = TransformerFactory.newInstance();
 				final Transformer transformer = transFactory.newTransformer(new StreamSource(pathTaskTableXslt));
-				final PipedOutputStream transformationStream = new PipedOutputStream();
+				final PipedInputStream transformationStream = new PipedInputStream();
 
-				transformer.transform(new StreamSource(xmlFile), new StreamResult(transformationStream));
-				taskTable = (TaskTable) xmlConverter
-						.convertFromStreamToObject(new PipedInputStream(transformationStream));
+				transformer.transform(new StreamSource(xmlFile),
+						new StreamResult(new PipedOutputStream(transformationStream)));
+				taskTable = (TaskTable) xmlConverter.convertFromStreamToObject(transformationStream);
 			}
 			taskTable.setLevel(level);
 			return taskTable;
