@@ -1,9 +1,14 @@
 package esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.Transformer;
@@ -39,11 +44,13 @@ public class TaskTableFactory {
 			} else {
 				final TransformerFactory transFactory = TransformerFactory.newInstance();
 				final Transformer transformer = transFactory.newTransformer(new StreamSource(pathTaskTableXslt));
-				final PipedInputStream transformationStream = new PipedInputStream();
+				final ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
 
-				transformer.transform(new StreamSource(xmlFile),
-						new StreamResult(new PipedOutputStream(transformationStream)));
-				taskTable = (TaskTable) xmlConverter.convertFromStreamToObject(transformationStream);
+				transformer.transform(new StreamSource(xmlFile), new StreamResult(transformationStream));
+				String taskTableString = transformationStream.toString(Charset.defaultCharset().name());
+				InputStream taskTableStream = new ByteArrayInputStream(taskTableString.getBytes(StandardCharsets.UTF_8));
+				
+				taskTable = (TaskTable) xmlConverter.convertFromStreamToObject(taskTableStream);
 			}
 			taskTable.setLevel(level);
 			return taskTable;
