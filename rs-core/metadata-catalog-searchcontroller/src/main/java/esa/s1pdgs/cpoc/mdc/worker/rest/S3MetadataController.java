@@ -40,17 +40,17 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	public ResponseEntity<List<S3Metadata>> getProductsInRange(@PathVariable(name = "productType") String productType,
 			@RequestParam(name = "productFamily") final String productFamily,
 			@RequestParam(name = "satellite") final String satellite,
-			@RequestParam(name = "start") final String rangeStart, @RequestParam(name = "stop") final String rangeStop,
-			@RequestParam(value = "timeliness") final String timeliness) {
+			@RequestParam(name = "start") final String rangeStart,
+			@RequestParam(name = "stop") final String rangeStop) {
 
 		try {
 			List<S3Metadata> response = new ArrayList<>();
 
-			LOGGER.info("Received S3 MarginTT search query for family '{}', product type '{}', timeliness '{}'",
-					productFamily.toString(), productType, timeliness);
+			LOGGER.info("Received S3 MarginTT search query for family '{}', product type '{}'",
+					productFamily.toString(), productType);
 
 			List<S3Metadata> result = esServices.rangeCoverQuery(rangeStart, rangeStop, productType, satellite,
-					timeliness, ProductFamily.fromValue(productFamily));
+					ProductFamily.fromValue(productFamily));
 
 			if (result != null) {
 				LOGGER.debug("Query returned {} results", result.size());
@@ -94,8 +94,8 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 					orbitNumber, e.getCode().getCode(), e.getLogMessage());
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		} catch (final Exception e) {
-			LOGGER.error("Error on performing Orbit search for product type {} and orbit {}: {}", productType, orbitNumber,
-					LogUtils.toString(e));
+			LOGGER.error("Error on performing Orbit search for product type {} and orbit {}: {}", productType,
+					orbitNumber, LogUtils.toString(e));
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}

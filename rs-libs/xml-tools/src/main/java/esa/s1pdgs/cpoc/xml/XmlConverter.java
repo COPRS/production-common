@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.xml;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.stream.StreamResult;
@@ -65,5 +66,17 @@ public class XmlConverter {
 	public Object convertFromXMLToObject(final String xmlfile) throws IOException, JAXBException {
 		final FileInputStream is = new FileInputStream(xmlfile);
 		return unmarshaller.unmarshal(new StreamSource(is));
+	}
+	
+	/**
+	 * Convert an InputStream into an object
+	 * 
+	 * @param inputStream
+	 * @return
+	 * @throws IOException
+	 * @throws JAXBException
+	 */
+	public Object convertFromStreamToObject(final InputStream inputStream) throws IOException, JAXBException {
+		return unmarshaller.unmarshal(new StreamSource(inputStream));
 	}
 }

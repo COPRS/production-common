@@ -87,10 +87,10 @@ public class ServiceConfiguration {
 		for (File taskTableFile : ttManager.tasktables()) {
 			LOG.debug("Loading tasktable {}", taskTableFile.getAbsolutePath());
 			
-			TaskTableAdapter adapter = new TaskTableAdapter(taskTableFile,
-					taskTableFactory.buildTaskTable(taskTableFile, processSettings.getLevel()), elementMapper,
-					settings.getProductMode());
-			
+			TaskTableAdapter adapter = new TaskTableAdapter(taskTableFile, taskTableFactory
+					.buildTaskTable(taskTableFile, processSettings.getLevel(), settings.getPathTaskTableXslt()),
+					elementMapper, settings.getProductMode());
+
 			/* RS-584: Custom selection policy existing in SL1 that is not supported by the software
 			   Thus it will be checked if custom and class matching to com.werum.esa.pfm.selection.policies.PolicyIntersectMinNumber.
 			   If this is true, it will be replaced with ValIntersect

@@ -352,6 +352,13 @@ public class SearchMetadataController {
 					response.add(f);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else if ("LatestStartValidity".equals(mode)) {
+				final SearchMetadata f = esServices.latestStartValidity(productType, ProductFamily.fromValue(productFamily), satellite);
+
+				if (f != null) {
+					response.add(f);
+				}
+				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("LatestStopValidity".equals(mode)) {
 				final SearchMetadata f = esServices.latestStopValidity(productType, ProductFamily.fromValue(productFamily), satellite);
 

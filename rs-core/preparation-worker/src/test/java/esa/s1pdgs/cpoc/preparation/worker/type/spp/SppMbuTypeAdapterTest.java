@@ -84,7 +84,7 @@ public class SppMbuTypeAdapterTest {
 		final File xmlFile = new File("./src/test/resources/MBU_TT_01.xml");
 
 		taskTableAdapter = new TaskTableAdapter(xmlFile,
-				taskTableFactory.buildTaskTable(xmlFile, ApplicationLevel.SPP_MBU), elementMapper,
+				taskTableFactory.buildTaskTable(xmlFile, ApplicationLevel.SPP_MBU, ""), elementMapper,
 				ProductMode.NON_SLICING);
 		
 

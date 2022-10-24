@@ -836,6 +836,59 @@ public class EsServices {
 		return Collections.emptyList();
 	}
 
+	public SearchMetadata latestStartValidity(final String productType, final ProductFamily productFamily,
+			final String satelliteId) throws Exception {
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType)).must(satelliteId(satelliteId));
+
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("latestStartValidity: query composed is {}", queryBuilder);
+
+		sourceBuilder.size(1);
+		sourceBuilder.sort(new FieldSortBuilder("startTime").order(SortOrder.DESC));
+
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
+		searchRequest.source(sourceBuilder);
+
+		try {
+			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
+			if (this.isNotEmpty(searchResponse)) {
+				final Map<String, Object> source = searchResponse.getHits().getAt(0).getSourceAsMap();
+				final SearchMetadata r = new SearchMetadata();
+				r.setProductName(source.get("productName").toString());
+				r.setProductType(source.get("productType").toString());
+				r.setKeyObjectStorage(source.get("url").toString());
+				if (source.containsKey("validityStartTime")) {
+					try {
+						r.setValidityStart(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStartTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStartTime");
+					}
+				}
+				if (source.containsKey("validityStopTime")) {
+					try {
+						r.setValidityStop(
+								DateUtils.convertToMetadataDateTimeFormat(source.get("validityStopTime").toString()));
+					} catch (final DateTimeParseException e) {
+						throw new MetadataMalformedException("validityStopTime");
+					}
+				}
+				source.forEach((key, value) -> {
+					if (value != null)
+						r.addAdditionalProperty(key, value.toString());
+				});
+				return r;
+			}
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+
+		return null;
+	}
+	
 	public SearchMetadata latestStopValidity(final String productType,
 											 final ProductFamily productFamily, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
@@ -1112,13 +1165,12 @@ public class EsServices {
 	 *                   search itself throws an error
 	 */
 	public List<S3Metadata> rangeCoverQuery(final String startTime, final String stopTime, final String productType,
-			final String satelliteId, final String timeliness, final ProductFamily productFamily) throws Exception {
+			final String satelliteId, final ProductFamily productFamily) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
 				.must(QueryBuilders.rangeQuery("startTime").lt(stopTime))
 				.must(QueryBuilders.rangeQuery("stopTime").gt(startTime)).must(satelliteId(satelliteId))
-				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
-				.must(QueryBuilders.termQuery(timeliness, true));
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
 
 		LOGGER.debug("query composed is {}", queryBuilder);
 
@@ -1406,6 +1458,9 @@ public class EsServices {
 					local.setProductType(source.get("productType").toString());
 					local.setMissionId(source.get(MissionId.FIELD_NAME).toString());
 					local.setKeyObjectStorage(source.get("url").toString());
+					if (source.containsKey("satelliteId")) {
+						local.setSatelliteId(source.get("satelliteId").toString());
+					}
 					if (source.containsKey("startTime")) {
 						try {
 							local.setValidityStart(
