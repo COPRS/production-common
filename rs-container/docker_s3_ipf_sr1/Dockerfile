@@ -4,7 +4,7 @@ WORKDIR /app
 
 FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as base
 
-FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/sentinel3/s3-sr1:07.02
+FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/sentinel3/s3-sr1:07.03
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
