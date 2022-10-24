@@ -11,7 +11,7 @@ ARG COMMIT_ID
 ARG BRANCH_TEXT
 ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory/cfi"
 
-
+ 
 ### Reconstruction of the base image provided by the agency
 USER root
 
