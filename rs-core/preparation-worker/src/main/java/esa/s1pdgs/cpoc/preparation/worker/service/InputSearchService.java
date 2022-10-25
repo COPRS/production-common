@@ -61,51 +61,53 @@ public class InputSearchService {
 		List<IpfExecutionJob> executionJobs = new ArrayList<>();
 
 		for (AppDataJob job : appDataJobs) {
-			if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
-				try {
-					LOGGER.info("Start main input search for AppDataJob {}", job.getId());
-					job = mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
-				} catch (DiscardedException e) {
-					// Terminate Job
-					LOGGER.info("Received signal to discard job {}: {}", job.getId(), e.getMessage());
-					job.setState(AppDataJobState.TERMINATED);
-					job.setTimeoutDate(null);
-				}
-			}
-
-			if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
-				try {
-					LOGGER.info("Start aux input search for AppDataJob {}", job.getId());
-					job = auxInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Aux input search did not complete successfully: {}", e.getMessage());
-				}
-			}
-
-			if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
-				try {
-					LOGGER.info("Start generating IpfExecutionJob for AppDataJob {}", job.getId());
-
-					IpfExecutionJob executionJob = jobCreationService.createExecutionJob(job,
-							taskTableAdapters.get(job.getTaskTableName()));
-					if (executionJob != null) {
-						executionJobs.add(executionJob);
-					} else {
-						// TODO: Improve Error Handling
-						LOGGER.error("Could not generate ExecutionJob for AppDataJob {}", job.getId());
-					}
-				} catch (JobStateTransistionFailed e) {
-					LOGGER.info("Generation of IpfExecutionJob did not complete successfully: {}", e.getMessage());
-				}
-			}
-
-			// Update Job in Mongo
 			try {
+				if (job.getGeneration().getState() == AppDataJobGenerationState.INITIAL) {
+					try {
+						LOGGER.info("Start main input search for AppDataJob {}", job.getId());
+						job = mainInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+					} catch (JobStateTransistionFailed e) {
+						LOGGER.info("Main input search did not complete successfully: {}", e.getMessage());
+					} catch (DiscardedException e) {
+						// Terminate Job
+						LOGGER.info("Received signal to discard job {}: {}", job.getId(), e.getMessage());
+						job.setState(AppDataJobState.TERMINATED);
+						job.setTimeoutDate(null);
+					}
+				}
+	
+				if (job.getGeneration().getState() == AppDataJobGenerationState.PRIMARY_CHECK) {
+					try {
+						LOGGER.info("Start aux input search for AppDataJob {}", job.getId());
+						job = auxInputSearch(job, taskTableAdapters.get(job.getTaskTableName()));
+					} catch (JobStateTransistionFailed e) {
+						LOGGER.info("Aux input search did not complete successfully: {}", e.getMessage());
+					}
+				}
+	
+				if (job.getGeneration().getState() == AppDataJobGenerationState.READY) {
+					try {
+						LOGGER.info("Start generating IpfExecutionJob for AppDataJob {}", job.getId());
+	
+						IpfExecutionJob executionJob = jobCreationService.createExecutionJob(job,
+								taskTableAdapters.get(job.getTaskTableName()));
+						if (executionJob != null) {
+							executionJobs.add(executionJob);
+						} else {
+							// TODO: Improve Error Handling
+							LOGGER.error("Could not generate ExecutionJob for AppDataJob {}", job.getId());
+						}
+					} catch (JobStateTransistionFailed e) {
+						LOGGER.info("Generation of IpfExecutionJob did not complete successfully: {}", e.getMessage());
+					}
+				}
+
+				// Update Job in Mongo
 				appCatJobService.updateJob(job);
 			} catch (AppCatalogJobNotFoundException e) {
 				LOGGER.error("Error while saving new state of AppDataJob {}: {}", job.getId(), e.getMessage());
+			} catch (Exception e) {
+				LOGGER.error("An unexpected exception occured while processing AppDataJob {}: {}", job.getId(), e.getMessage());
 			}
 		}
 
