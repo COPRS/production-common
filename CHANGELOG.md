@@ -4,32 +4,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.7.0-rc1] - NEXT
+## [1.7.0-rc1] - 2022-10-16
 
-RS-571: Fixing typo in Bearer Token using OUTH2_ACCESS_TOKEN instead of OAUTH2_ACCESS_TOKEN. Please note that you need to upgrade your configurations!
+### Added
+
+- RS-508: Process EW L0 only inside AOI given by L0EWSliceMaskCheck (Note that the SLC products are currently not produced due to RS-661)
+- RS-509: Process L1 products only inside AOI given by SeaCoverageCheck
+- RS-570: Enable compression depending on the kind of input (Note: Existing configuration needs to be adjusted. Previously just a single script could be configured and become mission specific. Please check factory default configuration for an example configuration)
+
+### Changed
+- RS-418: Remove support for swift
+- RS-433: Realign CFI version with F1 for S3_L0ACQ RS add-on
+- RS-526: Extend housekeep to support cron based triggers
+- RS-571: Fixing typo in Bearer Token using OUTH2_ACCESS_TOKEN instead of OAUTH2_ACCESS_TOKEN. Please note that you need to upgrade your configurations!
+- RS-579: Remove DEM files from base image
+- RS-623: [BUG] [OPS] Sentinel-1 AIO preparation job stuck in GENERATING state with mandatory files not found (Note: This is just added for documentation purposes and was fixed in 1.5.0 already)
+- RS-635: [BUG] Sentinel-2 footprints are not added to PRIP index correctly
+- RS-650: [BUG] RS core Compression does not compress any product. (Note: This is just added for documentation purposes and was fixed in 1.5.0 already)
+
+### Removed
+
+- N/A
 
 ## [1.6.0-rc1] - 2022-09-29
 
 ### Added
 
-RS-157: Build CFI PUG S3 container
-RS-239: Implementation of a solution for "load balance the lag" mechanism
-RS-512: Script "S3ACQWrapperScript.sh" failed
-RS-518: Implementation of RequestParkingLot API from S1PRO-RequestRepository
-RS-520: Check on overwriting existing product in OBS
-RS-528: Create S3_SR1 processor as RS add-on
-RS-530: Create S3_MW1 processor as RS add-on
-RS-532: Create S3_SL1 processor as RS add-on
-RS-533: Create S3_SL2 processor as RS add-on
-RS-560: Inventory_Metadata.xml must not be mandatory for Metadata Extraction
+- RS-157: Build CFI PUG S3 container
+- RS-239: Implementation of a solution for "load balance the lag" mechanism
+- RS-512: Script "S3ACQWrapperScript.sh" failed
+- RS-518: Implementation of RequestParkingLot API from S1PRO-RequestRepository
+- RS-520: Check on overwriting existing product in OBS
+- RS-528: Create S3_SR1 processor as RS add-on
+- RS-530: Create S3_MW1 processor as RS add-on
+- RS-532: Create S3_SL1 processor as RS add-on
+- RS-533: Create S3_SL2 processor as RS add-on
+- RS-560: Inventory_Metadata.xml must not be mandatory for Metadata Extraction
 
 ### Changed
 
-RS-337: [S1] [L0] L0ASP execution worker fails.
-RS-517: Too many loops due to symbolic links on S3 ACQ execution worker
-RS-519: RS PRO: Make EDIP trigger robust
-RS-527: Create compression topic
-RS-552: Remove affinity from pro-common Helm chart (mocks only)
+- RS-337: [S1] [L0] L0ASP execution worker fails.
+- RS-517: Too many loops due to symbolic links on S3 ACQ execution worker
+- RS-519: RS PRO: Make EDIP trigger robust
+- RS-527: Create compression topic
+- RS-552: Remove affinity from pro-common Helm chart (mocks only)
 
 ### Removed
 
@@ -40,24 +58,37 @@ RS-552: Remove affinity from pro-common Helm chart (mocks only)
 
 ### Added
 
-RS-498: Adding a house keep service handling timeout scenarios
+- RS-498: Adding a house keep service handling timeout scenarios
 
 ### Changed
 
-RS-426: Create catalog topics via strimzi
-RS-427: Create error-warning topic via strimzi
-RS-448: Make wrapper used by S3 ACQ simulator and real IPF using the same code base
-RS-467: Split Sonarqube reports after production-common CI improvements
-RS-497: Update documentation to be easy to use
-RS-493: Removed JSON Licence library from project and replace it with other libs
-RS-496: Renamed action DELETE by drop in DLQ
-RS-501: Changed location where RS Core Components and images are pushed to
-RS-510: Renamed t0PdgsDate in messages
-RS-511: Moved t0PdgsDate from base message to additionalFields
+- RS-426: Create catalog topics via strimzi
+- RS-427: Create error-warning topic via strimzi
+- RS-448: Make wrapper used by S3 ACQ simulator and real IPF using the same code base
+- RS-467: Split Sonarqube reports after production-common CI improvements
+- RS-497: Update documentation to be easy to use
+- RS-493: Removed JSON Licence library from project and replace it with other libs
+- RS-496: Renamed action DELETE by drop in DLQ
+- RS-501: Changed location where RS Core Components and images are pushed to
+- RS-510: Renamed t0PdgsDate in messages
+- RS-511: Moved t0PdgsDate from base message to additionalFields
 
 ### Removed
 
 - N/A
+
+## [1.4.2-rc1] - 2022-10-17
+
+### Added
+N/A
+
+### Changed
+- RS-623 / RS-624: [BUG] [OPS] Sentinel-1 AIO preparation job stuck in GENERATING state with mandatory files not found. Backport from 1.5.0.
+  WARNING: When using this version ensure that the configuration 'app.preparation-worker.process.hostname' for the RS Add-on is not set to ${HOSTNAME}, but a static unique name.
+- RS-635: Sentinel-2 footprints are not added to PRIP index correctly
+
+### Removed
+N/A
 
 ## [1.4.1-rc1] - 2022-09-22
 
