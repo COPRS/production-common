@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-570: Enable compression depending on the kind of input (Note: Existing configuration needs to be adjusted. Previously just a single script could be configured and become mission specific. Please check factory default configuration for an example configuration)
 
 ### Changed
+
 - RS-418: Remove support for swift
 - RS-433: Realign CFI version with F1 for S3_L0ACQ RS add-on
 - RS-526: Extend housekeep to support cron based triggers
@@ -53,7 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - N/A
 
-
 ## [1.5.0-rc1] - 2022-08-31
 
 ### Added
@@ -80,27 +80,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.2-rc1] - 2022-10-17
 
 ### Added
-N/A
+
+- N/A
 
 ### Changed
+
 - RS-623 / RS-624: [BUG] [OPS] Sentinel-1 AIO preparation job stuck in GENERATING state with mandatory files not found. Backport from 1.5.0.
   WARNING: When using this version ensure that the configuration 'app.preparation-worker.process.hostname' for the RS Add-on is not set to ${HOSTNAME}, but a static unique name.
 - RS-635: Sentinel-2 footprints are not added to PRIP index correctly
 
 ### Removed
-N/A
+
+- N/A
 
 ## [1.4.1-rc1] - 2022-09-22
 
 ### Added
-N/A
+
+- N/A
 
 ### Changed
+
 - RS-XX: Backport documentation from develop to branch 1.4
 - RS-560: Inventory_Metadata.xml must not be mandatory for Metadata Extraction
 
 ### Removed
-N/A
+
+- N/A
 
 ## [1.4.0-rc1] - 2022-08-03
 
@@ -127,6 +133,7 @@ N/A
 ## [1.3.0-rc1] - 2022-07-06
 
 ### Added
+
 - RS-248: Update JobProcessing traces
 - RS-313: Develop "DLQ" as RS core component
 - RS-314: Develop DLQ Manager application
@@ -136,21 +143,25 @@ N/A
 - RS-422: Request the AUX GIP_VIEDIR on rs-metadata-catalog-searchcontroller-svc by band
 
 ### Changed
+
 - RS-402: Missing documentation for mongodb
 - RS-425: S2 HKTM and AUX_SAD metadata extraction fails with bad regex
 - RS-409: Remove affinity from pro-common Helm chart
 
 ### Removed
-N/A
+
+- N/A
 
 
 ## [1.2.0-rc1] - 2022-06-08
 
 ### Added
+
 - RS-387: Migration of Preparation Worker to SCDF Application
 - RS-207: Develop "DATALIFECYCLE" as a RS-core component
 
 ### Changed
+
 - RS-388: Request Chunks and DSIB through Search Metadata Controller
 - RS-373: RS-Addon: ingestion and metadata add-ons have multiple wrong deployment variables
 - RS-391: Update RS Core to be in line with ICD RS Core release V5.0
