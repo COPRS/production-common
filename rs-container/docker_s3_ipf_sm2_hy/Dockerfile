@@ -27,7 +27,7 @@ RUN useradd -u 1001 rsuser
 WORKDIR /opt
 
 
-RUN wget -v https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.17%2B8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.17_8.tar.gz
+RUN wget --no-proxy https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.17%2B8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.17_8.tar.gz
 RUN tar -xf OpenJDK11U-jdk_x64_linux_hotspot_11.0.17_8.tar.gz && rm OpenJDK11U-jdk_x64_linux_hotspot_11.0.17_8.tar.gz
 
 ### End of Base-Image  
