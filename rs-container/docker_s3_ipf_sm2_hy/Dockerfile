@@ -12,6 +12,9 @@ ARG BRANCH_TEXT
 ### Reconstruction of the base image provided by the agency
 USER root
 
+RUN unset http_proxy
+RUN unset https_proxy
+
 RUN yum install wget -y
 
 RUN useradd -u 1001 rsuser
@@ -20,9 +23,8 @@ RUN useradd -u 1001 rsuser
 
 WORKDIR /opt
 
-RUN unset http_proxy
-RUN unset https_proxy
-RUN wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.17%2B8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.17_8.tar.gz
+
+RUN wget -v https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.17%2B8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.17_8.tar.gz
 RUN tar -xf OpenJDK11U-jdk_x64_linux_hotspot_11.0.17_8.tar.gz && rm OpenJDK11U-jdk_x64_linux_hotspot_11.0.17_8.tar.gz
 
 ### End of Base-Image  
