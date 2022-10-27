@@ -12,8 +12,11 @@ ARG BRANCH_TEXT
 ### Reconstruction of the base image provided by the agency
 USER root
 
+# Removing proxy from image...
 RUN unset http_proxy
 RUN unset https_proxy
+RUN unset HTTPS_PROXY
+RUN unset HTTP_PROXY
 
 RUN yum install wget -y
 
