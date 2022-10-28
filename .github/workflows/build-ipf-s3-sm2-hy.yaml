@@ -86,10 +86,11 @@ jobs:
             "ARTIFACTORY_USER=${{ secrets.WERUM_ARTIFACTORY_USER }}"
             "ARTIFACTORY_PASS=${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"
           build-args: |
-            BRANCH=${{ steps.extract_branch.outputs.branch }}
+            BRANCH=${{ steps.extract_branch.outputs.branch }}            
             BRANCH_TEXT=${{ steps.extract_branch.outputs.branch }}
             VERSION=${{ env.VERSION }}
             COMMIT_ID=${{ env.COMMIT_ID }}
+            --squash
 
       - name: Scan image
         uses: anchore/scan-action@v2
