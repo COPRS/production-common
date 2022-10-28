@@ -13,7 +13,7 @@ ARG BRANCH_TEXT
 USER root
 
 # Possible workaround using squash to fix unwanted data
-RUN rm -fr /home/thematic-land-branches-s3-ipf
+RUN rm -fr /home/thematic-land-branches-s3-ipf 
 
 # Removing proxy from image...
 RUN unset http_proxy
