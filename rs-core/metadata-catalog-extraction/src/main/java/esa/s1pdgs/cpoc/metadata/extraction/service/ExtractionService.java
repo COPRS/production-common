@@ -136,7 +136,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		final ProductMetadata metadata = extractor.extract(reporting, catJob);
 
 		// TODO move to extractor
-		if (null != catJob.getTimeliness() && !metadata.has("timeliness")) {
+		if (null != catJob.getTimeliness() && !catJob.getTimeliness().isEmpty() && !metadata.has("timeliness")) {
 			metadata.put("timeliness", catJob.getTimeliness());
 		}
 
@@ -184,6 +184,9 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		catEvent.getAdditionalFields().put("productSizeByte", catJob.getProductSizeByte());
 		if (catJob.getStationName() != null) {
 			catEvent.getAdditionalFields().put("stationName", catJob.getStationName());
+		}
+		if (metadata.has("timeliness")) {
+			catEvent.setTimeliness((String) metadata.get("timeliness"));
 		}
 
 		return catEvent;

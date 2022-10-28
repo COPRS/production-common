@@ -90,7 +90,7 @@ public final class CatalogEventAdapter {
 	}
 	
 	public final String timeliness() {
-		return getStringValue("timeliness", null);
+		return getStringValue("timeliness", "");
 	}
 	
 	public final String productConsolidation() {

@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * Exchanged object for the product category LevelJobs.
@@ -31,10 +30,6 @@ public class IpfExecutionJob extends AbstractMessage {
 	 */
 	private String jobOrder;
 
-	/**
-	 * Timeliness
-	 */
-	private String timeliness;
 
 	private String etadMode = "";
 
@@ -109,20 +104,6 @@ public class IpfExecutionJob extends AbstractMessage {
 	 */
 	public void setJobOrder(final String jobOrder) {
 		this.jobOrder = jobOrder;
-	}
-
-	/**
-	 * @return the timeliness
-	 */
-	public String getTimeliness() {
-		return timeliness;
-	}
-
-	/**
-	 * @param timeliness the timeliness to set
-	 */
-	public void setTimeliness(final String timeliness) {
-		this.timeliness = timeliness;
 	}
 
 	/**
