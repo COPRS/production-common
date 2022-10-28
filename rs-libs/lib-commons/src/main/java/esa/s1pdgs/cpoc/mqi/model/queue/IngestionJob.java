@@ -39,8 +39,6 @@ public class IngestionJob extends AbstractMessage {
 
 	private String mode;
 
-	private String timeliness;
-
 	private Date lastModified; // ... timestamp of file on pickup
 
 	private Map<String, String> additionalMetadata = new HashMap<>();
@@ -126,15 +124,7 @@ public class IngestionJob extends AbstractMessage {
 	public void setMode(final String mode) {
 		this.mode = mode;
 	}
-
-	public String getTimeliness() {
-		return timeliness;
-	}
-
-	public void setTimeliness(final String timeliness) {
-		this.timeliness = timeliness;
-	}
-
+	
 	public String getInboxType() {
 		return inboxType;
 	}

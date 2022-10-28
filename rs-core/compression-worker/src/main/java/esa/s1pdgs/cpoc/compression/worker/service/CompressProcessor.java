@@ -102,6 +102,7 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 		result.setSatelliteId(event.getSatelliteId());
 		result.setUid(report.getUid());
 		result.setStoragePath(obsClient.getAbsoluteStoragePath(event.getProductFamily(), event.getKeyObjectStorage()));
+		result.setTimeliness(event.getTimeliness());
 
 		return MessageBuilder.withPayload(result).build();
 	}

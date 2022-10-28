@@ -69,7 +69,7 @@ public abstract class AbstractMessage {
 
 	protected boolean debug = false;
 		
-	protected String timeliness = null;
+	protected String timeliness = "";
 	
 	public AbstractMessage() {
 	}
