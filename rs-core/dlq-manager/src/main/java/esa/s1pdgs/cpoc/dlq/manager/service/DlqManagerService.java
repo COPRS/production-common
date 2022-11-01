@@ -49,7 +49,7 @@ public class DlqManagerService implements Function<Message<byte[]>, List<Message
 	
 	private final CommonConfigurationProperties commonProperties;
 	
-	public static String X_ROUTE_TO = "x-route-to";
+	public static final String X_ROUTE_TO = "x-route-to";
 	
 	private final RoutingTable routingTable;
 	private final String parkingLotTopic;
