@@ -140,7 +140,7 @@ public class DataLifecycleMetadataRepositoryImpl implements DataLifecycleMetadat
 	
 	private void save(final String productName, final DataLifecycleMetadata insertMetadata, final Map<String, Object> updateMetadata,
 			final boolean pureUpdate, final boolean refreshImmediately) throws DataLifecycleMetadataRepositoryException {
-		if (null != insertMetadata && insertMetadata.getProductName() != productName) {
+		if (null != insertMetadata && !insertMetadata.getProductName().equals(productName)) {
 			throw new IllegalStateException(String.format("Productname %s does not match %s", productName, insertMetadata));
 		}
 		final WriteRequest<?> request;
