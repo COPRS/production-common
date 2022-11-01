@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -94,7 +95,7 @@ public abstract class AbstractProcessor {
 			final String errMess = String.format("%s: Timeout after %s seconds",  message, properties.getCompressionTimeout());
 			
 			LOGGER.debug(errMess);
-			throw new InternalErrorException(errMess, e);
+			throw e;
 		}
 	}
 
@@ -112,8 +113,9 @@ public abstract class AbstractProcessor {
 			
 			final Path p = Paths.get(properties.getWorkingDirectory());
 			if (p.toFile().exists()) {
-				Files.walk(p, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
-					.forEach(File::delete);
+				try (Stream<Path> walk = Files.walk(p, FileVisitOption.FOLLOW_LINKS)) {
+					walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+				}
 			}
 		} catch (final IOException e) {
 			LOGGER.error("{} [code {}] Failed to erase local working directory", event,

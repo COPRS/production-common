@@ -42,7 +42,7 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 	}
 
 	@Override
-	public final Message<CompressionEvent> apply(final CatalogEvent event) {
+	public final Message<CompressionEvent> apply(final CatalogEvent event) throws RuntimeException {
 		final String workDir = properties.getWorkingDirectory();
 
 		final MissionId mission = MissionId.fromFileName(event.getKeyObjectStorage());

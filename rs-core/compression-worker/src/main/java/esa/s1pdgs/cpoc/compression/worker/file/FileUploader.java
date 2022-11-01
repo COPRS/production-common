@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -127,7 +128,13 @@ public class FileUploader {
 	private long size(final File file) {
 		try {
 			final Path folder = file.toPath();
-			return Files.walk(folder).filter(p -> p.toFile().isFile()).mapToLong(p -> p.toFile().length()).sum();
+			
+			long result;
+			try (Stream<Path> walk = Files.walk(folder)) {
+				result = walk.filter(p -> p.toFile().isFile()).mapToLong(p -> p.toFile().length()).sum();
+			}
+			
+			return result;
 
 		} catch (final IOException e) {
 			return 0L;
