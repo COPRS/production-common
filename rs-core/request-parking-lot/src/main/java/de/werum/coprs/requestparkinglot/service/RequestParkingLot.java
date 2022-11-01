@@ -8,6 +8,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 
 public interface RequestParkingLot {	
 
+	@SuppressWarnings("java:S2386")
 	public static final List<MessageState> PROCESSING_STATE_LIST = Arrays.asList(MessageState.values());
 
 	List<FailedProcessing> getFailedProcessings();
