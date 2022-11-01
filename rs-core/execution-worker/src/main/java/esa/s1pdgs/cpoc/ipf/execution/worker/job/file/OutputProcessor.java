@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,6 +41,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.mqi.model.queue.OQCFlag;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
+import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
@@ -685,10 +687,33 @@ public class OutputProcessor {
 						outputToPublish,
 						uuid, 
 						(String) job.getAdditionalFields().get("t0PdgsDate"));
+		processQuicklooks(reportingFactory, uploadBatch);
 		// Publish reports
 		processReports(reportToPublish, uuid);	
 		return res;
 	}
+	
+	private void processQuicklooks(final ReportingFactory reportingFactory, final List<FileObsUploadObject> uploadBatch)
+			throws IOException, AbstractCodedException, ObsEmptyFileException {
+
+		if ("S1".equals(inputMessage.getMissionId())) {
+			for (FileObsUploadObject o : uploadBatch) {
+				if (o.getFile().isDirectory()) {
+					Path previewPath = o.getFile().toPath().resolve("preview");
+					if (previewPath.toFile().exists()) {
+						List<Path> pngFiles = Files.list(previewPath).filter(a -> a.endsWith(".png"))
+								.collect(Collectors.toList());
+						if (pngFiles.size() == 1) {
+							obsClient.upload(Collections.singletonList(
+									newUploadObject(o.getFamily(), o.getKey() + "_bwi.png", pngFiles.get(0).toFile())),
+									reportingFactory);
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	
 	final String debugOutputPrefix(	
 			final String hostname,
