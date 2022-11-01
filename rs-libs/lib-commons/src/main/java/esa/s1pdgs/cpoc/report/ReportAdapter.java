@@ -285,19 +285,22 @@ public final class ReportAdapter implements Reporting {
 	}
 	
 	private static final double calcDuration(final long deltaTMillis) {
-		return new BigDecimal(deltaTMillis / 1000.0)
+		double value = deltaTMillis / 1000.0;
+		return BigDecimal.valueOf(value)
 				.setScale(6, RoundingMode.FLOOR)
 				.doubleValue();
 	}
 	
 	private static final double calcSize(final long sizeByte) {
-		return new BigDecimal(sizeByte / 1048576.0)
+		double value = sizeByte / 1048576.0;
+		return BigDecimal.valueOf(value)
 				.setScale(3, RoundingMode.FLOOR)
 				.doubleValue();
 	}
 	
 	private static final double calcRate(final long sizeByte, final long deltaTMillis) {
-		return new BigDecimal((sizeByte / 1048576.0) / (deltaTMillis / 1000.0))
+		double value = (sizeByte / 1048576.0) / (deltaTMillis / 1000.0);
+		return BigDecimal.valueOf(value)
 				.setScale(3, RoundingMode.FLOOR)
 				.doubleValue();
 	}
