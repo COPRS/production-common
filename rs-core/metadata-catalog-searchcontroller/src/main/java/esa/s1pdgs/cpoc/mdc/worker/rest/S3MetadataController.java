@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,7 +37,7 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	 * 
 	 * @return list of matching products
 	 */
-	@RequestMapping(path = "/{productType}/range")
+	@RequestMapping(path = "/{productType}/range", method = RequestMethod.GET)
 	public ResponseEntity<List<S3Metadata>> getProductsInRange(@PathVariable(name = "productType") String productType,
 			@RequestParam(name = "productFamily") final String productFamily,
 			@RequestParam(name = "satellite") final String satellite,
@@ -75,7 +76,7 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	 * Queries the elastic search for the first product (insertionTime) of a given
 	 * orbit.
 	 */
-	@RequestMapping(path = "/{productType}/orbit")
+	@RequestMapping(path = "/{productType}/orbit", method = RequestMethod.GET)
 	public ResponseEntity<S3Metadata> getFirstProductForOrbit(@PathVariable(name = "productType") String productType,
 			@RequestParam(name = "productFamily") final String productFamily,
 			@RequestParam(name = "satellite") final String satellite,
@@ -108,7 +109,7 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	 * @param productName   product name, which L1Triggering should be extracted
 	 * @return L1Triggering, "NONE" as default
 	 */
-	@RequestMapping(path = "/l1triggering")
+	@RequestMapping(path = "/l1triggering", method = RequestMethod.GET)
 	public ResponseEntity<String> getL1Triggering(@RequestParam(name = "productFamily") final String productFamily,
 			@RequestParam(name = "productName") final String productName) {
 		try {
@@ -137,7 +138,7 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	 * @param productType   product type to determine index
 	 * @return Empty Response
 	 */
-	@RequestMapping(path = "/refreshIndex/{productFamily}")
+	@RequestMapping(path = "/refreshIndex/{productFamily}", method = RequestMethod.GET)
 	public ResponseEntity<String> refreshIndex(@PathVariable(name = "productFamily") final String productFamily,
 			@RequestParam(name = "productType") final String productType) {
 		try {
@@ -165,7 +166,7 @@ public class S3MetadataController extends AbstractMetadataController<S3Metadata>
 	 * @param productName   product name, which the metadata should be extracted
 	 * @return S3Metadata-Object
 	 */
-	@RequestMapping(path = "/{productFamily}")
+	@RequestMapping(path = "/{productFamily}", method = RequestMethod.GET)
 	public ResponseEntity<S3Metadata> getMetadataForProduct(
 			@PathVariable(name = "productFamily") final String productFamily,
 			@RequestParam(name = "productName") final String productName) {

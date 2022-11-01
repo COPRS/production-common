@@ -144,7 +144,7 @@ public class SearchMetadataController {
 			@RequestParam(name = "satelliteId", defaultValue = "") final String satelliteId) {
 		LOGGER.info(
 				"Received interval query for family '{}', startTime '{}', stopTime '{}', productType '{}', satelliteId '{}'",
-				productFamily, intervalStart, intervalStop, productType);
+				productFamily, intervalStart, intervalStop, productType, satelliteId);
 
 		final List<SearchMetadata> response;
 		String startTime;
