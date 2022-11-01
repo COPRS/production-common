@@ -135,7 +135,6 @@ public enum ProductFamily {
             try {
                 ret = ProductFamily.valueOf(value);
             } catch (final IllegalArgumentException ex) {
-            	ex.printStackTrace();
                 ret = ProductFamily.BLANK;
             }
         }

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.appstatus.rest;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.appstatus.Status;
 import esa.s1pdgs.cpoc.appstatus.dto.AppStatusDto;
+import esa.s1pdgs.cpoc.common.ProductCategory;
 
 @RestController
 @RequestMapping(path = "/app")
@@ -55,10 +57,13 @@ public class AppStatusRestController {
 	        statusDto.setTimeSinceLastChange(System.currentTimeMillis() - status.getDateLastChangeMs());
     	} else {
     		for (Status subStatus : appStatus.getSubStatuses().values()) {
-    			AppStatusDto subStatusDto = new AppStatusDto(subStatus.getCategory().get(), subStatus.getState());
-    			subStatusDto.setErrorCounter(subStatus.getErrorCounterNextMessage() + subStatus.getErrorCounterProcessing());
-    			subStatusDto.setTimeSinceLastChange(System.currentTimeMillis() - subStatus.getDateLastChangeMs());
-    			statusDto.addSubStatuses(subStatusDto);
+    			Optional<ProductCategory> category = subStatus.getCategory();
+    			if (category.isPresent()) {
+    				AppStatusDto subStatusDto = new AppStatusDto(category.get(), subStatus.getState());
+    				subStatusDto.setErrorCounter(subStatus.getErrorCounterNextMessage() + subStatus.getErrorCounterProcessing());
+    				subStatusDto.setTimeSinceLastChange(System.currentTimeMillis() - subStatus.getDateLastChangeMs());
+    				statusDto.addSubStatuses(subStatusDto);
+    			}
     		}
     	}
         HttpStatus httpStatus = status.isFatalError() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK;
