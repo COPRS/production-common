@@ -701,7 +701,7 @@ public class OutputProcessor {
 				if (o.getFile().isDirectory()) {
 					Path previewPath = o.getFile().toPath().resolve("preview");
 					if (previewPath.toFile().exists()) {
-						List<Path> pngFiles = Files.list(previewPath).filter(a -> a.endsWith(".png"))
+						List<Path> pngFiles = Files.list(previewPath).filter(a -> a.toString().endsWith(".png"))
 								.collect(Collectors.toList());
 						if (pngFiles.size() == 1) {
 							obsClient.upload(Collections.singletonList(
