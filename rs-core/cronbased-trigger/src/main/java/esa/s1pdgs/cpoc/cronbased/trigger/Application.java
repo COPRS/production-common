@@ -18,6 +18,6 @@ public class Application {
 	 * @param args
 	 */
 	public static void main(final String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(Application.class);
 	}
 }
