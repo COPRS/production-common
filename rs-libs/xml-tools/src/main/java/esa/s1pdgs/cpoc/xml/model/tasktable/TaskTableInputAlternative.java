@@ -52,6 +52,20 @@ public class TaskTableInputAlternative {
 	 */
 	@XmlElement(name = "T1")
 	private double deltaTime1;
+	
+	// min and max results are just used by selection policy ValIntersectWithoutDuplicates
+	
+	/**
+	 * 
+	 */
+	@XmlElement(name = "minResults", required = false)
+	private int minResults;
+	
+	/**
+	 * 
+	 */
+	@XmlElement(name = "minResults", required = false)
+	private int maxResults;
 
 	/**
 	 * 
@@ -143,6 +157,20 @@ public class TaskTableInputAlternative {
 	 */
 	public double getDeltaTime1() {
 		return deltaTime1;
+	}
+
+	/**
+	 * @return the minimum results for ValIntersectWithoutDuplicates
+	 */
+	public int getMinResults() {
+		return minResults;
+	}
+
+	/**
+	 * @return the maximum results for ValIntersectWithoutDuplicates
+	 */
+	public int getMaxResults() {
+		return maxResults;
 	}
 
 	/**
