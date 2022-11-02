@@ -23,6 +23,7 @@ import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.common.BrowseImage;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
@@ -35,6 +36,7 @@ import esa.s1pdgs.cpoc.ipf.execution.worker.job.model.mqi.ObsQueueMessage;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCDefaultTaskFactory;
 import esa.s1pdgs.cpoc.ipf.execution.worker.job.oqc.OQCExecutor;
 import esa.s1pdgs.cpoc.ipf.execution.worker.service.report.GhostHandlingSegmentReportingOutput;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
@@ -687,25 +689,25 @@ public class OutputProcessor {
 						outputToPublish,
 						uuid, 
 						(String) job.getAdditionalFields().get("t0PdgsDate"));
-		processQuicklooks(reportingFactory, uploadBatch);
+		processBrowseImages(reportingFactory, uploadBatch);
 		// Publish reports
 		processReports(reportToPublish, uuid);	
 		return res;
 	}
 	
-	private void processQuicklooks(final ReportingFactory reportingFactory, final List<FileObsUploadObject> uploadBatch)
+	private void processBrowseImages(final ReportingFactory reportingFactory, final List<FileObsUploadObject> uploadBatch)
 			throws IOException, AbstractCodedException, ObsEmptyFileException {
 
-		if ("S1".equals(inputMessage.getMissionId())) {
+		if (MissionId.S1.name().equals(inputMessage.getMissionId())) {
 			for (FileObsUploadObject o : uploadBatch) {
 				if (o.getFile().isDirectory()) {
-					Path previewPath = o.getFile().toPath().resolve("preview");
+					Path previewPath = o.getFile().toPath().resolve(BrowseImage.S1_BROWSE_IMAGE_DIRECTORY);
 					if (previewPath.toFile().exists()) {
-						List<Path> pngFiles = Files.list(previewPath).filter(a -> a.toString().endsWith(".png"))
+						List<Path> pngFiles = Files.list(previewPath).filter(a -> a.toString().endsWith(BrowseImage.S1_BROWSE_IMAGE_FORMAT))
 								.collect(Collectors.toList());
 						if (pngFiles.size() == 1) {
 							obsClient.upload(Collections.singletonList(
-									newUploadObject(o.getFamily(), o.getKey() + "_bwi.png", pngFiles.get(0).toFile())),
+									newUploadObject(o.getFamily(), BrowseImage.s1BrowseImageName(o.getKey()), pngFiles.get(0).toFile())),
 									reportingFactory);
 						}
 					}
