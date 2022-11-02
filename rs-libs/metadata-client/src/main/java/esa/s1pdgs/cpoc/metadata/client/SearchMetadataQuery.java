@@ -220,7 +220,7 @@ public class SearchMetadataQuery {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1,
+        return Objects.hash(identifier, retrievalMode, deltaTime0, deltaTime1, minResults, maxResults,
                 productType, productFamily);
     }
 
@@ -240,6 +240,8 @@ public class SearchMetadataQuery {
                     && Objects.equals(retrievalMode, other.retrievalMode)
                     && Objects.equals(deltaTime0, other.deltaTime0)
                     && Objects.equals(deltaTime1, other.deltaTime1)
+                    && Objects.equals(minResults, other.minResults)
+                    && Objects.equals(maxResults, other.maxResults)
                     && Objects.equals(productType, other.productType)
                     && Objects.equals(productFamily, other.productFamily);
         }
@@ -249,7 +251,7 @@ public class SearchMetadataQuery {
 	@Override
 	public String toString() {
 		return "SearchMetadataQuery [identifier=" + identifier + ", retrievalMode=" + retrievalMode + ", deltaTime0="
-				+ deltaTime0 + ", deltaTime1=" + deltaTime1 + ", productType=" + productType + ", productFamily="
+				+ deltaTime0 + ", deltaTime1=" + deltaTime1 + ", minResults=" + minResults + ", maxResults=" + maxResults + ", productType=" + productType + ", productFamily="
 				+ productFamily + "]";
 	}
     
