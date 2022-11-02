@@ -730,8 +730,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		countRequest.source(searchSourceBuilder);
 
 		try {
-			count = Long.valueOf(this.restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount())
-					.intValue();
+			count = (int) (this.restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount());
 			LOGGER.info("counting PRIP metadata successful, number of hits {}", count);
 		} catch (final IOException e) {
 			LOGGER.error("error while counting PRIP metadata", e);
