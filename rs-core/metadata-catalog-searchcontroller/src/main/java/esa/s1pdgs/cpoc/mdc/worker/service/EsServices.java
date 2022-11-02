@@ -736,6 +736,11 @@ public class EsServices {
 		}
 		return null;
 	}
+	
+	public List<SearchMetadata> valIntersectWithoutDuplicates(final String beginDate, final String endDate, final String productType,
+	final ProductFamily productFamily, final String processMode, final String satelliteId, final int minResults, final int maxResults) throws Exception {
+		return null;
+	}
 
 	public List<SearchMetadata> fullCoverage(final String beginDate, final String endDate, final String productType,
 			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {

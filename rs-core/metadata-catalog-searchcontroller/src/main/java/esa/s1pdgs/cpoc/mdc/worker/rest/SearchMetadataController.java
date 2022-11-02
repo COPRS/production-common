@@ -229,6 +229,8 @@ public class SearchMetadataController {
 			@RequestParam(name = "insConfId", defaultValue = "-1") final int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") final double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") final double dt1,
+			@RequestParam(value = "minResults", required=false) final int minResults,
+			@RequestParam(value = "maxResults", required=false) final int maxResults,
 			@RequestParam(value = "polarisation", defaultValue = "NONE") final String polarisation,
 			@RequestParam(value = "bandIndexId", required = false) final String bandIndexId) {
 		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",
@@ -277,6 +279,24 @@ public class SearchMetadataController {
 					return new ResponseEntity<>(f, HttpStatus.OK);
 				}
 				return new ResponseEntity<>(response, HttpStatus.OK);
+			} else if ("ValIntersectWithoutDuplicates".equals(mode)) {
+				LOGGER.debug(
+						"Using val intersect without duplicates with productType={}, mode={}, t0={}, t1={}, processMode={}, insConfId={}, dt0={}, dt1={}, minResults={}, maxResults={}",
+						productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1, minResults, maxResults);
+				
+				final List<SearchMetadata> f = esServices.valIntersectWithoutDuplicates(
+						convertDateForSearch(startDate, -dt0,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						convertDateForSearch(stopDate, dt1,
+								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
+						productType, ProductFamily.fromValue(productFamily), processMode, satellite, minResults, maxResults);
+				
+				if (f != null) {
+					LOGGER.debug("Query returned {} results", f.size());
+					return new ResponseEntity<>(f, HttpStatus.OK);
+				}
+				return new ResponseEntity<>(response, HttpStatus.OK);
+				
 			} else if ("ClosestStartValidity".equals(mode)) {
 				final SearchMetadata f = esServices.closestStartValidity(productType,
 						ProductFamily.fromValue(productFamily),
