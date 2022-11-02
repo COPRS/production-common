@@ -64,13 +64,19 @@ public class SearchMetadataQuery {
             final double deltaTime0, final double deltaTime1,
             final int minResults, final int maxResults,
             final String productType, final ProductFamily productFamily) {
+        this(identifier, retrievalMode, deltaTime0, deltaTime1, productType, productFamily);
+        this.minResults = minResults;
+        this.maxResults = maxResults;
+    }
+    
+    public SearchMetadataQuery(final int identifier, final String retrievalMode,
+            final double deltaTime0, final double deltaTime1,
+            final String productType, final ProductFamily productFamily) {
         this();
         this.identifier = identifier;
         this.retrievalMode = retrievalMode;
         this.deltaTime0 = deltaTime0;
         this.deltaTime1 = deltaTime1;
-        this.minResults = minResults;
-        this.maxResults = maxResults;
         this.productType = productType;
         this.productFamily = productFamily;
     }
