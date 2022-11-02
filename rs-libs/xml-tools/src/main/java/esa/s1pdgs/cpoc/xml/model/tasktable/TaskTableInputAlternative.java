@@ -64,7 +64,7 @@ public class TaskTableInputAlternative {
 	/**
 	 * 
 	 */
-	@XmlElement(name = "minResults", required = false)
+	@XmlElement(name = "maxResults", required = false)
 	private int maxResults;
 
 	/**
@@ -192,7 +192,7 @@ public class TaskTableInputAlternative {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(order, origin, retrievalMode, customClass, deltaTime0, deltaTime1, fileType, fileNameType);
+		return Objects.hash(order, origin, retrievalMode, customClass, deltaTime0, deltaTime1, minResults, maxResults, fileType, fileNameType);
 	}
 
 	/**
