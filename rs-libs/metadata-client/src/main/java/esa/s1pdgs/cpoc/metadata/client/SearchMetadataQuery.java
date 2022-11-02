@@ -30,6 +30,9 @@ public class SearchMetadataQuery {
      * Delta time to apply to the validity stop time
      */
     private double deltaTime1;
+    
+    private int minResults;
+    private int maxResults;
 
     /**
      * Wanted product type
@@ -59,12 +62,15 @@ public class SearchMetadataQuery {
      */
     public SearchMetadataQuery(final int identifier, final String retrievalMode,
             final double deltaTime0, final double deltaTime1,
+            final int minResults, final int maxResults,
             final String productType, final ProductFamily productFamily) {
         this();
         this.identifier = identifier;
         this.retrievalMode = retrievalMode;
         this.deltaTime0 = deltaTime0;
         this.deltaTime1 = deltaTime1;
+        this.minResults = minResults;
+        this.maxResults = maxResults;
         this.productType = productType;
         this.productFamily = productFamily;
     }
@@ -75,8 +81,10 @@ public class SearchMetadataQuery {
      * @param obj
      */
     public SearchMetadataQuery(final SearchMetadataQuery obj) {
-        this(obj.getIdentifier(), obj.getRetrievalMode(), obj.getDeltaTime0(),
-                obj.getDeltaTime1(), obj.getProductType(),
+        this(obj.getIdentifier(), obj.getRetrievalMode(), 
+        		obj.getDeltaTime0(), obj.getDeltaTime1(), 
+        		obj.getMinResults(), obj.getMaxResults(),
+        		obj.getProductType(),
                 obj.getProductFamily());
     }
 
@@ -139,8 +147,24 @@ public class SearchMetadataQuery {
     public void setDeltaTime1(final double deltaTime1) {
         this.deltaTime1 = deltaTime1;
     }
+    
+    public int getMinResults() {
+		return minResults;
+	}
 
-    /**
+	public void setMinResults(int minResults) {
+		this.minResults = minResults;
+	}
+
+	public int getMaxResults() {
+		return maxResults;
+	}
+
+	public void setMaxResults(int maxResults) {
+		this.maxResults = maxResults;
+	}
+
+	/**
      * @return the productType
      */
     public String getProductType() {

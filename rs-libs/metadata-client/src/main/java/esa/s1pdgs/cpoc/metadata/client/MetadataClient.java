@@ -312,6 +312,11 @@ public class MetadataClient {
 				.queryParam("t0", t0).queryParam("t1", t1).queryParam("dt0", query.getDeltaTime0())
 				.queryParam("dt1", query.getDeltaTime1()).queryParam("satellite", satelliteId);
 
+		if (query.getRetrievalMode().equals("ValIntersectWithoutDuplicates")) {
+			builder.queryParam("minResults", query.getMinResults());
+			builder.queryParam("maxResults", query.getMaxResults());
+		}
+
 		if (processMode != null) {
 			builder.queryParam("processMode", processMode);
 		}

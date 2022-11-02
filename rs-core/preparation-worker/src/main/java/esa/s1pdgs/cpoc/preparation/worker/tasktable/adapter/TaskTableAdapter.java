@@ -329,6 +329,8 @@ public class TaskTableAdapter {
 				inputAltKey.getRetrievalMode(),
 				inputAltKey.getDeltaTime0(),
 				inputAltKey.getDeltaTime1(),
+				inputAltKey.getMinResults(),
+				inputAltKey.getMaxResults(),
 				fileType,
 				family
 		);

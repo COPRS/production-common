@@ -211,6 +211,7 @@ public class TaskTableInputAlternative {
 					&& Objects.equals(retrievalMode, other.retrievalMode)
 					&& Objects.equals(customClass, other.customClass)
 					&& Objects.equals(deltaTime0, other.deltaTime0) && Objects.equals(deltaTime1, other.deltaTime1)
+					&& Objects.equals(minResults, other.minResults) && Objects.equals(maxResults, other.maxResults)
 					&& Objects.equals(fileType, other.fileType) && Objects.equals(fileNameType, other.fileNameType);
 		}
 		return ret;
@@ -221,12 +222,14 @@ public class TaskTableInputAlternative {
 	@Override
 	public String toString() {
 		return "TaskTableInputAlternative [order=" + order + ", origin=" + origin + ", retrievalMode=" + retrievalMode
-				+ ", deltaTime0=" + deltaTime0 + ", deltaTime1=" + deltaTime1 + ", fileType=" + fileType
+				+ ", deltaTime0=" + deltaTime0 + ", deltaTime1=" + deltaTime1
+				+ ", minResults=" + minResults + ", maxResults=" + maxResults
+				+ ", fileType=" + fileType
 				+ ", fileNameType=" + fileNameType + "]";
 	}
 
 	public TaskTableInputAltKey getTaskTableInputAltKey() {
-		return new TaskTableInputAltKey(retrievalMode, deltaTime0, deltaTime1, fileType);
+		return new TaskTableInputAltKey(retrievalMode, deltaTime0, deltaTime1, minResults, maxResults, fileType);
 	}
 
 	/**
@@ -248,6 +251,9 @@ public class TaskTableInputAlternative {
 		 * 
 		 */
 		private final double deltaTime1;
+		
+		private final int minResults;
+		private final int maxResults;
 
 		/**
 		 * 
@@ -257,11 +263,13 @@ public class TaskTableInputAlternative {
 		/**
 		 * 
 		 */
-		public TaskTableInputAltKey(final String retrievalMode, final double deltaTime0, final double deltaTime1,
+		public TaskTableInputAltKey(final String retrievalMode, final double deltaTime0, final double deltaTime1, final int minResults, final int maxResults,
 				final String fileType) {
 			this.retrievalMode = retrievalMode;
 			this.deltaTime0 = deltaTime0;
 			this.deltaTime1 = deltaTime1;
+			this.minResults = minResults;
+			this.maxResults = maxResults;
 			this.fileType = fileType;
 		}
 
@@ -285,6 +293,14 @@ public class TaskTableInputAlternative {
 		public double getDeltaTime1() {
 			return deltaTime1;
 		}
+		
+		public int getMinResults() {
+			return minResults;
+		}
+
+		public int getMaxResults() {
+			return maxResults;
+		}
 
 		/**
 		 * @return the fileType
@@ -299,6 +315,8 @@ public class TaskTableInputAlternative {
 					"retrievalMode='" + retrievalMode + '\'' +
 					", deltaTime0=" + deltaTime0 +
 					", deltaTime1=" + deltaTime1 +
+					", minResults=" + minResults +
+					", maxResults=" + maxResults +
 					", fileType='" + fileType + '\'' +
 					'}';
 		}
@@ -308,7 +326,7 @@ public class TaskTableInputAlternative {
 		 */
 		@Override
 		public int hashCode() {
-			return Objects.hash(retrievalMode, deltaTime0, deltaTime1, fileType);
+			return Objects.hash(retrievalMode, deltaTime0, deltaTime1, minResults, maxResults, fileType);
 		}
 
 		/**
@@ -323,8 +341,10 @@ public class TaskTableInputAlternative {
 				ret = false;
 			} else {
 				final TaskTableInputAltKey other = (TaskTableInputAltKey) obj;
-				ret = Objects.equals(retrievalMode, other.retrievalMode) && Objects.equals(deltaTime0, other.deltaTime0)
-						&& Objects.equals(deltaTime1, other.deltaTime1) && Objects.equals(fileType, other.fileType);
+				ret = Objects.equals(retrievalMode, other.retrievalMode) 
+						&& Objects.equals(deltaTime0, other.deltaTime0) && Objects.equals(deltaTime1, other.deltaTime1) 
+						&& Objects.equals(minResults, other.minResults) && Objects.equals(maxResults,  other.maxResults) 
+						&& Objects.equals(fileType, other.fileType);
 			}
 			return ret;
 		}
