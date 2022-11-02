@@ -229,8 +229,8 @@ public class SearchMetadataController {
 			@RequestParam(name = "insConfId", defaultValue = "-1") final int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") final double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") final double dt1,
-			@RequestParam(value = "minResults", required=false) final int minResults,
-			@RequestParam(value = "maxResults", required=false) final int maxResults,
+			@RequestParam(value = "minResults", required=false) final Integer  minResults,
+			@RequestParam(value = "maxResults", required=false) final Integer maxResults,
 			@RequestParam(value = "polarisation", defaultValue = "NONE") final String polarisation,
 			@RequestParam(value = "bandIndexId", required = false) final String bandIndexId) {
 		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",
