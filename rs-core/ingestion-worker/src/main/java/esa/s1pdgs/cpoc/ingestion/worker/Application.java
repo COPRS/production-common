@@ -10,6 +10,6 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("esa.s1pdgs.cpoc")
 public class Application {
     public static void main(String[] args) {
-        SpringApplication.run(Application.class);
+        SpringApplication.run(Application.class, args);
     }
 }

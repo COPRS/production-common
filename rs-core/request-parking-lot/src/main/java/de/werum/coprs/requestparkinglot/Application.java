@@ -13,6 +13,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @ComponentScan({"de.werum.coprs", "esa.s1pdgs.cpoc"})
 public class Application {
     public static void main(final String[] args) {
-        SpringApplication.run(Application.class);
+        SpringApplication.run(Application.class, args);
     }
 }
