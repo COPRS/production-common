@@ -87,8 +87,6 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 	public void accept(CompressionEvent compressionEvent) {
 	
 		LOGGER.debug("starting saving PRIP metadata, got message: {}", compressionEvent);
-
-
 		MissionId mission = MissionId.fromFileName(compressionEvent.getKeyObjectStorage());
 		
 		final Reporting reporting = ReportingUtils
@@ -103,7 +101,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		reporting.begin(in, new ReportingMessage("Publishing file %s in PRIP", name));
 		
 		try {
-			createAndSave(mission, compressionEvent);
+			createAndSave(compressionEvent);
 		} catch (MetadataQueryException | InterruptedException | PripPublishingException | SdkClientException e) {
 			final String errorMessage = String.format("Error on publishing file %s in PRIP: %s", name,
 					LogUtils.toString(e));
@@ -115,7 +113,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		reporting.end(PripReportingOutput.newInstance(new Date()), new ReportingMessage("Finished publishing file %s in PRIP", name));
 	}
 
-	private final void createAndSave(final MissionId mission, final CompressionEvent compressionEvent) 
+	private final void createAndSave(final CompressionEvent compressionEvent) 
 			throws MetadataQueryException, InterruptedException, PripPublishingException, ObsServiceException, SdkClientException {
 		
 		if (pripMetadataAlreadyExists(compressionEvent.getKeyObjectStorage())) {
@@ -138,7 +136,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		pripMetadata
 				.setChecksums(getChecksums(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage()));
 		
-		processBrowseImages(mission, compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage(), pripMetadata);
+		processBrowseImages(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage(), pripMetadata);
 		
 		if(mdcQuery(compressionEvent.getKeyObjectStorage())) {
 		
@@ -192,21 +190,17 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		LOGGER.debug("end of saving PRIP metadata: {}", pripMetadata);
 	}
 	
-	private void processBrowseImages(MissionId mission, ProductFamily productFamily, String keyObjectStorage,
-			PripMetadata pripMetadata) throws ObsServiceException, SdkClientException {
+	private void processBrowseImages(ProductFamily productFamily, String keyObjectStorage, PripMetadata pripMetadata)
+			throws ObsServiceException, SdkClientException {
 
-		if (MissionId.S1 == mission) {
-		
-			String browseImageKey = BrowseImage.s1BrowseImageName(
-					CompressionEventUtil.removeZipFromKeyObjectStorage(keyObjectStorage));
-	
-			ObsObject obsObject = new ObsObject(CompressionEventUtil.removeZipSuffixFromProductFamily(productFamily),
-					browseImageKey);
-	
-			if (obsClient.exists(obsObject)) {
-	
-				pripMetadata.setBrowseKey(browseImageKey);
-			}
+		String key = CompressionEventUtil.removeZipFromKeyObjectStorage(keyObjectStorage);
+		String browseImagePrefix = BrowseImage.browseImagePrefix(key);
+		ProductFamily family = CompressionEventUtil.removeZipSuffixFromProductFamily(productFamily);
+
+		List<String> browseImageKeys = obsClient.list(family, browseImagePrefix);
+
+		if (browseImageKeys.size() > 0) {
+			pripMetadata.setBrowseKey(browseImageKeys.get(0)); // TODO for more than one quicklook
 		}
 	}
 
