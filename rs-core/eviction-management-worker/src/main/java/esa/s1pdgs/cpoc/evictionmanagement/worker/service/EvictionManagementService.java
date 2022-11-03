@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import esa.s1pdgs.cpoc.common.BrowseImage;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
@@ -28,7 +29,7 @@ import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalSe
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
-import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 
 public class EvictionManagementService {
@@ -82,7 +83,7 @@ public class EvictionManagementService {
 				for (final DataLifecycleMetadata metadata : productsToDelete) {
 					try {
 						numEvictions += this.updateAndDelete(metadata, false, false);
-					} catch (final DataLifecycleTriggerInternalServerErrorException | ObsException | ObsServiceException | MetadataQueryException e) {
+					} catch (final DataLifecycleTriggerInternalServerErrorException | ObsException | SdkClientException | MetadataQueryException e) {
 						LOG.error("error on evicting product, will skip this one: " + e.getMessage());
 						errors.add(e);
 						continue;
@@ -114,7 +115,7 @@ public class EvictionManagementService {
 	
 	private int updateAndDelete(@NonNull DataLifecycleMetadata dataLifecycleMetadata, boolean forceCompressed,
 			boolean forceUncompressed)
-			throws DataLifecycleTriggerInternalServerErrorException, ObsException, ObsServiceException, MetadataQueryException {
+			throws DataLifecycleTriggerInternalServerErrorException, ObsException, MetadataQueryException, SdkClientException {
 		int numEvicted = 0;
 		final LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
 
@@ -131,6 +132,14 @@ public class EvictionManagementService {
 			}
 			LOG.debug("eviction of product from uncompressed storage: " + dataLifecycleMetadata);
 			obsClient.delete(new ObsObject(productFamilyInUncompressedStorage, pathInUncompressedStorage));
+			
+			String browseImagePrefix = BrowseImage.browseImagePrefix(pathInUncompressedStorage);
+			List<String> browseImageKeys = obsClient.list(productFamilyInUncompressedStorage, browseImagePrefix);
+
+			for (String key: browseImageKeys) {
+				obsClient.delete(new ObsObject(productFamilyInUncompressedStorage, key));
+			}
+			
 			boolean metadataDeleted = metadataClient.deleteByFamilyAndProductName(productFamilyInUncompressedStorage, pathInUncompressedStorage);
 			if (metadataDeleted) {
 				evictionUpdater.updateEvictedMetadata(pathInUncompressedStorage, productFamilyInUncompressedStorage);
