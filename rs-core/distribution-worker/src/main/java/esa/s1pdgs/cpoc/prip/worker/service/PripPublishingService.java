@@ -200,7 +200,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		List<String> browseImageKeys = obsClient.list(family, browseImagePrefix);
 
 		if (browseImageKeys.size() > 0) {
-			pripMetadata.setBrowseKey(browseImageKeys.get(0)); // TODO for more than one quicklook
+			pripMetadata.setBrowseKeys(browseImageKeys);
 		}
 	}
 
