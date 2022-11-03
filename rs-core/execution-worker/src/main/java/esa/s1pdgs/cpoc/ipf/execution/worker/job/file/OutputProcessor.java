@@ -516,7 +516,7 @@ public class OutputProcessor {
 		final List<Message<CatalogJob>> res = new ArrayList<>();
 		
 		final double size = uploadBatch.size();
-		final double nbPool = Math.ceil(size / sizeUploadBatch);
+		final int nbPool = (int) Math.ceil(size / sizeUploadBatch);
 
 		for (int i = 0; i < nbPool; i++) {
 			final int lastIndex = Math.min((i + 1) * sizeUploadBatch, uploadBatch.size());
@@ -551,7 +551,7 @@ public class OutputProcessor {
 	 * 
 	 */
 	private List<Message<CatalogJob>> publishAccordingUploadFiles(
-			final double nbBatch,
+			final int nbBatch,
 			final String nextKeyUpload, 
 			final List<ObsQueueMessage> outputToPublish,
 			final UUID uuid,
