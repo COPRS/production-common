@@ -704,8 +704,11 @@ public class OutputProcessor {
 				if (o.getFile().isDirectory()) {
 					Path previewPath = o.getFile().toPath().resolve(BrowseImage.S1_BROWSE_IMAGE_DIRECTORY);
 					if (previewPath.toFile().exists()) {
-						List<Path> pngFiles = Files.list(previewPath).filter(a -> a.toString().endsWith(BrowseImage.S1_BROWSE_IMAGE_FORMAT))
-								.collect(Collectors.toList());
+						
+						List<Path> pngFiles = new ArrayList<>();
+						try (Stream<Path> pathStream =  Files.list(previewPath).filter(a -> a.toString().endsWith(BrowseImage.S1_BROWSE_IMAGE_FORMAT))) {
+							pngFiles = pathStream.collect(Collectors.toList());
+						}
 						if (pngFiles.size() == 1) {
 							obsClient.upload(Collections.singletonList(
 									newUploadObject(o.getFamily(), BrowseImage.s1BrowseImageName(o.getKey()), pngFiles.get(0).toFile())),
