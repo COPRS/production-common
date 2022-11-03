@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBException;
@@ -83,20 +84,28 @@ public class RfiAnnotationExtractor {
 				Path rfiDirectory = annotationDirectory.resolve(rfiConfiguration.getRfiDirectoryName());
 
 				try {
-
-					if (Files.exists(rfiDirectory) && Files.list(rfiDirectory).count() > 0) {
+					long count = 0;
+					try (Stream<Path> stream = Files.list(rfiDirectory)) {
+						count = stream.count();	
+					}
+					
+					if (Files.exists(rfiDirectory) && count > 0) {
 
 						Pattern patternAnnotation = Pattern.compile(rfiConfiguration.getAnnotationFilePattern(),
 								Pattern.CASE_INSENSITIVE);
 
-						rfiNbPolarisationsDetected = calculateRfiNbPolarisationsDetected(
-								Files.list(rfiDirectory).map(p -> p.toFile()).collect(Collectors.toList()));
+						try (Stream<Path> stream = Files.list(rfiDirectory)) {
+							rfiNbPolarisationsDetected = calculateRfiNbPolarisationsDetected(
+									stream.map(p -> p.toFile())
+									.collect(Collectors.toList()));
+						}
 
-						rfiMitigationPerformed = getRfiMitigationPerformedFromAnnotationFile(
-								Files.list(annotationDirectory).filter(p -> !Files.isDirectory(p))
-										.filter(p -> patternAnnotation.matcher(p.getFileName().toString()).matches())
-										.map(p -> p.toFile()).collect(Collectors.toList()));
-
+						try (Stream<Path> stream = Files.list(annotationDirectory)) {
+							rfiMitigationPerformed = getRfiMitigationPerformedFromAnnotationFile(
+									stream.filter(p -> !Files.isDirectory(p))
+									.filter(p -> patternAnnotation.matcher(p.getFileName().toString()).matches())
+									.map(p -> p.toFile()).collect(Collectors.toList()));
+						}
 					}
 
 				} catch (IOException e) {
