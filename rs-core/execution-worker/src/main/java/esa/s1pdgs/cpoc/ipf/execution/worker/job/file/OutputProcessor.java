@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,8 +23,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
-import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.BrowseImage;
+import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.common.errors.UnknownFamilyException;
@@ -731,7 +732,9 @@ public class OutputProcessor {
 	private long size(final File file) throws InternalErrorException {
 		try {
 			final Path folder = file.toPath();
-			return Files.walk(folder).filter(p -> p.toFile().isFile()).mapToLong(p -> p.toFile().length()).sum();
+			try (Stream<Path> walk = Files.walk(folder)) {
+				return walk.filter(p -> p.toFile().isFile()).mapToLong(p -> p.toFile().length()).sum();
+			}
 
 		} catch (final IOException e) {
 			// TODO to have the tests running without actual files
