@@ -83,7 +83,7 @@ public class OutputEstimation {
 		}
 	}
 
-	public void estimateWithError() {
+	public void estimateWithError() throws InternalErrorException {
 
 		ProductFamily inputProductFamily = job.getPreparationJob().getCatalogEvent().getProductFamily();
 		String inputProductType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("productType");
@@ -157,7 +157,7 @@ public class OutputEstimation {
 				productsInWorkDir, 1);
 	}
 
-	private void addMissingOutputForASP(final String inputProductType) {
+	private void addMissingOutputForASP(final String inputProductType) throws InternalErrorException {
 
 		String inputSwathType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("swathtype");
 
@@ -183,7 +183,7 @@ public class OutputEstimation {
 	}
 
 	private int determineCountForASPType(final String inputSwathType, final String inputStartTime,
-			final String inputStopTime) {
+			final String inputStopTime) throws InternalErrorException {
 
 		int estimatedCount = 1;
 
@@ -208,6 +208,10 @@ public class OutputEstimation {
 			} else if ("EW".equals(inputSwathType)) {
 				sliceLength = 60000;
 				sliceOverlap = 8200;
+			}
+			
+			if (sliceLength == 0) {
+				throw new InternalErrorException("Slice length is 0 and would cause a division by zero");
 			}
 
 			double c = (duration.toMillis() - sliceOverlap) * 1f / sliceLength;
