@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.json.JsonObject;
@@ -663,40 +666,20 @@ public class EsServices {
 			throw new Exception(e.getMessage());
 		}
 	}
-
-	/**
-	 * Function which returns the list of all the Segments for a specific datatakeid
-	 * and start/stop time
-	 *
-	 * @return the list of the corresponding Segment
+	
+	/* 
+	 * Creating a method for executing the ES query and format the metadata. This function is exclusively used for ValIntersect variants
+	 * and do not replace a major refactoring needed on all the selection policies  
 	 */
-	public List<SearchMetadata> valIntersect(final String beginDate, final String endDate, final String productType,
-			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
-
-		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+	private List<SearchMetadata> executeValIntersectQuery(String selectionPolicyName, SearchSourceBuilder sourceBuilder, ProductFamily productFamily, String productType) throws Exception {
+		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
 		// Generic fields
 		final String fieldNameStart = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStartTime" : "startTime";
 		final String fieldNameStop = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStopTime" : "stopTime";
-		final BoolQueryBuilder queryBuilder = ProductFamily.AUXILIARY_FILE.equals(productFamily) ?
-				QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
-				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
-				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
-		:
-				QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
-				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
-				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
-				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
-		sourceBuilder.query(queryBuilder);
-		LOGGER.debug("valIntersect: query composed is {}", queryBuilder);
-		sourceBuilder.size(SIZE_LIMIT);
-
-		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
 		searchRequest.source(sourceBuilder);
 		try {
 			final SearchResponse searchResponse = elasticsearchDAO.search(searchRequest);
-			LOGGER.debug("valIntersect: Total Hits Found  {}", this.getTotalSearchHitsStr(searchResponse.getHits()));
+			LOGGER.debug("{}: Total Hits Found  {}", selectionPolicyName, this.getTotalSearchHitsStr(searchResponse.getHits()));
 
 			if (this.isNotEmpty(searchResponse)) {
 				final List<SearchMetadata> r = new ArrayList<>();
@@ -736,10 +719,125 @@ public class EsServices {
 		}
 		return null;
 	}
+
+	/**
+	 * Function which returns the list of all the Segments for a specific datatakeid
+	 * and start/stop time
+	 *
+	 * @return the list of the corresponding Segment
+	 */
+	public List<SearchMetadata> valIntersect(final String beginDate, final String endDate, final String productType,
+			final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
+
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final String fieldNameStart = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStartTime" : "startTime";
+		final String fieldNameStop = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStopTime" : "stopTime";
+		final BoolQueryBuilder queryBuilder = ProductFamily.AUXILIARY_FILE.equals(productFamily) ?
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+		:
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+		sourceBuilder.query(queryBuilder);
+		LOGGER.debug("valIntersect: query composed is {}", queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+
+		return executeValIntersectQuery("valIntersect", sourceBuilder, productFamily, productType);
+	}
+	
+	private static final class DateRange {
+		private String startTime;
+		private String stopTime;
+		
+		public DateRange(final String startTime, final String stopTime) {
+			this.startTime = startTime;
+			this.stopTime = stopTime;
+		}
+		
+		public String getStartTime() {
+			return startTime;
+		}
+
+		public String getStopTime() {
+			return stopTime;
+		}
+		
+		public final int hashCode()
+		  {			
+			return Objects.hash(startTime, stopTime);
+		  }
+
+		public final boolean equals(final Object _obj)
+		  {
+		    if (getClass() == _obj.getClass())
+		    {
+			  return Objects.equals(this, _obj);
+		    }
+		    return false;
+		  }
+				
+	}
 	
 	public List<SearchMetadata> valIntersectWithoutDuplicates(final String beginDate, final String endDate, final String productType,
 	final ProductFamily productFamily, final String processMode, final String satelliteId, final int minResults, final int maxResults) throws Exception {
-		return null;
+		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		// Generic fields
+		final String fieldNameStart = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStartTime" : "startTime";
+		final String fieldNameStop = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStopTime" : "stopTime";
+		final BoolQueryBuilder queryBuilder = ProductFamily.AUXILIARY_FILE.equals(productFamily) ?
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+		:
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
+		sourceBuilder.query(queryBuilder);		
+		LOGGER.debug("valIntersectWithoutDuplicates: query composed is {}", queryBuilder);
+		sourceBuilder.size(SIZE_LIMIT);
+		sourceBuilder.sort("insertionTime");
+		
+		List<SearchMetadata> queryResults = executeValIntersectQuery("valIntersectWithoutDuplicates", sourceBuilder, productFamily, productType);
+		if (queryResults == null || queryResults.size() == 0) {
+			// Query not successful or no hits at all, return empty list
+			return Collections.emptyList();
+		}
+		
+		final List<SearchMetadata> results = new ArrayList<>();
+		final Set<DateRange> usedDateRanges = new HashSet<>();
+		
+		for (final SearchMetadata candidate: queryResults) {
+			final DateRange currentDateRange = new DateRange(candidate.getValidityStart(), candidate.getValidityStop());
+			// results are already ordered by insertion time so the first hit for a specific time slot wins
+			if (!usedDateRanges.contains(currentDateRange)) {
+				results.add(candidate);
+				usedDateRanges.add(currentDateRange);
+			}
+		}
+		
+		LOGGER.debug("After ValintersectNoDuplicate filtering {} hits remains", results.size());
+		
+		if ((results.size()< minResults) | (results.size() > maxResults)) {
+			throw new IllegalArgumentException(
+			          String.format(
+			              "Number of %s query results doesn't match Min(%s) or Max(%s) constraints.",
+			              results.size(),
+			              String.valueOf(minResults),
+			              String.valueOf(maxResults)
+			          )
+			      );
+		}
+
+		return results;
 	}
 
 	public List<SearchMetadata> fullCoverage(final String beginDate, final String endDate, final String productType,
