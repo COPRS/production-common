@@ -338,6 +338,20 @@ public class S3ObsServices {
 
 		return result;
 	}
+	
+	public List<S3ObjectSummary> getAllWithMD5(final String bucketName, final String prefix) {
+		final List<S3ObjectSummary> result = new ArrayList<>();
+		ObjectListing listing = null;
+		do {
+			listing = listing == null ? s3client.listObjects(bucketName, prefix)
+					: s3client.listNextBatchOfObjects(listing);
+			for (final S3ObjectSummary object : listing.getObjectSummaries()) {
+				result.add(object);
+			}
+		} while (listing.isTruncated());
+
+		return result;
+	}
 
 	public final InputStream getAsInputStream(final String bucketName, final String key) throws S3ObsServiceException {
 		try {
