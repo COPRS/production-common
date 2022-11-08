@@ -321,25 +321,30 @@ public abstract class AbstractObsClient implements ObsClient {
 	private ObsObject baseKeyOf(final List<StreamObsUploadObject> objects) {
 		// TODO this needs a safety net against misusage
 		// currently, the assumpion is that all provided StreamObsUploadObject belong to the same directory
-		
+				
 		// for the case it's a single file
 		if (objects.size() == 1) {
 			final StreamObsUploadObject element = objects.get(0);	
 			return new ObsObject(element.getFamily(), element.getKey());
 		}
-		
-		for (final StreamObsUploadObject element : objects) {
-			
-			if (element.getKey().contains("/")) {
-				// trim at first slash (inclusive)
-				return new ObsObject(
-						element.getFamily(), 
-						element.getKey().substring(0, element.getKey().indexOf('/'))
-				);
+				
+				
+		if (objects != null) {
+			if (objects.size() > 1) {
+				final StreamObsUploadObject element = objects.get(0);
+				if (element.getKey().contains("/")) {
+					// trim at first slash (inclusive)
+					return new ObsObject(
+							element.getFamily(), 
+							element.getKey().substring(0, element.getKey().indexOf('/'))
+					);
+				} else {
+					// for the case it's a single file
+					return new ObsObject(element.getFamily(), element.getKey());
+				}
 			}
-			// for the case it's a single file
-			return new ObsObject(element.getFamily(), element.getKey());
-		}		
+		}
+		
 		return null;
 	}
 
@@ -425,8 +430,9 @@ public abstract class AbstractObsClient implements ObsClient {
 						md5sums.remove(key);
 		            }
                 }
-				for (final String key : md5sums.keySet()) {
-					throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
+				
+				if (!md5sums.keySet().isEmpty()) {
+					throw new ObsValidationException("Unexpected objects found: {} for {} of family {}", md5sums.keySet(), object.getKey(), object.getFamily());
 				}
 			}
 		} catch (SdkClientException | ObsException | IOException e) {
