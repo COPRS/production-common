@@ -19,6 +19,8 @@ public final class ReportingUtils {
 		return ( e.getFamily().equals(ProductFamily.L0_SEGMENT) && !toFlatFilename(e.getProductName())
 				.matches(segmentBlacklistPattern));
 	};
+	
+	private static final Predicate<ReportingFilenameEntry> ALL_FILTER = e -> { return true; };
 
 	// This is dirty but the easiest way without modifying 
 	public static void setSegmentBlacklistPattern(final String segmentBlacklistPattern) {
@@ -50,8 +52,7 @@ public final class ReportingUtils {
 	}
 	
 	static List<String> filenamesOf(final List<ReportingFilenameEntry> products) {
-		// everything not matching the segment filter will be reported as 'filename'
-		return uniqueFlatProducts(products, not(SEGMENT_FILTER));				
+		return uniqueFlatProducts(products, ALL_FILTER);				
 	}
 		
 	private static final <E> Predicate<E> not(final Predicate<E> predicate) {
