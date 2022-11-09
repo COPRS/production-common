@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.ApplicationMode;
 import esa.s1pdgs.cpoc.common.ProductCategory;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 
 /**
  * Extraction class of "process" configuration properties
@@ -106,8 +107,18 @@ public class ProcessProperties {
 	private String l0EwSlcMaskFilePath;
 	
 	private String landMaskFilePath;
+	
+	private MissionId mission;
 
-    public ApplicationLevel getLevel() {
+    public MissionId getMission() {
+		return mission;
+	}
+
+	public void setMission(MissionId mission) {
+		this.mission = mission;
+	}
+
+	public ApplicationLevel getLevel() {
         return level;
     }
 

@@ -17,6 +17,7 @@
 		<project.artifactId>rs-preparation-worker</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.preparation.worker.Application</start-class>
         <geotools.version>26-RC</geotools.version>
+        <micrometer.version>1.5.0</micrometer.version>
 	</properties>
 
   <repositories>
@@ -187,6 +188,14 @@
           <artifactId>gt-shapefile</artifactId>
           <version>${geotools.version}</version>
         </dependency>
+        
+        <!-- Expose metrics for Prometheus -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
