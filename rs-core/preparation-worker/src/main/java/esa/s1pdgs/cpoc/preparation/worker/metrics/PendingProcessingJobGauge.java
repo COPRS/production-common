@@ -23,11 +23,14 @@ public class PendingProcessingJobGauge {
 	@Autowired
 	private AppCatJobService appCatJobService;
 	
+	@Autowired
+	private MeterRegistry registry;
+	
 	public Supplier<Number> fetchPendingProcessingJobs() {
 		return () -> appCatJobService.getCountOfPendingJobs();
 	}
 
-	public PendingProcessingJobGauge(MeterRegistry registry) {
+	public PendingProcessingJobGauge() {
 		Gauge.builder("rs_pending_processing_job", fetchPendingProcessingJobs())
 			.tag("mission", processProperties.getMission().toString())
 			.tag("level", processProperties.getLevel().toString())
