@@ -45,7 +45,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.RecoverableDataAccessException;
 
-import esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductEntityCollectionProcessor;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
@@ -167,7 +167,7 @@ public class TestProductEntityCollectionProcessor {
 		doReturn(Arrays.asList(uriResourceEntitySetMock)).when(uriInfoMock).getUriResourceParts();
 		
 		UriInfo uriInfo = new UriInfoImpl().addResourcePart(
-				new UriResourcePrimitivePropertyImpl(new EdmPropertyImpl(null, new CsdlProperty().setName(EntityTypeProperties.Name.name()))));
+				new UriResourcePrimitivePropertyImpl(new EdmPropertyImpl(null, new CsdlProperty().setName(ProductProperties.Name.name()))));
 
 		Method method = new MethodImpl(MethodKind.CONTAINS, Arrays.asList(
 				new MemberImpl(uriInfo, null), new LiteralImpl("'foobar'", EdmString.getInstance())));

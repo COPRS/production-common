@@ -591,7 +591,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		throw new IllegalArgumentException(String.format("sort order not supported: %s", sortOrder));
 	}
 
-	private PripMetadata mapSearchHitToPripMetadata(SearchHit hit) {
+	@SuppressWarnings("unchecked")
+   private PripMetadata mapSearchHitToPripMetadata(SearchHit hit) {
 		final Map<String, Object> sourceAsMap = hit.getSourceAsMap();
 		final PripMetadata pm = new PripMetadata();
 
@@ -652,6 +653,12 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 					}
 					return value;
 				})));
+
+      List<String> browseKeys = (List<String>)sourceAsMap.get(PripMetadata.FIELD_NAMES.BROWSE_KEYS.fieldName());
+		if (null == browseKeys) {
+		   browseKeys = new ArrayList<>();
+		}
+		pm.setBrowseKeys(browseKeys);
 
 		LOGGER.debug("hit {}", pm);
 		return pm;

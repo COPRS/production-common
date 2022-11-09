@@ -1,12 +1,12 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.End;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.EvictionDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Start;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ProductionType;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.PublicationDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
 import static esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION;
 
 import java.time.Instant;
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
-import esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
@@ -88,7 +88,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
 
 		PRIP_INTEGER_PROPERTY_FIELD_NAMES = new HashMap<>();
-		PRIP_INTEGER_PROPERTY_FIELD_NAMES.put(EntityTypeProperties.ContentLength.name(), FIELD_NAMES.CONTENT_LENGTH);
+		PRIP_INTEGER_PROPERTY_FIELD_NAMES.put(ProductProperties.ContentLength.name(), FIELD_NAMES.CONTENT_LENGTH);
 
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES = new HashMap<>();
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_DATETIME_PROPERTY_FIELD_NAMES);
