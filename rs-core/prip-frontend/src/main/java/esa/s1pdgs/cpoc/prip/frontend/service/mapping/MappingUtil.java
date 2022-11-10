@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,9 +164,11 @@ public class MappingUtil {
 	
 	public static EntityCollection quicklookEntityCollectionOf(PripMetadata pripMetadata) {
 	   final EntityCollection quicklookEntityCollection = new EntityCollection();
-      for (final String imageFilename : pripMetadata.getBrowseKeys()) {
-         quicklookEntityCollection.getEntities().add(quicklookEntityOf(imageFilename));         
-   	}
+	   if (null != pripMetadata.getBrowseKeys()) {
+         for (final String imageFilename : pripMetadata.getBrowseKeys()) {
+            quicklookEntityCollection.getEntities().add(quicklookEntityOf(imageFilename));         
+      	}
+	   }
 	   return quicklookEntityCollection; 
 	}
 	

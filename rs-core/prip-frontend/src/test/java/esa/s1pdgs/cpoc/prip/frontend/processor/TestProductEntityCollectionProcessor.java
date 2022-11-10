@@ -11,10 +11,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
@@ -28,7 +31,9 @@ import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerResult;
 import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.Method;
@@ -48,6 +53,7 @@ import org.springframework.dao.RecoverableDataAccessException;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties;
 import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductEntityCollectionProcessor;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
@@ -69,11 +75,23 @@ public class TestProductEntityCollectionProcessor {
 	
 	@Mock
 	UriResourceEntitySet uriResourceEntitySetMock;
+	
+	@Mock
+	UriResourceNavigation uriResourceNavigationMock;
+	
+	@Mock
+	UriParameter UriParameterMock;
+
+	@Mock
+	EdmNavigationProperty edmNavigationPropertyMock;
 
 	@Mock
 	EdmEntitySet edmEntitySetMock;
 
-	@Mock
+   @Mock
+   EdmEntitySet secondLevelEdmEntitySetMock;
+
+   @Mock
 	ODataRequest odataRequestMock;
 
 	@Mock
@@ -90,7 +108,8 @@ public class TestProductEntityCollectionProcessor {
 	}
 
 	@Test
-	public void testReadEntityCollection_OnResult_ShallReturnStatusOk() throws ODataApplicationException, ODataLibraryException, IOException {
+	public void testReadProductEntityCollection_OnResult_ShallReturnStatusOk()
+	      throws ODataApplicationException, ODataLibraryException, IOException {
 		String entitySetName = "Products";
 		String baseUri = "http://example.org";
 		String odataPath = "/" + entitySetName;
@@ -122,7 +141,8 @@ public class TestProductEntityCollectionProcessor {
 	}
 	
 	@Test
-	public void TestReadEntityCollectionWithoutFilters_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailable() throws ODataLibraryException {
+	public void TestReadProductEntityCollectionWithoutFilters_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailable()
+	      throws ODataLibraryException {
 		String entitySetName = "Products";
 		String baseUri = "http://example.org";
 		String odataPath = "/" + entitySetName;
@@ -153,7 +173,8 @@ public class TestProductEntityCollectionProcessor {
 	}
 	
 	@Test
-	public void TestReadEntityCollectionWithFilters_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailable() throws ODataLibraryException {
+	public void TestReadProductEntityCollectionWithFilters_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailable()
+	      throws ODataLibraryException {
 		String entitySetName = "Products";
 		String baseUri = "http://example.org";
 		String odataPath = "/" + entitySetName;
@@ -195,5 +216,53 @@ public class TestProductEntityCollectionProcessor {
 		PripTextFilter filter = new PripTextFilter(FIELD_NAMES.NAME.fieldName(), PripTextFilter.Function.CONTAINS, "foobar");
 		Mockito.verify(pripMetadataRepositoryMock, times(1)).findWithFilter(filter, Optional.empty(), Optional.empty(), Collections.emptyList());
 	}
+	
+	@Test
+   public void testReadQuicklookEntityCollection_OnResult_ShallReturnStatusOk()
+         throws ODataApplicationException, ODataLibraryException, IOException {
+      String rootEntitySetName = "Products";
+      String secondaryEntitySetName = "Quicklooks";
+      String baseUri = "http://example.org";
+      String productId = "00000000-0000-0000-0000-000000000001";
+      String odataPath = "/" + rootEntitySetName + "(" + productId + ")/" + secondaryEntitySetName;
+      
+      final PripMetadata pripMetadata = new PripMetadata();
+      pripMetadata.setId(UUID.fromString(productId));
+      doReturn(pripMetadata).when(pripMetadataRepositoryMock).findById(Mockito.eq(productId));
+      
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(List.of(uriResourceEntitySetMock, uriResourceNavigationMock))
+            .when(uriInfoMock).getUriResourceParts();
+      
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(List.of(UriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn(productId).when(UriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationMock).getProperty();
+
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+
+      doReturn(odataSerializerMock).when(odataMock).createSerializer(Mockito.any());
+      
+      doReturn(serializerResultMock).when(odataSerializerMock).entityCollection(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+      
+      doReturn(new ByteArrayInputStream("expected result".getBytes())).when(serializerResultMock).getContent();
+      
+      ODataResponse odataResponse = new ODataResponse();
+      uut.readEntityCollection(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(productId));
+      assertEquals(HttpStatusCode.OK.getStatusCode(), odataResponse.getStatusCode());
+      assertEquals("expected result", IOUtils.toString(odataResponse.getContent(), StandardCharsets.UTF_8));
+   }
 
 }

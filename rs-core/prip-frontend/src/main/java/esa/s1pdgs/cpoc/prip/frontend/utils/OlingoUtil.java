@@ -20,30 +20,35 @@ public class OlingoUtil {
 	}
 	
 	public static void validate(final UriInfo uriInfo) throws ODataApplicationException {
-	      if(uriInfo.getCustomQueryOptions() != null && uriInfo.getCustomQueryOptions().size() > 0) {
-	         
-	         StringBuffer query = new StringBuffer();
-	         for(CustomQueryOption co : uriInfo.getCustomQueryOptions()) {
-	            query.append(co.getName()).append("=").append(co.getText());
-	         }
-	         
-	         throw new ODataApplicationException("Invalid Query Options: "+query.toString(), HttpStatusCode.BAD_REQUEST.getStatusCode(),
-	               Locale.ROOT);
-	      }
-	      
-	   }
+      if(uriInfo.getCustomQueryOptions() != null && uriInfo.getCustomQueryOptions().size() > 0) {
+         
+         StringBuffer query = new StringBuffer();
+         for(CustomQueryOption co : uriInfo.getCustomQueryOptions()) {
+            query.append(co.getName()).append("=").append(co.getText());
+         }
+         
+         throw new ODataApplicationException("Invalid Query Options: "+query.toString(), HttpStatusCode.BAD_REQUEST.getStatusCode(),
+               Locale.ROOT);
+      }
+   }
 	
-	// --------------------------------------------------------------------------
-
 	public static ContextURL getContextUrl(final EdmEntitySet entitySet, final EdmEntityType entityType,
 			final boolean isSingleEntity) throws ODataLibraryException {
 
 		ContextURL.Builder builder = ContextURL.with();
-		builder = entitySet == null
-				? isSingleEntity ? builder.type(entityType) : builder.asCollection().type(entityType)
-				: builder.entitySet(entitySet);
 
-		builder = builder.suffix(isSingleEntity && entitySet != null ? Suffix.ENTITY : null);
+		if (null != entitySet) {
+		   builder.entitySet(entitySet);
+		   if (isSingleEntity) {
+		      builder.suffix(Suffix.ENTITY);
+		   }
+		} else {
+		   builder.type(entityType);
+		   if (!isSingleEntity) {
+		      builder.asCollection();
+		   }
+		}
+
 		return builder.build();
 	}
 	
@@ -52,17 +57,11 @@ public class OlingoUtil {
 		final String navPropName = edmNavigationProperty.getName();
 		final EdmBindingTarget edmBindingTarget = startEdmEntitySet.getRelatedBindingTarget(navPropName);
 
-		if (null == edmBindingTarget) {
-			throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
-					Locale.ROOT);
-		}
-
 		if (edmBindingTarget instanceof EdmEntitySet) {
-			return (EdmEntitySet) edmBindingTarget;
+		   return (EdmEntitySet) edmBindingTarget;
 		}
-
 		throw new ODataApplicationException("Not supported.", HttpStatusCode.NOT_IMPLEMENTED.getStatusCode(),
-				Locale.ROOT);
+		      Locale.ROOT);
 	}
 
 }

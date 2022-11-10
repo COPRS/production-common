@@ -29,7 +29,6 @@ import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.apache.olingo.server.core.uri.UriResourceWithKeysImpl;
-import org.apache.olingo.server.core.uri.queryoption.ExpandOptionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.RecoverableDataAccessException;
@@ -105,7 +104,8 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 	private void serveProduct(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
          final ContentType responseFormat, final EdmEntitySet edmEntitySet)
                throws ODataApplicationException, ODataLibraryException {
-	   final List<UriParameter> keyPredicates = ((UriResourceEntitySet)uriInfo.getUriResourceParts().get(0)).getKeyPredicates();
+	   final List<UriResource> resourceParts = uriInfo.getUriResourceParts();
+	   final List<UriParameter> keyPredicates = ((UriResourceEntitySet)resourceParts.get(0)).getKeyPredicates();
       final String uuid = keyPredicates.get(0).getText().replace("'", "");
       try {
          final PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
@@ -130,14 +130,14 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 	private void serveQuicklook(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
          final ContentType responseFormat, final EdmEntitySet edmEntitySet) throws ODataApplicationException, ODataLibraryException {
 	   final List<UriResource> resourceParts = uriInfo.getUriResourceParts();
-	   final List<UriParameter> keyPredicates = ((UriResourceEntitySet)uriInfo.getUriResourceParts().get(0)).getKeyPredicates();
+	   final List<UriParameter> keyPredicates = ((UriResourceEntitySet)resourceParts.get(0)).getKeyPredicates();
 	   final ExpandOption expandOption = (ExpandOption) uriInfo.getExpandOption();
 	   final String uuid = keyPredicates.get(0).getText().replace("'", "");
 	   try {
          final PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
          if (null != foundPripMetadata) {
-            final UriResourceWithKeysImpl uriResourceNavigationWithKeys = (UriResourceWithKeysImpl) resourceParts.get(1);
-            final List<UriParameter> quicklookKeyPredicates = uriResourceNavigationWithKeys.getKeyPredicates();
+            final UriResourceWithKeysImpl uriResourceWithKeys = (UriResourceWithKeysImpl) resourceParts.get(1);
+            final List<UriParameter> quicklookKeyPredicates = uriResourceWithKeys.getKeyPredicates();
             final String quicklookId = quicklookKeyPredicates.get(0).getText().replace("'", "");
 
             if (foundPripMetadata.getBrowseKeys().contains(quicklookId)) {
@@ -186,7 +186,8 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
     
 	public void serveProductDownload(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
          final ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-	   final List<UriParameter> keyPredicates = ((UriResourceEntitySet)uriInfo.getUriResourceParts().get(0)).getKeyPredicates();
+	   final List<UriResource> resourceParts = uriInfo.getUriResourceParts();
+	   final List<UriParameter> keyPredicates = ((UriResourceEntitySet)resourceParts.get(0)).getKeyPredicates();
 		final String uuid = keyPredicates.get(0).getText().replace("'", "");
 		try {
 			final PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
@@ -254,13 +255,14 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
 
 	public void serveQuicklookDownload(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
          final ContentType responseFormat) throws ODataApplicationException, ODataLibraryException {
-      final List<UriParameter> keyPredicates = ((UriResourceEntitySet)uriInfo.getUriResourceParts().get(0)).getKeyPredicates();
+	   final List<UriResource> resourceParts = uriInfo.getUriResourceParts();
+      final List<UriParameter> keyPredicates = ((UriResourceEntitySet)resourceParts.get(0)).getKeyPredicates();
       final String uuid = keyPredicates.get(0).getText().replace("'", "");
       try {
          final PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
          if (null != foundPripMetadata) {
-            final UriResourceWithKeysImpl uriResourceNavigationWithKeys = (UriResourceWithKeysImpl) (uriInfo.getUriResourceParts()).get(1);
-            final List<UriParameter> quicklookKeyPredicates = uriResourceNavigationWithKeys.getKeyPredicates();
+            final UriResourceWithKeysImpl uriResourceWithKeys = (UriResourceWithKeysImpl)resourceParts.get(1);
+            final List<UriParameter> quicklookKeyPredicates = uriResourceWithKeys.getKeyPredicates();
             final String quicklookId = quicklookKeyPredicates.get(0).getText().replace("'", "");
             
             if (foundPripMetadata.getBrowseKeys().contains(quicklookId)) {

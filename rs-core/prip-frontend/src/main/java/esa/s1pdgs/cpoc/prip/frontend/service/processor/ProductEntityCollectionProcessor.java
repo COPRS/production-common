@@ -280,7 +280,8 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 	
 	private void serveQuicklooks(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
 	      final ContentType responseFormat, final EdmEntitySet edmEntitySet) throws ODataApplicationException, ODataLibraryException {
-	   final List<UriParameter> keyPredicates = ((UriResourceEntitySet)uriInfo.getUriResourceParts().get(0)).getKeyPredicates();
+	   final List<UriResource> resourceParts = uriInfo.getUriResourceParts();
+	   final List<UriParameter> keyPredicates = ((UriResourceEntitySet)resourceParts.get(0)).getKeyPredicates();
       final String uuid = keyPredicates.get(0).getText().replace("'", "");
       try {
          final PripMetadata foundPripMetadata = pripMetadataRepository.findById(uuid);
