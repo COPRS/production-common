@@ -121,6 +121,7 @@ obs:
 
 # L0 Process configuration
 process:
+  mission: "S1"
   level: "L0"
   hostname: "hostname"
   mode: "TEST"
@@ -145,7 +146,11 @@ process:
     tm-connect-ms: 200
   fixed-delay-ms: 200
   initial-delay-ms: 500
-  
+ 
+common: 
+  rsChainName: test
+  rsChainVersion: 0.0.1
+
 mqi:
   host-uri: http://localhost:8081
   max-retries: 3
