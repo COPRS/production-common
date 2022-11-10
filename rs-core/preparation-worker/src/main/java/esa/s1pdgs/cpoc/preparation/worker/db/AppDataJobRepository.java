@@ -40,5 +40,6 @@ public interface AppDataJobRepository extends MongoRepository<AppDataJob, Long> 
 	@Query(value = "{ 'state': ?0, 'pod': ?1, 'lastUpdateDate': { $lt: ?2 } }")
 	List<AppDataJob> findByStateAndLastUpdateDateLessThan(final String state, final String podName, final Date lastUpdated);
 	
+	@Query(value = "{ 'generation.state' : { $ne: 'SENT' }, 'state' : { $ne: 'TERMINATED' }, 'pod': ?0 }", count = true)
 	Long countByPod(final String podName);
 }
