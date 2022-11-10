@@ -44,8 +44,10 @@ Additionally the Ingestion system needs a persistence in order to store which pr
 The default configuration provided in the RS Core Component is expecting a secret "mongoingestion" in the namespace "processing" containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
 
 Please note that further initialization might be required. For the Ingestion component please execute the following commands in the MongoDB in order to create the credentials for the secret:
+
 ``
 db.createUser({user: "<USER>", pwd: "<PASSWORD>", roles: [{role: "readWrite", db: "coprs"}]})
+db.inboxEntry.createIndex({"processingPod":1, "pickupURL":1, "stationName":1})
 ``
 
 
