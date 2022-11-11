@@ -10,7 +10,7 @@ This document describes the modifications that had been required to tailor the P
 | --- | --- | --- | --- |
 | 01 | 2022/11/07 | N/A | First issue of document |
 
-## Reporting ICD
+## Reporting
 
 PRIP Frontend Reporting has been extendend with the reporting messages:
 
