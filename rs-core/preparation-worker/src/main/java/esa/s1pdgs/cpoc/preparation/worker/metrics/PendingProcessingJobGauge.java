@@ -12,7 +12,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 @Component
 public class PendingProcessingJobGauge {
-	
+
 	@Autowired
 	private AppCatJobService appCatJobService;
 
@@ -21,10 +21,14 @@ public class PendingProcessingJobGauge {
 	}
 
 	@Autowired
-	public PendingProcessingJobGauge(final MeterRegistry registry, final PrometheusMetricsProperties metricsProperties) {
-		Gauge.builder("rs_pending_processing_job", fetchPendingProcessingJobs())
-				.tag("mission", metricsProperties.getMission())
-				.tag("level", metricsProperties.getLevel())
-				.tag("addonName", metricsProperties.getAddonName()).register(registry);
+	public PendingProcessingJobGauge(final MeterRegistry registry,
+			final PrometheusMetricsProperties metricsProperties) {
+		// Expose metric of currently pending jobs to actuator/prometheus, if properties are set
+		if (!metricsProperties.getMission().isEmpty() && !metricsProperties.getLevel().isEmpty()
+				&& !metricsProperties.getAddonName().isEmpty()) {
+			Gauge.builder("rs_pending_processing_job", fetchPendingProcessingJobs())
+					.tag("mission", metricsProperties.getMission()).tag("level", metricsProperties.getLevel())
+					.tag("addonName", metricsProperties.getAddonName()).register(registry);
+		}
 	}
 }
