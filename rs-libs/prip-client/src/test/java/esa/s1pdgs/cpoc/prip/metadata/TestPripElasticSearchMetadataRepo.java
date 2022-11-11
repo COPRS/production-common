@@ -346,6 +346,8 @@ public class TestPripElasticSearchMetadataRepo {
 		attributes.put("attr_name8_date", LocalDateTime.of(2000, 1, 1, 0, 0));
 		
 		pripMetadata.setAttributes(attributes);
+		
+		pripMetadata.setBrowseKeys(List.of("foo.png"));
 		return pripMetadata;
 	}
 

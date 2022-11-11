@@ -294,7 +294,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
             response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
             LOGGER.debug("Serving quicklook product metadata collection with {} items for product with id {}", quicklookEntityCollection.getEntities().size(), uuid);
          } else {
-            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());          
+            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
             LOGGER.debug("No product metadata found with id {}", uuid);
          }
