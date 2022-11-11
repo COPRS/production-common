@@ -31,7 +31,7 @@ public class IngestionFilterService implements Function<List<IngestionJob>, List
 		
 		if (properties.getConfig() != null) {
 			LOG.info("The following {} filter(s) are used by the filter app:", properties.getConfig().size());
-			properties.getConfig().forEach((missionId,filter) -> LOG.info("For MissioId {} -> {}",missionId, filter));	
+			properties.getConfig().forEach((missionId,filter) -> LOG.info("For MissioId {} -> {}",missionId, filter.getCronDefinition()));
 		} else {
 			LOG.info("The filter app does not have any filters configured!");
 		}
