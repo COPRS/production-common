@@ -20,22 +20,22 @@ New reporting elements:
 
 <table>
 <tr><th>task</th><th>event</th><th>status</th><th>message</th><th>additional keys</th></tr>
-<tr><td>PripTempQuicklookUrl</td><td>begin</td><td></td><td>Creating temporary quicklook URL for obsKey <KEY> for user <USERNAME></td><td><pre>"input":{
-  "filename_strings": [<FILENAME>],
-  "segment_strings": [<FILENAME>],
-  "user_name_string": <USERNAME>,
+<tr><td>PripTempQuicklookUrl</td><td>begin</td><td></td><td>Creating temporary quicklook URL for obsKey &lt;KEY&gt; for user &lt;USERNAME&gt;</td><td><pre>"input":{
+  "filename_strings": [&lt;FILENAME&gt;],
+  "segment_strings": [&lt;FILENAME&gt;],
+  "user_name_string": &lt;SERNAME&gt;,
 }</pre></td></tr>
-<tr><td>PripTempQuicklookUrl</td><td>end</td><td>OK</td><td>Temporary quicklook URL for obsKey <KEY> for user <USERNAME></td><td><pre>"input":{
-  "filename_strings": [<FILENAME>],
-  "segment_strings": [<FILENAME>],
-  "user_name_string": <USERNAME>",
+<tr><td>PripTempQuicklookUrl</td><td>end</td><td>OK</td><td>Temporary quicklook URL for obsKey &lt;KEY&gt; for user &lt;USERNAME&gt;</td><td><pre>"input":{
+  "filename_strings": [&lt;FILENAME&gt;],
+  "segment_strings": [&lt;FILENAME&gt;],
+  "user_name_string": &lt;USERNAME&gt;",
 }</pre></td></tr>
-<tr><td>PripTempQuicklookUrl</td><td>end</td><td>NOK</td><td>Error on creating quicklook URL for obsKey <KEY> for user <USERNAME>: <ERRMESS></td><td><pre>"input":{
-  "filename_strings": [<FILENAME>],
-  "segment_strings": [<FILENAME>],
-  "user_name_string": <USERNAME>,
+<tr><td>PripTempQuicklookUrl</td><td>end</td><td>NOK</td><td>Error on creating quicklook URL for obsKey &lt;KEY&gt; for user &lt;USERNAME&gt;: &lt;ERRMESS&gt;</td><td><pre>"input":{
+  "filename_strings": [&lt;FILENAME&gt;],
+  "segment_strings": [&lt;FILENAME&gt;],
+  "user_name_string": &lt;USERNAME&gt;,
 }
 "output":{
-  "download_url_string": [<TEMP_QUICKLOOK_URL>]
+  "download_url_string": [&lt;TEMP_QUICKLOOK_URL&gt;]
 }</pre></td></tr>
 </table>
