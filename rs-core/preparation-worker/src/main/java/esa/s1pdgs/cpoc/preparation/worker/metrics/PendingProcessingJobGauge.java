@@ -4,10 +4,8 @@ import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
-import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
-import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
+import esa.s1pdgs.cpoc.preparation.worker.config.PrometheusMetricsProperties;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -23,14 +21,10 @@ public class PendingProcessingJobGauge {
 	}
 
 	@Autowired
-	public PendingProcessingJobGauge(final MeterRegistry registry, final ProcessProperties processProperties,
-			final CommonConfigurationProperties commonProperties) {
-		Assert.notNull(processProperties.getMission(), "property process.mission has to be set");
-		Assert.notNull(processProperties.getLevel(), "property process.level has to be set");
-
+	public PendingProcessingJobGauge(final MeterRegistry registry, final PrometheusMetricsProperties metricsProperties) {
 		Gauge.builder("rs_pending_processing_job", fetchPendingProcessingJobs())
-				.tag("mission", processProperties.getMission().toString())
-				.tag("level", processProperties.getLevel().toString())
-				.tag("addonName", commonProperties.getRsChainName()).register(registry);
+				.tag("mission", metricsProperties.getMission())
+				.tag("level", metricsProperties.getLevel())
+				.tag("addonName", metricsProperties.getAddonName()).register(registry);
 	}
 }
