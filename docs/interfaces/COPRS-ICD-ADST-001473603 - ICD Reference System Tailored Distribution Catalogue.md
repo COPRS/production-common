@@ -14,8 +14,6 @@ This document describes the modifications that had been required to tailor the P
 
 PRIP Frontend Reporting has been extendend with the reporting messages:
 
-### rs-prip-frontend
-
 <table>
 <tr><th>task</th><th>event</th><th>status</th><th>message</th><th>additional keys</th></tr>
 <tr><td>PripTempQuicklookUrl</td><td>begin</td><td></td><td>Creating temporary quicklook URL for obsKey &lt;KEY&gt; for user &lt;USERNAME&gt;</td><td><pre>"input":{
