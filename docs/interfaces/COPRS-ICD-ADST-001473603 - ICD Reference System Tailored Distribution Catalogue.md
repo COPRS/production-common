@@ -12,7 +12,7 @@ This document describes the modifications that had been required to tailor the P
 
 ## Reporting
 
-PRIP Frontend Reporting has been extendend with the reporting messages:
+PRIP Frontend Reporting has been extendend with the following reporting messages.
 
 <table>
 <tr><th>task</th><th>event</th><th>status</th><th>message</th><th>additional keys</th></tr>
