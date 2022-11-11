@@ -10,11 +10,9 @@ This document describes the modifications that had been required to tailor the P
 | --- | --- | --- | --- |
 | 01 | 2022/11/07 | N/A | First issue of document |
 
-## TODO 
+## Reporting ICD
 
-Extend Reporting ICD with PRIP Frontend Quicklook Reporting.
-
-New reporting elements:
+PRIP Frontend Reporting has been extendend with the reporting messages:
 
 ### rs-prip-frontend
 
