@@ -93,7 +93,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Override
 	public void save(PripMetadata pripMetadata) {
-
 		LOGGER.info("saving PRIP metadata {}", pripMetadata);
 
 		final IndexRequest request = new IndexRequest(ES_INDEX).id(pripMetadata.getName())
@@ -123,7 +122,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Override
 	public PripMetadata findById(String id) {
-
 		LOGGER.info("finding PRIP metadata with id {}", id);
 
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
@@ -155,7 +153,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	
 	@Override
 	public boolean deleteByName(String name) {
-
 		LOGGER.info("delete PRIP metadata with name {}", name);
 
 		PripMetadata pripMetadata = findByName(name);
