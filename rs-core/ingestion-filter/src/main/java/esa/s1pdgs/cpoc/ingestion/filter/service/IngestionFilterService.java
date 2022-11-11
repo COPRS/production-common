@@ -28,6 +28,14 @@ public class IngestionFilterService implements Function<List<IngestionJob>, List
 	@Autowired
 	public IngestionFilterService(final IngestionFilterConfigurationProperties properties) {
 		this.properties = properties;
+		
+		if (properties.getConfig() != null) {
+			LOG.info("The following {} filter(s) are used by the filter app:", properties.getConfig().size());
+			properties.getConfig().forEach((missionId,filter) -> LOG.info("For MissioId {} -> {}",missionId, filter));	
+		} else {
+			LOG.info("The filter app does not have any filters configured!");
+		}
+		
 	}
 
 	@Override
