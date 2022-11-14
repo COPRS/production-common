@@ -117,7 +117,7 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
             response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
             LOGGER.debug("Serving product metadata for id {}", uuid);
          } else {
-            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());          
+            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
             LOGGER.debug("No product metadata found with id {}", uuid);
          }
@@ -149,12 +149,12 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
                response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
                LOGGER.debug("Serving quicklook metadata for id {}", quicklookId);
             } else {
-               response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());            
+               response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
                response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
                LOGGER.debug("No quicklook metadata found with id {}", quicklookId);
             }
          } else {
-            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());          
+            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
             LOGGER.debug("No product metadata found with id {}", uuid);
          }
@@ -320,12 +320,12 @@ public class ProductEntityProcessor implements EntityProcessor, MediaEntityProce
                response.setHeader("Content-Disposition", "attachment; filename=\"" + quicklookId + "\"");
                LOGGER.debug("Redirecting to quicklook image for id '{}'", quicklookId);
             } else {
-               response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());          
+               response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
                response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-               LOGGER.debug("No quicklook image found with id '{}'", quicklookId);               
+               LOGGER.debug("No quicklook image found with id '{}'", quicklookId);
             }
          } else {
-            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());          
+            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
             LOGGER.debug("No product metadata found with id '{}'", uuid);
          }

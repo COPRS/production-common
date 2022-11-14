@@ -172,110 +172,108 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 			entityCollection.setCount(count);
 		}
 			
-			// List of Entities Request
+		// List of Entities Request
 
-			Optional<Integer> top = Optional.empty();
-			if (null != uriInfo.getTopOption()) {
-				top = Optional.of(uriInfo.getTopOption().getValue());
-				if (top.get() < 0) {
-					throw new ODataApplicationException("Invalid value for $top", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
-				}
+		Optional<Integer> top = Optional.empty();
+		if (null != uriInfo.getTopOption()) {
+			top = Optional.of(uriInfo.getTopOption().getValue());
+			if (top.get() < 0) {
+				throw new ODataApplicationException("Invalid value for $top", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
+		}
 
-			Optional<Integer> skip = Optional.empty();
-			if (null != uriInfo.getSkipOption()) {
-				skip = Optional.of(uriInfo.getSkipOption().getValue());
-				if (skip.get() < 0) {
-					throw new ODataApplicationException("Invalid value for $skip", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
-				}
+		Optional<Integer> skip = Optional.empty();
+		if (null != uriInfo.getSkipOption()) {
+			skip = Optional.of(uriInfo.getSkipOption().getValue());
+			if (skip.get() < 0) {
+				throw new ODataApplicationException("Invalid value for $skip", HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
+		}
 
-			// extract sorting parameters, if any
-			final List<PripSortTerm> sortTerms = new ArrayList<>();
-			final OrderByOption orderByOption = uriInfo.getOrderByOption();
-			if (null != orderByOption && CollectionUtil.isNotEmpty(orderByOption.getOrders())) {
-
+		// extract sorting parameters, if any
+		final List<PripSortTerm> sortTerms = new ArrayList<>();
+		final OrderByOption orderByOption = uriInfo.getOrderByOption();
+		if (null != orderByOption && CollectionUtil.isNotEmpty(orderByOption.getOrders())) {
 				for (final OrderByItem orderByItem : orderByOption.getOrders()) {
-					final PripSortOrder sortOrder;
-					if (orderByItem.isDescending()) {
-						sortOrder = PripSortOrder.DESCENDING;
-					} else {
-						sortOrder = PripSortOrder.ASCENDING;
-					}
+				final PripSortOrder sortOrder;
+				if (orderByItem.isDescending()) {
+					sortOrder = PripSortOrder.DESCENDING;
+				} else {
+					sortOrder = PripSortOrder.ASCENDING;
+				}
 
-					FIELD_NAMES sortFieldName = null;
-					final Expression expression = orderByItem.getExpression();
-					if (expression instanceof Member) {
-						final UriInfoResource resourcePath = ((Member) expression).getResourcePath();
-						final UriResource uriResource = resourcePath.getUriResourceParts().get(0);
-
+				FIELD_NAMES sortFieldName = null;
+				final Expression expression = orderByItem.getExpression();
+				if (expression instanceof Member) {
+					final UriInfoResource resourcePath = ((Member) expression).getResourcePath();
+					final UriResource uriResource = resourcePath.getUriResourceParts().get(0);
 						if (uriResource instanceof UriResourcePrimitiveProperty) {
 							final EdmProperty edmProperty = ((UriResourcePrimitiveProperty) uriResource).getProperty();
 
-							if (StringUtil.isNotBlank(edmProperty.getName())) {
-								final String fieldName = edmProperty.getName();
+						if (StringUtil.isNotBlank(edmProperty.getName())) {
+							final String fieldName = edmProperty.getName();
 
-								if (SORTABLE_FIELDS.containsKey(fieldName)) {
-									sortFieldName = SORTABLE_FIELDS.get(fieldName);
-								} else {
-									throw new ODataApplicationException(
-											"Invalid value for $orderby: field name '" + fieldName
-											+ "' is not supported! Supported field names: " + SORTABLE_FIELDS.keySet(),
-											HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
-								}
-							}
-						} else if (uriResource instanceof UriResourceComplexProperty) {
-							final UriResourceComplexProperty complexProperty = (UriResourceComplexProperty) uriResource;
-							final String complexTypeAttrName = complexProperty.getSegmentValue();
-							final UriResource subElement = resourcePath.getUriResourceParts().get(1);
-							final String subElementAttrName = subElement.getSegmentValue();
-							final String complexTypePath = complexTypeAttrName + "/" + subElementAttrName;
-
-							if (SORTABLE_FIELDS.containsKey(complexTypePath)) {
-								sortFieldName = SORTABLE_FIELDS.get(complexTypePath);
+							if (SORTABLE_FIELDS.containsKey(fieldName)) {
+								sortFieldName = SORTABLE_FIELDS.get(fieldName);
 							} else {
 								throw new ODataApplicationException(
-										"Invalid value for $orderby: field name '" + complexTypePath
-												+ "' is not supported! Supported field names: "
-												+ SORTABLE_FIELDS.keySet(),
+										"Invalid value for $orderby: field name '" + fieldName
+										+ "' is not supported! Supported field names: " + SORTABLE_FIELDS.keySet(),
 										HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
 							}
 						}
-					}
+					} else if (uriResource instanceof UriResourceComplexProperty) {
+						final UriResourceComplexProperty complexProperty = (UriResourceComplexProperty) uriResource;
+						final String complexTypeAttrName = complexProperty.getSegmentValue();
+						final UriResource subElement = resourcePath.getUriResourceParts().get(1);
+						final String subElementAttrName = subElement.getSegmentValue();
+						final String complexTypePath = complexTypeAttrName + "/" + subElementAttrName;
 
-					if (null != sortFieldName) {
-						sortTerms.add(new PripSortTerm(sortFieldName, sortOrder));
+						if (SORTABLE_FIELDS.containsKey(complexTypePath)) {
+							sortFieldName = SORTABLE_FIELDS.get(complexTypePath);
+						} else {
+							throw new ODataApplicationException(
+									"Invalid value for $orderby: field name '" + complexTypePath
+											+ "' is not supported! Supported field names: "
+											+ SORTABLE_FIELDS.keySet(),
+									HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+						}
 					}
 				}
 
-				LOGGER.debug("using sort terms: " + sortTerms);
-			}
-
-			List<PripMetadata> queryResult;
-			try {
-				if (null == queryFilters) {
-					queryResult = this.pripMetadataRepository.findAll(top, skip, sortTerms);
-				} else {
-					queryResult = this.pripMetadataRepository.findWithFilter(queryFilters, top, skip, sortTerms);
+				if (null != sortFieldName) {
+					sortTerms.add(new PripSortTerm(sortFieldName, sortOrder));
 				}
-			} catch (RecoverableDataAccessException e) {
-				throw new ODataApplicationException(HttpStatusCode.SERVICE_UNAVAILABLE.getInfo(),
-						HttpStatusCode.SERVICE_UNAVAILABLE.getStatusCode(), Locale.ROOT);
-			}
-			final List<Entity> productList = entityCollection.getEntities();
-			for (final PripMetadata pripMetadata : queryResult) {
-				productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
 			}
 
-			// serialize
-			final InputStream serializedContent = this.serializeEntityCollection(entityCollection,
-			      edmEntitySet.getEntityType(), request.getRawBaseUri(), edmEntitySet.getName(), contextUrl,
-					responseFormat, uriInfo, expandOption);
+			LOGGER.debug("using sort terms: " + sortTerms);
+		}
 
-			response.setContent(serializedContent);
-			response.setStatusCode(HttpStatusCode.OK.getStatusCode());
-			response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
-			LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
+		List<PripMetadata> queryResult;
+		try {
+			if (null == queryFilters) {
+				queryResult = this.pripMetadataRepository.findAll(top, skip, sortTerms);
+			} else {
+				queryResult = this.pripMetadataRepository.findWithFilter(queryFilters, top, skip, sortTerms);
+			}
+		} catch (RecoverableDataAccessException e) {
+			throw new ODataApplicationException(HttpStatusCode.SERVICE_UNAVAILABLE.getInfo(),
+					HttpStatusCode.SERVICE_UNAVAILABLE.getStatusCode(), Locale.ROOT);
+		}
+		final List<Entity> productList = entityCollection.getEntities();
+		for (final PripMetadata pripMetadata : queryResult) {
+			productList.add(MappingUtil.pripMetadataToEntity(pripMetadata, request.getRawBaseUri()));
+		}
+
+		// serialize
+		final InputStream serializedContent = this.serializeEntityCollection(entityCollection,
+		      edmEntitySet.getEntityType(), request.getRawBaseUri(), edmEntitySet.getName(), contextUrl,
+				responseFormat, uriInfo, expandOption);
+
+		response.setContent(serializedContent);
+		response.setStatusCode(HttpStatusCode.OK.getStatusCode());
+		response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
+		LOGGER.debug("Serving product metadata collection with {} items", entityCollection.getEntities().size());
 	}
 	
 	private void serveQuicklooks(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
@@ -296,7 +294,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
             response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
             LOGGER.debug("Serving quicklook product metadata collection with {} items for product with id {}", quicklookEntityCollection.getEntities().size(), uuid);
          } else {
-            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());          
+            response.setStatusCode(HttpStatusCode.NOT_FOUND.getStatusCode());
             response.setHeader(HttpHeader.CONTENT_TYPE, responseFormat.toContentTypeString());
             LOGGER.debug("No product metadata found with id {}", uuid);
          }

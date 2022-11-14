@@ -4,17 +4,15 @@ import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
-import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
-import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
+import esa.s1pdgs.cpoc.preparation.worker.config.PrometheusMetricsProperties;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 
 @Component
 public class PendingProcessingJobGauge {
-	
+
 	@Autowired
 	private AppCatJobService appCatJobService;
 
@@ -23,14 +21,14 @@ public class PendingProcessingJobGauge {
 	}
 
 	@Autowired
-	public PendingProcessingJobGauge(final MeterRegistry registry, final ProcessProperties processProperties,
-			final CommonConfigurationProperties commonProperties) {
-		Assert.notNull(processProperties.getMission(), "property process.mission has to be set");
-		Assert.notNull(processProperties.getLevel(), "property process.level has to be set");
-
-		Gauge.builder("rs_pending_processing_job", fetchPendingProcessingJobs())
-				.tag("mission", processProperties.getMission().toString())
-				.tag("level", processProperties.getLevel().toString())
-				.tag("addonName", commonProperties.getRsChainName()).register(registry);
+	public PendingProcessingJobGauge(final MeterRegistry registry,
+			final PrometheusMetricsProperties metricsProperties) {
+		// Expose metric of currently pending jobs to actuator/prometheus, if properties are set
+		if (!metricsProperties.getMission().isEmpty() && !metricsProperties.getLevel().isEmpty()
+				&& !metricsProperties.getAddonName().isEmpty()) {
+			Gauge.builder("rs_pending_processing_job", fetchPendingProcessingJobs())
+					.tag("mission", metricsProperties.getMission()).tag("level", metricsProperties.getLevel())
+					.tag("addonName", metricsProperties.getAddonName()).register(registry);
+		}
 	}
 }
