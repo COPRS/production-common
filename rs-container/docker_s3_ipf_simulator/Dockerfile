@@ -16,7 +16,8 @@ USER root:root
 
 RUN mkdir -p /usr/local/conf
 #ADD files/ipf-sim-s3-2.5.1_bc1.tar.gz /usr/local/conf
-ADD files/IPFSimulator-4.0.13.tgz /usr/local/conf
+ADD files/IPFSimulator-4.0.13.tgz /usr/local/conf/IPFSimulator.tgz
+RUN tar -xvzf /usr/local/conf/IPFSimulator.tar.gz -C /usr/local/conf
 ADD files/tasktables /usr/local/conf/IPFSimulator/TaskTables
  
 #COPY IPFSimulator.tar.gz /usr/local/conf
