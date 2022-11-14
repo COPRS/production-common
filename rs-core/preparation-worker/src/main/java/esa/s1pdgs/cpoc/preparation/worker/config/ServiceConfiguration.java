@@ -48,6 +48,9 @@ import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 public class ServiceConfiguration {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServiceConfiguration.class);
+	
+	@Autowired
+	private MetadataClientProperties metaProperties;
 
 	@Bean
 	@Autowired
@@ -104,11 +107,13 @@ public class ServiceConfiguration {
 					}
 					
 					throw new IllegalArgumentException("Unsupported custom selection policy: "+alternative.getCustomClass());
-				}/* else if (alternative.getRetrievalMode().equals("ValIntersectWithoutDuplicates")) {
-					alternative.setRetrievalMode("ValIntersect");
-					LOG.info("Found selection policy 'ValIntersectWithoutDuplicates'. Replace with 'ValIntersect'");
-					continue;
-				}*/
+				} else if (alternative.getRetrievalMode().equals("ValIntersectWithoutDuplicates")) {
+					if (metaProperties.isValIntersectNoDuplicatesWorkaround()) {
+						alternative.setRetrievalMode("ValIntersect");
+						LOG.info("Found selection policy 'ValIntersectWithoutDuplicates'. Replace with 'ValIntersect'");					
+						continue;
+					}
+				}
 			}
 			ttAdapters.put(taskTableFile.getName(), adapter);
 		}
