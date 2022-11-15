@@ -228,7 +228,7 @@ HTTP/1.1 200 OK
 }
 </pre>
 
-#### Download a Quicklook Media Stream
+#### Downloading a Quicklook Media Stream
 
 ##### Example Request:
 
