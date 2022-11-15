@@ -243,7 +243,23 @@ jobs:
       WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
-
+  
+  build-s3-ol1-spc:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-ol1-spc.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}    
+      
+  build-s3-ol1-rac:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-ol1-rac.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}    
+ 
   build-s3-ol2:
     needs: [build-all-core]
     uses: ./.github/workflows/build-ipf-s3-ol2.yaml
