@@ -12,7 +12,7 @@ This document describes the modifications that had been required to tailor the P
 
 ## Quicklook Images
 
-The Product entity has been extended with a navigation property binding to a new entity type Quicklook, allowing to provide multiple preview images with a product. The Quicklook entity has one attribute Image of type String, containing the filename of the preview image as well as acting as the identifier of the entity. A media stream is present under its /$value resource path to download an image.
+The Product entity has been extended with a navigation property binding to a new entity type Quicklook, allowing to provide multiple preview images with a product. The Quicklook entity has one attribute Image of type String, containing the filename of the preview image as well as acting as the identifier of the entity. A media stream is present under the /$value resource path of a Quicklook to download an image.
 
 ### Query Examples
 
