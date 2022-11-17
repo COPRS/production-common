@@ -12,7 +12,7 @@ ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory
 
 
 ### Reconstruction of the base image provided by the agency
-USER root
+USER root 
 
 RUN yum install wget -y
 
