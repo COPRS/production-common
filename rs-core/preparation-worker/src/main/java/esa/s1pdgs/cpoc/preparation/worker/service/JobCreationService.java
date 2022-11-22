@@ -37,7 +37,6 @@ import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
 import esa.s1pdgs.cpoc.preparation.worker.model.joborder.JobOrderAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
-import esa.s1pdgs.cpoc.preparation.worker.type.s3.S3Timeliness;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
 import esa.s1pdgs.cpoc.report.ReportingOutput;
@@ -106,10 +105,8 @@ public class JobCreationService {
 		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.getProduct());
 
 		final File joborder = new File(jobOrderAdapter.getWorkdir(), jobOrderAdapter.getJobOrderName());
-		
-		final ProductFamily family = settings.getLevel().toFamily();
 
-		final IpfExecutionJob execJob = new IpfExecutionJob(family, product.getProductName(),
+		final IpfExecutionJob execJob = new IpfExecutionJob(settings.getLevel().toFamily(), product.getProductName(),
 				product.getProcessMode(), jobOrderAdapter.getWorkdir().getPath() + "/", joborder.getPath(),
 				product.getStringValue("timeliness", ""), reporting.getUid());
 		execJob.setCreationDate(new Date());
@@ -121,13 +118,6 @@ public class JobCreationService {
 		execJob.setDebug(prepJob.isDebug());
 		execJob.setTimedOut(job.getTimedOut());
 		
-		if (missionId == MissionId.S3 && (execJob.getTimeliness() == null || execJob.getTimeliness().isEmpty())) {
-			
-			S3Timeliness s3timeliness = S3Timeliness.fromFamily(family);
-			if (s3timeliness != S3Timeliness.NONE) {
-				execJob.setTimeliness(s3timeliness.name());
-			}
-		}
 
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)
