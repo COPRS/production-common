@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -118,12 +119,11 @@ public class JobCreationService {
 		execJob.setDebug(prepJob.isDebug());
 		execJob.setTimedOut(job.getTimedOut());
 		
-		if (missionId == MissionId.S3 
-				&& (execJob.getTimeliness() == null || execJob.getTimeliness().isEmpty())
-				&& settings.getParams().containsKey("Processing_Mode")) {
+		if ((settings.getLevel() == ApplicationLevel.S3_L1 || settings.getLevel() == ApplicationLevel.S3_L2)
+				&& settings.getParams().containsKey("Processing_Mode")
+				&& (execJob.getTimeliness() == null || execJob.getTimeliness().isEmpty())) {
 			execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
 		}
-		
 
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)
