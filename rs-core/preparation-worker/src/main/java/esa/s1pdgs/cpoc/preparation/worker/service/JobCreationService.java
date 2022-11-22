@@ -118,6 +118,12 @@ public class JobCreationService {
 		execJob.setDebug(prepJob.isDebug());
 		execJob.setTimedOut(job.getTimedOut());
 		
+		if (missionId == MissionId.S3 
+				&& (execJob.getTimeliness() == null || execJob.getTimeliness().isEmpty())
+				&& settings.getParams().containsKey("Processing_Mode")) {
+			execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
+		}
+		
 
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)
