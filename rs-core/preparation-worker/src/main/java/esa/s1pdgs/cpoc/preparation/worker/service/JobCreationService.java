@@ -119,9 +119,18 @@ public class JobCreationService {
 		execJob.setDebug(prepJob.isDebug());
 		execJob.setTimedOut(job.getTimedOut());
 		
-		if ((settings.getLevel() == ApplicationLevel.S3_L1 || settings.getLevel() == ApplicationLevel.S3_L2)
-				&& settings.getParams().containsKey("Processing_Mode")) {
-			execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
+		if (missionId == MissionId.S3) {
+			if (settings.getLevel() == ApplicationLevel.L0 
+					|| settings.getLevel() == ApplicationLevel.S3_L0
+					|| settings.getLevel() == ApplicationLevel.S3_PDU) {
+				
+				// S3 Granule, L0 and PDU have always NRT timeliness
+				execJob.setTimeliness("NRT");
+			} else if (settings.getParams().containsKey("Processing_Mode")
+					&& (settings.getLevel() == ApplicationLevel.S3_L1
+							|| settings.getLevel() == ApplicationLevel.S3_L2)) {
+				execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
+			}
 		}
 
 		try {
