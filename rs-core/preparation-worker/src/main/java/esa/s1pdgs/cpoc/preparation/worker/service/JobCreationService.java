@@ -120,8 +120,7 @@ public class JobCreationService {
 		execJob.setTimedOut(job.getTimedOut());
 		
 		if ((settings.getLevel() == ApplicationLevel.S3_L1 || settings.getLevel() == ApplicationLevel.S3_L2)
-				&& settings.getParams().containsKey("Processing_Mode")
-				&& (execJob.getTimeliness() == null || execJob.getTimeliness().isEmpty())) {
+				&& settings.getParams().containsKey("Processing_Mode")) {
 			execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
 		}
 
