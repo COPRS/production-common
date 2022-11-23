@@ -19,6 +19,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
@@ -118,12 +119,19 @@ public class JobCreationService {
 		execJob.setDebug(prepJob.isDebug());
 		execJob.setTimedOut(job.getTimedOut());
 		
-		if (missionId == MissionId.S3 
-				&& (execJob.getTimeliness() == null || execJob.getTimeliness().isEmpty())
-				&& settings.getParams().containsKey("Processing_Mode")) {
-			execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
+		if (missionId == MissionId.S3) {
+			if (settings.getLevel() == ApplicationLevel.L0 
+					|| settings.getLevel() == ApplicationLevel.S3_L0
+					|| settings.getLevel() == ApplicationLevel.S3_PDU) {
+				
+				// S3 Granule, L0 and PDU have always NRT timeliness
+				execJob.setTimeliness("NRT");
+			} else if (settings.getParams().containsKey("Processing_Mode")
+					&& (settings.getLevel() == ApplicationLevel.S3_L1
+							|| settings.getLevel() == ApplicationLevel.S3_L2)) {
+				execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
+			}
 		}
-		
 
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)
