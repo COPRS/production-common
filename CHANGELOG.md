@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0-rc1] - 2022-11-23
+
+### Added
+
+- RS-461: Add browse images to PRIP index in RS Core DISTRIBUTION
+- RS-513: Expose S1 & S3 pending processing as gauge metric
+- RS-591: Extract browse images from S1 products
+- RS-593: Update RS Core DATALIFECYCLE to handle browse images
+- RS-643: Implement selection policy ValIntersectWithoutDuplicates
+
+### Changed
+
+- RS-586: Improve the rates of sonarqube reports
+- RS-639: "null" is not the default value for timeliness
+- RS-662: S1 and S3 ACQ Preparation Worker seems Stuck / Very slow to read new message
+- RS-686: XBIP filter cron parameters doesn't works
+- RS-690: native-api queries can not reach the rs-api
+- RS-706: S1 L0ASP execution worker traces do not contain segment(s) on field task.input.filename_strings
+- RS-721: Correct the S3_L0p base image in Dockerfile
+
+### Removed
+
+- N/A
+
 ## [1.7.0-rc1] - 2022-10-16
 
 ### Added
