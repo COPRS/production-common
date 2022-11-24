@@ -13,11 +13,6 @@ spec:
     matchLabels:
       app: {{ .Release.Name }}
   replicas: {{ .Values.replicaCount }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: {{ .Values.update.maxSurge }}
-      maxUnavailable: {{ .Values.update.maxUnavailable }} 
   template:
     metadata:
       name: {{ .Release.Name }}

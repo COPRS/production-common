@@ -12,12 +12,7 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}
-  replicas: {{ .Values.replicaCount }}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: {{ .Values.update.maxSurge }}
-      maxUnavailable: {{ .Values.update.maxUnavailable }}
+  replicas: 1
   template:
     metadata:
       name: {{ .Release.Name }}

@@ -20,10 +20,6 @@ image:
 processing:
   namespace: processing
   
-update:
-  maxSurge: 100%
-  maxUnavailable: 50% 
-  
 nativeapi:
     prip:
         protocol: http
