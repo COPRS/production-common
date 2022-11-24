@@ -59,6 +59,8 @@ The latest version of it can be deployed using the following command line:
 | `ddip.dispatch.prip.host` | The hostname or IP used to connect to the PRIP | `rs-prip-frontend-svc.processing.svc.cluster.local` |
 | `ddip.dispatch.prip.port` | The port on which the PRIP listens for requests | `8080` |
 | `ddip.dispatch.collections` | value (collection name) and key (ODATA expression) pairs to define collections that can be searched via DDIP feature (filter=Collection/Name eq 'Sentinel1')  | Sentinel1: startswith(Name,'S1')</br> Sentinel3: startswith(Name,'S3') |
+| `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
+| `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
 
 ## PRIP
 
@@ -74,6 +76,8 @@ The latest version can be deployed by using the following command line:
 | `elasticsearch.connect-timeout-ms` | Timeout in milliseconds of connection to the cluster | `2000` |
 | `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
 | `prip-frontend.debug-support` | Adding additional debug information on the Odata interface. Don't use this in an operational setup | `false` |
+| `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
+| `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
 
 ## Native API
 
@@ -90,6 +94,8 @@ The latest version can be deployed by using the following command line:
 | `nativeapi.external.protocol` | The protocol used to externally connect to the PRIP/DDIP frontend | `http` |
 | `nativeapi.external.host` | The externally reachable hostname or IP used to connect to the PRIP/DDIP frontend | `coprs.werum.de/prip/odata/v1/` |
 | `nativeapi.external.port` | The port on which the PRIP/DDIP frontend listens externally for requests | `80` |
+| `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
+| `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
 
 ## Metadata Search Controller
 
