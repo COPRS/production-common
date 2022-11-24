@@ -1,6 +1,3 @@
-/**
- * 
- */
 package esa.s1pdgs.cpoc.mdc.worker.rest;
 
 import static org.mockito.Mockito.doReturn;

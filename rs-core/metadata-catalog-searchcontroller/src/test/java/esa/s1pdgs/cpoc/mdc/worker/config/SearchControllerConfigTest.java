@@ -1,4 +1,3 @@
-
 package esa.s1pdgs.cpoc.mdc.worker.config;
 
 import org.junit.jupiter.api.Test;
