@@ -27,6 +27,10 @@ elasticsearch:
   timeout:
     connection: 2000
     socket: 10000
+    
+update:
+  maxSurge: 100%
+  maxUnavailable: 50%    
 
 prip:
   debug: false
