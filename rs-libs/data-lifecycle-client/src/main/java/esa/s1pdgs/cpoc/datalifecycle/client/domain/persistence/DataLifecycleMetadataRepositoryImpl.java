@@ -1,4 +1,3 @@
-
 package esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence;
 
 import static esa.s1pdgs.cpoc.datalifecycle.client.domain.model.DataLifecycleMetadata.FIELD_NAME.AVAILABLE_IN_LTA;

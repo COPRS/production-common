@@ -1,6 +1,3 @@
-/**
- * 
- */
 package esa.s1pdgs.cpoc.common.errors.processing;
 
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;

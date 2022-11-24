@@ -1,4 +1,3 @@
-
 package esa.s1pdgs.cpoc.datalifecycle.client.domain.model;
 
 import java.time.LocalDateTime;

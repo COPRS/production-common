@@ -1,6 +1,3 @@
-/**
- * 
- */
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model;
 
 import java.util.Objects;
