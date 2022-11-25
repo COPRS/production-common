@@ -31,7 +31,7 @@ public interface AppDataJobRepository extends MongoRepository<AppDataJob, Long> 
 	@Query(value = "{ 'productName' : { $regex : ?0 }, 'pod' : ?1, 'state' : { $ne: 'TERMINATED' } }")
 	List<AppDataJob> findByProductType(final String productType, final String podName);
 
-	@Query(value = "{ 'triggerProducts' : ?0, 'pod' : ?1 }")
+	@Query(value = "{ 'triggerProducts' : ?0, 'pod' : ?1, 'state' : { $ne: 'TERMINATED' }, 'generation.state' : { $ne: 'SENT' } }")
 	List<AppDataJob> findByTriggerProduct(final String productType, final String podName);
 
 	@Query(value = "{ 'product.metadata.sessionId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
