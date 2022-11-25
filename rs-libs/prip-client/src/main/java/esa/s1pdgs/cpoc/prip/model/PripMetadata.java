@@ -39,7 +39,8 @@ public class PripMetadata {
 		CHECKSUM("checksum", PripMetadata::getChecksums),
 		PRODUCTION_TYPE("productionType", PripMetadata::getProductionType),
 		FOOTPRINT("footprint", PripMetadata::getFootprint),
-		BROWSE_KEYS("browseKeys", PripMetadata::getBrowseKeys);
+		BROWSE_KEYS("browseKeys", PripMetadata::getBrowseKeys),
+		ONLINE("online", PripMetadata::isOnline);
 
 		private final String fieldName;
 		private final Function<PripMetadata, Object> toJsonAccessor;
@@ -132,6 +133,8 @@ public class PripMetadata {
 	private PripGeoShape footprint;
 	
 	private List<String> browseKeys;
+	
+	private boolean online;
 	
 	private Map<String, Object> attributes;
 
@@ -246,6 +249,14 @@ public class PripMetadata {
 		this.browseKeys = browseKeys;
 	}
 	
+	public boolean isOnline() {
+		return online;
+	}
+
+	public void setOnline(boolean online) {
+		this.online = online;
+	}
+
 	public Map<String, Object> getAttributes() {
 		return attributes;
 	}
@@ -297,7 +308,7 @@ public class PripMetadata {
 	@Override
 	public int hashCode() {
 		return Objects.hash(checksums, contentDateEnd, contentDateStart, contentLength, contentType, creationDate,
-				evictionDate, id, name, obsKey, productFamily, productionType, footprint, browseKeys, attributes);
+				evictionDate, id, name, obsKey, productFamily, productionType, footprint, browseKeys, online, attributes);
 	}
 
 	@Override
@@ -317,6 +328,7 @@ public class PripMetadata {
 				&& productFamily == other.productFamily && productionType == other.productionType
 				&& Objects.equals(footprint, other.footprint)
 				&& Objects.equals(browseKeys, other.browseKeys)
+				&& Objects.equals(online, other.online)
 				&& Objects.equals(attributes, other.attributes);
 	}
 
