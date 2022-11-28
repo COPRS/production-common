@@ -6,6 +6,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Checks
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentType;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Footprint;
@@ -62,6 +63,7 @@ public class MappingUtil {
 		Entity entity = new Entity()
 				.addProperty(new Property(null, Id.name(), ValueType.PRIMITIVE, pripMetadata.getId()))
 				.addProperty(new Property(null, Name.name(), ValueType.PRIMITIVE, pripMetadata.getName()))
+				.addProperty(new Property(null, Online.name(), ValueType.PRIMITIVE, pripMetadata.isOnline()))
 				.addProperty(new Property(null, ContentType.name(), ValueType.PRIMITIVE, pripMetadata.getContentType()))
 				.addProperty(
 						new Property(null, ContentLength.name(), ValueType.PRIMITIVE, pripMetadata.getContentLength()))
