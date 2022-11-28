@@ -20,6 +20,10 @@ image:
   tag: develop
   
   imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
+  
+update:
+  maxSurge: 100%
+  maxUnavailable: 50% 
 
 elasticsearch:
   host: elasticsearch-processing-es-http.database.svc.cluster.local

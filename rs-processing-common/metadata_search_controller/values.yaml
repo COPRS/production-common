@@ -27,7 +27,10 @@ image:
   tag: develop
   
   imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
-  
+
+update:
+  maxSurge: 100%
+  maxUnavailable: 50%   
 
 resources:
   cpu:

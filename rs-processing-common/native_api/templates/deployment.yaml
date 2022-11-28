@@ -1,4 +1,4 @@
-kind: StatefulSet
+kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{ .Release.Name }}
@@ -89,6 +89,5 @@ spec:
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
-  serviceName: {{ .Release.Name }}-svc
   revisionHistoryLimit: 10
   
