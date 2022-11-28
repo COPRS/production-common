@@ -134,7 +134,7 @@ public class PripMetadata {
 	
 	private List<String> browseKeys;
 	
-	private boolean online;
+	private boolean online = true; // by default if not specified other, products are online
 	
 	private Map<String, Object> attributes;
 

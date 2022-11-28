@@ -133,6 +133,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 				getContentLength(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage()));
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
+		pripMetadata.setOnline(true);
 		pripMetadata
 				.setChecksums(getChecksums(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage()));
 		
