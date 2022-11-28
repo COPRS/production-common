@@ -13,7 +13,6 @@ spec:
     matchLabels:
       app: {{ .Release.Name }}
   replicas: {{ .Values.replicaCount }}
-  podManagementPolicy: Parallel
   template:
     metadata:
       name: {{ .Release.Name }}
