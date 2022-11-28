@@ -13,6 +13,11 @@ spec:
     matchLabels:
       app: {{ .Release.Name }}
   replicas: {{ .Values.replicaCount }}
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.update.maxSurge }}
+      maxUnavailable: {{ .Values.update.maxUnavailable }} 
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -89,5 +94,4 @@ spec:
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
-  #serviceName: {{ .Release.Name }}-svc
   revisionHistoryLimit: 10
