@@ -89,5 +89,5 @@ spec:
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
-  serviceName: {{ .Release.Name }}-svc
+  #serviceName: {{ .Release.Name }}-svc
   revisionHistoryLimit: 10
