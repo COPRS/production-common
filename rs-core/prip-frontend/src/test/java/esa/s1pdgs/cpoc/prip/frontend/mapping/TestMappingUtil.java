@@ -120,6 +120,7 @@ public class TestMappingUtil {
 		Entity expectedEntity = new Entity()
 				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, UUID.fromString("00000000-0000-0000-0000-000000000001")))
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "Name"))
+				.addProperty(new Property(null, "Online", ValueType.PRIMITIVE, true))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 123L))
 				.addProperty(new Property(null, "ContentDate", ValueType.COMPLEX, contentDate))
@@ -166,6 +167,7 @@ public class TestMappingUtil {
 		inputPripMetadata.setCreationDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(100000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setEvictionDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setAttributes(new LinkedHashMap<String,Object>());
+		inputPripMetadata.setOnline(true);
 		
 		GeoShapePolygon inputPolygon = new GeoShapePolygon(Arrays.asList(
 				new PripGeoCoordinate(0.0, 1.0), new PripGeoCoordinate(2.0, 3.0),
