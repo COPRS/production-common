@@ -10,6 +10,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ProductionType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
@@ -257,6 +258,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			final List<CsdlProperty> properties = new ArrayList<>();
 			properties.add(new CsdlProperty().setName(Id.name()).setType(GUID_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(Name.name()).setType(STRING_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(Online.name()).setType(BOOLEAN_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentType.name()).setType(STRING_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentLength.name()).setType(INT_64_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(PublicationDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
