@@ -106,7 +106,15 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 		}
 
 		LOGGER.debug("Retrieved last timestamp {}", intervalStart.toString());
-		LocalDateTime intervalStop = LocalDateTime.now();
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime intervalStop = now;
+		
+		// Handle offsets
+		if (timerProperties.getQueryOffsetInS() > 0) {
+			LOGGER.debug("Use offset {} to move interval back into the past", timerProperties.getQueryOffsetInS());
+			intervalStart = intervalStart.minusSeconds(timerProperties.getQueryOffsetInS());
+			intervalStop = intervalStop.minusSeconds(timerProperties.getQueryOffsetInS());
+		}
 
 		List<String> satelliteIds = new ArrayList<String>(Arrays.asList(timerProperties.getSatelliteIds().split(",")));
 
@@ -128,7 +136,7 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 
 				// Update database entry, use intervalStop minus two seconds (to account for
 				// index refreshes) or lastInsertionTime, whichever is bigger.
-				LocalDateTime newEntryTime = intervalStop.minusSeconds(2);
+				LocalDateTime newEntryTime = now.minusSeconds(2);
 
 				if (lastInsertionTime != null) {
 					LocalDateTime lastInsertion = DateUtils.parse(lastInsertionTime);
