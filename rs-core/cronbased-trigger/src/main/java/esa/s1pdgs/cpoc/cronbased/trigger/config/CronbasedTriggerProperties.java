@@ -21,6 +21,8 @@ public class CronbasedTriggerProperties {
 
 		private String satelliteIds;
 		
+		private long queryOffsetInS = 0;
+		
 		public String getCron() {
 			return cron;
 		}
@@ -43,6 +45,14 @@ public class CronbasedTriggerProperties {
 
 		public void setSatelliteIds(String satelliteIds) {
 			this.satelliteIds = satelliteIds;
+		}
+
+		public long getQueryOffsetInS() {
+			return queryOffsetInS;
+		}
+
+		public void setQueryOffsetInS(long queryOffsetInS) {
+			this.queryOffsetInS = queryOffsetInS;
 		}
 	}
 
