@@ -74,6 +74,9 @@ public class PripMetadata {
 			if (NAME.fieldName().equalsIgnoreCase(fieldName) || NAME.name().equalsIgnoreCase(fieldName)) {
 				return NAME;
 			}
+			if (ONLINE.fieldName().equalsIgnoreCase(fieldName) || ONLINE.name().equalsIgnoreCase(fieldName)) {
+				return ONLINE;
+			}
 			if (CONTENT_LENGTH.fieldName().equalsIgnoreCase(fieldName) || CONTENT_LENGTH.name().equalsIgnoreCase(fieldName)) {
 				return CONTENT_LENGTH;
 			}
