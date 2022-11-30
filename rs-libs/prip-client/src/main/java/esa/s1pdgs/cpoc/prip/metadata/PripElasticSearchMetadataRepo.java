@@ -614,6 +614,13 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			pm.setContentDateEnd(
 					DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
 		}
+		
+		// If no value is found, we assume it to be true for backward compatibility reasons
+		if (Strings.isNotEmpty((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName()))) {
+			pm.setOnline(Boolean.valueOf((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName())));
+		} else {
+			pm.setOnline(true);
+		}
 
 		final List<Checksum> checksumList = new ArrayList<>();
 		for (final Map<String, Object> c : (List<Map<String, Object>>) sourceAsMap
