@@ -616,8 +616,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 		
 		// If no value is found, we assume it to be true for backward compatibility reasons
-		if (Strings.isNotEmpty((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName()))) {
-			pm.setOnline(Boolean.valueOf((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName())));
+		if (sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName()) != null) {
+			pm.setOnline((Boolean)sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName()));
 		} else {
 			pm.setOnline(true);
 		}
