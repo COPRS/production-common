@@ -8,6 +8,7 @@ public enum PripOdataEntityProperties {
 
 	Id,
 	Name,
+	Online,
 	ContentType,
 	ContentLength,
 	PublicationDate,

@@ -117,6 +117,7 @@ public class PripToStacMapper {
 				switch (attribute) {
 				case Id:
 				case Name:
+				case Online:
 				case ContentType:
 				case ContentLength:
 				case PublicationDate:
