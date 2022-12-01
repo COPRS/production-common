@@ -619,6 +619,8 @@ components:
           type: string
         ProductionType:
           type: string
+        Online:
+          type: boolean
         ContentLength:
           type: integer
         AdditionalAttributes:
