@@ -28,6 +28,7 @@ import esa.s1pdgs.cpoc.preparation.worker.type.slice.LevelSliceTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppMbuTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppObsPropertiesAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppObsTypeAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.type.synergy.S3SynergyTypeAdapter;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @Configuration
@@ -55,6 +56,9 @@ public class TypeAdapterConfiguration {
 	
 	@Autowired
 	private S3TypeAdapterProperties s3TypeAdapterSettings;
+	
+	@Autowired
+	private S3SynergyProperties s3SynSettings;
     
 	@Autowired
 	private PDUProperties pduSettings;
@@ -111,6 +115,13 @@ public class TypeAdapterConfiguration {
 						processSettings,
 						pduSettings
 				);
+			case S3_SYN:
+				return new S3SynergyTypeAdapter(
+						metadataClient, 
+						elementMapper, 
+						processSettings, 
+						settings,
+						s3SynSettings);
 			case SPP_MBU:
 				return new SppMbuTypeAdapter(
 						metadataClient

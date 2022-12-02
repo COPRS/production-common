@@ -16,7 +16,8 @@ public enum ApplicationLevel {
 	S3_L0(ProductFamily.S3_JOB),
 	S3_L1(ProductFamily.S3_JOB),
 	S3_L2(ProductFamily.S3_JOB),
-	S3_PDU(ProductFamily.S3_JOB);
+	S3_PDU(ProductFamily.S3_JOB),
+	S3_SYN(ProductFamily.S3_JOB);
 	
 	private final ProductFamily jobFamily;
 	
