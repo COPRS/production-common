@@ -4,4 +4,4 @@ description: COPRS DDIP Frontend
 name: rs-ddip-frontend
 version: {{CHART_VERSION}}
 maintainers:
-  - name: Werum Software & Systems
+  - name: Werum Software & Systems 
