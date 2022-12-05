@@ -4,4 +4,4 @@ description: COPRS Request Parking Lot
 name: rs-request-parking-lot
 version: {{CHART_VERSION}}
 maintainers:
-  - name: Werum Software & Systems 
+  - name: Werum Software & Systems
