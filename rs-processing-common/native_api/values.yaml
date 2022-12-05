@@ -13,7 +13,7 @@ image:
   repository: rs-docker
   
   name: rs-core-native-api
-  tag: develop
+  tag: {{CHART_VERSION}}
   
   imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
   

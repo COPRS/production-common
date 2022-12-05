@@ -33,7 +33,7 @@ image:
   repository: rs-docker
   
   name: rs-core-eviction-management-worker
-  tag: develop
+  tag: {{CHART_VERSION}}
   
   imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
 

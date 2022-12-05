@@ -17,7 +17,7 @@ image:
   repository: rs-docker
 
   name: rs-core-request-parking-lot
-  tag: develop
+  tag: {{CHART_VERSION}}
   
   imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
   

@@ -24,7 +24,7 @@ image:
   repository: rs-docker
   
   name: rs-core-metadata-catalog-searchcontroller
-  tag: develop
+  tag: {{CHART_VERSION}}
   
   imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
 
