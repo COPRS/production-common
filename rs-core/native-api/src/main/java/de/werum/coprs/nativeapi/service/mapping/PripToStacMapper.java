@@ -79,10 +79,12 @@ public class PripToStacMapper {
 		final String productId = pripOdataJsonProduct.getString(Id.name());
 		stacItem.setId(productId);
 
-		// geometry and bbox
-				
-		final JsonObject footprint = pripOdataJsonProduct.getJsonObject(Footprint.name());
-		stacItem.setGeometry(asGeoJson(footprint));
+		// geometry and bbox				
+		JsonObject footprint = null;
+		if (!pripOdataJsonProduct.isNull(Footprint.name())) {
+			footprint = pripOdataJsonProduct.getJsonObject(Footprint.name());
+			stacItem.setGeometry(asGeoJson(footprint));	
+		}		
 
 		// if this item has a geometry a bbox is required
 		if (null != stacItem.getGeometry()) {
@@ -135,7 +137,9 @@ public class PripToStacMapper {
 					addAdditionalAttributes(stacItem, attribute, pripOdataJsonProduct.getJsonArray(propertyKey));
 					continue;
 				case Footprint:
-					setFootprint(stacItem, footprint);
+					if (footprint != null) {
+						setFootprint(stacItem, footprint);
+					}
 					continue;
 				case ContentDate:
 					setContentDate(stacItem, contentDateStartStr, contentDateEndStr);
