@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'rs-container/docker_s3_ipf_sy2_vgs/**'
-      - '.github/workflows/build-ipf-s3-sy2_vgs.yaml'
+      - '.github/workflows/build-ipf-s3-sy2-vgs.yaml'
     branches:
       - '!main'
       - 'release/**'
