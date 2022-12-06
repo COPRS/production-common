@@ -1,10 +1,10 @@
-name: Build IPF S3 SY2 AOD
+name: Build IPF S3 SY2 VGS
 
 on:
   push:
     paths:
-      - 'rs-container/docker_s3_ipf_sy2_aod/**'
-      - '.github/workflows/build-ipf-s3-sy2-aod.yaml'
+      - 'rs-container/docker_s3_ipf_sy2_vgs/**'
+      - '.github/workflows/build-ipf-s3-sy2-vgs.yaml'
     branches:
       - '!main'
       - 'release/**'
@@ -28,12 +28,13 @@ env:
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
   VERSION: ${{ github.ref }}
-  IMAGE_NAME: "rs-ipf-s3-sy2-aod"
+  IMAGE_NAME: "rs-ipf-s3-sy2-vgs"
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
-  build-ipf-s3-sy2-aod:
+  build-ipf-s3-sy2-vgs:
     runs-on: ubuntu-latest
+
     # Just build when being a tag or explicitely asked for using #IPF 
     if: startsWith(github.ref, 'refs/tags') || contains(github.event.head_commit.message, '#IPF')
     steps:
@@ -79,7 +80,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           load: true
-          context: ./rs-container/docker_s3_ipf_sy2_aod
+          context: ./rs-container/docker_s3_ipf_sy2_vgs
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
@@ -107,15 +108,15 @@ jobs:
       - name: Upload Anchore scan json report
         uses: actions/upload-artifact@master
         with:
-          name: vulnerabilities-ipf-s3-sy2-aod
+          name: vulnerabilities-ipf-s3-sy2-vgs
           path: ${{ steps.scan.outputs.vulnerabilities }}
 
       - name: Push image
         run: |
           docker push ${{ fromJSON(steps.meta.outputs.json).tags[0] }};
           
-  generate-reports-ipf-s3-sy2-aod:
-    needs: build-ipf-s3-sy2-aod
+  generate-reports-ipf-s3-sy2-vgs:
+    needs: build-ipf-s3-sy2-vgs
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -124,7 +125,7 @@ jobs:
       - name: Download json report from build jobs
         uses: actions/download-artifact@v2
         with:
-          name: vulnerabilities-ipf-s3-sy2-aod
+          name: vulnerabilities-ipf-s3-sy2-vgs
 
       - name: Generate CSV and intermediate HTML report
         run: |
@@ -141,7 +142,7 @@ jobs:
       - name: Upload Anchore scan reports
         uses: actions/upload-artifact@master
         with:
-          name: vulnerabilities-ipf-s3-sy2-aod
+          name: vulnerabilities-ipf-s3-sy2-vgs
           path: |
             vulnerabilities.csv
             vulnerabilities.pdf
