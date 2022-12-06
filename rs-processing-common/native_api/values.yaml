@@ -5,8 +5,8 @@ service:
   name: rs-native-api
   port: 8080
 
-logLevel: ${logLevel:DEBUG}
-logConfig: ${logConfig:log/log4j2.yml}
+logLevel: DEBUG
+logConfig: log/log4j2.yml
 
 image:
   registry: artifactory.coprs.esa-copernicus.eu
