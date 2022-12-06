@@ -2,8 +2,8 @@ package esa.s1pdgs.cpoc.preparation.worker.type.synergy;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -34,23 +34,18 @@ import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.type.S3SynergyProperties;
-import esa.s1pdgs.cpoc.preparation.worker.config.type.PDUProperties.PDUTypeProperties;
-import esa.s1pdgs.cpoc.preparation.worker.config.type.S3TypeAdapterProperties.MPCSearchSettings;
 import esa.s1pdgs.cpoc.preparation.worker.model.exception.DiscardedException;
-import esa.s1pdgs.cpoc.preparation.worker.model.pdu.PDUReferencePoint;
-import esa.s1pdgs.cpoc.preparation.worker.model.pdu.PDUType;
+import esa.s1pdgs.cpoc.preparation.worker.model.exception.TimedOutException;
 import esa.s1pdgs.cpoc.preparation.worker.service.AppCatJobService;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableFactory;
 import esa.s1pdgs.cpoc.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
-import esa.s1pdgs.cpoc.preparation.worker.type.pdu.PDUProduct;
 import esa.s1pdgs.cpoc.preparation.worker.type.s3.DuplicateProductFilter;
-import esa.s1pdgs.cpoc.preparation.worker.type.s3.MultipleProductCoverSearch;
-import esa.s1pdgs.cpoc.preparation.worker.type.s3.OLCICalibrationFilter;
-import esa.s1pdgs.cpoc.preparation.worker.type.s3.S3Product;
 import esa.s1pdgs.cpoc.preparation.worker.util.QueryUtils;
+import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
@@ -62,15 +57,17 @@ public class S3SynergyTypeAdapter extends AbstractProductTypeAdapter implements 
 
 	private MetadataClient metadataClient;
 	private ElementMapper elementMapper;
+	private TaskTableFactory ttFactory;
 	private ProcessProperties processSettings;
 	private PreparationWorkerProperties workerSettings;
 	private S3SynergyProperties settings;
 
 	public S3SynergyTypeAdapter(final MetadataClient metadataClient, final ElementMapper elementMapper,
-			final ProcessProperties processSettings, final PreparationWorkerProperties workerSettings,
-			final S3SynergyProperties settings) {
+			final TaskTableFactory ttFactory, final ProcessProperties processSettings,
+			final PreparationWorkerProperties workerSettings, final S3SynergyProperties settings) {
 		this.metadataClient = metadataClient;
 		this.elementMapper = elementMapper;
+		this.ttFactory = ttFactory;
 		this.processSettings = processSettings;
 		this.workerSettings = workerSettings;
 		this.settings = settings;
@@ -123,24 +120,24 @@ public class S3SynergyTypeAdapter extends AbstractProductTypeAdapter implements 
 
 		List<AppDataJobTaskInputs> tasks = QueryUtils.buildInitialInputs(tasktableAdapter);
 		List<S3Metadata> synergyProducts = new ArrayList<>();
-		
+
 		// Search all products in the specified time range of the job
-		try {			
+		try {
 			synergyProducts = metadataClient.getProductsInRange(product.getProductType(),
-				elementMapper.inputFamilyOf(product.getProductType()), product.getSatelliteId(), job.getStartTime(),
-				job.getStopTime(), 0, 0);
-			
+					elementMapper.inputFamilyOf(product.getProductType()), product.getSatelliteId(), job.getStartTime(),
+					job.getStopTime(), 0, 0);
+
 			synergyProducts = DuplicateProductFilter.filterS3Metadata(synergyProducts);
 		} catch (MetadataQueryException e) {
 			LOGGER.error("Error while querying metadata: {}", e.getMessage());
 		}
-		
+
 		final Map<String, TaskTableInput> taskTableInputs = QueryUtils
 				.taskTableTasksAndInputsMappedTo((list, task) -> list, Collections::singletonMap, tasktableAdapter)
 				.stream().flatMap(Collection::stream).flatMap(map -> map.entrySet().stream())
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-		// Add all found inputs to task 
+		// Add all found inputs to task
 		for (final AppDataJobTaskInputs task : tasks) {
 			for (final AppDataJobInput input : task.getInputs()) {
 				final TaskTableInput ttInput = taskTableInputs.get(input.getTaskTableInputReference());
@@ -161,15 +158,62 @@ public class S3SynergyTypeAdapter extends AbstractProductTypeAdapter implements 
 	}
 
 	@Override
-	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
-		// TODO Auto-generated method stub
+	public void validateInputSearch(AppDataJob job, TaskTableAdapter tasktableAdpter)
+			throws IpfPrepWorkerInputsMissingException, DiscardedException, TimedOutException {
+		// No validation happening here. There will always be at least one input (the
+		// one triggering the job), and we can't expect to have all products at any
+		// time. We will produce what we got and send the job to the execution worker.
+	}
 
+	@Override
+	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
+		TaskTableAdapter taskTableAdapter = getTTAdapterForTaskTableName(job.getTaskTableName());
+
+		LOGGER.debug("Fill dynamic process parameters based on tasktable {}", job.getTaskTableName());
+		/*
+		 * For each dynamic process parameter defined in the tasktable do the following:
+		 * 
+		 * 1. Extract the default value 2. If we have a static configuration for this
+		 * parameter name in the s3 type settings, use that value 3. If the parameter
+		 * name is part of the main product metadata, use the value of the metadata
+		 * 
+		 * If the resulting value is not null, write the parameter on the job order
+		 */
+		taskTableAdapter.taskTable().getDynProcParams().forEach(dynProcParam -> {
+			LOGGER.trace("Handle dynamic process parameter \"{}\"", dynProcParam.getName());
+			String result = dynProcParam.getDefaultValue();
+
+			if (this.settings.getDynProcParams().containsKey(dynProcParam.getName())) {
+				result = this.settings.getDynProcParams().get(dynProcParam.getName());
+			}
+
+			if (job.getProduct().getMetadata().containsKey(dynProcParam.getName())) {
+				result = job.getProduct().getMetadata().get(dynProcParam.getName()).toString();
+			}
+
+			if (result != null) {
+				LOGGER.trace("Dynamic process parameter got value {}", result);
+				updateProcParam(jobOrder, dynProcParam.getName(), result);
+			}
+		});
+
+		/*
+		 * Remove optional outputs from last proc, except for configured additional
+		 * outputs
+		 */
+		if (!jobOrder.getProcs().isEmpty()) {
+			AbstractJobOrderProc proc = jobOrder.getProcs().get(jobOrder.getProcs().size() - 1);
+			String outputFileType = (job.getProductName().matches(".*SY_2_VGK___.*") ? "SY_2_VG1___" : "SY_2_V10___");
+
+			proc.setOutputs(proc.getOutputs().stream()
+					.filter(output -> output.isMandatory() || output.getFileType().equals(outputFileType))
+					.collect(toList()));
+		}
 	}
 
 	@Override
 	public void customJobDto(AppDataJob job, IpfExecutionJob dto) {
-		// TODO Auto-generated method stub
-
+		// Nothing to do currently
 	}
 
 	/*
@@ -254,5 +298,20 @@ public class S3SynergyTypeAdapter extends AbstractProductTypeAdapter implements 
 					product.getValidityStart(), product.getValidityStop(), t0));
 		}
 		return files;
+	}
+
+	/**
+	 * Create a TaskTableAdapter for the given tasktable
+	 * 
+	 * @param taskTable name of the taskTable
+	 * @return TaskTableAdapter to access the tasktable information
+	 */
+	private TaskTableAdapter getTTAdapterForTaskTableName(final String taskTable) {
+		final File ttFile = new File(workerSettings.getDiroftasktables(), taskTable);
+		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
+				ttFactory.buildTaskTable(ttFile, processSettings.getLevel(), workerSettings.getPathTaskTableXslt()),
+				elementMapper, workerSettings.getProductMode());
+
+		return tasktableAdapter;
 	}
 }

@@ -117,7 +117,8 @@ public class TypeAdapterConfiguration {
 				);
 			case S3_SYN:
 				return new S3SynergyTypeAdapter(
-						metadataClient, 
+						metadataClient,
+						taskTableFactory,
 						elementMapper, 
 						processSettings, 
 						settings,
