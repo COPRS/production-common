@@ -35,7 +35,7 @@ The following global parameters exist per instance and can be used when deployin
 | `service.port` | The port that shall be exposed by the deployed service | `8080`|
 | `service.name` | The name of the service when it is deployed | e.g. `rs-core-metadata-catalog-searchcontroller` |
 | `logLevel` | Defines the threadhold level of the logging | e.g. `DEBUG` or `INFO` |
-| `logConfig.` | Defines the config that shall be used for log4j. By default all logs will be written in json format, the debug config allows to print it out in an human readable format | by default `log/log4j2.yml` is used for json output. Use `log/log4j2_debug.yml` for a human readable format.
+| `logConfig` | Defines the config that shall be used for log4j. By default all logs will be written in json format, the debug config allows to print it out in an human readable format | by default `log/log4j2.yml` is used for json output. Use `log/log4j2_debug.yml` for a human readable format.
 | `processing.namespace` | The namespace into that the chart shall be deployed | `processing` |
 | `image.registry` | The registry from that the image shall be pulled | `artifactory.coprs.esa-copernicus.eu` |
 | `image.repository` | The path within the directory from that the image shall be pulled | `rs-docker` |
