@@ -105,7 +105,7 @@ public class NativeApiStacServiceImpl implements NativeApiStacService {
 		String pripFilterUrl = String.format("%s%s%s", pripUrl, "/odata/v1/Products?", createPripFilterTerm(datetime));
 
 		if (includeAdditionalAttributes) {
-			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? "$expand=Attributes" : "&$expand=Attributes");
+			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? "$expand=Attributes,Quicklooks" : "&$expand=Attributes,Quicklooks");
 		}
 
 		return pripFilterUrl;
