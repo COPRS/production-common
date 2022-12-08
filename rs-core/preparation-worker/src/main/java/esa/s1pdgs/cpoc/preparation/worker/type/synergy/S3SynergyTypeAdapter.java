@@ -153,6 +153,11 @@ public class S3SynergyTypeAdapter extends AbstractProductTypeAdapter implements 
 			}
 		}
 
+		// In a following step, the job gets its start and stop time overwritten with
+		// the ones of the product
+		product.setStartTime(job.getStartTime());
+		product.setStopTime(job.getStopTime());
+
 		product.setAdditionalInputs(tasks);
 		return product;
 	}
