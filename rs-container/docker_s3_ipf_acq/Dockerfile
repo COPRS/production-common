@@ -22,7 +22,7 @@ RUN ln -s /usr/lib64/libboost_date_time.so.1.53.0 /usr/lib64/libboost_date_time.
 
 # create user
 RUN useradd -u 1001 rsuser
-
+ 
 WORKDIR /tmp 
 
 # DDC
