@@ -110,6 +110,6 @@ RUN chmod +x /tini
 RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
-USER rsuser:rsuser
+#USER rsuser:rsuser
 
 ENTRYPOINT ["/tini", "--", "/app/start.sh"]
