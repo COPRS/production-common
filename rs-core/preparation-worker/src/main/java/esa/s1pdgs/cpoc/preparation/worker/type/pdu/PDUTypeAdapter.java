@@ -1,14 +1,18 @@
 package esa.s1pdgs.cpoc.preparation.worker.type.pdu;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -46,7 +50,9 @@ import esa.s1pdgs.cpoc.preparation.worker.type.s3.MultipleProductCoverSearch;
 import esa.s1pdgs.cpoc.preparation.worker.type.s3.gap.ThresholdGapHandler;
 import esa.s1pdgs.cpoc.preparation.worker.util.QueryUtils;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInput;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
+import esa.s1pdgs.cpoc.xml.model.tasktable.enums.TaskTableMandatoryEnum;
 
 public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
@@ -84,21 +90,33 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 	@Override
 	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
+		PDUTypeProperties typeSettings = settings.getConfig()
+				.get(job.getPrepJob().getCatalogEvent().getMetadataProductType());
+
 		// Add FrameNumber if it exists in metadata
 		String frameNumber = (String) job.getProduct().getMetadata().get(PDUProduct.FRAME_NUMBER);
 		if (frameNumber != null) {
 			updateProcParam(jobOrder, "MtdPDUFrameNumbers", frameNumber);
 		}
 
-		// Add PDUTimeIntervals for all PDUs
-		String timeIntervals = (String) job.getProduct().getMetadata().get(PDUProduct.PDU_TIME_INTERVALS);
-		if (timeIntervals == null) {
-			timeIntervals = "[" + DateUtils.convertToPDUDateTimeFormat(job.getStartTime()) + ","
-					+ DateUtils.convertToPDUDateTimeFormat(job.getStopTime()) + "]";
+		// Add PDUTimeIntervals for FRAME and STRIPE PDUs
+		if (typeSettings != null && typeSettings.getType() != PDUType.TILE) {
+			String timeIntervals = (String) job.getProduct().getMetadata().get(PDUProduct.PDU_TIME_INTERVALS);
+			if (timeIntervals == null) {
+				timeIntervals = "[" + DateUtils.convertToPDUDateTimeFormat(job.getStartTime()) + ","
+						+ DateUtils.convertToPDUDateTimeFormat(job.getStopTime()) + "]";
+			}
+
+			updateProcParam(jobOrder, "PDUTimeIntervals", timeIntervals);
+		}
+		
+		// Add other dynamic processing parameters
+		if  (typeSettings != null && !typeSettings.getDynProcParams().isEmpty()) {
+			for (Entry<String, String> entry : typeSettings.getDynProcParams().entrySet()) {
+				updateProcParam(jobOrder, entry.getKey(), entry.getValue());
+			}
 		}
 
-		updateProcParam(jobOrder, "PDUTimeIntervals", timeIntervals);
-		
 		// Update timeliness
 		updateProcParam(jobOrder, "orderType", workerSettings.getProductMode().toString());
 	}
@@ -161,7 +179,8 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 			try {
 				PDUTypeProperties typeSettings = settings.getConfig().get(alternative.getFileType());
 
-				if (typeSettings != null) {
+				// Handle mainInputSearch for FRAME and STRIPE PDUs
+				if (typeSettings != null && typeSettings.getType() != PDUType.TILE) {
 					LOGGER.debug("Use additional logic 'MultipleProductCoverSearch (PDU)' for product type {}",
 							alternative.getFileType());
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
@@ -203,6 +222,43 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 						}
 					}
 				}
+
+				// Handle mainInputSearch for TILE PDUs
+				if (typeSettings != null && typeSettings.getType() == PDUType.TILE) {
+					S3Metadata s3Metadata = metadataClient.getS3MetadataForProduct(
+							elementMapper.inputFamilyOf(alternative.getFileType()), job.getProductName());
+
+					final Map<String, TaskTableInput> taskTableInputs = QueryUtils
+							.taskTableTasksAndInputsMappedTo((list, task) -> list, Collections::singletonMap,
+									tasktableAdapter)
+							.stream().flatMap(Collection::stream).flatMap(map -> map.entrySet().stream())
+							.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+					for (final AppDataJobTaskInputs task : tasks) {
+						for (final AppDataJobInput input : task.getInputs()) {
+							final TaskTableInput ttInput = taskTableInputs.get(input.getTaskTableInputReference());
+							if (ttInput.getAlternatives().contains(alternative)) {
+								input.setHasResults(true);
+								input.setFileNameType(alternative.getFileNameType().toString());
+								input.setFileType(alternative.getFileType());
+								input.setMandatory(TaskTableMandatoryEnum.YES.equals(ttInput.getMandatory()));
+
+								// Extract t0PdgsDate if possible to determine when all inputs where ready
+								Date t0 = null;
+								if (s3Metadata.getAdditionalProperties().containsKey("t0PdgsDate")) {
+									t0 = DateUtils.toDate(s3Metadata.getAdditionalProperties().get("t0PdgsDate"));
+								}
+
+								AppDataJobFile file = new AppDataJobFile(s3Metadata.getProductName(),
+										s3Metadata.getKeyObjectStorage(), s3Metadata.getValidityStart(),
+										s3Metadata.getValidityStop(), t0);
+
+								input.setFiles(Collections.singletonList(file));
+							}
+						}
+					}
+				}
+
 			} catch (final MetadataQueryException me) {
 				LOGGER.error("Error on query execution, retrying next time", me);
 			}

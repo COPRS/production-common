@@ -28,6 +28,8 @@ public interface PDUGenerator {
 			return new PDUFrameGenerator(processSettings, settings, mdClient);
 		} else if (settings.getType() == PDUType.STRIPE) {
 			return new PDUStripeGenerator(processSettings, settings, mdClient);
+		} else if (settings.getType() == PDUType.TILE) {
+			return new PDUTileGenerator();
 		}
 
 		return null;
