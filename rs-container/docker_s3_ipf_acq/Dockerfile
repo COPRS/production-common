@@ -18,7 +18,7 @@ USER root
 RUN yum install -y java-1.8.0-openjdk java-11-openjdk boost-date-time boost-thread boost-devel tar
 
 # RS-747: This is a work around to use the xerces-c from the operating system
-RUN yum xerces-c -y 
+RUN yum install xerces-c -y 
 
 # Creating symbolic link to match expectation from IPF
 RUN ln -s /usr/lib64/libboost_date_time.so.1.53.0 /usr/lib64/libboost_date_time.so.5
