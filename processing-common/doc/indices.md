@@ -70,6 +70,7 @@ l2_acn
 s2_l0_ds
 s2_l0_gr
 s2_hktm
+s2_sad
 s3_granules
 s3_l0
 s3_cal
