@@ -161,7 +161,7 @@ public class PripToStacMapper {
 		
 		JsonArray quicklooks = pripOdataJsonProduct.getJsonArray("Quicklooks");		
 		if (quicklooks != null) {
-			if (quicklooks.size() >= 0) {
+			if (quicklooks.size() > 0) {
 				// Currently just a single item is supported
 				JsonObject obj = quicklooks.getJsonObject(0);
 				String quicklookId = obj.getString("Image");
