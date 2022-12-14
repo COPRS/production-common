@@ -1420,7 +1420,7 @@ public class EsServicesTest{
 		
 		try {
 			final List<SearchMetadata> result = esServices.intervalTypeQuery("2000-01-01T00:00:00.000000Z", "2001-01-01T00:00:00.000000Z", ProductFamily.L0_ACN, 
-					"type", "satelliteId");			
+					"type", "satelliteId", "");			
 			assertEquals("Search metadata are not equals", expectedResult, result.get(0));
 		} catch (final Exception e) {
 			fail("Exception occurred: " + e.getMessage());

@@ -122,7 +122,7 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 			try {
 				LOGGER.debug("Retrieve new products from database");
 				List<SearchMetadata> products = this.metadataClient.searchInterval(timerProperties.getFamily(),
-						productType, intervalStart, intervalStop, satelliteId);
+						productType, intervalStart, intervalStop, satelliteId, timerProperties.getTimeliness());
 
 				String lastInsertionTime = null;
 

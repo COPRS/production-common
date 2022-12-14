@@ -141,9 +141,10 @@ public class SearchMetadataController {
 			@RequestParam(name = "productType") final String productType,
 			@RequestParam(name = "intervalStart") final String intervalStart,
 			@RequestParam(name = "intervalStop") final String intervalStop,
-			@RequestParam(name = "satelliteId", defaultValue = "") final String satelliteId) {
+			@RequestParam(name = "satelliteId", defaultValue = "") final String satelliteId,
+			@RequestParam(name = "timeliness", defaultValue = "") final String timeliness) {
 		LOGGER.info(
-				"Received interval query for family '{}', startTime '{}', stopTime '{}', productType '{}', satelliteId '{}'",
+				"Received interval query for family '{}', startTime '{}', stopTime '{}', productType '{}', satelliteId '{}', timeliness '{}'",
 				productFamily, intervalStart, intervalStop, productType, satelliteId);
 
 		final List<SearchMetadata> response;
@@ -160,8 +161,8 @@ public class SearchMetadataController {
 		}
 
 		try {
-			response = esServices.intervalTypeQuery(startTime, stopTime,
-					ProductFamily.fromValue(productFamily), productType, satelliteId);
+			response = esServices.intervalTypeQuery(startTime, stopTime, ProductFamily.fromValue(productFamily),
+					productType, satelliteId, timeliness);
 
 			if (response == null) {
 				LOGGER.info("No results returned.");
