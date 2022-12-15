@@ -23,6 +23,8 @@ public class CronbasedTriggerProperties {
 		
 		private long queryOffsetInS = 0;
 		
+		private String timeliness = "";
+		
 		public String getCron() {
 			return cron;
 		}
@@ -53,6 +55,14 @@ public class CronbasedTriggerProperties {
 
 		public void setQueryOffsetInS(long queryOffsetInS) {
 			this.queryOffsetInS = queryOffsetInS;
+		}
+
+		public String getTimeliness() {
+			return timeliness;
+		}
+
+		public void setTimeliness(String timeliness) {
+			this.timeliness = timeliness;
 		}
 	}
 

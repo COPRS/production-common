@@ -1526,12 +1526,17 @@ public class EsServices {
 	 * interval (lower bound not included), and matching productFamily and productType
 	 */
 	public List<SearchMetadata> intervalTypeQuery(final String startTime, final String stopTime,
-			final ProductFamily productFamily, final String productType, final String satelliteId) throws Exception {
+			final ProductFamily productFamily, final String productType, final String satelliteId,
+			final String timeliness) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders
-				.rangeQuery("insertionTime").from(startTime, false).to(stopTime))
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery("insertionTime").from(startTime, false).to(stopTime))
 				.must(QueryBuilders.termQuery("satelliteId.keyword", satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType));
+		
+		if (!timeliness.isEmpty()) {
+			queryBuilder = queryBuilder.must(QueryBuilders.termsQuery("timeliness", timeliness));
+		}
 
 		LOGGER.debug("query composed is {}", queryBuilder);
 

@@ -348,6 +348,16 @@ public class MetadataClient {
 	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
 			final LocalDateTime intervalStart, final LocalDateTime intervalStop, final String satelliteId)
 			throws MetadataQueryException {
+		return searchInterval(productFamily, productType, intervalStart, intervalStop, satelliteId, "");
+	}
+
+	/**
+	 * Queries the products inside a given time interval for the given producttype.
+	 * The time interval is applied on the insertionTime
+	 */
+	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
+			final LocalDateTime intervalStart, final LocalDateTime intervalStop, final String satelliteId,
+			final String timeliness) throws MetadataQueryException {
 
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
 				+ productFamily.toString() + "/searchTypeInterval";
@@ -359,6 +369,10 @@ public class MetadataClient {
 
 		if (!StringUtils.isEmpty(satelliteId)) {
 			builder.queryParam("satelliteId", satelliteId);
+		}
+		
+		if (!StringUtils.isEmpty(timeliness)) {
+			builder.queryParam("timeliness", timeliness);
 		}
 
 		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
