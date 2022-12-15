@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0-rc1] - 2022-12-15
+
+### Added
+
+- RS-400: Adding function to support online/offline products
+- RS-726: Adding HKM Granules to PRIP. Implementing support for S2 SAD files and add them to PRIP as well.
+- RS-743: Quicklook URLs are not given out on request via the Native API
+
+
+
+### Changed
+
+- RS-241: Implementing rolling update infos in frontend components
+- RS-740: Standalone component charts did not set the default image tag to the current version
+- RS-744: Default values for log4j configuration was invalid for standalone configuration
+- RS-745: GP_RAW and HK_RAW files caused on the native api a cast exception causing queries not to be successful
+- RS-766: S3 L0P tasktables was not updated correctly and is now in line with 06.14 
+
+### Removed
+
+- N/A
+
+
 ## [1.8.0-rc1] - 2022-11-23
 
 ### Added
