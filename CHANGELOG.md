@@ -9,10 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - RS-400: Adding function to support online/offline products
+- RS-583: Adding handling for S3 Synergy vegetation products
 - RS-726: Adding HKM Granules to PRIP. Implementing support for S2 SAD files and add them to PRIP as well.
 - RS-743: Quicklook URLs are not given out on request via the Native API
-
-
 
 ### Changed
 
