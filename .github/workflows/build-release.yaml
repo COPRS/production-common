@@ -186,4 +186,124 @@ jobs:
       
       - uses: ./.github/actions/generate-report
         with: 
-          COMPONENT: ${{ matrix.component }}
+          COMPONENT: ${{ matrix.component }} 
+
+  build-s3-ol1:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-ol1.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+  
+  build-s3-ol1-spc:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-ol1-spc.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}    
+      
+  build-s3-ol1-rac:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-ol1-rac.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}    
+ 
+  build-s3-ol2:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-ol2.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-mw1:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-mw1.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-sl1:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sl1.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-sl2:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sl2.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-sl2-frp:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sl2-frp.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-sr1:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sr1.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+  
+  build-s3-sm2-hy:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sm2-hy.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      
+  build-s3-sm2-si:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sm2-si.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      
+  build-s3-sm2-li:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sm2-li.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-sy2:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sy2.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-sy2-aod:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sy2-aod.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
+  build-s3-sy2-vgs:
+    needs: [build-all-core]
+    uses: ./.github/workflows/build-ipf-s3-sy2-vgs.yaml
+    secrets:
+      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
