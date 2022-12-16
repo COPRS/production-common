@@ -317,8 +317,8 @@ public class PripToStacMapper {
 		asset.setHref(pripDownloadUrl.toString());
 		asset.setTitle(quicklookId);
 
-		if (null != quicklookId && quicklookId.toUpperCase().endsWith(".ZIP")) {
-			asset.setType("application/zip");
+		if (null != quicklookId && quicklookId.toUpperCase().endsWith(".PNG")) {
+			asset.setType("image/png");
 		}
 
 		asset.setDescription("download link for quicklook data");
