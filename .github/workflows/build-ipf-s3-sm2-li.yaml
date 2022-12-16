@@ -21,6 +21,10 @@ on:
         description: 'API Key for GitGuardian'
         required: true
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Release Build Pipeline production-common"]
+    types:
+      - completed
 
 env:
   REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
