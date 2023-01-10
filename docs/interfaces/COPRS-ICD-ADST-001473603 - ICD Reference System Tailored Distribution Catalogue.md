@@ -10,6 +10,26 @@ This document describes the modifications that had been required to tailor the P
 | --- | --- | --- | --- |
 | 01 | 2022/11/07 | N/A | First issue of document |
 
+## Known Limitations
+
+Especially for the DDIP not all features that are described within the DDIP ICD (Data Distribution Interface Control Document, v1.2, ESA-EOPG-EOPGC-IF-4) are available within the COPRS system. The used functions are either solved in a different way or was removed from the scope of the project. The following sections are giving an overview about the known limitations.
+
+### Delete Product
+
+The ICD asks for a delete function that allows to remove products from the catalog. As this function is not supposed to be exposed to the end-user and used internally and also marked as deprecated already, it was decided not to implement it. The COPRS does have a with the Data Lifecycle Manager a component that is automatically expiring outdated products from the system and there are operational procedures that are performed by the system operators if a product needs to be removed.
+
+### On Demand Processing
+
+The ICD is describing on-demand functionality. However this features was removed from the scope of the project at the beginning and thus the interface is not provided.
+
+### Quota Management
+
+There is currently no quota management existing for the DDIP system. Quota handling might be added in a future version of the system and and Denial of Service Violations will be handled by the system layer. There is no individual Quota handling for users at the moment.
+
+### Catalog Export
+
+There is no catalog export existing at the moment for the system. End users can use the OData interface or the STAC native API to paginate throught the whole catalog to get the data. For system operators there are operational procedures in order to create backups of the system databases that are not requiring an individual export of the full catalog.
+
 ## Quicklook Images
 
 The Product entity has been extended with a navigation property binding to a new entity type Quicklook, allowing to provide multiple preview images with a product. The Quicklook entity has one attribute Image of type String, containing the filename of the preview image as well as acting as the identifier of the entity. A media stream is present under the /$value resource path of a Quicklook to download an image.
