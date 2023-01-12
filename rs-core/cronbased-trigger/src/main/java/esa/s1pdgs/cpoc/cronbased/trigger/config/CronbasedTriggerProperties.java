@@ -20,11 +20,11 @@ public class CronbasedTriggerProperties {
 		private ProductFamily family;
 
 		private String satelliteIds;
-		
+
 		private long queryOffsetInS = 0;
-		
+
 		private String timeliness = "";
-		
+
 		public String getCron() {
 			return cron;
 		}
@@ -72,11 +72,25 @@ public class CronbasedTriggerProperties {
 	 */
 	private Map<String, TimerProperties> config;
 
+	/**
+	 * The pod contains a static unique identifier to distinguish different
+	 * configuration of different running applications
+	 */
+	private String pod;
+
 	public Map<String, TimerProperties> getConfig() {
 		return config;
 	}
 
 	public void setConfig(Map<String, TimerProperties> config) {
 		this.config = config;
+	}
+
+	public String getPod() {
+		return pod;
+	}
+
+	public void setPod(String pod) {
+		this.pod = pod;
 	}
 }

@@ -10,6 +10,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 @Component
 public interface CronbasedTriggerEntryRepository extends MongoRepository<CronbasedTriggerEntry, String> {
 
-	public List<CronbasedTriggerEntry> findByProductTypeAndProductFamily(String productType,
-			ProductFamily productFamily);
+	public List<CronbasedTriggerEntry> findByProductTypeAndProductFamilyAndPod(String productType,
+			ProductFamily productFamily, String pod);
 }

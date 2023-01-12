@@ -53,7 +53,7 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 
 		for (Entry<String, TimerProperties> entry : properties.getConfig().entrySet()) {
 			CronbasedTriggerEntry triggerEntry = getCatalogEventTimerEntry(entry.getValue().getFamily(),
-					entry.getKey());
+					entry.getKey(), properties.getPod());
 
 			if (groupShallBeChecked(triggerEntry, new Date(), entry.getValue().getCron())) {
 				LOGGER.info("Start checking for new products of productType {} and productFamily {}", entry.getKey(),
@@ -170,9 +170,9 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 	 * @return CronbasedTriggerEntry corresponding to this dispatcher
 	 */
 	private CronbasedTriggerEntry getCatalogEventTimerEntry(final ProductFamily productFamily,
-			final String productType) {
-		List<CronbasedTriggerEntry> entries = this.repository.findByProductTypeAndProductFamily(productType,
-				productFamily);
+			final String productType, final String pod) {
+		List<CronbasedTriggerEntry> entries = this.repository.findByProductTypeAndProductFamilyAndPod(productType,
+				productFamily, pod);
 
 		if (entries.isEmpty()) {
 			return null;

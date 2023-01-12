@@ -13,18 +13,19 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 
 @Document(collection = "catalogEventTimerEntry")
 @CompoundIndexes({
-	@CompoundIndex(name = "productType_productFamily", def = "{'productType' : 1, 'productFamily' : 1}")
-})
+		@CompoundIndex(name = "productType_productFamily_pod", def = "{'productType' : 1, 'productFamily' : 1, 'pod': 1}") })
 public class CronbasedTriggerEntry {
-	
+
 	@Id
 	private ObjectId id;
-	
+
 	private String productType;
-	
+
 	private ProductFamily productFamily;
-	
+
 	private Date lastCheckDate;
+
+	private String pod;
 
 	public ObjectId getId() {
 		return id;
@@ -58,9 +59,17 @@ public class CronbasedTriggerEntry {
 		this.lastCheckDate = lastCheckDate;
 	}
 
+	public String getPod() {
+		return pod;
+	}
+
+	public void setPod(String pod) {
+		this.pod = pod;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, lastCheckDate, productFamily, productType);
+		return Objects.hash(id, lastCheckDate, productFamily, productType, pod);
 	}
 
 	@Override
@@ -73,12 +82,13 @@ public class CronbasedTriggerEntry {
 		}
 		CronbasedTriggerEntry other = (CronbasedTriggerEntry) obj;
 		return Objects.equals(id, other.id) && Objects.equals(lastCheckDate, other.lastCheckDate)
-				&& productFamily == other.productFamily && Objects.equals(productType, other.productType);
+				&& productFamily == other.productFamily && Objects.equals(productType, other.productType)
+				&& Objects.equals(pod, other.pod);
 	}
 
 	@Override
 	public String toString() {
 		return "CatalogEventTimerEntry [id=" + id + ", productType=" + productType + ", productFamily=" + productFamily
-				+ ", lastCheckDate=" + lastCheckDate + "]";
+				+ ", lastCheckDate=" + lastCheckDate + ", pod=" + pod + "]";
 	}
 }
