@@ -148,6 +148,7 @@ public class CronbasedTriggerService implements Function<Message<?>, List<Messag
 					triggerEntry = new CronbasedTriggerEntry();
 					triggerEntry.setProductFamily(timerProperties.getFamily());
 					triggerEntry.setProductType(productType);
+					triggerEntry.setPod(properties.getPod());
 				}
 
 				LOGGER.info("Update database entry for this dispatcher");
