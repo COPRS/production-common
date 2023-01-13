@@ -55,7 +55,8 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 			throw new PripFilterOperatorException(String.format("operator not supported: %s", operator));
 		}
 		
-		public RelationalOperator getInverse() { // used for switching operands: x < 3 --> 3 > x
+		public RelationalOperator getHorizontallyFlippedOperator() {
+		   // used for switching operands: x < 3 --> 3 > x
 			switch (this) {
 			case LT:
 				return GT;

@@ -119,21 +119,18 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		switch (operator) {
 		case OR:
 		case AND:
-			this.filterStack.applyOperator(operator);
+			filterStack.applyOperator(operator);
 			break;
 		case GT:
 		case GE:
 		case LT:
 		case LE:
-		case EQ: {
+		case EQ:
 			final PripQueryFilterTerm filter = createFilter(operator, left, right, leftOperand, rightOperand);
-			if (null == filter) {
-				return null;
+			if (null != filter) {
+			   filterStack.push(filter);
 			}
-
-			this.filterStack.push(filter);
 			break;
-		}
 		default:
 			throw new UnsupportedOperationException("Operator " + operator + " not supported!");
 		}
@@ -199,9 +196,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	@Override
 	public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
-
 		Object result = member;
-		String type = "*";
+		String odataTypeName = null;
 		boolean ignored = true;
 		LOGGER.debug(String.format("iterating: %s", member.getResourcePath().getUriResourceParts()));
 
@@ -209,31 +205,36 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			LOGGER.debug(String.format("           %s (%s)", uriResource, uriResource.getKind()));
 			if (uriResource instanceof UriResourceNavigation) {
 				UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) uriResource;
-				String typeRepresentation = uriResourceNavigation.getSegmentValue(true);
-				switch (typeRepresentation.substring(typeRepresentation.lastIndexOf(".") + 1)) {
-				case EdmProvider.ET_STRING_ATTRIBUTE_NAME:
-					type = "string";
-					break;
-				case EdmProvider.ET_INTEGER_ATTRIBUTE_NAME:
-					type = "long";
-					break;
-				case EdmProvider.ET_DOUBLE_ATTRIBUTE_NAME:
-					type = "double";
-					break;
-				case EdmProvider.ET_BOOLEAN_ATTRIBUTE_NAME:
-					type = "boolean";
-					break;
-				case EdmProvider.ET_DATE_ATTRIBUTE_NAME:
-					type = "date";
-					break;
-				default:
-				}
-				LOGGER.debug(String.format("               %s -> %s", typeRepresentation, type));
+				odataTypeName = uriResourceNavigation.getSegmentValue(true);
 			} else if (uriResource instanceof UriResourceLambdaAny) {
-				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
+			   final String fieldNameSuffix; // database fieldname suffix (for e.g. att_foobar_string)
+            switch (odataTypeName.substring(odataTypeName.lastIndexOf(".") + 1)) {
+            case EdmProvider.ET_STRING_ATTRIBUTE_NAME:
+               fieldNameSuffix = "string";
+               break;
+            case EdmProvider.ET_INTEGER_ATTRIBUTE_NAME:
+               fieldNameSuffix = "long";
+               break;
+            case EdmProvider.ET_DOUBLE_ATTRIBUTE_NAME:
+               fieldNameSuffix = "double";
+               break;
+            case EdmProvider.ET_BOOLEAN_ATTRIBUTE_NAME:
+               fieldNameSuffix = "boolean";
+               break;
+            case EdmProvider.ET_DATE_ATTRIBUTE_NAME:
+               fieldNameSuffix = "date";
+               break;
+            default:
+               final String msg = String.format("Unsupported Type: %s" + odataTypeName);
+               LOGGER.error(msg);
+               throw new IllegalArgumentException(msg);
+            }
+            LOGGER.debug(String.format("               %s -> %s", odataTypeName, fieldNameSuffix));
+				final AttributesFilterVisitor filterExpressionVisitor =
+				      new AttributesFilterVisitor(fieldNameSuffix);
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
 				final Expression expression = any.getExpression();
-				LOGGER.debug(String.format("               visit AttributesFilterVisitor(%s) for: %s", type, expression));
+				LOGGER.debug(String.format("               visit AttributesFilterVisitor(%s) for: %s", fieldNameSuffix, expression));
 				
 				expression.accept(filterExpressionVisitor);
 				final PripQueryFilter filter = filterExpressionVisitor.getFilter();
@@ -321,7 +322,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		final Matcher matcher = ODATA_EWKT_EXTRACTION_PATTERN.matcher(uriParameter.getText());
 
 		if (!matcher.matches()) {
-			throw new ParseException("Invalid structered parameter");
+			throw new ParseException("Invalid parameter format");
 		}
 
 		matcher.group(1); // geometry or geography for flat-earth or round-earth coordinate reference systems (CRS), must match with SRID
@@ -490,7 +491,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			}
 		} else if (left instanceof Literal && right instanceof Member) {
 			if (isDateField(rightOperand)) {
-				return new PripDateTimeFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getInverse(),
+				return new PripDateTimeFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getHorizontallyFlippedOperator(),
 						convertToLocalDateTime(leftOperand));
 			}
 		}
@@ -542,7 +543,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			}
 		} else if (left instanceof Literal && right instanceof Member) {
 			if (isIntegerField(rightOperand)) {
-				return new PripIntegerFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getInverse(), Long.valueOf(leftOperand));
+				return new PripIntegerFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getHorizontallyFlippedOperator(), Long.valueOf(leftOperand));
 			}
 		}
 
