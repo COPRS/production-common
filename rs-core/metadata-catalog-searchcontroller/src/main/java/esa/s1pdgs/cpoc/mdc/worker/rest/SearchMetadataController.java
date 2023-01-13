@@ -223,7 +223,7 @@ public class SearchMetadataController {
 	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productFamily}/search")
 	public ResponseEntity<List<SearchMetadata>> search(@PathVariable(name = "productFamily") final String productFamily,
 			@RequestParam(name = "productType", defaultValue = "NONE") final String productType,
-			@RequestParam(name = "mode", defaultValue = "NONE") final String mode,
+			@RequestParam(name = "mode", defaultValue = "NONE") final String modeInput,
 			@RequestParam(name = "satellite", defaultValue = "NONE") final String satellite,
 			@RequestParam(name = "t0") final String startDate, @RequestParam(name = "t1") final String stopDate,
 			@RequestParam(name = "processMode", defaultValue = "NONE") final String processMode,
@@ -234,6 +234,11 @@ public class SearchMetadataController {
 			@RequestParam(value = "maxResults", required=false) final Integer maxResults,
 			@RequestParam(value = "polarisation", defaultValue = "NONE") final String polarisation,
 			@RequestParam(value = "bandIndexId", required = false) final String bandIndexId) {
+		
+		// Some tasktables contain trailing spaces in the SelectionPolicy. Make this
+		// part more robust
+		String mode = modeInput.trim();
+		
 		LOGGER.info("Received search query for family '{}', product type '{}', mode '{}', satellite '{}'",
 				productFamily, productType, mode, satellite);
 		try {
