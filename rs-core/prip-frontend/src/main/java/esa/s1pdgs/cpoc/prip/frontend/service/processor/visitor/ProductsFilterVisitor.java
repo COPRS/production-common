@@ -173,7 +173,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 																						// field
 		final Function filterFunction = PripTextFilter.Function.fromString(methodCall.name());
 		final String literal = ((Literal) parameters.get(1)).getText();
-		final String text = literal.substring(1, literal.length() - 1);
+		final String text = getStringData(literal);
 		final PripTextFilter textFilter = new PripTextFilter(pripFieldName, filterFunction, text);
 
 		this.filterStack.push(textFilter);
@@ -368,6 +368,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	}
 
 	public static String operandToString(Object operand) {
+	   // converts objects into text form, preserving surrounding quotes if present.
+	   // use getStringData() to extract absolute string values in a second step where applicable. 
 		String result = "";
 		if (operand instanceof Member) {
 			result = memberText((Member) operand);
@@ -507,12 +509,12 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		if (left instanceof Member && right instanceof Literal) {
 			if (isTextField(leftOperand)) {
 				return new PripTextFilter(mapToPripFieldName(leftOperand).orElse(null), function,
-						rightOperand.substring(1, rightOperand.length() - 1));
+						getStringData(rightOperand));
 			}
 		} else if (left instanceof Literal && right instanceof Member) {
 			if (isTextField(rightOperand)) {
 				return new PripTextFilter(mapToPripFieldName(rightOperand).orElse(null), function,
-						leftOperand.substring(1, leftOperand.length() - 1));
+						getStringData(leftOperand));
 			}
 		} else if (left instanceof Member && right instanceof List || left instanceof List && right instanceof Member) {
 			final String memberText = left instanceof Member ? leftOperand : rightOperand;
@@ -550,5 +552,13 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand + " " + operator.getOperator() + " " + rightOperand,
 				BAD_REQUEST.getStatusCode(), null);
 	}
-
+	
+	public static String getStringData(String odataStringParameter) {
+	   // converts an odata string parameter WITH its surrounding single quotes to plain text WITHOUT
+	   // surrounding single quotes. single quotes inside of the string, which are represented by
+	   // two following single quotes are unescaped to one single quote each. see also:
+	   // https://docs.oasis-open.org/odata/odata/v4.01/cs01/abnf/odata-abnf-construction-rules.txt
+	   return odataStringParameter.substring(1, odataStringParameter.length() - 1).replace("''", "'");
+	   
+	}
 }

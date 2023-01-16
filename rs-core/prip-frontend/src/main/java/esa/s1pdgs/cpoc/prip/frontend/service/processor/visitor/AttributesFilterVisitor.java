@@ -1,5 +1,9 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
+import static esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor.convertToLocalDateTime;
+import static esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor.getStringData;
+import static esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor.memberText;
+import static esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor.operandToString;
 import static org.apache.olingo.commons.api.http.HttpStatusCode.BAD_REQUEST;
 import static org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind.OR;
 
@@ -37,7 +41,7 @@ import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
 
 public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(ProductsFilterVisitor.class);
+   private static final Logger LOGGER = LoggerFactory.getLogger(AttributesFilterVisitor.class);
 
    private static final String ATT_NAME = "att/Name";
    private static final String ATT_VALUE = "att/Value";
@@ -63,8 +67,8 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
    public Object visitBinaryOperator(final BinaryOperatorKind operator, final Object left, 
          final Object right) throws ExpressionVisitException, ODataApplicationException {
 
-      final String leftOperand = ProductsFilterVisitor.operandToString(left);
-      final String rightOperand = ProductsFilterVisitor.operandToString(right);
+      final String leftOperand = operandToString(left);
+      final String rightOperand = operandToString(right);
       LOGGER.debug(String.format("AttributesFilterVisitor got: %s %s %s", leftOperand, operator, rightOperand));
 
       // on the first call only, olingo will pass the fieldname
@@ -77,7 +81,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
                LOGGER.error(msg);
                throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
          }
-         attributeName = rightOperand.replace("'", "");
+         attributeName = getStringData(rightOperand);
          fieldName = "attr_" + attributeName + "_" + fieldNameSuffix;
          return new LiteralImpl(MARKED_TO_IGNORE, EdmString.getInstance());
       } else if (MARKED_TO_IGNORE.equals(leftOperand) || MARKED_TO_IGNORE.equals(rightOperand)) {
@@ -157,7 +161,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
       }
 
       final Member field = (Member) parameters.get(0);
-      final String odataFieldname = ProductsFilterVisitor.memberText(field);
+      final String odataFieldname = memberText(field);
 
       if (!FIELD_TYPE_STRING.equals(fieldNameSuffix)) {
          throw new ODataApplicationException("Unsupported field name: " + odataFieldname,
@@ -166,7 +170,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
       final Function filterFunction = PripTextFilter.Function.fromString(methodCall.name());
       final String literal = ((Literal) parameters.get(1)).getText();
-      final String text = literal.substring(1, literal.length() - 1);
+      final String text = getStringData(literal);
       final PripTextFilter textFilter = new PripTextFilter(fieldName, filterFunction, text);
 
       filterStack.push(textFilter);
@@ -236,10 +240,10 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
          switch (fieldNameSuffix) {
          case "string":
             return new PripTextFilter(fieldName, PripTextFilter.Function.fromString(op.name()),
-                  value.substring(1, value.length() - 1));
+                  getStringData(value));
          case "date":
             return new PripDateTimeFilter(fieldName, getRelationalOperator(op, flipOperator),
-                  ProductsFilterVisitor.convertToLocalDateTime(value));
+                  convertToLocalDateTime(value));
          case "long":
             return new PripIntegerFilter(fieldName, getRelationalOperator(op, flipOperator),
                   Long.valueOf(value));
