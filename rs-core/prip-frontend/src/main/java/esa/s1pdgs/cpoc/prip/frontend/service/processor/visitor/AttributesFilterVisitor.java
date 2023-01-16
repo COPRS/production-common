@@ -1,11 +1,13 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
+import static org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind.OR;
+import static org.apache.olingo.commons.api.http.HttpStatusCode.BAD_REQUEST;
+
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmType;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -31,8 +33,8 @@ import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.RelationalOperator;
-import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter.Function;
 
 public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
@@ -74,21 +76,29 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
          if (!ATT_NAME.equals(leftOperand) || operator != BinaryOperatorKind.EQ) {
                String msg = String.format("Invalid request: %s %s %s", leftOperand, operator, rightOperand);
                LOGGER.error(msg);
-               throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+               throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
          }
          attributeName = removeQuotes(rightOperand);
          fieldName = "attr_" + attributeName + "_" + fieldNameSuffix;
          return new LiteralImpl(MARKED_TO_IGNORE, EdmString.getInstance());
+      } else if (MARKED_TO_IGNORE.equals(leftOperand) || MARKED_TO_IGNORE.equals(rightOperand)) {
+         // due to it's recursive nature, the visitor comes back later to combine all previous
+         // results. as the att/Name went into the fieldName instead of the filterStack, the
+         // related logical operation to the filterStack have to be discarded. 
+         if (operator == OR) {
+            String msg = String.format("Invalid request: OR with %s not allowed (must be distinct)",
+                  ATT_NAME);
+            LOGGER.error(msg);
+            throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
+         }
+         return null;
       }
       
       // on subsequent calls, conditions on the value are added
       switch (operator) {
          case OR:
          case AND:
-            if (!(MARKED_TO_IGNORE.equals(leftOperand) ||
-                  MARKED_TO_IGNORE.equals(rightOperand))) {
-               filterStack.applyOperator(operator);
-            }
+            filterStack.applyOperator(operator);
             break;
          case GT:
          case GE:
@@ -102,7 +112,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
                      attributeName, StringUtil.isNotEmpty(leftOperand) ? leftOperand : "[MISSING VALUE]",
                      operator, StringUtil.isNotEmpty(rightOperand) ? rightOperand : "[MISSING VALUE]");
                LOGGER.error(msg);
-               throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+               throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
             }
             
             // create filter
@@ -180,7 +190,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
             || !(parameters.get(1) instanceof Literal)) {
          throw new ODataApplicationException(
                "Invalid or unsupported parameter(s): " + StringUtil.makeListString(",", parameters),
-               HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+               BAD_REQUEST.getStatusCode(), null);
       }
 
       final Member field = (Member) parameters.get(0);
@@ -188,7 +198,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 
       if (!FIELD_TYPE_STRING.equals(fieldNameSuffix)) {
          throw new ODataApplicationException("Unsupported field name: " + odataFieldname,
-               HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+               BAD_REQUEST.getStatusCode(), null);
       }
 
       final Function filterFunction = PripTextFilter.Function.fromString(methodCall.name());
@@ -253,7 +263,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
          final String msg = String.format("Incomplete filter expression: more than one result on filter stack after traversing expression tree -> %s",
                filterStack);
          LOGGER.error(msg);
-         throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+         throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
       }
    }
    

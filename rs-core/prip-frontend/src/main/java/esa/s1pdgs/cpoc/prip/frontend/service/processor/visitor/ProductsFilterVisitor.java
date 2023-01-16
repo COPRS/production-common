@@ -8,6 +8,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Produc
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
 import static esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION;
+import static org.apache.olingo.commons.api.http.HttpStatusCode.BAD_REQUEST;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -27,7 +28,6 @@ import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriParameter;
@@ -158,7 +158,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				|| !(parameters.get(1) instanceof Literal)) {
 			throw new ODataApplicationException(
 					"Invalid or unsupported parameter(s): " + StringUtil.makeListString(",", parameters),
-					HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+					BAD_REQUEST.getStatusCode(), null);
 		}
 
 		final Member field = (Member) parameters.get(0);
@@ -166,7 +166,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 		if (!isTextField(odataFieldname)) {
 			throw new ODataApplicationException("Unsupported field name: " + odataFieldname,
-					HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+					BAD_REQUEST.getStatusCode(), null);
 		}
 
 		final String pripFieldName = mapToPripFieldName(odataFieldname).orElse(null); // we already checked if text
@@ -186,7 +186,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			throws ExpressionVisitException, ODataApplicationException {
 		throw new ODataApplicationException(
 				"Unsupported lambda expression: " + lambdaFunction + " / " + lambdaVariable + " / " + expression,
-				HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+				BAD_REQUEST.getStatusCode(), Locale.ROOT);
 	}
 
 	@Override
@@ -256,7 +256,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				}
 			} else if (uriResource instanceof UriResourceLambdaAll) {
 				throw new ODataApplicationException("Unsupported lambda expression on filter expression: all",
-						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+						BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
 		}
 		LOGGER.debug(String.format("           %s.", ignored ? "visitMember: ignored" : "visitMember: done"));
@@ -289,13 +289,13 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				geometry = asGeometry(parameters.get(1));
 			} catch (ParseException e) {
 				throw new ODataApplicationException("Invalid geography parameter",
-						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+						BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
 		} else {
 			throw new ODataApplicationException(
 					"Invalid parameter for function "
 							+ functionName.getFullQualifiedNameAsString(),
-					HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+					BAD_REQUEST.getStatusCode(), Locale.ROOT);
 		}
 
 		if (EdmProvider.FUNCTION_INTERSECTS_FQN.equals(functionName)) {
@@ -404,7 +404,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			final String msg = String.format("Incomplete filter expression: more than one result on filter stack after traversing expression tree -> %s",
 					this.filterStack);
 			LOGGER.error(msg);
-			throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+			throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
 		}
 	}
 
@@ -477,7 +477,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			final String msg = String.format("Unsupported operation: %s %s %s", leftOperand != null ? leftOperand : "''", operator,
 					rightOperand != null ? rightOperand : "''");
 			LOGGER.error(msg);
-			throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+			throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
 		}
 	}
 
@@ -498,7 +498,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 		throw new ODataApplicationException(
 				"Invalid or unsupported operand(s): " + leftOperand + " " + operator.getOperator() + " " + rightOperand,
-				HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				BAD_REQUEST.getStatusCode(), null);
 	}
 
 	private static PripTextFilter createTextFilter(Function function, Object left, Object right, String leftOperand,
@@ -531,7 +531,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 
 		throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand + " "
-				+ function.getFunctionName() + " " + rightOperand, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				+ function.getFunctionName() + " " + rightOperand, BAD_REQUEST.getStatusCode(), null);
 	}
 
 	private static PripIntegerFilter createIntegerFilter(final RelationalOperator operator, final Object left, final Object right, final String leftOperand,
@@ -548,7 +548,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 
 		throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand + " " + operator.getOperator() + " " + rightOperand,
-				HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				BAD_REQUEST.getStatusCode(), null);
 	}
 
 }
