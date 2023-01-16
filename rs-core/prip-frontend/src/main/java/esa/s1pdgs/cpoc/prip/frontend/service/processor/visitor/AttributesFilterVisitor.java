@@ -90,6 +90,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
             LOGGER.error(msg);
             throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
          }
+         // no operation (discard)
          return null;
       }
       
