@@ -236,7 +236,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
          switch (fieldNameSuffix) {
          case "string":
             return new PripTextFilter(fieldName, PripTextFilter.Function.fromString(op.name()),
-                  value);
+                  value.substring(1, value.length() - 1));
          case "date":
             return new PripDateTimeFilter(fieldName, getRelationalOperator(op, flipOperator),
                   ProductsFilterVisitor.convertToLocalDateTime(value));
