@@ -332,10 +332,10 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	private static void buildQueryWithBooleanFilter(final PripBooleanFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
-		case EQUALS:
+		case EQ:
 			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
 			break;
-		case EQUALS_NOT:
+		case NE:
 			appendQueryNegated(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
 			break;
 		default:

@@ -57,56 +57,6 @@ public class PripMetadata {
 		public String fieldName() {
 			return fieldName;
 		}
-		
-		public static FIELD_NAMES fromString(String fieldName) {
-			if (CREATION_DATE.fieldName().equalsIgnoreCase(fieldName) || CREATION_DATE.name().equalsIgnoreCase(fieldName)) {
-				return CREATION_DATE;
-			}
-			if (EVICTION_DATE.fieldName().equalsIgnoreCase(fieldName) || EVICTION_DATE.name().equalsIgnoreCase(fieldName)) {
-				return EVICTION_DATE;
-			}
-			if ("ContentDate/Start".equalsIgnoreCase(fieldName) || CONTENT_DATE_START.fieldName().equalsIgnoreCase(fieldName) || CONTENT_DATE_START.name().equalsIgnoreCase(fieldName)) {
-				return CONTENT_DATE_START;
-			}
-			if ("ContentDate/End".equalsIgnoreCase(fieldName) || CONTENT_DATE_END.fieldName().equalsIgnoreCase(fieldName) || CONTENT_DATE_END.name().equalsIgnoreCase(fieldName)) {
-				return CONTENT_DATE_END;
-			}
-			if (NAME.fieldName().equalsIgnoreCase(fieldName) || NAME.name().equalsIgnoreCase(fieldName)) {
-				return NAME;
-			}
-			if (ONLINE.fieldName().equalsIgnoreCase(fieldName) || ONLINE.name().equalsIgnoreCase(fieldName)) {
-				return ONLINE;
-			}
-			if (CONTENT_LENGTH.fieldName().equalsIgnoreCase(fieldName) || CONTENT_LENGTH.name().equalsIgnoreCase(fieldName)) {
-				return CONTENT_LENGTH;
-			}
-			if (PRODUCT_FAMILY.fieldName().equalsIgnoreCase(fieldName) || PRODUCT_FAMILY.name().equalsIgnoreCase(fieldName)) {
-				return PRODUCT_FAMILY;
-			}
-			if (PRODUCTION_TYPE.fieldName().equalsIgnoreCase(fieldName) || PRODUCTION_TYPE.name().equalsIgnoreCase(fieldName)) {
-				return PRODUCTION_TYPE;
-			}
-			if (FOOTPRINT.fieldName().equalsIgnoreCase(fieldName) || FOOTPRINT.name().equalsIgnoreCase(fieldName)) {
-				return FOOTPRINT;
-			}
-			if (CHECKSUM.fieldName().equalsIgnoreCase(fieldName) || CHECKSUM.name().equalsIgnoreCase(fieldName)) {
-				return CHECKSUM;
-			}
-			if (CONTENT_TYPE.fieldName().equalsIgnoreCase(fieldName) || CONTENT_TYPE.name().equalsIgnoreCase(fieldName)) {
-				return CONTENT_TYPE;
-			}
-			if (ID.fieldName().equalsIgnoreCase(fieldName) || ID.name().equalsIgnoreCase(fieldName)) {
-				return ID;
-			}
-			if (OBS_KEY.fieldName().equalsIgnoreCase(fieldName) || OBS_KEY.name().equalsIgnoreCase(fieldName)) {
-				return OBS_KEY;
-			}
-			if (BROWSE_KEYS.fieldName().equalsIgnoreCase(fieldName) || BROWSE_KEYS.name().equalsIgnoreCase(fieldName)) {
-				return BROWSE_KEYS;
-			}
-
-			throw new IllegalArgumentException(String.format("field name not supported: %s", fieldName));
-		}
 	}
 
 	private UUID id;

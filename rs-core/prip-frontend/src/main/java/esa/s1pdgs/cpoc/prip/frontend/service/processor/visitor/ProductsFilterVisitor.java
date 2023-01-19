@@ -54,6 +54,7 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
+import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
@@ -72,6 +73,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	private static final Map<String, FIELD_NAMES> PRIP_DATETIME_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_TEXT_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_INTEGER_PROPERTY_FIELD_NAMES;
+	private static final Map<String, FIELD_NAMES> PRIP_BOOLEAN_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_SUPPORTED_PROPERTY_FIELD_NAMES;
 	private static final List<String> PRIP_PRODUCTION_TYPES;
 	private static final List<MethodKind> SUPPORTED_METHODS;
@@ -90,10 +92,14 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		PRIP_INTEGER_PROPERTY_FIELD_NAMES = new HashMap<>();
 		PRIP_INTEGER_PROPERTY_FIELD_NAMES.put(ProductProperties.ContentLength.name(), FIELD_NAMES.CONTENT_LENGTH);
 
+		PRIP_BOOLEAN_PROPERTY_FIELD_NAMES = new HashMap<>();
+      PRIP_BOOLEAN_PROPERTY_FIELD_NAMES.put(ProductProperties.Online.name(), FIELD_NAMES.ONLINE);
+
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES = new HashMap<>();
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_DATETIME_PROPERTY_FIELD_NAMES);
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_TEXT_PROPERTY_FIELD_NAMES);
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_INTEGER_PROPERTY_FIELD_NAMES);
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_BOOLEAN_PROPERTY_FIELD_NAMES);
 
 		PRIP_PRODUCTION_TYPES = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
 				.map(v -> v.getName()).collect(Collectors.toList());
@@ -125,6 +131,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		case GE:
 		case LT:
 		case LE:
+		case NE:
 		case EQ:
 			final PripQueryFilterTerm filter = createFilter(operator, left, right, leftOperand, rightOperand);
 			if (null != filter) {
@@ -457,6 +464,19 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	private static boolean isIntegerField(String odataFieldName) {
 		return PRIP_INTEGER_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
 	}
+	
+	private static boolean isBooleanComparison(final Object leftOperandExpression, final String leftOperandString, final Object rightOperandExpression,
+         final String rightOperandString) {
+      return isBooleanComparison(leftOperandExpression, leftOperandString) || isIntegerComparison(rightOperandExpression, rightOperandString);
+   }
+
+   private static boolean isBooleanComparison(final Object operandExpression, final String operandString) {
+      return operandExpression instanceof Member && isBooleanField(operandString);
+   }
+
+   private static boolean isBooleanField(String odataFieldName) {
+      return PRIP_BOOLEAN_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
+   }
 
 	private static Optional<String> mapToPripFieldName(String odataFieldName) {
 		if (PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
@@ -468,13 +488,15 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static PripQueryFilterTerm createFilter(final BinaryOperatorKind operator, final Object left, final Object right, final String leftOperand,
 			final String rightOperand) throws ODataApplicationException, ExpressionVisitException {
-
 		if (isTextComparison(left, leftOperand, right, rightOperand)) {
 			return createTextFilter(Function.fromString(operator.name()), left, right, leftOperand, rightOperand);
 		} else if (isDateComparison(left, leftOperand, right, rightOperand)) {
 			return createDateTimeFilter(RelationalOperator.fromString(operator.name()), left, right, leftOperand, rightOperand);
 		} else if (isIntegerComparison(left, leftOperand, right, rightOperand)) {
 			return createIntegerFilter(RelationalOperator.fromString(operator.name()), left, right, leftOperand, rightOperand);
+      } else if (isBooleanComparison(left, leftOperand, right, rightOperand)) {
+         return createBooleanFilter(esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter.Function
+               .fromString(operator.name()), left, right, leftOperand, rightOperand);
 		} else {
 			final String msg = String.format("Unsupported operation: %s %s %s", leftOperand != null ? leftOperand : "''", operator,
 					rightOperand != null ? rightOperand : "''");
@@ -538,7 +560,6 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static PripIntegerFilter createIntegerFilter(final RelationalOperator operator, final Object left, final Object right, final String leftOperand,
 			final String rightOperand) throws ODataApplicationException, ExpressionVisitException {
-
 		if (left instanceof Member && right instanceof Literal) {
 			if (isIntegerField(leftOperand)) {
 				return new PripIntegerFilter(mapToPripFieldName(leftOperand).orElse(null), operator, Long.valueOf(rightOperand));
@@ -552,6 +573,26 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand + " " + operator.getOperator() + " " + rightOperand,
 				BAD_REQUEST.getStatusCode(), null);
 	}
+	
+	private static PripBooleanFilter createBooleanFilter(
+	      final esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter.Function function,
+	      final Object left, final Object right, final String leftOperand, final String rightOperand)
+	            throws ODataApplicationException, ExpressionVisitException {
+      if (left instanceof Member && right instanceof Literal) {
+         if (isBooleanField(leftOperand)) {
+            return new PripBooleanFilter(mapToPripFieldName(leftOperand).orElse(null), function,
+                  Boolean.valueOf(rightOperand));
+         }
+      } else if (left instanceof Literal && right instanceof Member) {
+         if (isBooleanField(rightOperand)) {
+            return new PripBooleanFilter(mapToPripFieldName(rightOperand).orElse(null), function,
+                  Boolean.valueOf(leftOperand));
+         }
+      }
+
+      throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand +
+            " " + function + " " + rightOperand, BAD_REQUEST.getStatusCode(), null);
+   }
 	
 	public static String getStringData(String odataStringParameter) {
 	   // converts an odata string parameter WITH its surrounding single quotes to plain text WITHOUT

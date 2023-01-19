@@ -108,6 +108,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
          case GE:
          case LT:
          case LE:
+         case NE:
          case EQ:
             // validate operands
             if (StringUtil.isEmpty(leftOperand) || StringUtil.isEmpty(rightOperand) ||
