@@ -61,6 +61,11 @@
 			<xsl:value-of
 				select="//*[local-name() = 'Quality_Info']" />
 		</qualityInfo>
+    
+        <cloudPercentage>
+            <xsl:value-of
+                select="//*[local-name() = 'CloudPercentage']" />
+        </cloudPercentage>
 
 		<coordinates>
 			<xsl:for-each select="//*[local-name() = 'Geo_Pnt']">
