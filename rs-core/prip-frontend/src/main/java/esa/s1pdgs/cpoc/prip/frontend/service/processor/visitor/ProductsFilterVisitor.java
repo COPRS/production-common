@@ -4,6 +4,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Conten
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ProductionType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
@@ -580,12 +581,12 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	            throws ODataApplicationException, ExpressionVisitException {
       if (left instanceof Member && right instanceof Literal) {
          if (isBooleanField(leftOperand)) {
-            return new PripBooleanFilter(mapToPripFieldName(leftOperand).orElse(null), function,
+            return newPripBooleanFilter(mapToPripFieldName(leftOperand).orElse(null), function,
                   Boolean.valueOf(rightOperand));
          }
       } else if (left instanceof Literal && right instanceof Member) {
          if (isBooleanField(rightOperand)) {
-            return new PripBooleanFilter(mapToPripFieldName(rightOperand).orElse(null), function,
+            return newPripBooleanFilter(mapToPripFieldName(rightOperand).orElse(null), function,
                   Boolean.valueOf(leftOperand));
          }
       }
@@ -594,12 +595,35 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
             " " + function + " " + rightOperand, BAD_REQUEST.getStatusCode(), null);
    }
 	
+	private static PripBooleanFilter newPripBooleanFilter(final String fieldName,
+	      final PripBooleanFilter.Function function, final boolean value) {
+	   // RS-400: By default if not specified otherwise, products are online.
+	   // This means a query for online EQ true has to return {online=true, online=null} (instead of
+	   // {online=true}) and a query for online NE true has to return only {online=false} (instead of
+	   // {online=false, online=null}).
+	   // Note: Latter results having online=null will use the default (true) as set in
+	   // esa.s1pdgs.cpoc.prip.model.PripMetadata without an explicit mapping step. 
+	   if (value && PripBooleanFilter.Function.EQ == function
+	            && Online.name().equalsIgnoreCase(fieldName)) {
+	      // rewrite query to find {online=true, online=null} when searching for online EQ true
+	      LOGGER.debug("Rewriting '{} {} {}' to '{} {} {}'", fieldName, function, value, fieldName,
+	            PripBooleanFilter.Function.NE, false);
+         return new PripBooleanFilter(fieldName, PripBooleanFilter.Function.NE, false);  	     
+	   } else if (value && PripBooleanFilter.Function.NE == function
+	         && Online.name().equalsIgnoreCase(fieldName)) {
+	      // rewrite query to find {online=false} when searching for online NE true
+         LOGGER.debug("Rewriting '{} {} {}' to '{} {} {}'", fieldName, function, value, fieldName,
+               PripBooleanFilter.Function.EQ, false);
+	      return new PripBooleanFilter(fieldName, PripBooleanFilter.Function.EQ, false);  
+	   }
+	   return new PripBooleanFilter(fieldName, function, value);
+	}
+	
 	public static String getStringData(String odataStringParameter) {
 	   // converts an odata string parameter WITH its surrounding single quotes to plain text WITHOUT
 	   // surrounding single quotes. single quotes inside of the string, which are represented by
 	   // two following single quotes are unescaped to one single quote each. see also:
 	   // https://docs.oasis-open.org/odata/odata/v4.01/cs01/abnf/odata-abnf-construction-rules.txt
 	   return odataStringParameter.substring(1, odataStringParameter.length() - 1).replace("''", "'");
-	   
 	}
 }

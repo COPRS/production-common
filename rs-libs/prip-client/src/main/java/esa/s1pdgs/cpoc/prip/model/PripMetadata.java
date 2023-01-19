@@ -87,7 +87,7 @@ public class PripMetadata {
 	
 	private List<String> browseKeys;
 	
-	private boolean online = true; // by default if not specified other, products are online
+	private boolean online = true; // RS-400: by default if not specified otherwise, products are online. see also: esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor.newPripBooleanFilter(String, Function, boolean)
 	
 	private Map<String, Object> attributes;
 
