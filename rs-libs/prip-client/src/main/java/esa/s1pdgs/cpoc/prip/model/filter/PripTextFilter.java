@@ -58,15 +58,10 @@ public class PripTextFilter extends PripQueryFilterTerm {
 		this(fieldName.fieldName());
 	}
 
-	private PripTextFilter(String fieldName, Function function, String text, boolean nested, String path) {
-		super(fieldName, nested, path);
-
-		this.function = Objects.requireNonNull(function);
-		this.text = Objects.requireNonNull(text);
-	}
-
 	public PripTextFilter(String fieldName, Function function, String text) {
-		this(fieldName, function, text, false, null);
+		super(fieldName, false, null);
+		this.function = Objects.requireNonNull(function);
+      this.text = Objects.requireNonNull(text);
 	}
 
 	// --------------------------------------------------------------------------
@@ -98,15 +93,6 @@ public class PripTextFilter extends PripQueryFilterTerm {
 		return this.getFieldName() + " " + (null != this.function ? this.function.name() : "NO_FUNCTION") + " "
 				+ this.text;
 	}
-
-	// --------------------------------------------------------------------------
-
-	@Override
-	public PripTextFilter copy() {
-		return new PripTextFilter(this.getFieldName(), this.getFunction(), this.getText(), this.isNested(), this.getPath());
-	}
-
-	// --------------------------------------------------------------------------
 
 	public Function getFunction() {
 		return this.function;

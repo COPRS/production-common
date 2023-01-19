@@ -82,15 +82,10 @@ public abstract class PripRangeValueFilter<T extends Object> extends PripQueryFi
 		super(fieldName);
 	}
 
-	protected PripRangeValueFilter(String fieldName, RelationalOperator operator, T value, boolean nested, String path) {
-		super(fieldName, nested, path);
-
-		this.relationalOperator = Objects.requireNonNull(operator, "relational operator is required!");
-		this.value = Objects.requireNonNull(value, "value is required!");
-	}
-
 	public PripRangeValueFilter(String fieldName, RelationalOperator operator, T value) {
-		this(fieldName, operator, value, false, null);
+	   super(fieldName, false, null);
+	   this.relationalOperator = Objects.requireNonNull(operator, "relational operator is required!");
+      this.value = Objects.requireNonNull(value, "value is required!");
 	}
 
 	// --------------------------------------------------------------------------
