@@ -164,7 +164,7 @@ public class ProductMetadataCustomObjectFiller {
 				fillwithKeyMapping("orbit_number_integer", "orbitNumber");
 				output.getProductMetadataCustomObject().put("processing_level_integer", 1);
 				fillwithKeyMapping("product_type_string", "productType");
-//				fillwithKeyMapping("cloud_cover_double",?);
+				fillwithKeyMapping("cloud_cover_double", "cloudPercentage");
 				break;
 			case S3_L2_NRT:
 			case S3_L2_NTC:
@@ -177,7 +177,7 @@ public class ProductMetadataCustomObjectFiller {
 				fillwithKeyMapping("orbit_number_integer", "orbitNumber");
 				output.getProductMetadataCustomObject().put("processing_level_integer", 2);
 				fillwithKeyMapping("product_type_string", "productType");
-//				fillwithKeyMapping("cloud_cover_double",?);
+				fillwithKeyMapping("cloud_cover_double", "cloudPercentage");
 				break;
 			case AUXILIARY_FILE:
 			case S2_AUX:
