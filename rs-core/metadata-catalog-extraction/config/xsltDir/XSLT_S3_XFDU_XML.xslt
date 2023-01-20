@@ -188,6 +188,11 @@
 			<xsl:value-of
 				select="//*[local-name()='onlineQualityCheck']" />
 		</qualityIndicator>
+    
+        <cloudPercentage>
+            <xsl:value-of
+                select="//*[local-name()='classificationSummary']//*[local-name()='cloudyPixels']/@percentage" />
+        </cloudPercentage>
 
 		<xsl:call-template name="setTimeliness">
 			<xsl:with-param name="timeliness">
