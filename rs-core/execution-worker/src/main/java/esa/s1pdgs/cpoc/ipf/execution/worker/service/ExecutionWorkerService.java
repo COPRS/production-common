@@ -243,7 +243,6 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		List<MissingOutput> missingOutputs = new ArrayList<>();
 		OutputEstimation outputEstimation = new OutputEstimation(
 				properties, 
-				job,
 				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), 
 				outputListFile, 
 				missingOutputs);
@@ -325,7 +324,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			
 			if (properties.isProductTypeEstimationEnabled()) {
 				LOGGER.debug("output product type estimation enabled");
-				outputEstimation.estimateWithoutError();
+				outputEstimation.estimateWithoutError(job);
 			} else {
 				LOGGER.debug("output product type estimation disabled");
 			}
@@ -334,7 +333,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		} catch (Exception e) {
 			if (properties.isProductTypeEstimationEnabled()) {
 				LOGGER.debug("output product type estimation enabled");
-				outputEstimation.estimateWithError();
+				outputEstimation.estimateWithError(job);
 			} else {
 				LOGGER.debug("output product type estimation disabled");
 			}
