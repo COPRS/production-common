@@ -80,7 +80,9 @@ public class OutputEstimation {
 
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
 			findMissingTypesForASP(job, inputProductType, productsInWorkDir);
-		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN) {
+		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
+				|| inputProductFamily == ProductFamily.S3_L0 || inputProductFamily == ProductFamily.S3_L1_NRT
+				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC) {
 			findMissingTypesFromJob(job, productsInWorkDir);
 		}
 	}
@@ -105,7 +107,9 @@ public class OutputEstimation {
 
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
 			addMissingOutputForASP(job, inputProductType);
-		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN) {
+		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
+				|| inputProductFamily == ProductFamily.S3_L0 || inputProductFamily == ProductFamily.S3_L1_NRT
+				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC) {
 			addMissingOutputFromJob(job);
 		}
 	}
@@ -321,6 +325,27 @@ public class OutputEstimation {
 			customObject.put("platform_short_name_string", "SENTINEL-3");
 			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
 			customObject.put("processing_level_integer", 0);
+			customObject.put("orbit_number_integer", job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
+			break;
+		case S3_L1_NRT:
+		case S3_L1_NTC:
+		case S3_L1_STC:
+			customObject.put("beginning_date_time_date", job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
+			customObject.put("ending_date_time_date", job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
+			customObject.put("platform_short_name_string", "SENTINEL-3");
+			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
+			customObject.put("processing_level_integer", 1);
+			customObject.put("orbit_number_integer", job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
+			break;
+		case S3_L2_NRT:
+		case S3_L2_NTC:
+		case S3_L2_STC:
+			customObject.put("beginning_date_time_date", job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
+			customObject.put("ending_date_time_date", job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
+			customObject.put("platform_short_name_string", "SENTINEL-3");
+			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
+			customObject.put("processing_level_integer", 2);
+			customObject.put("orbit_number_integer", job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
 			break;
 		}
 
