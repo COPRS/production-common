@@ -29,6 +29,9 @@ USER root:root
 RUN mkdir -p /usr/local/conf
 RUN ln -s /shared/sentinel1/DEM /usr/local/conf/IPF_CFG
 
+# RS-783: Files from the IPF are expected in /usr/local/components/S1IPF
+RUN ln -s /usr/local/components/S1IPF_V00350/ /usr/local/components/S1IPF/
+
 # Install java 11
 RUN yum install -y java-11-openjdk 
 #RUN update-alternatives --set java /usr/lib/jvm/java-11-openjdk-11.0.4.11-0.el7_6.x86_64/bin/java
