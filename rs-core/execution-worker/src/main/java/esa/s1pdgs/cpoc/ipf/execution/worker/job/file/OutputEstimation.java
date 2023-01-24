@@ -186,7 +186,7 @@ public class OutputEstimation {
 	void findMissingTypesFromJob(final IpfExecutionJob job, final List<String> productsInWorkDir) {
 		for (LevelJobOutputDto o : job.getOutputs()) {
 			ProductFamily family = ProductFamily.fromValue(o.getFamily());
-			if (family != ProductFamily.L0_BLANK) {
+			if (family != ProductFamily.BLANK) {
 				findMissingType(job, o.getRegexp(), family, productsInWorkDir, 1);
 			}
 		}
@@ -195,7 +195,7 @@ public class OutputEstimation {
 	void addMissingOutputFromJob(final IpfExecutionJob job) {
 		for (LevelJobOutputDto o : job.getOutputs()) {
 			ProductFamily family = ProductFamily.fromValue(o.getFamily());
-			if (family != ProductFamily.L0_BLANK) {
+			if (family != ProductFamily.BLANK) {
 				addMissingOutput(job, regexpToType(typeToRegexp(o.getRegexp())), family, 1);
 			}
 		}
