@@ -41,8 +41,8 @@ runs:
       tags: ${{ steps.meta.outputs.tags }}
       labels: ${{ steps.meta.outputs.labels }}
       secrets: |
-        "ARTIFACTORY_USER=${{ secrets.WERUM_ARTIFACTORY_USER }}"
-        "ARTIFACTORY_PASS=${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}"
+        "ARTIFACTORY_USER=${{ env.WERUM_ARTIFACTORY_USER }}"
+        "ARTIFACTORY_PASS=${{ env.WERUM_ARTIFACTORY_PASSWORD }}"
       build-args: |
         BRANCH=${{ inputs.BRANCH_NAME }}
         BRANCH_TEXT=${{ inputs.BRANCH_NAME }}
