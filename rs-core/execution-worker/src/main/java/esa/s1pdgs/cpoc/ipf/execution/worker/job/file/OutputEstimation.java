@@ -83,7 +83,7 @@ public class OutputEstimation {
 		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
 				|| inputProductFamily == ProductFamily.S3_L0 || inputProductFamily == ProductFamily.S3_L1_NRT
 				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC
-				|| inputProductFamily == ProductFamily.S3_L2_NRT || inputProductFamily == ProductFamily.S3_L2_NTC 
+				|| inputProductFamily == ProductFamily.S3_L2_NRT || inputProductFamily == ProductFamily.S3_L2_NTC
 				|| inputProductFamily == ProductFamily.S3_L2_STC || inputProductFamily == ProductFamily.S3_PUG) {
 			findMissingTypesFromJob(job, productsInWorkDir);
 		}
@@ -112,7 +112,7 @@ public class OutputEstimation {
 		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
 				|| inputProductFamily == ProductFamily.S3_L0 || inputProductFamily == ProductFamily.S3_L1_NRT
 				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC
-				|| inputProductFamily == ProductFamily.S3_L2_NRT || inputProductFamily == ProductFamily.S3_L2_NTC 
+				|| inputProductFamily == ProductFamily.S3_L2_NRT || inputProductFamily == ProductFamily.S3_L2_NTC
 				|| inputProductFamily == ProductFamily.S3_L2_STC || inputProductFamily == ProductFamily.S3_PUG) {
 			addMissingOutputFromJob(job);
 		}
@@ -190,8 +190,9 @@ public class OutputEstimation {
 	void findMissingTypesFromJob(final IpfExecutionJob job, final List<String> productsInWorkDir) {
 		for (LevelJobOutputDto o : job.getOutputs()) {
 			ProductFamily family = ProductFamily.fromValue(o.getFamily());
+			String type = regexpToType(typeToRegexp(o.getRegexp()));
 			if (family != ProductFamily.BLANK) {
-				findMissingType(job, o.getRegexp(), family, productsInWorkDir, 1);
+				findMissingType(job, o.getRegexp(), family, productsInWorkDir, getCountFromConfigOrDefault(type));
 			}
 		}
 	}
@@ -199,10 +200,23 @@ public class OutputEstimation {
 	void addMissingOutputFromJob(final IpfExecutionJob job) {
 		for (LevelJobOutputDto o : job.getOutputs()) {
 			ProductFamily family = ProductFamily.fromValue(o.getFamily());
+			String type = regexpToType(typeToRegexp(o.getRegexp()));
 			if (family != ProductFamily.BLANK) {
-				addMissingOutput(job, regexpToType(typeToRegexp(o.getRegexp())), family, 1);
+				addMissingOutput(job, type, family, getCountFromConfigOrDefault(type));
 			}
 		}
+	}
+
+	private int getCountFromConfigOrDefault(String type) {
+		int estimatedCount = 1;
+
+		for (TypeEstimationMapping t : properties.getProductTypeEstimatedCount().values()) {
+			if (t.getRegexp().equals(type)) {
+				estimatedCount = t.getCount();
+				break;
+			}
+		}
+		return estimatedCount;
 	}
 
 	int determineCountForASPType(final String inputSwathType, final String inputStartTime, final String inputStopTime)
@@ -329,27 +343,34 @@ public class OutputEstimation {
 			customObject.put("platform_short_name_string", "SENTINEL-3");
 			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
 			customObject.put("processing_level_integer", 0);
-			customObject.put("orbit_number_integer", job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
+			customObject.put("orbit_number_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
 			break;
 		case S3_L1_NRT:
 		case S3_L1_NTC:
 		case S3_L1_STC:
-			customObject.put("beginning_date_time_date", job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
-			customObject.put("ending_date_time_date", job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
+			customObject.put("beginning_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
+			customObject.put("ending_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
 			customObject.put("platform_short_name_string", "SENTINEL-3");
 			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
 			customObject.put("processing_level_integer", 1);
-			customObject.put("orbit_number_integer", job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
+			customObject.put("orbit_number_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
 			break;
 		case S3_L2_NRT:
 		case S3_L2_NTC:
 		case S3_L2_STC:
-			customObject.put("beginning_date_time_date", job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
-			customObject.put("ending_date_time_date", job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
+			customObject.put("beginning_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
+			customObject.put("ending_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
 			customObject.put("platform_short_name_string", "SENTINEL-3");
 			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
 			customObject.put("processing_level_integer", 2);
-			customObject.put("orbit_number_integer", job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
+			customObject.put("orbit_number_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
 			break;
 		}
 
