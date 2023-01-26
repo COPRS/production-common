@@ -693,17 +693,6 @@ The message filter is a basic SCDF component that allows to filter out products 
 
 The SCDF application Extraction takes the product from the received event and will identify the type of extraction that is required for them. It will then fetch the metadata from the OBS (e.g. the manifest file for a SAFE product) and start with the extraction of the metadata. The result will be stored within the Elastic Search index related to the product and it will become visible for other application within the system. Products that are not extracted yet, will not be visible e.g. via the Metadata Search Controller.
 
-
-### Browse Image
-
-TBD: The browse image extractor is not required before V2 and thus is not available at the moment.
-
-A processor that is extracting the browse image depending on the input file. Might be a simple selection from product or invoking a conversion (e.g. S2 JPEG2k -> JPG).
-
-The extracted image will be uploaded into the OBS and the image written into the browse image catalog.
-![fc2864113e1f34778f09531d59358623.png](media/fc2864113e1f34778f09531d59358623.png)
-
-
 ### Compression
 
 ![e830e7833cab916176c295924f8437bb.png](media/e830e7833cab916176c295924f8437bb.png)
