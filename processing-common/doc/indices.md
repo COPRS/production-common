@@ -75,10 +75,16 @@ s3_granules
 s3_l0
 s3_cal
 s3_pug
+s3_l1_nrt
+s3_l1_ntc
+s3_l1_stc
+s3_l2_nrt
+s3_l2_ntc
+s3_l2_stc
 ```
 
 ```
-{"mappings":{"properties":{"creationTime":{"type":"date"},"startTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape"},"oqcFlag":{"type":"text"},"insertionTime":{"type":"date"}}}}
+{"mappings":{"properties":{"creationTime":{"type":"date"},"startTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape"},"oqcFlag":{"type":"text"},"insertionTime":{"type":"date"},"validityStartTime":{"type":"date"},"validityStopTime":{"type":"date"}}}}
 ```
 
 -------------------
