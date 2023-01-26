@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
         id: extract_branch
-
+        
       - uses: ./.github/actions/build-ipf-container
         with:
           BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
