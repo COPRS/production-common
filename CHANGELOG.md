@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0-rc1] - 2023-01-27
+
+### Added
+
+- RS-779: Adding function to support all operators on extended attributes
+- RS-769: Adding function to support L1 and L2 products in missing output part of traces
+
+### Changed
+
+- RS-783: Updating Dockerfile for S1 L1 and L2 Execution worker with symbolic link to IPF
+
+### Removed
+
 ## [1.9.0-rc1] - 2022-12-15
 
 ### Added
