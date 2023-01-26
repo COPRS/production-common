@@ -82,7 +82,9 @@ public class OutputEstimation {
 			findMissingTypesForASP(job, inputProductType, productsInWorkDir);
 		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
 				|| inputProductFamily == ProductFamily.S3_L0 || inputProductFamily == ProductFamily.S3_L1_NRT
-				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC) {
+				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC
+				|| inputProductFamily == ProductFamily.S3_L2_NRT || inputProductFamily == ProductFamily.S3_L2_NTC 
+				|| inputProductFamily == ProductFamily.S3_L2_STC || inputProductFamily == ProductFamily.S3_PUG) {
 			findMissingTypesFromJob(job, productsInWorkDir);
 		}
 	}
@@ -109,7 +111,9 @@ public class OutputEstimation {
 			addMissingOutputForASP(job, inputProductType);
 		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
 				|| inputProductFamily == ProductFamily.S3_L0 || inputProductFamily == ProductFamily.S3_L1_NRT
-				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC) {
+				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC
+				|| inputProductFamily == ProductFamily.S3_L2_NRT || inputProductFamily == ProductFamily.S3_L2_NTC 
+				|| inputProductFamily == ProductFamily.S3_L2_STC || inputProductFamily == ProductFamily.S3_PUG) {
 			addMissingOutputFromJob(job);
 		}
 	}
