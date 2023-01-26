@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- RS-779: Adding function to support all operators on extended attributes
 - RS-769: Adding function to support L1 and L2 products in missing output part of traces
+- RS-779: Adding function to support all operators on extended attributes
 
 ### Changed
 
