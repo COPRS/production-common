@@ -210,7 +210,7 @@
 
 		<operationalMode>
 			<xsl:value-of
-				select="//*[local-name()='instrument']//*[local-name()='mode']/@identifier" />
+				select="//*[local-name()='instrument']//*[local-name()='mode']" />
 		</operationalMode>
 			
 		<brightPercentage>
@@ -319,6 +319,11 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		</cloudPercentage>
+		
+		<timeliness>
+			<xsl:value-of
+				select="//*[local-name()='generalProductInformation']//*[local-name()='s3timeliness']" />
+		</timeliness>
 
 	</xsl:template>
 
