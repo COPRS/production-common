@@ -80,6 +80,11 @@
 				select="//*[local-name()='orbitNumber'][@type='start']/@groundTrackDirection" />
 		</orbitDirection>
 
+		<stopOrbitDirection>
+			<xsl:value-of
+				select="//*[local-name()='orbitNumber'][@type='stop']/@groundTrackDirection" />
+		</stopOrbitDirection>
+
 		<xsl:call-template name="getOrbits">
 			<xsl:with-param name="xfduOrbitName"
 				select="'relativeOrbitNumber'" />
