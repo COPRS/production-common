@@ -1,4 +1,4 @@
-Metadata Catalog Searchcontroler API
+Metadata Catalog Searchcontroller API
 ====================================
 
 It is a server which extracts metadata of available products and offers a set of REST API for querying these metadata.
