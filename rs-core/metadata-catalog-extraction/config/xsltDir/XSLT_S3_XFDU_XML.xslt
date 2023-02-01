@@ -320,10 +320,10 @@
 			</xsl:choose>
 		</cloudPercentage>
 		
-		<timeliness>
+		<s3timeliness>
 			<xsl:value-of
-				select="//*[local-name()='generalProductInformation']//*[local-name()='s3timeliness']" />
-		</timeliness>
+				select="//*[local-name()='generalProductInformation']//*[local-name()='timeliness']" />
+		</s3timeliness>
 
 	</xsl:template>
 
@@ -372,6 +372,7 @@
 		<NTC>
 			<xsl:value-of select="$NTC" />
 		</NTC>
+		
 	</xsl:template>
 
 	<!--==================== Format Date Time Template ========================= -->
