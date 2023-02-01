@@ -35,20 +35,21 @@ public class IngestionTriggerServiceTransactional {
 	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName, final String missionId, final ProductFamily productFamily) {
 		final List<InboxEntry> result = this.repository.findByProcessingPodAndPickupURLAndStationNameAndMissionIdAndProductFamily(
 				this.processConfiguration.getHostname(), pickupURL, stationName, missionId, productFamily.name());
-		LOG.debug("listing persisted inbox entries for inbox " + pickupURL + ", station " + stationName + ", missionId " + missionId
-				+ " and product family " + productFamily + ": " + result);
+		LOG.trace("listing persisted inbox entries for inbox {}, station {}, missionId {} and product family {}: {}",
+				pickupURL, stationName, missionId, productFamily, result);
 		return new HashSet<>(result);
 	}
 
 	public Set<InboxEntry> getAllForPath(final String pickupURL, final String stationName, final String missionId) {
 		final List<InboxEntry> result = this.repository.findByProcessingPodAndPickupURLAndStationNameAndMissionId(
 				this.processConfiguration.getHostname(), pickupURL, stationName, missionId);
-		LOG.debug("listing persisted inbox entries for inbox " + pickupURL + ", station " + stationName + " and missionId " + missionId +": " + result);
+		LOG.trace("listing persisted inbox entries for inbox {}, station {} and missionId {}: {}",
+				pickupURL, stationName, missionId, result);
 		return new HashSet<>(result);
 	}
 
 	public void removeFinished(final Collection<InboxEntry> finishedEntries) {
-		LOG.debug("deleting inbox entries: " + finishedEntries);
+		LOG.trace("deleting inbox entries: {}", finishedEntries);
 		this.repository.deleteAll(finishedEntries);
 	}
 
@@ -57,7 +58,7 @@ public class IngestionTriggerServiceTransactional {
 		if (null == entry.getKnownSince()) {
 			entry.setKnownSince(LocalDateTime.now(ZoneOffset.UTC));
 		}
-		LOG.debug("persisting inbox entry: " + entry);
+		LOG.debug("persisting inbox entry: {}", entry);
 		return this.repository.save(entry);
 	}
 }
