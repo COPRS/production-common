@@ -109,7 +109,8 @@ public class MdcToPripMapper {
 							try {
 								List<String> items = GSON.fromJson(inputValue, new TypeToken<List<String>>(){}.getType());
 								attributeValue = String.join(",", items).replace("\"", "");
-							} catch (JsonSyntaxException e) {
+							} catch (NullPointerException | JsonSyntaxException e) {
+								// NPE occurs, when inputValue is empty String
 								attributeValue = inputValue;
 							}
 							break;
