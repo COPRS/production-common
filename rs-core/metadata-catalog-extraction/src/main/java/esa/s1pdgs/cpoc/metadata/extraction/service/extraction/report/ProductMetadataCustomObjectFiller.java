@@ -125,6 +125,7 @@ public class ProductMetadataCustomObjectFiller {
 				break;
 			case S2_L2A_DS:
 			case S2_L2A_TL:
+			case S2_L2A_TC:
 				fillwithKeyMapping("product_group_id", "productGroupId");
 				fillwithKeyMapping("beginning_date_time_date", "startTime");
 				fillwithKeyMapping("ending_date_time_date", "stopTime");
