@@ -39,6 +39,8 @@ This software does have the following minimal requirements:
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
+- See [COPRS OBS Bucket](/processing-common/doc/buckets.md)
+- See [COPRS Kubernetes Secret](/processing-common/doc/secrets.md)
 
 # Additional resources
 In the scope of the COPRS it is necessary to be able to adjust the configuration of the commonly used kafka topics. As the SCDF server would create the kafka topics itself, when they aren't already present, it is necessary, that the kafka topics ``catalog-job`` and ``catalog-event`` are already created, before the SCDF streams are started.

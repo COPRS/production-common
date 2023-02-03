@@ -34,7 +34,9 @@ This software does have the following minimal requirements:
 # Deployment Prerequisite
 The following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
-
+- See [COPRS OBS Bucket](/processing-common/doc/buckets.md)
+- See [COPRS ES Indice](/processing-common/doc/indices.md) 
+- See [COPRS Kubernetes Secret](/processing-common/doc/secrets.md)
 
 # Configuration
 ## Application properties

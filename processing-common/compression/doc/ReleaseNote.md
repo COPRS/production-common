@@ -2,7 +2,7 @@
 
 COPRS Compression chain is responsible to perform a compression operation on a file or directory product.
 
-## General
+# Overview
 
 ![overview](./media/overview.png "Overview")
 
@@ -22,7 +22,7 @@ These can be used to honour the different requirements on timeliness. Each prior
 
 For details, please see [Compression Chain Design](https://github.com/COPRS/reference-system-documentation/blob/develop/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#compression-chain)
 
-## Requirements
+# Requirements
 
 This software does have the following minimal requirements:
 
@@ -38,6 +38,14 @@ This software does have the following minimal requirements:
 
 *These resource requirements are applicable for one worker. There may be many instances of an compression worker, see scaling up workers for more details.
 ** This amount had been used in previous operational S1 environment. The disk size might be lower depending on the products that are processed. This needs to be at least twice of the product size of the biggest product. An additional margin of 10% is recommended however.
+
+# Deployment Prerequisite
+Following components of the COPRS shall be installed and running
+- [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
+- See [COPRS OBS Bucket](/processing-common/doc/buckets.md)
+- See [COPRS Kubernetes Secret](/processing-common/doc/secrets.md)
+
+# Configuration
 
 ## Compression Filter
 
