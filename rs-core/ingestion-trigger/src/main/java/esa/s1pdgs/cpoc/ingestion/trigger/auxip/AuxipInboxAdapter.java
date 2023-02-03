@@ -119,14 +119,14 @@ public class AuxipInboxAdapter extends AbstractInboxAdapter implements SupportsP
     @Override
     public void advanceAfterPublish() {
 		if (auxipClient.isDisabled()) {
-			LOG.info("won't advance auxip query time window for [" + inboxURL() + ", " + stationName + ", "
-					+ productFamily + "] as the auxip client is disabled");
+			LOG.info("won't advance auxip query time window for [{}, {}, {}] as the auxip client is disabled",
+					inboxURL(), stationName, productFamily);
 		} else {
 			AuxipState auxipState = retrieveState();
-			
-			if(isTooCloseToNow(auxipState)) {
-				LOG.debug("omit advancing time window for [" + inboxURL() + ", " + stationName + ", "
-						+ productFamily + "] as it's too close to now");
+
+			if (isTooCloseToNow(auxipState)) {
+				LOG.debug("omit advancing time window for [{}, {}, {}] as it's too close to now", inboxURL(),
+						stationName, productFamily);
 				return;
 			}
 			

@@ -167,7 +167,7 @@ final class PollingRun {
 		if (log.isDebugEnabled()) {
 			entries.stream()
 				.map(p -> p.getRelativePath())
-				.forEach(e -> log.debug("PickupAction - " + logTemplate, e));
+				.forEach(e -> log.debug("PickupAction - {}", logTemplate, e));
 		}			
 	}
 

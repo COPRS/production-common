@@ -168,8 +168,9 @@ public enum ProductCategory {
 			case S2_L1C_TL:
 			case S2_L1C_DS:
 			case S2_L1C_TC:
-			case S2_L2A_TL:
+			case S2_L2A_TL:			
 			case S2_L2A_DS:
+			case S2_L2A_TC:
 			case S2_HKTM:
 				return ProductCategory.S2_PRODUCTS;
 			// S3 families
