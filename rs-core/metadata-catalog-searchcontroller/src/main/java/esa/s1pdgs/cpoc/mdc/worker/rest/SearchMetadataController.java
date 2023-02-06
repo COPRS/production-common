@@ -230,8 +230,6 @@ public class SearchMetadataController {
 			@RequestParam(name = "insConfId", defaultValue = "-1") final int insConfId,
 			@RequestParam(value = "dt0", defaultValue = "0.0") final double dt0,
 			@RequestParam(value = "dt1", defaultValue = "0.0") final double dt1,
-			@RequestParam(value = "minResults", required=false) final Integer  minResults,
-			@RequestParam(value = "maxResults", required=false) final Integer maxResults,
 			@RequestParam(value = "polarisation", defaultValue = "NONE") final String polarisation,
 			@RequestParam(value = "bandIndexId", required = false) final String bandIndexId) {
 		
@@ -287,15 +285,15 @@ public class SearchMetadataController {
 				return new ResponseEntity<>(response, HttpStatus.OK);
 			} else if ("ValIntersectWithoutDuplicates".equals(mode)) {
 				LOGGER.debug(
-						"Using val intersect without duplicates with productType={}, mode={}, t0={}, t1={}, processMode={}, insConfId={}, dt0={}, dt1={}, minResults={}, maxResults={}",
-						productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1, minResults, maxResults);
+						"Using val intersect without duplicates with productType={}, mode={}, t0={}, t1={}, processMode={}, insConfId={}, dt0={}, dt1={}",
+						productType, mode, startDate, stopDate, processMode, insConfId, dt0, dt1);
 				
 				final List<SearchMetadata> f = esServices.valIntersectWithoutDuplicates(
 						convertDateForSearch(startDate, -dt0,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
 						convertDateForSearch(stopDate, dt1,
 								DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")),
-						productType, ProductFamily.fromValue(productFamily), processMode, satellite, minResults, maxResults);
+						productType, ProductFamily.fromValue(productFamily), processMode, satellite);
 				
 				if (f != null) {
 					LOGGER.debug("Query returned {} results", f.size());

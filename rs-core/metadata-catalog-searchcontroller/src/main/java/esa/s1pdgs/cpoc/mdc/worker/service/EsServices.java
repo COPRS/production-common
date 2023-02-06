@@ -785,7 +785,7 @@ public class EsServices {
 	}
 	
 	public List<SearchMetadata> valIntersectWithoutDuplicates(final String beginDate, final String endDate, final String productType,
-	final ProductFamily productFamily, final String processMode, final String satelliteId, final int minResults, final int maxResults) throws Exception {
+	final ProductFamily productFamily, final String processMode, final String satelliteId) throws Exception {
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
 		final String fieldNameStart = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStartTime" : "startTime";
@@ -825,17 +825,6 @@ public class EsServices {
 		}
 		
 		LOGGER.debug("After ValintersectNoDuplicate filtering {} hits remains", results.size());
-		
-		if ((results.size()< minResults) | (results.size() > maxResults)) {
-			throw new IllegalArgumentException(
-			          String.format(
-			              "Number of %s query results doesn't match Min(%s) or Max(%s) constraints.",
-			              results.size(),
-			              String.valueOf(minResults),
-			              String.valueOf(maxResults)
-			          )
-			      );
-		}
 
 		return results;
 	}

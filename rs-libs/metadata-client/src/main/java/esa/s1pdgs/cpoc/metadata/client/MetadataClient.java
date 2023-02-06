@@ -312,11 +312,6 @@ public class MetadataClient {
 				.queryParam("t0", t0).queryParam("t1", t1).queryParam("dt0", query.getDeltaTime0())
 				.queryParam("dt1", query.getDeltaTime1()).queryParam("satellite", satelliteId);
 
-		if (query.getRetrievalMode().equals("ValIntersectWithoutDuplicates")) {
-			builder.queryParam("minResults", query.getMinResults());
-			builder.queryParam("maxResults", query.getMaxResults());
-		}
-
 		if (processMode != null) {
 			builder.queryParam("processMode", processMode);
 		}
@@ -326,19 +321,32 @@ public class MetadataClient {
 		if (polarisation != null) {
 			builder.queryParam("polarisation", polarisation);
 		}
+		
 		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<SearchMetadata>>() {
 				});
-
+		
 		if (response == null || response.getBody() == null) {
 			LOGGER.debug("Metadata query for family '{}' and product type '{}' returned no results",
 					query.getProductFamily(), query.getProductType());
 			return new ArrayList<>();
-		} else {
-			LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results",
-					query.getProductFamily(), query.getProductType(), numResults(response));
-			return response.getBody();
 		}
+		
+		// Handling for ValIntersectWithoutDuplicates -> return no result, if amount does not match expectation
+		if (query.getRetrievalMode().equals("ValIntersectWithoutDuplicates")) {
+			int numResults = numResults(response);
+			if (query.getMinResults() > numResults || query.getMaxResults() < numResults) {
+				LOGGER.info(
+						"Metadata query for family '{}' and product type '{}' returned unexpected number of results: expected between {} and {} results, returned {} results",
+						query.getProductFamily(), query.getProductType(), query.getMinResults(),
+						query.getMaxResults(), numResults);
+				return new ArrayList<>();
+			}
+		}
+			
+		LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results",
+				query.getProductFamily(), query.getProductType(), numResults(response));
+		return response.getBody();
 	}
 
 	/**
