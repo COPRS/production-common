@@ -164,12 +164,14 @@ public class OutputEstimation {
 
 		findMissingType(job, inputProductType, ProductFamily.L0_SLICE, productsInWorkDir, determineCountForASPType(
 				inputSwathType, job.getPreparationJob().getStartTime(), job.getPreparationJob().getStopTime()));
-		findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN,
-				productsInWorkDir, 1);
-		findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN,
-				productsInWorkDir, 1);
-		findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN,
-				productsInWorkDir, 1);
+		if(!"RF_RAW__0S".equals(inputProductType)) { //for RFC no ACN is expected #RS-708 
+			findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN,
+					productsInWorkDir, 1);
+			findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN,
+					productsInWorkDir, 1);
+			findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN,
+					productsInWorkDir, 1);
+		}
 	}
 
 	void addMissingOutputForASP(final IpfExecutionJob job, final String inputProductType)
@@ -179,12 +181,14 @@ public class OutputEstimation {
 
 		addMissingOutput(job, inputProductType, ProductFamily.L0_SLICE, determineCountForASPType(inputSwathType,
 				job.getPreparationJob().getStartTime(), job.getPreparationJob().getStopTime()));
-		addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN,
-				1);
-		addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN,
-				1);
-		addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN,
-				1);
+		if(!"RF_RAW__0S".equals(inputProductType)) { //for RFC no ACN expected #RS-708
+			addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN,
+					1);
+			addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN,
+					1);
+			addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN,
+					1);
+		}
 	}
 
 	void findMissingTypesFromJob(final IpfExecutionJob job, final List<String> productsInWorkDir) {
