@@ -44,9 +44,12 @@ import org.apache.olingo.commons.api.edm.geo.Point;
 import org.apache.olingo.commons.api.edm.geo.Polygon;
 import org.apache.olingo.commons.api.edm.geo.SRID;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.QuicklookProperties;
+import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductEntityCollectionProcessor;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
@@ -56,9 +59,13 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class MappingUtil {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(MappingUtil.class);
+	
 	private static final int MILLIS_PER_SECOND = 1000;
 
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
+		LOGGER.debug("pripMetadataToEntity {}", pripMetadata.getName());
+		
 		URI uri = MappingUtil.createId(rawBaseUri, EdmProvider.ES_PRODUCTS_NAME, pripMetadata.getId());
 		Entity entity = new Entity()
 				.addProperty(new Property(null, Id.name(), ValueType.PRIMITIVE, pripMetadata.getId()))
@@ -93,6 +100,7 @@ public class MappingUtil {
 		// TODO sort attributes
 		if (null != pripMetadata.getAttributes()) {
 			for (Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
+				LOGGER.debug("Handle {}", entrySet.getKey());
 				final FullQualifiedName valueType;
 				final int firstSeparatorPosition = entrySet.getKey().indexOf('_');
 				final int lastSeparatorPosition = entrySet.getKey().lastIndexOf('_');

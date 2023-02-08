@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.prip.metadata;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -640,23 +641,51 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		pm.setFootprint(this.mapToPripGeoShape(sourceAsMap));
 
-		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
-				.collect(Collectors.toMap(Entry::getKey, s -> {
-					final String key = s.getKey();
-					final Object value = s.getValue();
-					if (key.endsWith("_date")) {
-						return DateUtils.parse((String) value);
-					} else if (key.endsWith("_double")) {
-						if (value instanceof Long) {
-							return Double.valueOf((Long) value);
-						} else if (value instanceof Integer) {
-							return Double.valueOf((Integer) value);
-						}
-					} else if (key.endsWith("_long") && value instanceof Integer) {
-						return Long.valueOf((Integer) value);
+		// Collectors.toMap has a known bug: https://bugs.openjdk.org/browse/JDK-8261865
+//		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
+//				.collect(Collectors.toMap(Entry::getKey, s -> {
+//					final String key = s.getKey();
+//					final Object value = s.getValue();
+//					if (key.endsWith("_date")) {
+//						return DateUtils.parse((String) value);
+//					} else if (key.endsWith("_double")) {
+//						if (value instanceof Long) {
+//							return Double.valueOf((Long) value);
+//						} else if (value instanceof Integer) {
+//							return Double.valueOf((Integer) value);
+//						}
+//					} else if (key.endsWith("_long") && value instanceof Integer) {
+//						return Long.valueOf((Integer) value);
+//					}
+//					return value;
+//				})));		
+		Map<String, Object> attributeMap = new HashMap<>();
+		for (Entry<String, Object> entry : sourceAsMap.entrySet()) {
+			if (entry.getKey().startsWith("attr_")) {
+				
+				if (entry.getKey() == "attr_processingDate_date") {
+					LOGGER.debug("Processing attr_processingDate_date");
+				}
+				
+				final String key = entry.getKey();
+				final Object value = entry.getValue();
+				if (key.endsWith("_date")) {
+					attributeMap.put(key, DateUtils.parse((String) value));
+				} else if (key.endsWith("_double")) {
+					if (value instanceof Long) {
+						attributeMap.put(key, Double.valueOf((Long) value));
+					} else if (value instanceof Integer) {
+						attributeMap.put(key, Double.valueOf((Integer) value));
 					}
-					return value;
-				})));
+				} else if (key.endsWith("_long") && value instanceof Integer) {
+					attributeMap.put(key, Long.valueOf((Integer) value));
+				}
+				if (!attributeMap.containsKey(key)) {
+					attributeMap.put(key, value);
+				}
+			}
+		}
+		pm.setAttributes(attributeMap);
 
       List<String> browseKeys = (List<String>)sourceAsMap.get(PripMetadata.FIELD_NAMES.BROWSE_KEYS.fieldName());
 		if (null == browseKeys) {
