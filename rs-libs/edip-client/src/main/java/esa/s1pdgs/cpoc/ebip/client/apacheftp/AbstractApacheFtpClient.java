@@ -47,6 +47,9 @@ public abstract class AbstractApacheFtpClient {
 		try {
 			final FTPClient ftpClient = newClient();
 			ftpClient.setRemoteVerificationEnabled(false);
+			
+			LOG.debug("Setting internal buffer size to {} Bytes",config.getBufferSize());
+			ftpClient.setBufferSize(config.getBufferSize());
 
 			if (!ftpClient.login(config.getUser(), config.getPass())) {
 				throw new RuntimeException("Could not authenticate user " + config.getUser());

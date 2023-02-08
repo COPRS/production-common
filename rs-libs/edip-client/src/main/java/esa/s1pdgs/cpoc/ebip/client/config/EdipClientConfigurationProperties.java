@@ -29,6 +29,7 @@ public class EdipClientConfigurationProperties {
 		private String trustManagerKeyStore =  "";
 		private String trustManagerKeyStorePassword = "changeit"; // default JKS password
 		private int listingTimeoutSec = 180;
+		private int bufferSize = 1024*1024;
 						
 		public String getServerName() {
 			return serverName;
@@ -164,6 +165,15 @@ public class EdipClientConfigurationProperties {
 		public void setListingTimeoutSec(int listingTimeoutSec) {
 			this.listingTimeoutSec = listingTimeoutSec;
 		}
+
+		public int getBufferSize() {
+			return bufferSize;
+		}
+
+		public void setBufferSize(int bufferSize) {
+			this.bufferSize = bufferSize;
+		}
+
 	}
 	
 	private String proxyHost;

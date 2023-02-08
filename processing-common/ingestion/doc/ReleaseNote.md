@@ -205,6 +205,7 @@ EDIP Client module is used by both EDIP triggers and workers.
 |``app.ingestion-edip-trigger.edip.host-configs.host1.connectTimeoutSec``|Connection Timeout in seconds. Default: `60`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.pasv``| PASV FTP protocol, where the cclient initiates the communication. Default: `true`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.enableHostnameVerification``|Hostname verification ensures that hostname in the URL matches with the one in digital certificate. Default: `false`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.buffersize`` || Setting the internal buffer used for buffered streams in Bytes. Default: `1048576`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.sslProtocol``|SLL protocol being used. Supported value: `TLSv1.2`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.explicitFtps``|EDIP client request the server to create a secured session using SSL. Default: `true`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.keyManagerKeyStore``|The keystore is used to keep private keys and certificates. It is needed for FTPS encryption, otherwise can be left empty. Default: `` `` |
