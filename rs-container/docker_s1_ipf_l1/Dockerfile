@@ -45,5 +45,5 @@ RUN chmod +x /tini
 RUN useradd -u 1001 rsuser
 
 USER rsuser:rsuser
-
+ 
 ENTRYPOINT ["/tini", "--", "/app/start.sh"]
