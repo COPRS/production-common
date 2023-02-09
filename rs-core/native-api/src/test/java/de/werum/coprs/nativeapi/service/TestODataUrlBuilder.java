@@ -1,7 +1,7 @@
 package de.werum.coprs.nativeapi.service;
 
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +10,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Ignore
 public class TestODataUrlBuilder {
 	@Autowired
 	private ODataBackendServiceImpl backend;
 
+	@Disabled
 	@Test
 	public void testUrlBuilder() {
 
