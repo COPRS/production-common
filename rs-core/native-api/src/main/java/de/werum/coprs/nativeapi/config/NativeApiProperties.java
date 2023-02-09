@@ -1,5 +1,9 @@
 package de.werum.coprs.nativeapi.config;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -8,10 +12,6 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 @ConfigurationProperties("native-api")
 public class NativeApiProperties {
-
-	private String majorVersion;
-	private String version;
-
 	private String pripProtocol;
 	private String pripHost;
 	private Integer pripPort;
@@ -21,21 +21,15 @@ public class NativeApiProperties {
 	private Integer externalPripPort;
 
 	private boolean includeAdditionalAttributes = true;
+	
+	private Map<String,List<String>> lutConfigs = new HashMap<>();
 
-	public String getMajorVersion() {
-		return this.majorVersion;
+	public Map<String, List<String>> getLutConfigs() {
+		return lutConfigs;
 	}
 
-	public void setMajorVersion(final String majorVersion) {
-		this.majorVersion = majorVersion;
-	}
-
-	public String getVersion() {
-		return this.version;
-	}
-
-	public void setVersion(final String version) {
-		this.version = version;
+	public void setLutConfigs(Map<String, List<String>> lutConfigs) {
+		this.lutConfigs = lutConfigs;
 	}
 
 	public String getPripProtocol() {

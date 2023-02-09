@@ -1,4 +1,4 @@
-package de.werum.coprs.nativeapi.service;
+package de.werum.coprs.nativeapi.service.old;
 
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.ContentDate;
 import static de.werum.coprs.nativeapi.service.mapping.PripOdataEntityProperties.End;

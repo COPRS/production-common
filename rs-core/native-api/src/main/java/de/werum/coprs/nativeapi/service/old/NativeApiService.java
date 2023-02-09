@@ -1,4 +1,4 @@
-package de.werum.coprs.nativeapi.service;
+package de.werum.coprs.nativeapi.service.old;
 
 public interface NativeApiService {
 

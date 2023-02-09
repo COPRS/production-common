@@ -1,0 +1,34 @@
+{
+  "@odata.context": "$metadata#Products",
+  "value": [
+    {
+      "@odata.mediaContentType": "application/octet-stream",
+      "Id": "36fcab94-62fd-432f-bcf0-264a4ded068f",
+      "Name": "S3A_DO_0_DOP__G_20200928T060206_20200928T062829_20221207T152046___________________WER_D_NR____.ISIP.zip",
+      "Online": true,
+      "ContentType": "application/octet-stream",
+      "ContentLength": 3784,
+      "PublicationDate": "2022-12-07T15:24:40.944Z",
+      "EvictionDate": "2022-12-14T15:24:40.944Z",
+      "Checksum": [
+        {
+          "Algorithm": "MD5",
+          "Value": "ca8498e54c05727e08c9ed05bf7f0123",
+          "ChecksumDate": "2022-12-07T15:24:39Z"
+        }
+      ],
+      "ProductionType": "systematic_production",
+      "ContentDate": {
+        "Start": "2020-09-28T06:02:06Z",
+        "End": "2020-09-28T06:28:29Z"
+      },
+      "Footprint": null,
+      "Attributes": [],
+      "Quicklooks": [
+      	{
+      		"Image": "S1A_IW_GRDH_1SDV_20200120T124926_20200120T124958_030884_038B5E_F0D1.SAFE_bwi.png"
+    	}
+       ]
+    }
+  ]
+}
