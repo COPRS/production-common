@@ -67,14 +67,14 @@ spec:
           privileged: false
         livenessProbe:
           httpGet:
-            path: /api/ping
+            path: /stac/search
             port: {{ .Values.service.port }}
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
-            path: /api/ping
+            path: /stac/search
             port: {{ .Values.service.port }}
           initialDelaySeconds: 30
           periodSeconds: 30
