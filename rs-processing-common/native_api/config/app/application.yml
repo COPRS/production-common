@@ -26,3 +26,13 @@ native-api:
   external-prip-port: {{ .Values.nativeapi.external.port }}
   # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
   include-additional-attributes: true
+  lutConfigs:
+    "[bbox={value}]":
+      - "OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POLYGON(({value})))"
+    "[point={value}]": 
+      - "OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POINT({value}))"
+    "[productname={value}]": 
+      - "contains(Name,'{value}')"
+    "[datetime={start}/{stop}]": 
+      - "ContentDate/Start gt {start}"
+      - "ContentDate/End lt {stop}"  
