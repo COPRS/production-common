@@ -102,7 +102,7 @@ public class ODataBackendServiceImpl {
 		}
 				
 
-		return UriUtils.encodePath(pripFilterUrl, "UTF-8");
+		return pripFilterUrl;// UriUtils.encodePath(pripFilterUrl, "UTF-8");
 	}
 	
 	static URL buildInternalPripUrl(final NativeApiProperties apiProperties) {
