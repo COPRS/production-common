@@ -39,6 +39,10 @@ public class NativeAPIServiceImpl {
 		Map<String,String> parameters = flattenParameters(request.getParameterMap());
 		LOG.debug("Identified {} parameters for search request: {}",parameters.size(), parameters);
 		String oDataQuery = parser.buildOdataQuery(parameters);
+		if (oDataQuery == null || oDataQuery.isEmpty()) {
+			throw new IllegalArgumentException("Unable to generate a request from the parameters and look up table");
+		}
+		
 		LOG.debug("OData query generated: {}", oDataQuery);
 
 		String queryUrl = backend.buildPripQueryUrl(oDataQuery, false);		
