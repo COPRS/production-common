@@ -75,6 +75,8 @@ public class ODataBackendServiceImpl {
 			}
 
 			final String responseBody = responseEntity.getBody();
+			LOG.debug("Response is code:{} body:{}", responseEntity.getStatusCode(), responseBody);
+			
 			if (null != responseBody) {
 				final JsonReader jsonReader = Json.createReader(new StringReader(responseBody));
 			    final JsonObject jsonObject = jsonReader.readObject();
