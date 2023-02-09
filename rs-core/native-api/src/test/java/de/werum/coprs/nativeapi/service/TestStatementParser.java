@@ -91,7 +91,7 @@ class TestStatementParser {
 		Assert.assertEquals(
 				"OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POINT(44.8571%2020.3411)')", query);
 	}
-	
+	 
 	@Test
 	public void testDatetime() {
 		Map<String, String> params = Map.of("datetime", "2010-10-18T14:33:00.000Z/2023-02-06T14:33:00.000Z");
