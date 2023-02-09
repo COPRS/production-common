@@ -75,7 +75,7 @@ public class ODataBackendServiceImpl {
 			}
 
 			final String responseBody = responseEntity.getBody();
-			LOG.debug("Response is code:{} body:{}", responseEntity.getStatusCode(), responseBody);
+			LOG.trace("Response is code:{} body:{}", responseEntity.getStatusCode(), responseBody);
 			
 			if (null != responseBody) {
 				final JsonReader jsonReader = Json.createReader(new StringReader(responseBody));
@@ -97,7 +97,7 @@ public class ODataBackendServiceImpl {
 	}
 	
 	static String buildPripQueryUrl(final URL pripUrl, final String oDataQuery, final boolean includeAdditionalAttributes) {
-		String pripFilterUrl = String.format("%s%s%s", pripUrl, "/odata/v1/Products?filter=", oDataQuery);
+		String pripFilterUrl = String.format("%s%s%s", pripUrl, "/odata/v1/Products?$filter=", oDataQuery);
 
 		if (includeAdditionalAttributes) {
 			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? "$expand=Attributes,Quicklooks" : "&$expand=Attributes,Quicklooks");
