@@ -1,6 +1,6 @@
 Copyright (c) 2023 Airbus Defence & Space
 
-This software is distributed under the Apache License (ASL) v2.0, see LICENSE file or http://www.apache.org/licenses/LICENSE-2.0 for details.
+This software is distributed under the Apache License V2.0, see LICENSE file or http://www.apache.org/licenses/LICENSE-2.0 for details.
 
 Given below are all third party dependecies for this project:
 
