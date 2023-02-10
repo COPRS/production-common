@@ -5,6 +5,10 @@
     <xsl:template match="/">
         <!-- Inventory_Metadata.xml -->
         <xsl:if test="string(//*[local-name() = 'Inventory_Metadata']) != ''">
+            <datastripId>
+                <xsl:value-of select="//*[local-name() = 'Parent_ID']" />
+            </datastripId>
+
             <productGroupId>
                 <xsl:value-of select="//*[local-name() = 'Group_ID']" />
             </productGroupId>
