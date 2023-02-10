@@ -66,6 +66,8 @@ public class ExtractMetadata {
 	private static final String XSLT_L1_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
 	private static final String XSLT_ETAD_MANIFEST = "XSLT_L1_MANIFEST.xslt";
+	private static final String XSLT_S2_XML = "XSLT_S2_XMLS.xslt";
+	private static final String XSLT_S2_HKTM_XML = "XSLT_S2_MANIFEST.xslt";
 	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
@@ -398,20 +400,44 @@ public class ExtractMetadata {
 		}
 	}
 
-	public ProductMetadata processS2Metadata(S2FileDescriptor descriptor, File metadataFile, ProductFamily family, String productName)
+	public ProductMetadata processS2Metadata(S2FileDescriptor descriptor, List<File> metadataFiles, ProductFamily family, String productName)
 			throws MetadataExtractionException, MetadataMalformedException {
 
-		File xsltFile = new File(this.xsltDirectory + XSLT_FILE_PREFIX + family.toString() + XSLT_FILE_SUFFIX);
+		File xsltFile = new File(this.xsltDirectory + XSLT_S2_XML);
 		
 		if (!xsltFile.exists()) {
-			throw new MetadataExtractionException("Unable to find S2 XSLT file for family " + family.toString());
+			throw new MetadataExtractionException("Unable to find S2 XSLT file '" + XSLT_S2_XML + "'");
 		}
 		
-		ProductMetadata metadata = transformXMLWithXSLTToJSON(metadataFile,	xsltFile);
+		List<ProductMetadata> metadataList = new ArrayList<>();
+		for (File metadataFile : metadataFiles) {
+			metadataList.add(transformXMLWithXSLTToJSON(metadataFile, xsltFile));
+		}
+		
 		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
 		
-		metadata = checkS2Metadata(metadata, additionalMetadata);
+		ProductMetadata metadata = checkS2Metadata(metadataList, additionalMetadata);
 		metadata = processS2Coordinates(metadata, family);
+		metadata = putS2FileMetadataToJSON(metadata, descriptor);
+		
+		LOGGER.debug("composed Json: {} ", metadata);
+		return metadata;
+	}
+	
+	public ProductMetadata processS2HKTMMetadata(S2FileDescriptor descriptor, File metadataFile, ProductFamily family, String productName)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		File xsltFile = new File(this.xsltDirectory + XSLT_S2_HKTM_XML);
+		
+		if (!xsltFile.exists()) {
+			throw new MetadataExtractionException("Unable to find S2 XSLT file '" + XSLT_S2_HKTM_XML + "'");
+		}
+		
+		ProductMetadata metadata = transformXMLWithXSLTToJSON(metadataFile, xsltFile);
+		
+		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
+		
+		metadata = checkS2Metadata(Arrays.asList(metadata), additionalMetadata);
 		metadata = putS2FileMetadataToJSON(metadata, descriptor);
 		
 		LOGGER.debug("composed Json: {} ", metadata);
@@ -558,9 +584,14 @@ public class ExtractMetadata {
 		}
 	}
 
-	private ProductMetadata checkS2Metadata(final ProductMetadata metadata, final ProductMetadata additionalMetadata) 
+	private ProductMetadata checkS2Metadata(final List<ProductMetadata> metadataList, final ProductMetadata additionalMetadata) 
 			throws MetadataExtractionException {
 		try {
+			ProductMetadata metadata = metadataList.get(0);
+			for (int i = 1; i < metadataList.size(); i++) {
+				metadata.asMap().putAll(metadataList.get(i).asMap());
+			}
+			
 			// Add additional metadata
 			if (!metadata.has("productType") && additionalMetadata.has("productType")) {
 				metadata.put("productType", additionalMetadata.get("productType"));
@@ -570,6 +601,9 @@ public class ExtractMetadata {
 			}
 			if (!metadata.has("platformSerialIdentifier") && additionalMetadata.has("platformSerialIdentifier")) {
 				metadata.put("platformSerialIdentifier", additionalMetadata.get("platformSerialIdentifier"));
+			}
+			if (!metadata.has("tileNumber") && additionalMetadata.has("tileNumber")) {
+				metadata.put("tileNumber", additionalMetadata.get("tileNumber"));
 			}
 			
 			// Fix format of timestamps

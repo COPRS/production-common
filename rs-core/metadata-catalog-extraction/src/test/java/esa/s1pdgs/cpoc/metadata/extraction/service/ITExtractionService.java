@@ -435,36 +435,47 @@ public class ITExtractionService {
 	
 	@Test
 	public void testExtractionService_onS2HKTM_shallPersistValidRecord() throws IOException, AbstractCodedException {
+		List<File> files1 = List.of(new File(testDir, "S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.SAFE/manifest.safe"));
+		doReturn(files1).when(mockObsClient).download(Mockito.any(), Mockito.any());
 		doReturn(newGetResponse_withExistsFalse()).when(mockElasticsearchDAO).get(Mockito.any(GetRequest.class));
 		doReturn(newIndexResponse_withCreatedTrue()).when(mockElasticsearchDAO).index(Mockito.any(IndexRequest.class));
 		ArgumentCaptor<IndexRequest> argumentCaptor = ArgumentCaptor.forClass(IndexRequest.class);
 
 		extractionService.apply(newCatalogJob(
-				"S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar",
+				"S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.SAFE",
 				NOT_DEFINED, ProductFamily.S2_HKTM, "NRT", null)); // timeliness will only be persisted if not null
 		
-		verify(mockObsClient, times(0)).download(Mockito.any(), Mockito.any());
+		verify(mockObsClient, times(1)).download(Mockito.any(), Mockito.any());
 		verify(mockElasticsearchDAO).index(argumentCaptor.capture());
 		IndexRequest indexRequest = argumentCaptor.getValue();
 		ProductMetadata metadata = ProductMetadata.ofJson(indexRequest.source().utf8ToString());
 		System.out.println(metadata.toString());
 
-		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar",
+		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.SAFE",
 				indexRequest.id());
 		
-		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar", metadata.getString("productName"));
+		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.SAFE", metadata.getString("productName"));
 		assertEquals(ProductFamily.S2_HKTM.name(), metadata.getString("productFamily"));
 		assertEquals("S2", metadata.getString("missionId"));
 		assertEquals("A", metadata.getString("satelliteId"));
 		assertEquals("OPER", metadata.getString("productClass"));
 		assertEquals("PRD_HKTM__", metadata.getString("productType"));
-		assertEquals("2019-12-03T05:18:37.000000Z", metadata.getString("validityStartTime"));
-		assertEquals("2019-12-03T05:18:42.000000Z", metadata.getString("validityStopTime"));
+		assertEquals("2019-12-03T05:18:37.000850Z", metadata.getString("validityStartTime"));
+		assertEquals("2019-12-03T05:18:42.000319Z", metadata.getString("validityStopTime"));
+		assertEquals("2019-12-03T05:18:41.000342Z", metadata.getString("creationTime"));
 		assertEquals("NRT", metadata.getString("timeliness"));
 		assertEquals(DateUtils.convertToMetadataDateTimeFormat(
 				metadata.getString("insertionTime")), metadata.getString("insertionTime")); // check format
-		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.tar", metadata.getString("url"));
-		assertEquals(11, metadata.length());
+		assertEquals("S2A_OPER_PRD_HKTM___20191203T051837_20191203T051842_0001.SAFE", metadata.getString("url"));
+		assertEquals("HKTM", metadata.getString("instrumentShortName"));
+		assertEquals(23225, metadata.getLong("orbitNumber"));
+		assertEquals(23225, metadata.getLong("lastOrbitNumber"));
+		assertEquals(59, metadata.getLong("relativeOrbitNumber"));
+		assertEquals("A", metadata.getString("platformSerialIdentifier"));
+		assertEquals("Svalbard", metadata.getString("site"));
+		assertEquals("SENTINEL-2", metadata.getString("platfomShortName"));
+		assertEquals("NOMINAL", metadata.getString("processMode"));
+		assertEquals(20, metadata.length());
 	}
 	
 	@Test

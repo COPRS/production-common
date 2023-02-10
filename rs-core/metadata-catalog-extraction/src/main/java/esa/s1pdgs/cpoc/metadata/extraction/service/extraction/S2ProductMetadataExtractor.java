@@ -1,10 +1,8 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,78 +40,68 @@ public class S2ProductMetadataExtractor extends AbstractMetadataExtractor {
 	public ProductMetadata extract(ReportingFactory reportingFactory, CatalogJob catalogJob)
 			throws AbstractCodedException {
 
-		// When HKTM, skip download and extract metadata from filename
-		if (enableExtractionFromProductName && ProductFamily.S2_HKTM.equals(catalogJob.getProductFamily())) {
-			LOG.trace("Extracting metadata from product name: {}", catalogJob.getProductName());
-			final ProductMetadata metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
-			metadata.put("productFamily", catalogJob.getProductFamily().name());
-			metadata.put("url", catalogJob.getKeyObjectStorage());
-			return metadata;
+		// When HKTM, extract information from manifest.safe
+		if (ProductFamily.S2_HKTM.equals(catalogJob.getProductFamily())) {
+			final File metadataFile = downloadMetadataFileToLocalFolder(reportingFactory, catalogJob.getProductFamily(),
+					catalogJob.getKeyObjectStorage());
+			
+			try {
+				final S2FileDescriptor descriptor = fileDescriptorBuilder.buildS2FileDescriptor(catalogJob);
+
+				// Build metadata from file and extracted
+				final ProductMetadata metadata = mdBuilder.buildS2HKTMFileMetadata(descriptor, metadataFile, catalogJob);
+				return metadata;
+			} finally {
+					FileUtils.delete(metadataFile.getPath());
+			}
 		}
 
-		final File metadataFile = downloadS2MetadataFileToLocalFolder(
-				processConfiguration.getManifestFilenames().get("s2"), reportingFactory, catalogJob.getProductFamily(),
-				catalogJob.getKeyObjectStorage());
+		// In all other cases download all .xml files and use xslt to extract necessary information
+		final List<File> metadataFiles = downloadS2MetadataFilesToLocalFolder(reportingFactory,
+				catalogJob.getProductFamily(), catalogJob.getKeyObjectStorage());
 
 		try {
 			final S2FileDescriptor descriptor = fileDescriptorBuilder.buildS2FileDescriptor(catalogJob);
 
 			// Build metadata from file and extracted
-			final ProductMetadata metadata = mdBuilder.buildS2ProductFileMetadata(descriptor, metadataFile, catalogJob);
+			final ProductMetadata metadata = mdBuilder.buildS2ProductFileMetadata(descriptor, metadataFiles, catalogJob);
 			return metadata;
 		} finally {
-			FileUtils.delete(metadataFile.getPath());
+			for (File metadataFile : metadataFiles) {
+				FileUtils.delete(metadataFile.getPath());
+			}
 		}
 	}
 
-	private File downloadS2MetadataFileToLocalFolder(final String metadataFileName,
-			final ReportingFactory reportingFactory, final ProductFamily family, final String keyObs) {
-		// Replace placeholder
-		String fileName = replacePlaceholderS2PRODUCTNAME(metadataFileName, keyObs);
-		
-		// make sure that keyObs contains the metadata file
-		final String metadataKeyObs = keyObs + "/" + fileName;
-
+	private List<File> downloadS2MetadataFilesToLocalFolder(final ReportingFactory reportingFactory,
+			final ProductFamily family, final String keyObs) {
 		try {
-			final List<File> files = Retries
+			// Retrieve list of xml files from obs
+			List<String> filenameList = obsClient.list(family, keyObs);
+
+			List<String> metadataFilenames = filenameList.stream().filter((filename -> filename.endsWith(".xml")))
+					.collect(Collectors.toList());
+			
+			final List<File> metadataFiles = Retries
 					.performWithRetries(
-							() -> obsClient.download(
-									Collections.singletonList(
-											new ObsDownloadObject(family, metadataKeyObs, this.localDirectory)),
-									reportingFactory),
-							"Download of metadata file " + metadataKeyObs + " to " + localDirectory,
+							() -> obsClient
+									.download(
+											metadataFilenames.stream()
+													.map(filename -> new ObsDownloadObject(family, filename,
+															this.localDirectory))
+													.collect(Collectors.toList()),
+											reportingFactory),
+							"Download of metadata files " + metadataFilenames.toString() + " to " + localDirectory,
 							processConfiguration.getNumObsDownloadRetries(),
 							processConfiguration.getSleepBetweenObsRetriesMillis());
-			if (files.size() != 1) {
-				throw new IllegalArgumentException(String.format(
-						"Expected to download one metadata file '%s', but found: %s", metadataKeyObs, files.size()));
+			if (metadataFiles.size() == 0) {
+				throw new IllegalArgumentException(
+						String.format("Expected to download at least one metadata file, but found none"));
 			}
-			final File metadataFile = files.get(0);
-			logger.debug("Downloaded metadata file {} to {}", metadataKeyObs, metadataFile);
-			return metadataFile;
+			logger.debug("Downloaded metadata files {} to {}", metadataFilenames.toString(), metadataFiles.toString());
+			return metadataFiles;
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	/*
-	 * Replace the String [S2PRODUCTNAME] with the expected filename for the
-	 * metadata file which is context sensitive to the productname
-	 */
-	protected String replacePlaceholderS2PRODUCTNAME(String fileName, String productKeyObs) {
-		// Replace string "[S2PRODUCTNAME]" with productkey (OBS-Key without extension)
-		// The product name contains the string "_MSI_" which has to be replaced with
-		// "_MTD_" to find the metadata file
-		String alteredProductName = productKeyObs.replace("_MSI_", "_MTD_");
-
-		// If the product name contains a processingBaseline it has to be removed in
-		// order to retrieve the correct metadata file name
-		Pattern pattern = Pattern.compile("^(.*?)(_N[0-9]{2}\\.?[0-9]{2})(.*?)$");
-		Matcher matcher = pattern.matcher(alteredProductName);
-		if (matcher.matches()) {
-			alteredProductName = matcher.group(1) + matcher.group(3);
-		}
-
-		return fileName.replace("[S2PRODUCTNAME]", alteredProductName);
 	}
 }
