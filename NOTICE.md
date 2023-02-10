@@ -1,4 +1,10 @@
-# Annex - Third Party Libraries
+Copyright (c) 2023 Airbus Defence & Space
+
+This software is distributed under the Apache License (ASL) v2.0, see LICENSE file or http://www.apache.org/licenses/LICENSE-2.0 for details.
+
+Given below are all third party dependecies for this project:
+
+###  Third Party Libraries
 | Library | Version | License |
 | --- | :---: | --- |
 | [aalto-xml](http://github.com/FasterXML/aalto-xml/)  | 0.9.11 | The Apache Software License, Version 2.0 |
@@ -23,15 +29,8 @@
 | [Apache HttpClient](http://hc.apache.org/httpcomponents-client)  | 4.5.1 | Apache License, Version 2.0 |
 | [Apache HttpCore NIO](http://hc.apache.org/httpcomponents-core-ga)  | 4.4.15 | Apache License, Version 2.0 |
 | [Apache HttpCore](http://hc.apache.org/httpcomponents-core-ga)  | 4.4.15 | Apache License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 2.5.0 | The Apache Software License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 3.0.1 | The Apache License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 3.0.1 | The Apache License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 3.0.1 | The Apache License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 3.0.1 | The Apache License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 3.0.1 | The Apache License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 3.0.1 | The Apache License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 3.0.1 | The Apache License, Version 2.0 |
-| [Apache Kafka](https://kafka.apache.org)  | 3.0.1 | The Apache License, Version 2.0 |
+| [Apache Kafka](https://github.com/apache/kafka)  | 2.5.0 | The Apache Software License, Version 2.0 |
+| [Apache Kafka](https://github.com/apache/kafka)  | 3.0.1 | The Apache License, Version 2.0 |
 | [Apache Log4j API](https://logging.apache.org/log4j/2.x/log4j-api/)  | 2.17.1 | Apache License, Version 2.0 |
 | [Apache Log4j Core](https://logging.apache.org/log4j/2.x/log4j-core/)  | 2.17.1 | Apache License, Version 2.0 |
 | [Apache Log4j JUL Adapter](https://logging.apache.org/log4j/2.x/log4j-jul/)  | 2.17.2 | Apache License, Version 2.0 |
