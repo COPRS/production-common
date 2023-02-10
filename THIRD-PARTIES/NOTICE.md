@@ -3,14 +3,14 @@
 ## HdrHistogram
 GroupId: org.hdrhistogram\
 ArtifactId: HdrHistogram\
-Version: 2.1.9\
+Version: 2.1.9
 ### Copyright
 ### Licenses 
  - Creative Commons Zero v1.0 Universal [CC0-1.0]
 ## HikariCP
 GroupId: com.zaxxer\
 ArtifactId: HikariCP\
-Version: 4.0.3\
+Version: 4.0.3
 ### Copyright
 - Copyright (c) 2013 Brett Wooldridge
 - Copyright (c) 2013, 2014 Brett Wooldridge
@@ -25,14 +25,14 @@ Version: 4.0.3\
 ## LatencyUtils
 GroupId: org.latencyutils\
 ArtifactId: LatencyUtils\
-Version: 2.0.3\
+Version: 2.0.3
 ### Copyright
 ### Licenses 
  - Creative Commons Zero v1.0 Universal [CC0-1.0]
 ## aalto-xml
 GroupId: com.fasterxml\
 ArtifactId: aalto-xml\
-Version: 0.9.11\
+Version: 0.9.11
 ### Copyright
 - Copyright (c) 2006- Tatu Saloranta, tatu.saloranta@iki.fi
 ### Licenses 
@@ -40,7 +40,7 @@ Version: 0.9.11\
 ## accessors-smart
 GroupId: net.minidev\
 ArtifactId: accessors-smart\
-Version: 2.4.8\
+Version: 2.4.8
 ### Copyright
 - Copyright 2011 JSON-SMART
 ### Licenses 
@@ -48,7 +48,7 @@ Version: 2.4.8\
 ## aggs-matrix-stats-client
 GroupId: org.elasticsearch.plugin\
 ArtifactId: aggs-matrix-stats-client\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -59,7 +59,7 @@ Version: 7.14.0\
 ## android-json
 GroupId: com.vaadin.external.google\
 ArtifactId: android-json\
-Version: 0.0.20131108.vaadin1\
+Version: 0.0.20131108.vaadin1
 ### Copyright
 - Copyright (c) 2010 The Android Open Source Project
 ### Licenses 
@@ -67,7 +67,7 @@ Version: 0.0.20131108.vaadin1\
 ## apiguardian-api
 GroupId: org.apiguardian\
 ArtifactId: apiguardian-api\
-Version: 1.1.2\
+Version: 1.1.2
 ### Copyright
 - Copyright 2002-2017 the original author or authors
 ### Licenses 
@@ -75,7 +75,7 @@ Version: 1.1.2\
 ## argparse4j
 GroupId: net.sourceforge.argparse4j\
 ArtifactId: argparse4j\
-Version: 0.7.0\
+Version: 0.7.0
 ### Copyright
 - Copyright (c) 2011 Tatsuhiro Tsujikawa
 - Copyright (c) 2012 Tatsuhiro Tsujikawa
@@ -88,7 +88,7 @@ Version: 0.7.0\
 ## asm
 GroupId: org.ow2.asm\
 ArtifactId: asm\
-Version: 9.2\
+Version: 9.2
 ### Copyright
 - Copyright (c) 2000-2011 INRIA, France Telecom
 ### Licenses 
@@ -96,7 +96,7 @@ Version: 9.2\
 ## asm-analysis
 GroupId: org.ow2.asm\
 ArtifactId: asm-analysis\
-Version: 9.2\
+Version: 9.2
 ### Copyright
 - Copyright (c) 2000-2011 INRIA, France Telecom
 ### Licenses 
@@ -104,7 +104,7 @@ Version: 9.2\
 ## asm-commons
 GroupId: org.ow2.asm\
 ArtifactId: asm-commons\
-Version: 9.2\
+Version: 9.2
 ### Copyright
 - Copyright (c) 2000-2011 INRIA, France Telecom
 ### Licenses 
@@ -112,7 +112,7 @@ Version: 9.2\
 ## asm-tree
 GroupId: org.ow2.asm\
 ArtifactId: asm-tree\
-Version: 9.2\
+Version: 9.2
 ### Copyright
 - Copyright (c) 2000-2011 INRIA, France Telecom
 ### Licenses 
@@ -120,7 +120,7 @@ Version: 9.2\
 ## aspectjweaver
 GroupId: org.aspectj\
 ArtifactId: aspectjweaver\
-Version: 1.9.7\
+Version: 1.9.7
 ### Copyright
 - Copyright (c) 1998-2001 Xerox Corporation, 2002 Palo Alto Research Center, Incorporated (PARC)
 - Copyright (c) 1999-2001 Xerox Corporation, 2002 Palo Alto Research Center, Incorporated
@@ -196,7 +196,7 @@ Version: 1.9.7\
 ## assertj-core
 GroupId: org.assertj\
 ArtifactId: assertj-core\
-Version: 3.13.2\
+Version: 3.13.2
 ### Copyright
 - Copyright 2012-2019 the original author or authors
 ### Licenses 
@@ -204,7 +204,7 @@ Version: 3.13.2\
 ## audience-annotations
 GroupId: org.apache.yetus\
 ArtifactId: audience-annotations\
-Version: 0.5.0\
+Version: 0.5.0
 ### Copyright
 - Copyright 2015-2017 The Apache Software Foundation
 ### Licenses 
@@ -212,7 +212,7 @@ Version: 0.5.0\
 ## aws-java-sdk-core
 GroupId: com.amazonaws\
 ArtifactId: aws-java-sdk-core\
-Version: 1.11.271\
+Version: 1.11.271
 ### Copyright
 - Copyright (c) 2016 Amazon.com, Inc. or its affiliates
 - Copyright (c) 2016. Amazon.com, Inc. or its affiliates
@@ -234,7 +234,7 @@ Version: 1.11.271\
 ## aws-java-sdk-kms
 GroupId: com.amazonaws\
 ArtifactId: aws-java-sdk-kms\
-Version: 1.11.271\
+Version: 1.11.271
 ### Copyright
 - Copyright 2011-2018 Amazon.com, Inc. or its affiliates
 - Copyright 2013-2018 Amazon.com, Inc. or its affiliates
@@ -243,7 +243,7 @@ Version: 1.11.271\
 ## aws-java-sdk-s3
 GroupId: com.amazonaws\
 ArtifactId: aws-java-sdk-s3\
-Version: 1.11.271\
+Version: 1.11.271
 ### Copyright
 - Copyright (c) 2016. Amazon.com, Inc. or its affiliates
 - Copyright (c) 2017. Amazon.com, Inc. or its affiliates
@@ -266,14 +266,14 @@ Version: 1.11.271\
 ## bcpkix-jdk15on
 GroupId: org.bouncycastle\
 ArtifactId: bcpkix-jdk15on\
-Version: 1.70\
+Version: 1.70
 ### Copyright
 ### Licenses 
  - MIT License [MIT]
 ## bcprov-jdk15on
 GroupId: org.bouncycastle\
 ArtifactId: bcprov-jdk15on\
-Version: 1.70\
+Version: 1.70
 ### Copyright
 - (c) ECFieldElement A1
 - (c) Nat224.isOne
@@ -285,14 +285,14 @@ Version: 1.70\
 ## bcutil-jdk15on
 GroupId: org.bouncycastle\
 ArtifactId: bcutil-jdk15on\
-Version: 1.70\
+Version: 1.70
 ### Copyright
 ### Licenses 
  - MIT License [MIT]
 ## bson
 GroupId: org.mongodb\
 ArtifactId: bson\
-Version: 4.4.2\
+Version: 4.4.2
 ### Copyright
 - Copyright (c) 2008-2014 Atlassian Pty Ltd
 - Copyright 2008-present MongoDB, Inc.
@@ -302,7 +302,7 @@ Version: 4.4.2\
 ## btf
 GroupId: com.github.java-json-tools\
 ArtifactId: btf\
-Version: 1.3\
+Version: 1.3
 ### Copyright
 - Copyright (c) 2007 Free Software Foundation, Inc. &lt;http://fsf.org/&gt;
 - Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
@@ -312,7 +312,7 @@ Version: 1.3\
 ## byte-buddy
 GroupId: net.bytebuddy\
 ArtifactId: byte-buddy\
-Version: 1.11.22\
+Version: 1.11.22
 ### Copyright
 - Copyright (c) 2000-2011 INRIA, France Telecom
 - Copyright 2014 - Present Rafael Winterhalter
@@ -322,7 +322,7 @@ Version: 1.11.22\
 ## byte-buddy-agent
 GroupId: net.bytebuddy\
 ArtifactId: byte-buddy-agent\
-Version: 1.11.22\
+Version: 1.11.22
 ### Copyright
 - Copyright 2014 - Present Rafael Winterhalter
 ### Licenses 
@@ -330,7 +330,7 @@ Version: 1.11.22\
 ## checker-qual
 GroupId: org.checkerframework\
 ArtifactId: checker-qual\
-Version: 3.12.0\
+Version: 3.12.0
 ### Copyright
 - Copyright 2004-present by the Checker Framework
 ### Licenses 
@@ -338,7 +338,7 @@ Version: 3.12.0\
 ## classgraph
 GroupId: io.github.classgraph\
 ArtifactId: classgraph\
-Version: 4.8.69\
+Version: 4.8.69
 ### Copyright
 - Copyright (c) 2016 Johno Crawford
 - Copyright (c) 2017 Harith Elrufaie
@@ -353,14 +353,14 @@ Version: 4.8.69\
 ## classmate
 GroupId: com.fasterxml\
 ArtifactId: classmate\
-Version: 1.5.1\
+Version: 1.5.1
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## commons-beanutils
 GroupId: commons-beanutils\
 ArtifactId: commons-beanutils\
-Version: 1.9.4\
+Version: 1.9.4
 ### Copyright
 - Copyright 2000-2019 The Apache Software Foundation
 ### Licenses 
@@ -368,7 +368,7 @@ Version: 1.9.4\
 ## commons-cli
 GroupId: commons-cli\
 ArtifactId: commons-cli\
-Version: 1.4\
+Version: 1.4
 ### Copyright
 - Copyright 2001-2017 The Apache Software Foundation
 ### Licenses 
@@ -376,7 +376,7 @@ Version: 1.4\
 ## commons-codec
 GroupId: commons-codec\
 ArtifactId: commons-codec\
-Version: 1.15\
+Version: 1.15
 ### Copyright
 - Copyright (c) 2002 Kevin Atkinson (kevina@gnu.org)
 - Copyright (c) 2004-2006 Intel Corportation
@@ -388,7 +388,7 @@ Version: 1.15\
 ## commons-collections
 GroupId: commons-collections\
 ArtifactId: commons-collections\
-Version: 3.2.2\
+Version: 3.2.2
 ### Copyright
 - Copyright 2001-2015 The Apache Software Foundation
 ### Licenses 
@@ -396,7 +396,7 @@ Version: 3.2.2\
 ## commons-compress
 GroupId: org.apache.commons\
 ArtifactId: commons-compress\
-Version: 1.21\
+Version: 1.21
 ### Copyright
 - copyright (c) 1996-2019 Julian R Seward
 - Copyright (c) 2004-2006 Intel Corporation
@@ -407,7 +407,7 @@ Version: 1.21\
 ## commons-digester3
 GroupId: org.apache.commons\
 ArtifactId: commons-digester3\
-Version: 3.2\
+Version: 3.2
 ### Copyright
 - Copyright 2001-2011 The Apache Software Foundation
 ### Licenses 
@@ -415,7 +415,7 @@ Version: 3.2\
 ## commons-io
 GroupId: commons-io\
 ArtifactId: commons-io\
-Version: 2.3\
+Version: 2.3
 ### Copyright
 - Copyright 2002-2012 The Apache Software Foundation
 ### Licenses 
@@ -423,7 +423,7 @@ Version: 2.3\
 ## commons-lang
 GroupId: commons-lang\
 ArtifactId: commons-lang\
-Version: 2.6\
+Version: 2.6
 ### Copyright
 - Copyright 2001-2011 The Apache Software Foundation
 ### Licenses 
@@ -431,7 +431,7 @@ Version: 2.6\
 ## commons-lang3
 GroupId: org.apache.commons\
 ArtifactId: commons-lang3\
-Version: 3.12.0\
+Version: 3.12.0
 ### Copyright
 - Copyright 2001-2021 The Apache Software Foundation
 ### Licenses 
@@ -439,7 +439,7 @@ Version: 3.12.0\
 ## commons-logging
 GroupId: commons-logging\
 ArtifactId: commons-logging\
-Version: 1.2\
+Version: 1.2
 ### Copyright
 - Copyright 2003-2014 The Apache Software Foundation
 ### Licenses 
@@ -447,7 +447,7 @@ Version: 1.2\
 ## commons-net
 GroupId: commons-net\
 ArtifactId: commons-net\
-Version: 3.8.0\
+Version: 3.8.0
 ### Copyright
 - Copyright 2001-2021 The Apache Software Foundation
 ### Licenses 
@@ -455,7 +455,7 @@ Version: 3.8.0\
 ## commons-text
 GroupId: org.apache.commons\
 ArtifactId: commons-text\
-Version: 1.9\
+Version: 1.9
 ### Copyright
 - Copyright 2014-2020 The Apache Software Foundation
 ### Licenses 
@@ -463,7 +463,7 @@ Version: 1.9\
 ## de.flapdoodle.embed.mongo
 GroupId: de.flapdoodle.embed\
 ArtifactId: de.flapdoodle.embed.mongo\
-Version: 3.4.5\
+Version: 3.4.5
 ### Copyright
 - Copyright (c) 2011 Can Yaman &lt;can@yaman.me&gt; Michael Mosmann &lt;michael@mosmann.de&gt;
 - Copyright (c) 2011 Michael Mosmann &lt;michael@mosmann.de&gt; Martin Johren &lt;m.joehren@googlemail.com&gt;
@@ -472,7 +472,7 @@ Version: 3.4.5\
 ## de.flapdoodle.embed.mongo.packageresolver
 GroupId: de.flapdoodle.embed\
 ArtifactId: de.flapdoodle.embed.mongo.packageresolver\
-Version: 1.0.3\
+Version: 1.0.3
 ### Copyright
 - Copyright (c) 2011 Michael Mosmann &lt;michael@mosmann.de&gt; Martin Johren &lt;m.joehren@googlemail.com&gt;
 ### Licenses 
@@ -480,7 +480,7 @@ Version: 1.0.3\
 ## de.flapdoodle.embed.process
 GroupId: de.flapdoodle.embed\
 ArtifactId: de.flapdoodle.embed.process\
-Version: 3.1.10\
+Version: 3.1.10
 ### Copyright
 - Copyright (c) 2011 Michael Mosmann &lt;michael@mosmann.de&gt; Martin Johren &lt;m.joehren@googlemail.com&gt;
 ### Licenses 
@@ -488,7 +488,7 @@ Version: 3.1.10\
 ## de.flapdoodle.os
 GroupId: de.flapdoodle\
 ArtifactId: de.flapdoodle.os\
-Version: 1.1.8\
+Version: 1.1.8
 ### Copyright
 - Copyright (c) 2020 Michael Mosmann &lt;michael@mosmann.de&gt;
 ### Licenses 
@@ -496,7 +496,7 @@ Version: 1.1.8\
 ## disruptor
 GroupId: com.lmax\
 ArtifactId: disruptor\
-Version: 3.4.4\
+Version: 3.4.4
 ### Copyright
 - Copyright 2011 LMAX Ltd.
 - Copyright 2012 LMAX Ltd.
@@ -508,7 +508,7 @@ Version: 3.4.4\
 ## elasticsearch
 GroupId: org.elasticsearch\
 ArtifactId: elasticsearch\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2006 Google Inc.
 - Copyright (c) 2007 Google Inc.
@@ -532,7 +532,7 @@ Version: 7.14.0\
 ## elasticsearch-cli
 GroupId: org.elasticsearch\
 ArtifactId: elasticsearch-cli\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -543,7 +543,7 @@ Version: 7.14.0\
 ## elasticsearch-core
 GroupId: org.elasticsearch\
 ArtifactId: elasticsearch-core\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 1993 by Sun Microsystems, Inc.
 - Copyright (c) 2018 MongoDB, Inc.
@@ -557,7 +557,7 @@ Version: 7.14.0\
 ## elasticsearch-geo
 GroupId: org.elasticsearch\
 ArtifactId: elasticsearch-geo\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -568,7 +568,7 @@ Version: 7.14.0\
 ## elasticsearch-plugin-classloader
 GroupId: org.elasticsearch\
 ArtifactId: elasticsearch-plugin-classloader\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -579,7 +579,7 @@ Version: 7.14.0\
 ## elasticsearch-rest-client
 GroupId: org.elasticsearch.client\
 ArtifactId: elasticsearch-rest-client\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright 2009-2021 Elasticsearch
 - Copyright 2019 Elastic and contributors
@@ -588,7 +588,7 @@ Version: 7.14.0\
 ## elasticsearch-rest-high-level-client
 GroupId: org.elasticsearch.client\
 ArtifactId: elasticsearch-rest-high-level-client\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -600,7 +600,7 @@ Version: 7.14.0\
 ## elasticsearch-secure-sm
 GroupId: org.elasticsearch\
 ArtifactId: elasticsearch-secure-sm\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -611,7 +611,7 @@ Version: 7.14.0\
 ## elasticsearch-x-content
 GroupId: org.elasticsearch\
 ArtifactId: elasticsearch-x-content\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -622,14 +622,14 @@ Version: 7.14.0\
 ## equalsverifier
 GroupId: nl.jqno.equalsverifier\
 ArtifactId: equalsverifier\
-Version: 3.10\
+Version: 3.10
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## error_prone_annotations
 GroupId: com.google.errorprone\
 ArtifactId: error_prone_annotations\
-Version: 2.11.0\
+Version: 2.11.0
 ### Copyright
 - Copyright 2014 The Error Prone
 - Copyright 2015 The Error Prone
@@ -641,7 +641,7 @@ Version: 2.11.0\
 ## failureaccess
 GroupId: com.google.guava\
 ArtifactId: failureaccess\
-Version: 1.0.1\
+Version: 1.0.1
 ### Copyright
 - Copyright (c) 2018 The Guava Authors
 ### Licenses 
@@ -649,7 +649,7 @@ Version: 1.0.1\
 ## ftplet-api
 GroupId: org.apache.ftpserver\
 ArtifactId: ftplet-api\
-Version: 1.0.5\
+Version: 1.0.5
 ### Copyright
 - Copyright 2003-2010 The Apache Software Foundation
 ### Licenses 
@@ -657,7 +657,7 @@ Version: 1.0.5\
 ## ftpserver-core
 GroupId: org.apache.ftpserver\
 ArtifactId: ftpserver-core\
-Version: 1.0.5\
+Version: 1.0.5
 ### Copyright
 - Copyright 1999-2004 The Apache Software Foundation
 - Copyright 2003-2010 The Apache Software Foundation
@@ -666,14 +666,14 @@ Version: 1.0.5\
 ## geojson-jackson
 GroupId: de.grundid.opendatalab\
 ArtifactId: geojson-jackson\
-Version: 1.14\
+Version: 1.14
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## gson
 GroupId: com.google.code.gson\
 ArtifactId: gson\
-Version: 2.8.9\
+Version: 2.8.9
 ### Copyright
 - Copyright (c) 2008 Google Inc.
 - Copyright (c) 2009 Google Inc.
@@ -691,7 +691,7 @@ Version: 2.8.9\
 ## guava
 GroupId: com.google.guava\
 ArtifactId: guava\
-Version: 31.1-jre\
+Version: 31.1-jre
 ### Copyright
 - Copyright (c) 2005 The Guava Authors
 - Copyright (c) 2006 The Guava Authors
@@ -717,35 +717,35 @@ Version: 31.1-jre\
 ## hamcrest
 GroupId: org.hamcrest\
 ArtifactId: hamcrest\
-Version: 2.2\
+Version: 2.2
 ### Copyright
 ### Licenses 
  - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 ## hamcrest-core
 GroupId: org.hamcrest\
 ArtifactId: hamcrest-core\
-Version: 2.2\
+Version: 2.2
 ### Copyright
 ### Licenses 
  - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 ## hamcrest-library
 GroupId: org.hamcrest\
 ArtifactId: hamcrest-library\
-Version: 2.2\
+Version: 2.2
 ### Copyright
 ### Licenses 
  - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 ## hibernate-commons-annotations
 GroupId: org.hibernate.common\
 ArtifactId: hibernate-commons-annotations\
-Version: 5.1.2.Final\
+Version: 5.1.2.Final
 ### Copyright
 ### Licenses 
  - GNU Lesser General Public License v2.1 or later [LGPL-2.1-or-later]
 ## hibernate-core
 GroupId: org.hibernate\
 ArtifactId: hibernate-core\
-Version: 5.6.7.Final\
+Version: 5.6.7.Final
 ### Copyright
 - (c) 2012 Red Hat Inc.
 - (c) match(IDENT) AST
@@ -757,7 +757,7 @@ Version: 5.6.7.Final\
 ## hibernate-validator
 GroupId: org.hibernate.validator\
 ArtifactId: hibernate-validator\
-Version: 6.2.3.Final\
+Version: 6.2.3.Final
 ### Copyright
 - (c) 2011 SERLI
 - (c) 2012 SERLI
@@ -768,14 +768,14 @@ Version: 6.2.3.Final\
 ## hppc
 GroupId: com.carrotsearch\
 ArtifactId: hppc\
-Version: 0.8.1\
+Version: 0.8.1
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## hsqldb
 GroupId: org.hsqldb\
 ArtifactId: hsqldb\
-Version: 2.5.2\
+Version: 2.5.2
 ### Copyright
 - (c) 2004-2011 Blaine Simpson and the HSQL Development Group
 - (c) 2004-2011 Blaine Simpson und die HSQL Development Group
@@ -792,7 +792,7 @@ Version: 2.5.2\
 ## httpasyncclient
 GroupId: org.apache.httpcomponents\
 ArtifactId: httpasyncclient\
-Version: 4.1.5\
+Version: 4.1.5
 ### Copyright
 - Copyright 2010-2021 The Apache Software Foundation
 ### Licenses 
@@ -800,7 +800,7 @@ Version: 4.1.5\
 ## httpclient
 GroupId: org.apache.httpcomponents\
 ArtifactId: httpclient\
-Version: 4.5.1\
+Version: 4.5.1
 ### Copyright
 - Copyright 1999-2015 The Apache Software Foundation
 ### Licenses 
@@ -808,7 +808,7 @@ Version: 4.5.1\
 ## httpcore
 GroupId: org.apache.httpcomponents\
 ArtifactId: httpcore\
-Version: 4.4.15\
+Version: 4.4.15
 ### Copyright
 - Copyright 2005-2021 The Apache Software Foundation
 ### Licenses 
@@ -816,7 +816,7 @@ Version: 4.4.15\
 ## httpcore-nio
 GroupId: org.apache.httpcomponents\
 ArtifactId: httpcore-nio\
-Version: 4.4.15\
+Version: 4.4.15
 ### Copyright
 - Copyright 2005-2021 The Apache Software Foundation
 ### Licenses 
@@ -824,7 +824,7 @@ Version: 4.4.15\
 ## ion-java
 GroupId: software.amazon.ion\
 ArtifactId: ion-java\
-Version: 1.0.2\
+Version: 1.0.2
 ### Copyright
 - Copyright (c) 2007 Amazon.com, Inc.
 - Copyright (c) 2007-
@@ -846,7 +846,7 @@ Version: 1.0.2\
 ## istack-commons-runtime
 GroupId: com.sun.istack\
 ArtifactId: istack-commons-runtime\
-Version: 3.0.12\
+Version: 3.0.12
 ### Copyright
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates
 - Copyright (c) 1997, 2019 Oracle and/or its affiliates
@@ -865,7 +865,7 @@ Version: 3.0.12\
 ## itu
 GroupId: com.ethlo.time\
 ArtifactId: itu\
-Version: 1.5.1\
+Version: 1.5.1
 ### Copyright
 - Copyright (c) 2017 - 2018 Morten Haraldsen
 - Copyright (c) 2017 - 2019 Morten Haraldsen
@@ -876,7 +876,7 @@ Version: 1.5.1\
 ## j2objc-annotations
 GroupId: com.google.j2objc\
 ArtifactId: j2objc-annotations\
-Version: 1.3\
+Version: 1.3
 ### Copyright
 - Copyright 2012 Google Inc.
 ### Licenses 
@@ -884,14 +884,14 @@ Version: 1.3\
 ## jackson-annotations
 GroupId: com.fasterxml.jackson.core\
 ArtifactId: jackson-annotations\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jackson-core
 GroupId: com.fasterxml.jackson.core\
 ArtifactId: jackson-core\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 - (c) Override public ObjectCodec
 - Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
@@ -900,7 +900,7 @@ Version: 2.13.2\
 ## jackson-core-asl
 GroupId: org.codehaus.jackson\
 ArtifactId: jackson-core-asl\
-Version: 1.9.7\
+Version: 1.9.7
 ### Copyright
 - Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 ### Licenses 
@@ -908,7 +908,7 @@ Version: 1.9.7\
 ## jackson-coreutils
 GroupId: com.github.java-json-tools\
 ArtifactId: jackson-coreutils\
-Version: 2.0\
+Version: 2.0
 ### Copyright
 - Copyright (c) 2007 Free Software Foundation, Inc. &lt;http://fsf.org/&gt;
 - Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
@@ -918,7 +918,7 @@ Version: 2.0\
 ## jackson-coreutils-equivalence
 GroupId: com.github.java-json-tools\
 ArtifactId: jackson-coreutils-equivalence\
-Version: 1.0\
+Version: 1.0
 ### Copyright
 - Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
 ### Licenses 
@@ -927,28 +927,28 @@ Version: 1.0\
 ## jackson-databind
 GroupId: com.fasterxml.jackson.core\
 ArtifactId: jackson-databind\
-Version: 2.13.2.2\
+Version: 2.13.2.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jackson-dataformat-cbor
 GroupId: com.fasterxml.jackson.dataformat\
 ArtifactId: jackson-dataformat-cbor\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jackson-dataformat-csv
 GroupId: com.fasterxml.jackson.dataformat\
 ArtifactId: jackson-dataformat-csv\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jackson-dataformat-smile
 GroupId: com.fasterxml.jackson.dataformat\
 ArtifactId: jackson-dataformat-smile\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 - Copyright 2012 FasterXML.com
 ### Licenses 
@@ -956,28 +956,28 @@ Version: 2.13.2\
 ## jackson-dataformat-xml
 GroupId: com.fasterxml.jackson.dataformat\
 ArtifactId: jackson-dataformat-xml\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jackson-dataformat-yaml
 GroupId: com.fasterxml.jackson.dataformat\
 ArtifactId: jackson-dataformat-yaml\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jackson-datatype-jdk8
 GroupId: com.fasterxml.jackson.datatype\
 ArtifactId: jackson-datatype-jdk8\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jackson-datatype-jsr310
 GroupId: com.fasterxml.jackson.datatype\
 ArtifactId: jackson-datatype-jsr310\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 - Copyright 2013 FasterXML.com
 ### Licenses 
@@ -985,7 +985,7 @@ Version: 2.13.2\
 ## jackson-mapper-asl
 GroupId: org.codehaus.jackson\
 ArtifactId: jackson-mapper-asl\
-Version: 1.9.7\
+Version: 1.9.7
 ### Copyright
 - Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 ### Licenses 
@@ -993,14 +993,14 @@ Version: 1.9.7\
 ## jackson-module-parameter-names
 GroupId: com.fasterxml.jackson.module\
 ArtifactId: jackson-module-parameter-names\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jackson-module-scala_2.13
 GroupId: com.fasterxml.jackson.module\
 ArtifactId: jackson-module-scala_2.13\
-Version: 2.13.2\
+Version: 2.13.2
 ### Copyright
 - Copyright (c) 2011 ScalaStuff.org
 ### Licenses 
@@ -1008,7 +1008,7 @@ Version: 2.13.2\
 ## jakarta.activation
 GroupId: com.sun.activation\
 ArtifactId: jakarta.activation\
-Version: 1.2.2\
+Version: 1.2.2
 ### Copyright
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates
 - Copyright (c) 1997, 2019 Oracle and/or its affiliates
@@ -1020,7 +1020,7 @@ Version: 1.2.2\
 ## jakarta.activation-api
 GroupId: jakarta.activation\
 ArtifactId: jakarta.activation-api\
-Version: 1.2.2\
+Version: 1.2.2
 ### Copyright
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates
 - Copyright (c) 1997, 2019 Oracle and/or its affiliates
@@ -1031,7 +1031,7 @@ Version: 1.2.2\
 ## jakarta.annotation-api
 GroupId: jakarta.annotation\
 ArtifactId: jakarta.annotation-api\
-Version: 1.3.5\
+Version: 1.3.5
 ### Copyright
 - Copyright (c) 1989, 1991 Free Software Foundation, Inc.
 - Copyright (c) 2005, 2018 Oracle and/or its affiliates
@@ -1045,7 +1045,7 @@ Version: 1.3.5\
 ## jakarta.persistence-api
 GroupId: jakarta.persistence\
 ArtifactId: jakarta.persistence-api\
-Version: 2.2.3\
+Version: 2.2.3
 ### Copyright
 - Copyright (c) 2006, 2019 Oracle and/or its affiliates
 - Copyright (c) 2008, 2019 Oracle and/or its affiliates
@@ -1059,7 +1059,7 @@ Version: 2.2.3\
 ## jakarta.servlet-api
 GroupId: jakarta.servlet\
 ArtifactId: jakarta.servlet-api\
-Version: 4.0.4\
+Version: 4.0.4
 ### Copyright
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates and others
@@ -1081,7 +1081,7 @@ Version: 4.0.4\
 ## jakarta.transaction-api
 GroupId: jakarta.transaction\
 ArtifactId: jakarta.transaction-api\
-Version: 1.3.3\
+Version: 1.3.3
 ### Copyright
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates
 - Copyright (c) 2010, 2018 Oracle and/or its affiliates
@@ -1093,7 +1093,7 @@ Version: 1.3.3\
 ## jakarta.validation-api
 GroupId: jakarta.validation\
 ArtifactId: jakarta.validation-api\
-Version: 2.0.2\
+Version: 2.0.2
 ### Copyright
 - Copyright (c) 2019 Eclipse Foundation
 ### Licenses 
@@ -1101,7 +1101,7 @@ Version: 2.0.2\
 ## jakarta.websocket-api
 GroupId: jakarta.websocket\
 ArtifactId: jakarta.websocket-api\
-Version: 1.1.2\
+Version: 1.1.2
 ### Copyright
 - Copyright (c) 1989, 1991 Free Software Foundation, Inc.
 - Copyright (c) 2018 Oracle and/or its affiliates and others
@@ -1112,7 +1112,7 @@ Version: 1.1.2\
 ## jakarta.xml.bind-api
 GroupId: jakarta.xml.bind\
 ArtifactId: jakarta.xml.bind-api\
-Version: 2.3.3\
+Version: 2.3.3
 ### Copyright
 - Copyright (c) 2003, 2018 Oracle and/or its affiliates
 - Copyright (c) 2003, 2019 Oracle and/or its affiliates
@@ -1139,7 +1139,7 @@ Version: 2.3.3\
 ## jandex
 GroupId: org.jboss\
 ArtifactId: jandex\
-Version: 2.4.2.Final\
+Version: 2.4.2.Final
 ### Copyright
 - Copyright 2013 Red Hat, Inc., and individual contributors
 - Copyright 2014 Red Hat, Inc., and individual contributors
@@ -1150,7 +1150,7 @@ Version: 2.4.2.Final\
 ## java-uuid-generator
 GroupId: com.fasterxml.uuid\
 ArtifactId: java-uuid-generator\
-Version: 4.0.1\
+Version: 4.0.1
 ### Copyright
 - Copyright (c) 2002 Tatu Saloranta, tatu.saloranta@iki.fi
 - Copyright (c) 2002- Tatu Saloranta, tatu.saloranta@iki.fi
@@ -1159,7 +1159,7 @@ Version: 4.0.1\
 ## javax-websocket-client-impl
 GroupId: org.eclipse.jetty.websocket\
 ArtifactId: javax-websocket-client-impl\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1177,7 +1177,7 @@ Version: 9.4.45.v20220203\
 ## javax-websocket-server-impl
 GroupId: org.eclipse.jetty.websocket\
 ArtifactId: javax-websocket-server-impl\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1195,7 +1195,7 @@ Version: 9.4.45.v20220203\
 ## javax.activation
 GroupId: com.sun.activation\
 ArtifactId: javax.activation\
-Version: 1.2.0\
+Version: 1.2.0
 ### Copyright
 - Copyright (c) 1989, 1991 Free Software Foundation, Inc.
 - Copyright (c) 1996-2017, http://www.oracle.com&#x27; Oracle and/or its affiliates
@@ -1208,7 +1208,7 @@ Version: 1.2.0\
 ## javax.annotation-api
 GroupId: javax.annotation\
 ArtifactId: javax.annotation-api\
-Version: 1.3.2\
+Version: 1.3.2
 ### Copyright
 - Copyright (c) 1989, 1991 Free Software Foundation, Inc.
 - Copyright (c) 1999-2017, http://www.oracle.com&#x27; Oracle and/or its affiliates
@@ -1225,7 +1225,7 @@ Version: 1.3.2\
 ## javax.json
 GroupId: org.glassfish\
 ArtifactId: javax.json\
-Version: 1.1.4\
+Version: 1.1.4
 ### Copyright
 - Copyright (c) 2011-2018 Oracle and/or its affiliates
 - Copyright (c) 2012-2017 Oracle and/or its affiliates
@@ -1238,7 +1238,7 @@ Version: 1.1.4\
 ## javax.json-api
 GroupId: javax.json\
 ArtifactId: javax.json-api\
-Version: 1.1.4\
+Version: 1.1.4
 ### Copyright
 - Copyright (c) 2011-2017 Oracle and/or its affiliates
 - Copyright (c) 2011-2018 Oracle and/or its affiliates
@@ -1255,7 +1255,7 @@ Version: 1.1.4\
 ## javax.servlet-api
 GroupId: javax.servlet\
 ArtifactId: javax.servlet-api\
-Version: 4.0.1\
+Version: 4.0.1
 ### Copyright
 - Copyright (c) 1989, 1991 Free Software Foundation, Inc.
 - Copyright (c) 1997-2017 Oracle and/or its affiliates
@@ -1274,7 +1274,7 @@ Version: 4.0.1\
 ## jaxb-core
 GroupId: com.sun.xml.bind\
 ArtifactId: jaxb-core\
-Version: 3.0.2\
+Version: 3.0.2
 ### Copyright
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates
 - Copyright (c) 1997, 2019 Oracle and/or its affiliates
@@ -1300,7 +1300,7 @@ Version: 3.0.2\
 ## jaxb-impl
 GroupId: com.sun.xml.bind\
 ArtifactId: jaxb-impl\
-Version: 2.3.3\
+Version: 2.3.3
 ### Copyright
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates
 - Copyright (c) 1997, 2019 Oracle and/or its affiliates
@@ -1327,7 +1327,7 @@ Version: 2.3.3\
 ## jaxb-runtime
 GroupId: org.glassfish.jaxb\
 ArtifactId: jaxb-runtime\
-Version: 2.3.6\
+Version: 2.3.6
 ### Copyright
 - Copyright (c) 1997, 2021 Oracle and/or its affiliates
 - Copyright (c) 2011, 2021 Oracle and/or its affiliates
@@ -1349,7 +1349,7 @@ Version: 2.3.6\
 ## jboss-logging
 GroupId: org.jboss.logging\
 ArtifactId: jboss-logging\
-Version: 3.4.3.Final\
+Version: 3.4.3.Final
 ### Copyright
 - Copyright 2010 Red Hat, Inc.
 - Copyright 2010 Red Hat, Inc., and individual contributors
@@ -1363,7 +1363,7 @@ Version: 3.4.3.Final\
 ## jboss-servlet-api_4.0_spec
 GroupId: org.jboss.spec.javax.servlet\
 ArtifactId: jboss-servlet-api_4.0_spec\
-Version: 2.0.0.Final\
+Version: 2.0.0.Final
 ### Copyright
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates
 - Copyright (c) 1997, 2018 Oracle and/or its affiliates and others
@@ -1382,7 +1382,7 @@ Version: 2.0.0.Final\
 ## jcip-annotations
 GroupId: com.github.stephenc.jcip\
 ArtifactId: jcip-annotations\
-Version: 1.0-1\
+Version: 1.0-1
 ### Copyright
 - Copyright 2013 Stephen Connolly
 ### Licenses 
@@ -1390,7 +1390,7 @@ Version: 1.0-1\
 ## jcl-over-slf4j
 GroupId: org.slf4j\
 ArtifactId: jcl-over-slf4j\
-Version: 1.7.36\
+Version: 1.7.36
 ### Copyright
 - Copyright 2001-2004 The Apache Software Foundation
 ### Licenses 
@@ -1398,7 +1398,7 @@ Version: 1.7.36\
 ## jetty-annotations
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-annotations\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1416,7 +1416,7 @@ Version: 9.4.45.v20220203\
 ## jetty-client
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-client\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1434,7 +1434,7 @@ Version: 9.4.45.v20220203\
 ## jetty-continuation
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-continuation\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1452,7 +1452,7 @@ Version: 9.4.45.v20220203\
 ## jetty-http
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-http\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1470,7 +1470,7 @@ Version: 9.4.45.v20220203\
 ## jetty-io
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-io\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1488,7 +1488,7 @@ Version: 9.4.45.v20220203\
 ## jetty-plus
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-plus\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1506,7 +1506,7 @@ Version: 9.4.45.v20220203\
 ## jetty-security
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-security\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1524,7 +1524,7 @@ Version: 9.4.45.v20220203\
 ## jetty-server
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-server\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1542,7 +1542,7 @@ Version: 9.4.45.v20220203\
 ## jetty-servlet
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-servlet\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1560,7 +1560,7 @@ Version: 9.4.45.v20220203\
 ## jetty-servlets
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-servlets\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1578,7 +1578,7 @@ Version: 9.4.45.v20220203\
 ## jetty-util
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-util\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright (c) 1996 Aki Yoshida
@@ -1599,7 +1599,7 @@ Version: 9.4.45.v20220203\
 ## jetty-util-ajax
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-util-ajax\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1616,7 +1616,7 @@ Version: 9.4.45.v20220203\
 ## jetty-webapp
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-webapp\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1634,7 +1634,7 @@ Version: 9.4.45.v20220203\
 ## jetty-xml
 GroupId: org.eclipse.jetty\
 ArtifactId: jetty-xml\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -1652,7 +1652,7 @@ Version: 9.4.45.v20220203\
 ## jmespath-java
 GroupId: com.amazonaws\
 ArtifactId: jmespath-java\
-Version: 1.11.271\
+Version: 1.11.271
 ### Copyright
 - Copyright 2010-2018 Amazon.com, Inc. or its affiliates
 ### Licenses 
@@ -1660,14 +1660,14 @@ Version: 1.11.271\
 ## jmustache
 GroupId: com.samskivert\
 ArtifactId: jmustache\
-Version: 1.15\
+Version: 1.15
 ### Copyright
 ### Licenses 
  - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 ## jna
 GroupId: org.elasticsearch\
 ArtifactId: jna\
-Version: 5.7.0-1\
+Version: 5.7.0-1
 ### Copyright
 - Copyright (c) 2007 Timothy Wall
 - Copyright (c) 2007 Wayne Meissner
@@ -1687,7 +1687,7 @@ Version: 5.7.0-1\
 ## jna-platform
 GroupId: net.java.dev.jna\
 ArtifactId: jna-platform\
-Version: 5.10.0\
+Version: 5.10.0
 ### Copyright
 - Copyright (c) 2007 Olivier Chafik
 - Copyright (c) 2007 Timothy Wall
@@ -1737,7 +1737,7 @@ Version: 5.10.0\
 ## joda-time
 GroupId: joda-time\
 ArtifactId: joda-time\
-Version: 2.10.10\
+Version: 2.10.10
 ### Copyright
 - Copyright 2001-2005 Stephen Colebourne
 - Copyright 2001-2006 Stephen Colebourne
@@ -1755,7 +1755,7 @@ Version: 2.10.10\
 ## jopt-simple
 GroupId: net.sf.jopt-simple\
 ArtifactId: jopt-simple\
-Version: 5.0.2\
+Version: 5.0.2
 ### Copyright
 - Copyright (c) 2004-2014 Paul R. Holser, Jr
 - Copyright (c) 2004-2015 Paul R. Holser, Jr
@@ -1764,14 +1764,14 @@ Version: 5.0.2\
 ## joss
 GroupId: org.javaswift\
 ArtifactId: joss\
-Version: 0.10.2\
+Version: 0.10.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## json-patch
 GroupId: com.github.java-json-tools\
 ArtifactId: json-patch\
-Version: 1.13\
+Version: 1.13
 ### Copyright
 - Copyright (c) 2007 Free Software Foundation, Inc. &lt;http://fsf.org/&gt;
 - Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
@@ -1781,7 +1781,7 @@ Version: 1.13\
 ## json-path
 GroupId: com.jayway.jsonpath\
 ArtifactId: json-path\
-Version: 2.6.0\
+Version: 2.6.0
 ### Copyright
 - Copyright 2011 the original author or authors
 ### Licenses 
@@ -1789,7 +1789,7 @@ Version: 2.6.0\
 ## json-schema-core
 GroupId: com.github.java-json-tools\
 ArtifactId: json-schema-core\
-Version: 1.2.14\
+Version: 1.2.14
 ### Copyright
 - Copyright (c) 2007 Free Software Foundation, Inc. &lt;http://fsf.org/&gt;
 - Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
@@ -1799,7 +1799,7 @@ Version: 1.2.14\
 ## json-schema-validator
 GroupId: com.github.java-json-tools\
 ArtifactId: json-schema-validator\
-Version: 2.2.14\
+Version: 2.2.14
 ### Copyright
 - Copyright (c) 2007 Free Software Foundation, Inc. &lt;http://fsf.org/&gt;
 - Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
@@ -1809,7 +1809,7 @@ Version: 2.2.14\
 ## json-simple
 GroupId: com.github.cliftonlabs\
 ArtifactId: json-simple\
-Version: 3.0.2\
+Version: 3.0.2
 ### Copyright
 - Copyright 2016 Clifton Labs
 - Copyright 2016-2017 Clifton Labs
@@ -1818,7 +1818,7 @@ Version: 3.0.2\
 ## json-smart
 GroupId: net.minidev\
 ArtifactId: json-smart\
-Version: 2.4.8\
+Version: 2.4.8
 ### Copyright
 - Copyright 2011 JSON-SMART
 - Copyright 2011-2014 JSON-SMART
@@ -1827,7 +1827,7 @@ Version: 2.4.8\
 ## json-unit-core
 GroupId: net.javacrumbs.json-unit\
 ArtifactId: json-unit-core\
-Version: 2.33.0\
+Version: 2.33.0
 ### Copyright
 - Copyright 2009-2019 the original author or authors
 ### Licenses 
@@ -1835,14 +1835,14 @@ Version: 2.33.0\
 ## jsonassert
 GroupId: org.skyscreamer\
 ArtifactId: jsonassert\
-Version: 1.5.0\
+Version: 1.5.0
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## jsr305
 GroupId: com.google.code.findbugs\
 ArtifactId: jsr305\
-Version: 3.0.2\
+Version: 3.0.2
 ### Copyright
 - Copyright (c) 2005 Brian Goetz
 ### Licenses 
@@ -1850,7 +1850,7 @@ Version: 3.0.2\
 ## jts-core
 GroupId: org.locationtech.jts\
 ArtifactId: jts-core\
-Version: 1.15.0\
+Version: 1.15.0
 ### Copyright
 - Copyright (c) 1995 by INRIA Prisme Project BP 93 06902 Sophia Antipolis Cedex, France
 - Copyright (c) 2016 Martin Davis
@@ -1861,7 +1861,7 @@ Version: 1.15.0\
 ## jul-to-slf4j
 GroupId: org.slf4j\
 ArtifactId: jul-to-slf4j\
-Version: 1.7.36\
+Version: 1.7.36
 ### Copyright
 - Copyright (c) 2004-2011 QOS.ch
 ### Licenses 
@@ -1869,14 +1869,14 @@ Version: 1.7.36\
 ## junit
 GroupId: junit\
 ArtifactId: junit\
-Version: 4.13.2\
+Version: 4.13.2
 ### Copyright
 ### Licenses 
  - Eclipse Public License 1.0 [EPL-1.0]
 ## junit-jupiter
 GroupId: org.junit.jupiter\
 ArtifactId: junit-jupiter\
-Version: 5.8.2\
+Version: 5.8.2
 ### Copyright
 - Copyright 2015-2021 the original author or authors
 ### Licenses 
@@ -1884,7 +1884,7 @@ Version: 5.8.2\
 ## junit-jupiter-api
 GroupId: org.junit.jupiter\
 ArtifactId: junit-jupiter-api\
-Version: 5.8.2\
+Version: 5.8.2
 ### Copyright
 - Copyright 2015-2021 the original author or authors
 ### Licenses 
@@ -1892,7 +1892,7 @@ Version: 5.8.2\
 ## junit-jupiter-engine
 GroupId: org.junit.jupiter\
 ArtifactId: junit-jupiter-engine\
-Version: 5.8.2\
+Version: 5.8.2
 ### Copyright
 - Copyright 2015-2021 the original author or authors
 ### Licenses 
@@ -1900,7 +1900,7 @@ Version: 5.8.2\
 ## junit-jupiter-params
 GroupId: org.junit.jupiter\
 ArtifactId: junit-jupiter-params\
-Version: 5.8.2\
+Version: 5.8.2
 ### Copyright
 - Copyright 2015-2021 the original author or authors
 ### Licenses 
@@ -1908,7 +1908,7 @@ Version: 5.8.2\
 ## junit-platform-commons
 GroupId: org.junit.platform\
 ArtifactId: junit-platform-commons\
-Version: 1.8.2\
+Version: 1.8.2
 ### Copyright
 - Copyright 2015-2021 the original author or authors
 ### Licenses 
@@ -1916,7 +1916,7 @@ Version: 1.8.2\
 ## junit-platform-engine
 GroupId: org.junit.platform\
 ArtifactId: junit-platform-engine\
-Version: 1.8.2\
+Version: 1.8.2
 ### Copyright
 - Copyright 2015-2021 the original author or authors
 ### Licenses 
@@ -1924,7 +1924,7 @@ Version: 1.8.2\
 ## junit-vintage-engine
 GroupId: org.junit.vintage\
 ArtifactId: junit-vintage-engine\
-Version: 5.8.2\
+Version: 5.8.2
 ### Copyright
 - Copyright 2015-2021 the original author or authors
 ### Licenses 
@@ -1932,7 +1932,7 @@ Version: 5.8.2\
 ## jzlib
 GroupId: com.jcraft\
 ArtifactId: jzlib\
-Version: 1.1.3\
+Version: 1.1.3
 ### Copyright
 - Copyright (c) 2000,2001,2002,2003 ymnk, JCraft,Inc.
 - Copyright (c) 2000-2011 ymnk, JCraft,Inc.
@@ -1942,7 +1942,7 @@ Version: 1.1.3\
 ## kafka-clients
 GroupId: org.apache.kafka\
 ArtifactId: kafka-clients\
-Version: 2.5.0\
+Version: 2.5.0
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2015-2016, Luben Karavelov
@@ -1956,7 +1956,7 @@ Version: 2.5.0\
 ## kafka-metadata
 GroupId: org.apache.kafka\
 ArtifactId: kafka-metadata\
-Version: 3.0.1\
+Version: 3.0.1
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2017-2018 Alexis Seigneurin
@@ -1969,7 +1969,7 @@ Version: 3.0.1\
 ## kafka-raft
 GroupId: org.apache.kafka\
 ArtifactId: kafka-raft\
-Version: 3.0.1\
+Version: 3.0.1
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2017-2018 Alexis Seigneurin
@@ -1983,7 +1983,7 @@ Version: 3.0.1\
 ## kafka-server-common
 GroupId: org.apache.kafka\
 ArtifactId: kafka-server-common\
-Version: 3.0.1\
+Version: 3.0.1
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2017-2018 Alexis Seigneurin
@@ -1997,7 +1997,7 @@ Version: 3.0.1\
 ## kafka-storage
 GroupId: org.apache.kafka\
 ArtifactId: kafka-storage\
-Version: 3.0.1\
+Version: 3.0.1
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2017-2018 Alexis Seigneurin
@@ -2011,7 +2011,7 @@ Version: 3.0.1\
 ## kafka-storage-api
 GroupId: org.apache.kafka\
 ArtifactId: kafka-storage-api\
-Version: 3.0.1\
+Version: 3.0.1
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2017-2018 Alexis Seigneurin
@@ -2025,7 +2025,7 @@ Version: 3.0.1\
 ## kafka-streams
 GroupId: org.apache.kafka\
 ArtifactId: kafka-streams\
-Version: 3.0.1\
+Version: 3.0.1
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2017-2018 Alexis Seigneurin
@@ -2038,7 +2038,7 @@ Version: 3.0.1\
 ## kafka-streams-test-utils
 GroupId: org.apache.kafka\
 ArtifactId: kafka-streams-test-utils\
-Version: 3.0.1\
+Version: 3.0.1
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2017-2018 Alexis Seigneurin
@@ -2051,7 +2051,7 @@ Version: 3.0.1\
 ## kafka_2.13
 GroupId: org.apache.kafka\
 ArtifactId: kafka_2.13\
-Version: 3.0.1\
+Version: 3.0.1
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corporation
 - Copyright (c) 2017-2018 Alexis Seigneurin
@@ -2064,7 +2064,7 @@ Version: 3.0.1\
 ## lang-mustache-client
 GroupId: org.elasticsearch.plugin\
 ArtifactId: lang-mustache-client\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -2075,7 +2075,7 @@ Version: 7.14.0\
 ## libphonenumber
 GroupId: com.googlecode.libphonenumber\
 ArtifactId: libphonenumber\
-Version: 8.11.1\
+Version: 8.11.1
 ### Copyright
 - Copyright (c) 2009 The Libphonenumber Authors
 - Copyright (c) 2010 The Libphonenumber Authors
@@ -2089,7 +2089,7 @@ Version: 8.11.1\
 ## log4j-api
 GroupId: org.apache.logging.log4j\
 ArtifactId: log4j-api\
-Version: 2.17.1\
+Version: 2.17.1
 ### Copyright
 - Copyright 1999-1969 The Apache Software Foundation
 ### Licenses 
@@ -2097,7 +2097,7 @@ Version: 2.17.1\
 ## log4j-core
 GroupId: org.apache.logging.log4j\
 ArtifactId: log4j-core\
-Version: 2.17.1\
+Version: 2.17.1
 ### Copyright
 - Copyright (c) 2017 public
 - Copyright 1999-2005 The Apache Software Foundation
@@ -2118,7 +2118,7 @@ Version: 2.17.1\
 ## log4j-jul
 GroupId: org.apache.logging.log4j\
 ArtifactId: log4j-jul\
-Version: 2.17.2\
+Version: 2.17.2
 ### Copyright
 - Copyright 1999-2022 The Apache Software Foundation
 ### Licenses 
@@ -2126,7 +2126,7 @@ Version: 2.17.2\
 ## log4j-slf4j-impl
 GroupId: org.apache.logging.log4j\
 ArtifactId: log4j-slf4j-impl\
-Version: 2.17.2\
+Version: 2.17.2
 ### Copyright
 - Copyright 1999-2022 The Apache Software Foundation
 ### Licenses 
@@ -2135,7 +2135,7 @@ Version: 2.17.2\
 ## lucene-analyzers-common
 GroupId: org.apache.lucene\
 ArtifactId: lucene-analyzers-common\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2173,7 +2173,7 @@ Version: 8.9.0\
 ## lucene-backward-codecs
 GroupId: org.apache.lucene\
 ArtifactId: lucene-backward-codecs\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2204,7 +2204,7 @@ Version: 8.9.0\
 ## lucene-core
 GroupId: org.apache.lucene\
 ArtifactId: lucene-core\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1970-2003, Wm. Randolph Franklin
 - Copyright (c) 1993 by Sun Microsystems, Inc.
@@ -2240,7 +2240,7 @@ Version: 8.9.0\
 ## lucene-grouping
 GroupId: org.apache.lucene\
 ArtifactId: lucene-grouping\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2271,7 +2271,7 @@ Version: 8.9.0\
 ## lucene-highlighter
 GroupId: org.apache.lucene\
 ArtifactId: lucene-highlighter\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2302,7 +2302,7 @@ Version: 8.9.0\
 ## lucene-join
 GroupId: org.apache.lucene\
 ArtifactId: lucene-join\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2333,7 +2333,7 @@ Version: 8.9.0\
 ## lucene-memory
 GroupId: org.apache.lucene\
 ArtifactId: lucene-memory\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2364,7 +2364,7 @@ Version: 8.9.0\
 ## lucene-misc
 GroupId: org.apache.lucene\
 ArtifactId: lucene-misc\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2395,7 +2395,7 @@ Version: 8.9.0\
 ## lucene-queries
 GroupId: org.apache.lucene\
 ArtifactId: lucene-queries\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2426,7 +2426,7 @@ Version: 8.9.0\
 ## lucene-queryparser
 GroupId: org.apache.lucene\
 ArtifactId: lucene-queryparser\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2457,7 +2457,7 @@ Version: 8.9.0\
 ## lucene-sandbox
 GroupId: org.apache.lucene\
 ArtifactId: lucene-sandbox\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2488,7 +2488,7 @@ Version: 8.9.0\
 ## lucene-spatial-extras
 GroupId: org.apache.lucene\
 ArtifactId: lucene-spatial-extras\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2519,7 +2519,7 @@ Version: 8.9.0\
 ## lucene-spatial3d
 GroupId: org.apache.lucene\
 ArtifactId: lucene-spatial3d\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2550,7 +2550,7 @@ Version: 8.9.0\
 ## lucene-suggest
 GroupId: org.apache.lucene\
 ArtifactId: lucene-suggest\
-Version: 8.9.0\
+Version: 8.9.0
 ### Copyright
 - Copyright (c) 1995-2008 International Business Machines Corporation and others
 - Copyright (c) 1999-2010, International Business Machines Corporation and others
@@ -2582,7 +2582,7 @@ Version: 8.9.0\
 ## lz4-java
 GroupId: org.lz4\
 ArtifactId: lz4-java\
-Version: 1.8.0\
+Version: 1.8.0
 ### Copyright
 - Copyright 2020 Adrien Grand
 - Copyright 2020 Linnaea Von Lavia
@@ -2593,7 +2593,7 @@ Version: 1.8.0\
 ## mailapi
 GroupId: com.sun.mail\
 ArtifactId: mailapi\
-Version: 1.6.2\
+Version: 1.6.2
 ### Copyright
 - Copyright (c) 1989, 1991 Free Software Foundation, Inc.
 - Copyright (c) 1997-2017 Oracle and/or its affiliates
@@ -2612,7 +2612,7 @@ Version: 1.6.2\
 ## mapper-extras-client
 GroupId: org.elasticsearch.plugin\
 ArtifactId: mapper-extras-client\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -2623,14 +2623,14 @@ Version: 7.14.0\
 ## metrics-core
 GroupId: io.dropwizard.metrics\
 ArtifactId: metrics-core\
-Version: 4.2.9\
+Version: 4.2.9
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## micrometer-core
 GroupId: io.micrometer\
 ArtifactId: micrometer-core\
-Version: 1.8.4\
+Version: 1.8.4
 ### Copyright
 - Copyright (c) 2004-2011 QOS.ch
 - Copyright 2002-2017 the original author or authors
@@ -2651,7 +2651,7 @@ Version: 1.8.4\
 ## mina-core
 GroupId: org.apache.mina\
 ArtifactId: mina-core\
-Version: 2.0.0-RC1\
+Version: 2.0.0-RC1
 ### Copyright
 - Copyright (c) 2003 Eric Glass
 - Copyright 2004-2009 Apache MINA Project
@@ -2661,7 +2661,7 @@ Version: 2.0.0-RC1\
 ## mockito-core
 GroupId: org.mockito\
 ArtifactId: mockito-core\
-Version: 4.0.0\
+Version: 4.0.0
 ### Copyright
 - Copyright (c) 2007 Mockito
 - Copyright (c) 2015 Mockito
@@ -2677,7 +2677,7 @@ Version: 4.0.0\
 ## mockito-junit-jupiter
 GroupId: org.mockito\
 ArtifactId: mockito-junit-jupiter\
-Version: 4.0.0\
+Version: 4.0.0
 ### Copyright
 - Copyright (c) 2007 Mockito
 - Copyright (c) 2018 Mockito
@@ -2686,14 +2686,14 @@ Version: 4.0.0\
 ## mockserver-client-java
 GroupId: org.mock-server\
 ArtifactId: mockserver-client-java\
-Version: 5.13.2\
+Version: 5.13.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## mockserver-core
 GroupId: org.mock-server\
 ArtifactId: mockserver-core\
-Version: 5.13.2\
+Version: 5.13.2
 ### Copyright
 - Copyright 2017 SmartBear Software
 ### Licenses 
@@ -2701,7 +2701,7 @@ Version: 5.13.2\
 ## mockserver-netty
 GroupId: org.mock-server\
 ArtifactId: mockserver-netty\
-Version: 5.13.2\
+Version: 5.13.2
 ### Copyright
 - (c) Dustin Diaz 2015
 - (c) Sindre Sorhus
@@ -2720,7 +2720,7 @@ Version: 5.13.2\
 ## mongodb-driver-core
 GroupId: org.mongodb\
 ArtifactId: mongodb-driver-core\
-Version: 4.4.2\
+Version: 4.4.2
 ### Copyright
 - Copyright (c) 2005 Brian Goetz and Tim Peierls
 - Copyright (c) 2008-2014 Atlassian Pty Ltd
@@ -2738,7 +2738,7 @@ Version: 4.4.2\
 ## mongodb-driver-sync
 GroupId: org.mongodb\
 ArtifactId: mongodb-driver-sync\
-Version: 4.4.2\
+Version: 4.4.2
 ### Copyright
 - Copyright 2008-present MongoDB, Inc.
 ### Licenses 
@@ -2746,7 +2746,7 @@ Version: 4.4.2\
 ## msg-simple
 GroupId: com.github.java-json-tools\
 ArtifactId: msg-simple\
-Version: 1.2\
+Version: 1.2
 ### Copyright
 - Copyright (c) 2007 Free Software Foundation, Inc. &lt;http://fsf.org/&gt;
 - Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
@@ -2756,7 +2756,7 @@ Version: 1.2\
 ## netty-buffer
 GroupId: io.netty\
 ArtifactId: netty-buffer\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2012 The Netty Project
 - Copyright 2013 The Netty Project
@@ -2772,7 +2772,7 @@ Version: 4.1.75.Final\
 ## netty-codec
 GroupId: io.netty\
 ArtifactId: netty-codec\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2012 The Netty Project
 - Copyright 2013 The Netty Project
@@ -2787,7 +2787,7 @@ Version: 4.1.75.Final\
 ## netty-codec-http
 GroupId: io.netty\
 ArtifactId: netty-codec-http\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright (c) 2008-2009 Bjoern Hoehrmann &lt;bjoern@hoehrmann.de&gt;
 - Copyright (c) 2011, Joe Walnes and contributors
@@ -2808,7 +2808,7 @@ Version: 4.1.75.Final\
 ## netty-codec-socks
 GroupId: io.netty\
 ArtifactId: netty-codec-socks\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2012 The Netty Project
 - Copyright 2013 The Netty Project
@@ -2819,7 +2819,7 @@ Version: 4.1.75.Final\
 ## netty-common
 GroupId: io.netty\
 ArtifactId: netty-common\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright (c) 2004-2011 QOS.ch
 - Copyright 2012 The Netty Project
@@ -2839,7 +2839,7 @@ Version: 4.1.75.Final\
 ## netty-handler
 GroupId: io.netty\
 ArtifactId: netty-handler\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2011 The Netty Project
 - Copyright 2012 The Netty Project
@@ -2858,7 +2858,7 @@ Version: 4.1.75.Final\
 ## netty-handler-proxy
 GroupId: io.netty\
 ArtifactId: netty-handler-proxy\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2014 The Netty Project
 ### Licenses 
@@ -2866,7 +2866,7 @@ Version: 4.1.75.Final\
 ## netty-resolver
 GroupId: io.netty\
 ArtifactId: netty-resolver\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2014 The Netty Project
 - Copyright 2015 The Netty Project
@@ -2878,7 +2878,7 @@ Version: 4.1.75.Final\
 ## netty-tcnative-classes
 GroupId: io.netty\
 ArtifactId: netty-tcnative-classes\
-Version: 2.0.51.Final\
+Version: 2.0.51.Final
 ### Copyright
 - Copyright 2014 The Netty Project
 - Copyright 2016 The Netty Project
@@ -2893,7 +2893,7 @@ Version: 2.0.51.Final\
 ## netty-transport
 GroupId: io.netty\
 ArtifactId: netty-transport\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2012 The Netty Project
 - Copyright 2013 The Netty Project
@@ -2910,7 +2910,7 @@ Version: 4.1.75.Final\
 ## netty-transport-classes-epoll
 GroupId: io.netty\
 ArtifactId: netty-transport-classes-epoll\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2012 The Netty Project
 - Copyright 2013 The Netty Project
@@ -2923,7 +2923,7 @@ Version: 4.1.75.Final\
 ## netty-transport-native-epoll
 GroupId: io.netty\
 ArtifactId: netty-transport-native-epoll\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2013 The Netty Project
 - Copyright 2014 The Netty Project
@@ -2933,7 +2933,7 @@ Version: 4.1.75.Final\
 ## netty-transport-native-unix-common
 GroupId: io.netty\
 ArtifactId: netty-transport-native-unix-common\
-Version: 4.1.75.Final\
+Version: 4.1.75.Final
 ### Copyright
 - Copyright 2014 The Netty Project
 - Copyright 2015 The Netty Project
@@ -2947,7 +2947,7 @@ Version: 4.1.75.Final\
 ## nimbus-jose-jwt
 GroupId: com.nimbusds\
 ArtifactId: nimbus-jose-jwt\
-Version: 9.21\
+Version: 9.21
 ### Copyright
 - Copyright 2012-2016, Connect2id Ltd and contributors
 - Copyright 2012-2016, Connect2id Ltd.
@@ -2963,7 +2963,7 @@ Version: 9.21\
 ## objenesis
 GroupId: org.objenesis\
 ArtifactId: objenesis\
-Version: 3.2\
+Version: 3.2
 ### Copyright
 - Copyright 2006-2021 Joe Walnes, Henri Tremblay, Leonardo Mesquita
 - Copyright 2006-2021 the original author or authors
@@ -2972,7 +2972,7 @@ Version: 3.2\
 ## odata-client-api
 GroupId: org.apache.olingo\
 ArtifactId: odata-client-api\
-Version: 4.8.0\
+Version: 4.8.0
 ### Copyright
 - Copyright 2013-2020 The Apache Software Foundation
 ### Licenses 
@@ -2981,7 +2981,7 @@ Version: 4.8.0\
 ## odata-client-core
 GroupId: org.apache.olingo\
 ArtifactId: odata-client-core\
-Version: 4.8.0\
+Version: 4.8.0
 ### Copyright
 - Copyright 2013-2020 The Apache Software Foundation
 - Copyright 2014 The Apache Software Foundation
@@ -2992,7 +2992,7 @@ Version: 4.8.0\
 ## odata-commons-api
 GroupId: org.apache.olingo\
 ArtifactId: odata-commons-api\
-Version: 4.8.0\
+Version: 4.8.0
 ### Copyright
 - Copyright (c) OASIS Open 2013
 - Copyright 2013-2020 The Apache Software Foundation
@@ -3001,7 +3001,7 @@ Version: 4.8.0\
 ## odata-commons-core
 GroupId: org.apache.olingo\
 ArtifactId: odata-commons-core\
-Version: 4.8.0\
+Version: 4.8.0
 ### Copyright
 - Copyright 2013-2020 The Apache Software Foundation
 ### Licenses 
@@ -3009,7 +3009,7 @@ Version: 4.8.0\
 ## odata-server-api
 GroupId: org.apache.olingo\
 ArtifactId: odata-server-api\
-Version: 4.8.0\
+Version: 4.8.0
 ### Copyright
 - Copyright 2013-2020 The Apache Software Foundation
 ### Licenses 
@@ -3017,7 +3017,7 @@ Version: 4.8.0\
 ## odata-server-core
 GroupId: org.apache.olingo\
 ArtifactId: odata-server-core\
-Version: 4.8.0\
+Version: 4.8.0
 ### Copyright
 - Copyright 2013-2020 The Apache Software Foundation
 ### Licenses 
@@ -3025,42 +3025,42 @@ Version: 4.8.0\
 ## openapi-core
 GroupId: org.openapi4j\
 ArtifactId: openapi-core\
-Version: 1.0.4\
+Version: 1.0.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## openapi-operation-servlet
 GroupId: org.openapi4j\
 ArtifactId: openapi-operation-servlet\
-Version: 1.0.4\
+Version: 1.0.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## openapi-operation-validator
 GroupId: org.openapi4j\
 ArtifactId: openapi-operation-validator\
-Version: 1.0.4\
+Version: 1.0.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## openapi-parser
 GroupId: org.openapi4j\
 ArtifactId: openapi-parser\
-Version: 1.0.4\
+Version: 1.0.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## openapi-schema-validator
 GroupId: org.openapi4j\
 ArtifactId: openapi-schema-validator\
-Version: 1.0.4\
+Version: 1.0.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## opentest4j
 GroupId: org.opentest4j\
 ArtifactId: opentest4j\
-Version: 1.2.0\
+Version: 1.2.0
 ### Copyright
 - Copyright 2015-2018 the original author or authors
 ### Licenses 
@@ -3068,7 +3068,7 @@ Version: 1.2.0\
 ## org.eclipse.persistence.antlr
 GroupId: org.eclipse.persistence\
 ArtifactId: org.eclipse.persistence.antlr\
-Version: 2.5.0\
+Version: 2.5.0
 ### Copyright
 - Copyright (c) 2005-2008 Terence Parr
 - Copyright (c) 2007, Eclipse Foundation, Inc.
@@ -3079,7 +3079,7 @@ Version: 2.5.0\
 ## org.eclipse.persistence.asm
 GroupId: org.eclipse.persistence\
 ArtifactId: org.eclipse.persistence.asm\
-Version: 2.5.0\
+Version: 2.5.0
 ### Copyright
 - Copyright (c) 2000-2005 INRIA, France Telecom
 - Copyright (c) 2000-2007 INRIA, France Telecom
@@ -3091,7 +3091,7 @@ Version: 2.5.0\
 ## org.eclipse.persistence.core
 GroupId: org.eclipse.persistence\
 ArtifactId: org.eclipse.persistence.core\
-Version: 2.5.0\
+Version: 2.5.0
 ### Copyright
 - Copyright (c) 1998, 2008 Oracle
 - Copyright (c) 1998, 2009 SAP.
@@ -3127,7 +3127,7 @@ Version: 2.5.0\
 ## org.eclipse.persistence.moxy
 GroupId: org.eclipse.persistence\
 ArtifactId: org.eclipse.persistence.moxy\
-Version: 2.5.0\
+Version: 2.5.0
 ### Copyright
 - Copyright (c) 1998, 2010 Oracle
 - Copyright (c) 1998, 2013 Oracle and/or its affiliates
@@ -3143,7 +3143,7 @@ Version: 2.5.0\
 ## paranamer
 GroupId: com.thoughtworks.paranamer\
 ArtifactId: paranamer\
-Version: 2.8\
+Version: 2.8
 ### Copyright
 - Copyright (c) 2007 Paul Hammant
 - Copyright (c) 2009 Paul Hammant
@@ -3157,7 +3157,7 @@ Version: 2.8\
 ## parent-join-client
 GroupId: org.elasticsearch.plugin\
 ArtifactId: parent-join-client\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -3168,7 +3168,7 @@ Version: 7.14.0\
 ## rank-eval-client
 GroupId: org.elasticsearch.plugin\
 ArtifactId: rank-eval-client\
-Version: 7.14.0\
+Version: 7.14.0
 ### Copyright
 - Copyright (c) 2018 MongoDB, Inc.
 - Copyright 2009-2021 Elasticsearch
@@ -3179,14 +3179,14 @@ Version: 7.14.0\
 ## reactive-streams
 GroupId: org.reactivestreams\
 ArtifactId: reactive-streams\
-Version: 1.0.3\
+Version: 1.0.3
 ### Copyright
 ### Licenses 
  - Creative Commons Zero v1.0 Universal [CC0-1.0]
 ## reactor-core
 GroupId: io.projectreactor\
 ArtifactId: reactor-core\
-Version: 3.4.16\
+Version: 3.4.16
 ### Copyright
 - Copyright (c) 2011-2021 VMware Inc. or its affiliates
 - Copyright (c) 2015-2021 VMware Inc. or its affiliates
@@ -3206,7 +3206,7 @@ Version: 3.4.16\
 ## rhino
 GroupId: org.mozilla\
 ArtifactId: rhino\
-Version: 1.7.7.2\
+Version: 1.7.7.2
 ### Copyright
 - Copyright (c) 1991, 2000, 2001 by Lucent Technologies
 - Copyright 1997, 1998 Sun Microsystems, Inc.
@@ -3219,7 +3219,7 @@ Version: 1.7.7.2\
 ## rocksdbjni
 GroupId: org.rocksdb\
 ArtifactId: rocksdbjni\
-Version: 6.19.3\
+Version: 6.19.3
 ### Copyright
 - Copyright (c) 2011-present, Facebook, Inc.
 - Copyright (c) 2014, Vlad Balan (vlad.gm@gmail.com)
@@ -3232,7 +3232,7 @@ Version: 6.19.3\
 ## sardine
 GroupId: com.github.lookfirst\
 ArtifactId: sardine\
-Version: 5.10\
+Version: 5.10
 ### Copyright
 - copyright (c) 2014 SAS Institute, Cary NC
 - Copyright 2009-2011 Jon Stevens
@@ -3242,21 +3242,21 @@ Version: 5.10\
 ## scala-collection-compat_2.13
 GroupId: org.scala-lang.modules\
 ArtifactId: scala-collection-compat_2.13\
-Version: 2.4.4\
+Version: 2.4.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## scala-java8-compat_2.13
 GroupId: org.scala-lang.modules\
 ArtifactId: scala-java8-compat_2.13\
-Version: 1.0.0\
+Version: 1.0.0
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## scala-library
 GroupId: org.scala-lang\
 ArtifactId: scala-library\
-Version: 2.13.6\
+Version: 2.13.6
 ### Copyright
 - Copyright (c) 2002-2021 EPFL
 - Copyright (c) 2011 The Guava Authors
@@ -3267,14 +3267,14 @@ Version: 2.13.6\
 ## scala-logging_2.13
 GroupId: com.typesafe.scala-logging\
 ArtifactId: scala-logging_2.13\
-Version: 3.9.3\
+Version: 3.9.3
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## scala-reflect
 GroupId: org.scala-lang\
 ArtifactId: scala-reflect\
-Version: 2.13.6\
+Version: 2.13.6
 ### Copyright
 - (c) , M &#x27;. group Trees
 - Copyright (c) 2002-2021 EPFL
@@ -3286,7 +3286,7 @@ Version: 2.13.6\
 ## slf4j-api
 GroupId: org.slf4j\
 ArtifactId: slf4j-api\
-Version: 1.7.30\
+Version: 1.7.30
 ### Copyright
 - Copyright (c) 2004-2011 QOS.ch
 ### Licenses 
@@ -3294,7 +3294,7 @@ Version: 1.7.30\
 ## snakeyaml
 GroupId: org.yaml\
 ArtifactId: snakeyaml\
-Version: 1.29\
+Version: 1.29
 ### Copyright
 - Copyright (c) 2008 Google Inc.
 - Copyright (c) 2008, http://www.snakeyaml.org
@@ -3307,7 +3307,7 @@ Version: 1.29\
 ## snappy-java
 GroupId: org.xerial.snappy\
 ArtifactId: snappy-java\
-Version: 1.1.7.3\
+Version: 1.1.7.3
 ### Copyright
 - Copyright (c) 2004-2006 Intel Corportation
 - Copyright 2008 Taro L. Saito
@@ -3318,7 +3318,7 @@ Version: 1.1.7.3\
 ## spatial4j
 GroupId: org.locationtech.spatial4j\
 ArtifactId: spatial4j\
-Version: 0.7\
+Version: 0.7
 ### Copyright
 - (c) 2008 VeriSign, Inc.
 - Copyright (c) 2015 David Smiley
@@ -3335,7 +3335,7 @@ Version: 0.7\
 ## spring-aop
 GroupId: org.springframework\
 ArtifactId: spring-aop\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2006 the original author or authors
 - Copyright 2002-2007 the original author or authors
@@ -3356,7 +3356,7 @@ Version: 5.3.18\
 ## spring-aspects
 GroupId: org.springframework\
 ArtifactId: spring-aspects\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2012 the original author or authors
 - Copyright 2002-2013 the original author or authors
@@ -3372,7 +3372,7 @@ Version: 5.3.18\
 ## spring-beans
 GroupId: org.springframework\
 ArtifactId: spring-beans\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2007 the original author or authors
 - Copyright 2002-2009 the original author or authors
@@ -3394,7 +3394,7 @@ Version: 5.3.18\
 ## spring-boot
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 - Copyright 2002-2020 the original author or authors
@@ -3409,7 +3409,7 @@ Version: 2.6.6\
 ## spring-boot-actuator
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-actuator\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 - Copyright 2012-2019 the original author or authors
@@ -3421,7 +3421,7 @@ Version: 2.6.6\
 ## spring-boot-actuator-autoconfigure
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-actuator-autoconfigure\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 - Copyright 2012-2019 the original author or authors
@@ -3433,7 +3433,7 @@ Version: 2.6.6\
 ## spring-boot-autoconfigure
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-autoconfigure\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 - Copyright 2012-2019 the original author or authors
@@ -3445,7 +3445,7 @@ Version: 2.6.6\
 ## spring-boot-configuration-processor
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-configuration-processor\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2010 The Android Open Source Project
 - Copyright (c) 2012-2022 Pivotal, Inc.
@@ -3458,7 +3458,7 @@ Version: 2.6.6\
 ## spring-boot-devtools
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-devtools\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 - Copyright 2012-2019 the original author or authors
@@ -3469,7 +3469,7 @@ Version: 2.6.6\
 ## spring-boot-starter
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3477,7 +3477,7 @@ Version: 2.6.6\
 ## spring-boot-starter-actuator
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-actuator\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3485,7 +3485,7 @@ Version: 2.6.6\
 ## spring-boot-starter-aop
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-aop\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3493,7 +3493,7 @@ Version: 2.6.6\
 ## spring-boot-starter-data-jpa
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-data-jpa\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3501,7 +3501,7 @@ Version: 2.6.6\
 ## spring-boot-starter-data-mongodb
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-data-mongodb\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3509,7 +3509,7 @@ Version: 2.6.6\
 ## spring-boot-starter-jdbc
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-jdbc\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3517,7 +3517,7 @@ Version: 2.6.6\
 ## spring-boot-starter-jetty
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-jetty\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3525,7 +3525,7 @@ Version: 2.6.6\
 ## spring-boot-starter-json
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-json\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3533,7 +3533,7 @@ Version: 2.6.6\
 ## spring-boot-starter-log4j2
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-log4j2\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3541,7 +3541,7 @@ Version: 2.6.6\
 ## spring-boot-starter-test
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-test\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3549,7 +3549,7 @@ Version: 2.6.6\
 ## spring-boot-starter-tomcat
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-tomcat\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3557,7 +3557,7 @@ Version: 2.6.6\
 ## spring-boot-starter-validation
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-validation\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3565,7 +3565,7 @@ Version: 2.6.6\
 ## spring-boot-starter-web
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-starter-web\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 ### Licenses 
@@ -3573,7 +3573,7 @@ Version: 2.6.6\
 ## spring-boot-test
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-test\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 - Copyright 2012-2017 the original author or authors
@@ -3586,7 +3586,7 @@ Version: 2.6.6\
 ## spring-boot-test-autoconfigure
 GroupId: org.springframework.boot\
 ArtifactId: spring-boot-test-autoconfigure\
-Version: 2.6.6\
+Version: 2.6.6
 ### Copyright
 - Copyright (c) 2012-2022 Pivotal, Inc.
 - Copyright 2012-2019 the original author or authors
@@ -3597,7 +3597,7 @@ Version: 2.6.6\
 ## spring-cloud-function-context
 GroupId: org.springframework.cloud\
 ArtifactId: spring-cloud-function-context\
-Version: 3.2.3\
+Version: 3.2.3
 ### Copyright
 - Copyright 2012-2019 the original author or authors
 - Copyright 2012-2020 the original author or authors
@@ -3618,7 +3618,7 @@ Version: 3.2.3\
 ## spring-cloud-function-core
 GroupId: org.springframework.cloud\
 ArtifactId: spring-cloud-function-core\
-Version: 3.2.3\
+Version: 3.2.3
 ### Copyright
 - Copyright 2012-2019 the original author or authors
 - Copyright 2019-2019 the original author or authors
@@ -3628,7 +3628,7 @@ Version: 3.2.3\
 ## spring-cloud-stream
 GroupId: org.springframework.cloud\
 ArtifactId: spring-cloud-stream\
-Version: 3.2.2\
+Version: 3.2.2
 ### Copyright
 - Copyright 2013-2018 the original author or authors
 - Copyright 2013-2019 the original author or authors
@@ -3662,7 +3662,7 @@ Version: 3.2.2\
 ## spring-cloud-stream-binder-kafka
 GroupId: org.springframework.cloud\
 ArtifactId: spring-cloud-stream-binder-kafka\
-Version: 3.2.2\
+Version: 3.2.2
 ### Copyright
 - Copyright 2014-2021 the original author or authors
 - Copyright 2015-2019 the original author or authors
@@ -3680,7 +3680,7 @@ Version: 3.2.2\
 ## spring-cloud-stream-binder-kafka-core
 GroupId: org.springframework.cloud\
 ArtifactId: spring-cloud-stream-binder-kafka-core\
-Version: 3.2.2\
+Version: 3.2.2
 ### Copyright
 - Copyright 2014-2018 the original author or authors
 - Copyright 2015-2021 the original author or authors
@@ -3695,7 +3695,7 @@ Version: 3.2.2\
 ## spring-cloud-stream-binder-kafka-streams
 GroupId: org.springframework.cloud\
 ArtifactId: spring-cloud-stream-binder-kafka-streams\
-Version: 3.2.2\
+Version: 3.2.2
 ### Copyright
 - Copyright 2017-2018 the original author or authors
 - Copyright 2017-2019 the original author or authors
@@ -3715,7 +3715,7 @@ Version: 3.2.2\
 ## spring-cloud-stream-test-support
 GroupId: org.springframework.cloud\
 ArtifactId: spring-cloud-stream-test-support\
-Version: 3.2.2\
+Version: 3.2.2
 ### Copyright
 - Copyright 2015-2017 the original author or authors
 - Copyright 2015-2019 the original author or authors
@@ -3725,7 +3725,7 @@ Version: 3.2.2\
 ## spring-context
 GroupId: org.springframework\
 ArtifactId: spring-context\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2005 the original author or authors
 - Copyright 2002-2007 the original author or authors
@@ -3747,7 +3747,7 @@ Version: 5.3.18\
 ## spring-core
 GroupId: org.springframework\
 ArtifactId: spring-core\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright (c) 2000-2011 INRIA, France Telecom
 - Copyright 2002,2003,2004 The Apache Software Foundation
@@ -3773,7 +3773,7 @@ Version: 5.3.18\
 ## spring-data-commons
 GroupId: org.springframework.data\
 ArtifactId: spring-data-commons\
-Version: 2.6.3\
+Version: 2.6.3
 ### Copyright
 - Copyright (c) 2010-2021 Pivotal Software, Inc.
 - Copyright 2008-2022 the original author or authors
@@ -3796,7 +3796,7 @@ Version: 2.6.3\
 ## spring-data-jpa
 GroupId: org.springframework.data\
 ArtifactId: spring-data-jpa\
-Version: 2.6.3\
+Version: 2.6.3
 ### Copyright
 - Copyright (c) 2011-2019 Pivotal Software, Inc.
 - Copyright 2008-2022 the original author or authors
@@ -3816,7 +3816,7 @@ Version: 2.6.3\
 ## spring-data-mongodb
 GroupId: org.springframework.data\
 ArtifactId: spring-data-mongodb\
-Version: 3.3.3\
+Version: 3.3.3
 ### Copyright
 - Copyright 2002-2022 the original author or authors
 - Copyright 2008-2022 the original author or authors
@@ -3838,7 +3838,7 @@ Version: 3.3.3\
 ## spring-expression
 GroupId: org.springframework\
 ArtifactId: spring-expression\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2009 the original author or authors
 - Copyright 2002-2012 the original author or authors
@@ -3856,7 +3856,7 @@ Version: 5.3.18\
 ## spring-integration-core
 GroupId: org.springframework.integration\
 ArtifactId: spring-integration-core\
-Version: 5.5.10\
+Version: 5.5.10
 ### Copyright
 - Copyright 2002-2019 the original author or authors
 - Copyright 2002-2020 the original author or authors
@@ -3895,7 +3895,7 @@ Version: 5.5.10\
 ## spring-integration-jmx
 GroupId: org.springframework.integration\
 ArtifactId: spring-integration-jmx\
-Version: 5.5.10\
+Version: 5.5.10
 ### Copyright
 - Copyright 2002-2019 the original author or authors
 - Copyright 2002-2020 the original author or authors
@@ -3912,7 +3912,7 @@ Version: 5.5.10\
 ## spring-integration-kafka
 GroupId: org.springframework.integration\
 ArtifactId: spring-integration-kafka\
-Version: 5.5.10\
+Version: 5.5.10
 ### Copyright
 - Copyright 2002-2020 the original author or authors
 - Copyright 2013-2019 the original author or authors
@@ -3932,7 +3932,7 @@ Version: 5.5.10\
 ## spring-jcl
 GroupId: org.springframework\
 ArtifactId: spring-jcl\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2017 the original author or authors
 - Copyright 2002-2018 the original author or authors
@@ -3943,7 +3943,7 @@ Version: 5.3.18\
 ## spring-jdbc
 GroupId: org.springframework\
 ArtifactId: spring-jdbc\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2007 the original author or authors
 - Copyright 2002-2008 the original author or authors
@@ -3963,7 +3963,7 @@ Version: 5.3.18\
 ## spring-kafka
 GroupId: org.springframework.kafka\
 ArtifactId: spring-kafka\
-Version: 2.8.4\
+Version: 2.8.4
 ### Copyright
 - Copyright 2002-2019 the original author or authors
 - Copyright 2002-2020 the original author or authors
@@ -4002,7 +4002,7 @@ Version: 2.8.4\
 ## spring-kafka-test
 GroupId: org.springframework.kafka\
 ArtifactId: spring-kafka-test\
-Version: 2.8.4\
+Version: 2.8.4
 ### Copyright
 - Copyright 2002-2019 the original author or authors
 - Copyright 2015-2019 the original author or authors
@@ -4018,7 +4018,7 @@ Version: 2.8.4\
 ## spring-messaging
 GroupId: org.springframework\
 ArtifactId: spring-messaging\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2012 the original author or authors
 - Copyright 2002-2013 the original author or authors
@@ -4036,7 +4036,7 @@ Version: 5.3.18\
 ## spring-orm
 GroupId: org.springframework\
 ArtifactId: spring-orm\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2012 the original author or authors
 - Copyright 2002-2014 the original author or authors
@@ -4052,7 +4052,7 @@ Version: 5.3.18\
 ## spring-oxm
 GroupId: org.springframework\
 ArtifactId: spring-oxm\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2009 the original author or authors
 - Copyright 2002-2012 the original author or authors
@@ -4066,7 +4066,7 @@ Version: 5.3.18\
 ## spring-retry
 GroupId: org.springframework.retry\
 ArtifactId: spring-retry\
-Version: 1.3.2\
+Version: 1.3.2
 ### Copyright
 - Copyright 2002-2008 the original author or authors
 - Copyright 2002-2014 the original author or authors
@@ -4093,7 +4093,7 @@ Version: 1.3.2\
 ## spring-test
 GroupId: org.springframework\
 ArtifactId: spring-test\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2012 the original author or authors
 - Copyright 2002-2013 the original author or authors
@@ -4111,7 +4111,7 @@ Version: 5.3.18\
 ## spring-tx
 GroupId: org.springframework\
 ArtifactId: spring-tx\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2008 the original author or authors
 - Copyright 2002-2012 the original author or authors
@@ -4130,7 +4130,7 @@ Version: 5.3.18\
 ## spring-web
 GroupId: org.springframework\
 ArtifactId: spring-web\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2005 the original author or authors
 - Copyright 2002-2007 the original author or authors
@@ -4152,7 +4152,7 @@ Version: 5.3.18\
 ## spring-webmvc
 GroupId: org.springframework\
 ArtifactId: spring-webmvc\
-Version: 5.3.18\
+Version: 5.3.18
 ### Copyright
 - Copyright 2002-2007 the original author or authors
 - Copyright 2002-2010 the original author or authors
@@ -4172,7 +4172,7 @@ Version: 5.3.18\
 ## spring-xml
 GroupId: org.springframework.ws\
 ArtifactId: spring-xml\
-Version: 3.1.3\
+Version: 3.1.3
 ### Copyright
 - Copyright 2002-2012 the original author or authors
 - Copyright 2005-2010 the original author or authors
@@ -4189,7 +4189,7 @@ Version: 3.1.3\
 ## springdoc-openapi-common
 GroupId: org.springdoc\
 ArtifactId: springdoc-openapi-common\
-Version: 1.4.6\
+Version: 1.4.6
 ### Copyright
 - Copyright 2019-2020 the original author or authors
 ### Licenses 
@@ -4197,7 +4197,7 @@ Version: 1.4.6\
 ## springdoc-openapi-webmvc-core
 GroupId: org.springdoc\
 ArtifactId: springdoc-openapi-webmvc-core\
-Version: 1.4.6\
+Version: 1.4.6
 ### Copyright
 - Copyright 2019-2020 the original author or authors
 ### Licenses 
@@ -4205,7 +4205,7 @@ Version: 1.4.6\
 ## stax2-api
 GroupId: org.codehaus.woodstox\
 ArtifactId: stax2-api\
-Version: 4.2.1\
+Version: 4.2.1
 ### Copyright
 - Copyright (c) 2004- Tatu Saloranta, tatu.saloranta@iki.fi
 - Copyright (c) 2005- Tatu Saloranta, tatu.saloranta@iki.fi
@@ -4216,7 +4216,7 @@ Version: 4.2.1\
 ## swagger-annotations
 GroupId: io.swagger\
 ArtifactId: swagger-annotations\
-Version: 1.6.6\
+Version: 1.6.6
 ### Copyright
 - Copyright 2016 SmartBear Software
 ### Licenses 
@@ -4224,70 +4224,70 @@ Version: 1.6.6\
 ## swagger-compat-spec-parser
 GroupId: io.swagger\
 ArtifactId: swagger-compat-spec-parser\
-Version: 1.0.59\
+Version: 1.0.59
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## swagger-core
 GroupId: io.swagger\
 ArtifactId: swagger-core\
-Version: 1.6.6\
+Version: 1.6.6
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## swagger-integration
 GroupId: io.swagger.core.v3\
 ArtifactId: swagger-integration\
-Version: 2.1.4\
+Version: 2.1.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## swagger-models
 GroupId: io.swagger\
 ArtifactId: swagger-models\
-Version: 1.6.6\
+Version: 1.6.6
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## swagger-parser
 GroupId: io.swagger\
 ArtifactId: swagger-parser\
-Version: 1.0.59\
+Version: 1.0.59
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## swagger-parser-core
 GroupId: io.swagger.parser.v3\
 ArtifactId: swagger-parser-core\
-Version: 2.0.32\
+Version: 2.0.32
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## swagger-parser-v2-converter
 GroupId: io.swagger.parser.v3\
 ArtifactId: swagger-parser-v2-converter\
-Version: 2.0.32\
+Version: 2.0.32
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## swagger-parser-v3
 GroupId: io.swagger.parser.v3\
 ArtifactId: swagger-parser-v3\
-Version: 2.0.32\
+Version: 2.0.32
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## t-digest
 GroupId: com.tdunning\
 ArtifactId: t-digest\
-Version: 3.2\
+Version: 3.2
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## tomcat-embed-core
 GroupId: org.apache.tomcat.embed\
 ArtifactId: tomcat-embed-core\
-Version: 9.0.60\
+Version: 9.0.60
 ### Copyright
 - (c) Copyright International Business Machines Corporation 2002
 - Copyright (c) 1999-2022, Apache Software Foundation
@@ -4305,7 +4305,7 @@ Version: 9.0.60\
 ## tomcat-embed-el
 GroupId: org.apache.tomcat.embed\
 ArtifactId: tomcat-embed-el\
-Version: 9.0.60\
+Version: 9.0.60
 ### Copyright
 - Copyright 1999-2022 The Apache Software Foundation
 ### Licenses 
@@ -4313,7 +4313,7 @@ Version: 9.0.60\
 ## tomcat-embed-websocket
 GroupId: org.apache.tomcat.embed\
 ArtifactId: tomcat-embed-websocket\
-Version: 9.0.60\
+Version: 9.0.60
 ### Copyright
 - Copyright 1999-2022 The Apache Software Foundation
 ### Licenses 
@@ -4321,7 +4321,7 @@ Version: 9.0.60\
 ## txw2
 GroupId: org.glassfish.jaxb\
 ArtifactId: txw2\
-Version: 2.3.6\
+Version: 2.3.6
 ### Copyright
 - Copyright (c) 2005, 2021 Oracle and/or its affiliates
 - Copyright (c) 2005, 2022 Oracle and/or its affiliates
@@ -4339,7 +4339,7 @@ Version: 2.3.6\
 ## typetools
 GroupId: net.jodah\
 ArtifactId: typetools\
-Version: 0.6.2\
+Version: 0.6.2
 ### Copyright
 - Copyright 2002-2017 the original author or authors
 ### Licenses 
@@ -4347,7 +4347,7 @@ Version: 0.6.2\
 ## uri-template
 GroupId: com.github.java-json-tools\
 ArtifactId: uri-template\
-Version: 0.10\
+Version: 0.10
 ### Copyright
 - Copyright (c) 2007 Free Software Foundation, Inc. &lt;http://fsf.org/&gt;
 - Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
@@ -4357,7 +4357,7 @@ Version: 0.10\
 ## velocity-engine-core
 GroupId: org.apache.velocity\
 ArtifactId: velocity-engine-core\
-Version: 2.3\
+Version: 2.3
 ### Copyright
 - Copyright 2000-2020 The Apache Software Foundation
 ### Licenses 
@@ -4366,7 +4366,7 @@ Version: 2.3\
 ## velocity-engine-scripting
 GroupId: org.apache.velocity\
 ArtifactId: velocity-engine-scripting\
-Version: 2.3\
+Version: 2.3
 ### Copyright
 - Copyright 2000-2020 The Apache Software Foundation
 - Copyright 2006 Sun Microsystems, Inc.
@@ -4376,7 +4376,7 @@ Version: 2.3\
 ## velocity-tools-generic
 GroupId: org.apache.velocity.tools\
 ArtifactId: velocity-tools-generic\
-Version: 3.1\
+Version: 3.1
 ### Copyright
 - Copyright 2002-2020 The Apache Software Foundation
 ### Licenses 
@@ -4385,7 +4385,7 @@ Version: 3.1\
 ## websocket-api
 GroupId: org.eclipse.jetty.websocket\
 ArtifactId: websocket-api\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -4403,7 +4403,7 @@ Version: 9.4.45.v20220203\
 ## websocket-client
 GroupId: org.eclipse.jetty.websocket\
 ArtifactId: websocket-client\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -4421,7 +4421,7 @@ Version: 9.4.45.v20220203\
 ## websocket-common
 GroupId: org.eclipse.jetty.websocket\
 ArtifactId: websocket-common\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -4439,7 +4439,7 @@ Version: 9.4.45.v20220203\
 ## websocket-server
 GroupId: org.eclipse.jetty.websocket\
 ArtifactId: websocket-server\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -4457,7 +4457,7 @@ Version: 9.4.45.v20220203\
 ## websocket-servlet
 GroupId: org.eclipse.jetty.websocket\
 ArtifactId: websocket-servlet\
-Version: 9.4.45.v20220203\
+Version: 9.4.45.v20220203
 ### Copyright
 - Copyright (c) 1995-2022 Mort Bay Consulting Pty Ltd and others
 - Copyright 1995-2018 Mort Bay Consulting Pty Ltd.
@@ -4475,7 +4475,7 @@ Version: 9.4.45.v20220203\
 ## woodstox-core
 GroupId: com.fasterxml.woodstox\
 ArtifactId: woodstox-core\
-Version: 6.2.7\
+Version: 6.2.7
 ### Copyright
 - Copyright (c) 2004 Tatu Saloranta, tatu.saloranta@iki.fi
 - Copyright (c) 2004- Tatu Saloranta, tatu.saloranta@iki.fi
@@ -4485,35 +4485,35 @@ Version: 6.2.7\
 ## xmlunit-core
 GroupId: org.xmlunit\
 ArtifactId: xmlunit-core\
-Version: 2.8.4\
+Version: 2.8.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## xmlunit-placeholders
 GroupId: org.xmlunit\
 ArtifactId: xmlunit-placeholders\
-Version: 2.8.4\
+Version: 2.8.4
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## zookeeper
 GroupId: org.apache.zookeeper\
 ArtifactId: zookeeper\
-Version: 3.6.3\
+Version: 3.6.3
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## zookeeper-jute
 GroupId: org.apache.zookeeper\
 ArtifactId: zookeeper-jute\
-Version: 3.6.3\
+Version: 3.6.3
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 ## zstd-jni
 GroupId: com.github.luben\
 ArtifactId: zstd-jni\
-Version: 1.4.4-7\
+Version: 1.4.4-7
 ### Copyright
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
