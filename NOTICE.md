@@ -87,7 +87,7 @@
 | [elasticsearch-plugin-classloader](https://github.com/elastic/elasticsearch)  | 7.14.0 | Elastic License 2.0<br>Server Side Public License, v 1 |
 | [elasticsearch-secure-sm](https://github.com/elastic/elasticsearch)  | 7.14.0 | Elastic License 2.0<br>Server Side Public License, v 1 |
 | [elasticsearch-x-content](https://github.com/elastic/elasticsearch)  | 7.14.0 | Elastic License 2.0<br>Server Side Public License, v 1 |
-| [EqualsVerifier | release normal jar](https://www.jqno.nl/equalsverifier)  | 3.10 | Apache License, Version 2.0 |
+| [EqualsVerifier ](https://www.jqno.nl/equalsverifier)  | 3.10 | Apache License, Version 2.0 |
 | [error-prone annotations](https://errorprone.info/error_prone_annotations)  | 2.11.0 | Apache 2.0 |
 | [FindBugs-jsr305](http://findbugs.sourceforge.net/)  | 3.0.2 | The Apache Software License, Version 2.0 |
 | [Flapdoodle Embedded MongoDB Package Resolver](http://github.com/flapdoodle-oss/de.flapdoodle.embed.mongo.packageresolver)  | 1.0.3 | The Apache Software License, Version 2.0 |
