@@ -21,7 +21,7 @@ public class StatementParserServiceImpl {
 	private static final Logger LOG = LogManager.getLogger(StatementParserServiceImpl.class);
 
 	public enum StatementType {
-		SINGLE, RANGE
+		SINGLE, RANGE, ARRAY
 	}
 
 	public static class Config {
@@ -52,6 +52,8 @@ public class StatementParserServiceImpl {
 	StatementType determinateType(String statement) {
 		if (statement.contains("/")) {
 			return StatementType.RANGE;
+		} else if (statement.startsWith("[") && statement.endsWith("]")) {
+			return StatementType.ARRAY;
 		} else {
 			return StatementType.SINGLE;
 		}
@@ -83,28 +85,29 @@ public class StatementParserServiceImpl {
 				Matcher matcher = pattern.matcher(statement);
 				while (matcher.find()) {
 					String variable = matcher.group();
-/*					if (!Pattern.compile(".*\\{" + variable + "\\}.*").matcher(statement).matches()) {
-						LOG.error("Variable '{}' is set, but not contained in odata statement: {}", variable,
-								entry.getValue());
-						// The statement is invalid and will be ignored
-						return;
-					}*/				
+					/*
+					 * if (!Pattern.compile(".*\\{" + variable +
+					 * "\\}.*").matcher(statement).matches()) {
+					 * LOG.error("Variable '{}' is set, but not contained in odata statement: {}",
+					 * variable, entry.getValue()); // The statement is invalid and will be ignored
+					 * return; }
+					 */
 					config.variables.add(variable);
 				}
 			}
-			
+
 			config.parameter = splits[0];
 			config.type = determinateType(splits[1]);
 			config.statements = entry.getValue();
 
 			parsedConfigs.put(config.parameter, config);
-			LOG.debug("Parsed configuration: {}",config);
+			LOG.debug("Parsed configuration: {}", config);
 		}
 	}
 
 	public String buildOdataQuery(Map<String, String> parameters) {
 		List<String> oDataStatements = new ArrayList<>();
-		
+
 		for (Map.Entry<String, String> entry : parameters.entrySet()) {
 			Config config = parsedConfigs.get(entry.getKey());
 			if (config == null) {
@@ -129,10 +132,11 @@ public class StatementParserServiceImpl {
 				String min = values[0];
 				String max = values[1];
 
-				/*System.out.println(min);
-				System.out.println(max);
-				System.out.println(config.variables.get(0));
-				System.out.println(config.variables.get(1));*/
+				/*
+				 * System.out.println(min); System.out.println(max);
+				 * System.out.println(config.variables.get(0));
+				 * System.out.println(config.variables.get(1));
+				 */
 				oDataStatements.add(config.statements.get(0).replaceAll("\\{" + config.variables.get(0) + "\\}", min));
 				oDataStatements.add(config.statements.get(1).replaceAll("\\{" + config.variables.get(1) + "\\}", max));
 			}

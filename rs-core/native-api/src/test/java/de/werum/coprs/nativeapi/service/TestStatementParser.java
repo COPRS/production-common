@@ -31,6 +31,7 @@ class TestStatementParser {
 		configs.put("point={value}",List.of("OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POINT({value})')"));
 		configs.put("productname={value}",List.of("contains(Name,'{value}')"));
 		configs.put("datetime={start}/{stop}", List.of("ContentDate/Start gt {start}","ContentDate/End lt {stop}"));
+		configs.put("collections={producttype}",List.of("Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq ‘{producttype}')"));
 		// configs.put("cloudCoverage={min}/{max}","cloudcoverage > {min}# cloudcoverage
 		// < {max}");
 	}
@@ -55,7 +56,7 @@ class TestStatementParser {
 		Assert.assertTrue(t2 == StatementType.RANGE);
 
 		StatementType t3 = parser.determinateType("[{value}]");
-		// FIXME: Missing scenario
+		Assert.assertTrue(t3 == StatementType.ARRAY);
 	}
 
 	@Test
@@ -100,6 +101,24 @@ class TestStatementParser {
 		String query = parser.buildOdataQuery(params);
 		Assert.assertEquals(
 				"ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000Z", query);
+	}
+	
+	@Test
+	public void testCollection() {
+		Map<String,String> params = Map.of("collections","myproducttype");
+		parser.parseConfig(configs);
+		
+		String query = parser.buildOdataQuery(params);
+		Assert.assertEquals("Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq ‘myproducttype')", query);
+	}
+	
+	@Test
+	public void testId() {
+		Map<String,String> params = Map.of("ids","ae4ac3c0-f207-47a7-9585-d77a2bf164c2");
+		parser.parseConfig(configs);
+		
+		String query = parser.buildOdataQuery(params);
+		System.out.println(query);
 	}
 
 }
