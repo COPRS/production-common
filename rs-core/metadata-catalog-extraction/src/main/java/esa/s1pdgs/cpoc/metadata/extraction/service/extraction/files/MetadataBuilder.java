@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -150,9 +151,45 @@ public class MetadataBuilder {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
-	public ProductMetadata buildS2ProductFileMetadata(final S2FileDescriptor descriptor, final File metadataFile, final CatalogJob job)
+	public ProductMetadata buildS2ProductFileMetadata(final S2FileDescriptor descriptor, final List<File> metadataFiles, final CatalogJob job)
 			throws MetadataExtractionException, MetadataMalformedException {
-		ProductMetadata metadataToIndex = extractor.processS2Metadata(descriptor, metadataFile, job.getProductFamily(), job.getProductName());
+		ProductMetadata metadataToIndex = extractor.processS2Metadata(descriptor, metadataFiles, job.getProductFamily(), job.getProductName());
+		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
+		return metadataToIndex;
+	}
+	
+	/**
+	 * Build the metadata for an S2 HKTM
+	 * 
+	 * @param descriptor file descriptor of the product
+	 * @param metadataFile       file to extract metadata from
+	 * 
+	 * @return the ProductMetadata containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public ProductMetadata buildS2HKTMFileMetadata(final S2FileDescriptor descriptor, final File metadataFile, final CatalogJob job)
+			throws MetadataExtractionException, MetadataMalformedException {
+		ProductMetadata metadataToIndex = extractor.processS2HKTMMetadata(descriptor, metadataFile, job.getProductFamily(), job.getProductName());
+		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
+		return metadataToIndex;
+	}
+	
+	/**
+	 * Build the metadata for an S2 SAD
+	 * 
+	 * @param descriptor file descriptor of the product
+	 * @param metadataFile       file to extract metadata from
+	 * 
+	 * @return the ProductMetadata containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public ProductMetadata buildS2SADFileMetadata(final S2FileDescriptor descriptor, final File metadataFile, final CatalogJob job)
+			throws MetadataExtractionException, MetadataMalformedException {
+		ProductMetadata metadataToIndex = extractor.processS2SADMetadata(descriptor, metadataFile, job.getProductFamily(), job.getProductName());
 		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
 		return metadataToIndex;
 	}

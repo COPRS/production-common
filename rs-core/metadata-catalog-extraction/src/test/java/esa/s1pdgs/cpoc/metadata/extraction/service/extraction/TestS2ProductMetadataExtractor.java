@@ -36,6 +36,7 @@ import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
 
@@ -93,7 +94,7 @@ public class TestS2ProductMetadataExtractor {
 	}
 
 	@Test
-	public void extract_S2_L0_DS_Metadata() throws AbstractCodedException {
+	public void extract_S2_L0_DS_Metadata() throws AbstractCodedException, SdkClientException {
 
 		final String keyObs = "S2A_OPER_MSI_L0__DS_SGS__20200420T205828_S20200322T173347_N02.08";
 
@@ -103,6 +104,9 @@ public class TestS2ProductMetadataExtractor {
 		// Prepare OBS returnValues
 		final String metadataPath = keyObs + File.separator
 				+ "S2A_OPER_MTD_L0__DS_SGS__20200420T205828_S20200322T173347.xml";
+		final List<String> metadataFilenames = Arrays.asList(metadataPath);
+		doReturn(metadataFilenames).when(obsClient).list(Mockito.any(), Mockito.any());
+		
 		final List<File> metadataFiles = Arrays.asList(new File(testDir, metadataPath));
 		doReturn(metadataFiles).when(obsClient).download(
 				eq(Collections
@@ -126,7 +130,7 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setInstrumentShortName("MSI");
 
 		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
-				metadataFiles.get(0), message);
+				metadataFiles, message);
 
 		final ProductMetadata result = extractor.extract(reporting, message);
 
@@ -141,7 +145,7 @@ public class TestS2ProductMetadataExtractor {
 	}
 
 	@Test
-	public void extract_S2_L0_GR_Metadata() throws AbstractCodedException {
+	public void extract_S2_L0_GR_Metadata() throws AbstractCodedException, SdkClientException {
 
 		final String keyObs = "S2A_OPER_MSI_L0__GR_SGS__20200420T205828_S20200322T173347_D01_N02.08";
 
@@ -151,6 +155,9 @@ public class TestS2ProductMetadataExtractor {
 		// Prepare OBS returnValues
 		final String metadataPath = keyObs + File.separator
 				+ "S2A_OPER_MTD_L0__GR_SGS__20200420T205828_S20200322T173347_D01.xml";
+		final List<String> metadataFilenames = Arrays.asList(metadataPath);
+		doReturn(metadataFilenames).when(obsClient).list(Mockito.any(), Mockito.any());
+		
 		final List<File> metadataFiles = Arrays.asList(new File(testDir, metadataPath));
 		doReturn(metadataFiles).when(obsClient).download(
 				eq(Collections
@@ -174,7 +181,7 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setInstrumentShortName("MSI");
 
 		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
-				metadataFiles.get(0), message);
+				metadataFiles, message);
 
 		final ProductMetadata result = extractor.extract(reporting, message);
 

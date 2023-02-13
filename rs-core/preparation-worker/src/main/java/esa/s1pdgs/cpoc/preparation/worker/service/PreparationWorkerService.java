@@ -66,12 +66,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		final Reporting reporting = ReportingUtils
 				.newReportingBuilder(MissionId.valueOf((String) catalogEvent.getMetadata().get(MissionId.FIELD_NAME)))
 				.rsChainName(commonProperties.getRsChainName()).rsChainVersion(commonProperties.getRsChainVersion())
-				.predecessor(catalogEvent.getUid()).newReporting("PreparationWorkerService");
-
-		reporting.begin(
-				ReportingUtils.newFilenameReportingInputFor(catalogEvent.getProductFamily(),
-						catalogEvent.getProductName()),
-				new ReportingMessage("Check if any jobs can be finalized for the IPF"));
+				.predecessor(catalogEvent.getUid()).newReporting("ProductionTrigger");
 
 		List<IpfExecutionJob> result = new ArrayList<>();
 
@@ -84,18 +79,30 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 				dispatch(preparationJob);
 			}
 
+			// Finish reporting
+			if (preparationJobs.size() > 0) {
+				reporting.end(null, new ReportingMessage("IpfPreparationJobs for product %s created",
+						catalogEvent.getProductName()));
+			}
+		} catch (Exception e) {
+			LOGGER.error("Preparation worker failed: {}", LogUtils.toString(e));
+			reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e)));
+			
+			throw new RuntimeException(e);
+		}
+		
+		try {
 			// Find matching jobs
 			List<AppDataJob> appDataJobs = appCatJobService.findByTriggerProduct(catalogEvent.getMetadataProductType());
 
 			// Check if jobs are ready
 			result = inputSearchService.checkIfJobsAreReady(appDataJobs);
-
 		} catch (Exception e) {
-			reporting.error(new ReportingMessage("Preparation worker failed: %s", LogUtils.toString(e)));
+			LOGGER.error("Preparation worker failed: {}", LogUtils.toString(e));
 			throw new RuntimeException(e);
 		}
 
-		reporting.end(null, new ReportingMessage("End preparation of new execution jobs"));
+		LOGGER.info("End preparation of new execution jobs");
 
 		// Prevent empty array messages on kafka topic
 		if (result.isEmpty()) {
@@ -112,16 +119,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		MissionId mission = MissionId
 				.valueOf((String) preparationJob.getCatalogEvent().getMetadata().get(MissionId.FIELD_NAME));
 
-		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
-				.rsChainName(commonProperties.getRsChainName()).rsChainVersion(commonProperties.getRsChainVersion())
-				.predecessor(preparationJob.getUid()).newReporting("TaskTableLookup");
-
 		final List<AppDataJob> jobs = typeAdapter.createAppDataJobs(preparationJob);
-
-		reporting.begin(
-				ReportingUtils.newFilenameReportingInputFor(preparationJob.getProductFamily(),
-						preparationJob.getKeyObjectStorage()),
-				new ReportingMessage("Start associating TaskTables to created AppDataJobs"));
 
 		List<AppDataJob> result = new ArrayList<>();
 		try {
@@ -132,24 +130,19 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 
 				LOGGER.trace("Got TaskTable {}", tasktableFilename);
 
-				result = handleJobs(preparationJob, jobs, reporting.getUid(), tasktableFilename);
+				result = handleJobs(preparationJob, jobs, tasktableFilename);
 			}
 		} catch (Exception e) {
 			LOGGER.error("Error handling PreparationJob {}: {}", preparationJob.getUid().toString(),
 					LogUtils.toString(e));
-			reporting.error(
-					new ReportingMessage("Error associating TaskTables to AppDataJobs: %s", LogUtils.toString(e)));
 		}
-
-		reporting.end(new TaskTableLookupReportingOutput(Collections.singletonList(preparationJob.getTaskTableName())),
-				new ReportingMessage("End associating TaskTables to AppDataJobs"));
 
 		return result;
 	}
 
 	// This needs to be synchronized to avoid duplicate jobs
 	private final synchronized List<AppDataJob> handleJobs(final IpfPreparationJob preparationJob,
-			final List<AppDataJob> jobsFromMessage, final UUID reportingUid, final String tasktableFilename)
+			final List<AppDataJob> jobsFromMessage, final String tasktableFilename)
 			throws AbstractCodedException {
 		final AppDataJob firstJob = jobsFromMessage.get(0);
 
@@ -190,7 +183,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 
 					job.setGeneration(gen);
 					job.setPrepJob(preparationJob);
-					job.setReportingId(reportingUid);
+					job.setReportingId(preparationJob.getUid());
 					job.setState(AppDataJobState.GENERATING); // will activate that this request can be polled
 					job.setPod(processProperties.getHostname());
 
