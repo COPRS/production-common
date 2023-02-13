@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.prip.model.filter;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
-import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter.Function;
 
 /**
  * Text filter for querying the persistence repository.
