@@ -68,6 +68,7 @@ public class ExtractMetadata {
 	private static final String XSLT_ETAD_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_S2_XML = "XSLT_S2_XMLS.xslt";
 	private static final String XSLT_S2_HKTM_XML = "XSLT_S2_MANIFEST.xslt";
+	private static final String XSLT_S2_SAD_XML = "XSLT_S2_SAD_INVENTORY.xslt";
 	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
@@ -431,6 +432,26 @@ public class ExtractMetadata {
 		
 		if (!xsltFile.exists()) {
 			throw new MetadataExtractionException("Unable to find S2 XSLT file '" + XSLT_S2_HKTM_XML + "'");
+		}
+		
+		ProductMetadata metadata = transformXMLWithXSLTToJSON(metadataFile, xsltFile);
+		
+		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
+		
+		metadata = checkS2Metadata(Arrays.asList(metadata), additionalMetadata);
+		metadata = putS2FileMetadataToJSON(metadata, descriptor);
+		
+		LOGGER.debug("composed Json: {} ", metadata);
+		return metadata;
+	}
+	
+	public ProductMetadata processS2SADMetadata(S2FileDescriptor descriptor, File metadataFile, ProductFamily family, String productName)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		File xsltFile = new File(this.xsltDirectory + XSLT_S2_SAD_XML);
+		
+		if (!xsltFile.exists()) {
+			throw new MetadataExtractionException("Unable to find S2 XSLT file '" + XSLT_S2_SAD_XML + "'");
 		}
 		
 		ProductMetadata metadata = transformXMLWithXSLTToJSON(metadataFile, xsltFile);

@@ -175,6 +175,24 @@ public class MetadataBuilder {
 		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
 		return metadataToIndex;
 	}
+	
+	/**
+	 * Build the metadata for an S2 SAD
+	 * 
+	 * @param descriptor file descriptor of the product
+	 * @param metadataFile       file to extract metadata from
+	 * 
+	 * @return the ProductMetadata containing the metadata to index
+	 * 
+	 * @throws MetadataExtractionException
+	 * @throws MetadataMalformedException
+	 */
+	public ProductMetadata buildS2SADFileMetadata(final S2FileDescriptor descriptor, final File metadataFile, final CatalogJob job)
+			throws MetadataExtractionException, MetadataMalformedException {
+		ProductMetadata metadataToIndex = extractor.processS2SADMetadata(descriptor, metadataFile, job.getProductFamily(), job.getProductName());
+		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
+		return metadataToIndex;
+	}
     
 	/**
 	 * Build the metadata for an S3 auxiliary product
