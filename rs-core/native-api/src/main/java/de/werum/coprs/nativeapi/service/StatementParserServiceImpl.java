@@ -127,7 +127,24 @@ public class StatementParserServiceImpl {
 					throw new IllegalArgumentException(
 							"Ranged query expected 2 variables, but found " + config.variables.size());
 				}
-				String[] values = entry.getValue().split("/");
+				
+				/*
+				 * A open range parameter can be either expressed as a simple slash or as  ..
+				 * we are normalize it as it eases the split operation afterwards.
+				 */
+				String rangeParam = entry.getValue();
+				if (rangeParam.startsWith("/") && rangeParam.endsWith("/")) {
+					throw new IllegalArgumentException("You cannot use a ranged query with open boundaries to both sides");
+				}
+				if (rangeParam.endsWith("/")) {
+					rangeParam += "..";
+				}
+				
+				if (rangeParam.startsWith("/")) {
+					rangeParam = ".."+rangeParam;
+				}
+				
+				String[] values = rangeParam.split("/");
 
 				String min = values[0];
 				String max = values[1];
@@ -137,8 +154,13 @@ public class StatementParserServiceImpl {
 				 * System.out.println(config.variables.get(0));
 				 * System.out.println(config.variables.get(1));
 				 */
-				oDataStatements.add(config.statements.get(0).replaceAll("\\{" + config.variables.get(0) + "\\}", min));
-				oDataStatements.add(config.statements.get(1).replaceAll("\\{" + config.variables.get(1) + "\\}", max));
+				if (!min.equals("..")) {
+					oDataStatements.add(config.statements.get(0).replaceAll("\\{" + config.variables.get(0) + "\\}", min));	
+				}
+				
+				if (!max.equals("..")) {
+					oDataStatements.add(config.statements.get(1).replaceAll("\\{" + config.variables.get(1) + "\\}", max));	
+				}				
 			}
 		}
 

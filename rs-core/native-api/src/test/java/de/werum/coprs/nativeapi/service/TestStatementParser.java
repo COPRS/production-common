@@ -31,7 +31,9 @@ class TestStatementParser {
 		configs.put("point={value}",List.of("OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POINT({value})')"));
 		configs.put("productname={value}",List.of("contains(Name,'{value}')"));
 		configs.put("datetime={start}/{stop}", List.of("ContentDate/Start gt {start}","ContentDate/End lt {stop}"));
+		configs.put("publicationdate={start}/{stop}", List.of("PublicationDate gt {start}","PublicationDate lt {stop}"));
 		configs.put("collections={producttype}",List.of("Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq ‘{producttype}')"));
+		configs.put("ids={id}",List.of("Id eq {id}"));
 		// configs.put("cloudCoverage={min}/{max}","cloudcoverage > {min}# cloudcoverage
 		// < {max}");
 	}
@@ -104,6 +106,42 @@ class TestStatementParser {
 	}
 	
 	@Test
+	public void testPublicationdate() {
+		Map<String, String> params = Map.of("publicationdate", "2010-10-18T14:33:00.000Z/2023-02-06T14:33:00.000Z");
+		parser.parseConfig(configs);
+		
+		String query = parser.buildOdataQuery(params);
+		Assert.assertEquals("PublicationDate gt 2010-10-18T14:33:00.000Z and PublicationDate lt 2023-02-06T14:33:00.000Z",query);		
+		System.out.println(query);
+	}
+	
+	@Test
+	public void testPublicationdateOpenEnd() {
+		Map<String, String> params1 = Map.of("publicationdate", "2010-10-18T14:33:00.000Z/");
+		Map<String, String> params2 = Map.of("publicationdate", "2010-10-18T14:33:00.000Z/..");
+		parser.parseConfig(configs);
+		
+		String query1 = parser.buildOdataQuery(params1);
+		String query2 = parser.buildOdataQuery(params2);
+		
+		Assert.assertEquals("PublicationDate gt 2010-10-18T14:33:00.000Z", query1);
+		Assert.assertEquals("PublicationDate gt 2010-10-18T14:33:00.000Z", query2);
+	}
+	
+	@Test
+	public void testPublicationdateOpenStart() {
+		Map<String, String> params1 = Map.of("publicationdate", "/2023-02-06T14:33:00.000Z");
+		Map<String, String> params2 = Map.of("publicationdate", "../2023-02-06T14:33:00.000Z");
+		parser.parseConfig(configs);
+		
+		String query1 = parser.buildOdataQuery(params1);
+		String query2 = parser.buildOdataQuery(params2);
+		
+		Assert.assertEquals("PublicationDate lt 2023-02-06T14:33:00.000Z", query1);
+		Assert.assertEquals("PublicationDate lt 2023-02-06T14:33:00.000Z", query2);
+	}
+	
+	@Test
 	public void testCollection() {
 		Map<String,String> params = Map.of("collections","myproducttype");
 		parser.parseConfig(configs);
@@ -118,7 +156,7 @@ class TestStatementParser {
 		parser.parseConfig(configs);
 		
 		String query = parser.buildOdataQuery(params);
-		System.out.println(query);
+		Assert.assertEquals("Id eq ae4ac3c0-f207-47a7-9585-d77a2bf164c2", query);
 	}
 
 }
