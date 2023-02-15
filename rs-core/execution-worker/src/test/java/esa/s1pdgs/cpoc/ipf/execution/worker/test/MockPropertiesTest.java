@@ -78,6 +78,7 @@ public class MockPropertiesTest {
         mockTmAppProperties(1800, 600, 300, 60);
         mockSizeAppProperties(20, 5);
         mockWapAppProperties(12, 1);
+        mockOverwriteShell("");
     }
 
     /**
@@ -121,6 +122,10 @@ public class MockPropertiesTest {
     
     protected void mockWorkingdirProperties(final Path workingdir) {
     	doReturn(workingdir.toString()).when(properties).getWorkingDir();
+    }
+    
+    protected void mockOverwriteShell(final String overwriteShell) {
+    	doReturn(overwriteShell).when(properties).getOverwriteShell();
     }
 
     /**

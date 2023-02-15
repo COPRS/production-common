@@ -33,7 +33,7 @@ public class PoolProcessorTest {
     public void testExecutionOk() throws AbstractCodedException {
         final LevelJobPoolDto dto = new LevelJobPoolDto();
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdMkdir()));
-        final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60, Collections.emptyList());
+        final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60, "", Collections.emptyList());
         assertFalse(testDir.exists());
         processor.process(reporting);
         assertTrue(testDir.exists() && testDir.isDirectory());
@@ -44,7 +44,7 @@ public class PoolProcessorTest {
         final LevelJobPoolDto dto = new LevelJobPoolDto();
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdMkdir()));
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdLs()));
-        final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60, Collections.emptyList());
+        final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60, "", Collections.emptyList());
         assertFalse(testDir.exists());
         processor.process(reporting);
         assertTrue(testDir.exists() && testDir.isDirectory());
@@ -58,7 +58,7 @@ public class PoolProcessorTest {
     public void testExecutionK0SeveralTasks() throws AbstractCodedException {
         final LevelJobPoolDto dto = new LevelJobPoolDto();
         dto.addTask(new LevelJobTaskDto(SystemUtils.getCmdFalse()));
-        final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60, Collections.emptyList());
+        final PoolProcessor processor = new PoolProcessor(dto, "3", "./", "log", 60, "", Collections.emptyList());
         processor.process(reporting);
     }
 }
