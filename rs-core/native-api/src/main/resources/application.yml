@@ -40,6 +40,8 @@ native-api:
   external-prip-port: 80
   # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
   include-additional-attributes: true
+  # default limit
+  defaultLimit: 100
   
   lutConfigs:
     "[bbox={value}]":

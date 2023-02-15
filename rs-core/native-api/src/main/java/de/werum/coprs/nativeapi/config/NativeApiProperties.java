@@ -19,6 +19,8 @@ public class NativeApiProperties {
 	private String externalPripProtocol;
 	private String externalPripHost;
 	private Integer externalPripPort;
+	
+	private Integer defaultLimit = 100;
 
 	private boolean includeAdditionalAttributes = true;
 	
@@ -86,6 +88,14 @@ public class NativeApiProperties {
 
 	public void setIncludeAdditionalAttributes(boolean includeAdditionalAttributes) {
 		this.includeAdditionalAttributes = includeAdditionalAttributes;
+	}
+
+	public Integer getDefaultLimit() {
+		return defaultLimit;
+	}
+
+	public void setDefaultLimit(Integer defaultLimit) {
+		this.defaultLimit = defaultLimit;
 	}
 
 }

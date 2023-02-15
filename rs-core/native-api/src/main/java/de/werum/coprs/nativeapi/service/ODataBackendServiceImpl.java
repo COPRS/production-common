@@ -53,7 +53,7 @@ public class ODataBackendServiceImpl {
 	private static final Logger LOG = LogManager.getLogger(ODataBackendServiceImpl.class);
 	
 	String buildPripQueryUrl(final String filterQuery, final boolean includeAdditionalAttributes) {
-		return buildPripQueryUrl(internalPripUrl, filterQuery, includeAdditionalAttributes);
+		return buildPripQueryUrl(internalPripUrl, filterQuery, includeAdditionalAttributes, properties.getDefaultLimit());
 	}
 	
 	public StacItemCollection queryOData(String url) {
@@ -96,12 +96,16 @@ public class ODataBackendServiceImpl {
 		return null;
 	}
 	
-	static String buildPripQueryUrl(final URL pripUrl, final String oDataQuery, final boolean includeAdditionalAttributes) {
+	static String buildPripQueryUrl(final URL pripUrl, final String oDataQuery, final boolean includeAdditionalAttributes, final int limit) {
 		String pripFilterUrl = String.format("%s%s%s", pripUrl, "/odata/v1/Products?$filter=", oDataQuery);
 
 		if (includeAdditionalAttributes) {
 			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? "$expand=Attributes,Quicklooks" : "&$expand=Attributes,Quicklooks");
 		}
+		
+		// Adding default limit
+		String topUrl = String.format("$top=%s", limit);
+		pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? topUrl : "&"+topUrl );
 				
 
 		return pripFilterUrl;// UriUtils.encodePath(pripFilterUrl, "UTF-8");

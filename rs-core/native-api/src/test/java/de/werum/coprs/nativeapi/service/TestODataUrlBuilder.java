@@ -13,8 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 public class TestODataUrlBuilder {
 	@Autowired
 	private ODataBackendServiceImpl backend;
-
-	@Disabled
+	
 	@Test
 	public void testUrlBuilder() {
 
@@ -29,10 +28,10 @@ public class TestODataUrlBuilder {
 		System.out.println(url2);
 
 		Assert.assertEquals(
-				"http://s1pro-prip-frontend-svc.processing.svc.cluster.local:8080/odata/v1/Products?$filter=ContentDate/Start%20gt%202010-10-18T14:33:00.000Z%20and%20ContentDate/End%20lt%202023-02-06T14:33:00.000%20and%20contains(Name,'S3A_PRODUCT')",
+				"http://s1pro-prip-frontend-svc.processing.svc.cluster.local:8080/odata/v1/Products?$filter=ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000 and contains(Name,'S3A_PRODUCT')&$top=100')",
 				url1);
 		Assert.assertEquals(
-				"http://s1pro-prip-frontend-svc.processing.svc.cluster.local:8080/odata/v1/Products%3Ffilter=ContentDate/Start%20gt%202010-10-18T14:33:00.000Z%20and%20ContentDate/End%20lt%202023-02-06T14:33:00.000%20and%20contains(Name,'S3A_PRODUCT')&$expand=Attributes,Quicklooks",
+				"http://s1pro-prip-frontend-svc.processing.svc.cluster.local:8080/odata/v1/Products?$filter=ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000 and contains(Name,'S3A_PRODUCT')&$expand=Attributes,Quicklooks&$top=100",
 				url2);
 	}
 }
