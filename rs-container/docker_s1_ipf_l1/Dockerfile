@@ -37,7 +37,7 @@ RUN chmod +x /tini
 
 RUN mkdir -p /data/localWD && chown piccontrol:pic_run /data/localWD
 RUN mkdir -p /data/oqcWD && chown piccontrol:pic_run /data/oqcWD
-
+ 
 ### WA RS-815 START ###
 #RUN useradd -u 1001 rsuser
 
