@@ -1,13 +1,10 @@
-## bcprov-jdk15on
-GroupId: org.bouncycastle\
-ArtifactId: bcprov-jdk15on\
-Version: 1.70
+## jopt-simple
+GroupId: net.sf.jopt-simple\
+ArtifactId: jopt-simple\
+Version: 5.0.4
 ### Copyright
-- (c) ECFieldElement A1
-- (c) Nat224.isOne
-- Copyright (c) 2000-2021 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
-- Copyright (c) 2000-2021 The Legion Of The Bouncy Castle Inc. (https://www.bouncycastle.org)
-- Copyright Dr B. R Gladman (gladman@seven77.demon.co.uk) and Sam Simpson (s.simpson@mia.co.uk)
+- Copyright (c) 2004-2014 Paul R. Holser, Jr
+- Copyright (c) 2004-2015 Paul R. Holser, Jr
 ### Licenses 
  - MIT License [MIT]
 

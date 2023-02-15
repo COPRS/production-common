@@ -1,13 +1,9 @@
-## bcprov-jdk15on
-GroupId: org.bouncycastle\
-ArtifactId: bcprov-jdk15on\
-Version: 1.70
+## slf4j-api
+GroupId: org.slf4j\
+ArtifactId: slf4j-api\
+Version: 1.7.36
 ### Copyright
-- (c) ECFieldElement A1
-- (c) Nat224.isOne
-- Copyright (c) 2000-2021 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
-- Copyright (c) 2000-2021 The Legion Of The Bouncy Castle Inc. (https://www.bouncycastle.org)
-- Copyright Dr B. R Gladman (gladman@seven77.demon.co.uk) and Sam Simpson (s.simpson@mia.co.uk)
+- Copyright (c) 2004-2011 QOS.ch
 ### Licenses 
  - MIT License [MIT]
 
