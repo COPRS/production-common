@@ -15,6 +15,8 @@ import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
 @Controller
 public class NativeAPIServiceImpl {
 	private static final Logger LOG = LogManager.getLogger(NativeAPIServiceImpl.class);
+	
+	private static final String PARAM_PAGE = "page";
 
 	@Autowired
 	private StatementParserServiceImpl parser;
@@ -38,6 +40,16 @@ public class NativeAPIServiceImpl {
 	public StacItemCollection processSearchRequest(final HttpServletRequest request) {
 		Map<String,String> parameters = flattenParameters(request.getParameterMap());
 		LOG.debug("Identified {} parameters for search request: {}",parameters.size(), parameters);
+		
+		// extract pagination parameter if existing and remove it from the parameter as not intended to be processed by the filter
+		int page = 0;
+		String pageParam = parameters.get(PARAM_PAGE);
+		if (pageParam != null) {
+			parameters.remove(PARAM_PAGE);
+			page = Integer.parseInt(pageParam);
+		}
+		
+		// build the query for the OData backend
 		String oDataQuery = parser.buildOdataQuery(parameters);
 		if (oDataQuery == null || oDataQuery.isEmpty()) {
 			throw new IllegalArgumentException("Unable to generate a request from the parameters and look up table");
@@ -45,7 +57,8 @@ public class NativeAPIServiceImpl {
 		
 		LOG.debug("OData query generated: {}", oDataQuery);
 
-		String queryUrl = backend.buildPripQueryUrl(oDataQuery, false);		
+		// send the query to the backend and convert to stac
+		String queryUrl = backend.buildPripQueryUrl(oDataQuery, false, page);		
 		StacItemCollection result = backend.queryOData(queryUrl);
 		return result;
 	}

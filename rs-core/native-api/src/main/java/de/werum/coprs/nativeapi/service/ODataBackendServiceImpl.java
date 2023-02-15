@@ -24,8 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriTemplate;
-import org.springframework.web.util.UriUtils;
 
 import de.werum.coprs.nativeapi.config.NativeApiProperties;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
@@ -52,8 +50,8 @@ public class ODataBackendServiceImpl {
 	
 	private static final Logger LOG = LogManager.getLogger(ODataBackendServiceImpl.class);
 	
-	String buildPripQueryUrl(final String filterQuery, final boolean includeAdditionalAttributes) {
-		return buildPripQueryUrl(internalPripUrl, filterQuery, includeAdditionalAttributes, properties.getDefaultLimit());
+	String buildPripQueryUrl(final String filterQuery, final boolean includeAdditionalAttributes, final int page) {
+		return buildPripQueryUrl(internalPripUrl, filterQuery, includeAdditionalAttributes, properties.getDefaultLimit(), page);
 	}
 	
 	public StacItemCollection queryOData(String url) {
@@ -96,18 +94,23 @@ public class ODataBackendServiceImpl {
 		return null;
 	}
 	
-	static String buildPripQueryUrl(final URL pripUrl, final String oDataQuery, final boolean includeAdditionalAttributes, final int limit) {
+	static String buildPripQueryUrl(final URL pripUrl, final String oDataQuery, final boolean includeAdditionalAttributes, final int limit, final int page) {
 		String pripFilterUrl = String.format("%s%s%s", pripUrl, "/odata/v1/Products?$filter=", oDataQuery);
 
 		if (includeAdditionalAttributes) {
 			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? "$expand=Attributes,Quicklooks" : "&$expand=Attributes,Quicklooks");
 		}
 		
-		// Adding default limit
+		// Adding top param using the default limit
 		String topUrl = String.format("$top=%s", limit);
 		pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? topUrl : "&"+topUrl );
-				
-
+		
+		// Adding skip param using the page. If no page is set we ignore it.
+		if (page == 0) {
+			String skipUrl = String.format("$skip=%s", page);
+			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? topUrl : "&"+skipUrl );	
+		}
+	
 		return pripFilterUrl;// UriUtils.encodePath(pripFilterUrl, "UTF-8");
 	}
 	
@@ -143,3 +146,4 @@ public class ODataBackendServiceImpl {
 		}
 	}
 }
+ 
