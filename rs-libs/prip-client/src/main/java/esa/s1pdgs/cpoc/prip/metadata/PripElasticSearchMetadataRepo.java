@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -322,11 +321,15 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		case CONTAINS:
 			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())), filter);
 			break;
-		case EQUALS:
+		case EQ:
 			appendQuery(queryBuilder, operator,
 					QueryBuilders.matchQuery(filter.getFieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND), filter);
 			break;
-		default:
+      case NE:
+         appendQueryNegated(queryBuilder, operator,
+               QueryBuilders.matchQuery(filter.getFieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND), filter);
+         break;
+      default:
 			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
 		}
 	}

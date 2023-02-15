@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ProductionType;
@@ -87,6 +88,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(ContentDate.name() + "/" + End.name(), FIELD_NAMES.CONTENT_DATE_END);
 
 		PRIP_TEXT_PROPERTY_FIELD_NAMES = new HashMap<>();
+		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(Id.name(), FIELD_NAMES.ID);
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(Name.name(), FIELD_NAMES.NAME);
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
 
@@ -547,7 +549,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			// systematic_production
 			if (ProductionType.name().equals("ProductionType")
 					&& !SYSTEMATIC_PRODUCTION.getName().equals(firstListElementText)) {
-				return new PripTextFilter(FIELD_NAMES.NAME.fieldName(), Function.EQUALS, "NOTEXISTINGPRODUCTNAME");
+				return new PripTextFilter(FIELD_NAMES.NAME.fieldName(), Function.EQ, "NOTEXISTINGPRODUCTNAME");
 			} else {
 				return null;
 			}
@@ -624,6 +626,12 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	   // surrounding single quotes. single quotes inside of the string, which are represented by
 	   // two following single quotes are unescaped to one single quote each. see also:
 	   // https://docs.oasis-open.org/odata/odata/v4.01/cs01/abnf/odata-abnf-construction-rules.txt
+	   
+	   if (odataStringParameter.length() >= 1 && odataStringParameter.charAt(0) != '\'') {
+	      // workaround to handle GUID as text
+	      return odataStringParameter;
+	   }
+	   
 	   return odataStringParameter.substring(1, odataStringParameter.length() - 1).replace("''", "'");
 	}
 }
