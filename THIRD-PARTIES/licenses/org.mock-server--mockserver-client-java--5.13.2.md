@@ -3,7 +3,8 @@ GroupId: org.mock-server\
 ArtifactId: mockserver-client-java\
 Version: 5.13.2
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

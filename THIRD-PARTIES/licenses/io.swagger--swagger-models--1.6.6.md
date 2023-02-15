@@ -3,7 +3,8 @@ GroupId: io.swagger\
 ArtifactId: swagger-models\
 Version: 1.6.6
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

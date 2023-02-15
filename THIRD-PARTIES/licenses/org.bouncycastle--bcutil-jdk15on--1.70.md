@@ -3,7 +3,8 @@ GroupId: org.bouncycastle\
 ArtifactId: bcutil-jdk15on\
 Version: 1.70
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - MIT License [MIT]
 
 ```MIT License

@@ -3,7 +3,8 @@ GroupId: com.samskivert\
 ArtifactId: jmustache\
 Version: 1.15
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 
 ```Copyright (c) <year> <owner>. 

@@ -3,7 +3,8 @@ GroupId: org.hibernate.common\
 ArtifactId: hibernate-commons-annotations\
 Version: 5.1.2.Final
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - GNU Lesser General Public License v2.1 or later [LGPL-2.1-or-later]
 
 ```GNU LESSER GENERAL PUBLIC LICENSE

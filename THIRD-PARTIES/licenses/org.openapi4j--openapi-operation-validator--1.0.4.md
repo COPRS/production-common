@@ -3,7 +3,8 @@ GroupId: org.openapi4j\
 ArtifactId: openapi-operation-validator\
 Version: 1.0.4
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

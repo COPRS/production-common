@@ -3,7 +3,8 @@ GroupId: nl.jqno.equalsverifier\
 ArtifactId: equalsverifier\
 Version: 3.10
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

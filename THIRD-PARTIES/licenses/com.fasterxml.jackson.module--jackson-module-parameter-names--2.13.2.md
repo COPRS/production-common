@@ -3,7 +3,8 @@ GroupId: com.fasterxml.jackson.module\
 ArtifactId: jackson-module-parameter-names\
 Version: 2.13.2
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

@@ -3,7 +3,8 @@ GroupId: com.typesafe.scala-logging\
 ArtifactId: scala-logging_2.13\
 Version: 3.9.3
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

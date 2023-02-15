@@ -3,7 +3,8 @@ GroupId: org.scala-lang.modules\
 ArtifactId: scala-collection-compat_2.13\
 Version: 2.4.4
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

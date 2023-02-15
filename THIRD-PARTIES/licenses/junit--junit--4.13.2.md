@@ -3,7 +3,8 @@ GroupId: junit\
 ArtifactId: junit\
 Version: 4.13.2
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Eclipse Public License 1.0 [EPL-1.0]
 
 ```Eclipse Public License - v 1.0

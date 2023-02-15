@@ -3,7 +3,8 @@ GroupId: io.swagger\
 ArtifactId: swagger-compat-spec-parser\
 Version: 1.0.59
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

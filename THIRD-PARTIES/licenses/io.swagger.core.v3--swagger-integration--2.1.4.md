@@ -3,7 +3,8 @@ GroupId: io.swagger.core.v3\
 ArtifactId: swagger-integration\
 Version: 2.1.4
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

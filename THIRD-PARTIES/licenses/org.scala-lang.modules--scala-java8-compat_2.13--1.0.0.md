@@ -3,7 +3,8 @@ GroupId: org.scala-lang.modules\
 ArtifactId: scala-java8-compat_2.13\
 Version: 1.0.0
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
 ```Apache License

@@ -3,7 +3,8 @@ GroupId: org.latencyutils\
 ArtifactId: LatencyUtils\
 Version: 2.0.3
 ### Copyright
-_No information_### Licenses 
+_No information_
+### Licenses 
  - Creative Commons Zero v1.0 Universal [CC0-1.0]
 
 ```Creative Commons Legal Code
