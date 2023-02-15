@@ -5,8 +5,8 @@ Version: 1.70
 ### Copyright
 - (c) ECFieldElement A1
 - (c) Nat224.isOne
-- Copyright (c) 2000-2021 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
 - Copyright (c) 2000-2021 The Legion Of The Bouncy Castle Inc. (https://www.bouncycastle.org)
+- Copyright (c) 2000-2021 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
 - Copyright Dr B. R Gladman (gladman@seven77.demon.co.uk) and Sam Simpson (s.simpson@mia.co.uk)
 ### Licenses 
  - MIT License [MIT]
