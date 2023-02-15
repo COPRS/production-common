@@ -121,6 +121,10 @@ public class ApplicationProperties {
 	
 	private Map<String, TypeEstimationMapping> productTypeEstimatedCount = new HashMap<>();
 	
+	/**
+	 * Workaround configuration for S1 L1 
+	 */
+	private String overwriteShell = "";
 
 	/**
      * Default constructor
@@ -320,7 +324,7 @@ public class ApplicationProperties {
 		this.oqcTimeoutInSeconds = oqcTimeoutInSeconds;
 	}
 
-	public String getOqcBinaryPath() {
+	public String getOqcBinaryPath(get) {
 		return oqcBinaryPath;
 	}
 
@@ -391,5 +395,12 @@ public class ApplicationProperties {
 	public void setProductTypeEstimationOutputFamily(ProductFamily productTypeEstimationOutputFamily) {
 		this.productTypeEstimationOutputFamily = productTypeEstimationOutputFamily;
 	}
-	
+
+	public String getOverwriteShell() {
+		return overwriteShell;
+	}
+
+	public void setOverwriteShell(String overwriteShell) {
+		this.overwriteShell = overwriteShell;
+	}
 }

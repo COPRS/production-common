@@ -87,6 +87,7 @@ public class PoolExecutorCallable implements Callable<Void> {
                     job.getWorkDirectory(),
                     String.format("%s [poolCounter %d] [s1pdgsTask %sProcessing] ", prefixMonitorLogs, counter, appLevel),
                     properties.getTmProcOneTaskS(),
+                    properties.getOverwriteShell(),
                     plainTextLoggingTasks
             ));
         }
