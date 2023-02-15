@@ -26,6 +26,8 @@ native-api:
   external-prip-port: {{ .Values.nativeapi.external.port }}
   # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
   include-additional-attributes: true
+  # default limit
+  defaultLimit: {{ .Values.nativeapi.defaultLimit }}
   lutConfigs:
     "[bbox={value}]":
       - "OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POLYGON(({value})))"
@@ -33,6 +35,13 @@ native-api:
       - "OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POINT({value}))"
     "[productname={value}]": 
       - "contains(Name,'{value}')"
+    "[collections={producttype}]":
+      - "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq ‘{producttype}"
     "[datetime={start}/{stop}]": 
       - "ContentDate/Start gt {start}"
-      - "ContentDate/End lt {stop}"  
+      - "ContentDate/End lt {stop}"
+    "[publicationdate={start}/{stop}]":
+      - "CreationDate gt {start}"
+      - "CreationDate lt {stop}"  
+    "[polarisation]={value}]":
+      - "Attributes/OData.CSC.DoubleAttribute/any(att:att/Name eq ‘polarisationChannels’ and att/OData.CSC.DoubleAttribute/Value eq {polarization}"
