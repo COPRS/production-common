@@ -106,7 +106,7 @@ public class ODataBackendServiceImpl {
 		pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? topUrl : "&"+topUrl );
 		
 		// Adding skip param using the page. If no page is set we ignore it.
-		if (page == 0) {
+		if (page != 0) {
 			String skipUrl = String.format("$skip=%s", page);
 			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? topUrl : "&"+skipUrl );	
 		}
