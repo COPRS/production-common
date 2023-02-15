@@ -13,7 +13,8 @@ Version: 4.1.75.Final
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -86,9 +87,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - Creative Commons Public Domain Dedication and Certification [CC-PDDC]
+```
+ - Creative Commons Public Domain Dedication and Certification [CC-PDDC]
 
 ```
+
 The person or persons who have associated work with this document (the "Dedicator" or "Certifier") hereby either (a) certifies that, to the best of his knowledge, the work of authorship identified is in the public domain of the country from which the work is published, or (b) hereby dedicates whatever copyright the dedicators holds in the work of authorship identified below (the "Work") to the public domain. A certifier, moreover, dedicates any copyright interest he may have in the associated work, and for these purposes, is described as a "dedicator" below.
 
 A certifier has taken reasonable steps to verify the copyright status of this work. Certifier recognizes that his good faith efforts may not shield him from liability if in fact the work certified is not in the public domain.

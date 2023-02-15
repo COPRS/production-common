@@ -22,7 +22,8 @@ Version: 2.3.3
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -95,9 +96,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
+```
+ - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 
-```Copyright (c) <year> <owner>. 
+```
+Copyright (c) <year> <owner>. 
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
@@ -108,14 +111,18 @@ Redistribution and use in source and binary forms, with or without modification,
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-``` - Classpath exception 2.0 [Classpath-exception-2.0]
+```
+ - Classpath exception 2.0 [Classpath-exception-2.0]
 
-```Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
+```
+Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
 
 As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.
-``` - GNU General Public License v2.0 only [GPL-2.0-only]
+```
+ - GNU General Public License v2.0 only [GPL-2.0-only]
 
-```GNU GENERAL PUBLIC LICENSE
+```
+GNU GENERAL PUBLIC LICENSE
 Version 2, June 1991
 
 Copyright (C) 1989, 1991 Free Software Foundation, Inc.
@@ -232,9 +239,11 @@ You should also get your employer (if you work as a programmer) or your school, 
      Yoyodyne, Inc., hereby disclaims all copyright interest in the program `Gnomovision' (which makes passes at compilers) written by James Hacker.
 
 signature of Ty Coon, 1 April 1989 Ty Coon, President of Vice
-``` - MIT License [MIT]
+```
+ - MIT License [MIT]
 
-```MIT License
+```
+MIT License
 
 Copyright (c) <year> <copyright holders>
 

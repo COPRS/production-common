@@ -17,7 +17,8 @@ Version: 4.1.75.Final
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -90,9 +91,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - Creative Commons Zero v1.0 Universal [CC0-1.0]
+```
+ - Creative Commons Zero v1.0 Universal [CC0-1.0]
 
-```Creative Commons Legal Code
+```
+Creative Commons Legal Code
 
 CC0 1.0 Universal
 
@@ -213,9 +216,11 @@ express Statement of Purpose.
  d. Affirmer understands and acknowledges that Creative Commons is not a
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
-``` - MIT License [MIT]
+```
+ - MIT License [MIT]
 
-```MIT License
+```
+MIT License
 
 Copyright (c) <year> <copyright holders>
 

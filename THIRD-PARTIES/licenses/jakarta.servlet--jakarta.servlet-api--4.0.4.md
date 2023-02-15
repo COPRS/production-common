@@ -17,7 +17,8 @@ Version: 4.0.4
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -90,14 +91,18 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - Classpath exception 2.0 [Classpath-exception-2.0]
+```
+ - Classpath exception 2.0 [Classpath-exception-2.0]
 
-```Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
+```
+Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
 
 As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.
-``` - Common Development and Distribution License 1.0 [CDDL-1.0]
+```
+ - Common Development and Distribution License 1.0 [CDDL-1.0]
 
-```COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
+```
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 Version 1.0
 
 1. Definitions.
@@ -216,9 +221,11 @@ This License represents the complete agreement concerning subject matter hereof.
 10. RESPONSIBILITY FOR CLAIMS.
 
 As between Initial Developer and the Contributors, each party is responsible for claims and damages arising, directly or indirectly, out of its utilization of rights under this License and You agree to work with Initial Developer and Contributors to distribute such responsibility on an equitable basis. Nothing herein is intended or shall be deemed to constitute any admission of liability.
-``` - Eclipse Public License 2.0 [EPL-2.0]
+```
+ - Eclipse Public License 2.0 [EPL-2.0]
 
-```Eclipse Public License - v 2.0
+```
+Eclipse Public License - v 2.0
 THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE (“AGREEMENT”). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.
 
 1. DEFINITIONS
@@ -298,9 +305,11 @@ Simply including a copy of this Agreement, including this Exhibit A is not suffi
 If it is not possible or desirable to put the notice in a particular file, then You may include the notice in a location (such as a LICENSE file in a relevant directory) where a recipient would be likely to look for such a notice.
 
 You may add additional accurate notices of copyright ownership.
-``` - GNU General Public License v2.0 only [GPL-2.0-only]
+```
+ - GNU General Public License v2.0 only [GPL-2.0-only]
 
-```GNU GENERAL PUBLIC LICENSE
+```
+GNU GENERAL PUBLIC LICENSE
 Version 2, June 1991
 
 Copyright (C) 1989, 1991 Free Software Foundation, Inc.

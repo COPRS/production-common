@@ -9,7 +9,8 @@ Version: 1.1.7.3
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -82,9 +83,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
+```
+ - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 
-```Copyright (c) <year> <owner>. 
+```
+Copyright (c) <year> <owner>. 
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

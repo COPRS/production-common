@@ -12,7 +12,8 @@ Version: 1.3.2
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -85,14 +86,18 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - Classpath exception 2.0 [Classpath-exception-2.0]
+```
+ - Classpath exception 2.0 [Classpath-exception-2.0]
 
-```Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
+```
+Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
 
 As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.
-``` - Common Development and Distribution License 1.0 [CDDL-1.0]
+```
+ - Common Development and Distribution License 1.0 [CDDL-1.0]
 
-```COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
+```
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 Version 1.0
 
 1. Definitions.
@@ -211,9 +216,11 @@ This License represents the complete agreement concerning subject matter hereof.
 10. RESPONSIBILITY FOR CLAIMS.
 
 As between Initial Developer and the Contributors, each party is responsible for claims and damages arising, directly or indirectly, out of its utilization of rights under this License and You agree to work with Initial Developer and Contributors to distribute such responsibility on an equitable basis. Nothing herein is intended or shall be deemed to constitute any admission of liability.
-``` - Common Development and Distribution License 1.1 [CDDL-1.1]
+```
+ - Common Development and Distribution License 1.1 [CDDL-1.1]
 
-```COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
+```
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 Version 1.1
 
 1. Definitions.
@@ -336,9 +343,11 @@ As between Initial Developer and the Contributors, each party is responsible for
 
 NOTICE PURSUANT TO SECTION 9 OF THE COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 The code released under the CDDL shall be governed by the laws of the State of California (excluding conflict-of-law provisions). Any litigation relating to this License shall be subject to the jurisdiction of the Federal Courts of the Northern District of California and the state courts of the State of California, with venue lying in Santa Clara County, California.
-``` - GNU Lesser General Public License v3.0 only [LGPL-3.0-only]
+```
+ - GNU Lesser General Public License v3.0 only [LGPL-3.0-only]
 
-```GNU LESSER GENERAL PUBLIC LICENSE
+```
+GNU LESSER GENERAL PUBLIC LICENSE
 Version 3, 29 June 2007
 
 Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>

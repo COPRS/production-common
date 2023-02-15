@@ -10,7 +10,8 @@ Version: 3.0.1
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -83,9 +84,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
+```
+ - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 
-```Copyright (c) <year> <owner>. 
+```
+Copyright (c) <year> <owner>. 
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
@@ -96,9 +99,11 @@ Redistribution and use in source and binary forms, with or without modification,
 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-``` - Common Development and Distribution License 1.0 [CDDL-1.0]
+```
+ - Common Development and Distribution License 1.0 [CDDL-1.0]
 
-```COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
+```
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 Version 1.0
 
 1. Definitions.
@@ -217,9 +222,11 @@ This License represents the complete agreement concerning subject matter hereof.
 10. RESPONSIBILITY FOR CLAIMS.
 
 As between Initial Developer and the Contributors, each party is responsible for claims and damages arising, directly or indirectly, out of its utilization of rights under this License and You agree to work with Initial Developer and Contributors to distribute such responsibility on an equitable basis. Nothing herein is intended or shall be deemed to constitute any admission of liability.
-``` - Eclipse Public License 2.0 [EPL-2.0]
+```
+ - Eclipse Public License 2.0 [EPL-2.0]
 
-```Eclipse Public License - v 2.0
+```
+Eclipse Public License - v 2.0
 THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE (“AGREEMENT”). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.
 
 1. DEFINITIONS

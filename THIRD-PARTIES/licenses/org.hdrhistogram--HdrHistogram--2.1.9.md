@@ -7,7 +7,8 @@ _No information_
 ### Licenses 
  - Creative Commons Zero v1.0 Universal [CC0-1.0]
 
-```Creative Commons Legal Code
+```
+Creative Commons Legal Code
 
 CC0 1.0 Universal
 

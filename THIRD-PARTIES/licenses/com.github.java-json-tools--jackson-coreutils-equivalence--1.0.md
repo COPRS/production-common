@@ -7,7 +7,8 @@ Version: 1.0
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -80,9 +81,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - GNU Lesser General Public License v3.0 only [LGPL-3.0-only]
+```
+ - GNU Lesser General Public License v3.0 only [LGPL-3.0-only]
 
-```GNU LESSER GENERAL PUBLIC LICENSE
+```
+GNU LESSER GENERAL PUBLIC LICENSE
 Version 3, 29 June 2007
 
 Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>

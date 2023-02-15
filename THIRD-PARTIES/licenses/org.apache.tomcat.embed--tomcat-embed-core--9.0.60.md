@@ -14,7 +14,8 @@ Version: 9.0.60
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -87,9 +88,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - Common Development and Distribution License 1.0 [CDDL-1.0]
+```
+ - Common Development and Distribution License 1.0 [CDDL-1.0]
 
-```COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
+```
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 Version 1.0
 
 1. Definitions.
@@ -208,9 +211,11 @@ This License represents the complete agreement concerning subject matter hereof.
 10. RESPONSIBILITY FOR CLAIMS.
 
 As between Initial Developer and the Contributors, each party is responsible for claims and damages arising, directly or indirectly, out of its utilization of rights under this License and You agree to work with Initial Developer and Contributors to distribute such responsibility on an equitable basis. Nothing herein is intended or shall be deemed to constitute any admission of liability.
-``` - Common Development and Distribution License 1.1 [CDDL-1.1]
+```
+ - Common Development and Distribution License 1.1 [CDDL-1.1]
 
-```COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
+```
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 Version 1.1
 
 1. Definitions.
@@ -333,9 +338,11 @@ As between Initial Developer and the Contributors, each party is responsible for
 
 NOTICE PURSUANT TO SECTION 9 OF THE COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 The code released under the CDDL shall be governed by the laws of the State of California (excluding conflict-of-law provisions). Any litigation relating to this License shall be subject to the jurisdiction of the Federal Courts of the Northern District of California and the state courts of the State of California, with venue lying in Santa Clara County, California.
-``` - W3C Software Notice and License (2002-12-31) [W3C]
+```
+ - W3C Software Notice and License (2002-12-31) [W3C]
 
-```W3C SOFTWARE NOTICE AND LICENSE
+```
+W3C SOFTWARE NOTICE AND LICENSE
 
 This work (and included software, documentation such as READMEs, or other related items) is being provided by the copyright holders under the following license.
 

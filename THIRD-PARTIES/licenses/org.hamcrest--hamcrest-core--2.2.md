@@ -7,7 +7,8 @@ _No information_
 ### Licenses 
  - BSD 3-Clause &quot;New&quot; or &quot;Revised&quot; License [BSD-3-Clause]
 
-```Copyright (c) <year> <owner>. 
+```
+Copyright (c) <year> <owner>. 
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

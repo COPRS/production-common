@@ -17,7 +17,8 @@ Version: 4.0.1
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -90,9 +91,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - Common Development and Distribution License 1.1 [CDDL-1.1]
+```
+ - Common Development and Distribution License 1.1 [CDDL-1.1]
 
-```COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
+```
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
 Version 1.1
 
 1. Definitions.

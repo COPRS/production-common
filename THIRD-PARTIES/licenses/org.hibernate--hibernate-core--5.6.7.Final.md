@@ -10,7 +10,8 @@ Version: 5.6.7.Final
 ### Licenses 
  - Eclipse Public License 2.0 [EPL-2.0]
 
-```Eclipse Public License - v 2.0
+```
+Eclipse Public License - v 2.0
 THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE PUBLIC LICENSE (“AGREEMENT”). ANY USE, REPRODUCTION OR DISTRIBUTION OF THE PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.
 
 1. DEFINITIONS
@@ -90,9 +91,11 @@ Simply including a copy of this Agreement, including this Exhibit A is not suffi
 If it is not possible or desirable to put the notice in a particular file, then You may include the notice in a location (such as a LICENSE file in a relevant directory) where a recipient would be likely to look for such a notice.
 
 You may add additional accurate notices of copyright ownership.
-``` - GNU Lesser General Public License v2.1 or later [LGPL-2.1-or-later]
+```
+ - GNU Lesser General Public License v2.1 or later [LGPL-2.1-or-later]
 
-```GNU LESSER GENERAL PUBLIC LICENSE
+```
+GNU LESSER GENERAL PUBLIC LICENSE
 
 Version 2.1, February 1999
 

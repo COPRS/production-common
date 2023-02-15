@@ -7,7 +7,8 @@ _No information_
 ### Licenses 
  - GNU Lesser General Public License v2.1 or later [LGPL-2.1-or-later]
 
-```GNU LESSER GENERAL PUBLIC LICENSE
+```
+GNU LESSER GENERAL PUBLIC LICENSE
 
 Version 2.1, February 1999
 

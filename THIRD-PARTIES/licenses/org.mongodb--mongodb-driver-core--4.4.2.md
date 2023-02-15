@@ -14,7 +14,8 @@ Version: 4.4.2
 ### Licenses 
  - Apache License 2.0 [Apache-2.0]
 
-```Apache License
+```
+Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/
 
@@ -87,9 +88,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-``` - Creative Commons Attribution 2.5 Generic [CC-BY-2.5]
+```
+ - Creative Commons Attribution 2.5 Generic [CC-BY-2.5]
 
-```Creative Commons Attribution 2.5
+```
+Creative Commons Attribution 2.5
 
  CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM ITS USE.
 
@@ -170,9 +173,11 @@ Creative Commons is not a party to this License, and makes no warranty whatsoeve
 Except for the limited purpose of indicating to the public that the Work is licensed under the CCPL, neither party will use the trademark "Creative Commons" or any related trademark or logo of Creative Commons without the prior written consent of Creative Commons. Any permitted use will be in compliance with Creative Commons' then-current trademark usage guidelines, as may be published on its website or otherwise made available upon request from time to time.
 
 Creative Commons may be contacted at http://creativecommons.org/.
-``` - Creative Commons Zero v1.0 Universal [CC0-1.0]
+```
+ - Creative Commons Zero v1.0 Universal [CC0-1.0]
 
-```Creative Commons Legal Code
+```
+Creative Commons Legal Code
 
 CC0 1.0 Universal
 
@@ -293,9 +298,11 @@ express Statement of Purpose.
  d. Affirmer understands and acknowledges that Creative Commons is not a
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
-``` - MIT License [MIT]
+```
+ - MIT License [MIT]
 
-```MIT License
+```
+MIT License
 
 Copyright (c) <year> <copyright holders>
 

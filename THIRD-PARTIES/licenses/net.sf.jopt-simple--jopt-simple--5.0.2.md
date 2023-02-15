@@ -8,7 +8,8 @@ Version: 5.0.2
 ### Licenses 
  - MIT License [MIT]
 
-```MIT License
+```
+MIT License
 
 Copyright (c) <year> <copyright holders>
 

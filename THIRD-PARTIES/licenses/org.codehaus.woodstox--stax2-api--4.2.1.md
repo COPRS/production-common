@@ -10,7 +10,8 @@ Version: 4.2.1
 ### Licenses 
  - BSD 2-Clause &quot;Simplified&quot; License [BSD-2-Clause]
 
-```Copyright (c) <year> <owner> 
+```
+Copyright (c) <year> <owner> 
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 

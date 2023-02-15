@@ -7,7 +7,8 @@ Version: 1.7.36
 ### Licenses 
  - MIT License [MIT]
 
-```MIT License
+```
+MIT License
 
 Copyright (c) <year> <copyright holders>
 
