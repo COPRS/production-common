@@ -324,7 +324,7 @@ public class ApplicationProperties {
 		this.oqcTimeoutInSeconds = oqcTimeoutInSeconds;
 	}
 
-	public String getOqcBinaryPath(get) {
+	public String getOqcBinaryPath() {
 		return oqcBinaryPath;
 	}
 
