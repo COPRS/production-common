@@ -91,7 +91,7 @@ public class TaskCallable implements Callable<TaskResult> {
             if (!overwriteShell) {
             	builder.command(binaryPath, jobOrderPath);
             } else {
-            	builder.command("/bin/tcsh", "-c", "\"", binaryPath, jobOrderPath, "\"");
+            	builder.command("/bin/tcsh", "-c", binaryPath +" " + jobOrderPath);
             }
             
             builder.directory(new File(workDirectory));
