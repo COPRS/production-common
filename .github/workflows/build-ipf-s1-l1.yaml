@@ -21,7 +21,7 @@ on:
         description: 'API Key for GitGuardian'
         required: true
   workflow_dispatch:
-
+  
 env:
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
   ARTIFACTORY_PROJECT_DOCKER_PRIVATE: rs-docker-private
