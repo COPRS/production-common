@@ -86,6 +86,7 @@ public enum ProductFamily {
     S2_L1C_TC_ZIP,
     S2_L2A_TL_ZIP,
     S2_L2A_DS_ZIP,
+    S2_L2A_TC_ZIP,
     S2_SAD_ZIP,
     S2_HKTM_ZIP,
     
