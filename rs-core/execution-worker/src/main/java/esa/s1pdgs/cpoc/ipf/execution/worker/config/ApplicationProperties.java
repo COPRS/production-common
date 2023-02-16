@@ -124,7 +124,7 @@ public class ApplicationProperties {
 	/**
 	 * Workaround configuration for S1 L1 
 	 */
-	private String overwriteShell = "";
+	private boolean overwriteShell = false;
 
 	/**
      * Default constructor
@@ -396,11 +396,11 @@ public class ApplicationProperties {
 		this.productTypeEstimationOutputFamily = productTypeEstimationOutputFamily;
 	}
 
-	public String getOverwriteShell() {
+	public boolean getOverwriteShell() {
 		return overwriteShell;
 	}
 
-	public void setOverwriteShell(String overwriteShell) {
+	public void setOverwriteShell(boolean overwriteShell) {
 		this.overwriteShell = overwriteShell;
 	}
 }

@@ -76,12 +76,12 @@ public class PoolProcessor {
     /**
      *  Overwrite shell command as a workaround for specific IPFs
      */
-    private final String overwriteShell;
+    private final boolean overwriteShell;
     
     private final List<String> plainTextLoggingTasks;
 
 	public PoolProcessor(final LevelJobPoolDto pool, final String jobOrderPath, final String workDirectory,
-			final String prefixLogs, final long tmProcessOneTaskS, final String overwriteShell,
+			final String prefixLogs, final long tmProcessOneTaskS, final boolean overwriteShell,
 			final List<String> plainTextLoggingTasks) {
 		this.pool = pool;
 		this.nbTasks = pool.getTasks().size();
