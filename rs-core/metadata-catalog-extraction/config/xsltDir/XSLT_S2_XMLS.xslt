@@ -33,10 +33,6 @@
                     select="//*[local-name() = 'Validity_Stop']" />
             </stopTime>
 
-            <productType>
-                <xsl:value-of select="//*[local-name() = 'File_Type']" />
-            </productType>
-
             <orbitNumber>
                 <xsl:value-of
                     select="//*[local-name() = 'Start_Orbit_Number']" />
