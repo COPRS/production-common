@@ -73,7 +73,7 @@ public class S2AuxMetadataExtractor extends AbstractMetadataExtractor {
 					.performWithRetries(
 							() -> obsClient.download(
 									Collections.singletonList(
-											new ObsDownloadObject(family, metadataKeyObs, this.localDirectory)),
+											new ObsDownloadObject(family, keyObs + "/" + metadataKeyObs, this.localDirectory)),
 									reportingFactory),
 							"Download of metadata file " + metadataKeyObs + " to " + localDirectory,
 							processConfiguration.getNumObsDownloadRetries(),
