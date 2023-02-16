@@ -1,7 +1,7 @@
 ARG BRANCH
 FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app
-
+ 
 FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as base
 
 # RS-597: Original image contains DEM files, however the resulting image is to big for the build pipe
