@@ -87,7 +87,7 @@ public class S2ProductMetadataExtractor extends AbstractMetadataExtractor {
 							() -> obsClient
 									.download(
 											metadataFilenames.stream()
-													.map(filename -> new ObsDownloadObject(family, filename,
+													.map(filename -> new ObsDownloadObject(family, keyObs + "/" + filename,
 															this.localDirectory))
 													.collect(Collectors.toList()),
 											reportingFactory),
