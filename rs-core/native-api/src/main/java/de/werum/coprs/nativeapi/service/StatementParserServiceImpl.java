@@ -46,7 +46,7 @@ public class StatementParserServiceImpl {
 	public void init() {
 		LOG.debug("Loading LUT table from configurations...");
 		parseConfig(properties.getLutConfigs());
-		LOG.debug("Parsed {} LUT table configurations", parsedConfigs.size());
+		LOG.info("Parsed {} LUT table configurations", parsedConfigs.size());
 	}
 
 	StatementType determinateType(String statement) {
