@@ -26,7 +26,7 @@ public class PendingProcessingJobGauge {
 		// Expose metric of currently pending jobs to actuator/prometheus, if properties are set
 		if (!metricsProperties.getMission().isEmpty() && !metricsProperties.getLevel().isEmpty()
 				&& !metricsProperties.getAddonName().isEmpty()) {
-			Gauge.builder("rs_pending_processing_job", fetchPendingProcessingJobs())
+			Gauge.builder("rs.pending.processing.job", fetchPendingProcessingJobs())
 					.tag("mission", metricsProperties.getMission()).tag("level", metricsProperties.getLevel())
 					.tag("addonName", metricsProperties.getAddonName()).register(registry);
 		}
