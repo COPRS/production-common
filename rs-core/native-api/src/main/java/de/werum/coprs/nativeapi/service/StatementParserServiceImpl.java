@@ -71,7 +71,7 @@ public class StatementParserServiceImpl {
 //			System.out.println("splits:"+splits[0]+"=> "+splits[1]);
 			if (splits.length != 2) {
 				LOG.error("Configuration for key '{}' seems to be invalid and will be ignored", entry.getKey());
-				return;
+				continue;
 			}
 
 			Config config = new Config();
