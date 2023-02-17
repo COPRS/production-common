@@ -40,7 +40,7 @@ native-api:
     "[productname={value}]": 
       - "contains(Name,'{value}')"
     "[collections={producttype}]":
-      - "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq '{producttype}'"
+      - "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq '{producttype})'"
     "[datetime={start}/{stop}]": 
       - "ContentDate/Start gt {start}"
       - "ContentDate/End lt {stop}"
