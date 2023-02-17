@@ -82,6 +82,7 @@ public class NativeAPIServiceImpl {
 		
 		List<String> conformsTo = new ArrayList<>();
 		conformsTo.add("https://api.stacspec.org/v1.0.0-rc.1/core");
+		rootCatalog.setConformsTo(conformsTo);
 		
 		rootCatalog.getLinks().add(new StacLink("self", properties.getHostname(), "application/json", properties.getRootCatalogTitle()));
 		rootCatalog.getLinks().add(new StacLink("root", properties.getHostname(), "application/json", properties.getRootCatalogTitle()));
