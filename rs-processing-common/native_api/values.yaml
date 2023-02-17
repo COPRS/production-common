@@ -38,7 +38,7 @@ nativeapi:
         id: catalogs
         title: Copernicus Reference System STAC
         description: 
-    hostname: https://referencesystem.copernicus.eu/
+    hostname: https://referencesystem.copernicus.eu
 
 resources:
   cpu:
