@@ -2,6 +2,7 @@ package de.werum.coprs.nativeapi.rest.model.stac;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -19,5 +20,12 @@ public class StacRootCatalog extends StacCatalog {
 
 	public void setConformsTo(List<String> conformsTo) {
 		this.conformsTo = conformsTo;
+	}
+	
+	@Override
+	@JsonIgnore
+	public List<String> getStacExtensions() {
+		// TODO Auto-generated method stub
+		return super.getStacExtensions();
 	}
 }
