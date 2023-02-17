@@ -34,6 +34,11 @@ nativeapi:
         host: processing.platform.ops-csc.com/prip/odata/v1/
         port: 80
     defaultLimit: 100
+    rootCatalog:
+        id: catalogs
+        title: Copernicus Reference System STAC
+        description: 
+    hostname: https://referencesystem.copernicus.eu/
 
 resources:
   cpu:

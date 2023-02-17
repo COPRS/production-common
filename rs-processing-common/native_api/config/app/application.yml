@@ -28,6 +28,10 @@ native-api:
   include-additional-attributes: true
   # default limit
   defaultLimit: {{ .Values.nativeapi.defaultLimit }}
+  rootCatalogId: {{ .Values.nativeapi.rootCalatog.id }}
+  rootCatalogTitle: {{ .Values.nativeapi.rootCalatog.title }}
+  rootCatalogDescription: {{ .Values.nativeapi.rootCalatog.description }}
+  hostname: {{ .Values.nativeapi.hostname }}
   lutConfigs:
     "[bbox={value}]":
       - "OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POLYGON(({value})))"
