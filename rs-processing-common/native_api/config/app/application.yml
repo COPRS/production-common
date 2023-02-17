@@ -28,9 +28,9 @@ native-api:
   include-additional-attributes: true
   # default limit
   defaultLimit: {{ .Values.nativeapi.defaultLimit }}
-  rootCatalogId: {{ .Values.nativeapi.rootCalatog.id }}
-  rootCatalogTitle: {{ .Values.nativeapi.rootCalatog.title }}
-  rootCatalogDescription: {{ .Values.nativeapi.rootCalatog.description }}
+  rootCatalogId: {{ .Values.nativeapi.rootCatalog.id }}
+  rootCatalogTitle: {{ .Values.nativeapi.rootCatalog.title }}
+  rootCatalogDescription: {{ .Values.nativeapi.rootCatalog.description }}
   hostname: {{ .Values.nativeapi.hostname }}
   lutConfigs:
     "[bbox={value}]":
