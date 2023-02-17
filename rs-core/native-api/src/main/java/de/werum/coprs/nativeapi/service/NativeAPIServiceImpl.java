@@ -1,6 +1,8 @@
 package de.werum.coprs.nativeapi.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,14 +12,22 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import de.werum.coprs.nativeapi.config.NativeApiProperties;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
+import de.werum.coprs.nativeapi.rest.model.stac.StacLink;
+import de.werum.coprs.nativeapi.rest.model.stac.StacRootCatalog;
 
 @Controller
 public class NativeAPIServiceImpl {
 	private static final Logger LOG = LogManager.getLogger(NativeAPIServiceImpl.class);
 	
 	private static final String PARAM_PAGE = "page";
+	
+	private static final String STACSPEC_CORE = "https://api.stacspec.org/v1.0.0-rc.1/core";
 
+	@Autowired
+	private NativeApiProperties properties;
+	
 	@Autowired
 	private StatementParserServiceImpl parser;
 	
@@ -63,5 +73,21 @@ public class NativeAPIServiceImpl {
 		return result;
 	}
 	
-
+	public StacRootCatalog getLandingPage() {
+		StacRootCatalog rootCatalog = new StacRootCatalog();
+		
+		rootCatalog.setId(properties.getRootCatalogId());
+		rootCatalog.setTitle(properties.getRootCatalogTitle());
+		rootCatalog.setDescription(properties.getRootCatalogDescription());
+		
+		List<String> conformsTo = new ArrayList<>();
+		conformsTo.add("https://api.stacspec.org/v1.0.0-rc.1/core");
+		
+		rootCatalog.getLinks().add(new StacLink("self", properties.getHostname(), "application/json", properties.getRootCatalogTitle()));
+		rootCatalog.getLinks().add(new StacLink("root", properties.getHostname(), "application/json", properties.getRootCatalogTitle()));
+		rootCatalog.getLinks().add(new StacLink("child", properties.getHostname() + "/collections", "application/json", "Collections"));
+		rootCatalog.getLinks().add(new StacLink("search", properties.getHostname() + "/search", "application/geo+json", "STAC search endpoint"));
+		
+		return rootCatalog;
+	}
 }

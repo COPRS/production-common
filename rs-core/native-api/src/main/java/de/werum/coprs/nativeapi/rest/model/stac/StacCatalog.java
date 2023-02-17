@@ -20,7 +20,7 @@ public class StacCatalog implements Serializable {
 	private String type = "Catalog";
 	
 	@JsonProperty("stac_version")
-	private String stacVersion;
+	private String stacVersion = "1.0.0";
 	
 	@JsonProperty("stac_extensions")
 	private List<String> stacExtensions = new ArrayList<>();
@@ -31,7 +31,7 @@ public class StacCatalog implements Serializable {
 	
 	private String description;
 	
-	private List<StacLink> links;
+	private List<StacLink> links = new ArrayList<>();
 	
 	public String getType() {
 		return type;

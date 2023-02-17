@@ -24,24 +24,31 @@ public class StacProvider implements Serializable {
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	public String getDescription() {
 		return description;
 	}
+	
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
 	public List<String> getRoles() {
 		return roles;
 	}
+	
 	public void setRoles(List<String> roles) {
 		this.roles = roles;
 	}
+	
 	public String getUrl() {
 		return url;
 	}
+	
 	public void setUrl(String url) {
 		this.url = url;
 	}

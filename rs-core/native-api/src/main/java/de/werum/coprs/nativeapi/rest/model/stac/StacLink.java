@@ -17,6 +17,17 @@ public class StacLink implements Serializable {
 	private String href;
 	private String type;
 	private String title;
+	
+	public StacLink() {
+		super();
+	}
+	
+	public StacLink(String rel, String href, String type, String title) {
+		this.rel = rel;
+		this.href = href;
+		this.type = type;
+		this.title = title;
+	}
 
 	public String getHref() {
 		return this.href;
@@ -49,6 +60,4 @@ public class StacLink implements Serializable {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-
-
 }

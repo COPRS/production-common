@@ -1,6 +1,8 @@
 package de.werum.coprs.nativeapi.rest.model.stac;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +26,7 @@ public class StacCollection implements Serializable {
 	private String stacVersion;
 	
 	@JsonProperty("stac_extensions")
-	private List<String> stacExtensions;
+	private List<String> stacExtensions = new ArrayList<>();
 	
 	private String id;
 	
@@ -32,19 +34,19 @@ public class StacCollection implements Serializable {
 	
 	private String description;
 	
-	private List<String> keywords;
+	private List<String> keywords = new ArrayList<>();
 	
 	private String license;
 	
-	private List<StacProvider> providers;
+	private List<StacProvider> providers = new ArrayList<>();
 	
 	private StacExtent extent;
 	
-	private Map<String, Object> summaries;
+	private Map<String, Object> summaries = new HashMap<>();
 	
-	private List<StacLink> links;
+	private List<StacLink> links = new ArrayList<>();
 	
-	private Map<String, StacAsset> assets;
+	private Map<String, StacAsset> assets = new HashMap<>();
 
 	public String getType() {
 		return type;

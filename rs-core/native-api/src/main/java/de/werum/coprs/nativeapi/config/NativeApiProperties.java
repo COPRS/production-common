@@ -24,6 +24,20 @@ public class NativeApiProperties {
 
 	private boolean includeAdditionalAttributes = true;
 	
+	private String rootCatalogId;
+	private String rootCatalogTitle;
+	private String rootCatalogDescription;
+	
+	private String hostname;
+	
+	public String getHostname() {
+		return hostname;
+	}
+
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
+	}
+
 	private Map<String,List<String>> lutConfigs = new HashMap<>();
 
 	public Map<String, List<String>> getLutConfigs() {
@@ -96,6 +110,30 @@ public class NativeApiProperties {
 
 	public void setDefaultLimit(Integer defaultLimit) {
 		this.defaultLimit = defaultLimit;
+	}
+
+	public String getRootCatalogId() {
+		return rootCatalogId;
+	}
+
+	public void setRootCatalogId(String rootCatalogId) {
+		this.rootCatalogId = rootCatalogId;
+	}
+
+	public String getRootCatalogTitle() {
+		return rootCatalogTitle;
+	}
+
+	public void setRootCatalogTitle(String rootCatalogTitle) {
+		this.rootCatalogTitle = rootCatalogTitle;
+	}
+
+	public String getRootCatalogDescription() {
+		return rootCatalogDescription;
+	}
+
+	public void setRootCatalogDescription(String rootCatalogDescription) {
+		this.rootCatalogDescription = rootCatalogDescription;
 	}
 
 }
