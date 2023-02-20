@@ -1,6 +1,7 @@
 package de.werum.coprs.nativeapi.config;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ public class NativeApiProperties {
 	
 	private String hostname;
 	
-	private Map<String, StacCollectionProperties> collections = new HashMap<>();
+	private Map<String, StacCollectionProperties> collections = new LinkedHashMap<>();
 	
 	public String getHostname() {
 		return hostname;

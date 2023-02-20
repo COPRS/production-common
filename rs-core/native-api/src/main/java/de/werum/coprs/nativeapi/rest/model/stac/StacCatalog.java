@@ -33,7 +33,7 @@ public class StacCatalog implements Serializable {
 
 	private List<StacLink> links = new ArrayList<>();
 
-	private List<StacCollection> collections;
+	private List<StacCollection> collections = new ArrayList<>();
 
 	public String getType() {
 		return type;
