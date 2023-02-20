@@ -30,6 +30,8 @@ public class NativeApiProperties {
 	
 	private String hostname;
 	
+	private Map<String, StacCollectionProperties> collections;
+	
 	public String getHostname() {
 		return hostname;
 	}
@@ -136,4 +138,36 @@ public class NativeApiProperties {
 		this.rootCatalogDescription = rootCatalogDescription;
 	}
 
+	public Map<String, StacCollectionProperties> getCollections() {
+		return collections;
+	}
+
+	public void setCollections(Map<String, StacCollectionProperties> collections) {
+		this.collections = collections;
+	}
+
+	public class StacCollectionProperties {
+		private String title;
+		private String description;
+		private String license;
+		
+		public String getTitle() {
+			return title;
+		}
+		public void setTitle(String title) {
+			this.title = title;
+		}
+		public String getDescription() {
+			return description;
+		}
+		public void setDescription(String description) {
+			this.description = description;
+		}
+		public String getLicense() {
+			return license;
+		}
+		public void setLicense(String license) {
+			this.license = license;
+		}
+	}
 }

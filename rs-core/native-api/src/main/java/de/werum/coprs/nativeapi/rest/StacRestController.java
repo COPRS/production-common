@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.werum.coprs.nativeapi.rest.model.stac.StacCatalog;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
 import de.werum.coprs.nativeapi.rest.model.stac.StacRootCatalog;
 import de.werum.coprs.nativeapi.service.NativeAPIServiceImpl;
@@ -29,6 +30,13 @@ public class StacRestController {
 		LOG.info("Received external stac landing page request");
 		
 		return ResponseEntity.ok(nativeAPI.getLandingPage());
+	}
+	
+	@RequestMapping(path = "/collections", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<StacCatalog> handleStacCollectionsPage() {
+		LOG.info("Received external request for stac collections page");
+		
+		return ResponseEntity.ok(nativeAPI.getCollectionsPage());
 	}
 	
 	@RequestMapping(path = "/search", method = RequestMethod.GET, produces = "application/geo+json")
