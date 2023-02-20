@@ -24,7 +24,7 @@ public class StacRestController {
 	@Autowired
 	private NativeAPIServiceImpl nativeAPI;
 
-	@RequestMapping(path = "/", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(path = "", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<StacRootCatalog> handleStacLandingPage() {
 		LOG.info("Received external stac landing page request");
 		
