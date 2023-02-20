@@ -68,7 +68,7 @@ public class NativeAPIServiceImpl {
 		LOG.debug("OData query generated: {}", oDataQuery);
 
 		// send the query to the backend and convert to stac
-		String queryUrl = backend.buildPripQueryUrl(oDataQuery, false, page);		
+		String queryUrl = backend.buildPripQueryUrl(oDataQuery, true, page);		
 		StacItemCollection result = backend.queryOData(queryUrl);
 		return result;
 	}
