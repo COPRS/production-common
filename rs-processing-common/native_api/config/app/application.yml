@@ -32,6 +32,8 @@ native-api:
   rootCatalogTitle: {{ .Values.nativeapi.rootCatalog.title }}
   rootCatalogDescription: {{ .Values.nativeapi.rootCatalog.description }}
   hostname: {{ .Values.nativeapi.hostname }}
+  collections:
+    {{ .Values.nativeapi.collections }}
   lutConfigs:
     "[bbox={value}]":
       - "OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POLYGON(({value})))"

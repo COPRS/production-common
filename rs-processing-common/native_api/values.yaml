@@ -36,9 +36,19 @@ nativeapi:
     defaultLimit: 100
     rootCatalog:
         id: catalogs
-        title: Copernicus Reference System STAC
-        description: 
+        title: COPRS STAC
+        description: STAC interface for the Copernicus Reference System
     hostname: https://referencesystem.copernicus.eu
+    collections:
+        s1:
+            title: Collection of Sentinel-1
+            description: This description holds all published Sentinel-1 products of the Copernicus Reference System
+        s2:
+            title: Collection of Sentinel-2
+            description: This description holds all published Sentinel-2 products of the Copernicus Reference System
+        s3:
+            title: Collection of Sentinel-3
+            description: This description holds all published Sentinel-3 products of the Copernicus Reference System
 
 resources:
   cpu:
