@@ -33,7 +33,19 @@ native-api:
   rootCatalogDescription: {{ .Values.nativeapi.rootCatalog.description }}
   hostname: {{ .Values.nativeapi.hostname }}
   collections:
-    {{ .Values.nativeapi.collections }}
+    s1:
+      title: {{ .Values.nativeapi.collection.s1.title }}
+      description: {{ .Values.nativeapi.collection.s1.description }}
+      license: {{ .Values.nativeapi.collection.s1.license }}
+    s2:
+      title: {{ .Values.nativeapi.collection.s2.title }}
+      description: {{ .Values.nativeapi.collection.s2.description }}
+      license: {{ .Values.nativeapi.collection.s2.license }}
+    s3:
+      title: {{ .Values.nativeapi.collection.s3.title }}
+      description: {{ .Values.nativeapi.collection.s3.description }}
+      license: {{ .Values.nativeapi.collection.s3.license }}
+    
   lutConfigs:
     "[bbox={value}]":
       - "OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POLYGON(({value})))"
