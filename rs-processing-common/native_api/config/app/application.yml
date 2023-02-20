@@ -34,17 +34,17 @@ native-api:
   hostname: {{ .Values.nativeapi.hostname }}
   collections:
     s1:
-      title: {{ .Values.nativeapi.collection.s1.title }}
-      description: {{ .Values.nativeapi.collection.s1.description }}
-      license: {{ .Values.nativeapi.collection.s1.license }}
+      title: {{ .Values.nativeapi.collections.s1.title }}
+      description: {{ .Values.nativeapi.collections.s1.description }}
+      license: {{ .Values.nativeapi.collections.s1.license }}
     s2:
-      title: {{ .Values.nativeapi.collection.s2.title }}
-      description: {{ .Values.nativeapi.collection.s2.description }}
-      license: {{ .Values.nativeapi.collection.s2.license }}
+      title: {{ .Values.nativeapi.collections.s2.title }}
+      description: {{ .Values.nativeapi.collections.s2.description }}
+      license: {{ .Values.nativeapi.collections.s2.license }}
     s3:
-      title: {{ .Values.nativeapi.collection.s3.title }}
-      description: {{ .Values.nativeapi.collection.s3.description }}
-      license: {{ .Values.nativeapi.collection.s3.license }}
+      title: {{ .Values.nativeapi.collections.s3.title }}
+      description: {{ .Values.nativeapi.collections.s3.description }}
+      license: {{ .Values.nativeapi.collections.s3.license }}
     
   lutConfigs:
     "[bbox={value}]":
