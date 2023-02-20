@@ -33,18 +33,12 @@ native-api:
   rootCatalogDescription: {{ .Values.nativeapi.rootCatalog.description }}
   hostname: {{ .Values.nativeapi.hostname }}
   collections:
-    s1:
-      title: {{ .Values.nativeapi.collections.s1.title }}
-      description: {{ .Values.nativeapi.collections.s1.description }}
-      license: {{ .Values.nativeapi.collections.s1.license }}
-    s2:
-      title: {{ .Values.nativeapi.collections.s2.title }}
-      description: {{ .Values.nativeapi.collections.s2.description }}
-      license: {{ .Values.nativeapi.collections.s2.license }}
-    s3:
-      title: {{ .Values.nativeapi.collections.s3.title }}
-      description: {{ .Values.nativeapi.collections.s3.description }}
-      license: {{ .Values.nativeapi.collections.s3.license }}
+{{- range $key, $val := .Values.nativeapi.collections }}
+    {{ $key}}:
+      title: {{ $val.title | quote }}
+      description: {{ $val.description | quote }}
+      license: {{ $val.license | quote }}
+{{- end}}
     
   lutConfigs:
     "[bbox={value}]":
