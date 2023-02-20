@@ -30,7 +30,7 @@ public class NativeApiProperties {
 	
 	private String hostname;
 	
-	private Map<String, StacCollectionProperties> collections;
+	private Map<String, StacCollectionProperties> collections = new HashMap<>();
 	
 	public String getHostname() {
 		return hostname;
@@ -146,7 +146,7 @@ public class NativeApiProperties {
 		this.collections = collections;
 	}
 
-	public class StacCollectionProperties {
+	public static class StacCollectionProperties {
 		private String title;
 		private String description;
 		private String license;
