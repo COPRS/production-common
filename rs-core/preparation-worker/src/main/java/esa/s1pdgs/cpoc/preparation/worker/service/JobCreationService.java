@@ -174,6 +174,8 @@ public class JobCreationService {
 			if (t0 != null) {
 				execJob.getAdditionalFields().put("t0PdgsDate", DateUtils.formatToMetadataDateTimeFormat(
 						t0.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+			} else {
+				LOGGER.warn("Inputs did not have any t0PdgsDate values. Set t0PdgsDate for outputs to null!");
 			}
 
 			typeAdapter.customJobDto(job, execJob);
