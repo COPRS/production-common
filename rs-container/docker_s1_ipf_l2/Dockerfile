@@ -40,7 +40,7 @@ RUN mkdir -p /data/oqcWD && chown piccontrol:pic_run /data/oqcWD
  
 ### WA RS-815 START ###
 #RUN useradd -u 1001 rsuser
-
+ 
 #USER rsuser:rsuser
 
 USER  piccontrol:pic_run
