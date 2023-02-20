@@ -23,7 +23,7 @@ public class StacCollection implements Serializable {
 	private String type = "Collection";
 	
 	@JsonProperty("stac_version")
-	private String stacVersion;
+	private String stacVersion = "1.0.0";
 	
 	@JsonProperty("stac_extensions")
 	private List<String> stacExtensions = new ArrayList<>();
