@@ -128,6 +128,17 @@ public class NativeAPIServiceImpl {
 
 		return catalog;
 	}
+	
+	/**
+	 * Create static page for one specific collection
+	 */
+	public StacCollection getCollectionPage(final String collectionName) {
+		if (properties.getCollections().containsKey(collectionName)) {
+			return createCollection(collectionName, properties.getCollections().get(collectionName));
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Create a StacCollection object based on a name and defined properties

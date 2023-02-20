@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import de.werum.coprs.nativeapi.rest.model.stac.StacError;
+
 @RestControllerAdvice
 public class StacRestExceptionHandler {
 
@@ -27,7 +29,6 @@ public class StacRestExceptionHandler {
 		final StacRestControllerException ex = (StacRestControllerException) e;
 //		NativeApiRestController.LOGGER.error(ex.getMessage());
 
-		return ResponseEntity.status(ex.getStatus()).body(ex.getMessage());
+		return ResponseEntity.status(ex.getStatus()).body(new StacError(ex.getMessage(), ex.getStatus().value()));
 	}
-
 }

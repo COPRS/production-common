@@ -5,13 +5,16 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.werum.coprs.nativeapi.rest.model.stac.StacCatalog;
+import de.werum.coprs.nativeapi.rest.model.stac.StacCollection;
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
 import de.werum.coprs.nativeapi.rest.model.stac.StacRootCatalog;
 import de.werum.coprs.nativeapi.service.NativeAPIServiceImpl;
@@ -37,6 +40,18 @@ public class StacRestController {
 		LOG.info("Received external request for stac collections page");
 		
 		return ResponseEntity.ok(nativeAPI.getCollectionsPage());
+	}
+	
+	@RequestMapping(path = "/collections/{name}", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<StacCollection> handleStacCollectionPage(@PathVariable("name") final String name) {
+		LOG.info("Received external request for stac collection page: {}", name);
+		
+		StacCollection result = nativeAPI.getCollectionPage(name);
+		if (result != null) {
+			return ResponseEntity.ok(result);
+		}
+		
+		throw new StacRestControllerException("Collection " + name + " not found", HttpStatus.NOT_FOUND);
 	}
 	
 	@RequestMapping(path = "/search", method = RequestMethod.GET, produces = "application/geo+json")
