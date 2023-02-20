@@ -105,6 +105,10 @@ public class ODataBackendServiceImpl {
 		String topUrl = String.format("$top=%s", limit);
 		pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? topUrl : "&"+topUrl );
 		
+		// Adding expand attributes by default
+		String expandUrl = String.format("$expand=%s", "Attributes");
+		pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? expandUrl : "&"+expandUrl );
+		
 		// Adding skip param using the page. If no page is set we ignore it.
 		if (page != 0) {
 			String skipUrl = String.format("$skip=%s", page);
