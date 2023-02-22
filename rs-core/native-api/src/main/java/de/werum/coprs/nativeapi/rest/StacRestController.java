@@ -1,5 +1,8 @@
 package de.werum.coprs.nativeapi.rest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
@@ -52,6 +55,20 @@ public class StacRestController {
 		}
 		
 		throw new StacRestControllerException("Collection " + name + " not found", HttpStatus.NOT_FOUND);
+	}
+	
+	@RequestMapping(path = "/collections/{name}/items", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<StacItemCollection> handleStacCollectionItemsPage(@PathVariable("name") final String name) {
+		LOG.info("Received external request for stac collection items page: {}", name);
+		Map<String, String> parameters = new HashMap<>();
+		parameters.put("collections", name);
+		
+		StacItemCollection result = nativeAPI.processSearchRequest(parameters);
+		if (result != null) {
+			return ResponseEntity.ok(result);
+		}
+		
+		throw new StacRestControllerException("No items found for collection " + name, HttpStatus.NOT_FOUND);
 	}
 	
 	@RequestMapping(path = "/search", method = RequestMethod.GET, produces = "application/geo+json")
