@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-730: Add extended attributes to PRIP for SENTINEL-3
 - RS-731: Add extended attributes to PRIP for SENTINEL-2
 
-
 ### Changed
 
 - RS-595: Updated metadata extraction for Sentinel-2
