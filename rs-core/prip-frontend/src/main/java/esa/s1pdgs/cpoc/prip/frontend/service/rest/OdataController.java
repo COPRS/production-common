@@ -108,7 +108,7 @@ public class OdataController {
 		   
 	      if(queryString != null) {
 	         // ICD 1.4 Intersects query (required), Within and Disjoints queries (supported due to testing requirements)
-	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.(Intersects|Within|Disjoints)(?:\\(|%28))([^,]*area=geography)", "$1geo_property=Footprint,geo_shape=geography")
+	         queryString = queryString.replaceFirst("(\\$filter=.*OData\\.CSC\\.(Intersects|Within|Disjoints)(?:\\(|%28))([^,]*area(=|%3D|%3d)geography)", "$1geo_property=Footprint,geo_shape=geography")
 	        		 				  .replaceAll(",%20", ","); // replace unsupported spaces after comma
 	      }
 	      
