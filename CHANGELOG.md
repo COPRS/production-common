@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - RS-730: Add extended attributes to PRIP for SENTINEL-3
 - RS-731: Add extended attributes to PRIP for SENTINEL-2
+- RS-826: Add option to overwrite shell for IPF with "tcsh"
 
 ### Changed
 
