@@ -13,6 +13,6 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY /target/rs-metadata-catalog-extraction-*.jar rs-metadata-catalog-extraction.jar
 COPY /config/start.sh start.sh
-COPY /config/xsltDir xslt
+#COPY /config/xsltDir xslt
 
 ENTRYPOINT ["/app/start.sh"]
