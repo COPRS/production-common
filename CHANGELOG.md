@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0-rc1] - 2023-02-22
+
+### Added
+
+- RS-730: Add extended attributes to PRIP for SENTINEL-3
+- RS-731: Add extended attributes to PRIP for SENTINEL-2
+
+
+### Changed
+
+- RS-595: Updated metadata extraction for Sentinel-2
+- RS-708: Fix missing_output field for L0ASP processing in RFC instrument mode
+- RS-751: Updated traces in preparation-worker to be more in line with Trace ICD
+- RS-801: Updated documentation for processing-common chains regarding required OBS connection
+- RS-809: Improved logging for missmatching number of results for selection policy "ValIntersectWithoutDuplicates"
+- RS-811: Prevent string concatenation for debug log, if debug logs are not printed
+- RS-821: Improved logging of missing t0PdgsDate on input files
+- RS-822: Renamed prometheus gauge "rs_pending_processing_job" to "rs.pending.processing.job"
+
+### Removed
+
+- N/A
+
 ## [1.10.0-rc1] - 2023-01-27
 
 ### Added
