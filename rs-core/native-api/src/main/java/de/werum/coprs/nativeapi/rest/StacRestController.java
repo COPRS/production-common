@@ -57,7 +57,7 @@ public class StacRestController {
 		throw new StacRestControllerException("Collection " + name + " not found", HttpStatus.NOT_FOUND);
 	}
 	
-	@RequestMapping(path = "/collections/{name}/items", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(path = "/collections/{name}/items", method = RequestMethod.GET, produces = "application/geo+json")
 	public ResponseEntity<StacItemCollection> handleStacCollectionItemsPage(@PathVariable("name") final String name) {
 		LOG.info("Received external request for stac collection items page: {}", name);
 		Map<String, String> parameters = new HashMap<>();
