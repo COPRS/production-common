@@ -42,7 +42,7 @@ native-api:
     
   lutConfigs:
     "[bbox={value}]":
-      - "OData.CSC.Intersects(area=geography'SRID=4326;POLYGON(({value}))'')"
+      - "OData.CSC.Intersects(area=geography'SRID=4326;POLYGON(({value}))')"
     "[point={value}]": 
       - "OData.CSC.Intersects(area=geography'SRID=4326;POINT({value})')"
     "[productname={value}]": 
