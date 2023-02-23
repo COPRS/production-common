@@ -35,7 +35,7 @@ jobs:
         GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
 
   build-base:
-    #needs: [gg-scan] 
+    needs: [gg-scan] 
     runs-on: ubuntu-latest    
     
     steps:
