@@ -124,7 +124,8 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 	private void serveProducts(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
 	      final ContentType responseFormat, final EdmEntitySet edmEntitySet) throws ODataApplicationException, ODataLibraryException {
       final ExpandOptionImpl expandOption = (ExpandOptionImpl) uriInfo.getExpandOption();
-		if (null != expandOption && EdmProvider.ATTRIBUTES_SET_NAME.equals(expandOption.getText())) {
+		if (null != expandOption && null != expandOption.getText() &&
+		      List.of(expandOption.getText().split(",")).contains(EdmProvider.ATTRIBUTES_SET_NAME)) {
 			for (final String setname : EdmProvider.ATTRIBUTES_TYPE_NAMES) {
 				final ExpandItem item = new ExpandItemImpl().setResourcePath(new UriInfoImpl().addResourcePart(
 						new UriResourceNavigationPropertyImpl(edmEntitySet.getEntityType().getNavigationProperty(setname))));

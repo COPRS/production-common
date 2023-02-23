@@ -667,7 +667,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			if (entry.getKey().startsWith("attr_")) {
 				
 				if (entry.getKey() == "attr_processingDate_date") {
-					LOGGER.debug("Processing attr_processingDate_date");
+					LOGGER.trace("Processing attr_processingDate_date");
 				}
 				
 				final String key = entry.getKey();
@@ -696,7 +696,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 		pm.setBrowseKeys(browseKeys);
 
-		LOGGER.debug("hit {}", pm);
+		LOGGER.trace("hit {}", pm);
 		return pm;
 	}
 

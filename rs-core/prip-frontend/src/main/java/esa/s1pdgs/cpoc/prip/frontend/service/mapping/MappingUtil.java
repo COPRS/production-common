@@ -6,12 +6,12 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Checks
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentLength;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentType;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Footprint;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ProductionType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.QuicklookProperties;
-import esa.s1pdgs.cpoc.prip.frontend.service.processor.ProductEntityCollectionProcessor;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
@@ -64,7 +63,7 @@ public class MappingUtil {
 	private static final int MILLIS_PER_SECOND = 1000;
 
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
-		LOGGER.debug("pripMetadataToEntity {}", pripMetadata.getName());
+		LOGGER.trace("pripMetadataToEntity {}", pripMetadata.getName());
 		
 		URI uri = MappingUtil.createId(rawBaseUri, EdmProvider.ES_PRODUCTS_NAME, pripMetadata.getId());
 		Entity entity = new Entity()
@@ -100,7 +99,7 @@ public class MappingUtil {
 		// TODO sort attributes
 		if (null != pripMetadata.getAttributes()) {
 			for (Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
-				LOGGER.debug("Handle {}", entrySet.getKey());
+				LOGGER.trace("Handle {}", entrySet.getKey());
 				final FullQualifiedName valueType;
 				final int firstSeparatorPosition = entrySet.getKey().indexOf('_');
 				final int lastSeparatorPosition = entrySet.getKey().lastIndexOf('_');
