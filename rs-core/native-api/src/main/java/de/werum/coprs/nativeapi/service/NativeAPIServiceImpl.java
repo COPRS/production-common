@@ -52,7 +52,11 @@ public class NativeAPIServiceImpl {
 	}
 	
 	public StacItemCollection processSearchRequest(final HttpServletRequest request) {
-		Map<String,String> parameters = flattenParameters(request.getParameterMap());
+		return processSearchRequest(flattenParameters(request.getParameterMap()));
+		
+	}
+	
+	public StacItemCollection processSearchRequest(final Map<String, String> parameters) {
 		LOG.debug("Identified {} parameters for search request: {}",parameters.size(), parameters);
 		
 		// extract pagination parameter if existing and remove it from the parameter as not intended to be processed by the filter
