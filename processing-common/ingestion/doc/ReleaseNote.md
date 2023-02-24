@@ -264,7 +264,17 @@ If using EDIP client:
 |---------------------------------------------------------------|---------------|
 |``app.ingestion-worker.edip.host-configs.host1.listingTimeoutSec``|Timeout in seconds for the robust EDIP client (if enabled) while listing directories. Default: `180`|
 |``app.ingestion-worker.edip.enableRobustFtpClient``|To switch on the robust EDIP client using timeout mechanism for listing directories (#RS-519). Default `true`|
- 
+
+## Uncompression worker
+
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-uncompress.compression-worker.uncompressionCommand``| Defines the script that shall be executed for performing an uncompression activity. As default the script ``/app/uncompression.sh`` will be used. The script is mission agnostic.|
+|``app.ingestion-uncompress.compression-worker.workingDirectory`` | The local directory of the worker that shall be used as temporary working directory to perform the compression activity. This is set by default to ``/tmp/compression`` |
+|``app.ingestion-uncompress.compression-worker.compressionTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
+|``app.ingestion-uncompress.compression-worker.requestTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
+|``app.ingestion-uncompress.compression-worker.hostname`` | The timeout of the overall request. If the request takes more seconds than configured, it is considered to be hanging. |
+|``app.ingestion-uncompress.compression-worker.skipUncompression`` | Flag to signal whether or not the complete uncompression-logic shall be skipped. Default: false |
   
 ## Deployer properties
 
