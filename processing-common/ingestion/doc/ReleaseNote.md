@@ -10,7 +10,9 @@ The Ingestion Trigger application polls the configured source and looking for th
 
 The Ingestion Filter application verifies if the product is in the time window for products that are accepted. By default the COPRS is not processing all data arriving, but just about 3%. Products that are not within the accepted time window will be discard. If they are accepted, a message will be send to the Ingestion Worker.
 
-The Ingestion Worker application is doing the actual I/O activity and performing the download from the configured interface. Once successfully finished, the product will be uploaded into the Object Storage and a new Ingestion Event generated to notify the COPRS that a new product had been added to the system.
+The Ingestion Worker application is doing the actual I/O activity and performing the download from the configured interface. Once successfully finished, the product will be uploaded into the Object Storage and a new CatalogJob generated and provided to the umcompression.
+
+The Uncompression is used, to provide the input files uncompressed to the system. Compressed inputs will be downloaded from the OBS and uploaded in their uncompressed form to a different bucket. A new CatalogJob is then generated to notify the COPRS of the new product.
 
 For details, please see [Ingestion Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#ingestion-chain)
 
