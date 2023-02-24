@@ -103,6 +103,9 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 		result.setUid(report.getUid());
 		result.setStoragePath(obsClient.getAbsoluteStoragePath(event.getProductFamily(), event.getKeyObjectStorage()));
 		result.setTimeliness(event.getTimeliness());
+		
+		// RS-536: Add RS Chain Version to message
+		result.setRsChainVersion(commonProperties.getRsChainVersion());
 
 		return MessageBuilder.withPayload(result).build();
 	}

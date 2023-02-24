@@ -106,6 +106,9 @@ public class IngestionWorkerService implements Function<IngestionJob, List<Messa
 		for (final Product<CatalogJob> product : products) {
 			final CatalogJob event = product.getDto();
 			event.setUid(reportingId);
+			
+			// RS-536: Add RS Chain version to message
+			event.setRsChainVersion(commonProperties.getRsChainVersion());
 
 			LOG.info("publishing : {}", event);
 			result.add(MessageBuilder.withPayload(event).build());

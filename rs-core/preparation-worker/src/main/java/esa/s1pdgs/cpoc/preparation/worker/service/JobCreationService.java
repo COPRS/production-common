@@ -132,6 +132,9 @@ public class JobCreationService {
 				execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
 			}
 		}
+		
+		// RS-536: Add RS Chain version to message
+		execJob.setRsChainVersion(commonProperties.getRsChainVersion());
 
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)

@@ -232,6 +232,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
 				properties.getLevel(), 
 				properties,
+				commonProperties,
 				job.isDebug());
 		
 		reporting.begin(

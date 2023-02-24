@@ -24,6 +24,7 @@ import org.springframework.messaging.support.MessageBuilder;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.BrowseImage;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -116,6 +117,11 @@ public class OutputProcessor {
 	 */
 	private final ApplicationProperties properties;
 	
+	/**
+	 * Common Properties
+	 */
+	private final CommonConfigurationProperties commonProperties;
+	
 	private final boolean debugMode;
 
 	public enum AcquisitionMode {
@@ -137,7 +143,8 @@ public class OutputProcessor {
 			final int sizeUploadBatch,
 			final String prefixMonitorLogs, 
 			final ApplicationLevel appLevel, 
-			final ApplicationProperties properties
+			final ApplicationProperties properties,
+			final CommonConfigurationProperties commonProperties
 	) {
 		this(
 				obsClient,
@@ -149,6 +156,7 @@ public class OutputProcessor {
 				prefixMonitorLogs,
 				appLevel,
 				properties,
+				commonProperties,
 				inputMessage.isDebug());
 	}
 	
@@ -162,6 +170,7 @@ public class OutputProcessor {
 			final String prefixMonitorLogs,
 			final ApplicationLevel appLevel,
 			final ApplicationProperties properties,
+			final CommonConfigurationProperties commonProperties,
 			final boolean debugMode) {
 		this.obsClient = obsClient;
 		this.workDirectory = workDirectory;
@@ -172,6 +181,7 @@ public class OutputProcessor {
 		this.prefixMonitorLogs = prefixMonitorLogs;
 		this.appLevel = appLevel;
 		this.properties = properties;
+		this.commonProperties = commonProperties;
 		this.debugMode = debugMode;
 		
 		this.outputUtils = new OutputUtils(properties, prefixMonitorLogs);
@@ -591,6 +601,10 @@ public class OutputProcessor {
 			res.setMissionId(inputMessage.getMissionId());
 			res.getAdditionalFields().put("t0PdgsDate", t0PdgsDate);
 			res.setProductSizeByte(msg.getProductSizeBytes());
+			
+			// RS-536: Add RS Chain Version to message
+			res.setRsChainVersion(commonProperties.getRsChainVersion());
+			
 			LOGGER.info("{} 3 - Successful published KAFKA message for output {}", prefixMonitorLogs,
 					msg.getProductName());
 			return res;

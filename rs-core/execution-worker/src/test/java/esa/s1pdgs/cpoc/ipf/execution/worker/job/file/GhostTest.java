@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
@@ -31,9 +32,13 @@ public class GhostTest {
 		properties.setThresholdIw(2);
 		properties.setThresholdSm(2);
 		properties.setThresholdWv(30);
+		
+		final CommonConfigurationProperties commonProperties = new CommonConfigurationProperties();
+		commonProperties.setRsChainName("test-chain");
+		commonProperties.setRsChainVersion("0.0.1");
 
 		processor = new OutputProcessor(obsClient, inputMessage, "outputs.list", 2, "MONITOR",
-				ApplicationLevel.L0, properties);
+				ApplicationLevel.L0, properties, commonProperties);
 	}
 
 	private final boolean isGhostCandidate(final String name) {

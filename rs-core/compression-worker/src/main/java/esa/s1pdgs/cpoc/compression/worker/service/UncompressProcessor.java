@@ -110,6 +110,9 @@ public class UncompressProcessor extends AbstractProcessor
 		result.setStationName(event.getStationName());
 		result.setMetadataMode(event.getMetadataMode());
 		result.setTimeliness(event.getTimeliness());
+		
+		// RS-536: Add RS Chain Version to message
+		result.setRsChainVersion(commonProperties.getRsChainVersion());
 
 
 		return MessageBuilder.withPayload(result).build();

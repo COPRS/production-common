@@ -215,6 +215,8 @@ public final class Inbox {
 					pathMetadataExtractor.metadataFrom(absolutePath),
 					t0PdgsDate
 				);
+			// RS-536: Add RS Chain version to message
+			job.setRsChainVersion(commonProperties.getRsChainVersion());
 			
 			reporting.end(
 					new IngestionTriggerReportingOutput(entry.getPickupURL() + "/" + entry.getRelativePath()), 

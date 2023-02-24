@@ -188,6 +188,9 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		if (metadata.has("timeliness")) {
 			catEvent.setTimeliness((String) metadata.get("timeliness"));
 		}
+		
+		// RS-536: Add RS Chain Version to message
+		catEvent.setRsChainVersion(commonProperties.getRsChainVersion());
 
 		return catEvent;
 	}
