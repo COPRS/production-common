@@ -13,6 +13,6 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY /target/rs-core-prip-frontend-*.jar rs-core-prip-frontend.jar
 COPY /config/start.sh start.sh
-
+ 
 ENTRYPOINT "/app/start.sh"
  
