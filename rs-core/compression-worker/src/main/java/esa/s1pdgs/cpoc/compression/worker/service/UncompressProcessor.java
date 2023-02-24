@@ -40,10 +40,29 @@ public class UncompressProcessor extends AbstractProcessor
 			final ObsClient obsClient) {
 		super(appStatus, properties, obsClient);
 		this.commonProperties = commonProperties;
+		
+		if (properties.isSkipUncompression()) {
+			LOGGER.info("Skip uncompression flag is set to true. Just pushing incoming messages forward.");
+		}
 	}
 
 	@Override
 	public Message<CatalogJob> apply(CatalogJob event) {
+		CatalogJob result = event;
+		
+		if (!properties.isSkipUncompression()) {
+			result = performUncompression(event);
+		}
+
+		return MessageBuilder.withPayload(result).build();
+	}
+	
+	private CatalogJob performUncompression(CatalogJob event) {
+		
+		if (!event.getProductFamily().isCompressed()) {
+			LOGGER.warn("Received uncompressed message (ProductFamily=%s). This may be an error, but still trying to uncompress.");
+		}
+		
 		final String workDir = properties.getWorkingDirectory();
 
 		final MissionId mission = MissionId.fromFileName(event.getKeyObjectStorage());
@@ -113,9 +132,8 @@ public class UncompressProcessor extends AbstractProcessor
 		
 		// RS-536: Add RS Chain Version to message
 		result.setRsChainVersion(commonProperties.getRsChainVersion());
-
-
-		return MessageBuilder.withPayload(result).build();
+		
+		return result;
 	}
 
 }

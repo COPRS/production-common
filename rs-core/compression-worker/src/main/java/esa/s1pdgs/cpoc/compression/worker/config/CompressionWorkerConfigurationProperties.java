@@ -33,6 +33,10 @@ public class CompressionWorkerConfigurationProperties {
      */
     private long requestTimeout;
 
+    /**
+     * Flag whether or not to skip uncompression
+     */
+    private boolean skipUncompression = false;
     
     private String hostname;
     
@@ -82,6 +86,14 @@ public class CompressionWorkerConfigurationProperties {
 
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
+	}
+
+	public boolean isSkipUncompression() {
+		return skipUncompression;
+	}
+
+	public void setSkipUncompression(boolean skipUncompression) {
+		this.skipUncompression = skipUncompression;
 	}
 
 }
