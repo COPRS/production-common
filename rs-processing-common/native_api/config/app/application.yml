@@ -39,7 +39,7 @@ native-api:
       description: {{ $val.description | quote }}
       license: {{ $val.license | quote }}
 {{- end}}
-    
+   
   lutConfigs:
     "[ids={value}]":
       - "Id eq {value}"
