@@ -99,6 +99,26 @@ The latest version can be deployed by using the following command line:
 | `nativeapi.defaultLimit` | The amount of products that are returned as limit from a query. This will be added to the OData query by using $top | `100` |
 | `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
 | `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
+| `nativeapi.collections` | Allows to configure a set of collections that shall be exposed by the stac endpoint. It contains the information about the collections that are available. | See the section below for a detailed description of the configuration | 
+
+### Collection configuration
+The attribute `nativeapi.collection` contains a list of collections that shall be exposed by the stac native API. A typical configuration looks like this:
+```
+    collections:
+        s1:
+            title: Collection of Sentinel-1
+            description: This collection holds all published Sentinel-1 products of the Copernicus Reference System
+            license: proprietary
+```
+The collection starts with its id used as key (e.g. `s1`) and will be used within URLs. The level below this structure are giving more a more descriptive information about the collection and used within the actual stac collections returned.
+
+`title` contains a long name of the the collection.
+`description` contains a more verbose description of the collection
+`license` defines the licence that shall be shown next to the collection
+
+`nativeapi.collection` can contain multiple definitions of collections that shall be made available via the endpoint `/stac/collections`.
+
+### Look up Table (LuT) configuration
 
 When a query is added to the native API endpoint a set of GET parameters will be provided. In order to translate these parameters into a valid OData query a lookup table is used that defines how the parameter shall be translated. These elements can be defined under `nativeapi.lutConfigs`. The following section contains an example configuration:
 ```
