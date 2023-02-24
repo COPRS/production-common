@@ -53,7 +53,6 @@ public class NativeAPIServiceImpl {
 	
 	public StacItemCollection processSearchRequest(final HttpServletRequest request) {
 		return processSearchRequest(flattenParameters(request.getParameterMap()));
-		
 	}
 	
 	public StacItemCollection processSearchRequest(final Map<String, String> parameters) {
