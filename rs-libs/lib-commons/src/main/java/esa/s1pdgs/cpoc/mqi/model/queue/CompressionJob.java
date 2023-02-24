@@ -86,6 +86,7 @@ public class CompressionJob extends AbstractMessage {
 		return "CompressionJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
 				+ ", outputProductFamily=" + outputProductFamily + ", outputKeyObjectStorage=" + outputKeyObjectStorage
-				+ ", compressionDirection=" + compressionDirection + ", uid=" + uid + "]";
+				+ ", compressionDirection=" + compressionDirection + ", uid=" + uid + ", rsChainVersion="
+				+ rsChainVersion + "]";
 	}
 }

@@ -64,7 +64,7 @@ public class DataRequestEvent extends AbstractMessage {
 				+ ", productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage + ", storagePath="
 				+ storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName=" + podName
 				+ ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter=" + retryCounter
-				+ ", debug=" + debug + "]";
+				+ ", debug=" + debug + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 
 }

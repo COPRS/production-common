@@ -45,6 +45,8 @@ public abstract class AbstractMessage {
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
 	protected Date creationDate = new Date();
 	
+	protected String rsChainVersion = "";
+	
 	protected String missionId = "";
 	
 	protected String satelliteId = "";
@@ -109,6 +111,14 @@ public abstract class AbstractMessage {
 
 	public void setCreationDate(final Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public String getRsChainVersion() {
+		return rsChainVersion;
+	}
+
+	public void setRsChainVersion(String rsChainVersion) {
+		this.rsChainVersion = rsChainVersion;
 	}
 
 	public String getPodName() {
@@ -218,6 +228,7 @@ public abstract class AbstractMessage {
 		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
 		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
 		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
+		result = prime * result + ((rsChainVersion == null) ? 0 : rsChainVersion.hashCode());
 		return result;
 	}
 
@@ -295,6 +306,11 @@ public abstract class AbstractMessage {
 				return false;
 		} else if (!satelliteId.equals(other.satelliteId))
 			return false;		
+		if (rsChainVersion == null) {
+			if (other.rsChainVersion != null)
+				return false;
+		} else if (!rsChainVersion.equals(other.rsChainVersion))
+			return false;
 		
 		return true;
 	}

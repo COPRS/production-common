@@ -53,7 +53,7 @@ public class PripPublishingJob extends AbstractMessage {
 	public String toString() {
 		return "PripPublishingJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
-				+ ", evictionDate=" + evictionDate + ", uid=" + uid + "]";
+				+ ", evictionDate=" + evictionDate + ", uid=" + uid + + ", rsChainVersion=" + rsChainVersion "]";
 	}
 
 }

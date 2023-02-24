@@ -11,11 +11,11 @@ import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 
 public class CatalogJob extends AbstractMessage {
 	public static final String ADDITIONAL_METADATA_FLAG_KEY = "isPathExtracted";
-	
+
 	private static final String PRODUCT_NAME_KEY = "productName";
 	private static final String RELATIVE_PATH_KEY = "relativePath";
 	private static final String MODE_KEY = "mode";
-	
+
 	private long productSizeByte = 0L;
 	private OQCFlag oqcFlag = OQCFlag.NOT_CHECKED;
 	private String stationName;
@@ -78,7 +78,7 @@ public class CatalogJob extends AbstractMessage {
 	public String getProductName() {
 		return keyObjectStorage;
 	}
-	
+
 	@JsonIgnore
 	public String getMetadataProductName() {
 		return metadata.getOrDefault(PRODUCT_NAME_KEY, "").toString();
@@ -160,7 +160,8 @@ public class CatalogJob extends AbstractMessage {
 		return "CatalogJob [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
 				+ ", oqcFlag=" + oqcFlag + ", timeliness=" + timeliness + ", uid=" + uid + ", stationName="
-				+ stationName + ", missionId=" + missionId + ", productSizeByte=" + productSizeByte + "]";
+				+ stationName + ", missionId=" + missionId + ", productSizeByte=" + productSizeByte
+				+ ", rsChainVersion=" + rsChainVersion + "]";
 	}
 
 }

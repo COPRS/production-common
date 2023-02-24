@@ -175,7 +175,7 @@ public class IngestionJob extends AbstractMessage {
 				+ ", relativePath=" + relativePath + ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName
 				+ ", uid=" + uid + ", productSizeByte=" + productSizeByte + ", lastModified=" + lastModified
 				+ ", stationName=" + stationName + ", mode=" + mode + ", timeliness=" + timeliness + ", inboxType="
-				+ inboxType + ", additionalMetadata=" + additionalMetadata + "]";
+				+ inboxType + ", additionalMetadata=" + additionalMetadata + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 
 }

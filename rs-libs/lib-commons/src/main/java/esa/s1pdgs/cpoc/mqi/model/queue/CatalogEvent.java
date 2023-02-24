@@ -43,6 +43,6 @@ public class CatalogEvent extends AbstractMessage {
 		return "CatalogEvent [productName=" + metadata.get(PRODUCT_NAME_KEY) + ", productType="
 				+ metadata.get(PRODUCT_TYPE_KEY) + ", metadata=" + metadata + ", productFamily=" + productFamily
 				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", creationDate="
-				+ creationDate + ", podName=" + podName + ", uid=" + uid + "]";
+				+ creationDate + ", podName=" + podName + ", uid=" + uid + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 }

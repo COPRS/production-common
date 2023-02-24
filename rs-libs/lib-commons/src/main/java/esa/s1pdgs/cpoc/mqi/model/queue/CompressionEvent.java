@@ -21,6 +21,6 @@ public class CompressionEvent extends AbstractMessage {
 	public String toString() {
 		return "CompressionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName + ", uid="
-				+ uid + "]";
+				+ uid + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 }
