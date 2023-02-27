@@ -38,6 +38,7 @@ native-api:
       title: {{ $val.title | quote }}
       description: {{ $val.description | quote }}
       license: {{ $val.license | quote }}
+      catalog: {{ $val.catalog | quote }}
 {{- end}}
    
   lutConfigs:
