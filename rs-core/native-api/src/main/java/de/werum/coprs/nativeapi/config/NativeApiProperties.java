@@ -146,11 +146,12 @@ public class NativeApiProperties {
 	public void setCollections(Map<String, StacCollectionProperties> collections) {
 		this.collections = collections;
 	}
-
+	
 	public static class StacCollectionProperties {
 		private String title;
 		private String description;
 		private String license;
+		private String catalog;
 		
 		public String getTitle() {
 			return title;
@@ -169,6 +170,12 @@ public class NativeApiProperties {
 		}
 		public void setLicense(String license) {
 			this.license = license;
+		}
+		public String getCatalog() {
+			return catalog;
+		}
+		public void setCatalog(String catalog) {
+			this.catalog = catalog;
 		}
 	}
 }
