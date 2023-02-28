@@ -301,6 +301,10 @@ public class PripToStacMapper {
 		if (null != filename && filename.toUpperCase().endsWith(".ZIP")) {
 			asset.setType("application/zip");
 		}
+		
+		if (null != filename && filename.toUpperCase().endsWith(".TAR")) {
+			asset.setType("application/x-tar");
+		}
 
 		asset.setDescription("download link for product data");
 		asset.setRoles(Collections.singletonList("data"));
