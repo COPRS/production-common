@@ -47,6 +47,8 @@ native-api:
       - "OData.CSC.Intersects(area=geography'SRID=4326;POLYGON(({value}))')"
     "[point={value}]": 
       - "OData.CSC.Intersects(area=geography'SRID=4326;POINT({value})')"
+    "[line={value}]":
+      - "Odata.CSC.Intersects(area=geography'SRID=4326;LINESTRING({value})')"
     "[productname={value}]": 
       - "contains(Name,'{value}')"
     "[collections={producttype}]":
