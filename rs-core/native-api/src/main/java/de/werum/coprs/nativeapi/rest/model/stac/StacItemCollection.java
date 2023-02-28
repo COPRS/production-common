@@ -17,7 +17,7 @@ public class StacItemCollection extends GeoJsonBase {
 
 	private List<StacItem> features = new ArrayList<StacItem>();
 
-	private List<Object> links;
+	private List<StacLink> links = new ArrayList<>();
 
 	@Override
 	public boolean equals(final Object o) {
@@ -48,11 +48,11 @@ public class StacItemCollection extends GeoJsonBase {
 		this.features = features;
 	}
 
-	public List<Object> getLinks() {
+	public List<StacLink> getLinks() {
 		return this.links;
 	}
 
-	public void setLinks(List<Object> links) {
+	public void setLinks(List<StacLink> links) {
 		this.links = links;
 	}
 
