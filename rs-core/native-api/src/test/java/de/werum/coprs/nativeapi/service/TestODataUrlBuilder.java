@@ -18,14 +18,14 @@ public class TestODataUrlBuilder {
 
 		String url1 = backend.buildPripQueryUrl(
 				"ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000 and contains(Name,'S3A_PRODUCT')",
-				false, 0);
+				false, 1, 100);
 		String url2 = backend.buildPripQueryUrl(
 				"ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000 and contains(Name,'S3A_PRODUCT')",
-				true, 0);
+				true, 1, 100);
 
 		String url3 = backend.buildPripQueryUrl(
 				"ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000 and contains(Name,'S3A_PRODUCT')",
-				true, 10);
+				true, 10, 100);
 
 		Assert.assertEquals(
 				"http://s1pro-prip-frontend-svc.processing.svc.cluster.local:8080/odata/v1/Products?$filter=ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000 and contains(Name,'S3A_PRODUCT')&$top=100",
@@ -35,7 +35,7 @@ public class TestODataUrlBuilder {
 				url2);
 
 		Assert.assertEquals(
-				"http://s1pro-prip-frontend-svc.processing.svc.cluster.local:8080/odata/v1/Products?$filter=ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000 and contains(Name,'S3A_PRODUCT')&$expand=Attributes,Quicklooks&$top=100&$skip=10",
+				"http://s1pro-prip-frontend-svc.processing.svc.cluster.local:8080/odata/v1/Products?$filter=ContentDate/Start gt 2010-10-18T14:33:00.000Z and ContentDate/End lt 2023-02-06T14:33:00.000 and contains(Name,'S3A_PRODUCT')&$expand=Attributes,Quicklooks&$top=100&$skip=900",
 				url3);
 	}
 }
