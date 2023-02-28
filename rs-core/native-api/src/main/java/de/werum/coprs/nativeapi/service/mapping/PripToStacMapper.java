@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import org.geojson.Crs;
 import org.geojson.GeoJsonObject;
@@ -235,29 +236,31 @@ public class PripToStacMapper {
 			for (int i = 0; i < attributesOdataJsonArray.size(); i++) {
 				final JsonObject attributeJson = attributesOdataJsonArray.getJsonObject(i);
 
-				switch (attribute) {
-				case StringAttributes:
-					additionalAttributes.addStringAttribute(attributeJson.getString("Name"),
-							attributeJson.getString("Value"));
-					continue;
-				case IntegerAttributes:
-					additionalAttributes.addIntegerAttribute(attributeJson.getString("Name"),
-							attributeJson.getJsonNumber("Value").longValue());
-					continue;
-				case DoubleAttributes:
-					additionalAttributes.addDoubleAttribute(attributeJson.getString("Name"),
-							attributeJson.getJsonNumber("Value").doubleValue());
-					continue;
-				case DateTimeOffsetAttributes:
-					additionalAttributes.addDateAttribute(attributeJson.getString("Name"),
-							attributeJson.getString("Value"));
-					continue;
-				case BooleanAttributes:
-					additionalAttributes.addBooleanAttribute(attributeJson.getString("Name"),
-							attributeJson.getBoolean("Value"));
-					continue;
-				default:
-					continue;
+				if (attributeJson.get("Value") != JsonValue.NULL) {
+					switch (attribute) {
+					case StringAttributes:
+						additionalAttributes.addStringAttribute(attributeJson.getString("Name"),
+								attributeJson.getString("Value"));
+						continue;
+					case IntegerAttributes:
+						additionalAttributes.addIntegerAttribute(attributeJson.getString("Name"),
+								attributeJson.getJsonNumber("Value").longValue());
+						continue;
+					case DoubleAttributes:
+						additionalAttributes.addDoubleAttribute(attributeJson.getString("Name"),
+								attributeJson.getJsonNumber("Value").doubleValue());
+						continue;
+					case DateTimeOffsetAttributes:
+						additionalAttributes.addDateAttribute(attributeJson.getString("Name"),
+								attributeJson.getString("Value"));
+						continue;
+					case BooleanAttributes:
+						additionalAttributes.addBooleanAttribute(attributeJson.getString("Name"),
+								attributeJson.getBoolean("Value"));
+						continue;
+					default:
+						continue;
+					}
 				}
 			}
 		}

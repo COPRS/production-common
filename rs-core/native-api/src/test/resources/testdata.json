@@ -24,6 +24,13 @@
       },
       "Footprint": null,
       "Attributes": [],
+      "DoubleAttributes": [
+        {
+          "Name": "closedSeaCover",
+          "ValueType": "Edm.Double",
+          "Value": 75.4
+        }
+      ],
       "Quicklooks": [
       	{
       		"Image": "S1A_IW_GRDH_1SDV_20200120T124926_20200120T124958_030884_038B5E_F0D1.SAFE_bwi.png"
