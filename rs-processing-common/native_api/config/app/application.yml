@@ -40,10 +40,10 @@ native-api:
       license: {{ $val.license | quote }}
       catalog: {{ $val.catalog | quote }}
 {{- end}}
-   
-{{- range $key, $val := .Values.nativeapi.lutConfigs }}
-  "{{ $key}}":
-    {{- range $config := $val}}
-      - {{ $config }}
-    {{- end}}
-{{- end}}
+  lutConfigs: 
+  {{- range $key, $val := .Values.nativeapi.lutConfigs }}
+    "{{ $key}}":
+      {{- range $config := $val}}
+        - {{ $config }}
+      {{- end}}
+  {{- end}}
