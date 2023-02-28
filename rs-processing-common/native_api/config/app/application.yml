@@ -41,27 +41,9 @@ native-api:
       catalog: {{ $val.catalog | quote }}
 {{- end}}
    
-  lutConfigs:
-    "[ids={value}]":
-      - "Id eq {value}"
-    "[bbox={value}]":
-      - "OData.CSC.Intersects(area=geography'SRID=4326;POLYGON(({value}))')"
-    "[point={value}]": 
-      - "OData.CSC.Intersects(area=geography'SRID=4326;POINT({value})')"
-    "[line={value}]":
-      - "Odata.CSC.Intersects(area=geography'SRID=4326;LINESTRING({value})')"
-    "[productname={value}]": 
-      - "contains(Name,'{value}')"
-    "[collections={producttype}]":
-      - "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq '{producttype}')"
-    "[cloudcover={min}/{max}]":
-      - "Attributes/OData.CSC.DoubleAttribute/any(att:att/Name eq 'cloudCover' and att/OData.CSC.DoubleAttribute/Value gt {min})"
-      - "Attributes/OData.CSC.DoubleAttribute/any(att:att/Name eq 'cloudCover' and att/OData.CSC.DoubleAttribute/Value lt {max})"
-    "[datetime={start}/{stop}]": 
-      - "ContentDate/Start gt {start}"
-      - "ContentDate/End lt {stop}"
-    "[publicationdate={start}/{stop}]":
-      - "CreationDate gt {start}"
-      - "CreationDate lt {stop}"  
-    "[polarisation={value}]":
-      - "Attributes/OData.CSC.DoubleAttribute/any(att:att/Name eq 'polarisationChannels' and att/OData.CSC.DoubleAttribute/Value eq {value}"
+{{- range $key, $val := .Values.nativeapi.lutConfigs }}
+  {{ $key}}:
+    {{- range $config := $val}}
+      - {{ $config }}
+    {{- end}}
+{{- end}}
