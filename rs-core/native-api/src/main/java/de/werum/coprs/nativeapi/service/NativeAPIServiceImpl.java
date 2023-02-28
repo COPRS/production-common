@@ -28,6 +28,7 @@ public class NativeAPIServiceImpl {
 	private static final Logger LOG = LogManager.getLogger(NativeAPIServiceImpl.class);
 
 	private static final String PARAM_PAGE = "page";
+	private static final String PARAM_LIMIT = "limit";
 
 	private static final String STACSPEC_CORE = "https://api.stacspec.org/v1.0.0-rc.1/core";
 
@@ -52,21 +53,30 @@ public class NativeAPIServiceImpl {
 
 		return results;
 	}
-
+	
 	public StacItemCollection processSearchRequest(final HttpServletRequest request) {
 		return processSearchRequest(flattenParameters(request.getParameterMap()));
 	}
 
-	public StacItemCollection processSearchRequest(final Map<String, String> parameters) {
+	public StacItemCollection processSearchRequest(final Map<String, String> parameters) {		
 		LOG.debug("Identified {} parameters for search request: {}", parameters.size(), parameters);
 
 		// extract pagination parameter if existing and remove it from the parameter as
 		// not intended to be processed by the filter
-		int page = 0;
+		int page = 1;
 		String pageParam = parameters.get(PARAM_PAGE);
 		if (pageParam != null) {
 			parameters.remove(PARAM_PAGE);
 			page = Integer.parseInt(pageParam);
+		}
+		
+		// extract limit parameter if existing and remove it from the parameter as
+		// not intended to be processed by the filter
+		int limit = properties.getDefaultLimit();
+		String limitParam = parameters.get(PARAM_LIMIT);
+		if (limitParam != null) {
+			parameters.remove(PARAM_LIMIT);
+			limit = Integer.parseInt(limitParam);
 		}
 
 		// build the query for the OData backend
@@ -78,9 +88,48 @@ public class NativeAPIServiceImpl {
 		LOG.debug("OData query generated: {}", oDataQuery);
 
 		// send the query to the backend and convert to stac
-		String queryUrl = backend.buildPripQueryUrl(oDataQuery, true, page);
+		String queryUrl = backend.buildPripQueryUrl(oDataQuery, true, page, limit);
 		StacItemCollection result = backend.queryOData(queryUrl);
+		
+		// Create links
+		result.getLinks().add(
+				new StacLink("root", properties.getHostname() + "/stac", "application/json", properties.getRootCatalogTitle()));
+		createSearchLinks(result, parameters, page, limit);
+		
 		return result;
+	}
+	
+	/**
+	 * Create list of search links (self, first, prev and next)
+	 */
+	private void createSearchLinks(StacItemCollection result, Map<String, String> parameters, int page, int limit) {
+		String queryParameters = "?";
+		for (Entry<String, String> parameter : parameters.entrySet()) {
+			queryParameters = queryParameters.concat("&" + parameter.getKey() + "=" + parameter.getValue());
+		}
+		
+		if (limit != properties.getDefaultLimit()) {
+			queryParameters = queryParameters.concat("&limit=" + limit);
+		}
+		
+		// Self, pref and first
+		if (page == 1) {
+			result.getLinks().add(
+				new StacLink("self", properties.getHostname() + "/stac/search" + queryParameters, "application/json", "STAC search endpoint"));
+		} else {
+			result.getLinks().add(
+				new StacLink("self", properties.getHostname() + "/stac/search" + queryParameters + "&page=" + page, "application/json", "STAC search endpoint"));
+			result.getLinks().add(
+				new StacLink("first", properties.getHostname() + "/stac/search" + queryParameters, "application/json", "STAC search endpoint"));
+			result.getLinks().add(
+				new StacLink("prev", properties.getHostname() + "/stac/search" + queryParameters + "&page=" + (page-1), "application/json", "STAC search endpoint"));
+		}
+		
+		// Next link
+		if (result.getFeatures().size() == limit || result.getFeatures().size() == properties.getMaxLimit()) {
+			result.getLinks().add(
+				new StacLink("next", properties.getHostname() + "/stac/search" + queryParameters + "&page=" + (page + 1), "application/json", "STAC search endpoint"));
+		}
 	}
 
 	/**
@@ -98,16 +147,16 @@ public class NativeAPIServiceImpl {
 		rootCatalog.setConformsTo(conformsTo);
 
 		rootCatalog.getLinks().add(
-				new StacLink("self", properties.getHostname(), "application/json", properties.getRootCatalogTitle()));
+				new StacLink("self", properties.getHostname() + "/stac", "application/json", properties.getRootCatalogTitle()));
 		rootCatalog.getLinks().add(
-				new StacLink("root", properties.getHostname(), "application/json", properties.getRootCatalogTitle()));
+				new StacLink("root", properties.getHostname() + "/stac", "application/json", properties.getRootCatalogTitle()));
 		
 		for (String subCatalog : extractSubCatalogs()) {
-			rootCatalog.getLinks().add(new StacLink("child", properties.getHostname() + "/" + subCatalog,
+			rootCatalog.getLinks().add(new StacLink("child", properties.getHostname() + "/stac/" + subCatalog,
 					"application/json", "Catalog for " + subCatalog));
 		}
 		
-		rootCatalog.getLinks().add(new StacLink("search", properties.getHostname() + "/search", "application/geo+json",
+		rootCatalog.getLinks().add(new StacLink("search", properties.getHostname() + "/stac/search", "application/geo+json",
 				"STAC search endpoint"));
 
 		return rootCatalog;
@@ -124,11 +173,11 @@ public class NativeAPIServiceImpl {
 			catalog.setTitle("Catalog for " + catalogName);
 			catalog.setDescription("Groups all collections for " + catalogName);
 
-			catalog.getLinks().add(new StacLink("self", properties.getHostname() + "/" + catalogName,
+			catalog.getLinks().add(new StacLink("self", properties.getHostname() + "/stac/" + catalogName,
 					"application/json", "Catalog for " + catalogName));
-			catalog.getLinks().add(new StacLink("root", properties.getHostname(), "application/json",
+			catalog.getLinks().add(new StacLink("root", properties.getHostname() + "/stac", "application/json",
 					properties.getRootCatalogTitle()));
-			catalog.getLinks().add(new StacLink("child", properties.getHostname() + "/" + catalogName + "/collections",
+			catalog.getLinks().add(new StacLink("child", properties.getHostname() + "/stac/" + catalogName + "/collections",
 					"application/json", "Collection list for " + catalogName));
 
 			return catalog;
@@ -148,18 +197,18 @@ public class NativeAPIServiceImpl {
 			catalog.setTitle("Collection list for " + catalogName);
 			catalog.setDescription("Lists all available collections of " + catalogName);
 	
-			catalog.getLinks().add(new StacLink("self", properties.getHostname() + "/" + catalogName + "/collections",
+			catalog.getLinks().add(new StacLink("self", properties.getHostname() + "/stac/" + catalogName + "/collections",
 					"application/json", "Collection list"));
 			catalog.getLinks().add(
-					new StacLink("root", properties.getHostname(), "application/json", properties.getRootCatalogTitle()));
-			catalog.getLinks().add(new StacLink("search", properties.getHostname() + "/search", "application/geo+json",
+					new StacLink("root", properties.getHostname() + "/stac", "application/json", properties.getRootCatalogTitle()));
+			catalog.getLinks().add(new StacLink("search", properties.getHostname() + "/stac/search", "application/geo+json",
 					"STAC search endpoint"));
 	
 			for (Entry<String, StacCollectionProperties> entry : properties.getCollections().entrySet()) {
 				if (entry.getValue().getCatalog().equals(catalogName)) {
 					catalog.getLinks()
 							.add(new StacLink("child",
-									properties.getHostname() + "/" + catalogName + "/collections/" + entry.getKey(),
+									properties.getHostname() + "/stac/" + catalogName + "/collections/" + entry.getKey(),
 									"application/json", entry.getValue().getTitle()));
 					catalog.getCollections().add(createCollection(catalogName, entry.getKey(), entry.getValue()));
 				}
@@ -200,13 +249,13 @@ public class NativeAPIServiceImpl {
 		collection.setLicense(collProperties.getLicense());
 
 		collection.getLinks()
-				.add(new StacLink("self", properties.getHostname() + "/" + catalogName + "/collections/" + name,
+				.add(new StacLink("self", properties.getHostname() + "/stac/" + catalogName + "/collections/" + name,
 						"application/json", collProperties.getTitle()));
 		collection.getLinks().add(
-				new StacLink("root", properties.getHostname(), "application/json", properties.getRootCatalogTitle()));
+				new StacLink("root", properties.getHostname() + "/stac", "application/json", properties.getRootCatalogTitle()));
 		collection.getLinks()
 				.add(new StacLink("child",
-						properties.getHostname() + "/" + catalogName + "/collections/" + name + "/items",
+						properties.getHostname() + "/stac/" + catalogName + "/collections/" + name + "/items",
 						"application/geo+json", "Item list of " + name));
 
 		return collection;

@@ -22,6 +22,7 @@ public class NativeApiProperties {
 	private Integer externalPripPort;
 	
 	private Integer defaultLimit = 100;
+	private Integer maxLimit = 100;
 
 	private boolean includeAdditionalAttributes = true;
 	
@@ -113,6 +114,14 @@ public class NativeApiProperties {
 
 	public void setDefaultLimit(Integer defaultLimit) {
 		this.defaultLimit = defaultLimit;
+	}
+
+	public Integer getMaxLimit() {
+		return maxLimit;
+	}
+
+	public void setMaxLimit(Integer maxLimit) {
+		this.maxLimit = maxLimit;
 	}
 
 	public String getRootCatalogId() {

@@ -50,8 +50,10 @@ public class ODataBackendServiceImpl {
 	
 	private static final Logger LOG = LogManager.getLogger(ODataBackendServiceImpl.class);
 	
-	String buildPripQueryUrl(final String filterQuery, final boolean includeAdditionalAttributes, final int page) {
-		return buildPripQueryUrl(internalPripUrl, filterQuery, includeAdditionalAttributes, properties.getDefaultLimit(), page);
+	String buildPripQueryUrl(final String filterQuery, final boolean includeAdditionalAttributes, final int page,
+			final int limit) {
+		return buildPripQueryUrl(internalPripUrl, filterQuery, includeAdditionalAttributes,
+				limit > properties.getMaxLimit() ? properties.getMaxLimit() : limit, page);
 	}
 	
 	public StacItemCollection queryOData(String url) {
@@ -101,13 +103,13 @@ public class ODataBackendServiceImpl {
 			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? "$expand=Attributes,Quicklooks" : "&$expand=Attributes,Quicklooks");
 		}
 		
-		// Adding top param using the default limit
+		// Adding top param using the default limit		
 		String topUrl = String.format("$top=%s", limit);
 		pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? topUrl : "&"+topUrl );
 		
 		// Adding skip param using the page. If no page is set we ignore it.
-		if (page != 0) {
-			String skipUrl = String.format("$skip=%s", page);
+		if (page != 1) {
+			String skipUrl = String.format("$skip=%s", (page - 1) * limit);
 			pripFilterUrl = String.format("%s%s", pripFilterUrl, pripFilterUrl.endsWith("?") ? topUrl : "&"+skipUrl );	
 		}
 	

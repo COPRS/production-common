@@ -1,5 +1,7 @@
 package de.werum.coprs.nativeapi.rest;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +63,8 @@ public class StacRestController {
 			return ResponseEntity.ok(result);
 		}
 
-		throw new StacRestControllerException("Collections for SubCatalog " + catalog + " not found", HttpStatus.NOT_FOUND);
+		throw new StacRestControllerException("Collections for SubCatalog " + catalog + " not found",
+				HttpStatus.NOT_FOUND);
 	}
 
 	@RequestMapping(path = "/{catalog}/collections/{name}", method = RequestMethod.GET, produces = "application/json")
@@ -79,11 +82,13 @@ public class StacRestController {
 
 	@RequestMapping(path = "/{catalog}/collections/{name}/items", method = RequestMethod.GET, produces = "application/geo+json")
 	public ResponseEntity<StacItemCollection> handleStacCollectionItemsPage(
-			@PathVariable("catalog") final String catalog, @PathVariable("name") final String name) {
+			@PathVariable("catalog") final String catalog, @PathVariable("name") final String name,
+			final HttpServletRequest request) {
 		LOG.info("Received external request for stac collection items page: {}", name);
+		
 		Map<String, String> parameters = new HashMap<>();
 		parameters.put("collections", name);
-
+		
 		StacItemCollection result = nativeAPI.processSearchRequest(parameters);
 		if (result != null) {
 			return ResponseEntity.ok(result);
@@ -95,6 +100,9 @@ public class StacRestController {
 	@RequestMapping(path = "/search", method = RequestMethod.GET, produces = "application/geo+json")
 	public ResponseEntity<StacItemCollection> handleStacItemSearch(final HttpServletRequest request) {
 		LOG.info("Received external query request: {}", request.toString());
+		
+		LOG.info(request.getAttributeNames());
+		
 		StacItemCollection result = nativeAPI.processSearchRequest(request);
 		if (result != null) {
 			return ResponseEntity.ok(result);
