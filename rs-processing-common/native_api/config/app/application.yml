@@ -42,7 +42,7 @@ native-api:
 {{- end}}
    
 {{- range $key, $val := .Values.nativeapi.lutConfigs }}
-  {{ $key}}:
+  "{{ $key}}":
     {{- range $config := $val}}
       - {{ $config }}
     {{- end}}
