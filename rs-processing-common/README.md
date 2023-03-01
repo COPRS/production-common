@@ -97,6 +97,7 @@ The latest version can be deployed by using the following command line:
 | `nativeapi.external.host` | The externally reachable hostname or IP used to connect to the PRIP/DDIP frontend | `coprs.werum.de/prip/odata/v1/` |
 | `nativeapi.external.port` | The port on which the PRIP/DDIP frontend listens externally for requests | `80` |
 | `nativeapi.defaultLimit` | The amount of products that are returned as limit from a query. This will be added to the OData query by using $top | `100` |
+| `nativeapi.maxLimit` | The maximal limit that is accepted. If a higher limit is requested, it will be truncated to this value. | `100` |
 | `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
 | `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
 | `nativeapi.collections` | Allows to configure a set of collections that shall be exposed by the stac endpoint. It contains the information about the collections that are available. | See the section below for a detailed description of the configuration | 

@@ -28,6 +28,7 @@ native-api:
   include-additional-attributes: true
   # default limit
   defaultLimit: {{ .Values.nativeapi.defaultLimit }}
+  maxLimit: {{ .Values.nativeapi.maxLimit }}
   rootCatalogId: {{ .Values.nativeapi.rootCatalog.id }}
   rootCatalogTitle: {{ .Values.nativeapi.rootCatalog.title }}
   rootCatalogDescription: {{ .Values.nativeapi.rootCatalog.description }}

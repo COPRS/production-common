@@ -34,6 +34,7 @@ nativeapi:
         host: processing.platform.ops-csc.com/prip/odata/v1/
         port: 80
     defaultLimit: 100
+    maxLimit: 100
     rootCatalog:
         id: catalogs
         title: COPRS STAC
