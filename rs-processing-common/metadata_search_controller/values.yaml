@@ -11,7 +11,7 @@ logConfig: log/log4j2.yml
 
 processing:
   namespace: processing
-  
+
 elasticsearch:
   host: elasticsearch-processing-es-http.database.svc.cluster.local
   port: 9200

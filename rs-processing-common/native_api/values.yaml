@@ -33,7 +33,7 @@ nativeapi:
         protocol: http
         host: processing.platform.ops-csc.com/prip/odata/v1/
         port: 80
-
+  
 resources:
   cpu:
     request: "100m"

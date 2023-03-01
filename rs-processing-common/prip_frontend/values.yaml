@@ -11,7 +11,7 @@ logConfig: log/log4j2.yml
 
 processing:
   namespace: processing
-  
+
 image:
   registry: artifactory.coprs.esa-copernicus.eu
   repository: rs-docker

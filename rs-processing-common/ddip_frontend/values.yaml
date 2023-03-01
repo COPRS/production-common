@@ -24,7 +24,7 @@ image:
 update:
   maxSurge: 100%
   maxUnavailable: 50% 
-   
+
 ddip:
   dispatch:
     prip:
