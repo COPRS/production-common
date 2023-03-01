@@ -10,7 +10,7 @@ on:
       - 'release/**'
       - 'develop**'
   workflow_dispatch:
-  
+
 env:
   CHART_FOLDER: rs-processing-common
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
