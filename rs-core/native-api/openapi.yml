@@ -274,7 +274,9 @@ components:
         * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
 
 
-        Only features that have a temporal property of `ContentDate` that intersects the value of `datetime` are selected.
+        Only features that have a temporal property of `ContentDate` that 
+        
+        intersects the value of `datetime` are selected.
       required: false
       schema:
         type: string
@@ -314,11 +316,18 @@ components:
       name: bbox
       in: query
       description: >-
-        4 points (longitude, latitude) describing a polygon. Longitude and latitude have to be seperated by an URL encoded space ("%20"), points have to be seperated by a comma. Items with intersecting footprints will be returned.
+        4 points (longitude, latitude) describing a polygon. Longitude and 
+        
+        latitude have to be seperated by an URL encoded space ("%20"), points 
+        
+        have to be seperated by a comma. Items with intersecting footprints 
+        
+        will be returned.
         
         Example:
         
-        * 76.036377%20-75.654331,76.57106%20-75.654331,76.57196%20-75.594357,76.036377%20-75.594357
+        * "76.036377%20-75.654331,76.57106%20-75.654331,
+        76.57196%20-75.594357,76.036377%20-75.594357"
       required: false
       schema:
         type: string
@@ -326,7 +335,11 @@ components:
       name: point
       in: query
       description: >-
-        1 point (logitude, latitude). Longitude and latitude have to be seperated by an URL encoded space ("%20"). Items with a footprint containing the point will be returned.
+        1 point (logitude, latitude). Longitude and latitude have to be 
+        
+        seperated by an URL encoded space ("%20"). Items with a footprint 
+        
+        containing the point will be returned.
         
         Example:
         
@@ -338,7 +351,13 @@ components:
       name: line
       in: query
       description: >-
-        2 points (logitude, latitude) describing a line. Longitude and latitude have to be seperated by an URL encoded space ("%20"), points have to be seperated by a comma. Items with a footprint intersecting the line will be returned.
+        2 points (logitude, latitude) describing a line. Longitude and latitude 
+        
+        have to be seperated by an URL encoded space ("%20"), points have to be 
+        
+        seperated by a comma. Items with a footprint intersecting the line will 
+        
+        be returned.
         
         Example:
         
@@ -374,7 +393,11 @@ components:
       name: cloudcover
       in: query
       description: >-
-        Percentage value interval in which the items are filtered for. Has to be provided in the form min/max where empty values may be left out or replaced by "..".
+        Percentage value interval in which the items are filtered for. Has to be 
+        
+        provided in the form min/max where empty values may be left out or 
+        
+        replaced by "..".
         
         Examples:
         
@@ -390,8 +413,9 @@ components:
       name: publicationdate
       in: query
       description: >-
-        Interval, open or closed. Date and time
-        expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
+        Interval, open or closed. Date and time expressions adhere to RFC 3339. 
+        
+        Open intervals are expressed using double-dots.
 
 
         Examples:
@@ -401,7 +425,9 @@ components:
         * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
 
 
-        Only features that have a temporal property of `CreationDate` that intersects the value of `datetime` are selected.
+        Only features that have a temporal property of `CreationDate` that 
+        
+        intersects the value of `datetime` are selected.
       required: false
       schema:
         type: string
@@ -429,7 +455,9 @@ components:
       name: limit
       in: query
       description: >-
-        Maximum number of results that shall be retrieved. Too big values might be cut down to maximum value allowed by API.
+        Maximum number of results that shall be retrieved. Too big values might 
+        
+        be cut down to maximum value allowed by API.
       required: false
       schema:
         type: integer
@@ -522,32 +550,15 @@ components:
     datetime_interval:
       type: string
       description: >-
-        Either a date-time or an interval, open or closed. Date and time
-        expressions
-
-        adhere to RFC 3339. Open intervals are expressed using double-dots.
-
+        Interval, open or closed. Date and time
+        
+        expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
 
         Examples:
-
-
-        * A date-time: "2018-02-12T23:20:50Z"
 
         * A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
 
         * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
-
-
-        Only features that have a temporal property that intersects the value of
-
-        `datetime` are selected.
-
-
-        If a feature has multiple temporal properties, it is the decision of the
-
-        server whether only a single temporal property is used to determine
-
-        the extent or all relevant temporal properties.
       example: 2018-02-12T00:00:00Z/2018-03-18T12:31:12Z
     pointGeoJSON:
       type: object
