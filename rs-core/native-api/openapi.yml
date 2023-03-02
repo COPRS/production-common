@@ -62,12 +62,7 @@ paths:
     get:
       summary: Retrieve SubCatalog for specific mission
       parameters: 
-        - in: path
-          name: missionId
-          schema:
-            type: string
-          required: true
-          description: Mission to retrieve collections for. Can be S1, S2 or S3
+        - $ref: '#/components/parameters/missionId'
       responses:
         '200':
           description: Returns STAC conform catalog containing further links
@@ -117,12 +112,7 @@ paths:
     get:
       summary: Retrieve list of collections for mission
       parameters: 
-        - in: path
-          name: missionId
-          schema:
-            type: string
-          required: true
-          description: Mission to retrieve collections for. Can be S1, S2 or S3
+        - $ref: '#/components/parameters/missionId'
       responses:
         '200':
           description: Returns list of collections available for this mission. Collections map to product type.
@@ -172,18 +162,8 @@ paths:
     get:
       description: Auto generated using Swagger Inspector
       parameters: 
-        - in: path
-          name: missionId
-          schema:
-            type: string
-          required: true
-          description: Mission to in which the collection is. Can be S1, S2 or S3
-        - in: path
-          name: productType
-          schema:
-            type: string
-          required: true
-          description: Collection to retrieve information of. Also called productType
+        - $ref: '#/components/parameters/missionId'
+        - $ref: '#/components/parameters/productType'
       responses:
         '200':
           description: Auto generated using Swagger Inspector
@@ -252,7 +232,16 @@ paths:
       tags:
         - STAC Interface
       parameters:
+        - $ref: '#/components/parameters/ids'
+        - $ref: '#/components/parameters/bbox'
+        - $ref: '#/components/parameters/point'
+        - $ref: '#/components/parameters/line'
+        - $ref: '#/components/parameters/productname'
+        - $ref: '#/components/parameters/collections'
+        - $ref: '#/components/parameters/cloudcover'
         - $ref: '#/components/parameters/datetime'
+        - $ref: '#/components/parameters/publicationdate'
+        - $ref: '#/components/parameters/polarisation'
       responses:
         '200':
           description: A feature collection.
@@ -272,35 +261,160 @@ components:
       name: datetime
       in: query
       description: >-
-        Either a date-time or an interval, open or closed. Date and time
+        Interval, open or closed. Date and time
         expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
 
 
         Examples:
-
-
-        * A date-time: "2018-02-12T23:20:50Z"
 
         * A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
 
         * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
 
 
-        Only features that have a temporal property that intersects the value of
-
-        `datetime` are selected.
-
-
-        If a feature has multiple temporal properties, it is the decision of the
-
-        server whether only a single temporal property is used to determine
-
-        the extent or all relevant temporal properties.
+        Only features that have a temporal property of `ContentDate` that intersects the value of `datetime` are selected.
       required: false
       schema:
         type: string
-      style: form
-      explode: false
+    ids:
+      name: ids
+      in: query
+      description: >-
+        UUID value for a specific item.
+        
+        Example:
+        
+        * "808dc636-5bd6-43d9-ad52-3b2b589c2d80"
+      required: false
+      schema:
+        type: string
+    missionId:
+      name: missionId
+      in: path
+      description: >-
+        Mission identifier to specify which Sentinel mission shall be queried. 
+      required: true
+      schema:
+        type: string
+        enum:
+          - S1
+          - S2
+          - S3
+    productType:
+      name: productType
+      in: path
+      description: >-
+        Product type to get the items of. 
+      required: true
+      schema:
+        type: string
+    bbox:
+      name: bbox
+      in: query
+      description: >-
+        4 points (longitude, latitude) describing a polygon. Longitude and latitude have to be seperated by an URL encoded space ("%20"), points have to be seperated by a comma. Items with intersecting footprints will be returned.
+        
+        Example:
+        
+        * 76.036377%20-75.654331,76.57106%20-75.654331,76.57196%20-75.594357,76.036377%20-75.594357
+      required: false
+      schema:
+        type: string
+    point: 
+      name: point
+      in: query
+      description: >-
+        1 point (logitude, latitude). Longitude and latitude have to be seperated by an URL encoded space ("%20"). Items with a footprint containing the point will be returned.
+        
+        Example:
+        
+        * 76.036377%20-75.654331
+      required: false
+      schema:
+        type: string
+    line: 
+      name: line
+      in: query
+      description: >-
+        2 points (logitude, latitude) describing a line. Longitude and latitude have to be seperated by an URL encoded space ("%20"), points have to be seperated by a comma. Items with a footprint intersecting the line will be returned.
+        
+        Example:
+        
+        * 76.036377%20-75.654331,76.57106%20-75.654331
+      required: false
+      schema:
+        type: string
+    productname:
+      name: productname
+      in: query
+      description: >-
+        Part of the productname that should be included in the retrieved items.
+        
+        Example:
+        
+        * S1A_EW_RAW__0NDH
+      required: false
+      schema:
+        type: string
+    collections:
+      name: collections
+      in: query
+      description: >-
+        Exact name of the product type which items shall be queried for.
+        
+        Example:
+        
+        * OL_1_EFR___
+      required: false
+      schema:
+        type: string
+    cloudcover:
+      name: cloudcover
+      in: query
+      description: >-
+        Percentage value interval in which the items are filtered for. Has to be provided in the form min/max where empty values may be left out or replaced by "..".
+        
+        Examples:
+        
+        * Closed interval: "5.0/10.0"
+        
+        * Open interval (minimum open): "../10.0"
+        
+        * Open interval (maximum open): 90.0/..
+      required: false
+      schema:
+        type: string
+    publicationdate:
+      name: publicationdate
+      in: query
+      description: >-
+        Interval, open or closed. Date and time
+        expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
+
+
+        Examples:
+
+        * A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
+
+        * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
+
+
+        Only features that have a temporal property of `CreationDate` that intersects the value of `datetime` are selected.
+      required: false
+      schema:
+        type: string
+    polarisation:
+      name: polarisation
+      in: query
+      description: >-
+        Polarisation to filter for.
+        
+        Example:
+        
+        * DV
+      required: false
+      schema:
+        type: string
   responses:
     Error:
       description: An error occurred.
