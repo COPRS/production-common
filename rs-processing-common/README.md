@@ -101,6 +101,7 @@ The latest version can be deployed by using the following command line:
 | `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
 | `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
 | `nativeapi.collections` | Allows to configure a set of collections that shall be exposed by the stac endpoint. It contains the information about the collections that are available. | See the section below for a detailed description of the configuration | 
+| `nativeapi.lutConfigs` | Allows to define a look up table that defines how incoming parameters shall be translated into OData. Each entry is defined by a key and multiple statements. For detailed instruction about how to use the look up table and examples, see the section below. | Default contains a set of typically used parameters |
 
 ### Collection configuration
 The attribute `nativeapi.collection` contains a list of collections that shall be exposed by the stac native API. A typical configuration looks like this:
@@ -152,9 +153,9 @@ If start and stop are provided, both statements will be concated using an and op
 If just start is provided and end is undefined this will result in:
 `PublicationDate gt 2010-10-18T14:33:00.000Z`
 
-The key contains the parameter name that is provided to the endpoint and . Please note that in order to avoid misunderstanding during the parsing the key needs to be surrounded by round brackets. These brackets are ignored and required to escape the term for YAML.
+The key contains the parameter name that is provided to the endpoint and. Please note that in order to avoid misunderstanding during the parsing the key needs to be surrounded by round brackets. These brackets are ignored and required to escape the term for YAML.
 
-If multiple parameters are provided to the STAC endpoint and multiple statements had been applied, they will be concat at the end of the processing all together using an AND operator.
+If multiple parameters are provided to the STAC endpoint and multiple statements had been applied, they will be concatenated at the end of the processing all together using an AND operator.
 
 ## Metadata Search Controller
 
