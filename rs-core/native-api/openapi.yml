@@ -1,39 +1,247 @@
 openapi: 3.0.1
 info:
   title: RS Native API
-  description: The Native API of the Copernicus Reference System (COPRS) that can
-    be used to query and download product data.
-  version: "1.0"
+  description: The Native API of the Copernicus Reference System (COPRS) that can be used to query and download product data.
+  version: 1.12.0-rc1
 servers:
-- url: http://localhost:8080
-  description: Test server url
-tags:
-- name: API
-- name: STAC Item Search
+  - url: http://localhost:8080
 paths:
-  /api/ping:
+  /stac:
     get:
-      tags:
-      - API
-      summary: check whether the API service is reachable and running and retrieve
-        the API version number
-      description: A HTTP 200 answer is to be expected when the API service is running
-        and reachable. Additionally the current API version number will be retrieved.
-      operationId: PingApi
+      summary: Landing page for the STAC interface
       responses:
-        "500":
-          description: Internal Server Error - the API service encountered an unexpected
-            condition that prevented it from fulfilling the request
-          content: {}
-        "200":
-          description: OK - the API service is running and reachable
+        '200':
+          description: Returns landing page of the STAC interface
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PingResponse'
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
+                type: object
+                properties:
+                  stac_version:
+                    type: string
+                  collections:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        rel:
+                          type: string
+                        href:
+                          type: string
+                        type:
+                          type: string
+                        title:
+                          type: string
+                  id:
+                    type: string
+                  conformsTo:
+                    type: array
+                    items:
+                      type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  stac_extensions:
+                    type: array
+                    items:
+                      type: string
+      servers:
+        - url: http://localhost:8080
+      tags:
+        - STAC Interface
+    servers:
+      - url: http://localhost:8080
+  /stac/{missionId}:
+    get:
+      summary: Retrieve SubCatalog for specific mission
+      parameters: 
+        - in: path
+          name: missionId
+          schema:
+            type: string
+          required: true
+          description: Mission to retrieve collections for. Can be S1, S2 or S3
+      responses:
+        '200':
+          description: Returns STAC conform catalog containing further links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stac_version:
+                    type: string
+                  collections:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        rel:
+                          type: string
+                        href:
+                          type: string
+                        type:
+                          type: string
+                        title:
+                          type: string
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  stac_extensions:
+                    type: array
+                    items:
+                      type: string
+      servers:
+        - url: http://localhost:8080
+      tags:
+        - STAC Interface
+    servers:
+      - url: http://localhost:8080
+  /stac/{missionId}/collections:
+    get:
+      summary: Retrieve list of collections for mission
+      parameters: 
+        - in: path
+          name: missionId
+          schema:
+            type: string
+          required: true
+          description: Mission to retrieve collections for. Can be S1, S2 or S3
+      responses:
+        '200':
+          description: Returns list of collections available for this mission. Collections map to product type.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stac_version:
+                    type: string
+                  collections:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        rel:
+                          type: string
+                        href:
+                          type: string
+                        type:
+                          type: string
+                        title:
+                          type: string
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  stac_extensions:
+                    type: array
+                    items:
+                      type: string
+      servers:
+        - url: http://localhost:8080
+      tags:
+        - STAC Interface
+    servers:
+      - url: http://localhost:8080
+  /stac/{missionId}/collections/{productType}:
+    get:
+      description: Auto generated using Swagger Inspector
+      parameters: 
+        - in: path
+          name: missionId
+          schema:
+            type: string
+          required: true
+          description: Mission to in which the collection is. Can be S1, S2 or S3
+        - in: path
+          name: productType
+          schema:
+            type: string
+          required: true
+          description: Collection to retrieve information of. Also called productType
+      responses:
+        '200':
+          description: Auto generated using Swagger Inspector
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  extent: {}
+                  stac_version:
+                    type: string
+                  keywords:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  license:
+                    type: string
+                  assets:
+                    type: object
+                    properties: {}
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        rel:
+                          type: string
+                        href:
+                          type: string
+                        type:
+                          type: string
+                        title:
+                          type: string
+                  id:
+                    type: string
+                  stac_extensions:
+                    type: array
+                    items:
+                      type: string
+                  providers:
+                    type: array
+                    items:
+                      type: string
+                  summaries:
+                    type: object
+                    properties: {}
+      servers:
+        - url: http://localhost:8080
+      tags:
+        - STAC Interface
+    servers:
+      - url: http://localhost:8080
   /search:
     get:
       summary: Search STAC items with simple filtering.
@@ -42,7 +250,7 @@ paths:
         Retrieve Items matching filters. Intended as a shorthand API for simple
         queries.
       tags:
-        - STAC Item Search
+        - STAC Interface
       parameters:
         - $ref: '#/components/parameters/datetime'
       responses:
@@ -55,6 +263,9 @@ paths:
                   - $ref: '#/components/schemas/itemCollection'
         default:
           $ref: '#/components/responses/Error'
+tags:
+  - name: STAC Interface
+    description: STAC interface to query items available on the RS
 components:
   parameters:
     datetime:
@@ -98,13 +309,6 @@ components:
           schema:
             $ref: '#/components/schemas/exception'
   schemas:
-    PingResponse:
-      type: object
-      properties:
-        apiVersion:
-          type: string
-          description: the version of the API
-          example: "1.0"
     Checksum:
       type: object
       properties:
