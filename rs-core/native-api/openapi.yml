@@ -242,6 +242,8 @@ paths:
         - $ref: '#/components/parameters/datetime'
         - $ref: '#/components/parameters/publicationdate'
         - $ref: '#/components/parameters/polarisation'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
       responses:
         '200':
           description: A feature collection.
@@ -415,6 +417,22 @@ components:
       required: false
       schema:
         type: string
+    page:
+      name: page
+      in: query
+      description: >-
+        Number of page used for pagination. First page is page number 1.
+      required: false
+      schema:
+        type: integer
+    limit:
+      name: limit
+      in: query
+      description: >-
+        Maximum number of results that shall be retrieved. Too big values might be cut down to maximum value allowed by API.
+      required: false
+      schema:
+        type: integer
   responses:
     Error:
       description: An error occurred.
