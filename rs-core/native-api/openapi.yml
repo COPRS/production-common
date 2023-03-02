@@ -222,7 +222,7 @@ paths:
         - STAC Interface
     servers:
       - url: http://localhost:8080
-  /search:
+  /stac/search:
     get:
       summary: Search STAC items with simple filtering.
       operationId: getItemSearch
