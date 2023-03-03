@@ -160,13 +160,13 @@ paths:
       - url: http://localhost:8080
   /stac/{missionId}/collections/{productType}:
     get:
-      description: Auto generated using Swagger Inspector
+      description: Retrieve information about a specific collection
       parameters: 
         - $ref: '#/components/parameters/missionId'
         - $ref: '#/components/parameters/productType'
       responses:
         '200':
-          description: Auto generated using Swagger Inspector
+          description: Collection object for a specific collection
           content:
             application/json:
               schema:
