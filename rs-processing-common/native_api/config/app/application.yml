@@ -32,6 +32,8 @@ native-api:
   rootCatalogId: {{ .Values.nativeapi.rootCatalog.id }}
   rootCatalogTitle: {{ .Values.nativeapi.rootCatalog.title }}
   rootCatalogDescription: {{ .Values.nativeapi.rootCatalog.description }}
+  serviceDocLink: {{ .Values.nativeapi.serviceDoc.link }}
+  serviceDocMimeType: {{ .Values.nativeapi.serviceDoc.mimeType }}
   hostname: {{ .Values.nativeapi.hostname }}
   collections:
 {{- range $key, $val := .Values.nativeapi.collections }}

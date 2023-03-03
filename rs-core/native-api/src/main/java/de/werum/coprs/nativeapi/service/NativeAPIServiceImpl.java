@@ -146,18 +146,20 @@ public class NativeAPIServiceImpl {
 		conformsTo.add(STACSPEC_CORE);
 		rootCatalog.setConformsTo(conformsTo);
 
-		rootCatalog.getLinks().add(
-				new StacLink("self", properties.getHostname() + "/stac", "application/json", properties.getRootCatalogTitle()));
-		rootCatalog.getLinks().add(
-				new StacLink("root", properties.getHostname() + "/stac", "application/json", properties.getRootCatalogTitle()));
-		
+		rootCatalog.getLinks().add(new StacLink("self", properties.getHostname() + "/stac", "application/json",
+				properties.getRootCatalogTitle()));
+		rootCatalog.getLinks().add(new StacLink("root", properties.getHostname() + "/stac", "application/json",
+				properties.getRootCatalogTitle()));
+		rootCatalog.getLinks().add(new StacLink("service-doc", properties.getServiceDocLink(),
+				properties.getServiceDocMimeType(), "OpenAPI 3.0 definition endpoint documentation"));
+
 		for (String subCatalog : extractSubCatalogs()) {
 			rootCatalog.getLinks().add(new StacLink("child", properties.getHostname() + "/stac/" + subCatalog,
 					"application/json", "Catalog for " + subCatalog));
 		}
-		
-		rootCatalog.getLinks().add(new StacLink("search", properties.getHostname() + "/stac/search", "application/geo+json",
-				"STAC search endpoint"));
+
+		rootCatalog.getLinks().add(new StacLink("search", properties.getHostname() + "/stac/search",
+				"application/geo+json", "STAC search endpoint"));
 
 		return rootCatalog;
 	}
@@ -251,8 +253,8 @@ public class NativeAPIServiceImpl {
 		collection.getLinks()
 				.add(new StacLink("self", properties.getHostname() + "/stac/" + catalogName + "/collections/" + name,
 						"application/json", collProperties.getTitle()));
-		collection.getLinks().add(
-				new StacLink("root", properties.getHostname() + "/stac", "application/json", properties.getRootCatalogTitle()));
+		collection.getLinks().add(new StacLink("root", properties.getHostname() + "/stac", "application/json",
+				properties.getRootCatalogTitle()));
 		collection.getLinks()
 				.add(new StacLink("child",
 						properties.getHostname() + "/stac/" + catalogName + "/collections/" + name + "/items",

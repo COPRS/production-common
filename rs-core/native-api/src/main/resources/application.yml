@@ -45,6 +45,8 @@ native-api:
   root-catalog-id: catalogs
   root-catalog-title: COPRS STAC
   root-catalog-description: STAC interface for the Copernicus Reference System
+  service-doc-link: https://github.com/COPRS/production-common/tree/develop/stac-native/interfaces/COPRS - OpenAPI Documentation.pdf
+  service-doc-mime-type: application/pdf
   hostname: https://referencesystem.copernicus.eu
 
   lutConfigs:

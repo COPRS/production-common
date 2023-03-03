@@ -29,6 +29,11 @@ native-api:
   external-prip-protocol: http
   external-prip-host: coprs.werum.de/prip/odata/v1/
   external-prip-port: 80
+  root-catalog-id: catalogs
+  root-catalog-title: COPRS STAC
+  root-catalog-description: STAC interface for the Copernicus Reference System
+  service-doc-link: https://github.com/COPRS/production-common/tree/develop/stac-native/interfaces/COPRS - OpenAPI Documentation.pdf
+  service-doc-mime-type: application/pdf
   # whether to include the attributes/values of the 'Attributes' collection of the PRIP response into the STAC response
   include-additional-attributes: true
   defaultLimit: 100

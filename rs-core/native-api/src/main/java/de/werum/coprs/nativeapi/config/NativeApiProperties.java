@@ -30,6 +30,9 @@ public class NativeApiProperties {
 	private String rootCatalogTitle;
 	private String rootCatalogDescription;
 	
+	private String serviceDocLink;
+	private String serviceDocMimeType;
+	
 	private String hostname;
 	
 	private Map<String, StacCollectionProperties> collections = new LinkedHashMap<>();
@@ -156,6 +159,22 @@ public class NativeApiProperties {
 		this.collections = collections;
 	}
 	
+	public String getServiceDocLink() {
+		return serviceDocLink;
+	}
+
+	public void setServiceDocLink(String serviceDocLink) {
+		this.serviceDocLink = serviceDocLink;
+	}
+
+	public String getServiceDocMimeType() {
+		return serviceDocMimeType;
+	}
+
+	public void setServiceDocMimeType(String serviceDocMimeType) {
+		this.serviceDocMimeType = serviceDocMimeType;
+	}
+
 	public static class StacCollectionProperties {
 		private String title;
 		private String description;

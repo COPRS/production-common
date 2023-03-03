@@ -39,6 +39,9 @@ nativeapi:
         id: catalogs
         title: COPRS STAC
         description: STAC interface for the Copernicus Reference System
+    serviceDoc:
+        link: https://github.com/COPRS/production-common/tree/develop/stac-native/interfaces/COPRS - OpenAPI Documentation.pdf
+        mimeType: application/pdf
     hostname: https://referencesystem.copernicus.eu
     collections:
         S1_RAW__0S:
