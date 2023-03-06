@@ -69,6 +69,12 @@ l2_slice
 l2_acn
 s2_l0_ds
 s2_l0_gr
+s2_l1_ds
+s2_l1_gr
+s2_l1_tl
+s2_l2_ds
+s2_l2_gr
+s2_l2_tl
 s2_hktm
 s2_sad
 s3_granules
