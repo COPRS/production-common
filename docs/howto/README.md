@@ -37,10 +37,12 @@ If you need more examples on how to build these containers, you can find [here](
 ### Build
 
 In order to build the image locally, simply go into the folder of your Docker file and invoke the docker build command on it. For example if you checked out [Production Common](https://github.com/COPRS/production-common) and want to build the SR1, you can do as follow:
+
 ```
 cd production-common/rs-container/docker_s3_ipf_sr1/
 docker build . -t rs-ipf-sr1:myversion
 ```
+
 The image will be build and added to your local docker engine and can be pushed from there into another docker registry in order to share it with other users.
 
 
@@ -54,6 +56,7 @@ The following sections are giving a brief overview about how to create a new add
 ### Manifest
 
 Each RS add-on does contain a so called Manifest that contains some descriptive information about the package itself. Mainly it contains the name and version of the rs-addon as well as the processing levels it is used. It does however also contains a list of files that are contained. The generic structure of that file looks like this:
+
 ```
 {
 	"ProcessorID": "template",
@@ -69,7 +72,9 @@ Each RS add-on does contain a so called Manifest that contains some descriptive 
 	]
 }
 ```
+
 Fill in the fields in order to describe your new processor like Ids, the mission and release dates. Under released items a list of all files are a full example of a manifest for S1 AIOP RS add-ons looks like this:
+
 ```
 {
 	"ProcessorID": "s1_aiop",
@@ -85,6 +90,7 @@ Fill in the fields in order to describe your new processor like Ids, the mission
 	]
 }
 ```
+
 and is in the file `RS_ADDON_S1-L0AIOP_1.10.0-rc1_Manifest.json`
 
 ### Content
@@ -95,6 +101,7 @@ The folder `content` does contain the configuration for the RS add-on and define
 * stream-parameters.properties
 
 The application list are actually defining the SCDF applications and mapping them on docker images. These images are expected to contain the actually IPF as well as an instance of the execution worker. They are basically the images that had been described above. A typical application file looks like this:
+
 ```
 processor.myaddon-filter=docker:springcloudstream/filter-processor-kafka:3.1.1
 processor.myaddon-preparation=docker:artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-preparation-worker:0.0.1
@@ -102,6 +109,7 @@ processor.myaddon-execution=docker:artifactory.coprs.esa-copernicus.eu/werum-doc
 processor.myaddon-housekeep=docker:artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-preparation-worker:0.0.1
 source.myaddon-time=docker:springcloudstream/time-source-kafka:3.2.1
 ```
+
 Please use a appropriate name for the applications to ensure that their name is unqiue and not interfere with other add-ons. Thus it is a good idea to encode the mission and level into that naming as well.
 
 The definition properties are defining the actual SCDF stream that shall be deployed and defines the order of the application that are called. A typical file looks like this:
@@ -119,9 +127,9 @@ The parameter properties is a property file that contains the configuration for 
 
 At the top level there is another optional folder called `additional_resources` that can contain a set of K8s yaml files that might contain additional kubernetes resources that shall be deployed when the RS add-on is deployed using the ansible playbook. This directory might contain one or multiple yaml files as long as they are valid K8s objects.
 
-Especially for S1 and S3 they contain a configmap that includes all the tasktables that are required by the Preparation Worker in order to prepare the processing operation before hands. These tasktables are not in the CFI images and needs to be mounted into the Preparation worker service.  Please consult the Software User Manual of the IPF in order to identify the tasktables that needs to be added into such a config map
+Especially for S1 and S3 they contain a configmap that includes all the tasktables that are required by the Preparation Worker in order to prepare the processing operation before hands. These tasktables are not in the CFI images and needs to be mounted into the Preparation worker service.  Please consult the Software User Manual of the IPF in order to identify the tasktables that needs to be added into such a configmap.
 
-Take note that the config map needs a unique name that allows to identify which RS add-on the config map related to. The actual tasktables are added as data text seperated by the file name followed by the actual XML content representing the tasktable. So the structure might look like this:
+Take note that the configmap needs a unique name that allows to identify which RS add-on the configmap related to. The actual tasktables are added as data text seperated by the file name followed by the actual XML content representing the tasktable. So the structure might look like this:
 
 ```
 apiVersion: v1
@@ -137,13 +145,14 @@ data:
       <Processor_Name>Template</Processor_Name>
 [...]
 ```
+
 Note that by this way it is possible to add multiple tasktables into that config map. In order to determinate what tasktables are provided by the CFI, please consult the User Manual of your IPF installation kit.
 
 Keep in mind that by adding the tasktable to the additional_resources it will be added to your cluster, you still tho need to mount it into your service to become available. This can be archieved by adding the following configuration into the file "stream-parameters.properties":
 
 ```
 deployer.preparation-worker.kubernetes.volumes=[{name: tasktablexslt, configMap: {{name: tasktables, configMap: {name: template-tasktables, items: [{key: 'tasktable.xml', path: 'tasktable.xml'}]}}]
-``
+```
 
 ### Documentation
 
@@ -152,6 +161,7 @@ Each RS add-on shall contain also a Release Document that is giving some overvie
 ### Build
 
 When checking out the repository for [Processing-Sentinel-1](https://github.com/COPRS/processing-sentinel-1) and [Processing-Sentinel-3](https://github.com/COPRS/processing-sentinel-3) at the top level there is a build script that will automatically rebuild all the RS add-ons locally. This can be also reutilized when creating new RS add-ons from the scratch by adding a new folder within the structure with your customized configuration. In order to invoke the build operation simply execute:
+
 ```
 ./build_all.sh /tmp/rsaddons 0.0.1
 ```
