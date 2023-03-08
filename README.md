@@ -22,6 +22,10 @@ In order to use the software correctly within your cluster, it needs some depend
 
 Please consult the [Installation Manual](./docs/install_manuals/) for further information on how to deploy the software of this repository.
 
+## How to contribute
+
+If you're interested in rebuilding RS add-ons on your own or customize them, please consult [this](./docs/howto/README.md) documentation.
+
 ## Structure of the Repository
 
 ### processing-common
