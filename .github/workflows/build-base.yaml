@@ -9,6 +9,8 @@ on:
       - '!main'
       - 'release/**'
       - 'develop**'
+      - 'stac-nativeapi**'
+      
   workflow_dispatch:
 
 env:

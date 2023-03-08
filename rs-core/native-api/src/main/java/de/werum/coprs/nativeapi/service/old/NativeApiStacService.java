@@ -1,4 +1,4 @@
-package de.werum.coprs.nativeapi.service;
+package de.werum.coprs.nativeapi.service.old;
 
 import de.werum.coprs.nativeapi.rest.model.stac.StacItemCollection;
 
