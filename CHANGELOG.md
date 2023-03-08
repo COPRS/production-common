@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0-rc1] - 2023-03-08
+
+### Added
+
+- RS-523: Add uncompression to default ingestion chain
+- RS-536: Add rsChainVersion field in execution-worker RS add-on messages
+
+- RS-759: STAC interface: Implement geopraphical point queries
+- RS-760: STAC interface: Implement geographical lineString queries
+- RS-761: STAC interface: Implement geographical polygone queries
+- RS-762: STAC interface: Implement productTypes collection query
+- RS-763: STAC interface: Implement LUT mechanism for custom parameters
+- RS-764: STAC interface: Implement skip option
+- RS-765: STAC interface: Implement default pagination
+- RS-767: STAC interface: Update date queries
+- RS-768: STAC interface: Update openapi documentation
+- RS-802: STAC interface: Enable STAC catalogs (Landing page)
+- RS-803: STAC interface: Export distribution collection
+
+### Changed
+
+- RS-848: Update build pipeline for Helm charts
+- RS-852: METADATA generates malformed error for S1__AUX_TEC
+
+### Removed
+
+- N/A
+
 ## [1.11.0-rc1] - 2023-02-22
 
 ### Added
