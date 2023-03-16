@@ -100,7 +100,8 @@ public class ProductMetadataCustomObjectFiller {
 				output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
 				output.getProductMetadataCustomObject().put("processing_level_integer", 0);
 				fillwithKeyMapping("processor_version_string", "processorVersion");
-				fillwithKeyMapping("quality_status_integer", "qualityStatus");
+				fillwithKeyMapping("quality_status_integer", "qualityInfo");
+				fillwithKeyMapping("quality_status_string", "qualityStatus");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				break;
 			case S2_L1A_DS:
@@ -118,7 +119,7 @@ public class ProductMetadataCustomObjectFiller {
 				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
 				output.getProductMetadataCustomObject().put("processing_level_integer", 1);
-				fillwithKeyMapping("quality_status_integer", "qualityStatus");
+				fillwithKeyMapping("quality_status_integer", "qualityInfo");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				fillwithKeyMapping("cloud_cover_double", "cloudPercentage");
 				fillwithKeyMapping("quality_status_string", "qualityStatus");
@@ -134,7 +135,7 @@ public class ProductMetadataCustomObjectFiller {
 				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
 				output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
 				output.getProductMetadataCustomObject().put("processing_level_integer", 2);
-				fillwithKeyMapping("quality_status_integer", "qualityStatus");
+				fillwithKeyMapping("quality_status_integer", "qualityInfo");
 				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
 				fillwithKeyMapping("cloud_cover_double", "cloudPercentage");
 				fillwithKeyMapping("quality_status_string", "qualityStatus");
