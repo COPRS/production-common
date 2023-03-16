@@ -56,7 +56,7 @@ public class RequestParkingLotTest {
 	public void testGetFailedProcessings_OnInvocation_ShallReturnAllElements() {
 		doReturn(Arrays.asList(newFailedProcessing("123"), newFailedProcessing("456")))
 			.when(failedProcessingRepo)
-			.findAll(Mockito.any(Sort.class));
+			.findAllOrderByFailureDate();
 
 		final List<FailedProcessing> actual = uut.getFailedProcessings();
 		
