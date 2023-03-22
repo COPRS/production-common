@@ -61,7 +61,7 @@ public class RequestParkingLotController {
 		try {
 			return requestParkingLot.getFailedProcessings();
 		} catch(Throwable e) {
-			throw new RequestParkingLotControllerException("Too many failed requests. Exceeded memory limitations",
+			throw new RequestParkingLotControllerException("Too many failed processings. Exceeded memory limitations",
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
