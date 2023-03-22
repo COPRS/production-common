@@ -56,7 +56,7 @@ public class RequestParkingLotTest {
 	public void testGetFailedProcessings_OnInvocation_ShallReturnAllElements() {
 		doReturn(Arrays.asList(newFailedProcessing("123"), newFailedProcessing("456")))
 			.when(failedProcessingRepo)
-			.findAllOrderByFailureDate();
+			.findAllByOrderByFailureDateAsc();
 
 		final List<FailedProcessing> actual = uut.getFailedProcessings();
 		
