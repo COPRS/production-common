@@ -15,7 +15,7 @@ public class RequestParkingLotExceptionHandler {
 	ResponseEntity<?> handleControllerException(final HttpServletRequest _request, final Throwable _e) {
 		final RequestParkingLotControllerException ex = (RequestParkingLotControllerException) _e;
 		RequestParkingLotController.LOGGER.error(ex.getMessage());
-		return new ResponseEntity<>(ex.getStatus());
+		return ResponseEntity.status(ex.getStatus()).body(ex.getMessage());
 	}
 	
 	@ExceptionHandler(RuntimeException.class)
