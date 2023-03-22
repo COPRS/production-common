@@ -40,7 +40,7 @@ public class RequestParkingLotImpl implements RequestParkingLot {
 	
 	@Override
 	public List<FailedProcessing> getFailedProcessings() {
-		return failedProcessingRepo.findAllOrderByFailureDate();
+		return failedProcessingRepo.findAllByOrderByFailureDateAsc();
 	}
 	
 	@Override

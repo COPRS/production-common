@@ -13,7 +13,7 @@ import esa.s1pdgs.cpoc.errorrepo.model.rest.FailedProcessing;
 public interface FailedProcessingRepo extends MongoRepository<FailedProcessing, String>{
 	
 	@Meta(allowDiskUse = true)
-	public List<FailedProcessing> findAllOrderByFailureDate();
+	public List<FailedProcessing> findAllByOrderByFailureDateAsc();
 	
 	public Optional<FailedProcessing> findById(String id);
 
