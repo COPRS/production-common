@@ -25,12 +25,4 @@ public class RequestParkingLotExceptionHandler {
 		RequestParkingLotController.LOGGER.error(ex);
 		return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
-	@ExceptionHandler(OutOfMemoryError.class)
-	@ResponseBody
-	ResponseEntity<?> handleOOMError(final HttpServletRequest _request, final Throwable _e) {
-		final OutOfMemoryError ex = (OutOfMemoryError) _e;
-		RequestParkingLotController.LOGGER.error(ex);
-		return new ResponseEntity<>("Could not retrieve data as retrieved data exceeded memory.", HttpStatus.INTERNAL_SERVER_ERROR);
-	}
 }

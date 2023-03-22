@@ -57,7 +57,13 @@ public class RequestParkingLotController {
 	) {
 		LOGGER.debug("get the list of failed processings");
 		assertValidApiKey(apiKey);
-		return requestParkingLot.getFailedProcessings();
+		
+		try {
+			return requestParkingLot.getFailedProcessings();
+		} catch(Throwable e) {
+			throw new RequestParkingLotControllerException("Too many failed requests. Exceeded memory limitations",
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, path = "failedProcessings/count")
