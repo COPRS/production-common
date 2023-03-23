@@ -645,6 +645,24 @@ public class ExtractMetadata {
 					throw new MetadataMalformedException("stopTime");
 				}
 			}
+			
+			if (metadata.has("validityStartTime")) {
+				try {
+					metadata.put("validityStartTime",
+							DateUtils.convertToMetadataDateTimeFormat((String) metadata.get("validityStartTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
+			}
+
+			if (metadata.has("validityStopTime")) {
+				try {
+					metadata.put("validityStopTime",
+							DateUtils.convertToMetadataDateTimeFormat((String) metadata.get("validityStopTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
+			}
 
 			if (metadata.has("creationTime")) {
 				try {
