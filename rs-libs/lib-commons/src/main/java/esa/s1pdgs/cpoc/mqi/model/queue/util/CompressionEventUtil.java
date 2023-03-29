@@ -26,7 +26,12 @@ public class CompressionEventUtil {
 			case S3:
 				return inputKeyObjectStorage + SUFFIX_ZIPPPRODUCTFILE;
 			case S2:
-				return inputKeyObjectStorage + SUFFIX_TARPRODUCTFILE;
+				if (inputKeyObjectStorage.endsWith(".jp2")) {
+					return inputKeyObjectStorage;
+				} else {
+					return inputKeyObjectStorage + SUFFIX_TARPRODUCTFILE;	
+				}
+				
 			default:
 				throw new IllegalArgumentException("Not applicable mission " + mission);
 		}

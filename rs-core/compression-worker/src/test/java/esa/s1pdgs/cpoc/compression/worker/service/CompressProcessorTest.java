@@ -86,5 +86,24 @@ public class CompressProcessorTest {
 			fail("Exception occurred: " + e.getMessage());
 		}
 	}
+	
+	@Test
+	public final void onMessage_compress_s2_jp2() throws IOException {
+
+		CatalogEvent event = new CatalogEvent();
+		event.setMissionId("S2");
+		event.setProductFamily(ProductFamily.S2_L1C_TC);
+		event.setUid(UUID.randomUUID());
+		event.setKeyObjectStorage("S2_L1C.jp2");
+		
+		Path filedir = Files.createDirectory(tmpWorkdir.resolve("S2_L1C.jp2"));
+		Files.createFile(filedir.resolve("S2_L1C.jp2"));
+
+		try {
+			uut.apply(event);
+		} catch (Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
 
 }

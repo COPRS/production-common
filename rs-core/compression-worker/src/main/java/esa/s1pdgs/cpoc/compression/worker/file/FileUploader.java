@@ -57,9 +57,14 @@ public class FileUploader {
 		File productPath;
 		String outputFileName;
 		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
-			// Compression
-			outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage(), mission);
-			productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
+			// Compression			
+			if (event.getKeyObjectStorage().endsWith(".jp2")) {
+				outputFileName = event.getKeyObjectStorage();
+				productPath = new File(workingDir + "/" + outputFileName);
+			} else {						
+				outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage(), mission);
+				productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
+			}
 		} 
 		else {
 			// Uncompression

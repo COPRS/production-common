@@ -31,12 +31,12 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class CompressProcessor extends AbstractProcessor implements Function<CatalogEvent, Message<CompressionEvent>> {
 	private static final Logger LOGGER = LogManager.getLogger(CompressProcessor.class);
-	
+
 	private final CommonConfigurationProperties commonProperties;
 
 	@Autowired
-	public CompressProcessor(final CommonConfigurationProperties commonProperties, final AppStatus appStatus, final CompressionWorkerConfigurationProperties properties,
-			final ObsClient obsClient) {
+	public CompressProcessor(final CommonConfigurationProperties commonProperties, final AppStatus appStatus,
+			final CompressionWorkerConfigurationProperties properties, final ObsClient obsClient) {
 		super(appStatus, properties, obsClient);
 		this.commonProperties = commonProperties;
 	}
@@ -46,10 +46,9 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 		final String workDir = properties.getWorkingDirectory();
 
 		final MissionId mission = MissionId.fromFileName(event.getKeyObjectStorage());
-		
+
 		final Reporting report = ReportingUtils.newReportingBuilder(mission)
-				.rsChainName(commonProperties.getRsChainName())
-				.rsChainVersion(commonProperties.getRsChainVersion())
+				.rsChainName(commonProperties.getRsChainName()).rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(event.getUid()).newReporting("CompressionProcessing");
 
 		// Initialize the pool processor executor
@@ -72,10 +71,13 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 			fileDownloader.processInputs(report);
 
 			checkThreadInterrupted();
-			LOGGER.info("Compressing inputs for {}", event);
-			final Future<?> fut = procCompletionSrv.submit(procExecutor);
-			waitForPoolProcessesEnding("Compressing inputs for " + event, fut, procCompletionSrv,
-					properties.getCompressionTimeout() * 1000L);
+
+			if (!event.getKeyObjectStorage().endsWith(".jp2")) {
+				LOGGER.info("Compressing inputs for {}", event);
+				final Future<?> fut = procCompletionSrv.submit(procExecutor);
+				waitForPoolProcessesEnding("Compressing inputs for " + event, fut, procCompletionSrv,
+						properties.getCompressionTimeout() * 1000L);
+			}
 
 			checkThreadInterrupted();
 			LOGGER.info("Uploading compressed outputs for {}", event);
@@ -103,7 +105,7 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 		result.setUid(report.getUid());
 		result.setStoragePath(obsClient.getAbsoluteStoragePath(event.getProductFamily(), event.getKeyObjectStorage()));
 		result.setTimeliness(event.getTimeliness());
-		
+
 		// RS-536: Add RS Chain Version to message
 		result.setRsChainVersion(commonProperties.getRsChainVersion());
 
