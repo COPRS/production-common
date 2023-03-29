@@ -91,7 +91,7 @@ The latest version can be deployed by using the following command line:
 | Name                              | Description                                              | Default |
 | ----------------------------------|----------------------------------------------------------|---------|
 | `nativeapi.prip.protocol` | The protocol that shall be used to contact the PRIP backend | `http`|
-| `nativeapi.prip.host` | The host that shall be used to contact the PRIP backend| `s1pro-prip-frontend-svc.processing.svc.cluster.local` |
+| `nativeapi.prip.host` | The host that shall be used to contact the PRIP backend| `rs-prip-frontend-svc.processing.svc.cluster.local` |
 | `nativeapi.prip.port` | The port that shall be used to contact the PRIP backend | `8080` |
 | `nativeapi.external.protocol` | The protocol used to externally connect to the PRIP/DDIP frontend | `http` |
 | `nativeapi.external.host` | The externally reachable hostname or IP used to connect to the PRIP/DDIP frontend | `coprs.werum.de/prip/odata/v1/` |
