@@ -60,7 +60,7 @@ public class FileUploader {
 			// Compression			
 			if (event.getKeyObjectStorage().endsWith(".jp2")) {
 				outputFileName = event.getKeyObjectStorage();
-				productPath = new File(workingDir + "/" + outputFileName);
+				productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
 			} else {						
 				outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage(), mission);
 				productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
