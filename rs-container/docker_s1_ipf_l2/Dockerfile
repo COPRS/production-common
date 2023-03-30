@@ -7,7 +7,7 @@ FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as bas
 # RS-597: Original image contains DEM files, however the resulting image is to big for the build pipe
 # to handle it. A new image without the DEM files are created that will assume the DEM files to be
 # on the shared disk.
-FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/s1_l12:3.6.1-nodem
+FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/s1_l12:3.5.2-light
  
 ARG VERSION
 ARG COMMIT_ID
