@@ -14,10 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - RS-855: AUXIP-INGESTION shall not ingest AUX_TRO and AUX_TEC. Filter was adjusted to ignore these files
+- RS-857: Service will return an error message when query on MongoDB exceeding the memory for the query
 - RS-869: Not compressing jp2 anymore and upload it uncompressed into the associated bucket
-- RS-857: Service will return an error message when query on  MongoDB exceeding the memory for the query
+- RS-877: Adjusted date handling routine to handle UTC in sad files correctly
 - RS-882: Upgrade to new MW1 version 06.14
-- RS-877: Adjusted date handling routine to handle UTC in sad files correctly.
 
 ### Removed
 
