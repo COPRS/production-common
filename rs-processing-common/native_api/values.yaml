@@ -994,10 +994,10 @@ nativeapi:
         - "ContentDate/Start gt {start}"
         - "ContentDate/End lt {stop}"
       "[publicationdate={start}/{stop}]":
-        - "CreationDate gt {start}"
-        - "CreationDate lt {stop}"  
+        - "PublicationDate gt {start}"
+        - "PublicationDate lt {stop}"
       "[polarisation={value}]":
-        - "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'polarisationChannels' and att/OData.CSC.StringAttribute/Value eq {value}"
+        - "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'polarisationChannels' and att/OData.CSC.StringAttribute/Value eq '{value}')"
       
 resources:
   cpu:
