@@ -33,6 +33,7 @@ ddip:
       port: 8080
   collections:
     Sentinel1: startswith(Name,'S1')
+    Sentinel2: startswith(Name,'S2')
     Sentinel3: startswith(Name,'S3')  
   
 resources:
