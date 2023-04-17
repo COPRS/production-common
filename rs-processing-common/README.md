@@ -91,7 +91,7 @@ The latest version can be deployed by using the following command line:
 | Name                              | Description                                              | Default |
 | ----------------------------------|----------------------------------------------------------|---------|
 | `nativeapi.prip.protocol` | The protocol that shall be used to contact the PRIP backend | `http`|
-| `nativeapi.prip.host` | The host that shall be used to contact the PRIP backend| `s1pro-prip-frontend-svc.processing.svc.cluster.local` |
+| `nativeapi.prip.host` | The host that shall be used to contact the PRIP backend| `rs-prip-frontend-svc.processing.svc.cluster.local` |
 | `nativeapi.prip.port` | The port that shall be used to contact the PRIP backend | `8080` |
 | `nativeapi.external.protocol` | The protocol used to externally connect to the PRIP/DDIP frontend | `http` |
 | `nativeapi.external.host` | The externally reachable hostname or IP used to connect to the PRIP/DDIP frontend | `coprs.werum.de/prip/odata/v1/` |
@@ -144,8 +144,8 @@ The `datetime` is an example for a ranged type. The value of the parameter conta
 When having a ranged query it is not sufficient enough to provide a single statement as the value cannot be mapped as empty string or null to provide a valid OData query. Thus if one of these ranges are open ended the associated OData statement needs to be ignored. To allow this in a generic manner, the statements needs to be listed independently. E.g.
 ```
     "[publicationdate={start}/{stop}]":
-      - "CreationDate gt {start}"
-      - "CreationDate lt {stop}"  
+      - "PublicationDate gt {start}"
+      - "PublicationDate lt {stop}"  
 ```
 If start and stop are provided, both statements will be concated using an and operator like:
 `PublicationDate gt 2010-10-18T14:33:00.000Z and PublicationDate lt 2023-02-06T14:33:00.000Z`
