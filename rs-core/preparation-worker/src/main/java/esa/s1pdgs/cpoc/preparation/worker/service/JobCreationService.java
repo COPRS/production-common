@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -18,10 +19,12 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
 import esa.s1pdgs.cpoc.appcatalog.util.AppDataJobProductAdapter;
+import esa.s1pdgs.cpoc.common.ApplicationLevel;
 import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
@@ -81,7 +84,7 @@ public class JobCreationService {
 			final JobOrderAdapter jobOrderAdapter = jobOrderFactory.newJobOrderFor(job, tasktableAdapter);
 
 			// Create the ExecutionJob as output of the PreparationWorker
-			executionJob = createIpfExecutionJob(job, jobOrderAdapter, tasktableAdapter, reporting);
+			executionJob = createIpfExecutionJob(mission, job, jobOrderAdapter, tasktableAdapter, reporting);
 			newState = AppDataJobGenerationState.SENT;
 			
 			final ReportingOutput reportOut = new JobOrderReportingOutput(jobOrderAdapter.getJobOrderName(),
@@ -98,7 +101,7 @@ public class JobCreationService {
 		return executionJob;
 	}
 
-	private IpfExecutionJob createIpfExecutionJob(final AppDataJob job, final JobOrderAdapter jobOrderAdapter,
+	private IpfExecutionJob createIpfExecutionJob(final MissionId missionId, final AppDataJob job, final JobOrderAdapter jobOrderAdapter,
 			final TaskTableAdapter tasktableAdapter, final Reporting reporting) throws InternalErrorException {
 		final AppDataJobProductAdapter product = new AppDataJobProductAdapter(job.getProduct());
 
@@ -109,11 +112,29 @@ public class JobCreationService {
 				product.getStringValue("timeliness", ""), reporting.getUid());
 		execJob.setCreationDate(new Date());
 		execJob.setPodName(settings.getHostname());
-
+		execJob.setMissionId(missionId.name());
+		
 		final IpfPreparationJob prepJob = job.getPrepJob();
 		execJob.setPreparationJob(prepJob);
 		execJob.setDebug(prepJob.isDebug());
 		execJob.setTimedOut(job.getTimedOut());
+		
+		if (missionId == MissionId.S3) {
+			if (settings.getLevel() == ApplicationLevel.L0 
+					|| settings.getLevel() == ApplicationLevel.S3_L0
+					|| settings.getLevel() == ApplicationLevel.S3_PDU) {
+				
+				// S3 Granule, L0 and PDU have always NRT timeliness
+				execJob.setTimeliness("NRT");
+			} else if (settings.getParams().containsKey("Processing_Mode")
+					&& (settings.getLevel() == ApplicationLevel.S3_L1
+							|| settings.getLevel() == ApplicationLevel.S3_L2)) {
+				execJob.setTimeliness(settings.getParams().get("Processing_Mode"));
+			}
+		}
+		
+		// RS-536: Add RS Chain version to message
+		execJob.setRsChainVersion(commonProperties.getRsChainVersion());
 
 		try {
 			// Add jobOrder inputs to ExecJob (except PROC inputs)
@@ -140,18 +161,25 @@ public class JobCreationService {
 				execJob.addPool(poolDto);
 			}
 			
-			// Determine t0_pdgs_date
+			// Determine t0PdgsDate
 			Date t0 = null;
+			
 			for (AppDataJobTaskInputs inputs : job.getAdditionalInputs()) {
 				for (AppDataJobInput input : inputs.getInputs()) {
 					for (AppDataJobFile file : input.getFiles()) {
-						if (file.getT0_pdgs_date() != null && (t0 == null || t0.before(file.getT0_pdgs_date()))) {
-							t0 = file.getT0_pdgs_date();
+						if (file.getT0PdgsDate() != null && (t0 == null || t0.before(file.getT0PdgsDate()))) {
+							t0 = file.getT0PdgsDate();
 						}
 					}
 				}
 			}
-			execJob.setT0_pdgs_date(t0);
+			
+			if (t0 != null) {
+				execJob.getAdditionalFields().put("t0PdgsDate", DateUtils.formatToMetadataDateTimeFormat(
+						t0.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+			} else {
+				LOGGER.warn("Inputs did not have any t0PdgsDate values. Set t0PdgsDate for outputs to null!");
+			}
 
 			typeAdapter.customJobDto(job, execJob);
 			return execJob;

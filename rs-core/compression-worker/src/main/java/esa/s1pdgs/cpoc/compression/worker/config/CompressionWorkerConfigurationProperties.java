@@ -1,5 +1,8 @@
 package esa.s1pdgs.cpoc.compression.worker.config;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -11,7 +14,12 @@ public class CompressionWorkerConfigurationProperties {
 	/**
 	 * The command that is performed to invoke the compression process
 	 */
-	private String compressionCommand;
+	private Map<String, String> compressionCommand = new LinkedHashMap<>();
+	
+	/**
+	 * The command that is performed to invoke the uncompression process
+	 */
+	private String uncompressionCommand = "/app/uncompression.sh";
 	
 	private String workingDirectory;
 	
@@ -25,15 +33,27 @@ public class CompressionWorkerConfigurationProperties {
      */
     private long requestTimeout;
 
+    /**
+     * Flag whether or not to skip uncompression
+     */
+    private boolean skipUncompression = false;
     
     private String hostname;
-
-	public String getCompressionCommand() {
+    
+	public Map<String, String> getCompressionCommand() {
 		return compressionCommand;
 	}
-
-	public void setCompressionCommand(String compressionCommand) {
+	
+	public void setCompressionCommand(Map<String, String> compressionCommand) {
 		this.compressionCommand = compressionCommand;
+	}
+
+	public String getUncompressionCommand() {
+		return uncompressionCommand;
+	}
+
+	public void setUncompressionCommand(String uncompressionCommand) {
+		this.uncompressionCommand = uncompressionCommand;
 	}
 
 	public String getWorkingDirectory() {
@@ -66,6 +86,14 @@ public class CompressionWorkerConfigurationProperties {
 
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
+	}
+
+	public boolean isSkipUncompression() {
+		return skipUncompression;
+	}
+
+	public void setSkipUncompression(boolean skipUncompression) {
+		this.skipUncompression = skipUncompression;
 	}
 
 }

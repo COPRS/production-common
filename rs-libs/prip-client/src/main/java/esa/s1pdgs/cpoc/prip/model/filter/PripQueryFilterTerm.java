@@ -66,12 +66,6 @@ public abstract class PripQueryFilterTerm implements PripQueryFilter, NestableQu
 		return Objects.equals(this.fieldName, other.fieldName) && Objects.equals(this.nested, other.nested) && Objects.equals(this.path, other.path);
 	}
 
-	// --------------------------------------------------------------------------
-
-	public abstract PripQueryFilterTerm copy();
-
-	// --------------------------------------------------------------------------
-
 	public String getFieldName() {
 		return this.fieldName;
 	}

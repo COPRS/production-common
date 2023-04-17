@@ -39,8 +39,6 @@ public class IngestionJob extends AbstractMessage {
 
 	private String mode;
 
-	private String timeliness;
-
 	private Date lastModified; // ... timestamp of file on pickup
 
 	private Map<String, String> additionalMetadata = new HashMap<>();
@@ -53,7 +51,7 @@ public class IngestionJob extends AbstractMessage {
 	public IngestionJob(final ProductFamily family, final String productName, final String pickupBaseURL,
 			final String relativePath, final long productSizeByte, final Date lastModified, final UUID uuid,
 			final String missionId, final String stationName, final String mode, final String timeliness,
-			final String inboxType, final Map<String, String> additionalMetadata) {
+			final String inboxType, final Map<String, String> additionalMetadata, final String t0PdgsDate) {
 		super(family, productName);
 		this.pickupBaseURL = pickupBaseURL;
 		this.relativePath = relativePath;
@@ -67,7 +65,7 @@ public class IngestionJob extends AbstractMessage {
 		this.timeliness = timeliness;
 		this.inboxType = inboxType;
 		this.additionalMetadata = additionalMetadata;
-		this.t0_pdgs_date = lastModified; // Last Modification date is used as availability time
+		this.getAdditionalFields().put("t0PdgsDate", t0PdgsDate); // Last Modification date is used as availability time
 		setAllowedActions(Arrays.asList(AllowedAction.RESTART));
 	}
 
@@ -126,15 +124,7 @@ public class IngestionJob extends AbstractMessage {
 	public void setMode(final String mode) {
 		this.mode = mode;
 	}
-
-	public String getTimeliness() {
-		return timeliness;
-	}
-
-	public void setTimeliness(final String timeliness) {
-		this.timeliness = timeliness;
-	}
-
+	
 	public String getInboxType() {
 		return inboxType;
 	}
@@ -185,7 +175,7 @@ public class IngestionJob extends AbstractMessage {
 				+ ", relativePath=" + relativePath + ", pickupBaseURL=" + pickupBaseURL + ", productName=" + productName
 				+ ", uid=" + uid + ", productSizeByte=" + productSizeByte + ", lastModified=" + lastModified
 				+ ", stationName=" + stationName + ", mode=" + mode + ", timeliness=" + timeliness + ", inboxType="
-				+ inboxType + ", additionalMetadata=" + additionalMetadata + "]";
+				+ inboxType + ", additionalMetadata=" + additionalMetadata + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 
 }

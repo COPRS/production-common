@@ -158,6 +158,34 @@ public class S3ObsClient extends AbstractObsClient {
 		ValidArgumentAssertion.assertValidArgument(object);
 		return s3Services.exist(getBucketFor(object.getFamily()), object.getKey());
 	}
+	
+	@Override
+	public boolean existsWithSameSize(ObsObject obsObject, long size) throws SdkClientException, ObsException {
+
+		
+		LOGGER.debug("checking if OBS object {} exists and has the size {}", obsObject, size);
+		long totalSize = -1;
+
+		if (this.exists(obsObject)) {
+			totalSize = this.size(obsObject);
+			LOGGER.debug("OBS object {} is a file and exists with size {}", obsObject, totalSize);
+
+		} else if (this.prefixExists(obsObject)) {
+
+			List<String> list = this.list(obsObject.getFamily(), obsObject.getKey());
+			totalSize = 0;
+			for (String key : list) {
+				totalSize += this.size(new ObsObject(obsObject.getFamily(), key));
+			}
+			LOGGER.debug("OBS object {} is a directory and exists with size {}", obsObject, totalSize);
+		}
+
+		if (totalSize < 0 || totalSize != size) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	@Override
 	public boolean prefixExists(final ObsObject object) throws SdkClientException {
@@ -261,18 +289,11 @@ public class S3ObsClient extends AbstractObsClient {
 		String keyPrefix = object.getKey();
 		try {
 			LOGGER.info("Deleting all files in bucket {} with prefix {}", bucket, keyPrefix);
-			final List<String> result = s3Services.getAll(bucket, keyPrefix).stream().map(S3ObjectSummary::getKey)
+			final List<String> result = s3Services.getAllWithMD5(bucket, keyPrefix).stream().map(S3ObjectSummary::getKey)
 					.collect(Collectors.toList());
 			for (String key : result) {
 				LOGGER.debug("Deleting file {} in bucket {}", key, bucket);
 				s3Services.deleteFile(new DeleteObjectRequest(bucket, key));
-			}
-			String md5sumfile = keyPrefix + Md5.MD5SUM_SUFFIX;
-			if (s3Services.exist(bucket, md5sumfile)) {
-				LOGGER.info("Deleting md5sum file {} in bucket {}", md5sumfile, bucket);
-				s3Services.deleteFile(new DeleteObjectRequest(bucket, md5sumfile));
-			} else {
-				LOGGER.warn("No md5sum file exist for file {} in bucket {}", md5sumfile, bucket);
 			}
 		} catch (S3SdkClientException | ObsServiceException e) {
 			throw new ObsException(object.getFamily(), object.getKey(), e);

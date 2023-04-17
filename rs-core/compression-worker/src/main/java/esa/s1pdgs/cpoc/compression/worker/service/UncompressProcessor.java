@@ -40,28 +40,49 @@ public class UncompressProcessor extends AbstractProcessor
 			final ObsClient obsClient) {
 		super(appStatus, properties, obsClient);
 		this.commonProperties = commonProperties;
+		
+		if (properties.isSkipUncompression()) {
+			LOGGER.info("Skip uncompression flag is set to true. Just pushing incoming messages forward.");
+		}
 	}
 
 	@Override
 	public Message<CatalogJob> apply(CatalogJob event) {
+		CatalogJob result = event;
+		
+		if (!properties.isSkipUncompression()) {
+			result = performUncompression(event);
+		}
+
+		return MessageBuilder.withPayload(result).build();
+	}
+	
+	private CatalogJob performUncompression(CatalogJob event) {
+		
+		if (!event.getProductFamily().isCompressed()) {
+			LOGGER.warn("Received uncompressed message (ProductFamily=%s). This may be an error, but still trying to uncompress.");
+		}
+		
 		final String workDir = properties.getWorkingDirectory();
 
-		final Reporting report = ReportingUtils.newReportingBuilder(MissionId.fromFileName(event.getKeyObjectStorage()))
+		final MissionId mission = MissionId.fromFileName(event.getKeyObjectStorage());
+		
+		final Reporting report = ReportingUtils.newReportingBuilder(mission)
 				.rsChainName(commonProperties.getRsChainName())
 				.rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(event.getUid()).newReporting("UncompressionProcessing");
 
 		// Initialize the pool processor executor
-		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(event, properties);
+		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(mission, event, properties);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		final FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, event);
+		final FileDownloader fileDownloader = new FileDownloader(mission, obsClient, workDir, event);
 
 		ProductFamily outputProductFamily = CompressionEventUtil.removeZipSuffixFromProductFamily(event.getProductFamily());
 		
-		final FileUploader fileUploader = new FileUploader(obsClient, workDir, event, outputProductFamily);
+		final FileUploader fileUploader = new FileUploader(mission, obsClient, workDir, event, outputProductFamily);
 		report.begin(ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getKeyObjectStorage()),
 				new ReportingMessage("Start uncompression processing"));
 		
@@ -108,9 +129,11 @@ public class UncompressProcessor extends AbstractProcessor
 		result.setStationName(event.getStationName());
 		result.setMetadataMode(event.getMetadataMode());
 		result.setTimeliness(event.getTimeliness());
-
-
-		return MessageBuilder.withPayload(result).build();
+		
+		// RS-536: Add RS Chain Version to message
+		result.setRsChainVersion(commonProperties.getRsChainVersion());
+		
+		return result;
 	}
 
 }

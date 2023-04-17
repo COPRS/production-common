@@ -115,6 +115,7 @@ public class IpfPreparationJob extends AbstractMessage {
 				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
 				+ retryCounter + ", debug=" + debug + ", level=" + level + ", catalogEvent=" + catalogEvent
 				+ ", taskTableName=" + taskTableName + ", startTime=" + startTime + ", stopTime=" + stopTime
-				+ ", processingMode=" + processingMode + ", triggerProducts=" + triggerProducts + "]";
+				+ ", processingMode=" + processingMode + ", triggerProducts=" + triggerProducts + ", rsChainVersion="
+				+ rsChainVersion + "]";
 	}
 }

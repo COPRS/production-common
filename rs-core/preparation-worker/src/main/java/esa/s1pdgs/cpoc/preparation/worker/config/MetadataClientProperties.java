@@ -22,6 +22,13 @@ public class MetadataClientProperties {
 	 * Temporisation in ms between 2 retries
 	 */
 	private int temporetryms;
+	
+	/**
+	 * Indicates if the workaround for valIntersectNoDuplicates shall be applied.
+	 * If true it will substitute this selection policy with valIntersect during
+	 * the startup. By default it will be deactivated.
+	 */
+	private boolean valIntersectNoDuplicatesWorkaround = false;
 
 	public String getMetadataHostname() {
 		return metadataHostname;
@@ -46,4 +53,14 @@ public class MetadataClientProperties {
 	public void setTemporetryms(int temporetryms) {
 		this.temporetryms = temporetryms;
 	}
+
+	public boolean isValIntersectNoDuplicatesWorkaround() {
+		return valIntersectNoDuplicatesWorkaround;
+	}
+
+	public void setValIntersectNoDuplicatesWorkaround(boolean valIntersectNoDuplicatesWorkaround) {
+		this.valIntersectNoDuplicatesWorkaround = valIntersectNoDuplicatesWorkaround;
+	}
+	
+	
 }

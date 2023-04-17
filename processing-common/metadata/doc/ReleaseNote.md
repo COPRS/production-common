@@ -39,7 +39,13 @@ This software does have the following minimal requirements:
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
 - [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
+- See [COPRS OBS Bucket](/processing-common/doc/buckets.md)
+- See [COPRS Kubernetes Secret](/processing-common/doc/secrets.md)
 
+# Additional resources
+In the scope of the COPRS it is necessary to be able to adjust the configuration of the commonly used kafka topics. As the SCDF server would create the kafka topics itself, when they aren't already present, it is necessary, that the kafka topics ``catalog-job`` and ``catalog-event`` are already created, before the SCDF streams are started.
+
+In case the default COPRS Infrastructure is used, this will be handled by the Strimzi Operator. On deployment of this RS core chain, the deployment script will firstly create the two KafkaTopic objects into the Kubernetes cluster, which will create the topics with the preferred configuration. The configuration can be found in the folder ``additional_resources`` in the files ``catalog-job.yaml`` and ``catalog-event.yaml``.
 
 # Configuration
 ## Application properties
@@ -72,7 +78,7 @@ The filter component is a generic component from SCDF and further information ca
 |``app.metadata-extraction.process.manifest-filenames.sen3``| Sentinel-3 product's Manifest name. Metadata contained within this file is extracted by the extraction Service.Default: ``xfdumanifest.xml``|
 |``app.metadata-extraction.process.manifest-filenames.isip``| Sentinel-1/2/3  products in an ISIP format. Metadata contained within this file is extracted by the extraction Service.Default: ``[PRODUCTNAME]_iif.xml``|
 |``app.metadata-extraction.process.manifest-filenames.safe``| Sentinel-1 SAFE format Manifest name. Metadata contained within this file is extracted by the extraction Service.Default: ``manifest.safe``|
-|``app.metadata-extraction.process.manifest-filenames.inventory``| Sentinel-1 SAFE format Manifest name. Metadata contained within this file is extracted by the extraction Service.Default: ``Inventory_Metadata.xml``|
+|``app.metadata-extraction.process.manifest-filenames.s2``| Sentinel-2 products Metadata file name. Metadata contained within this file is extracted by the extraction Service. Default: ``[S2PRODUCTNAME].xml`` |
 |``app.metadata-extraction.process.hostname``| Hostname of the Kubernetes pod that is running Metadata Extraction functionality.Default:``${HOSTNAME}``|
 |``app.metadata-extraction.worker.product-categories.auxiliary-files.pattern-config``| Pattern that matches with the filenames of the auxiliary files supported by the service. |``app.metadata-extraction.worker.product-categories.auxiliary-files.pattern-config``\| Pattern that matches with the filenames of the auxiliary files supported by the service. <br /> Default: ``^([0-9a-z][0-9a-z])([0-9a-z_])(_(OPER\|TEST))?_(AMH_ERRMAT\|AMV_ERRMAT\|AM__ERRMAT\|AUX_CAL\|AUX_ICE\|AUX_INS\|AUX_ITC\|AUX_OBMEMC\|AUX_PP1\|AUX_PP2\|AUX_POEORB\|AUX_PREORB\|AUX_RESORB\|AUX_SCF\|AUX_SCS\|AUX_TEC\|AUX_TRO\|AUX_WAV\|AUX_WND\|MPL_ORBPRE\|MPL_ORBRES\|MPL_ORBSCT\|MSK_EW_SLC\|MSK__LAND_\|MSK_OCEAN_\|MSK_OVRPAS)_\w{1,}\.(XML\|EOF\|SAFE)(/.*)?$``|
 |``app.metadata-extraction.worker.product-categories.auxiliary-files.local-directory``| The local working directory available to Metadata Extraction pod, where the auxiliary-files are retrieved from the OBS in order to extract the metadata.Default:``/data/local-catalog/auxiliary_files/``|

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.logging.log4j.LogManager;
@@ -72,10 +73,14 @@ public class OutputUtils {
 					throw new InternalErrorException(
 							"Found an unexpected number of LIST-files. Expected 1 found " + files.size() + ".");
 				}
-
-				return Files.lines(files.get(0).toPath()).collect(Collectors.toList());
+				
+				try (Stream<String> input = Files.lines(files.get(0).toPath())) {
+					return input.collect(Collectors.toList());
+				}
 			} else {
-				return Files.lines(Paths.get(listFile)).collect(Collectors.toList());
+				try (Stream<String> input = Files.lines(Paths.get(listFile))) {
+					return input.collect(Collectors.toList());
+				}				
 			}
 		} catch (final IOException | NullPointerException ioe) {
 			LOGGER.error("Cannot parse result list file {}: {}", listFile, ioe.getMessage());

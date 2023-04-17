@@ -23,7 +23,7 @@ The DLQ Manager polls the configured dead letter queue topic for failed processi
 
 **Comment**: Description and further notes about an error (optional).
 
-**Priority**: For the case when several rules match the same errorID, the rule with the highest priority is applied.
+**Priority**: For the case when several rules match the same errorID, the rule with the highest priority is applied (min 0 ; max 2147483647).
 
 Example rule table configuration:
 ```Bash
@@ -59,6 +59,10 @@ This software does have the following minimal requirements:
 | Volume Mount                |    n/a      |
 | Affinity between Pod / Node |    no       |
 
+## Additional resources
+In the scope of the COPRS it is necessary to be able to adjust the configuration of the commonly used kafka topics. As the SCDF server would create the kafka topics itself, when they aren't already present, it is necessary, that the kafka topics ``error-warning`` and ``parking-lot`` are already created, before the SCDF streams are started.
+
+In case the default COPRS Infrastructure is used, this will be handled by the Strimzi Operator. On deployment of this RS core chain, the deployment script will firstly create the two KafkaTopic objects into the Kubernetes cluster, which will create the topics with the preferred configuration. The configuration can be found in the folder ``additional_resources`` in the files ``error-warning.yaml`` and ``parking-lot.yaml``.
 
 ## Deployment Prerequisite
 

@@ -1,6 +1,6 @@
 ARG BRANCH
 
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH}
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
@@ -13,5 +13,6 @@ RUN echo "${COMMIT_ID}" >> VERSION
 
 COPY /target/rs-core-prip-frontend-*.jar rs-core-prip-frontend.jar
 COPY /config/start.sh start.sh
-
+ 
 ENTRYPOINT "/app/start.sh"
+ 

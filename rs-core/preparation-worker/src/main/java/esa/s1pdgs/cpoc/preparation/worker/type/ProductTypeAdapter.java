@@ -29,6 +29,10 @@ public interface ProductTypeAdapter {
 		// default implementation: don't validate
 	}
 	
+	default void updateTimeout(AppDataJob job, final TaskTableAdapter taskTableAdapter) {
+		// default implementation: timeout is already at the correct value
+	}
+	
 	List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) throws Exception;
 	
     void customJobOrder(final AppDataJob job, final JobOrder jobOrder);

@@ -54,7 +54,7 @@ public final class AuxipAuthenticationUtil {
 		{
 			case AUTHORIZATION:
 				return new BasicHeader("Authorization", "Bearer "+accessToken);
-			case OUTH2_ACCESS_TOKEN:
+			case OAUTH2_ACCESS_TOKEN:
 				return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
 		}
 		

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.util.Assert;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -18,6 +19,7 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties;
 import esa.s1pdgs.cpoc.ipf.execution.worker.config.ApplicationProperties.TypeEstimationMapping;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
+import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
 import esa.s1pdgs.cpoc.report.MissingOutput;
 
 public class OutputEstimation {
@@ -25,8 +27,6 @@ public class OutputEstimation {
 	private static final Logger LOGGER = LogManager.getLogger(OutputEstimation.class);
 
 	private final ApplicationProperties properties;
-
-	private final IpfExecutionJob job;
 
 	private final String prefixMonitorLogs;
 
@@ -36,10 +36,14 @@ public class OutputEstimation {
 
 	List<MissingOutput> missingOutputs;
 
+<<<<<<< HEAD
+	public OutputEstimation(final ApplicationProperties properties, final String prefixMonitorLogs,
+			final String listFile, final List<MissingOutput> missingOutputs) {
+=======
 	public OutputEstimation(final ApplicationProperties properties, final IpfExecutionJob job,
 			final String prefixMonitorLogs, final String listFile, final List<MissingOutput> missingOutputs) {
+>>>>>>> main
 		this.properties = properties;
-		this.job = job;
 		this.prefixMonitorLogs = prefixMonitorLogs;
 		this.listFile = listFile;
 		this.missingOutputs = missingOutputs;
@@ -47,7 +51,7 @@ public class OutputEstimation {
 		this.outputUtils = new OutputUtils(this.properties, this.prefixMonitorLogs);
 	}
 
-	public void estimateWithoutError() throws InternalErrorException {
+	public void estimateWithoutError(IpfExecutionJob job) throws InternalErrorException {
 
 		ProductFamily inputProductFamily = job.getPreparationJob().getCatalogEvent().getProductFamily();
 		String inputProductType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("productType");
@@ -72,18 +76,29 @@ public class OutputEstimation {
 			for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
 				TypeEstimationMapping typeEstimationMapping = properties.getProductTypeEstimatedCount()
 						.get(productType);
-				findMissingType(typeEstimationMapping.getRegexp(), properties.getProductTypeEstimationOutputFamily(),
-						productsInWorkDir, typeEstimationMapping.getCount());
+				findMissingType(job, typeEstimationMapping.getRegexp(),
+						properties.getProductTypeEstimationOutputFamily(), productsInWorkDir,
+						typeEstimationMapping.getCount());
 			}
 		} else if (inputProductFamily == ProductFamily.S3_GRANULES) {
+<<<<<<< HEAD
+			findMissingType(job, s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, productsInWorkDir, 1);
+=======
 			findMissingType(s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, productsInWorkDir, 1);
+>>>>>>> main
 
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
-			findMissingTypesForASP(inputProductType, productsInWorkDir);
+			findMissingTypesForASP(job, inputProductType, productsInWorkDir);
+		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
+				|| inputProductFamily == ProductFamily.S3_L0 || inputProductFamily == ProductFamily.S3_L1_NRT
+				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC
+				|| inputProductFamily == ProductFamily.S3_L2_NRT || inputProductFamily == ProductFamily.S3_L2_NTC
+				|| inputProductFamily == ProductFamily.S3_L2_STC || inputProductFamily == ProductFamily.S3_PUG) {
+			findMissingTypesFromJob(job, productsInWorkDir);
 		}
 	}
 
-	public void estimateWithError() {
+	public void estimateWithError(IpfExecutionJob job) throws InternalErrorException {
 
 		ProductFamily inputProductFamily = job.getPreparationJob().getCatalogEvent().getProductFamily();
 		String inputProductType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("productType");
@@ -94,96 +109,137 @@ public class OutputEstimation {
 			for (String productType : properties.getProductTypeEstimatedCount().keySet()) {
 				TypeEstimationMapping typeEstimationMapping = properties.getProductTypeEstimatedCount()
 						.get(productType);
-				addMissingOutput(typeEstimationMapping.getRegexp(), properties.getProductTypeEstimationOutputFamily(),
-						typeEstimationMapping.getCount());
+				addMissingOutput(job, typeEstimationMapping.getRegexp(),
+						properties.getProductTypeEstimationOutputFamily(), typeEstimationMapping.getCount());
 			}
 
 		} else if (inputProductFamily == ProductFamily.S3_GRANULES) {
+<<<<<<< HEAD
+			addMissingOutput(job, s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, 1);
+=======
 			addMissingOutput(s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, 1);
+>>>>>>> main
 
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
-			addMissingOutputForASP(inputProductType);
+			addMissingOutputForASP(job, inputProductType);
+		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
+				|| inputProductFamily == ProductFamily.S3_L0 || inputProductFamily == ProductFamily.S3_L1_NRT
+				|| inputProductFamily == ProductFamily.S3_L1_NTC || inputProductFamily == ProductFamily.S3_L1_STC
+				|| inputProductFamily == ProductFamily.S3_L2_NRT || inputProductFamily == ProductFamily.S3_L2_NTC
+				|| inputProductFamily == ProductFamily.S3_L2_STC || inputProductFamily == ProductFamily.S3_PUG) {
+			addMissingOutputFromJob(job);
 		}
 	}
 
-	private void findMissingType(final String productTypeRegexp, final ProductFamily productFamily,
-			final List<String> productsInWorkDir, final int estimatedCount) throws InternalErrorException {
+	void findMissingType(final IpfExecutionJob job, final String productTypeOrRegexp, final ProductFamily productFamily,
+			final List<String> productsInWorkDir, final int estimatedCount) {
 
-		LOGGER.debug("finding type {}", productTypeRegexp);
+		String regexp = typeToRegexp(productTypeOrRegexp);
+		String productType = regexpToType(regexp);
+
+		LOGGER.debug("finding type {}", productType);
 
 		int productTypeCount = 0;
 
 		for (final String line : productsInWorkDir) {
 
 			String productName = outputUtils.getProductName(line);
-			if (productName.matches("^.*" + productTypeRegexp + ".*$")) {
+			if (productName.matches(regexp)) {
 				productTypeCount++;
 			}
 		}
 
-		LOGGER.debug("count is {} for type {}, estimated {}", productTypeCount, productTypeRegexp, estimatedCount);
+		LOGGER.debug("count is {} for type {}, estimated {}", productTypeCount, productType, estimatedCount);
 
 		if (productTypeCount < estimatedCount) {
 
-			addMissingOutput(productTypeRegexp, productFamily, estimatedCount);
+			addMissingOutput(job, productType, productFamily, estimatedCount);
 		}
 	}
 
-	private void addMissingOutput(final String productType, final ProductFamily productFamily,
+	void addMissingOutput(final IpfExecutionJob job, final String productType, final ProductFamily productFamily,
 			final int estimatedCount) {
 
 		LOGGER.debug("adding type {} as missing, estimated count is {}", productType, estimatedCount);
 
 		MissingOutput missingOutput = new MissingOutput();
-		missingOutput.setProductMetadataCustomObject(productMetadataCustomObjectFor(productFamily, productType));
+		missingOutput.setProductMetadataCustomObject(productMetadataCustomObjectFor(job, productFamily, productType));
 		missingOutput.setEstimatedCountInteger(estimatedCount);
 		missingOutput.setEndToEndProductBoolean(productFamily.isEndToEndFamily());
 
 		missingOutputs.add(missingOutput);
 	}
 
-	private void findMissingTypesForASP(final String inputProductType, final List<String> productsInWorkDir)
+	void findMissingTypesForASP(final IpfExecutionJob job, final String inputProductType,
+			final List<String> productsInWorkDir) throws InternalErrorException {
+
+		String inputSwathType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("swathtype");
+
+		findMissingType(job, inputProductType, ProductFamily.L0_SLICE, productsInWorkDir, determineCountForASPType(
+				inputSwathType, job.getPreparationJob().getStartTime(), job.getPreparationJob().getStopTime()));
+		if(!"RF_RAW__0S".equals(inputProductType)) { //for RFC no ACN is expected #RS-708 
+			findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN,
+					productsInWorkDir, 1);
+			findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN,
+					productsInWorkDir, 1);
+			findMissingType(job, inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN,
+					productsInWorkDir, 1);
+		}
+	}
+
+	void addMissingOutputForASP(final IpfExecutionJob job, final String inputProductType)
 			throws InternalErrorException {
 
 		String inputSwathType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("swathtype");
 
-		findMissingType(inputProductType, ProductFamily.L0_SLICE, productsInWorkDir, determineCountForASPType(
-				inputSwathType, job.getPreparationJob().getStartTime(), job.getPreparationJob().getStopTime()));
-		findMissingType(inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN,
-				productsInWorkDir, 1);
-		findMissingType(inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN,
-				productsInWorkDir, 1);
-		findMissingType(inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN,
-				productsInWorkDir, 1);
-	}
-
-	private void addMissingOutputForASP(final String inputProductType) {
-
-		String inputSwathType = (String) job.getPreparationJob().getCatalogEvent().getMetadata().get("swathtype");
-
-		addMissingOutput(inputProductType, ProductFamily.L0_SLICE, determineCountForASPType(inputSwathType,
+		addMissingOutput(job, inputProductType, ProductFamily.L0_SLICE, determineCountForASPType(inputSwathType,
 				job.getPreparationJob().getStartTime(), job.getPreparationJob().getStopTime()));
-		addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN, 1);
-		addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN, 1);
-		addMissingOutput(inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN, 1);
+		if(!"RF_RAW__0S".equals(inputProductType)) { //for RFC no ACN expected #RS-708
+			addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "A", ProductFamily.L0_ACN,
+					1);
+			addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "C", ProductFamily.L0_ACN,
+					1);
+			addMissingOutput(job, inputProductType.substring(0, inputProductType.length() - 1) + "N", ProductFamily.L0_ACN,
+					1);
+		}
 	}
 	
 	private String s3L0TypeFromGranulesType(final String inputProductType) {
 
-		String outputS3L0Type = null;
-
-		if ("OL_0_CR___G".equals(inputProductType)) {
-
-			outputS3L0Type = "OL_0_CR[01]___";
-
-		} else {
-			outputS3L0Type = inputProductType.substring(0, inputProductType.length() - 1) + "_";
+	void findMissingTypesFromJob(final IpfExecutionJob job, final List<String> productsInWorkDir) {
+		for (LevelJobOutputDto o : job.getOutputs()) {
+			ProductFamily family = ProductFamily.fromValue(o.getFamily());
+			String type = regexpToType(typeToRegexp(o.getRegexp()));
+			if (family != ProductFamily.BLANK) {
+				findMissingType(job, o.getRegexp(), family, productsInWorkDir, getCountFromConfigOrDefault(type));
+			}
 		}
-		return outputS3L0Type;
 	}
 
-	private int determineCountForASPType(final String inputSwathType, final String inputStartTime,
-			final String inputStopTime) {
+	void addMissingOutputFromJob(final IpfExecutionJob job) {
+		for (LevelJobOutputDto o : job.getOutputs()) {
+			ProductFamily family = ProductFamily.fromValue(o.getFamily());
+			String type = regexpToType(typeToRegexp(o.getRegexp()));
+			if (family != ProductFamily.BLANK) {
+				addMissingOutput(job, type, family, getCountFromConfigOrDefault(type));
+			}
+		}
+	}
+
+	private int getCountFromConfigOrDefault(String type) {
+		int estimatedCount = 1;
+
+		for (TypeEstimationMapping t : properties.getProductTypeEstimatedCount().values()) {
+			if (t.getRegexp().equals(type)) {
+				estimatedCount = t.getCount();
+				break;
+			}
+		}
+		return estimatedCount;
+	}
+
+	int determineCountForASPType(final String inputSwathType, final String inputStartTime, final String inputStopTime)
+			throws InternalErrorException {
 
 		int estimatedCount = 1;
 
@@ -210,6 +266,10 @@ public class OutputEstimation {
 				sliceOverlap = 8200;
 			}
 
+			if (sliceLength == 0) {
+				throw new InternalErrorException("Slice length is 0 and would cause a division by zero");
+			}
+
 			double c = (duration.toMillis() - sliceOverlap) * 1f / sliceLength;
 
 			if (((c % 1) * sliceLength) < sliceOverlap) {
@@ -221,12 +281,10 @@ public class OutputEstimation {
 		}
 
 		LOGGER.info("estimated count for swathtype {} calculated to be: {}", inputSwathType, estimatedCount);
-
 		return estimatedCount;
-
 	}
 
-	private Map<String, Object> productMetadataCustomObjectFor(final ProductFamily productFamily,
+	Map<String, Object> productMetadataCustomObjectFor(final IpfExecutionJob job, final ProductFamily productFamily,
 			final String productType) {
 
 		Map<String, Object> customObject = new HashMap<>();
@@ -235,15 +293,15 @@ public class OutputEstimation {
 		customObject.put("platform_serial_identifier_string",
 				job.getPreparationJob().getCatalogEvent().getSatelliteId());
 
-		if (productFamily == ProductFamily.L0_SEGMENT) {
-
+		switch (productFamily) {
+		case L0_SEGMENT:
 			customObject.put("platform_short_name_string", "SENTINEL-1");
 			customObject.put("product_class_string", "S");
 			customObject.put("slice_product_flag_boolean", false);
 			customObject.put("processing_level_integer", 0);
-
-		} else if (productFamily == ProductFamily.L0_SLICE || productFamily == ProductFamily.L0_ACN) {
-
+			break;
+		case L0_SLICE:
+		case L0_ACN:
 			customObject.put("platform_short_name_string", "SENTINEL-1");
 			customObject.put("product_class_string", productClassOf(productType));
 			customObject.put("slice_product_flag_boolean", true);
@@ -256,30 +314,138 @@ public class OutputEstimation {
 					job.getPreparationJob().getCatalogEvent().getMetadata().get("polarisationChannels"));
 			customObject.put("swath_identifier_integer",
 					job.getPreparationJob().getCatalogEvent().getMetadata().get("swathIdentifier"));
-
-		} else if (productFamily == ProductFamily.S3_GRANULES) {
-
+			break;
+		case L1_SLICE:
+		case L1_ACN:
+			customObject.put("platform_short_name_string", "SENTINEL-1");
+			customObject.put("beginning_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
+			customObject.put("ending_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
+			customObject.put("operational_mode_string",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("opertationalMode"));
+			customObject.put("product_class_string", productClassOf(productType));
+			customObject.put("datatake_id_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("missionDataTakeId"));
+			customObject.put("slice_product_flag_boolean", true);
+			customObject.put("polarisation_channels_string",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("polarisationChannels"));
+			customObject.put("processing_level_integer", 1);
+			customObject.put("swath_identifier_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("swathIdentifier"));
+			break;
+		case L2_SLICE:
+		case L2_ACN:
+			customObject.put("platform_short_name_string", "SENTINEL-1");
+			customObject.put("beginning_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
+			customObject.put("ending_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
+			customObject.put("operational_mode_string",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("opertationalMode"));
+			customObject.put("product_class_string", productClassOf(productType));
+			customObject.put("datatake_id_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("missionDataTakeId"));
+			customObject.put("slice_product_flag_boolean", true);
+			customObject.put("polarisation_channels_string",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("polarisationChannels"));
+			customObject.put("processing_level_integer", 2);
+			customObject.put("swath_identifier_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("swathIdentifier"));
+			break;
+		case S3_GRANULES:
 			customObject.put("platform_short_name_string", "SENTINEL-3");
 			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
 			customObject.put("processing_level_integer", 0);
-
-		} else if (productFamily == ProductFamily.S3_L0) {
-
+			break;
+		case S3_L0:
 			customObject.put("platform_short_name_string", "SENTINEL-3");
 			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
 			customObject.put("processing_level_integer", 0);
-
+			customObject.put("orbit_number_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
+			break;
+		case S3_L1_NRT:
+		case S3_L1_NTC:
+		case S3_L1_STC:
+			customObject.put("beginning_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
+			customObject.put("ending_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
+			customObject.put("platform_short_name_string", "SENTINEL-3");
+			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
+			customObject.put("processing_level_integer", 1);
+			customObject.put("orbit_number_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
+			break;
+		case S3_L2_NRT:
+		case S3_L2_NTC:
+		case S3_L2_STC:
+			customObject.put("beginning_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("startTime"));
+			customObject.put("ending_date_time_date",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("stopTime"));
+			customObject.put("platform_short_name_string", "SENTINEL-3");
+			customObject.put("instrument_short_name_string", instrumentShortNameOf(productType));
+			customObject.put("processing_level_integer", 2);
+			customObject.put("orbit_number_integer",
+					job.getPreparationJob().getCatalogEvent().getMetadata().get("orbitNumber"));
+			break;
 		}
 
 		return customObject;
 	}
 
-	private String productClassOf(final String productType) {
+	static String productClassOf(final String productType) {
 		return productType.substring(productType.length() - 1);
 	}
 
-	private String instrumentShortNameOf(final String productType) {
+	static String instrumentShortNameOf(final String productType) {
 		return productType.substring(0, 2);
+	}
+
+	static String s3L0TypeFromGranulesType(final String inputProductType) {
+
+		String outputS3L0Type = null;
+
+		if ("OL_0_CR___G".equals(inputProductType)) {
+
+			outputS3L0Type = "OL_0_CR[01]___";
+
+		} else {
+			outputS3L0Type = inputProductType.substring(0, inputProductType.length() - 1) + "_";
+		}
+		return outputS3L0Type;
+	}
+
+	static String typeToRegexp(final String productType) {
+
+		Assert.notNull(productType, "productType is null");
+
+		String regex = productType;
+
+		if (regex.contains("/")) {
+			regex = regex.substring(regex.lastIndexOf("/") + 1);
+		}
+
+		if (!regex.startsWith("^.*") && !regex.endsWith(".*$")) {
+			regex = "^.*" + regex + ".*$";
+		}
+
+		return regex;
+	}
+
+	static String regexpToType(final String regex) {
+
+		Assert.notNull(regex, "regex is null");
+
+		String type = regex;
+
+		if (type.startsWith("^.*") && type.endsWith(".*$")) {
+			type = type.substring(3, type.length() - 3);
+		}
+
+		return type;
 	}
 
 }

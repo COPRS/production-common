@@ -334,6 +334,7 @@ public class TestPripElasticSearchMetadataRepo {
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 		pripMetadata.setChecksums(checksums);
+		pripMetadata.setOnline(true);
 		
 		final Map<String,Object> attributes = new LinkedHashMap<>();
 		attributes.put("attr_name1_string", "value1");
@@ -346,6 +347,8 @@ public class TestPripElasticSearchMetadataRepo {
 		attributes.put("attr_name8_date", LocalDateTime.of(2000, 1, 1, 0, 0));
 		
 		pripMetadata.setAttributes(attributes);
+		
+		pripMetadata.setBrowseKeys(List.of("foo.png"));
 		return pripMetadata;
 	}
 

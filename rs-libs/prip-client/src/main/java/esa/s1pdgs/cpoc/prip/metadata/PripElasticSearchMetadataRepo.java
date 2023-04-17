@@ -3,13 +3,13 @@ package esa.s1pdgs.cpoc.prip.metadata;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,7 +93,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Override
 	public void save(PripMetadata pripMetadata) {
-
 		LOGGER.info("saving PRIP metadata {}", pripMetadata);
 
 		final IndexRequest request = new IndexRequest(ES_INDEX).id(pripMetadata.getName())
@@ -123,7 +122,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 	@Override
 	public PripMetadata findById(String id) {
-
 		LOGGER.info("finding PRIP metadata with id {}", id);
 
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
@@ -155,7 +153,6 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	
 	@Override
 	public boolean deleteByName(String name) {
-
 		LOGGER.info("delete PRIP metadata with name {}", name);
 
 		PripMetadata pripMetadata = findByName(name);
@@ -324,21 +321,25 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		case CONTAINS:
 			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("*%s*", filter.getText())), filter);
 			break;
-		case EQUALS:
+		case EQ:
 			appendQuery(queryBuilder, operator,
 					QueryBuilders.matchQuery(filter.getFieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND), filter);
 			break;
-		default:
+      case NE:
+         appendQueryNegated(queryBuilder, operator,
+               QueryBuilders.matchQuery(filter.getFieldName(), filter.getText()).fuzziness(Fuzziness.ZERO).operator(Operator.AND), filter);
+         break;
+      default:
 			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
 		}
 	}
 
 	private static void buildQueryWithBooleanFilter(final PripBooleanFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
-		case EQUALS:
+		case EQ:
 			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
 			break;
-		case EQUALS_NOT:
+		case NE:
 			appendQueryNegated(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
 			break;
 		default:
@@ -591,7 +592,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		throw new IllegalArgumentException(String.format("sort order not supported: %s", sortOrder));
 	}
 
-	private PripMetadata mapSearchHitToPripMetadata(SearchHit hit) {
+	@SuppressWarnings("unchecked")
+   private PripMetadata mapSearchHitToPripMetadata(SearchHit hit) {
 		final Map<String, Object> sourceAsMap = hit.getSourceAsMap();
 		final PripMetadata pm = new PripMetadata();
 
@@ -616,6 +618,13 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			pm.setContentDateEnd(
 					DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
 		}
+		
+		// If no value is found, we assume it to be true for backward compatibility reasons
+		if (sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName()) != null) {
+			pm.setOnline((Boolean)sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName()));
+		} else {
+			pm.setOnline(true);
+		}
 
 		final List<Checksum> checksumList = new ArrayList<>();
 		for (final Map<String, Object> c : (List<Map<String, Object>>) sourceAsMap
@@ -635,25 +644,59 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 
 		pm.setFootprint(this.mapToPripGeoShape(sourceAsMap));
 
-		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
-				.collect(Collectors.toMap(Entry::getKey, s -> {
-					final String key = s.getKey();
-					final Object value = s.getValue();
-					if (key.endsWith("_date")) {
-						return DateUtils.parse((String) value);
-					} else if (key.endsWith("_double")) {
-						if (value instanceof Long) {
-							return Double.valueOf((Long) value);
-						} else if (value instanceof Integer) {
-							return Double.valueOf((Integer) value);
-						}
-					} else if (key.endsWith("_long") && value instanceof Integer) {
-						return Long.valueOf((Integer) value);
+		// Collectors.toMap has a known bug: https://bugs.openjdk.org/browse/JDK-8261865
+//		pm.setAttributes(sourceAsMap.entrySet().stream().filter(p -> p.getKey().startsWith("attr_"))
+//				.collect(Collectors.toMap(Entry::getKey, s -> {
+//					final String key = s.getKey();
+//					final Object value = s.getValue();
+//					if (key.endsWith("_date")) {
+//						return DateUtils.parse((String) value);
+//					} else if (key.endsWith("_double")) {
+//						if (value instanceof Long) {
+//							return Double.valueOf((Long) value);
+//						} else if (value instanceof Integer) {
+//							return Double.valueOf((Integer) value);
+//						}
+//					} else if (key.endsWith("_long") && value instanceof Integer) {
+//						return Long.valueOf((Integer) value);
+//					}
+//					return value;
+//				})));		
+		Map<String, Object> attributeMap = new HashMap<>();
+		for (Entry<String, Object> entry : sourceAsMap.entrySet()) {
+			if (entry.getKey().startsWith("attr_")) {
+				
+				if (entry.getKey() == "attr_processingDate_date") {
+					LOGGER.trace("Processing attr_processingDate_date");
+				}
+				
+				final String key = entry.getKey();
+				final Object value = entry.getValue();
+				if (key.endsWith("_date")) {
+					attributeMap.put(key, DateUtils.parse((String) value));
+				} else if (key.endsWith("_double")) {
+					if (value instanceof Long) {
+						attributeMap.put(key, Double.valueOf((Long) value));
+					} else if (value instanceof Integer) {
+						attributeMap.put(key, Double.valueOf((Integer) value));
 					}
-					return value;
-				})));
+				} else if (key.endsWith("_long") && value instanceof Integer) {
+					attributeMap.put(key, Long.valueOf((Integer) value));
+				}
+				if (!attributeMap.containsKey(key)) {
+					attributeMap.put(key, value);
+				}
+			}
+		}
+		pm.setAttributes(attributeMap);
 
-		LOGGER.debug("hit {}", pm);
+      List<String> browseKeys = (List<String>)sourceAsMap.get(PripMetadata.FIELD_NAMES.BROWSE_KEYS.fieldName());
+		if (null == browseKeys) {
+		   browseKeys = new ArrayList<>();
+		}
+		pm.setBrowseKeys(browseKeys);
+
+		LOGGER.trace("hit {}", pm);
 		return pm;
 	}
 
@@ -730,8 +773,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		countRequest.source(searchSourceBuilder);
 
 		try {
-			count = Long.valueOf(this.restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount())
-					.intValue();
+			count = (int) (this.restHighLevelClient.count(countRequest, RequestOptions.DEFAULT).getCount());
 			LOGGER.info("counting PRIP metadata successful, number of hits {}", count);
 		} catch (final IOException e) {
 			LOGGER.error("error while counting PRIP metadata", e);

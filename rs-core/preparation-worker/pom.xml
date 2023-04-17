@@ -16,13 +16,41 @@
 		<project.build.finalName>rs-preparation-worker</project.build.finalName>
 		<project.artifactId>rs-preparation-worker</project.artifactId>
 		<start-class>esa.s1pdgs.cpoc.preparation.worker.Application</start-class>
+        <geotools.version>26-RC</geotools.version>
+        <micrometer.version>1.5.0</micrometer.version>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>osgeo</id>
+			<name>OSGeo Release Repository</name>
+			<url>https://repo.osgeo.org/repository/release/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>osgeo-snapshot</id>
+			<name>OSGeo Snapshot Repository</name>
+			<url>https://repo.osgeo.org/repository/snapshot/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<!-- SCDF dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
@@ -129,6 +157,11 @@
 			<artifactId>s1pro-core-metadata-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>de.werum.s1pdgs</groupId>
+			<artifactId>s1pro-core-message-adapter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.junit.vintage</groupId>
@@ -145,6 +178,25 @@
 			<artifactId>equalsverifier</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+        <dependency>
+          <groupId>com.google.code.gson</groupId>
+          <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-shapefile</artifactId>
+          <version>${geotools.version}</version>
+        </dependency>
+        
+        <!-- Expose metrics for Prometheus -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

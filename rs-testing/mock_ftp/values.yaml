@@ -9,7 +9,7 @@ processing:
 
 image:
   registry: artifactory.coprs.esa-copernicus.eu
-  repository: werum-docker
+  repository: rs-docker-private
   
   name: rs-core-mock-ftpserver
   tag: develop

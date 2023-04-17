@@ -137,7 +137,7 @@ public class ITIngestionTriggerService {
 		assertEquals(DateUtils.parse("2000-01-01T00:00:00.000000Z").toInstant(ZoneOffset.UTC), jobs.getLastModified().toInstant());
 		assertEquals("FOO", jobs.getStationName());
 		assertNull(jobs.getMode());
-		assertNull(jobs.getTimeliness());
+		assertEquals("", jobs.getTimeliness());
 		assertEquals(0, jobs.getAdditionalMetadata().size());
 	}	
 }

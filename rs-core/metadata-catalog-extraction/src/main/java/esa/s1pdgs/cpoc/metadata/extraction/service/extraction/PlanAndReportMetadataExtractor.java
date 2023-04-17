@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
@@ -21,14 +20,13 @@ public class PlanAndReportMetadataExtractor extends AbstractMetadataExtractor {
 	private final static Pattern MISSION_ID_PATTERN = Pattern.compile("^([a-z][0-9])[0-9a-z_]_.*$", Pattern.CASE_INSENSITIVE);
 	
 	public PlanAndReportMetadataExtractor(
-			final EsServices esServices, 
 			final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, 
 			final String localDirectory,
 			final ProcessConfiguration processConfiguration, 
 			final ObsClient obsClient
 	) {
-		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
+		super(mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
 	}
 
 	@Override

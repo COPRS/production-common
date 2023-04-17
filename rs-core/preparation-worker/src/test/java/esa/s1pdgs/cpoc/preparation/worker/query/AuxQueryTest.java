@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.hamcrest.CustomMatcher;
@@ -49,6 +50,8 @@ import esa.s1pdgs.cpoc.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableFactory;
+import esa.s1pdgs.cpoc.preparation.worker.timeout.InputTimeoutChecker;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -66,6 +69,9 @@ public class AuxQueryTest {
 
     @Mock
     private MetadataClient metadataClient;
+    
+    @Mock
+    private Function<TaskTable, InputTimeoutChecker> inputTimeoutChecker;
 
     @Before
     public void initMocks() {
@@ -79,7 +85,7 @@ public class AuxQueryTest {
 
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
                 xmlFile,
-                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
+                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel(), ""),
                 elementMapper,
                 ProductMode.ALWAYS
         );
@@ -139,11 +145,13 @@ public class AuxQueryTest {
                                 "S1A",
                                 "S1A",
                                 "")));
+        
+        when(inputTimeoutChecker.apply(any())).thenReturn(InputTimeoutChecker.NULL);
 
 
         //actual test
         final List<AppDataJobTaskInputs> appDataJobTaskInputs =
-                new AuxQueryHandler(metadataClient, ProductMode.SLICING).queryFor(job, taskTableAdapter).queryAux();
+                new AuxQueryHandler(metadataClient, ProductMode.SLICING, inputTimeoutChecker).queryFor(job, taskTableAdapter).queryAux();
 
         //we have three distinct alternatives in the task table -> three different queries
         verify(metadataClient, times(3)).search(any(), any(), any(), any(), anyInt(), any(), any());
@@ -198,7 +206,7 @@ public class AuxQueryTest {
 
         final TaskTableAdapter taskTableAdapter = new TaskTableAdapter(
                 xmlFile,
-                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel()),
+                taskTableFactory.buildTaskTable(xmlFile, processSettings.getLevel(), ""),
                 elementMapper,
                 ProductMode.SLICING
         );
@@ -227,8 +235,10 @@ public class AuxQueryTest {
         expectAndReturnMetadataQuery("IW_RAW__0N", "IW_RAW__0N_RESULT", metadataClient);
         expectAndReturnMetadataQuery("IW_RAW__0S", "IW_RAW__0S_RESULT", metadataClient);
 
+        when(inputTimeoutChecker.apply(any())).thenReturn(InputTimeoutChecker.NULL);
+        
         //actual test
-        final List<AppDataJobTaskInputs> appDataJobTaskInputs = new AuxQueryHandler(metadataClient, ProductMode.SLICING).queryFor(job, taskTableAdapter).queryAux();
+        final List<AppDataJobTaskInputs> appDataJobTaskInputs = new AuxQueryHandler(metadataClient, ProductMode.SLICING, inputTimeoutChecker).queryFor(job, taskTableAdapter).queryAux();
 
         verify(metadataClient, times(11)).search(any(), any(), any(), any(), anyInt(), any(), any());
 

@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.appstatus;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,10 +47,11 @@ public abstract class AbstractAppStatus implements AppStatus {
 	
 	@Override
 	public void addSubStatus(final Status status) {
-		if (!status.getCategory().isPresent()) {
+		Optional<ProductCategory> category = status.getCategory();
+		if (!category.isPresent()) {
 			throw new IllegalArgumentException("Assignment as a substatus failed because category attribute is not present");
 		}
-		this.status.getSubStatuses().put(status.getCategory().get(), status);
+		this.status.getSubStatuses().put(category.get(), status);
 	}
     
     /**

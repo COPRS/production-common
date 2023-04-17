@@ -147,8 +147,8 @@ public class MetadataClient {
 	 * @return list of matching products
 	 */
 	public List<S3Metadata> getProductsInRange(final String productType, final ProductFamily productFamily,
-			final String satelliteId, final String t0, final String t1, final double dt0, final double dt1,
-			final String timeliness) throws MetadataQueryException {
+			final String satelliteId, final String t0, final String t1, final double dt0, final double dt1)
+			throws MetadataQueryException {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.S3_METADATA.path() + "/" + productType
 				+ "/range";
 
@@ -159,7 +159,7 @@ public class MetadataClient {
 
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 				.queryParam("productFamily", productFamily.toString()).queryParam("satellite", satelliteId)
-				.queryParam("start", rangeStart).queryParam("stop", rangeStop).queryParam("timeliness", timeliness);
+				.queryParam("start", rangeStart).queryParam("stop", rangeStop);
 
 		final ResponseEntity<List<S3Metadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<S3Metadata>>() {
@@ -262,7 +262,7 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
-	
+
 	/**
 	 * Extract the first product (based on insertionTime) of an start or stop orbit
 	 * 
@@ -273,34 +273,28 @@ public class MetadataClient {
 	 * @return Products of the orbit
 	 * @throws MetadataQueryException
 	 */
-	public List<L0AcnMetadata> getL0AcnForStartOrStopOrbit(
-			final ProductFamily productFamily, 
-			final String productType,
-			final String satelliteId, 
-			final long orbit
-	) throws MetadataQueryException {
+	public List<L0AcnMetadata> getL0AcnForStartOrStopOrbit(final ProductFamily productFamily, final String productType,
+			final String satelliteId, final long orbit) throws MetadataQueryException {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_ACN.path() + "/" + productType
 				+ "/startOrStopOrbit";
 
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
-				.queryParam("productFamily", productFamily.toString())
-				.queryParam("satellite", satelliteId)
+				.queryParam("productFamily", productFamily.toString()).queryParam("satellite", satelliteId)
 				.queryParam("orbitNumber", orbit);
 
-		final ResponseEntity<List<L0AcnMetadata>> response = query(
-				builder.build().toUri(),
-				new ParameterizedTypeReference<List<L0AcnMetadata>>() {}
-		);
+		final ResponseEntity<List<L0AcnMetadata>> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<List<L0AcnMetadata>>() {
+				});
 
 		if (response == null || response.getBody() == null) {
 			LOGGER.debug("Products of Start/Stop Orbit query for product type '{}' and orbit '{}' returned no results",
 					productType, orbit);
-			throw new MetadataQueryException(String
-						.format("Products of Start/Stop Orbit query for product type '%s' and orbit '%s' returned no results",
-								productType, orbit));
+			throw new MetadataQueryException(String.format(
+					"Products of Start/Stop Orbit query for product type '%s' and orbit '%s' returned no results",
+					productType, orbit));
 		} else {
-			LOGGER.info("Products of Start/Stop Orbit query for product type '{}' and orbit '{}' returned {}", productType,
-					orbit, response.getBody());
+			LOGGER.info("Products of Start/Stop Orbit query for product type '{}' and orbit '{}' returned {}",
+					productType, orbit, response.getBody());
 			return response.getBody();
 		}
 	}
@@ -327,34 +321,52 @@ public class MetadataClient {
 		if (polarisation != null) {
 			builder.queryParam("polarisation", polarisation);
 		}
+		
 		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
 				new ParameterizedTypeReference<List<SearchMetadata>>() {
 				});
-
+		
 		if (response == null || response.getBody() == null) {
 			LOGGER.debug("Metadata query for family '{}' and product type '{}' returned no results",
 					query.getProductFamily(), query.getProductType());
 			return new ArrayList<>();
-		} else {
-			LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results",
-					query.getProductFamily(), query.getProductType(), numResults(response));
-			return response.getBody();
 		}
+		
+		// Handling for ValIntersectWithoutDuplicates -> return no result, if amount does not match expectation
+		if (query.getRetrievalMode().equals("ValIntersectWithoutDuplicates")) {
+			int numResults = numResults(response);
+			if (query.getMinResults() > numResults || query.getMaxResults() < numResults) {
+				LOGGER.info(
+						"Metadata query for family '{}' and product type '{}' returned unexpected number of results: expected between {} and {} results, returned {} results",
+						query.getProductFamily(), query.getProductType(), query.getMinResults(),
+						query.getMaxResults(), numResults);
+				return new ArrayList<>();
+			}
+		}
+			
+		LOGGER.info("Metadata query for family '{}' and product type '{}' returned {} results",
+				query.getProductFamily(), query.getProductType(), numResults(response));
+		return response.getBody();
 	}
 
 	/**
 	 * Queries the products inside a given time interval for the given producttype.
 	 * The time interval is applied on the insertionTime
 	 */
-	public List<SearchMetadata> searchInterval(
-			final ProductFamily productFamily, 
-			final String productType,
-			final LocalDateTime intervalStart, 
-			final LocalDateTime intervalStop, 
-			final String satelliteId
-	) 
+	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
+			final LocalDateTime intervalStart, final LocalDateTime intervalStop, final String satelliteId)
 			throws MetadataQueryException {
-		
+		return searchInterval(productFamily, productType, intervalStart, intervalStop, satelliteId, "");
+	}
+
+	/**
+	 * Queries the products inside a given time interval for the given producttype.
+	 * The time interval is applied on the insertionTime
+	 */
+	public List<SearchMetadata> searchInterval(final ProductFamily productFamily, final String productType,
+			final LocalDateTime intervalStart, final LocalDateTime intervalStop, final String satelliteId,
+			final String timeliness) throws MetadataQueryException {
+
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/"
 				+ productFamily.toString() + "/searchTypeInterval";
 
@@ -362,15 +374,18 @@ public class MetadataClient {
 				.queryParam("productType", productType)
 				.queryParam("intervalStart", intervalStart.format(DateUtils.METADATA_DATE_FORMATTER))
 				.queryParam("intervalStop", intervalStop.format(DateUtils.METADATA_DATE_FORMATTER));
-		
+
 		if (!StringUtils.isEmpty(satelliteId)) {
 			builder.queryParam("satelliteId", satelliteId);
-		}		
+		}
+		
+		if (!StringUtils.isEmpty(timeliness)) {
+			builder.queryParam("timeliness", timeliness);
+		}
 
-		final ResponseEntity<List<SearchMetadata>> response = query(
-				builder.build().toUri(),
-				new ParameterizedTypeReference<List<SearchMetadata>>() {}
-		);
+		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<List<SearchMetadata>>() {
+				});
 
 		if (response == null || response.getBody() == null) {
 			LOGGER.debug("Metadata query for family '{}' returned no results", productFamily);
@@ -380,50 +395,43 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
-	
-	public List<SearchMetadata> getL1AcnProductsForDatatake(
-			final String productType,
-			final String datatakeId
-	) 	throws MetadataQueryException {
-		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L1_ACN.path() + "/" + productType + "/"
-				+ "/" + datatakeId;
-		
+
+	public List<SearchMetadata> getL1AcnProductsForDatatake(final String productType, final String datatakeId)
+			throws MetadataQueryException {
+		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L1_ACN.path() + "/" + productType + "/" + "/"
+				+ datatakeId;
+
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri);
-		
-		final ResponseEntity<List<SearchMetadata>> response = query(
-				builder.build().toUri(),
-				new ParameterizedTypeReference<List<SearchMetadata>>() {}
-		);
+
+		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<List<SearchMetadata>>() {
+				});
 
 		if (response == null || response.getBody() == null) {
-			LOGGER.debug("L1ACN query for productType '{}' and datatake '{}' returned no results", productType, datatakeId);
+			LOGGER.debug("L1ACN query for productType '{}' and datatake '{}' returned no results", productType,
+					datatakeId);
 			return Collections.emptyList();
 		} else {
-			LOGGER.info("L1ACN query for productType '{}' and datatake '{}' returned {} results", productType, datatakeId,
-					numResults(response));
+			LOGGER.info("L1ACN query for productType '{}' and datatake '{}' returned {} results", productType,
+					datatakeId, numResults(response));
 			return response.getBody();
 		}
-		
+
 	}
-	
-	public List<SearchMetadata> query(
-			final ProductFamily family, 
-			final String productType,
-			final TimeInterval timeInterval
-	) 
-		throws MetadataQueryException {
+
+	public List<SearchMetadata> query(final ProductFamily family, final String productType,
+			final TimeInterval timeInterval) throws MetadataQueryException {
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family.toString()
-			+ "/query";
-		
+				+ "/query";
+
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri)
 				.queryParam("productType", productType)
 				.queryParam("intervalStart", timeInterval.getStart().format(DateUtils.METADATA_DATE_FORMATTER))
 				.queryParam("intervalStop", timeInterval.getStop().format(DateUtils.METADATA_DATE_FORMATTER));
-		
-		final ResponseEntity<List<SearchMetadata>> response = query(
-				builder.build().toUri(),
-				new ParameterizedTypeReference<List<SearchMetadata>>() {}
-		);
+
+		final ResponseEntity<List<SearchMetadata>> response = query(builder.build().toUri(),
+				new ParameterizedTypeReference<List<SearchMetadata>>() {
+				});
 
 		if (response == null || response.getBody() == null) {
 			LOGGER.debug("Metadata query for family '{}' returned no results", family);
@@ -433,7 +441,6 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
-		
 
 	/**
 	 */
@@ -514,15 +521,15 @@ public class MetadataClient {
 			return response.getBody();
 		}
 	}
-	
+
 	public boolean deleteByFamilyAndProductName(final ProductFamily family, final String productName)
 			throws MetadataQueryException {
-		
+
 		LOGGER.info("delete MDC metadata for family {} and name {}", family, productName);
-		
+
 		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.METADATA.path() + "/" + family
 				+ "/deleteProduct";
-		
+
 		final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uri).queryParam("productName",
 				productName);
 
@@ -531,7 +538,8 @@ public class MetadataClient {
 		final ResponseEntity<Boolean> result = performWithRetries(commandDescription, () -> {
 			int notAvailableRetries = 10;
 			LOGGER.debug(commandDescription);
-			ResponseEntity<Boolean> response = this.restTemplate.exchange(builder.build().toUri(), HttpMethod.DELETE, null, Boolean.class);
+			ResponseEntity<Boolean> response = this.restTemplate.exchange(builder.build().toUri(), HttpMethod.DELETE,
+					null, Boolean.class);
 			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
 				LOGGER.debug("Product not available yet. Waiting...");
 				try {
@@ -558,197 +566,13 @@ public class MetadataClient {
 		if (deleted == null) {
 			throw new MetadataQueryException("No result body for deleting metadata of" + productName);
 		}
-		
+
 		if (deleted) {
 			LOGGER.info("MDC metadata for family {} and name {} deleted", family, productName);
 		} else {
 			LOGGER.warn("MDC metadata for family {} and name {} not deleted!", family, productName);
 		}
 		return deleted;
-	}
-	
-	
-
-	/**
-	 */
-	public int getSeaCoverage(final ProductFamily family, final String productName) throws MetadataQueryException {
-
-		final String uri = this.metadataBaseUri + MetadataCatalogRestPath.L0_SLICE.path() + "/" + family + "/"
-				+ productName + "/seaCoverage";
-
-		final String commandDescription = String.format("call rest metadata for sea coverage check on %s", uri);
-
-		final ResponseEntity<Integer> result = performWithRetries(commandDescription, () -> {
-			int notAvailableRetries = 10;
-			LOGGER.debug(commandDescription);
-			ResponseEntity<Integer> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
-			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
-				LOGGER.debug("Product not available yet. Waiting...");
-				try {
-					Thread.sleep(this.retryInMillis);
-				} catch (final InterruptedException e) {
-					throw new MetadataQueryException(e.getMessage(), e);
-				}
-				notAvailableRetries--;
-				LOGGER.debug("Retrying call rest metadata for sea coverage check on  {}", uri);
-				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
-				if (notAvailableRetries <= 0) {
-					LOGGER.trace("Max number of retries reached for {}", productName);
-					break;
-				}
-			}
-			handleReturnValueErrors(uri, response);
-			return response;
-		});
-
-		if (result == null) {
-			throw new MetadataQueryException("Query for seacoverage returns no result for " + productName);
-		}
-		final Integer coverage = result.getBody();
-		if (coverage == null) {
-			throw new MetadataQueryException("Query for seacoverage returns no result body for " + productName);
-		}
-		LOGGER.debug("Got coverage {}", coverage);
-		return coverage;
-	}
-	
-	public int getOverpassCoverage(final ProductFamily family, final String productName) throws MetadataQueryException {
-		MetadataCatalogRestPath metadataCatalogRestPath;
-		switch (family) {
-			case L1_SLICE: metadataCatalogRestPath = MetadataCatalogRestPath.L1_SLICE; break;  
-			case L1_ACN: metadataCatalogRestPath = MetadataCatalogRestPath.L1_ACN; break;
-			default: throw new RuntimeException(String.format("ProductFamily %s not supported for overpass coverage check", family));
-		}
-		
-		final String uri = this.metadataBaseUri + metadataCatalogRestPath.path() + "/" + family + "/"
-				+ productName + "/overpassCoverage";
-
-		final String commandDescription = String.format("call rest metadata for overpass coverage check on %s", uri);
-
-		final ResponseEntity<Integer> result = performWithRetries(commandDescription, () -> {
-			int notAvailableRetries = 10;
-			LOGGER.debug(commandDescription);
-			ResponseEntity<Integer> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
-			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
-				LOGGER.debug("Product not available yet. Waiting...");
-				try {
-					Thread.sleep(this.retryInMillis);
-				} catch (final InterruptedException e) {
-					throw new MetadataQueryException(e.getMessage(), e);
-				}
-				notAvailableRetries--;
-				LOGGER.debug("Retrying call rest metadata for overpass coverage check on  {}", uri);
-				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Integer.class);
-				if (notAvailableRetries <= 0) {
-					LOGGER.trace("Max number of retries reached for {}", productName);
-					break;
-				}
-			}
-			handleReturnValueErrors(uri, response);
-			return response;
-		});
-
-		if (result == null) {
-			throw new MetadataQueryException("Query for overpass coverage returns no result for " + productName);
-		}
-		final Integer coverage = result.getBody();
-		if (coverage == null) {
-			throw new MetadataQueryException("Query for overpass coverage returns no result body for " + productName);
-		}
-		LOGGER.debug("Got coverage {}", coverage);
-		return coverage;
-	}
-	
-	public boolean isIntersectingOceanMask(final ProductFamily family, final String productName) throws MetadataQueryException {
-		MetadataCatalogRestPath metadataCatalogRestPath;
-		switch (family) {
-			case L1_SLICE: metadataCatalogRestPath = MetadataCatalogRestPath.L1_SLICE; break;  
-			default: throw new RuntimeException(String.format("ProductFamily %s not supported for ocean mask intersection check", family));
-		}
-		
-		final String uri = this.metadataBaseUri + metadataCatalogRestPath.path() + "/" + family + "/"
-				+ productName + "/isIntersectingOceanMask";
-
-		final String commandDescription = String.format("call rest metadata for ocean mask intersection check on %s", uri);
-
-		final ResponseEntity<Boolean> result = performWithRetries(commandDescription, () -> {
-			int notAvailableRetries = 10;
-			LOGGER.debug(commandDescription);
-			ResponseEntity<Boolean> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
-			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
-				LOGGER.debug("Product not available yet. Waiting...");
-				try {
-					Thread.sleep(this.retryInMillis);
-				} catch (final InterruptedException e) {
-					throw new MetadataQueryException(e.getMessage(), e);
-				}
-				notAvailableRetries--;
-				LOGGER.debug("Retrying call rest metadata for ocean mask intersection check on  {}", uri);
-				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
-				if (notAvailableRetries <= 0) {
-					LOGGER.trace("Max number of retries reached for {}", productName);
-					break;
-				}
-			}
-			handleReturnValueErrors(uri, response);
-			return response;
-		});
-
-		if (result == null) {
-			throw new MetadataQueryException("Query for ocean mask intersection returns no result for " + productName);
-		}
-		final Boolean isIntersecting = result.getBody();
-		if (isIntersecting == null) {
-			throw new MetadataQueryException("Query for ocean mask intersection returns no result body for " + productName);
-		}
-		LOGGER.debug("Got intersection {}", isIntersecting);
-		return isIntersecting;
-	}
-	
-	public boolean isIntersectingEwSlcMask(final ProductFamily family, final String productName) throws MetadataQueryException {
-		MetadataCatalogRestPath metadataCatalogRestPath;
-		switch (family) {
-			case L0_SLICE: metadataCatalogRestPath = MetadataCatalogRestPath.L0_SLICE; break;  
-			default: throw new RuntimeException(String.format("ProductFamily %s not supported for EW SLC mask intersection check", family));
-		}
-		
-		final String uri = this.metadataBaseUri + metadataCatalogRestPath.path() + "/" + family + "/"
-				+ productName + "/isIntersectingEwSlcMask";
-
-		final String commandDescription = String.format("call rest metadata for EW SLC mask intersection check on %s", uri);
-
-		final ResponseEntity<Boolean> result = performWithRetries(commandDescription, () -> {
-			int notAvailableRetries = 10;
-			LOGGER.debug(commandDescription);
-			ResponseEntity<Boolean> response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
-			while (response.getStatusCode() == HttpStatus.NO_CONTENT) {
-				LOGGER.debug("Product not available yet. Waiting...");
-				try {
-					Thread.sleep(this.retryInMillis);
-				} catch (final InterruptedException e) {
-					throw new MetadataQueryException(e.getMessage(), e);
-				}
-				notAvailableRetries--;
-				LOGGER.debug("Retrying call rest metadata for EW SLC mask intersection check on  {}", uri);
-				response = this.restTemplate.exchange(uri, HttpMethod.GET, null, Boolean.class);
-				if (notAvailableRetries <= 0) {
-					LOGGER.trace("Max number of retries reached for {}", productName);
-					break;
-				}
-			}
-			handleReturnValueErrors(uri, response);
-			return response;
-		});
-
-		if (result == null) {
-			throw new MetadataQueryException("Query for EW SLC mask intersection returns no result for " + productName);
-		}
-		final Boolean isIntersecting = result.getBody();
-		if (isIntersecting == null) {
-			throw new MetadataQueryException("Query for EW SLC mask intersection returns no result body for " + productName);
-		}
-		LOGGER.debug("Got intersection {}", isIntersecting);
-		return isIntersecting;
 	}
 
 	/**

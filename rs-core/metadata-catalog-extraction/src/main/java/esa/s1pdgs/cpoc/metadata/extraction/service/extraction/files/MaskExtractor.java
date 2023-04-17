@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,6 +31,8 @@ public class MaskExtractor {
 		List<Map<String, Object>> result = new ArrayList<>();
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document xml = db.parse(eofFile);
 

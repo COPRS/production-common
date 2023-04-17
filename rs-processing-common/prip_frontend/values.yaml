@@ -6,20 +6,24 @@ service:
   port: 8080
   
 replicaCount: 1
-logLevel: ${logLevel:DEBUG}
-logConfig: ${logConfig:log/log4j2.yml}
+logLevel: DEBUG
+logConfig: log/log4j2.yml
 
 processing:
   namespace: processing
   
 image:
   registry: artifactory.coprs.esa-copernicus.eu
-  repository: werum-docker
+  repository: rs-docker
   
   name: rs-core-prip-frontend
-  tag: develop
+  tag: {{CHART_VERSION}}
   
   imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
+  
+update:
+  maxSurge: 100%
+  maxUnavailable: 50% 
 
 elasticsearch:
   host: elasticsearch-processing-es-http.database.svc.cluster.local

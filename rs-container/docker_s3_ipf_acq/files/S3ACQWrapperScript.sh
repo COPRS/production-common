@@ -107,7 +107,7 @@ function start_ddc() {
 	log "Start DirectDataCaptureServer:"
 	log "################################################################################"
 
-	/usr/local/components/DDC/bin/DirectDataCaptureServer 
+	/usr/local/components/DDC/bin/DirectDataCaptureServer
 
 	log "################################################################################"
 
@@ -284,10 +284,23 @@ function clean_acq_working_dirs() {
 }
 
 ################################################################################
-# Kill DirectDataCaptureServer
+# Kill dangling processes
 ################################################################################
-function kill_ddc() {
-	kill -9 $(pgrep -f DirectDataCaptureServer)
+function kill_dangling_processes() {
+	if pgrep -f "DirectDataCaptureServer" > /dev/null
+	then
+		kill -9 $(pgrep -f DirectDataCaptureServer)
+	fi
+
+	if pgrep -f "S3L0PreProcessor" > /dev/null
+	then
+		kill -9 $(pgrep -f S3L0PreProcessor)
+	fi
+
+	if pgrep -f "S3L0PostProcessor" > /dev/null
+	then
+		kill -9 $(pgrep -f S3L0PostProcessor)
+	fi
 }
 
 ################################################################################
@@ -326,6 +339,9 @@ cat <<EOF > /data/ACQ/conf/$(hostname).xml
 </root>
 EOF
 
+# RS-512: Make sure the environment is clean, so no old unfinished processing intervenes with the current one
+kill_dangling_processes
+clean_acq_working_dirs
 
 link_inputs
 
@@ -342,7 +358,7 @@ create_productlist
 
 clean_acq_working_dirs
 
-kill_ddc
+kill_dangling_processes
 
 log "Acquisition finished!"
 

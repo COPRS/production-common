@@ -10,7 +10,9 @@ The Ingestion Trigger application polls the configured source and looking for th
 
 The Ingestion Filter application verifies if the product is in the time window for products that are accepted. By default the COPRS is not processing all data arriving, but just about 3%. Products that are not within the accepted time window will be discard. If they are accepted, a message will be send to the Ingestion Worker.
 
-The Ingestion Worker application is doing the actual I/O activity and performing the download from the configured interface. Once successfully finished, the product will be uploaded into the Object Storage and a new Ingestion Event generated to notify the COPRS that a new product had been added to the system.
+The Ingestion Worker application is doing the actual I/O activity and performing the download from the configured interface. Once successfully finished, the product will be uploaded into the Object Storage and a new CatalogJob generated and provided to the umcompression.
+
+The Uncompression is used, to provide the input files uncompressed to the system. Compressed inputs will be downloaded from the OBS and uploaded in their uncompressed form to a different bucket. A new CatalogJob is then generated to notify the COPRS of the new product.
 
 For details, please see [Ingestion Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#ingestion-chain)
 
@@ -44,8 +46,10 @@ Additionally the Ingestion system needs a persistence in order to store which pr
 The default configuration provided in the RS Core Component is expecting a secret "mongoingestion" in the namespace "processing" containing a field for PASSWORD and USERNAME that can be used in order to authenticate at the MongoDB.
 
 Please note that further initialization might be required. For the Ingestion component please execute the following commands in the MongoDB in order to create the credentials for the secret:
+
 ``
 db.createUser({user: "<USER>", pwd: "<PASSWORD>", roles: [{role: "readWrite", db: "coprs"}]})
+db.inboxEntry.createIndex({"processingPod":1, "pickupURL":1, "stationName":1})
 ``
 
 
@@ -97,7 +101,7 @@ For an example configuration for an EDIP endpoint, please have a look at the [ex
 |---------------------------------------------------------------|---------------|
 |``app.ingestion-trigger.application.name``|The name of the ingestion trigger application|
 |``app.ingestion-trigger.process.hostname``|The hostname of the ingestion trigger. This is recommend to be set to a static string (e.g. `ingestion-trigger-0`). |
-|``app.ingestion-trigger.ingestion-trigger.polling-interval-ms``|The polling interval on the inbox from the trigger in milliseconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.|
+|``app.ingestion-trigger.spring.integration.poller.fixed-delay``|The polling interval on the inbox from the trigger in seconds. Please keep in mind that a too short interval might have an impact on the polled system. A too high value might result in unexpected wait time until a product is detected.|
 
 
 ### Inboxes
@@ -157,7 +161,7 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.pass``|Password the configured user of for the AUXIP Server. This is a referenced variable here, that shall be configured using `secret` Default:``${AUXIP_PASSWORD}``|
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.sslValidation``|SSL validation for the server.Default:``false``|
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.authType``|Authentication type for the AUXIP server.Possible values: basic, oauth2, disable.Default:``oauth2``|
-|``app.ingestion-auxip-trigger.auxip.host-configs.host1.bearerTokenType``|A Bearer Token is an opaque string, not intended to have any meaning to clients using Default:``OUTH2_ACCESS_TOKEN``|
+|``app.ingestion-auxip-trigger.auxip.host-configs.host1.bearerTokenType``|A Bearer Token is an opaque string, not intended to have any meaning to clients. This can be set to ``AUTHORIZATION`` that will use a bearer token like ``BasicHeader("Authorization", "Bearer "+accessToken)`` or using ``OAUTH2_ACCESS_TOKEN`` using a bearer token like ``new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken)``. Please note that version 1.6.0-rc1 and earlier had a typo and offered OUTH2_ACCESS_TOKEN. Please don't use this option anymore! |
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthAuthUrl``|Authentication type for the AUXIP server. Default:``https://aux1.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token``|
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthClientId``|Oauth2 Client it. This is a referenced variable here, that shall be configured using  Kubernetes secret .Default:``${AUXIP_CLIENT_ID}``|
 |``app.ingestion-auxip-trigger.auxip.host-configs.host1.oauthClientSecret``|Oauth2 Client secret. This is a referenced variable here, that shall be configured using Kubernetes secret .Default:``${AUXIP_CLIENT_SECRET}``|
@@ -171,12 +175,12 @@ In oder to connect to multiple AUXIP servers, following configuration shall be r
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-``app.ingestion-auxip-trigger.ingestion-trigger.polling-interval-ms`` |Polling interval between two tries to the AUXIP server in milliseconds. Default:``10000``|
+``app.ingestion-auxip-trigger.spring.integration.poller.fixed-delay`` |Polling interval between two tries to the AUXIP server in seconds. Default:``20s``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.directory``|The polling directory/url of the AUXIP server.DefaultDefault:``https://aux1.s1pdgs.eu/odata/v1``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.matchRegex``|Pattern that the trigger service shall be matching against the filenames on the AUXIP server in order to create a job. The pattern shall be adjusted in the associated trigger configruation in order to  match the filenames of Sentinel-2 and Sentinel-3 auxiliaries. Default:``^S1.*(AUX_\|AMH_\|AMV_\|MPL_).*$``|
-|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.ignoreRegex``Pattern for the filenames that are configured to ignored on the AUXIP server.Default:``(^\\..*\|.*\\.tmp$\|db.*\|^lost\+found$)``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.ignoreRegex``|Pattern for the filenames that are configured to ignored on the AUXIP server.Default:``(^\\..*\|.*\\.tmp$\|db.*\|^lost\+found$)``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.type``|Type of Inbox. For all AUXIP interfaces, the value shall be `prip` |
-|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.family``|Product Family assoociated with the for the files found on the AUXIP Server.- For S1, related it shall be `AUXILIARY_FILE_ZIP`- For S2, related it shall be `S2_AUX_ZIP`- For S3, related it shall be `S3_AUX_ZIP` <br>Default:``AUXILIARY_FILE_ZIP``|
+|``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.family``|Product Family associated with the for the files found on the AUXIP Server.- For S1, related it shall be `AUXILIARY_FILE_ZIP`- For S2, related it shall be `S2_AUX_ZIP`- For S3, related it shall be `S3_AUX_ZIP` <br>Default:``AUXILIARY_FILE_ZIP``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.stationName``|AUXIP Server/station name. Default:``PRIP``|
 |``app.ingestion-auxip-trigger.ingestion-trigger.polling.inbox1.missionId=S1``|Mission ID for the products to the related mission in COPRS.- `S1` for Sentinel-1 related files- `S2` for Sentinel-2 related files - `S3` for Sentinel-3 related files<br>Default:``S1``|
 |``app.ingestion-auxip-trigger.auxip.start`` |Starting date for the AUXIP trigger for polling files on the server based on the their publicationDate. Files prior to the configured date shall be ingored.Default:``2022-04-10T12:00:00.000000``|
@@ -203,13 +207,16 @@ EDIP Client module is used by both EDIP triggers and workers.
 |``app.ingestion-edip-trigger.edip.host-configs.host1.connectTimeoutSec``|Connection Timeout in seconds. Default: `60`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.pasv``| PASV FTP protocol, where the cclient initiates the communication. Default: `true`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.enableHostnameVerification``|Hostname verification ensures that hostname in the URL matches with the one in digital certificate. Default: `false`|
+|``app.ingestion-edip-trigger.edip.host-configs.host1.buffersize`` || Setting the internal buffer used for buffered streams in Bytes. Default: `1048576`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.sslProtocol``|SLL protocol being used. Supported value: `TLSv1.2`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.explicitFtps``|EDIP client request the server to create a secured session using SSL. Default: `true`|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.keyManagerKeyStore``|The keystore is used to keep private keys and certificates. It is needed for FTPS encryption, otherwise can be left empty. Default: `` `` |
 |``app.ingestion-edip-trigger.edip.host-configs.host1.keyManagerKeyStorePassword``|Password for `keyManagerKeyStorePassword`. Default: ``changeit``|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.trustManagerKeyStore``|The truststore keeps all trusted Certificate Authorities (CA) and certificates. It is necessary to import the CA or certificate for the trusted FTPS servers. Default: ``app/ssl/truststore.jks``|
 |``app.ingestion-edip-trigger.edip.host-configs.host1.trustManagerKeyStorePassword``|Password for `trustManagerKeyStorePassword`. Default: ``changeit``|
-
+|``app.ingestion-edip-trigger.edip.host-configs.host1.listingTimeoutSec``|Timeout in seconds for the robust EDIP client (if enabled) while listing directories. Default: `180`|
+|``app.ingestion-edip-trigger.edip.enableRobustFtpClient``|To switch on the robust EDIP client using timeout mechanism for listing directories (#RS-519). Default `true`|
+ 
  #### EDIP Trigger
 
 For EDIP trigger following two two properties need to adjusted. Rest of the properties are similar to other Triggers and needs to be adjusted for the client.
@@ -227,7 +234,7 @@ The configuration for the XBIP contains a set of properties that are grouped by 
 |---------------------------------------------------------------|---------------|
 |``app.ingestion-filter.application.name``|The name of the filter application that will be deployed. The name shall be descriptive to allow an easier identification, e.g. ``rs-ingestion-xbip-cgs01-filter`` for a filter used in XBIP context.|
 |``app.ingestion-filter.process.hostname``|The hostname of the system where the application is running. This one will also used identifying the persistence database to avoid firing events twice and thus needs to be unique within the system|
-|``app.ingestion-filter.ingestion-filter.config.\$mission_id.cron-definition=\$cron``|Defines the ingestion filter criteria that will be applied on the job fired by the trigger.<br>``mission_id`` must equal the mission id of the event to ensure that a specific mission filter.<br>``cron`` defines the interval when the product will be accepted and continued to be processed. It is expressed as a [Spring Cron Expression](https://spring.io/blog/2020/11/10/new-in-spring-5-3-improved-cron-expressions).<br>e.g. to define a filter for Sentinel-3 that will be accepting all products on Wednesday between 0 and 8 o'clock, the property needs to be set as:```app.ingestion-filter.ingestion-filter.config.S3.cron-definition=* * 0-8 ? * WED *```  |
+|``app.ingestion-filter.ingestion-filter.config.\$mission_id.cron-definition=\$cron``|Defines the ingestion filter criteria that will be applied on the job fired by the trigger.<br>``mission_id`` must equal the mission id of the event to ensure that a specific mission filter.<br>``cron`` defines the interval when the product will be accepted and continued to be processed. It is expressed as a [Apache Cron Expression](https://logging.apache.org/log4j/2.x/log4j-core/apidocs/org/apache/logging/log4j/core/util/CronExpression.html).<br>e.g. to define a filter for Sentinel-3 that will be accepting all products on Wednesday between 0 and 8 o'clock, the property needs to be set as:```app.ingestion-filter.ingestion-filter.config.S3.cron-definition=* * 0-8 ? * WED *```<br>Please note that according to the documentation 6 or 7 elements can be provided. The 7th element is specifying the year and is optional.<br>Also note that if no filter is provided at all that all products will be passing the check. Especially when having a typo in the property name and the filter is not mapped correctly this might be misleading. If configure the filter and deploy it for the first time, please consider to validate that the filter matches your expectation. During the startup the filter will dump the known configuration and giving information about the amount of filter configuration and what they are set for   |
 
 
 ## Ingestion Worker
@@ -253,6 +260,23 @@ The configuration for the XBIP contains a set of properties that are grouped by 
 |``app.ingestion-worker.xbip.host-configs.host1.pass``|Password for the user that is allowed on the server. This is a referenced variable here, that shall be configured by creating kubernetes secret. Default  ``${XBIP_PASSWORD}``|
 |``app.ingestion-worker.xbip.host-configs.host1.numRetries``| Maximum number of retries that an ingestion worker will perform to server. Default  ``5``|
 |``app.ingestion-worker.xbip.host-configs.host1.retrySleepMs``| Duration between number of retries that are performed to reach the server.  Default  ``3000``|
+
+If using EDIP client:
+|Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-worker.edip.host-configs.host1.listingTimeoutSec``|Timeout in seconds for the robust EDIP client (if enabled) while listing directories. Default: `180`|
+|``app.ingestion-worker.edip.enableRobustFtpClient``|To switch on the robust EDIP client using timeout mechanism for listing directories (#RS-519). Default `true`|
+
+## Uncompression worker
+
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-uncompress.compression-worker.uncompressionCommand``| Defines the script that shall be executed for performing an uncompression activity. As default the script ``/app/uncompression.sh`` will be used. The script is mission agnostic.|
+|``app.ingestion-uncompress.compression-worker.workingDirectory`` | The local directory of the worker that shall be used as temporary working directory to perform the compression activity. This is set by default to ``/tmp/compression`` |
+|``app.ingestion-uncompress.compression-worker.compressionTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
+|``app.ingestion-uncompress.compression-worker.requestTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
+|``app.ingestion-uncompress.compression-worker.hostname`` | The timeout of the overall request. If the request takes more seconds than configured, it is considered to be hanging. |
+|``app.ingestion-uncompress.compression-worker.skipUncompression`` | Flag to signal whether or not the complete uncompression-logic shall be skipped. Default: false |
   
 ## Deployer properties
 

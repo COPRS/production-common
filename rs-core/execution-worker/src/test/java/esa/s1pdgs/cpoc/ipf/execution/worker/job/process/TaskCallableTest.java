@@ -55,7 +55,7 @@ public class TaskCallableTest {
 	@Test
 	public void testRun_Nominal() throws Exception {		
 		final Future<TaskResult> future = completionService.submit(
-				new TaskCallable(ipf.getPath(), "0", testDir.getPath(),System.out::println, System.out::println, reporting)
+				new TaskCallable(ipf.getPath(), false, "0", testDir.getPath(),System.out::println, System.out::println, reporting)
 		);
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());
@@ -69,7 +69,7 @@ public class TaskCallableTest {
 		final Consumer<String> outputConsumer = m -> builder.append(m).append(';');
 
 		final Future<TaskResult> future = completionService
-				.submit(new TaskCallable(ipf.getPath(), "0", testDir.getPath(), outputConsumer, outputConsumer, reporting));
+				.submit(new TaskCallable(ipf.getPath(), false, "0", testDir.getPath(), outputConsumer, outputConsumer, reporting));
 		final TaskResult result = future.get();
 		assertEquals(ipf.getPath(), result.getBinary());
 		assertEquals(0, result.getExitCode());

@@ -1,8 +1,5 @@
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
-import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedKeyObjectStorage;
-import static esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil.composeCompressedProductFamily;
-
 import java.util.Arrays;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
@@ -24,11 +21,6 @@ public class CompressionEvent extends AbstractMessage {
 	public String toString() {
 		return "CompressionEvent [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName + ", uid="
-				+ uid + "]";
-	}
-
-	public void convertForPublishingCompressed() {
-		this.setKeyObjectStorage(composeCompressedKeyObjectStorage(this.getKeyObjectStorage()));
-		this.setProductFamily(composeCompressedProductFamily(this.getProductFamily()));
+				+ uid + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 }

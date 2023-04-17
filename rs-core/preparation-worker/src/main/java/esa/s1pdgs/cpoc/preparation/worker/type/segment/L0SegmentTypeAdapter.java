@@ -128,6 +128,13 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 		}
 	}
 	
+	@Override
+	public void updateTimeout(AppDataJob job, final TaskTableAdapter taskTableAdapter) {
+		// As the main Input search is updating the product stop time we need to update
+		// the timeout as well, in case it changes
+		job.setTimeoutDate(aspPropertiesAdapter.calculateTimeout(job));
+	}
+
 	// S1PRO-1851: Handling of RFC product 
 	private void handleRfcSegments(final L0SegmentProduct product, final TaskTableAdapter taskTableAdapter) {
 		final Map<String, List<LevelSegmentMetadata>> segmentsGroupByPol = product.segmentsForPolaristions();
@@ -273,10 +280,10 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	}
 
 	private final AppDataJobFile toAppDataJobFile(final LevelSegmentMetadata segment) {
-		// Extract t0_pdgs_date if possible to determine when all inputs where ready
+		// Extract t0PdgsDate if possible to determine when all inputs where ready
 		Date t0 = null;
-		if (segment.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-			t0 = DateUtils.toDate(segment.getAdditionalProperties().get("t0_pdgs_date"));
+		if (segment.getAdditionalProperties().containsKey("t0PdgsDate")) {
+			t0 = DateUtils.toDate(segment.getAdditionalProperties().get("t0PdgsDate"));
 		}
 		
 		return new AppDataJobFile(
@@ -398,6 +405,7 @@ public final class L0SegmentTypeAdapter extends AbstractProductTypeAdapter imple
 	@Override
 	public List<AppDataJob> createAppDataJobs(final IpfPreparationJob job) {
 		final AppDataJob appDataJob = AppDataJob.fromPreparationJob(job);
+		appDataJob.setTimeoutDate(aspPropertiesAdapter.calculateTimeout(appDataJob));
 		
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(appDataJob);
 		final L0SegmentProduct product = L0SegmentProduct.of(appDataJob);

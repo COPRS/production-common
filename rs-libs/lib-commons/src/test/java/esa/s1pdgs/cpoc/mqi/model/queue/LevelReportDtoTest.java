@@ -1,4 +1,3 @@
-
 package esa.s1pdgs.cpoc.mqi.model.queue;
 
 import static org.junit.Assert.assertEquals;

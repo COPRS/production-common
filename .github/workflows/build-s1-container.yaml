@@ -13,7 +13,7 @@ on:
 
 env:
   REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT: werum-docker
+  ARTIFACTORY_PROJECT: rs-docker-private
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
   VERSION: 3.32.1
@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 0 # fetch all history so multiple commits can be scanned
 
       - name: GitGuardian scan
-        uses: GitGuardian/gg-shield-action@master
+        uses: GitGuardian/ggshield-action@master
         env:
           GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
           GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
@@ -84,7 +84,7 @@ jobs:
           severity-cutoff: critical
 
       - name: Upload Anchore scan SARIF report
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
 

@@ -1,17 +1,22 @@
 package esa.s1pdgs.cpoc.preparation.worker.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.xml.sax.SAXException;
 
+import esa.s1pdgs.cpoc.common.MaskType;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
-import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
@@ -22,6 +27,7 @@ import esa.s1pdgs.cpoc.preparation.worker.report.L0EWSliceMaskCheckReportingOutp
 import esa.s1pdgs.cpoc.preparation.worker.report.SeaCoverageCheckReportingOutput;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.mapper.TasktableMapper;
+import esa.s1pdgs.cpoc.preparation.worker.util.GeoIntersection;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -33,15 +39,31 @@ public class TaskTableMapperService {
 
 	private TasktableMapper ttMapper;
 	private ProcessProperties processProperties;
-	private MetadataClient metadataClient;
 	private Map<String, TaskTableAdapter> ttAdapters;
 
+	private GeoIntersection ewSlcMaskIntersection;
+	private GeoIntersection landMaskIntersection;
+
 	public TaskTableMapperService(final TasktableMapper ttMapper, final ProcessProperties processProperties,
-			final MetadataClient metadataClient, final Map<String, TaskTableAdapter> ttAdapters) {
+			final Map<String, TaskTableAdapter> ttAdapters)
+			throws IOException, XPathExpressionException, ParserConfigurationException, SAXException {
 		this.ttMapper = ttMapper;
 		this.processProperties = processProperties;
-		this.metadataClient = metadataClient;
 		this.ttAdapters = ttAdapters;
+
+		if (processProperties.getL0EwSlcMaskFilePath() != null
+				&& !processProperties.getL0EwSlcMaskFilePath().isEmpty()) {
+			ewSlcMaskIntersection = new GeoIntersection(new File(processProperties.getL0EwSlcMaskFilePath()),
+					MaskType.EW_SLC);
+			ewSlcMaskIntersection.loadMaskFile();
+		}
+
+		if (processProperties.getLandMaskFilePath() != null && !processProperties.getLandMaskFilePath().isEmpty()) {
+			landMaskIntersection = new GeoIntersection(new File(processProperties.getLandMaskFilePath()),
+					MaskType.LAND);
+			landMaskIntersection.loadMaskFile();
+		}
+
 	}
 
 	/**
@@ -62,114 +84,143 @@ public class TaskTableMapperService {
 
 		reporting.begin(ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
 				new ReportingMessage("Received CatalogEvent for %s", productName));
+		boolean reportingFinished = false;
 
-		if (isAllowed(productName, family, reporting)) {
+		final List<IpfPreparationJob> preparationJobs = new ArrayList<>();
+
+		if (isAllowed(event, productName, family, reporting)) {
 			final List<String> taskTableNames = ttMapper.tasktableFor(event);
-			final List<IpfPreparationJob> preparationJobs = new ArrayList<>(taskTableNames.size());
 
-			for (final String taskTableName : taskTableNames) {
-				if (l0EwSliceMaskCheck(reporting, productName, family, taskTableName)) {
-					LOGGER.debug("Tasktable for {} is {}", productName, taskTableName);
-					IpfPreparationJob job = dispatch(event, reporting, taskTableName);
-					
-					if (job != null) {
-						preparationJobs.add(job);
+			final Reporting taskTableLookupReporting = reporting.newReporting("TaskTableLookup");
+			taskTableLookupReporting.begin(
+					ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), productName),
+					new ReportingMessage("Start associating TaskTables to CatalogEvent %s", productName));
+			try {
+				for (final String taskTableName : taskTableNames) {
+					if (l0EwSliceMaskCheck(event, productName, family, taskTableName, reporting)) {
+						LOGGER.debug("Tasktable for {} is {}", productName, taskTableName);
+						IpfPreparationJob job = dispatch(event, reporting, taskTableName);
+	
+						if (job != null) {
+							preparationJobs.add(job);
+						}
+					} else {
+						LOGGER.info("EW slice is not intersecting slice, skip IpfPreparationJob generation");
+						reporting.end(null, new ReportingMessage("Product %s is not intersecting EW slice mask, skipping",
+								productName));
+						reportingFinished = true;
 					}
 				}
+				
+				taskTableLookupReporting.end(
+						new ReportingMessage("End associating TaskTables to CatalogEvent %s", productName));
+			} catch (Exception e) {
+				taskTableLookupReporting.error(new ReportingMessage("Error on associating TaskTables to CatalogEvent %s: %s", productName, LogUtils.toString(e)));
+				throw e;
 			}
-			if (preparationJobs.isEmpty()) {
-				reporting.end(
-						new ReportingMessage("Product %s is not intersecting EW slice mask, skipping", productName));
-			}
-			LOGGER.info("Dispatching product {}", productName);
-			return preparationJobs;
+			
 		} else {
-			reporting.end(new ReportingMessage("Product %s is not over sea, skipping", productName));
-			LOGGER.debug("CatalogEvent for {} is ignored", productName);
+			reporting.end(null, new ReportingMessage("Product %s is not over sea, skipping", productName));
+			reportingFinished = true;
 		}
-		LOGGER.debug("Done handling consumption of product {}", productName);
-		return Collections.emptyList();
+
+		if (preparationJobs.isEmpty()) {
+			LOGGER.debug("CatalogEvent for {} is ignored", productName);
+			if (!reportingFinished) {
+				reporting.end(null,
+						new ReportingMessage("Product %s did not match any tasktables, skipping", productName));
+			}
+		} else {
+			LOGGER.info("Created IpfPreparationJobs for product {}", productName);
+		}
+		return preparationJobs;
 	}
 
-	private final boolean isAllowed(final String productName, final ProductFamily family,
-			final ReportingFactory reporting) throws Exception {
+	private final boolean isAllowed(final CatalogEvent catalogEvent, final String productName,
+			final ProductFamily family, final ReportingFactory reporting) throws Exception {
 		// S1PRO-483: check for matching products if they are over sea. If not, simply
 		// skip the
 		// production
-		final Reporting seaReport = reporting.newReporting("SeaCoverageCheck");
+
+		if (landMaskIntersection == null) {
+			return true;
+		}
 		Pattern seaCoverageCheckPattern = Pattern.compile(processProperties.getSeaCoverageCheckPattern());
+		if (!seaCoverageCheckPattern.matcher(productName).matches()) {
+			return true;
+		}
+
+		final Reporting seaReport = reporting.newReporting("SeaCoverageCheck");
 		try {
-			if (seaCoverageCheckPattern.matcher(productName).matches()) {
-				seaReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
-						new ReportingMessage("Checking sea coverage"));
-				if (metadataClient.getSeaCoverage(family, productName) <= processProperties
-						.getMinSeaCoveragePercentage()) {
-					seaReport.end(new SeaCoverageCheckReportingOutput(false),
-							new ReportingMessage("Product %s is not over sea", productName));
-					LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
-					return false;
-				} else {
-					seaReport.end(new SeaCoverageCheckReportingOutput(true),
-							new ReportingMessage("Product %s is over sea", productName));
-				}
+			seaReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
+					new ReportingMessage("Checking sea coverage"));
+
+			long coverage = landMaskIntersection.getCoverage(catalogEvent);
+
+			LOGGER.info("Got sea coverage {} for product {}", coverage, productName);
+
+			if (coverage == 0 || (coverage < 100 && coverage < processProperties.getMinSeaCoveragePercentage())) {
+				seaReport.end(new SeaCoverageCheckReportingOutput(false),
+						new ReportingMessage("Product %s is not over sea", productName));
+				LOGGER.warn("Skipping job generation for product {} because it is not over sea", productName);
+				return false;
+			} else {
+				seaReport.end(new SeaCoverageCheckReportingOutput(true),
+						new ReportingMessage("Product %s is over sea", productName));
+				return true;
 			}
+
 		} catch (final Exception e) {
 			seaReport.error(new ReportingMessage("SeaCoverage check failed: %s", LogUtils.toString(e)));
 			throw e;
 		}
-		return true;
 	}
 
-	private boolean l0EwSliceMaskCheck(final ReportingFactory reporting, final String productName,
-			final ProductFamily family, final String taskTableName) throws Exception {
+	private boolean l0EwSliceMaskCheck(final CatalogEvent catalogEvent, final String productName,
+			final ProductFamily family, final String taskTableName, final ReportingFactory reporting) throws Exception {
 		// S1PRO-2320: check if EW_SLC products matches a specific mask. If not, simply
 		// skip the production
-		final Reporting ewSlcReport = reporting.newReporting("L0EWSliceMaskCheck");
+		if (ewSlcMaskIntersection == null) {
+			return true;
+		}
 		Pattern l0EwSlcCheckPattern = Pattern.compile(processProperties.getL0EwSlcCheckPattern());
+		if (!l0EwSlcCheckPattern.matcher(productName).matches()
+				|| !taskTableName.contains(processProperties.getL0EwSlcTaskTableName())) {
+			return true;
+		}
+
+		final Reporting ewSlcReport = reporting.newReporting("L0EWSliceMaskCheck");
 		try {
-			if (l0EwSlcCheckPattern.matcher(productName).matches()
-					&& taskTableName.contains(processProperties.getL0EwSlcTaskTableName())) {
-				ewSlcReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
-						new ReportingMessage("Checking if L0 EW slice %s is intersecting mask", productName));
-				if (!metadataClient.isIntersectingEwSlcMask(family, productName)) {
-					ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(false),
-							new ReportingMessage("L0 EW slice %s is not intersecting mask", productName));
-					LOGGER.warn("Skipping job generation for product {} because it is not intersecting mask",
-							productName);
-					return false;
-				} else {
-					ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(true),
-							new ReportingMessage("L0 EW slice %s is intersecting mask", productName));
-				}
+			ewSlcReport.begin(ReportingUtils.newFilenameReportingInputFor(family, productName),
+					new ReportingMessage("Checking if L0 EW slice %s is intersecting mask", productName));
+			if (!ewSlcMaskIntersection.isIntersecting(catalogEvent)) {
+				ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(false),
+						new ReportingMessage("L0 EW slice %s is not intersecting mask", productName));
+				LOGGER.warn("Skipping job generation for product {} because it is not intersecting mask", productName);
+				return false;
+			} else {
+				ewSlcReport.end(new L0EWSliceMaskCheckReportingOutput(true),
+						new ReportingMessage("L0 EW slice %s is intersecting mask", productName));
+				return true;
 			}
+
 		} catch (final Exception e) {
 			ewSlcReport.error(new ReportingMessage("L0 EW slice check failed: %s", LogUtils.toString(e)));
 			throw e;
 		}
-		return true;
 	}
 
-	private final IpfPreparationJob dispatch(final CatalogEvent event, final ReportingFactory reportingFactory,
+	private final IpfPreparationJob dispatch(final CatalogEvent event, final Reporting reporting,
 			final String taskTableName) {
 		final CatalogEventAdapter eventAdapter = CatalogEventAdapter.of(event);
 		final TaskTableAdapter ttAdapter = ttAdapters.get(taskTableName);
-		
+
 		if (ttAdapter == null) {
-			LOGGER.warn("CatalogEvent got mapped to unknown TaskTable \"{}\" - Please update your TaskTableMapping!", taskTableName);
+			LOGGER.warn("CatalogEvent got mapped to unknown TaskTable \"{}\" - Please update your TaskTableMapping!",
+					taskTableName);
 			return null;
 		}
 
-		// FIXME reporting of AppDataJob doesn't make sense here any more, needs to be
-		// replaced by something
-		// meaningful
-		final int appDataJobId = 0;
-
-		final Reporting reporting = reportingFactory.newReporting("Dispatch");
-		reporting.begin(
-				DispatchReportInput.newInstance(appDataJobId, event.getProductName(),
-						processProperties.getProductType()),
-				new ReportingMessage("Dispatching AppDataJob %s for %s %s", appDataJobId,
-						processProperties.getProductType(), event.getProductName()));
 		final IpfPreparationJob job = new IpfPreparationJob();
 		job.setLevel(processProperties.getLevel());
 		job.setPodName(processProperties.getHostname());
@@ -185,8 +236,6 @@ public class TaskTableMapperService {
 		job.setUid(reporting.getUid());
 		job.setDebug(event.isDebug());
 
-		reporting.end(new ReportingMessage("AppDataJob %s for %s %s dispatched", appDataJobId,
-				processProperties.getProductType(), event.getProductName()));
 		return job;
 	}
 }

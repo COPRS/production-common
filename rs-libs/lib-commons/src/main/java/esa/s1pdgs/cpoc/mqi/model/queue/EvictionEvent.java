@@ -51,7 +51,7 @@ public class EvictionEvent extends AbstractMessage {
 		return "EvictionEvent [operatorName=" + operatorName + ", productFamily=" + productFamily
 				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", uid=" + uid
 				+ ", creationDate=" + creationDate + ", podName=" + podName + ", allowedActions=" + allowedActions
-				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
+				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 
 }

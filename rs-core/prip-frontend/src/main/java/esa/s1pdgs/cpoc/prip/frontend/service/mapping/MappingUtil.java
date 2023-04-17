@@ -1,20 +1,21 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.mapping;
 
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Algorithm;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Checksum;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ChecksumDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentLength;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentType;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.End;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.EvictionDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Footprint;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Id;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Start;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Value;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Algorithm;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Checksum;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ChecksumDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentLength;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentType;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Footprint;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Id;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ProductionType;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.PublicationDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Value;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,8 +44,11 @@ import org.apache.olingo.commons.api.edm.geo.Point;
 import org.apache.olingo.commons.api.edm.geo.Polygon;
 import org.apache.olingo.commons.api.edm.geo.SRID;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.QuicklookProperties;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapeLineString;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
@@ -54,13 +58,18 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class MappingUtil {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(MappingUtil.class);
+	
 	private static final int MILLIS_PER_SECOND = 1000;
 
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
+		LOGGER.trace("pripMetadataToEntity {}", pripMetadata.getName());
+		
 		URI uri = MappingUtil.createId(rawBaseUri, EdmProvider.ES_PRODUCTS_NAME, pripMetadata.getId());
 		Entity entity = new Entity()
 				.addProperty(new Property(null, Id.name(), ValueType.PRIMITIVE, pripMetadata.getId()))
 				.addProperty(new Property(null, Name.name(), ValueType.PRIMITIVE, pripMetadata.getName()))
+				.addProperty(new Property(null, Online.name(), ValueType.PRIMITIVE, pripMetadata.isOnline()))
 				.addProperty(new Property(null, ContentType.name(), ValueType.PRIMITIVE, pripMetadata.getContentType()))
 				.addProperty(
 						new Property(null, ContentLength.name(), ValueType.PRIMITIVE, pripMetadata.getContentLength()))
@@ -90,6 +99,7 @@ public class MappingUtil {
 		// TODO sort attributes
 		if (null != pripMetadata.getAttributes()) {
 			for (Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
+				LOGGER.trace("Handle {}", entrySet.getKey());
 				final FullQualifiedName valueType;
 				final int firstSeparatorPosition = entrySet.getKey().indexOf('_');
 				final int lastSeparatorPosition = entrySet.getKey().lastIndexOf('_');
@@ -151,10 +161,32 @@ public class MappingUtil {
 		dateLink.setTitle(EdmProvider.DATE_ATTRIBUTES_SET_NAME);
 		dateLink.setInlineEntitySet(entityCollections.get(EdmProvider.DATE_TIME_OFFSET_TYPE_FQN));
 		entity.getNavigationLinks().add(dateLink);
-
+      
+      EntityCollection quicklookEntityCollection = quicklookEntityCollectionOf(pripMetadata);
+      Link quicklookLink = new Link();
+      quicklookLink.setTitle(EdmProvider.QUICKLOOK_SET_NAME);
+      quicklookLink.setInlineEntitySet(quicklookEntityCollection);
+      entity.getNavigationLinks().add(quicklookLink);
+      
 		return entity;
 	}
-
+	
+	public static EntityCollection quicklookEntityCollectionOf(PripMetadata pripMetadata) {
+	   final EntityCollection quicklookEntityCollection = new EntityCollection();
+	   if (null != pripMetadata.getBrowseKeys()) {
+         for (final String imageFilename : pripMetadata.getBrowseKeys()) {
+            quicklookEntityCollection.getEntities().add(quicklookEntityOf(imageFilename));         
+      	}
+	   }
+	   return quicklookEntityCollection; 
+	}
+	
+	public static Entity quicklookEntityOf(String quicklookImageFilename) {
+	   final Entity quicklookEntity = new Entity();
+      quicklookEntity.addProperty(new Property(null, QuicklookProperties.Image.name(), ValueType.PRIMITIVE, quicklookImageFilename));
+      return quicklookEntity; 
+	}
+	
 	public static URI createId(String rawBaseUri, String entitySetName, UUID id) {
 		try {
 			return new URI(rawBaseUri + "/" + entitySetName + "(" + id.toString() + ")");

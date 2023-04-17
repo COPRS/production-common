@@ -9,6 +9,7 @@ on:
       - '!main'
       - 'release/**'
       - 'develop**'
+      - 'stac-nativeapi**'
   workflow_dispatch:
   
 env:
@@ -39,7 +40,7 @@ jobs:
           metadata_search_controller: '${{ env.CHART_FOLDER }}/metadata_search_controller/**'
           native_api: '${{ env.CHART_FOLDER }}/native_api/**'
           prip_frontend: '${{ env.CHART_FOLDER }}/prip_frontend/**'
-          request_repository: '${{ env.CHART_FOLDER }}/request_repository/**'
+          request_parking_lot: '${{ env.CHART_FOLDER }}/request_parking_lot/**'
           user_web_client: '${{ env.CHART_FOLDER }}/user_web_client/**'
   
   gg-scan:
@@ -50,7 +51,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: GitGuardian scan
-      uses: GitGuardian/gg-shield-action@master
+      uses: GitGuardian/ggshield-action@master
       env:
         GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
         GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}

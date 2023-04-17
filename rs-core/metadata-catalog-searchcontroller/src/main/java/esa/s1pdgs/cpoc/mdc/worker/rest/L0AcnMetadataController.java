@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +33,7 @@ public class L0AcnMetadataController extends AbstractMetadataController<L0AcnMet
 	/**
 	 * Queries the elastic search for products of a given start or stop orbit.
 	 */
-	@RequestMapping(path = "/{productType}/startOrStopOrbit")
+	@RequestMapping(path = "/{productType}/startOrStopOrbit", method = RequestMethod.GET)
 	public ResponseEntity<List<L0AcnMetadata>> getProductsForStartOrStopOrbit(@PathVariable(name = "productType") final String productType,
 			@RequestParam(name = "productFamily") final String productFamily,
 			@RequestParam(name = "satellite") final String satellite,

@@ -33,6 +33,11 @@ public class TaskCallable implements Callable<TaskResult> {
      * Absolute path of the binary
      */
     private final String binaryPath;
+    
+    /**
+     * Overwrite shell as a workaround for some IPFs
+     */
+    private final boolean overwriteShell;
 
     /**
      * Absolute path of the job order
@@ -50,7 +55,8 @@ public class TaskCallable implements Callable<TaskResult> {
     private final ReportingFactory reportingFactory;
 
     public TaskCallable(
-    		final String binaryPath, 
+    		final String binaryPath,
+    		final boolean overwriteShell,
     		final String jobOrderPath, 
     		final String workDirectory, 
 			final Consumer<String> stdOutConsumer, 
@@ -58,6 +64,7 @@ public class TaskCallable implements Callable<TaskResult> {
 			final ReportingFactory reportingFactory
 	) {
 		this.binaryPath = binaryPath;
+		this.overwriteShell = overwriteShell;
 		this.jobOrderPath = jobOrderPath;
 		this.workDirectory = workDirectory;
 		this.stdOutConsumer = stdOutConsumer;
@@ -79,7 +86,14 @@ public class TaskCallable implements Callable<TaskResult> {
         try {
             final ProcessBuilder builder = new ProcessBuilder();
             LOGGER.info("Start IPF with binary {}, jobOrder {} and workingDirectory {}", binaryPath, jobOrderPath, workDirectory);
-            builder.command(binaryPath, jobOrderPath);
+            
+            // Workaround for some IPFs requiring different shell
+            if (!overwriteShell) {
+            	builder.command(binaryPath, jobOrderPath);
+            } else {
+            	builder.command("/bin/tcsh", "-c", binaryPath +" " + jobOrderPath);
+            }
+            
             builder.directory(new File(workDirectory));
             process = builder.start();
 

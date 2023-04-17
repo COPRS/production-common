@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import esa.s1pdgs.cpoc.ebip.client.EdipClientFactory;
 import esa.s1pdgs.cpoc.ebip.client.apacheftp.ApacheFtpEdipClientFactory;
+import esa.s1pdgs.cpoc.ebip.client.apacheftp.RobustFtpEdipClientFactory;
 
 @Configuration
 public class EdipClientConfiguration {
@@ -19,7 +20,12 @@ public class EdipClientConfiguration {
 	
 	@Bean
 	public EdipClientFactory edipClientFactory() {
-		return new ApacheFtpEdipClientFactory(config);
+
+		if (config.isEnableRobustFtpClient()) {
+			return new RobustFtpEdipClientFactory(config);
+		} else {
+			return new ApacheFtpEdipClientFactory(config);
+		}
 	}
 
 }

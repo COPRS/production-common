@@ -1,4 +1,4 @@
-kind: StatefulSet
+kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{ .Release.Name }}
@@ -13,6 +13,11 @@ spec:
     matchLabels:
       app: {{ .Release.Name }}
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.update.maxSurge }}
+      maxUnavailable: {{ .Values.update.maxUnavailable }} 
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -61,15 +66,13 @@ spec:
         securityContext:
           privileged: false
         livenessProbe:
-          httpGet:
-            path: /api/ping
+          tcpSocket:
             port: {{ .Values.service.port }}
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 5
         readinessProbe:
-          httpGet:
-            path: /api/ping
+          tcpSocket:
             port: {{ .Values.service.port }}
           initialDelaySeconds: 30
           periodSeconds: 30
@@ -89,6 +92,5 @@ spec:
         - name: service-config-volume
           configMap:
             name: {{ .Release.Name }}-service-config
-  serviceName: {{ .Release.Name }}-svc
   revisionHistoryLimit: 10
   

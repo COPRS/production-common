@@ -8,9 +8,6 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Service;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobGenerationState;
-import esa.s1pdgs.cpoc.appcatalog.AppDataJobState;
-import esa.s1pdgs.cpoc.common.ApplicationLevel;
 
 /**
  * Access class to AppDataJob in mongo DB
@@ -31,9 +28,18 @@ public interface AppDataJobRepository extends MongoRepository<AppDataJob, Long> 
 	@Query(value = "{ 'productName' : { $regex : ?0 }, 'pod' : ?1, 'state' : { $ne: 'TERMINATED' } }")
 	List<AppDataJob> findByProductType(final String productType, final String podName);
 
-	@Query(value = "{ 'triggerProducts' : ?0, 'pod' : ?1 }")
+	@Query(value = "{ 'triggerProducts' : ?0, 'pod' : ?1, 'state' : { $ne: 'TERMINATED' }, 'generation.state' : { $ne: 'SENT' } }")
 	List<AppDataJob> findByTriggerProduct(final String productType, final String podName);
 
 	@Query(value = "{ 'product.metadata.sessionId' : ?0, 'state' : { $ne: 'TERMINATED' } }")
 	List<AppDataJob> findByProductSessionId(final String sessionId);
+
+	@Query(value = "{ 'pod': ?1, 'timeoutDate' : { $lt: ?0 }, 'generation.state' : { $ne: 'SENT' } }")
+	List<AppDataJob> findTimeoutJobs(final Date timeoutThreshhold, final String podName);
+	
+	@Query(value = "{ 'state': ?0, 'pod': ?1, 'lastUpdateDate': { $lt: ?2 } }")
+	List<AppDataJob> findByStateAndLastUpdateDateLessThan(final String state, final String podName, final Date lastUpdated);
+	
+	@Query(value = "{ 'generation.state' : { $ne: 'SENT' }, 'state' : { $ne: 'TERMINATED' }, 'pod': ?0 }", count = true)
+	Long countByPod(final String podName);
 }

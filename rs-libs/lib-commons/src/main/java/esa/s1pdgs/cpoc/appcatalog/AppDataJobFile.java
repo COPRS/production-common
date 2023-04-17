@@ -26,7 +26,7 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
 
     private String endDate;
     
-    private Date t0_pdgs_date;
+    private Date t0PdgsDate;
     
     private Map<String,String> metadata;
 
@@ -35,14 +35,14 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
     		final String keyObs, 
     		final String startDate, 
     		final String endDate,
-    		final Date t0_pdgs_date,
+    		final Date t0PdgsDate,
     		final Map<String,String> metadata
     ) {
         this.fileName = fileName;
         this.keyObs = keyObs;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.t0_pdgs_date = t0_pdgs_date;
+        this.t0PdgsDate = t0PdgsDate;
         this.metadata = metadata;
     }
     
@@ -58,8 +58,8 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
     	this(fileName, keyObs, null, null, null, new LinkedHashMap<>());
     }
     
-    public AppDataJobFile(final String fileName, final String keyObs, final Date t0_pdgs_date) {
-    	this(fileName, keyObs, null, null, t0_pdgs_date, new LinkedHashMap<>());
+    public AppDataJobFile(final String fileName, final String keyObs, final Date t0PdgsDate) {
+    	this(fileName, keyObs, null, null, t0PdgsDate, new LinkedHashMap<>());
     }
     
     public AppDataJobFile(
@@ -67,13 +67,13 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
     		final String keyObs, 
     		final String startDate, 
     		final String endDate,
-    		final Date t0_pdgs_date
+    		final Date t0PdgsDate
     ) {
-    	this(fileName, keyObs, startDate, endDate, t0_pdgs_date, new LinkedHashMap<>());
+    	this(fileName, keyObs, startDate, endDate, t0PdgsDate, new LinkedHashMap<>());
     }    
 
     public AppDataJobFile(final AppDataJobFile other) {
-    	this(other.fileName, other.keyObs, other.startDate, other.endDate, other.t0_pdgs_date, other.metadata);
+    	this(other.fileName, other.keyObs, other.startDate, other.endDate, other.t0PdgsDate, other.metadata);
     }
 
     /**
@@ -121,12 +121,12 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
         this.endDate = endDate;
     }
     
-    public Date getT0_pdgs_date() {
-		return t0_pdgs_date;
+    public Date getT0PdgsDate() {
+		return t0PdgsDate;
 	}
 
-	public void setT0_pdgs_date(Date t0_pdgs_date) {
-		this.t0_pdgs_date = t0_pdgs_date;
+	public void setT0PdgsDate(Date t0PdgsDate) {
+		this.t0PdgsDate = t0PdgsDate;
 	}
 
 	public Map<String, String> getMetadata() {
@@ -142,7 +142,7 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
      */
     @Override
     public String toString() {
-        return String.format("{fileName: %s, keyObs: %s, startDate: %s, endDate: %s, t0_pdgs_date: %s, metadata:%s}", fileName, keyObs, startDate, endDate, t0_pdgs_date, metadata);
+        return String.format("{fileName: %s, keyObs: %s, startDate: %s, endDate: %s, t0PdgsDate: %s, metadata:%s}", fileName, keyObs, startDate, endDate, t0PdgsDate, metadata);
     }
 
     /**
@@ -150,7 +150,7 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, keyObs, startDate, endDate, t0_pdgs_date, metadata);
+        return Objects.hash(fileName, keyObs, startDate, endDate, t0PdgsDate, metadata);
     }
 
     /**
@@ -169,7 +169,7 @@ public class AppDataJobFile implements Comparable<AppDataJobFile> {
                     && Objects.equals(keyObs, other.keyObs)
                     && Objects.equals(startDate, other.startDate)
                     && Objects.equals(endDate, other.endDate)
-                    && Objects.equals(t0_pdgs_date, other.t0_pdgs_date)
+                    && Objects.equals(t0PdgsDate, other.t0PdgsDate)
                     && Objects.equals(metadata, other.metadata);
         }
         return ret;

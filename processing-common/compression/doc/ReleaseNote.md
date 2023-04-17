@@ -2,7 +2,7 @@
 
 COPRS Compression chain is responsible to perform a compression operation on a file or directory product.
 
-## General
+# Overview
 
 ![overview](./media/overview.png "Overview")
 
@@ -22,7 +22,7 @@ These can be used to honour the different requirements on timeliness. Each prior
 
 For details, please see [Compression Chain Design](https://github.com/COPRS/reference-system-documentation/blob/develop/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#compression-chain)
 
-## Requirements
+# Requirements
 
 This software does have the following minimal requirements:
 
@@ -38,6 +38,14 @@ This software does have the following minimal requirements:
 
 *These resource requirements are applicable for one worker. There may be many instances of an compression worker, see scaling up workers for more details.
 ** This amount had been used in previous operational S1 environment. The disk size might be lower depending on the products that are processed. This needs to be at least twice of the product size of the biggest product. An additional margin of 10% is recommended however.
+
+# Deployment Prerequisite
+Following components of the COPRS shall be installed and running
+- [COPRS Infrastructure](https://github.com/COPRS/infrastructure)
+- See [COPRS OBS Bucket](/processing-common/doc/buckets.md)
+- See [COPRS Kubernetes Secret](/processing-common/doc/secrets.md)
+
+# Configuration
 
 ## Compression Filter
 
@@ -65,11 +73,18 @@ The following description is just given for high priority workers:
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-|``app.compression-worker-high.compression-worker.compressionCommand``| The command that shall be used to perform the compression action. This can be used to execute a different kind of compression on the archive by providing a different compression script in the base image. By default it will be using: ``/app/compression.sh`` that is doing the archiving-operation using the tool ``7za``.| 
+|``app.compression-worker-high.compression-worker.compression-command.<mission>``| Defines the command that shall be used to perform the compression action depending on the ``mission``. The supported misson are ``s1``, ``s2`` or ``s3``. The command that shall be executed is a script contained in the base image and can be either ``/app/zip-compression.sh`` (for 7za zip compression with level 1 (deflate)), ``/app/zip-nocompression.sh`` (for 7za zip compression level 0 (no compression)) or ``/app/tar-compression.sh`` (for generating a tarball). By default S1 is using zip compression, S2 tarballs and S3 zip without a compression.| 
+|``app.compression-worker-high.compression-worker.uncompressionCommand``| Defines the script that shall be executed for performing an uncompression activity. As default the script ``/app/uncompression.sh`` will be used. The script is mission agnostic.|
 |``app.compression-worker-high.compression-worker.workingDirectory`` | The local directory of the worker that shall be used as temporary working directory to perform the compression activity. This is set by default to ``/tmp/compression`` |
 |``app.compression-worker-high.compression-worker.compressionTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
 |``app.compression-worker-high.compression-worker.requestTimeout`` | The timeout in seconds when the compression process will be terminated. If it takes more time than the configured value, it will be considered to be hanging. |
 |``app.compression-worker-high.compression-worker.hostname`` | The timeout of the overall request. If the request takes more seconds than configured, it is considered to be hanging. |
+
+
+## Additional resources
+In the scope of the COPRS it is necessary to be able to adjust the configuration of the commonly used kafka topics. As the SCDF server would create the kafka topics itself, when they aren't already present, it is necessary, that the kafka topic ``compression-event`` is already created, before the SCDF streams are started.
+
+In case the default COPRS Infrastructure is used, this will be handled by the Strimzi Operator. On deployment of this RS core chain, the deployment script will firstly create the KafkaTopic object into the Kubernetes cluster, which will create the topics with the preferred configuration. The configuration can be found in the folder ``additional_resources`` in the files ``compression-event.yaml``.
 
 
 ## Deployer properties

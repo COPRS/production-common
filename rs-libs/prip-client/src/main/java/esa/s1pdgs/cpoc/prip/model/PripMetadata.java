@@ -38,7 +38,9 @@ public class PripMetadata {
 				m -> (m.getEvictionDate() == null) ? null : DateUtils.formatToOdataDateTimeFormat(m.getEvictionDate())),
 		CHECKSUM("checksum", PripMetadata::getChecksums),
 		PRODUCTION_TYPE("productionType", PripMetadata::getProductionType),
-		FOOTPRINT("footprint", PripMetadata::getFootprint);
+		FOOTPRINT("footprint", PripMetadata::getFootprint),
+		BROWSE_KEYS("browseKeys", PripMetadata::getBrowseKeys),
+		ONLINE("online", PripMetadata::isOnline);
 
 		private final String fieldName;
 		private final Function<PripMetadata, Object> toJsonAccessor;
@@ -54,50 +56,6 @@ public class PripMetadata {
 
 		public String fieldName() {
 			return fieldName;
-		}
-		
-		public static FIELD_NAMES fromString(String fieldName) {
-			if (CREATION_DATE.fieldName().equalsIgnoreCase(fieldName) || CREATION_DATE.name().equalsIgnoreCase(fieldName)) {
-				return CREATION_DATE;
-			}
-			if (EVICTION_DATE.fieldName().equalsIgnoreCase(fieldName) || EVICTION_DATE.name().equalsIgnoreCase(fieldName)) {
-				return EVICTION_DATE;
-			}
-			if ("ContentDate/Start".equalsIgnoreCase(fieldName) || CONTENT_DATE_START.fieldName().equalsIgnoreCase(fieldName) || CONTENT_DATE_START.name().equalsIgnoreCase(fieldName)) {
-				return CONTENT_DATE_START;
-			}
-			if ("ContentDate/End".equalsIgnoreCase(fieldName) || CONTENT_DATE_END.fieldName().equalsIgnoreCase(fieldName) || CONTENT_DATE_END.name().equalsIgnoreCase(fieldName)) {
-				return CONTENT_DATE_END;
-			}
-			if (NAME.fieldName().equalsIgnoreCase(fieldName) || NAME.name().equalsIgnoreCase(fieldName)) {
-				return NAME;
-			}
-			if (CONTENT_LENGTH.fieldName().equalsIgnoreCase(fieldName) || CONTENT_LENGTH.name().equalsIgnoreCase(fieldName)) {
-				return CONTENT_LENGTH;
-			}
-			if (PRODUCT_FAMILY.fieldName().equalsIgnoreCase(fieldName) || PRODUCT_FAMILY.name().equalsIgnoreCase(fieldName)) {
-				return PRODUCT_FAMILY;
-			}
-			if (PRODUCTION_TYPE.fieldName().equalsIgnoreCase(fieldName) || PRODUCTION_TYPE.name().equalsIgnoreCase(fieldName)) {
-				return PRODUCTION_TYPE;
-			}
-			if (FOOTPRINT.fieldName().equalsIgnoreCase(fieldName) || FOOTPRINT.name().equalsIgnoreCase(fieldName)) {
-				return FOOTPRINT;
-			}
-			if (CHECKSUM.fieldName().equalsIgnoreCase(fieldName) || CHECKSUM.name().equalsIgnoreCase(fieldName)) {
-				return CHECKSUM;
-			}
-			if (CONTENT_TYPE.fieldName().equalsIgnoreCase(fieldName) || CONTENT_TYPE.name().equalsIgnoreCase(fieldName)) {
-				return CONTENT_TYPE;
-			}
-			if (ID.fieldName().equalsIgnoreCase(fieldName) || ID.name().equalsIgnoreCase(fieldName)) {
-				return ID;
-			}
-			if (OBS_KEY.fieldName().equalsIgnoreCase(fieldName) || OBS_KEY.name().equalsIgnoreCase(fieldName)) {
-				return OBS_KEY;
-			}
-
-			throw new IllegalArgumentException(String.format("field name not supported: %s", fieldName));
 		}
 	}
 
@@ -126,6 +84,10 @@ public class PripMetadata {
 	private ProductionType productionType;
 	
 	private PripGeoShape footprint;
+	
+	private List<String> browseKeys;
+	
+	private boolean online = true; // RS-400: by default if not specified otherwise, products are online. see also: esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor.newPripBooleanFilter(String, Function, boolean)
 	
 	private Map<String, Object> attributes;
 
@@ -232,6 +194,22 @@ public class PripMetadata {
 		this.footprint = footprint;
 	}
 	
+	public List<String> getBrowseKeys() {
+		return browseKeys;
+	}
+
+	public void setBrowseKeys(List<String> browseKeys) {
+		this.browseKeys = browseKeys;
+	}
+	
+	public boolean isOnline() {
+		return online;
+	}
+
+	public void setOnline(boolean online) {
+		this.online = online;
+	}
+
 	public Map<String, Object> getAttributes() {
 		return attributes;
 	}
@@ -283,7 +261,7 @@ public class PripMetadata {
 	@Override
 	public int hashCode() {
 		return Objects.hash(checksums, contentDateEnd, contentDateStart, contentLength, contentType, creationDate,
-				evictionDate, id, name, obsKey, productFamily, productionType, footprint, attributes);
+				evictionDate, id, name, obsKey, productFamily, productionType, footprint, browseKeys, online, attributes);
 	}
 
 	@Override
@@ -302,6 +280,8 @@ public class PripMetadata {
 				&& Objects.equals(name, other.name) && Objects.equals(obsKey, other.obsKey)
 				&& productFamily == other.productFamily && productionType == other.productionType
 				&& Objects.equals(footprint, other.footprint)
+				&& Objects.equals(browseKeys, other.browseKeys)
+				&& Objects.equals(online, other.online)
 				&& Objects.equals(attributes, other.attributes);
 	}
 

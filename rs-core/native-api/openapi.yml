@@ -1,40 +1,228 @@
 openapi: 3.0.1
 info:
   title: RS Native API
-  description: The Native API of the Copernicus Reference System (COPRS) that can
-    be used to query and download product data.
-  version: "1.0"
+  description: The Native API of the Copernicus Reference System (COPRS) that can be used to query and download product data.
+  version: 1.12.0-rc1
 servers:
-- url: http://localhost:8080
-  description: Test server url
-tags:
-- name: API
-- name: STAC Item Search
+  - url: http://localhost:8080
 paths:
-  /api/ping:
+  /stac:
     get:
-      tags:
-      - API
-      summary: check whether the API service is reachable and running and retrieve
-        the API version number
-      description: A HTTP 200 answer is to be expected when the API service is running
-        and reachable. Additionally the current API version number will be retrieved.
-      operationId: PingApi
+      summary: Landing page for the STAC interface
       responses:
-        "500":
-          description: Internal Server Error - the API service encountered an unexpected
-            condition that prevented it from fulfilling the request
-          content: {}
-        "200":
-          description: OK - the API service is running and reachable
+        '200':
+          description: Returns landing page of the STAC interface
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PingResponse'
-        "400":
-          description: "Bad Request - the API service rejects to process the request\
-            \ because of client side errors, for example a malformed request syntax"
-  /search:
+                type: object
+                properties:
+                  stac_version:
+                    type: string
+                  collections:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        rel:
+                          type: string
+                        href:
+                          type: string
+                        type:
+                          type: string
+                        title:
+                          type: string
+                  id:
+                    type: string
+                  conformsTo:
+                    type: array
+                    items:
+                      type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  stac_extensions:
+                    type: array
+                    items:
+                      type: string
+      servers:
+        - url: http://localhost:8080
+      tags:
+        - STAC Interface
+    servers:
+      - url: http://localhost:8080
+  /stac/{missionId}:
+    get:
+      summary: Retrieve SubCatalog for specific mission
+      parameters: 
+        - $ref: '#/components/parameters/missionId'
+      responses:
+        '200':
+          description: Returns STAC conform catalog containing further links
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stac_version:
+                    type: string
+                  collections:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        rel:
+                          type: string
+                        href:
+                          type: string
+                        type:
+                          type: string
+                        title:
+                          type: string
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  stac_extensions:
+                    type: array
+                    items:
+                      type: string
+      servers:
+        - url: http://localhost:8080
+      tags:
+        - STAC Interface
+    servers:
+      - url: http://localhost:8080
+  /stac/{missionId}/collections:
+    get:
+      summary: Retrieve list of collections for mission
+      parameters: 
+        - $ref: '#/components/parameters/missionId'
+      responses:
+        '200':
+          description: Returns list of collections available for this mission. Collections map to product type.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stac_version:
+                    type: string
+                  collections:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        rel:
+                          type: string
+                        href:
+                          type: string
+                        type:
+                          type: string
+                        title:
+                          type: string
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  stac_extensions:
+                    type: array
+                    items:
+                      type: string
+      servers:
+        - url: http://localhost:8080
+      tags:
+        - STAC Interface
+    servers:
+      - url: http://localhost:8080
+  /stac/{missionId}/collections/{productType}:
+    get:
+      description: Retrieve information about a specific collection
+      parameters: 
+        - $ref: '#/components/parameters/missionId'
+        - $ref: '#/components/parameters/productType'
+      responses:
+        '200':
+          description: Collection object for a specific collection
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  extent: {}
+                  stac_version:
+                    type: string
+                  keywords:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+                  license:
+                    type: string
+                  assets:
+                    type: object
+                    properties: {}
+                  links:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        rel:
+                          type: string
+                        href:
+                          type: string
+                        type:
+                          type: string
+                        title:
+                          type: string
+                  id:
+                    type: string
+                  stac_extensions:
+                    type: array
+                    items:
+                      type: string
+                  providers:
+                    type: array
+                    items:
+                      type: string
+                  summaries:
+                    type: object
+                    properties: {}
+      servers:
+        - url: http://localhost:8080
+      tags:
+        - STAC Interface
+    servers:
+      - url: http://localhost:8080
+  /stac/search:
     get:
       summary: Search STAC items with simple filtering.
       operationId: getItemSearch
@@ -42,9 +230,20 @@ paths:
         Retrieve Items matching filters. Intended as a shorthand API for simple
         queries.
       tags:
-        - STAC Item Search
+        - STAC Interface
       parameters:
+        - $ref: '#/components/parameters/ids'
+        - $ref: '#/components/parameters/bbox'
+        - $ref: '#/components/parameters/point'
+        - $ref: '#/components/parameters/line'
+        - $ref: '#/components/parameters/productname'
+        - $ref: '#/components/parameters/collections'
+        - $ref: '#/components/parameters/cloudcover'
         - $ref: '#/components/parameters/datetime'
+        - $ref: '#/components/parameters/publicationdate'
+        - $ref: '#/components/parameters/polarisation'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
       responses:
         '200':
           description: A feature collection.
@@ -55,41 +254,213 @@ paths:
                   - $ref: '#/components/schemas/itemCollection'
         default:
           $ref: '#/components/responses/Error'
+tags:
+  - name: STAC Interface
+    description: STAC interface to query items available on the RS
 components:
   parameters:
     datetime:
       name: datetime
       in: query
       description: >-
-        Either a date-time or an interval, open or closed. Date and time
+        Interval, open or closed. Date and time
         expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
 
 
         Examples:
-
-
-        * A date-time: "2018-02-12T23:20:50Z"
 
         * A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
 
         * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
 
 
-        Only features that have a temporal property that intersects the value of
-
-        `datetime` are selected.
-
-
-        If a feature has multiple temporal properties, it is the decision of the
-
-        server whether only a single temporal property is used to determine
-
-        the extent or all relevant temporal properties.
+        Only features that have a temporal property of `ContentDate` that 
+        
+        intersects the value of `datetime` are selected.
       required: false
       schema:
         type: string
-      style: form
-      explode: false
+    ids:
+      name: ids
+      in: query
+      description: >-
+        UUID value for a specific item.
+        
+        Example:
+        
+        * "808dc636-5bd6-43d9-ad52-3b2b589c2d80"
+      required: false
+      schema:
+        type: string
+    missionId:
+      name: missionId
+      in: path
+      description: >-
+        Mission identifier to specify which Sentinel mission shall be queried. 
+      required: true
+      schema:
+        type: string
+        enum:
+          - S1
+          - S2
+          - S3
+    productType:
+      name: productType
+      in: path
+      description: >-
+        Product type to get the items of. 
+      required: true
+      schema:
+        type: string
+    bbox:
+      name: bbox
+      in: query
+      description: >-
+        4 points (longitude, latitude) describing a polygon. Longitude and 
+        
+        latitude have to be seperated by an URL encoded space ("%20"), points 
+        
+        have to be seperated by a comma. Items with intersecting footprints 
+        
+        will be returned.
+        
+        Example:
+        
+        * "76.036377%20-75.654331,76.57106%20-75.654331,
+        76.57196%20-75.594357,76.036377%20-75.594357"
+      required: false
+      schema:
+        type: string
+    point: 
+      name: point
+      in: query
+      description: >-
+        1 point (logitude, latitude). Longitude and latitude have to be 
+        
+        seperated by an URL encoded space ("%20"). Items with a footprint 
+        
+        containing the point will be returned.
+        
+        Example:
+        
+        * 76.036377%20-75.654331
+      required: false
+      schema:
+        type: string
+    line: 
+      name: line
+      in: query
+      description: >-
+        2 points (logitude, latitude) describing a line. Longitude and latitude 
+        
+        have to be seperated by an URL encoded space ("%20"), points have to be 
+        
+        seperated by a comma. Items with a footprint intersecting the line will 
+        
+        be returned.
+        
+        Example:
+        
+        * 76.036377%20-75.654331,76.57106%20-75.654331
+      required: false
+      schema:
+        type: string
+    productname:
+      name: productname
+      in: query
+      description: >-
+        Part of the productname that should be included in the retrieved items.
+        
+        Example:
+        
+        * S1A_EW_RAW__0NDH
+      required: false
+      schema:
+        type: string
+    collections:
+      name: collections
+      in: query
+      description: >-
+        Exact name of the product type which items shall be queried for.
+        
+        Example:
+        
+        * OL_1_EFR___
+      required: false
+      schema:
+        type: string
+    cloudcover:
+      name: cloudcover
+      in: query
+      description: >-
+        Percentage value interval in which the items are filtered for. Has to be 
+        
+        provided in the form min/max where empty values may be left out or 
+        
+        replaced by "..".
+        
+        Examples:
+        
+        * Closed interval: "5.0/10.0"
+        
+        * Open interval (minimum open): "../10.0"
+        
+        * Open interval (maximum open): 90.0/..
+      required: false
+      schema:
+        type: string
+    publicationdate:
+      name: publicationdate
+      in: query
+      description: >-
+        Interval, open or closed. Date and time expressions adhere to RFC 3339. 
+        
+        Open intervals are expressed using double-dots.
+
+
+        Examples:
+
+        * A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
+
+        * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
+
+
+        Only features that have a temporal property of `CreationDate` that 
+        
+        intersects the value of `datetime` are selected.
+      required: false
+      schema:
+        type: string
+    polarisation:
+      name: polarisation
+      in: query
+      description: >-
+        Polarisation to filter for.
+        
+        Example:
+        
+        * DV
+      required: false
+      schema:
+        type: string
+    page:
+      name: page
+      in: query
+      description: >-
+        Number of page used for pagination. First page is page number 1.
+      required: false
+      schema:
+        type: integer
+    limit:
+      name: limit
+      in: query
+      description: >-
+        Maximum number of results that shall be retrieved. Too big values might 
+        
+        be cut down to maximum value allowed by API.
+      required: false
+      schema:
+        type: integer
   responses:
     Error:
       description: An error occurred.
@@ -98,13 +469,6 @@ components:
           schema:
             $ref: '#/components/schemas/exception'
   schemas:
-    PingResponse:
-      type: object
-      properties:
-        apiVersion:
-          type: string
-          description: the version of the API
-          example: "1.0"
     Checksum:
       type: object
       properties:
@@ -177,42 +541,6 @@ components:
           type: string
         description:
           type: string
-    datetimeFilter:
-      description: An object representing a date+time based filter.
-      type: object
-      properties:
-        datetime:
-          $ref: '#/components/schemas/datetime_interval'
-    datetime_interval:
-      type: string
-      description: >-
-        Either a date-time or an interval, open or closed. Date and time
-        expressions
-
-        adhere to RFC 3339. Open intervals are expressed using double-dots.
-
-
-        Examples:
-
-
-        * A date-time: "2018-02-12T23:20:50Z"
-
-        * A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
-
-        * Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
-
-
-        Only features that have a temporal property that intersects the value of
-
-        `datetime` are selected.
-
-
-        If a feature has multiple temporal properties, it is the decision of the
-
-        server whether only a single temporal property is used to determine
-
-        the extent or all relevant temporal properties.
-      example: 2018-02-12T00:00:00Z/2018-03-18T12:31:12Z
     pointGeoJSON:
       type: object
       required:
@@ -348,159 +676,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/geometryGeoJSON'
-    geojson-bbox:
-      type: array
-      minItems: 4
-      maxItems: 4
-      items:
-        type: number
-    point:
-      title: GeoJSON Point
-      type: object
-      required:
-        - type
-        - coordinates
-      properties:
-        type:
-          type: string
-          enum:
-            - Point
-        coordinates:
-          type: array
-          minItems: 2
-          items:
-            type: number
-        bbox:
-          $ref: '#/components/schemas/geojson-bbox'
-    linestring:
-      title: GeoJSON LineString
-      type: object
-      required:
-        - type
-        - coordinates
-      properties:
-        type:
-          type: string
-          enum:
-            - LineString
-        coordinates:
-          type: array
-          minItems: 2
-          items:
-            type: array
-            minItems: 2
-            items:
-              type: number
-        bbox:
-          $ref: '#/components/schemas/geojson-bbox'
-    polygon:
-      title: GeoJSON Polygon
-      type: object
-      required:
-        - type
-        - coordinates
-      properties:
-        type:
-          type: string
-          enum:
-            - Polygon
-        coordinates:
-          type: array
-          items:
-            type: array
-            minItems: 4
-            items:
-              type: array
-              minItems: 2
-              items:
-                type: number
-        bbox:
-          $ref: '#/components/schemas/geojson-bbox'
-    multipoint:
-      title: GeoJSON MultiPoint
-      type: object
-      required:
-        - type
-        - coordinates
-      properties:
-        type:
-          type: string
-          enum:
-            - MultiPoint
-        coordinates:
-          type: array
-          items:
-            type: array
-            minItems: 2
-            items:
-              type: number
-        bbox:
-          $ref: '#/components/schemas/geojson-bbox'
-    multilinestring:
-      title: GeoJSON MultiLineString
-      type: object
-      required:
-        - type
-        - coordinates
-      properties:
-        type:
-          type: string
-          enum:
-            - MultiLineString
-        coordinates:
-          type: array
-          items:
-            type: array
-            minItems: 2
-            items:
-              type: array
-              minItems: 2
-              items:
-                type: number
-        bbox:
-          $ref: '#/components/schemas/geojson-bbox'
-    multipolygon:
-      title: GeoJSON MultiPolygon
-      type: object
-      required:
-        - type
-        - coordinates
-      properties:
-        type:
-          type: string
-          enum:
-            - MultiPolygon
-        coordinates:
-          type: array
-          items:
-            type: array
-            items:
-              type: array
-              minItems: 4
-              items:
-                type: array
-                minItems: 2
-                items:
-                  type: number
-        bbox:
-          $ref: '#/components/schemas/geojson-bbox'
-    geometryLiteral:
-      oneOf:
-        - $ref: '#/components/schemas/point'
-        - $ref: '#/components/schemas/linestring'
-        - $ref: '#/components/schemas/polygon'
-        - $ref: '#/components/schemas/multipoint'
-        - $ref: '#/components/schemas/multilinestring'
-        - $ref: '#/components/schemas/multipolygon'
-    bbox:
-      type: array
-      oneOf:
-        - minItems: 4
-          maxItems: 4
-        - minItems: 6
-          maxItems: 6
-      items:
-        type: number
     stac_version:
       title: STAC version
       type: string
@@ -544,38 +719,6 @@ components:
         title:
           type: string
           description: Title of the resource
-        method:
-          type: string
-          enum:
-            - GET
-            - POST
-          default: GET
-          description: Specifies the HTTP method that the resource expects
-        headers:
-          type: object
-          description: Object key values pairs they map to headers
-          example:
-            Accept: application/json
-        body:
-          type: object
-          description: >-
-            For POST requests, the resource can specify the HTTP body as a JSON
-            object.
-        merge:
-          type: boolean
-          default: false
-          description: |-
-            This is only valid when the server is responding to POST request.
-
-            If merge is true, the client is expected to merge the body value
-            into the current request body before following the link.
-            This avoids passing large post bodies back and forth when following
-            links, particularly for navigating pages through the `POST /search`
-            endpoint.
-
-            NOTE: To support form encoding it is expected that a client be able
-            to merge in the key value pairs specified as JSON
-            `{"next": "token"}` will become `&next=token`.
     links:
       type: array
       items:
@@ -619,6 +762,8 @@ components:
           type: string
         ProductionType:
           type: string
+        Online:
+          type: boolean
         ContentLength:
           type: integer
         AdditionalAttributes:

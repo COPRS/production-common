@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -105,12 +106,19 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 	}	
 
 	@Override
-	public final void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {       	
-        // S1PRO-1101: if timeout for primary search is reached -> just start the job 
+	public final void validateInputSearch(final AppDataJob job, final TaskTableAdapter tasktableAdpter) throws IpfPrepWorkerInputsMissingException {       			
+		// S1PRO-1101: if timeout for primary search is reached -> just start the job 
     	if (aiopAdapter.isTimedOut(job)) {	        		
     		throw new TimedOutException();
     	}
        	validator.assertIsComplete(EdrsSessionProduct.of(job));
+	}
+	
+	@Override
+	public final void updateTimeout(AppDataJob job, final TaskTableAdapter taskTableAdapter) {
+		// Use logic of AIOP Property Adapter to update timeout
+		// The same logic is applied before to check if a job is timeout
+		job.setTimeoutDate(aiopAdapter.calculateTimeout(job));
 	}
 
 	@Override
@@ -156,6 +164,8 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
 			appDataJob.setStopTime(eventAdapter.stopTime());
 		}
 		
+		appDataJob.setTimeoutDate(aiopAdapter.calculateTimeout(appDataJob));
+		
 		return Collections.singletonList(appDataJob);
 	}
 	
@@ -190,16 +200,16 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
                 	AppDataJobFile raw = raws1.get(i);
                     dto.addInput(newInputFor(raw, dto.getWorkDirectory(), "ch01"));
                     
-                    if (raw.getT0_pdgs_date() != null && (t0 == null || t0.before(raw.getT0_pdgs_date()))) {
-                    	t0 = raw.getT0_pdgs_date();
+                    if (raw.getT0PdgsDate() != null && (t0 == null || t0.before(raw.getT0PdgsDate()))) {
+                    	t0 = raw.getT0PdgsDate();
                     }
                 }
                 if (i < raws2.size()) {
                 	AppDataJobFile raw = raws2.get(i);
                     dto.addInput(newInputFor(raw, dto.getWorkDirectory(), "ch02"));
                     
-                    if (raw.getT0_pdgs_date() != null && (t0 == null || t0.before(raw.getT0_pdgs_date()))) {
-                    	t0 = raw.getT0_pdgs_date();
+                    if (raw.getT0PdgsDate() != null && (t0 == null || t0.before(raw.getT0PdgsDate()))) {
+                    	t0 = raw.getT0PdgsDate();
                     }
                 }
             }
@@ -208,9 +218,13 @@ public final class EdrsSessionTypeAdapter extends AbstractProductTypeAdapter imp
             dto.addInput(newInputForDSIB(product.getDsibForChannel(1), dto.getWorkDirectory(), "ch01"));
             dto.addInput(newInputForDSIB(product.getDsibForChannel(2), dto.getWorkDirectory(), "ch02"));
             
-            // Correct t0_pdgs_date
-            if (dto.getT0_pdgs_date() == null || dto.getT0_pdgs_date().before(t0)) {
-            	dto.setT0_pdgs_date(t0);
+            if (t0 != null) {
+	            String t0PdgsDate =  DateUtils.formatToMetadataDateTimeFormat(t0.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+	            
+	            // Correct t0PdgsDate
+	            if (dto.getAdditionalFields().get("t0PdgsDate") == null || DateUtils.toDate((String) dto.getAdditionalFields().get("t0PdgsDate")).before(t0)) {
+	            	dto.getAdditionalFields().put("t0PdgsDate", t0PdgsDate);
+	            }
             }
         }		
 	}

@@ -9,9 +9,9 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
 import esa.s1pdgs.cpoc.mqi.model.control.DemandType;
 
@@ -45,6 +45,8 @@ public abstract class AbstractMessage {
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
 	protected Date creationDate = new Date();
 	
+	protected String rsChainVersion = "";
+	
 	protected String missionId = "";
 	
 	protected String satelliteId = "";
@@ -69,10 +71,7 @@ public abstract class AbstractMessage {
 
 	protected boolean debug = false;
 		
-	protected String timeliness = null;
-	
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-	protected Date t0_pdgs_date;
+	protected String timeliness = "";
 	
 	public AbstractMessage() {
 	}
@@ -112,6 +111,14 @@ public abstract class AbstractMessage {
 
 	public void setCreationDate(final Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public String getRsChainVersion() {
+		return rsChainVersion;
+	}
+
+	public void setRsChainVersion(String rsChainVersion) {
+		this.rsChainVersion = rsChainVersion;
 	}
 
 	public String getPodName() {
@@ -202,14 +209,6 @@ public abstract class AbstractMessage {
 		this.timeliness = timeliness;
 	}
 
-	public Date getT0_pdgs_date() {
-		return t0_pdgs_date;
-	}
-
-	public void setT0_pdgs_date(Date t0_pdgs_date) {
-		this.t0_pdgs_date = t0_pdgs_date;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -229,7 +228,7 @@ public abstract class AbstractMessage {
 		result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
 		result = prime * result + ((timeliness == null) ? 0 : timeliness.hashCode());
 		result = prime * result + ((satelliteId == null) ? 0 : satelliteId.hashCode());
-		result = prime * result + ((t0_pdgs_date == null) ? 0 : t0_pdgs_date.hashCode());
+		result = prime * result + ((rsChainVersion == null) ? 0 : rsChainVersion.hashCode());
 		return result;
 	}
 
@@ -307,10 +306,10 @@ public abstract class AbstractMessage {
 				return false;
 		} else if (!satelliteId.equals(other.satelliteId))
 			return false;		
-		if (t0_pdgs_date == null) {
-			if (other.t0_pdgs_date != null)
+		if (rsChainVersion == null) {
+			if (other.rsChainVersion != null)
 				return false;
-		} else if (!t0_pdgs_date.equals(other.t0_pdgs_date))
+		} else if (!rsChainVersion.equals(other.rsChainVersion))
 			return false;
 		
 		return true;
@@ -319,7 +318,7 @@ public abstract class AbstractMessage {
 	@Override
 	public String toString() {
 		return "AbstractMessage [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
-				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", t0_pdgs_date=" + t0_pdgs_date + ", podName="
+				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
 				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
 				+ retryCounter + ", debug=" + debug + "]";
 	}

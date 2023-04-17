@@ -39,7 +39,6 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.obs_sdk.report.ReportingProductFactory;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3ObsUnrecoverableException;
 import esa.s1pdgs.cpoc.obs_sdk.s3.S3SdkClientException;
-import esa.s1pdgs.cpoc.obs_sdk.swift.SwiftSdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 import esa.s1pdgs.cpoc.report.ReportingMessage;
@@ -70,7 +69,7 @@ public abstract class AbstractObsClient implements ObsClient {
     
     protected abstract void uploadObject(FileObsUploadObject object) throws SdkClientException, ObsException;
 
-	protected abstract Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException;
+	protected abstract Md5.Entry uploadObject(final StreamObsUploadObject object) throws ObsServiceException, S3SdkClientException;
 
     private List<File> downloadObjects(final List<ObsDownloadObject> objects,
 									   final boolean parallel, final ReportingFactory reportingFactory)
@@ -322,29 +321,34 @@ public abstract class AbstractObsClient implements ObsClient {
 	private ObsObject baseKeyOf(final List<StreamObsUploadObject> objects) {
 		// TODO this needs a safety net against misusage
 		// currently, the assumpion is that all provided StreamObsUploadObject belong to the same directory
-		
+				
 		// for the case it's a single file
 		if (objects.size() == 1) {
 			final StreamObsUploadObject element = objects.get(0);	
 			return new ObsObject(element.getFamily(), element.getKey());
 		}
-		
-		for (final StreamObsUploadObject element : objects) {
-			
-			if (element.getKey().contains("/")) {
-				// trim at first slash (inclusive)
-				return new ObsObject(
-						element.getFamily(), 
-						element.getKey().substring(0, element.getKey().indexOf('/'))
-				);
+				
+				
+		if (objects != null) {
+			if (objects.size() > 1) {
+				final StreamObsUploadObject element = objects.get(0);
+				if (element.getKey().contains("/")) {
+					// trim at first slash (inclusive)
+					return new ObsObject(
+							element.getFamily(), 
+							element.getKey().substring(0, element.getKey().indexOf('/'))
+					);
+				} else {
+					// for the case it's a single file
+					return new ObsObject(element.getFamily(), element.getKey());
+				}
 			}
-			// for the case it's a single file
-			return new ObsObject(element.getFamily(), element.getKey());
-		}		
+		}
+		
 		return null;
 	}
 
-	private List<Md5.Entry> uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException, SwiftSdkClientException {
+	private List<Md5.Entry> uploadStreams(final List<StreamObsUploadObject> objects, final boolean parallel, final ReportingFactory reportingFactory) throws ObsServiceException, S3SdkClientException {
 		if (objects.size() > 1 && parallel) {
 			// Upload objects in parallel
 			final ExecutorService workerThread = Executors.newFixedThreadPool(objects.size());
@@ -426,8 +430,9 @@ public abstract class AbstractObsClient implements ObsClient {
 						md5sums.remove(key);
 		            }
                 }
-				for (final String key : md5sums.keySet()) {
-					throw new ObsValidationException("Unexpected object found: {} for {} of family {}", key, object.getKey(), object.getFamily());
+				
+				if (!md5sums.keySet().isEmpty()) {
+					throw new ObsValidationException("Unexpected objects found: {} for {} of family {}", md5sums.keySet(), object.getKey(), object.getFamily());
 				}
 			}
 		} catch (SdkClientException | ObsException | IOException e) {

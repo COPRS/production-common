@@ -1,9 +1,13 @@
 package esa.s1pdgs.cpoc.compression.worker.file;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,11 +15,14 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 import esa.s1pdgs.cpoc.obs_sdk.FileObsUploadObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsEmptyFileException;
+import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
+import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.ReportingFactory;
 
 public class FileUploader {
@@ -29,6 +36,8 @@ public class FileUploader {
 	private final AbstractMessage event;
 	
 	private final ProductFamily outputProductFamily;
+	
+	private final MissionId mission;
 
 	/**
 	 * OBS service
@@ -36,7 +45,8 @@ public class FileUploader {
 	private final ObsClient obsClient;
 	
 
-	public FileUploader(final ObsClient obsClient, final String workingDir, final AbstractMessage event, ProductFamily outputProductFamily) {
+	public FileUploader(final MissionId mission, final ObsClient obsClient, final String workingDir, final AbstractMessage event, ProductFamily outputProductFamily) {
+		this.mission = mission;
 		this.obsClient = obsClient;
 		this.workingDir = workingDir;
 		this.event = event;
@@ -47,9 +57,14 @@ public class FileUploader {
 		File productPath;
 		String outputFileName;
 		if (!CompressionEventUtil.isCompressed(event.getKeyObjectStorage())) {
-			// Compression
-			outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage());
-			productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
+			// Compression			
+			if (event.getKeyObjectStorage().endsWith(".jp2")) {
+				outputFileName = event.getKeyObjectStorage();
+				productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
+			} else {						
+				outputFileName = CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage(), mission);
+				productPath = new File(workingDir + "/" + outputFileName + "/" + outputFileName);
+			}
 		} 
 		else {
 			// Uncompression
@@ -92,8 +107,43 @@ public class FileUploader {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InternalErrorException("The current thread as been interrupted");
 		}
-		obsClient.upload(Collections.singletonList(new FileObsUploadObject(uploadObject.getFamily(), uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
+		
+		long productSizeBytes = size(uploadObject.getFile());
+		
+		try {
+			if (obsClient.existsWithSameSize(new ObsObject(uploadObject.getFamily(), uploadObject.getKey()),
+					productSizeBytes)) {
+
+				throw new InternalErrorException("Output " + uploadObject.getKey() + " with family "
+						+ uploadObject.getFamily() + " already exists in OBS with same size of " + productSizeBytes
+						+ " bytes and upload will be skipped");
+
+			} else {
+				obsClient.upload(Collections.singletonList(new FileObsUploadObject(uploadObject.getFamily(),
+						uploadObject.getKey(), uploadObject.getFile())), reportingFactory);
+			}
+		} catch (SdkClientException e) {
+			
+			throw new InternalErrorException(e.getMessage(), e);
+
+		}
 		return outputFileName;
+	}
+	
+	private long size(final File file) {
+		try {
+			final Path folder = file.toPath();
+			
+			long result;
+			try (Stream<Path> walk = Files.walk(folder)) {
+				result = walk.filter(p -> p.toFile().isFile()).mapToLong(p -> p.toFile().length()).sum();
+			}
+			
+			return result;
+
+		} catch (final IOException e) {
+			return 0L;
+		}
 	}
 
 }

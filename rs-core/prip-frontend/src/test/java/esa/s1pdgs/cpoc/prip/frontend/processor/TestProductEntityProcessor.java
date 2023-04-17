@@ -11,10 +11,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.OData;
@@ -28,6 +30,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResourceEntitySet;
 import org.apache.olingo.server.core.uri.UriResourceEntitySetImpl;
+import org.apache.olingo.server.core.uri.UriResourceNavigationPropertyImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -64,13 +67,25 @@ public class TestProductEntityProcessor {
 	EdmEntitySet edmEntitySetMock;
 	
 	@Mock
+   EdmEntitySet secondLevelEdmEntitySetMock;
+	
+	@Mock
 	ODataRequest odataRequestMock;
 	
 	@Mock
 	UriResourceEntitySet uriResourceEntitySetMock;
+
+   @Mock
+   UriResourceNavigationPropertyImpl uriResourceNavigationPropertyImplMock;
 	
 	@Mock
 	UriParameter uriParameterMock;
+	
+	@Mock
+   UriParameter uriParameterMock2;
+   
+	@Mock
+   EdmNavigationProperty edmNavigationPropertyMock;
 	
 	@Mock
 	ODataSerializer odataSerializerMock;
@@ -90,7 +105,8 @@ public class TestProductEntityProcessor {
 	}
 
 	@Test
-	public void testReadEntity_OnExistentProduct_ShallReturnStatusOk() throws ODataApplicationException, ODataLibraryException, IOException {
+	public void testReadProductEntity_OnExistentProduct_ShallReturnStatusOk()
+	      throws ODataApplicationException, ODataLibraryException, IOException {
 		final String entitySetName = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000001";
 		final String baseUri = "http://example.org";
@@ -111,7 +127,7 @@ public class TestProductEntityProcessor {
 		doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
 		
 		doReturn("Id").when(uriParameterMock).getName();
-		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
+		doReturn(uuid).when(uriParameterMock).getText();
 		
 		doReturn(entitySetName).when(edmEntitySetMock).getName();
 		
@@ -126,11 +142,12 @@ public class TestProductEntityProcessor {
 		
 		Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
 		assertEquals(HttpStatusCode.OK.getStatusCode(), odataResponse.getStatusCode());
-		assertEquals("expected result", IOUtils.toString(odataResponse.getContent(), StandardCharsets.UTF_8));
+		assertEquals("expected result", IOUtils.toString(odataResponse.getContent(), StandardCharsets.UTF_8));		
 	}
 
 	@Test
-	public void testReadEntity_OnNonExistentProduct_ShallReturnStatusNotFound() throws ODataApplicationException, ODataLibraryException {
+	public void testReadProductEntity_OnNonExistentProduct_ShallReturnStatusNotFound()
+	      throws ODataApplicationException, ODataLibraryException {
 		final String entity = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000002";
 		final String baseUri = "http://example.org";
@@ -146,7 +163,7 @@ public class TestProductEntityProcessor {
 		uriResourceEntitySet.setKeyPredicates(Arrays.asList(uriParameterMock));
 		
 		doReturn("Id").when(uriParameterMock).getName();
-		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
+		doReturn(uuid).when(uriParameterMock).getText();
 		
 		doReturn(Arrays.asList(uriResourceEntitySetMock)).when(uriInfoMock).getUriResourceParts();
 
@@ -163,7 +180,7 @@ public class TestProductEntityProcessor {
 	}
 	
 	@Test
-	public void testReadEntity_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailabl()
+	public void testReadProductEntity_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailabl()
 			throws ODataApplicationException, ODataLibraryException, IOException {
 		final String entitySetName = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000001";
@@ -185,7 +202,7 @@ public class TestProductEntityProcessor {
 		doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
 		
 		doReturn("Id").when(uriParameterMock).getName();
-		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
+		doReturn(uuid).when(uriParameterMock).getText();
 		
 		doReturn(entitySetName).when(edmEntitySetMock).getName();
 		
@@ -201,7 +218,7 @@ public class TestProductEntityProcessor {
 	}
 	
 	@Test
-	public void testReadMediaEntity_OnExistentProduct_ShallReturnStatusTemoraryRedirect()
+	public void testReadProductMediaEntity_OnExistentProduct_ShallReturnStatusTemoraryRedirect()
 			throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
 		final String entitySetName = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000001";
@@ -219,13 +236,14 @@ public class TestProductEntityProcessor {
 		doReturn(odataPath).when(odataRequestMock).getRawODataPath();
 		doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
 
-		doReturn(Arrays.asList(uriResourceEntitySetMock)).when(uriInfoMock).getUriResourceParts();
+		doReturn(Arrays.asList(uriResourceEntitySetMock, null /* $value part */))
+		      .when(uriInfoMock).getUriResourceParts();
 
 		doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
 		doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
 		
 		doReturn("Id").when(uriParameterMock).getName();
-		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
+		doReturn(uuid).when(uriParameterMock).getText();
 		
 		doReturn(entitySetName).when(edmEntitySetMock).getName();
 			
@@ -239,7 +257,7 @@ public class TestProductEntityProcessor {
 	}
 	
 	@Test
-	public void testReadMediaEntity_OnNonExistentProduct_ShallReturnStatusNotFound()
+	public void testReadProductMediaEntity_OnNonExistentProduct_ShallReturnStatusNotFound()
 			throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
 		final String entitySetName = "Products";
 		final String uuid = "00000000-0000-0000-0000-000000000001";
@@ -252,13 +270,14 @@ public class TestProductEntityProcessor {
 		doReturn(odataPath).when(odataRequestMock).getRawODataPath();
 		doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
 
-		doReturn(Arrays.asList(uriResourceEntitySetMock)).when(uriInfoMock).getUriResourceParts();
+		doReturn(Arrays.asList(uriResourceEntitySetMock, null /* $value part */))
+		      .when(uriInfoMock).getUriResourceParts();
 
 		doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
 		doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
 		
 		doReturn("Id").when(uriParameterMock).getName();
-		doReturn("'" + uuid + "'").when(uriParameterMock).getText();
+		doReturn(uuid).when(uriParameterMock).getText();
 		
 		doReturn(entitySetName).when(edmEntitySetMock).getName();
 			
@@ -268,4 +287,408 @@ public class TestProductEntityProcessor {
 		Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
 		assertEquals(HttpStatusCode.NOT_FOUND.getStatusCode(), odataResponse.getStatusCode());
 	}
+	
+	@Test
+   public void testReadQuicklookEntity_OnExistingProduct_ShallReturnStatusOk()
+         throws ODataApplicationException, ODataLibraryException, IOException {
+      final String rootEntitySetName = "Products";
+      final String secondaryEntitySetName = "Quicklooks";
+      final String uuid = "00000000-0000-0000-0000-000000000001";
+      final String img = "foo.png"; 
+      final String baseUri = "http://example.org";
+      final String odataPath = "/" + rootEntitySetName + "(" + uuid + ")/" + secondaryEntitySetName + "('" + img + "')";
+
+      final PripMetadata pripMetadata = new PripMetadata();
+      pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+      pripMetadata.setBrowseKeys(List.of(img));
+      
+      doReturn(pripMetadata).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(List.of(uriResourceEntitySetMock, uriResourceNavigationPropertyImplMock))
+            .when(uriInfoMock).getUriResourceParts();
+
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn("Id").when(uriParameterMock).getName();
+      doReturn(uuid).when(uriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+      
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationPropertyImplMock).getProperty();
+      
+      doReturn(List.of(uriParameterMock2)).when(uriResourceNavigationPropertyImplMock).getKeyPredicates();
+
+      doReturn("'" + img + "'").when(uriParameterMock2).getText();
+      
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+      
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+      
+      doReturn(odataSerializerMock).when(odataMock).createSerializer(Mockito.any());
+      
+      doReturn(serializerResultMock).when(odataSerializerMock).entity(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+      
+      doReturn(new ByteArrayInputStream("expected result".getBytes())).when(serializerResultMock).getContent();
+      
+      final ODataResponse odataResponse = new ODataResponse();
+      uut.readEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+      assertEquals(HttpStatusCode.OK.getStatusCode(), odataResponse.getStatusCode());
+      assertEquals("expected result", IOUtils.toString(odataResponse.getContent(), StandardCharsets.UTF_8));
+   }
+	
+	@Test
+   public void testReadQuicklookEntity_OnNotExistingProduct_ShallReturnStatusNotFound()
+         throws ODataApplicationException, ODataLibraryException, IOException {
+      final String rootEntitySetName = "Products";
+      final String secondaryEntitySetName = "Quicklooks";
+      final String uuid = "00000000-0000-0000-0000-000000000001";
+      final String img = "foo.png"; 
+      final String baseUri = "http://example.org";
+      final String odataPath = "/" + rootEntitySetName + "(" + uuid + ")/" + secondaryEntitySetName + "('" + img + "')";
+      
+      doReturn(null).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(List.of(uriResourceEntitySetMock, uriResourceNavigationPropertyImplMock))
+            .when(uriInfoMock).getUriResourceParts();
+
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn("Id").when(uriParameterMock).getName();
+      doReturn(uuid).when(uriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+      
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationPropertyImplMock).getProperty();
+      
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+      
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+      
+      final ODataResponse odataResponse = new ODataResponse();
+      uut.readEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+      assertEquals(HttpStatusCode.NOT_FOUND.getStatusCode(), odataResponse.getStatusCode());
+   }
+	
+	@Test
+   public void testReadQuicklookEntity_OnNotExistingQuicklook_ShallReturnStatusNotFound()
+         throws ODataApplicationException, ODataLibraryException, IOException {
+      final String rootEntitySetName = "Products";
+      final String secondaryEntitySetName = "Quicklooks";
+      final String uuid = "00000000-0000-0000-0000-000000000001";
+      final String img = "foo.png"; 
+      final String baseUri = "http://example.org";
+      final String odataPath = "/" + rootEntitySetName + "(" + uuid + ")/" + secondaryEntitySetName + "('" + img + "')";
+      
+      final PripMetadata pripMetadata = new PripMetadata();
+      pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+      pripMetadata.setBrowseKeys(List.of());
+      
+      doReturn(pripMetadata).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(List.of(uriResourceEntitySetMock, uriResourceNavigationPropertyImplMock))
+            .when(uriInfoMock).getUriResourceParts();
+
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn("Id").when(uriParameterMock).getName();
+      doReturn(uuid).when(uriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+      
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationPropertyImplMock).getProperty();
+      
+      doReturn(List.of(uriParameterMock2)).when(uriResourceNavigationPropertyImplMock).getKeyPredicates();
+
+      doReturn("'" + img + "'").when(uriParameterMock2).getText();
+      
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+      
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+      
+      final ODataResponse odataResponse = new ODataResponse();
+      uut.readEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+      assertEquals(HttpStatusCode.NOT_FOUND.getStatusCode(), odataResponse.getStatusCode());
+   }
+	
+	@Test
+   public void testReadQuicklookEntity_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailable()
+         throws ODataApplicationException, ODataLibraryException, IOException {
+      final String rootEntitySetName = "Products";
+      final String secondaryEntitySetName = "Quicklooks";
+      final String uuid = "00000000-0000-0000-0000-000000000001";
+      final String img = "foo.png"; 
+      final String baseUri = "http://example.org";
+      final String odataPath = "/" + rootEntitySetName + "(" + uuid + ")/" + secondaryEntitySetName + "('" + img + "')";
+
+      doThrow(RecoverableDataAccessException.class).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(List.of(uriResourceEntitySetMock, uriResourceNavigationPropertyImplMock))
+            .when(uriInfoMock).getUriResourceParts();
+
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn("Id").when(uriParameterMock).getName();
+      doReturn(uuid).when(uriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+      
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationPropertyImplMock).getProperty();
+      
+      doReturn(List.of(uriParameterMock2)).when(uriResourceNavigationPropertyImplMock).getKeyPredicates();
+
+      doReturn("'" + img + "'").when(uriParameterMock2).getText();
+      
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+      
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+      
+      doReturn(odataSerializerMock).when(odataMock).createSerializer(Mockito.any());
+      
+      doReturn(serializerResultMock).when(odataSerializerMock).entity(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+      
+      doReturn(new ByteArrayInputStream("expected result".getBytes())).when(serializerResultMock).getContent();
+      
+      final ODataResponse odataResponse = new ODataResponse();
+      try {
+         uut.readEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+         fail("Required exception wasn't thrown");
+      } catch (ODataApplicationException e) {
+         assertEquals(HttpStatusCode.SERVICE_UNAVAILABLE.getStatusCode(), e.getStatusCode());
+      }
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+   }
+	
+	@Test
+   public void testReadQuicklookMediaEntity_OnExistentProduct_ShallReturnStatusTemoraryRedirect()
+         throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
+      final String rootEntitySetName = "Products";
+      final String secondaryEntitySetName = "Quicklooks";
+      final String uuid = "00000000-0000-0000-0000-000000000001";
+      final String img = "S1A_foo.png"; 
+      final String baseUri = "http://example.org";
+      final String odataPath = "/" + rootEntitySetName + "(" + uuid + ")/" + secondaryEntitySetName + "('" + img + "')/$value";
+
+      final PripMetadata pripMetadata = new PripMetadata();
+      pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+      pripMetadata.setBrowseKeys(List.of(img));     
+      pripMetadata.setProductFamily(ProductFamily.L1_SLICE_ZIP);
+      
+      doReturn(pripMetadata).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(Arrays.asList(uriResourceEntitySetMock, uriResourceNavigationPropertyImplMock, null /* $value part */))
+            .when(uriInfoMock).getUriResourceParts();
+
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn("Id").when(uriParameterMock).getName();
+      doReturn(uuid).when(uriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+      
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationPropertyImplMock).getProperty();
+      
+      doReturn(List.of(uriParameterMock2)).when(uriResourceNavigationPropertyImplMock).getKeyPredicates();
+
+      doReturn("'" + img + "'").when(uriParameterMock2).getText();
+      
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+      
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+         
+      doReturn(new URL("http://www.example.org")).when(obsClientMock).createTemporaryDownloadUrl(Mockito.any(), Mockito.anyLong());
+      
+      final ODataResponse odataResponse = new ODataResponse();
+      uut.readMediaEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+      assertEquals(HttpStatusCode.TEMPORARY_REDIRECT.getStatusCode(), odataResponse.getStatusCode());
+   }
+	
+	@Test
+   public void testReadQuicklookMediaEntity_OnNotExistingProduct_ShallReturnStatusNotFound()
+         throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
+      final String rootEntitySetName = "Products";
+      final String secondaryEntitySetName = "Quicklooks";
+      final String uuid = "00000000-0000-0000-0000-000000000001";
+      final String img = "S1A_foo.png"; 
+      final String baseUri = "http://example.org";
+      final String odataPath = "/" + rootEntitySetName + "(" + uuid + ")/" + secondaryEntitySetName + "('" + img + "')/$value";
+
+      doReturn(null).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(Arrays.asList(uriResourceEntitySetMock, uriResourceNavigationPropertyImplMock, null /* $value part */))
+            .when(uriInfoMock).getUriResourceParts();
+
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn("Id").when(uriParameterMock).getName();
+      doReturn(uuid).when(uriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+      
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationPropertyImplMock).getProperty();
+      
+      doReturn(List.of(uriParameterMock2)).when(uriResourceNavigationPropertyImplMock).getKeyPredicates();
+
+      doReturn("'" + img + "'").when(uriParameterMock2).getText();
+      
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+      
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+         
+      doReturn(new URL("http://www.example.org")).when(obsClientMock).createTemporaryDownloadUrl(Mockito.any(), Mockito.anyLong());
+      
+      final ODataResponse odataResponse = new ODataResponse();
+      uut.readMediaEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+      assertEquals(HttpStatusCode.NOT_FOUND.getStatusCode(), odataResponse.getStatusCode());
+   }
+	
+	@Test
+   public void testReadQuicklookMediaEntity_OnNotExistingQuicklook_ShallReturnStatusNotFound()
+         throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
+      final String rootEntitySetName = "Products";
+      final String secondaryEntitySetName = "Quicklooks";
+      final String uuid = "00000000-0000-0000-0000-000000000001";
+      final String img = "S1A_foo.png"; 
+      final String baseUri = "http://example.org";
+      final String odataPath = "/" + rootEntitySetName + "(" + uuid + ")/" + secondaryEntitySetName + "('" + img + "')/$value";
+
+      final PripMetadata pripMetadata = new PripMetadata();
+      pripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+      pripMetadata.setBrowseKeys(List.of());     
+      pripMetadata.setProductFamily(ProductFamily.L1_SLICE_ZIP);
+      
+      doReturn(pripMetadata).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(Arrays.asList(uriResourceEntitySetMock, uriResourceNavigationPropertyImplMock, null /* $value part */))
+            .when(uriInfoMock).getUriResourceParts();
+
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn("Id").when(uriParameterMock).getName();
+      doReturn(uuid).when(uriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+      
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationPropertyImplMock).getProperty();
+      
+      doReturn(List.of(uriParameterMock2)).when(uriResourceNavigationPropertyImplMock).getKeyPredicates();
+
+      doReturn("'" + img + "'").when(uriParameterMock2).getText();
+      
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+      
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+         
+      doReturn(new URL("http://www.example.org")).when(obsClientMock).createTemporaryDownloadUrl(Mockito.any(), Mockito.anyLong());
+      
+      final ODataResponse odataResponse = new ODataResponse();
+      uut.readMediaEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+      assertEquals(HttpStatusCode.NOT_FOUND.getStatusCode(), odataResponse.getStatusCode());
+   }
+	
+	@Test
+   public void testReadQuicklookMediaEntity_OnRecoverableDataAccessException_ShallReturnStatusServiceUnavailable()
+         throws ODataApplicationException, ODataLibraryException, IOException, ObsException, ObsServiceException {
+      final String rootEntitySetName = "Products";
+      final String secondaryEntitySetName = "Quicklooks";
+      final String uuid = "00000000-0000-0000-0000-000000000001";
+      final String img = "S1A_foo.png"; 
+      final String baseUri = "http://example.org";
+      final String odataPath = "/" + rootEntitySetName + "(" + uuid + ")/" + secondaryEntitySetName + "('" + img + "')/$value";
+
+      doThrow(RecoverableDataAccessException.class).when(pripMetadataRepositoryMock).findById(Mockito.eq(uuid));
+
+      doReturn(baseUri).when(odataRequestMock).getRawBaseUri();
+      doReturn(odataPath).when(odataRequestMock).getRawODataPath();
+      doReturn(baseUri + odataPath).when(odataRequestMock).getRawRequestUri();
+
+      doReturn(Arrays.asList(uriResourceEntitySetMock, uriResourceNavigationPropertyImplMock, null /* $value part */))
+            .when(uriInfoMock).getUriResourceParts();
+
+      doReturn(edmEntitySetMock).when(uriResourceEntitySetMock).getEntitySet();
+      doReturn(Arrays.asList(uriParameterMock)).when(uriResourceEntitySetMock).getKeyPredicates();
+      
+      doReturn("Id").when(uriParameterMock).getName();
+      doReturn(uuid).when(uriParameterMock).getText();
+      
+      doReturn(rootEntitySetName).when(edmEntitySetMock).getName();
+      doReturn(secondLevelEdmEntitySetMock).when(edmEntitySetMock).getRelatedBindingTarget(Mockito.anyString());
+      
+      doReturn(edmNavigationPropertyMock).when(uriResourceNavigationPropertyImplMock).getProperty();
+      
+      doReturn(List.of(uriParameterMock2)).when(uriResourceNavigationPropertyImplMock).getKeyPredicates();
+
+      doReturn("'" + img + "'").when(uriParameterMock2).getText();
+      
+      doReturn(secondaryEntitySetName).when(edmNavigationPropertyMock).getName();
+      
+      doReturn(secondaryEntitySetName).when(secondLevelEdmEntitySetMock).getName();
+         
+      doReturn(new URL("http://www.example.org")).when(obsClientMock).createTemporaryDownloadUrl(Mockito.any(), Mockito.anyLong());
+           
+      final ODataResponse odataResponse = new ODataResponse();
+      try {
+         uut.readMediaEntity(odataRequestMock, odataResponse, uriInfoMock, ContentType.JSON_FULL_METADATA);
+         fail("Required exception wasn't thrown");
+      } catch (ODataApplicationException e) {
+         assertEquals(HttpStatusCode.SERVICE_UNAVAILABLE.getStatusCode(), e.getStatusCode());
+      }
+      
+      Mockito.verify(pripMetadataRepositoryMock, times(1)).findById(Mockito.eq(uuid));
+   }
+	
 }

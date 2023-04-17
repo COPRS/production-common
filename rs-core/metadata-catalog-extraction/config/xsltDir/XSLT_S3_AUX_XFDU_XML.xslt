@@ -57,6 +57,22 @@
 			<xsl:value-of
 				select="//*[local-name()='processing']/*[local-name()='facility']/@site" />
 		</site>
+		<platformShortName>
+			<xsl:value-of
+				select="//*[local-name()='platform']/*[local-name()='familyName']/text()" />
+		</platformShortName>
+		<platformSerialIdentifier>
+			<xsl:value-of
+				select="//*[local-name()='platform']/*[local-name()='number']/text()" />
+		</platformSerialIdentifier>
+		<procVersion>
+			<xsl:value-of
+				select="//*[local-name()='processing']//*[local-name()='software']/@version" />
+		</procVersion>
+		<procName>
+			<xsl:value-of
+				select="//*[local-name()='processing']//*[local-name()='software']/@name" />
+		</procName>
 		<xsl:call-template name="setTimeliness">
 			<xsl:with-param name="timeliness">
 				<xsl:value-of

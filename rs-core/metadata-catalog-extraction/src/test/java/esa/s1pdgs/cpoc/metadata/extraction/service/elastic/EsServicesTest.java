@@ -74,7 +74,7 @@ public class EsServicesTest{
 	@Before
 	public void init() throws IOException {
 		MockitoAnnotations.initMocks(this);
-		esServices = new EsServices(elasticsearchDAO, new MdcWorkerConfigurationProperties());
+		esServices = new EsServices(elasticsearchDAO);
 		
 	}
 	
@@ -229,6 +229,8 @@ public class EsServicesTest{
 		esServices.createMetadata(product);
 	}
 	
+<<<<<<< HEAD
+=======
 	@Test
 	public void lastValCoverTest() throws IOException {
 		// Product
@@ -1799,4 +1801,5 @@ public class EsServicesTest{
 		}
 	}
 	
+>>>>>>> main
 }

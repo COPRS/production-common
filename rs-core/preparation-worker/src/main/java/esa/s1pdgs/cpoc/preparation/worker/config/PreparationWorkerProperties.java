@@ -133,7 +133,7 @@ public class PreparationWorkerProperties {
 		}
 	}
 
-	private List<InputWaitingConfig> inputWaiting = new ArrayList<>();
+	private Map<String, InputWaitingConfig> inputWaiting = new LinkedHashMap<>();
 
 	private List<LatenessConfig> latenessConfig = new ArrayList<>();
 
@@ -156,6 +156,11 @@ public class PreparationWorkerProperties {
 	 */
 	private int jobgenfixedrate;
 
+	/**
+	 * Maximum lifespan for the primary check before continuing
+	 */
+	private int primaryCheckMaxTimelifeS;
+	
 	/**
 	 * Default family of products
 	 */
@@ -206,7 +211,14 @@ public class PreparationWorkerProperties {
 	 * Mode of the process
 	 */
 	private ProductMode productMode = ProductMode.SLICING;
+	
+	/**
+     * Maximal job age per status
+     */
+    private Map<String, Long> maxAgeJobMs = new HashMap<>();
 
+    private String pathTaskTableXslt = "";
+    
 	/**
 	 * Initialization function:
 	 * <li>Build maps by splitting the corresponding string (note: we cannot map
@@ -263,11 +275,11 @@ public class PreparationWorkerProperties {
 		this.latenessConfig = latenessConfig;
 	}
 
-	public List<InputWaitingConfig> getInputWaiting() {
+	public Map<String, InputWaitingConfig> getInputWaiting() {
 		return inputWaiting;
 	}
 
-	public void setInputWaiting(final List<InputWaitingConfig> inputWaiting) {
+	public void setInputWaiting(final Map<String, InputWaitingConfig> inputWaiting) {
 		this.inputWaiting = inputWaiting;
 	}
 
@@ -311,6 +323,20 @@ public class PreparationWorkerProperties {
 	 */
 	public void setJobgenfixedrate(final int jobgenfixedrate) {
 		this.jobgenfixedrate = jobgenfixedrate;
+	}
+
+	/**
+	 * @return the maximum time a job should be in primary check
+	 */
+	public int getPrimaryCheckMaxTimelifeS() {
+		return primaryCheckMaxTimelifeS;
+	}
+
+	/**
+	 * @param primaryCheckMaxTimelifeS how long a job should be in primary check
+	 */
+	public void setPrimaryCheckMaxTimelifeS(int primaryCheckMaxTimelifeS) {
+		this.primaryCheckMaxTimelifeS = primaryCheckMaxTimelifeS;
 	}
 
 	/**
@@ -446,17 +472,34 @@ public class PreparationWorkerProperties {
 		this.lateTopicActive = lateTopicActive;
 	}
 	
+	public Map<String, Long> getMaxAgeJobMs() {
+		return maxAgeJobMs;
+	}
+
+	public void setMaxAgeJobMs(Map<String, Long> maxAgeJobMs) {
+		this.maxAgeJobMs = maxAgeJobMs;
+	}
+
+	public String getPathTaskTableXslt() {
+		return pathTaskTableXslt;
+	}
+
+	public void setPathTaskTableXslt(String pathTaskTableXslt) {
+		this.pathTaskTableXslt = pathTaskTableXslt;
+	}
+
 	/**
 	 * Display object in JSON format
 	 */
 	@Override
 	public String toString() {
 		return "{maxnumberofjobs: " + maxnumberofjobs + "\", diroftasktables: \"" + diroftasktables
-				+ "\", jobgenfixedrate: " + jobgenfixedrate + ", defaultfamily: \"" + defaultfamily
-				+ "\", outputfamiliesstr: \"" + outputfamiliesstr + "\", outputfamilies: \"" + outputfamilies
-				+ "\", typeOverlap: \"" + typeOverlap + "\", typeSliceLength: \"" + typeSliceLength
-				+ "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \"" + oqcCheck + "\", productMode: \""
-				+ productMode + "\", inputWaiting: \"" + inputWaiting + "\", joborderTimelinessCategoryMapping="
-				+ joborderTimelinessCategoryMapping + "}";
+				+ "\", jobgenfixedrate: " + jobgenfixedrate + ", primaryCheckMaxTimelifeS:" + primaryCheckMaxTimelifeS
+				+ ", defaultfamily: \"" + defaultfamily + "\", outputfamiliesstr: \"" + outputfamiliesstr
+				+ "\", outputfamilies: \"" + outputfamilies + "\", typeOverlap: \"" + typeOverlap
+				+ "\", typeSliceLength: \"" + typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \""
+				+ oqcCheck + "\", productMode: \"" + productMode + "\", inputWaiting: \"" + inputWaiting
+				+ "\", joborderTimelinessCategoryMapping:" + joborderTimelinessCategoryMapping + "\", maxAgeJobMs:"
+				+ maxAgeJobMs + "\", pathTaskTableXslt:" + pathTaskTableXslt + "\"}";
 	}
 }

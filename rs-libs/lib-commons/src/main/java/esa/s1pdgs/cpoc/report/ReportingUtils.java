@@ -12,18 +12,7 @@ import esa.s1pdgs.cpoc.report.message.input.FilenameReportingInput;
 import esa.s1pdgs.cpoc.report.message.output.FilenameReportingOutput;
 
 public final class ReportingUtils {
-	// default pattern to use if no other is configured
-	private static String segmentBlacklistPattern = "^S1([A-Z_]{1}).*(GP|HK).*SAFE(.zip)?$";
-	
-	private static final Predicate<ReportingFilenameEntry> SEGMENT_FILTER = e -> {
-		return ( e.getFamily().equals(ProductFamily.L0_SEGMENT) && !toFlatFilename(e.getProductName())
-				.matches(segmentBlacklistPattern));
-	};
-
-	// This is dirty but the easiest way without modifying 
-	public static void setSegmentBlacklistPattern(final String segmentBlacklistPattern) {
-		ReportingUtils.segmentBlacklistPattern = segmentBlacklistPattern;
-	}
+	private static final Predicate<ReportingFilenameEntry> ALL_FILTER = e -> { return true; };
 	
 	public static final Reporting.Builder newReportingBuilder(MissionId mission) {
 		return new ReportAdapter.Builder(new LoggerReportingAppender(), mission);
@@ -45,17 +34,8 @@ public final class ReportingUtils {
 		return new FilenameReportingOutput(new ReportingFilenameEntries(Arrays.asList(products)));
 	}
 	
-	static List<String> segmentsOf(final List<ReportingFilenameEntry> products) {
-		return uniqueFlatProducts(products, SEGMENT_FILTER);				
-	}
-	
 	static List<String> filenamesOf(final List<ReportingFilenameEntry> products) {
-		// everything not matching the segment filter will be reported as 'filename'
-		return uniqueFlatProducts(products, not(SEGMENT_FILTER));				
-	}
-		
-	private static final <E> Predicate<E> not(final Predicate<E> predicate) {
-		return predicate.negate();
+		return uniqueFlatProducts(products, ALL_FILTER);				
 	}
 	
 	private static final List<String> uniqueFlatProducts(

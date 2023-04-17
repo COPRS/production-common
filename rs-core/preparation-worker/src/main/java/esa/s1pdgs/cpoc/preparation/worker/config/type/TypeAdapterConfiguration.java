@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.preparation.worker.config.type;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +15,7 @@ import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableFactory;
+import esa.s1pdgs.cpoc.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.edrs.AiopPropertiesAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.edrs.EdrsSessionProductValidator;
@@ -26,6 +28,8 @@ import esa.s1pdgs.cpoc.preparation.worker.type.slice.LevelSliceTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppMbuTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppObsPropertiesAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.spp.SppObsTypeAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.type.synergy.S3SynergyTypeAdapter;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 
 @Configuration
 public class TypeAdapterConfiguration {
@@ -52,6 +56,9 @@ public class TypeAdapterConfiguration {
 	
 	@Autowired
 	private S3TypeAdapterProperties s3TypeAdapterSettings;
+	
+	@Autowired
+	private S3SynergyProperties s3SynSettings;
     
 	@Autowired
 	private PDUProperties pduSettings;
@@ -61,6 +68,9 @@ public class TypeAdapterConfiguration {
 	
 	@Autowired
 	private ElementMapper elementMapper;
+	
+	@Autowired
+	private Function<TaskTable, InputTimeoutChecker> timeoutCheckerF;
 	
 	@Bean
 	@Autowired
@@ -81,12 +91,12 @@ public class TypeAdapterConfiguration {
 						AspPropertiesAdapter.of(aspProperties)
 				);
 			case L1: case L2:
-				// TODO: Add Timeout mechanic back for V2
 				return new LevelSliceTypeAdapter(
 						metadataClient, 
 						settings.getTypeOverlap(), 
 						settings.getTypeSliceLength(),
-						settings.getJoborderTimelinessCategoryMapping()
+						settings.getJoborderTimelinessCategoryMapping(),
+						timeoutCheckerF
 				);			
 			case S3_L0: case S3_L1: case S3_L2:
 				return new S3TypeAdapter(
@@ -105,6 +115,14 @@ public class TypeAdapterConfiguration {
 						processSettings,
 						pduSettings
 				);
+			case S3_SYN:
+				return new S3SynergyTypeAdapter(
+						metadataClient,
+						elementMapper,
+						taskTableFactory,
+						processSettings, 
+						settings,
+						s3SynSettings);
 			case SPP_MBU:
 				return new SppMbuTypeAdapter(
 						metadataClient

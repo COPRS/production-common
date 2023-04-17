@@ -1,11 +1,14 @@
 package esa.s1pdgs.cpoc.preparation.worker.type.slice;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import esa.s1pdgs.cpoc.appcatalog.AppDataJob;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
@@ -28,11 +31,13 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableInputAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.timeout.InputTimeoutChecker;
 import esa.s1pdgs.cpoc.preparation.worker.type.AbstractProductTypeAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.Product;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrderSensingTime;
+import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTable;
 import esa.s1pdgs.cpoc.xml.model.tasktable.TaskTableInputAlternative;
 
 public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter implements ProductTypeAdapter {
@@ -46,17 +51,20 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 	private final Map<String, Float> sliceOverlap;
 	private final Map<String, Float> sliceLength;
 	private final Map<String,String> timelinessMapping;
+	private final Function<TaskTable, InputTimeoutChecker> timeoutCheckerF;
 	
 	public LevelSliceTypeAdapter(
 			final MetadataClient metadataClient,
 			final Map<String, Float> sliceOverlap,
 			final Map<String, Float> sliceLength,
-			final Map<String,String> timelinessMapping
+			final Map<String,String> timelinessMapping,
+			final Function<TaskTable, InputTimeoutChecker> timeoutChecker
 	) {
 		this.metadataClient = metadataClient;
 		this.sliceOverlap = sliceOverlap;
 		this.sliceLength = sliceLength;
 		this.timelinessMapping = timelinessMapping;
+		this.timeoutCheckerF = timeoutChecker;
 	}
 
 	@Override
@@ -98,10 +106,10 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			preselected.setFileType(alt.getFileType());		
 			preselected.setFileNameType(alt.getFileNameType().toString());
 			
-			// Extract t0_pdgs_date if possible to determine when all inputs where ready
+			// Extract t0PdgsDate if possible to determine when all inputs where ready
 			Date t0 = null;
-			if (file.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-				t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0_pdgs_date"));
+			if (file.getAdditionalProperties().containsKey("t0PdgsDate")) {
+				t0 = DateUtils.toDate(file.getAdditionalProperties().get("t0PdgsDate"));
 			}
 			
 			final AppDataJobFile appJobFile = new AppDataJobFile(
@@ -152,7 +160,9 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			final TaskTableInputAdapter ttInput = opt.get();
 			
 			final AppDataJobProductAdapter productAdapter = new AppDataJobProductAdapter(job.getProduct());
-						
+			
+			final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(taskTableAdapter.taskTable());	
+			
 			boolean foundAux = false;
 						
 			for (final TaskTableInputAlternative alternative : ttInput.getInput().getAlternatives()) {		
@@ -185,10 +195,10 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 						
 						final List<AppDataJobFile> files = new ArrayList<>();
 						for (final SearchMetadata meta : queryResults) {
-							// Extract t0_pdgs_date if possible to determine when all inputs where ready
+							// Extract t0PdgsDate if possible to determine when all inputs where ready
 							Date t0 = null;
-							if (meta.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-								t0 = DateUtils.toDate(meta.getAdditionalProperties().get("t0_pdgs_date"));
+							if (meta.getAdditionalProperties().containsKey("t0PdgsDate")) {
+								t0 = DateUtils.toDate(meta.getAdditionalProperties().get("t0PdgsDate"));
 							}
 							
 							files.add(new AppDataJobFile(
@@ -215,8 +225,6 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 			}	
 			// S1PRO-2600: check timeout AFTER querying all alternatives...
 			// make the timeout check here because here we still got the TaskTableInput
-			// TODO: Remove timeout logic 
-			/*
 			if (!foundAux && !timeoutChecker.isTimeoutExpiredFor(job, ttInput.getInput())) {
 				LOGGER.debug("Waiting for timeout on {}", ttInput.getInput());
 				throw new IpfPrepWorkerInputsMissingException(
@@ -226,7 +234,6 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 						)
 				);
 			}
-			*/
 		}
 		return product;
 	}
@@ -261,6 +268,26 @@ public final class LevelSliceTypeAdapter extends AbstractProductTypeAdapter impl
 		}
 		// if both are there, job creation can proceed
 		LOGGER.info("Found slice {} and ACN {}", product.getSlices(), product.getAcns());
+	}
+	
+	@Override
+	public void updateTimeout(AppDataJob job, TaskTableAdapter taskTableAdapter) {
+		// Additional input based timeout for orbit auxiliary		
+		final Optional<TaskTableInputAdapter> opt = taskTableAdapter.firstInputContainingOneOf(AUX_ORB_TYPES);
+		
+		if (opt.isPresent()) {						
+			final TaskTableInputAdapter ttInput = opt.get();
+			final InputTimeoutChecker timeoutChecker = timeoutCheckerF.apply(taskTableAdapter.taskTable());	
+			
+			final LocalDateTime inputTimeoutLocalDateTime = timeoutChecker.timeoutFor(job, ttInput.getInput());
+			Date inputTimeoutDate = null;
+			
+			if (inputTimeoutLocalDateTime != null) {
+				inputTimeoutDate = Date.from(inputTimeoutLocalDateTime.atZone(ZoneId.systemDefault()).toInstant());
+			}
+			
+			job.setTimeoutDate(inputTimeoutDate);
+		}
 	}
 
 	@Override

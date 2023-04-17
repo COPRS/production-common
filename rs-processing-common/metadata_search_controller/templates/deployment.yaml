@@ -1,4 +1,4 @@
-kind: StatefulSet
+kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{ .Release.Name }}
@@ -13,7 +13,6 @@ spec:
     matchLabels:
       app: {{ .Release.Name }}
   replicas: {{ .Values.replicaCount }}
-  podManagementPolicy: Parallel
   template:
     metadata:
       name: {{ .Release.Name }}
@@ -89,6 +88,5 @@ spec:
         - name: xslt-config-volume
           configMap:
             name: {{ .Release.Name }}-xslt-config
-  serviceName: {{ .Release.Name }}-svc
   revisionHistoryLimit: 10
 

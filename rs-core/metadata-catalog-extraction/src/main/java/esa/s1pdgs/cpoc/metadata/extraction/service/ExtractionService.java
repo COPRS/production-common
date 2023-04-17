@@ -102,7 +102,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 
 		CatalogEvent result;
 		try {
-			result = handleMessage(catalogJob, reporting);
+			result = handleMessage(mission, catalogJob, reporting);
 		} catch (Exception e) {
 			reporting.error(new ReportingMessage("Metadata extraction failed: %s", LogUtils.toString(e)));
 			throw new RuntimeException(e);
@@ -126,7 +126,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		return result;
 	}
 
-	private final CatalogEvent handleMessage(final CatalogJob catJob, final Reporting reporting) throws Exception {
+	private final CatalogEvent handleMessage(final MissionId missionId, final CatalogJob catJob, final Reporting reporting) throws Exception {
 		final String productName = catJob.getProductName();
 		final ProductFamily family = catJob.getProductFamily();
 		final ProductCategory category = ProductCategory.of(family);
@@ -136,7 +136,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		final ProductMetadata metadata = extractor.extract(reporting, catJob);
 
 		// TODO move to extractor
-		if (null != catJob.getTimeliness() && !metadata.has("timeliness")) {
+		if (null != catJob.getTimeliness() && !catJob.getTimeliness().isEmpty() && !metadata.has("timeliness")) {
 			metadata.put("timeliness", catJob.getTimeliness());
 		}
 
@@ -144,11 +144,10 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		if (!metadata.has("insertionTime")) {
 			metadata.put("insertionTime", DateUtils.formatToMetadataDateTimeFormat(LocalDateTime.now()));
 		}
-
-		// RS-248: Adding t0_pdgs_date into metadata
-		if (catJob.getT0_pdgs_date() != null) {
-			metadata.put("t0_pdgs_date", DateUtils.formatToMetadataDateTimeFormat(
-					catJob.getT0_pdgs_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+		
+		// RS-248: Adding t0PdgsDate into metadata
+		if (catJob.getAdditionalFields().get("t0PdgsDate") != null) {
+			metadata.put("t0PdgsDate", (String) catJob.getAdditionalFields().get("t0PdgsDate") );
 		}
 
 		LOG.debug("Metadata extracted: {} for product: {}", metadata, productName);
@@ -156,12 +155,16 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		esServices.createMetadataWithRetries(metadata, productName,
 				properties.getProductInsertion().getMaxRetries(), properties.getProductInsertion().getTempoRetryMs());
 
-		final CatalogEvent event = toCatalogEvent(catJob, metadata);
+		final CatalogEvent event = toCatalogEvent(missionId, catJob, metadata);
 		event.setUid(reporting.getUid());
 		return event;
 	}
 
+<<<<<<< HEAD
+	private final CatalogEvent toCatalogEvent(final MissionId missionId, final CatalogJob catJob, final ProductMetadata metadata)
+=======
 	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final ProductMetadata metadata)
+>>>>>>> main
 				throws MetadataMalformedException {
 		final CatalogEvent catEvent = new CatalogEvent();
 		String satelliteId;
@@ -172,14 +175,30 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		}
 
 		catEvent.setMetadata(metadata.asMap());
+<<<<<<< HEAD
+		catEvent.setMissionId(missionId.name());
+=======
 		catEvent.setMissionId(catJob.getMissionId());
+>>>>>>> main
 		catEvent.setSatelliteId(satelliteId);
 		catEvent.setMetadataProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
 		catEvent.setStoragePath(catJob.getStoragePath());
 		catEvent.setProductFamily(catJob.getProductFamily());
 		catEvent.setMetadataProductType(metadata.getString("productType"));
-		catEvent.setT0_pdgs_date(catJob.getT0_pdgs_date());
+		if (catJob.getAdditionalFields().get("t0PdgsDate") != null) {
+			catEvent.getAdditionalFields().put("t0PdgsDate", (String) metadata.get("t0PdgsDate"));
+		}
+		catEvent.getAdditionalFields().put("productSizeByte", catJob.getProductSizeByte());
+		if (catJob.getStationName() != null) {
+			catEvent.getAdditionalFields().put("stationName", catJob.getStationName());
+		}
+		if (metadata.has("timeliness")) {
+			catEvent.setTimeliness((String) metadata.get("timeliness"));
+		}
+		
+		// RS-536: Add RS Chain Version to message
+		catEvent.setRsChainVersion(commonProperties.getRsChainVersion());
 
 		return catEvent;
 	}
@@ -228,7 +247,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		}
 		
 		// RS-407
-		new ProductMetadataCustomObjectFiller(catalogEvent, output).fillCustomObject();
+		new ProductMetadataCustomObjectFiller(catalogEvent, mission, output).fillCustomObject();
 		
 		// RS-444
 		output.setEndToEndProduct(catalogEvent.getProductFamily().isEndToEndFamily());
@@ -264,6 +283,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 			break;
 		case S2_L2A_DS:
 		case S2_L2A_TL:
+		case S2_L2A_TC:
 			output.setTimelinessName(S2_L2);
 			output.setTimelinessValueSeconds(timelinessConfig.get(S2_L2));
 			break;

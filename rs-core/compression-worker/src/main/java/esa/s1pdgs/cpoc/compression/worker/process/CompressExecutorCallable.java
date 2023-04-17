@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 import esa.s1pdgs.cpoc.compression.worker.config.CompressionWorkerConfigurationProperties;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.AbstractMessage;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CompressionEventUtil;
 
@@ -26,7 +27,9 @@ public class CompressExecutorCallable implements Callable<Void> {
 	
 	private static final Consumer<String> DEFAULT_OUTPUT_CONSUMER = LOGGER::info;
 
-	private AbstractMessage catalogEvent;
+	private final AbstractMessage catalogEvent;
+	
+	private final MissionId mission; 
 
 	
 	/**
@@ -41,7 +44,8 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 * @param job
 	 * @param prefixMonitorLogs
 	 */
-	public CompressExecutorCallable(final AbstractMessage catalogEvent, final CompressionWorkerConfigurationProperties properties) {
+	public CompressExecutorCallable(final MissionId mission, final AbstractMessage catalogEvent, final CompressionWorkerConfigurationProperties properties) {
+		this.mission = mission;
 		this.catalogEvent = catalogEvent;
 		this.properties = properties;
 	}
@@ -54,21 +58,31 @@ public class CompressExecutorCallable implements Callable<Void> {
 	 */
 	@Override
 	public Void call() throws AbstractCodedException {
-
-		String command = properties.getCompressionCommand();
-
-		LOGGER.debug("command={}, productName={}, workingDirectory={}", command, catalogEvent.getKeyObjectStorage(),
-				properties.getWorkingDirectory());
-
 		String outputPath;
+		String command;		
+		
 		if (!CompressionEventUtil.isCompressed(catalogEvent.getKeyObjectStorage())) {
+			// We trust in the mission id from the event and use it too look up the configured compression command.
+			
+			command = properties.getCompressionCommand().get(mission.name().toLowerCase());
+			
+			// If we didn't get a valid command, we fallback to the default compression that had been used previously.
+			if (command == null) {
+				LOGGER.warn("Unable to determine compression command for mission {}, assuming normal zip compression", mission);
+				command = "/app/zip-compression.sh";
+			}
+			
 			// Compression
-			outputPath = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage());
-		} else {
+			outputPath = CompressionEventUtil.composeCompressedKeyObjectStorage(catalogEvent.getKeyObjectStorage(), mission);
+		} else {			
 			// Uncompression
+			command = properties.getUncompressionCommand();
 			outputPath = CompressionEventUtil.removeZipFromKeyObjectStorage(catalogEvent.getKeyObjectStorage()); 
 		}
-		
+
+		LOGGER.debug("command={}, mission={}, productName={}, workingDirectory={}", command, mission, catalogEvent.getKeyObjectStorage(),
+				properties.getWorkingDirectory());
+
 		execute(
 				command, 
 				catalogEvent.getKeyObjectStorage(), 

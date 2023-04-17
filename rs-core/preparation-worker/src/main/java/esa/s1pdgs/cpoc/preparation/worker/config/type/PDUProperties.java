@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.preparation.worker.config.type;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -47,6 +48,12 @@ public class PDUProperties {
 		 * handled as continuous
 		 */
 		private double gapThreshholdInS = 0.0;
+		
+		/**
+		 * map for dynamic process parameters which are not part of the metadata (ex.
+		 * facilityName)
+		 */
+		private Map<String, String> dynProcParams = new HashMap<>();
 
 		public double getLengthInS() {
 			return lengthInS;
@@ -89,6 +96,14 @@ public class PDUProperties {
 
 		public void setGapThreshholdInS(double gapThreshholdInS) {
 			this.gapThreshholdInS = gapThreshholdInS;
+		}
+
+		public Map<String, String> getDynProcParams() {
+			return dynProcParams;
+		}
+
+		public void setDynProcParams(Map<String, String> dynProcParams) {
+			this.dynProcParams = dynProcParams;
 		}
 	}
 

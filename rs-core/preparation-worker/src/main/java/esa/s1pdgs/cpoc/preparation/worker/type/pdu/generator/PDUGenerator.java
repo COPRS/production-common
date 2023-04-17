@@ -12,7 +12,8 @@ import esa.s1pdgs.cpoc.preparation.worker.model.pdu.PDUType;
 
 public interface PDUGenerator {
 
-	public List<AppDataJob> generateAppDataJobs(final IpfPreparationJob job) throws MetadataQueryException;
+	public List<AppDataJob> generateAppDataJobs(final IpfPreparationJob job, final int primaryCheckMaxTimelifeS)
+			throws MetadataQueryException;
 
 	/**
 	 * Create a suitable instance of PDUGenerator for the given settings
@@ -27,6 +28,8 @@ public interface PDUGenerator {
 			return new PDUFrameGenerator(processSettings, settings, mdClient);
 		} else if (settings.getType() == PDUType.STRIPE) {
 			return new PDUStripeGenerator(processSettings, settings, mdClient);
+		} else if (settings.getType() == PDUType.TILE) {
+			return new PDUTileGenerator();
 		}
 
 		return null;

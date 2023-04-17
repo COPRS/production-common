@@ -163,7 +163,8 @@ public class OnDemandEvent extends AbstractMessage {
 				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", uid=" + uid
 				+ ", creationDate=" + creationDate + ", podName=" + podName + ", allowedActions=" + allowedActions
 				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug
-				+ ", tasktableName=" + tasktableName + ", outputProductType=" + outputProductType + "]";
+				+ ", tasktableName=" + tasktableName + ", outputProductType=" + outputProductType + ", rsChainVersion="
+				+ rsChainVersion + "]";
 	}
 
 }

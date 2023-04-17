@@ -42,20 +42,62 @@ public class CompressProcessorTest {
 		properties.setWorkingDirectory(tmpWorkdir.toAbsolutePath().toString());
 //		properties.setSizeBatchDownload(1000);
 		properties.setCompressionTimeout(5);
-		properties.setCompressionCommand("echo");
+		properties.getCompressionCommand().put("s1","echo");
+		properties.getCompressionCommand().put("s2","echo");
+		properties.getCompressionCommand().put("s3","echo");
+
 		uut = new CompressProcessor(commonProps, appStatus, properties, obsClient);
 	}
 
 	@Test
-	public final void onMessage_compress() throws IOException {
+	public final void onMessage_compress_s3() throws IOException {
 
 		CatalogEvent event = new CatalogEvent();
+		event.setMissionId("S3");
 		event.setProductFamily(ProductFamily.L1_SLICE);
 		event.setUid(UUID.randomUUID());
 		event.setKeyObjectStorage("S3l1");
 		
 		Path filedir = Files.createDirectory(tmpWorkdir.resolve("S3l1.zip"));
 		Files.createFile(filedir.resolve("S3l1.zip"));
+
+		try {
+			uut.apply(event);
+		} catch (Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public final void onMessage_compress_s2() throws IOException {
+
+		CatalogEvent event = new CatalogEvent();
+		event.setMissionId("S2");
+		event.setProductFamily(ProductFamily.S2_L0_DS);
+		event.setUid(UUID.randomUUID());
+		event.setKeyObjectStorage("S2l0");
+		
+		Path filedir = Files.createDirectory(tmpWorkdir.resolve("S2l0.tar"));
+		Files.createFile(filedir.resolve("S2l0.tar"));
+
+		try {
+			uut.apply(event);
+		} catch (Exception e) {
+			fail("Exception occurred: " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public final void onMessage_compress_s2_jp2() throws IOException {
+
+		CatalogEvent event = new CatalogEvent();
+		event.setMissionId("S2");
+		event.setProductFamily(ProductFamily.S2_L1C_TC);
+		event.setUid(UUID.randomUUID());
+		event.setKeyObjectStorage("S2_L1C.jp2");
+		
+		Path filedir = Files.createDirectory(tmpWorkdir.resolve("S2_L1C.jp2"));
+		Files.createFile(filedir.resolve("S2_L1C.jp2"));
 
 		try {
 			uut.apply(event);

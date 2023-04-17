@@ -1,5 +1,6 @@
 package esa.s1pdgs.cpoc.preparation.worker.type.segment;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -93,10 +94,10 @@ public class L0SegmentProduct extends AbstractProduct {
 		}		
 		final List<AppDataJobFile> res = product.getProductsFor(metadata.getPolarisation());
 		
-		// Extract t0_pdgs_date if possible to determine when all inputs where ready
+		// Extract t0PdgsDate if possible to determine when all inputs where ready
 		Date t0 = null;
-		if (metadata.getAdditionalProperties().containsKey("t0_pdgs_date")) {
-			t0 = DateUtils.toDate(metadata.getAdditionalProperties().get("t0_pdgs_date"));
+		if (metadata.getAdditionalProperties().containsKey("t0PdgsDate")) {
+			t0 = DateUtils.toDate(metadata.getAdditionalProperties().get("t0PdgsDate"));
 		}
 		
 		final AppDataJobFile segment = new AppDataJobFile(
@@ -243,6 +244,11 @@ public class L0SegmentProduct extends AbstractProduct {
 		meta.setValidityStart(startMetadataFormat);
 		meta.setValidityStop(stopMetadataFormat);
 		meta.setInsertionTime(file.getMetadata().get(INSERTION_TIME));
+		
+		if (file.getT0PdgsDate() != null) {
+			meta.addAdditionalProperty("t0PdgsDate", DateUtils.formatToMetadataDateTimeFormat(
+					file.getT0PdgsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()));
+		}
 		return meta;	
 	}
 	

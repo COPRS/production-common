@@ -70,6 +70,7 @@ public enum ProductFamily {
     S2_L1C_TC,
     S2_L2A_TL,
     S2_L2A_DS,
+    S2_L2A_TC,
     S2_SAD,
     S2_HKTM,
     // S2 compressed types
@@ -85,6 +86,7 @@ public enum ProductFamily {
     S2_L1C_TC_ZIP,
     S2_L2A_TL_ZIP,
     S2_L2A_DS_ZIP,
+    S2_L2A_TC_ZIP,
     S2_SAD_ZIP,
     S2_HKTM_ZIP,
     
@@ -135,7 +137,6 @@ public enum ProductFamily {
             try {
                 ret = ProductFamily.valueOf(value);
             } catch (final IllegalArgumentException ex) {
-            	ex.printStackTrace();
                 ret = ProductFamily.BLANK;
             }
         }

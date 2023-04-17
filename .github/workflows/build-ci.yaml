@@ -11,6 +11,8 @@ on:
       - '!main'
       - 'release/**'
       - 'develop**'
+      - 'stac-nativeapi**'
+      
   workflow_dispatch:
 
 env:
@@ -18,7 +20,7 @@ env:
   VERSION: 3.32.1
   COMMIT_ID: ${{ github.sha }}
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT_DOCKER: werum-docker
+  ARTIFACTORY_PROJECT_DOCKER: rs-docker
   ARTIFACTORY_PROJECT_MAVEN: rs-maven
 
 jobs:   
@@ -137,8 +139,11 @@ jobs:
           execution-worker: 
             - 'rs-core/execution-worker/**'
             - 'rs-core/pom.xml'
-          request-repository: 
-            - 'rs-core/request-repository/**'
+          request-parking-lot: 
+            - 'rs-core/request-parking-lot/**'
+            - 'rs-core/pom.xml'
+          cronbased-trigger: 
+            - 'rs-core/cronbased-trigger/**'
             - 'rs-core/pom.xml'
 
 #          data-lifecycle-trigger: 
@@ -152,9 +157,6 @@ jobs:
 #            - 'rs-core/pom.xml'
 #          dissemination-worker: 
 #            - 'rs-core/dissemination-worker/**'
-#            - 'rs-core/pom.xml'
-#          metadata-catalog-timer: 
-#            - 'rs-core/metadata-catalog-timer/**'
 #            - 'rs-core/pom.xml'
 #          on-demand-interface-provider: 
 #            - 'rs-core/on-demand-interface-provider/**'
@@ -171,7 +173,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: GitGuardian scan
-      uses: GitGuardian/gg-shield-action@master
+      uses: GitGuardian/ggshield-action@master
       env:
         GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
         GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
@@ -224,8 +226,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [compression-worker, distribution-worker, dlq-manager, eviction-management-worker, execution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, data-lifecycle-worker, prip-frontend, ddip-frontend, preparation-worker, request-repository] 
-        #component: [disseminator, request-repository, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]           
+        component: [compression-worker, distribution-worker, dlq-manager, eviction-management-worker, execution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, data-lifecycle-worker, prip-frontend, ddip-frontend, preparation-worker, request-parking-lot, cronbased-trigger] 
+        #component: [disseminator, request-parking-lot, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]           
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

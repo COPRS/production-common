@@ -73,21 +73,27 @@ public class PoolProcessor {
      */
     private final long tmProcessOneTaskS;
     
+    /**
+     *  Overwrite shell command as a workaround for specific IPFs
+     */
+    private final boolean overwriteShell;
+    
     private final List<String> plainTextLoggingTasks;
 
-    public PoolProcessor(final LevelJobPoolDto pool, final String jobOrderPath,
-            final String workDirectory, final String prefixLogs,
-            final long tmProcessOneTaskS, final List<String> plainTextLoggingTasks) {
-        this.pool = pool;
-        this.nbTasks = pool.getTasks().size();
-        this.execSrv = Executors.newFixedThreadPool(this.nbTasks);
-        this.completionSrv = new ExecutorCompletionService<>(execSrv);
-        this.jobOrderPath = jobOrderPath;
-        this.workDirectory = workDirectory;
-        this.prefixLogs = prefixLogs;
-        this.tmProcessOneTaskS = tmProcessOneTaskS;
-        this.plainTextLoggingTasks = plainTextLoggingTasks;
-    }
+	public PoolProcessor(final LevelJobPoolDto pool, final String jobOrderPath, final String workDirectory,
+			final String prefixLogs, final long tmProcessOneTaskS, final boolean overwriteShell,
+			final List<String> plainTextLoggingTasks) {
+		this.pool = pool;
+		this.nbTasks = pool.getTasks().size();
+		this.execSrv = Executors.newFixedThreadPool(this.nbTasks);
+		this.completionSrv = new ExecutorCompletionService<>(execSrv);
+		this.jobOrderPath = jobOrderPath;
+		this.workDirectory = workDirectory;
+		this.prefixLogs = prefixLogs;
+		this.tmProcessOneTaskS = tmProcessOneTaskS;
+		this.overwriteShell = overwriteShell;
+		this.plainTextLoggingTasks = plainTextLoggingTasks;
+	}
     
     // S1PRO-1561: Since some IPF already log in JSON format, it needs to be dumped directly into the log
     // without further JSON wrapping. For such tasks, LogUtils.PLAINTEXT logger is used.
@@ -117,11 +123,12 @@ public class PoolProcessor {
                 	final Consumer<String> logConsumer = getLogConsumerForTask(task.getBinaryPath());                	
                     completionSrv.submit(new TaskCallable(
                     		task.getBinaryPath(),
+                    		overwriteShell,
                             jobOrderPath, 
                             workDirectory, 
                             logConsumer,
                             logConsumer,
-                            reportingFactory           
+                            reportingFactory         
                     ));
                 }
                 LOGGER.info("{} 2 - Waiting for tasks execution", prefixLogs);

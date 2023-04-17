@@ -5,7 +5,6 @@ import java.io.File;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
@@ -17,13 +16,12 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public class S3AuxMetadataExtractor extends AbstractMetadataExtractor {
 
 	public S3AuxMetadataExtractor(
-			final EsServices esServices, 
 			final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, 
 			final String localDirectory,
 			final ProcessConfiguration processConfiguration, 
 			final ObsClient obsClient) {
-		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
+		super(mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
 	}
 
 	@Override

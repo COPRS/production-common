@@ -21,6 +21,7 @@ public class Rule {
 	private ActionType actionType;
 	private String targetTopic = "";
 	private int maxRetry;
+	private int priority;
 	private String comment = "";
 	private Pattern regexPattern; 
 	
@@ -69,6 +70,14 @@ public class Rule {
 		this.maxRetry = maxRetry;
 	}
 	
+	public int getPriority() {
+		return priority;
+	}
+	
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+	
 	public String getComment() {
 		return comment;
 	}
@@ -85,8 +94,8 @@ public class Rule {
 		map.put(PROPERTY_NAME_ACTION_TYPE, actionType);
 		map.put(PROPERTY_NAME_TARGET_TOPIC, targetTopic);
 		map.put(PROPERTY_NAME_MAX_RETRY, maxRetry);
-		map.put(PROPERTY_NAME_PRIORITY, comment);
-		map.put(PROPERTY_NAME_COMMENT, regexPattern);
+		map.put(PROPERTY_NAME_PRIORITY, priority);
+		map.put(PROPERTY_NAME_COMMENT, comment);
 		return new Gson().toJson(map);
 	}
 

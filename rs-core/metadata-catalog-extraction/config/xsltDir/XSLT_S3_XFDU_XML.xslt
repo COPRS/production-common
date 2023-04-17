@@ -8,6 +8,8 @@
 		select="//*[local-name()='generalProductInformation']//*[local-name()='productName']/text()" />
 	<xsl:variable name="PRODUCT_TYPE"
 		select="substring($PRODUCT_NAME, 5, 11)" />
+	<xsl:variable name="PRODUCT_GROUP"
+	    select="substring($PRODUCT_TYPE, 1, 2)" />
 
 	<!--======= Create a flat XML structure with the necessary information ======= -->
 	<xsl:template match="/">
@@ -72,6 +74,16 @@
 			<xsl:with-param name="stopOrbitName"
 				select="'absoluteStopOrbit'" />
 		</xsl:call-template>
+
+		<orbitDirection>
+			<xsl:value-of
+				select="//*[local-name()='orbitNumber'][@type='start']/@groundTrackDirection" />
+		</orbitDirection>
+
+		<stopOrbitDirection>
+			<xsl:value-of
+				select="//*[local-name()='orbitNumber'][@type='stop']/@groundTrackDirection" />
+		</stopOrbitDirection>
 
 		<xsl:call-template name="getOrbits">
 			<xsl:with-param name="xfduOrbitName"
@@ -195,6 +207,124 @@
 					select="//*[local-name()='generalProductInformation']/*[local-name()='timeliness']" />
 			</xsl:with-param>
 		</xsl:call-template>
+
+		<operationalMode>
+			<xsl:value-of
+				select="//*[local-name()='instrument']//*[local-name()='mode']" />
+		</operationalMode>
+			
+		<brightPercentage>
+			<xsl:value-of
+				select="//*[local-name()='classificationSummary']//*[local-name()='brightPixels']/@percentage" />
+		</brightPercentage>
+
+		<snowOrIcePercentage>
+			<xsl:value-of
+				select="//*[local-name()='classificationSummary']//*[local-name()='snowOrIcePixels']/@percentage" />
+		</snowOrIcePercentage>
+
+		<salineWaterPercentage>
+			<xsl:choose>
+				<xsl:when test="$PRODUCT_GROUP = 'SL'">
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary'][@grid='1 km']//*[local-name()='salineWaterPixels']/@percentage" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary']//*[local-name()='salineWaterPixels']/@percentage" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</salineWaterPercentage>
+
+		<coastalPercentage>
+			<xsl:choose>
+				<xsl:when test="$PRODUCT_GROUP = 'SL'">
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary'][@grid='1 km']//*[local-name()='coastalPixels']/@percentage" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary']//*[local-name()='coastalPixels']/@percentage" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</coastalPercentage>
+
+		<freshInlandWaterPercentage>
+			<xsl:choose>
+				<xsl:when test="$PRODUCT_GROUP = 'SL'">
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary'][@grid='1 km']//*[local-name()='freshInlandWaterPixels']/@percentage" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary']//*[local-name()='freshInlandWaterPixels']/@percentage" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</freshInlandWaterPercentage>
+
+		<tidalRegionPercentage>
+			<xsl:choose>
+				<xsl:when test="$PRODUCT_GROUP = 'SL'">
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary'][@grid='1 km']//*[local-name()='tidalRegionPixels']/@percentage" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary']//*[local-name()='tidalRegionPixels']/@percentage" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</tidalRegionPercentage>
+
+		<landPercentage>
+			<xsl:choose>
+				<xsl:when test="$PRODUCT_GROUP = 'SL'">
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary'][@grid='1 km']//*[local-name()='landPixels']/@percentage" />
+				</xsl:when>
+				<xsl:when test="$PRODUCT_GROUP = 'SR'">
+					<xsl:value-of
+						select="//*[local-name()='sralProductInformation']//*[local-name()='landPercentage']" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary']//*[local-name()='landPixels']/@percentage" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</landPercentage>
+
+		<closedSeaPercentage>
+			<xsl:value-of
+				select="//*[local-name()='sralProductInformation']//*[local-name()='closedSeaPercentage']" />
+		</closedSeaPercentage>
+
+		<continentalIcePercentage>
+			<xsl:value-of
+				select="//*[local-name()='sralProductInformation']//*[local-name()='continentalIcePercentage']" />
+		</continentalIcePercentage>
+
+		<openOceanPercentage>
+			<xsl:value-of
+				select="//*[local-name()='sralProductInformation']//*[local-name()='openOceanPercentage']" />
+		</openOceanPercentage>
+
+		<cloudPercentage>
+			<xsl:choose>
+				<xsl:when test="$PRODUCT_GROUP = 'SL'">
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary'][@grid='1 km']//*[local-name()='cloudyPixels']/@percentage" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of
+						select="//*[local-name()='classificationSummary']//*[local-name()='cloudyPixels']/@percentage" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</cloudPercentage>
+		
+		<s3timeliness>
+			<xsl:value-of
+				select="//*[local-name()='generalProductInformation']//*[local-name()='timeliness']" />
+		</s3timeliness>
+
 	</xsl:template>
 
 	<!--=================== Getting Timeliness Fields Template =================== -->
@@ -242,6 +372,7 @@
 		<NTC>
 			<xsl:value-of select="$NTC" />
 		</NTC>
+		
 	</xsl:template>
 
 	<!--==================== Format Date Time Template ========================= -->

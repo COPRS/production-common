@@ -4,7 +4,9 @@ import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +112,14 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 			}
 		}
 
+		// Calculate, when the Job will be timed out
+		if (workerSettings.getPrimaryCheckMaxTimelifeS() != 0) {
+			final Date creationDate = appDataJob.getGeneration().getCreationDate();
+			final Date timeoutDate = new Date(
+					creationDate.toInstant().toEpochMilli() + (workerSettings.getPrimaryCheckMaxTimelifeS() * 1000));
+			appDataJob.setTimeoutDate(timeoutDate);
+		}
+
 		// Default case
 		return Collections.singletonList(appDataJob);
 	}
@@ -171,7 +181,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 							mpcSettings.getGapThreshold());
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
 							returnValue.getStartTime(), returnValue.getStopTime(), alternative.getDeltaTime0(),
-							alternative.getDeltaTime1(), workerSettings.getProductMode().toString());
+							alternative.getDeltaTime1());
 				}
 
 				if (settings.isRangeSearchActiveForProductType(tasktableAdapter.taskTable().getProcessorName(),
@@ -181,7 +191,7 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 					final MultipleProductCoverSearch mpcSearch = new MultipleProductCoverSearch(tasktableAdapter,
 							elementMapper, metadataClient, workerSettings);
 					tasks = mpcSearch.updateTaskInputs(tasks, alternative, returnValue.getSatelliteId(),
-							job.getStartTime(), job.getStopTime(), workerSettings.getProductMode().toString());
+							job.getStartTime(), job.getStopTime());
 
 					/*
 					 * In a following step the start and stop time of the job will be set to the
@@ -296,11 +306,9 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	public void validateInputSearch(final AppDataJob job, final TaskTableAdapter taskTableAdapter)
 			throws IpfPrepWorkerInputsMissingException {
 		// Check if timeout is reached -> start job with current input
-		// TODO: Remove timeout logic
-		/*
-		if (workerSettings.getWaitprimarycheck().getMaxTimelifeS() != 0) {
+		if (workerSettings.getPrimaryCheckMaxTimelifeS() != 0) {
 			final long startTime = job.getGeneration().getCreationDate().toInstant().toEpochMilli();
-			final long timeoutTime = startTime + (workerSettings.getWaitprimarycheck().getMaxTimelifeS() * 1000);
+			final long timeoutTime = startTime + (workerSettings.getPrimaryCheckMaxTimelifeS() * 1000);
 
 			if (Instant.now().toEpochMilli() > timeoutTime) {
 				// Timeout reached
@@ -309,7 +317,6 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 				return;
 			}
 		}
-		*/
 
 		// Extract a list of all inputs from the tasks
 		final List<AppDataJobInput> inputsWithNoResults = job.getAdditionalInputs().stream()
@@ -404,8 +411,8 @@ public class S3TypeAdapter extends AbstractProductTypeAdapter implements Product
 	private TaskTableAdapter getTTAdapterForTaskTableName(final String taskTable) {
 		final File ttFile = new File(workerSettings.getDiroftasktables(), taskTable);
 		final TaskTableAdapter tasktableAdapter = new TaskTableAdapter(ttFile,
-				ttFactory.buildTaskTable(ttFile, processSettings.getLevel()), elementMapper,
-				workerSettings.getProductMode());
+				ttFactory.buildTaskTable(ttFile, processSettings.getLevel(), workerSettings.getPathTaskTableXslt()),
+				elementMapper, workerSettings.getProductMode());
 
 		return tasktableAdapter;
 	}

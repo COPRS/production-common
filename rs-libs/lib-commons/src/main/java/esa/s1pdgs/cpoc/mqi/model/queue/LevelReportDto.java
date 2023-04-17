@@ -69,6 +69,6 @@ public class LevelReportDto extends AbstractMessage {
 	public String toString() {
 		return "LevelReportDto [productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
 				+ ", storagePath=" + storagePath + ", creationDate=" + creationDate + ", podName=" + podName
-				+ ", content=" + content + ", uid=" + uid + "]";
+				+ ", content=" + content + ", uid=" + uid + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 }

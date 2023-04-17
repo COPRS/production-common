@@ -34,6 +34,8 @@ The following global parameters exist per instance and can be used when deployin
 | `replicaCount` | The amount of instances that shall be spawned as replica | `1`|
 | `service.port` | The port that shall be exposed by the deployed service | `8080`|
 | `service.name` | The name of the service when it is deployed | e.g. `rs-core-metadata-catalog-searchcontroller` |
+| `logLevel` | Defines the threadhold level of the logging | e.g. `DEBUG` or `INFO` |
+| `logConfig` | Defines the config that shall be used for log4j. By default all logs will be written in json format, the debug config allows to print it out in an human readable format | by default `log/log4j2.yml` is used for json output. Use `log/log4j2_debug.yml` for a human readable format.
 | `processing.namespace` | The namespace into that the chart shall be deployed | `processing` |
 | `image.registry` | The registry from that the image shall be pulled | `artifactory.coprs.esa-copernicus.eu` |
 | `image.repository` | The path within the directory from that the image shall be pulled | `rs-docker` |
@@ -59,6 +61,8 @@ The latest version of it can be deployed using the following command line:
 | `ddip.dispatch.prip.host` | The hostname or IP used to connect to the PRIP | `rs-prip-frontend-svc.processing.svc.cluster.local` |
 | `ddip.dispatch.prip.port` | The port on which the PRIP listens for requests | `8080` |
 | `ddip.dispatch.collections` | value (collection name) and key (ODATA expression) pairs to define collections that can be searched via DDIP feature (filter=Collection/Name eq 'Sentinel1')  | Sentinel1: startswith(Name,'S1')</br> Sentinel3: startswith(Name,'S3') |
+| `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
+| `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
 
 ## PRIP
 
@@ -74,6 +78,8 @@ The latest version can be deployed by using the following command line:
 | `elasticsearch.connect-timeout-ms` | Timeout in milliseconds of connection to the cluster | `2000` |
 | `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
 | `prip-frontend.debug-support` | Adding additional debug information on the Odata interface. Don't use this in an operational setup | `false` |
+| `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
+| `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
 
 ## Native API
 
@@ -90,6 +96,66 @@ The latest version can be deployed by using the following command line:
 | `nativeapi.external.protocol` | The protocol used to externally connect to the PRIP/DDIP frontend | `http` |
 | `nativeapi.external.host` | The externally reachable hostname or IP used to connect to the PRIP/DDIP frontend | `coprs.werum.de/prip/odata/v1/` |
 | `nativeapi.external.port` | The port on which the PRIP/DDIP frontend listens externally for requests | `80` |
+| `nativeapi.defaultLimit` | The amount of products that are returned as limit from a query. This will be added to the OData query by using $top | `100` |
+| `nativeapi.maxLimit` | The maximal limit that is accepted. If a higher limit is requested, it will be truncated to this value. | `100` |
+| `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
+| `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
+| `nativeapi.collections` | Allows to configure a set of collections that shall be exposed by the stac endpoint. It contains the information about the collections that are available. | See the section below for a detailed description of the configuration | 
+| `nativeapi.lutConfigs` | Allows to define a look up table that defines how incoming parameters shall be translated into OData. Each entry is defined by a key and multiple statements. For detailed instruction about how to use the look up table and examples, see the section below. | Default contains a set of typically used parameters |
+
+### Collection configuration
+The attribute `nativeapi.collection` contains a list of collections that shall be exposed by the stac native API. A typical configuration looks like this:
+```
+    collections:
+        s1:
+            title: Collection of Sentinel-1
+            description: This collection holds all published Sentinel-1 products of the Copernicus Reference System
+            license: proprietary
+```
+The collection starts with its id used as key (e.g. `s1`) and will be used within URLs. The level below this structure are giving more a more descriptive information about the collection and used within the actual stac collections returned.
+
+`title` contains a long name of the the collection.
+`description` contains a more verbose description of the collection
+`license` defines the licence that shall be shown next to the collection
+
+`nativeapi.collection` can contain multiple definitions of collections that shall be made available via the endpoint `/stac/collections`.
+
+### Look up Table (LuT) configuration
+
+When a query is added to the native API endpoint a set of GET parameters will be provided. In order to translate these parameters into a valid OData query a lookup table is used that defines how the parameter shall be translated. These elements can be defined under `nativeapi.lutConfigs`. The following section contains an example configuration:
+```
+  lutConfigs:
+    "[bbox={value}]":
+      - "OData.CSC.Intersects(location=Footprint,area=geography'SRID=4326;POLYGON(({value})))"
+    "[productname={value}]": 
+      - "contains(Name,'{value}')"
+    "[collections={producttype}]":
+      - "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq ‘{producttype}"
+    "[datetime={start}/{stop}]": 
+      - "ContentDate/Start gt {start}"
+      - "ContentDate/End lt {stop}"
+```
+The key of a statement will be defined e.g. as `[productname={value}]`. Please note that the whole term is defined by a key. As the equal character might cause issues with YAML parsing it is required to put the whole key into round brackets to escape it properly and avoid misunderstanding. This brackets are not evaluated by the backend itself. The left side of the equal character is the actual name of the parameter that is provided to the STAC endpoint, e.g. `search?productname=myproduct`. If a parameter that is provided maps to a statement it will be applied.
+
+The right side of the equal character defines the generic type of the statement and is either a single value that will be substituted in the actual OData term or is a range, e.g. if there is a start and stop value. The names of the values can be defined as wanted, but it needs to be used in the OData term. The productname is an example of a single value statement that will use the content of the provided parameter and put it into the configured statement. For example the result here would be `contains(Name,'myproduct')`.
+
+The `datetime` is an example for a ranged type. The value of the parameter contains two variables. Please note that open queries are possible by leaving out a definition or using ".." instead. So the following time query will be open ended "2010-10-18T14:33:00.000Z/" and query for all products after "2010-10-18T14:33:00.000Z". This statement is equal to "2010-10-18T14:33:00.000Z/.."
+
+When having a ranged query it is not sufficient enough to provide a single statement as the value cannot be mapped as empty string or null to provide a valid OData query. Thus if one of these ranges are open ended the associated OData statement needs to be ignored. To allow this in a generic manner, the statements needs to be listed independently. E.g.
+```
+    "[publicationdate={start}/{stop}]":
+      - "CreationDate gt {start}"
+      - "CreationDate lt {stop}"  
+```
+If start and stop are provided, both statements will be concated using an and operator like:
+`PublicationDate gt 2010-10-18T14:33:00.000Z and PublicationDate lt 2023-02-06T14:33:00.000Z`
+
+If just start is provided and end is undefined this will result in:
+`PublicationDate gt 2010-10-18T14:33:00.000Z`
+
+The key contains the parameter name that is provided to the endpoint and. Please note that in order to avoid misunderstanding during the parsing the key needs to be surrounded by round brackets. These brackets are ignored and required to escape the term for YAML.
+
+If multiple parameters are provided to the STAC endpoint and multiple statements had been applied, they will be concatenated at the end of the processing all together using an AND operator.
 
 ## Metadata Search Controller
 

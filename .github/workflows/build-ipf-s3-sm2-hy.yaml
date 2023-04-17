@@ -1,0 +1,75 @@
+name: Build IPF S3 sm2-hy
+
+on:
+  push:
+    paths:
+      - 'rs-container/docker_s3_ipf_sm2_hy/**'
+      - '.github/workflows/build-ipf-s3-sm2-hy.yaml'
+    branches:
+      - '!main'
+      - 'release/**'
+      - 'develop**'
+  workflow_call:
+    secrets:
+      WERUM_ARTIFACTORY_USER:
+        description: 'Username to log into Artifactory'
+        required: true
+      WERUM_ARTIFACTORY_PASSWORD:
+        description: 'Password to log into Artifactory'
+        required: true
+      GITGUARDIAN_API_KEY:
+        description: 'API Key for GitGuardian'
+        required: true
+  workflow_dispatch:
+
+env:
+  ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
+  ARTIFACTORY_PROJECT_DOCKER_PRIVATE: rs-docker-private
+  USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+  PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+  VERSION: ${{ github.ref }}
+  IMAGE_NAME: "rs-ipf-s3-sm2-hy"
+  COMMIT_ID: ${{ github.sha }}
+
+jobs:
+  gg-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: GitGuardian scan
+      uses: GitGuardian/ggshield-action@master
+      env:
+        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
+
+  build-ipf-s3-sm2-hy:
+    needs: [gg-scan]
+    runs-on: ubuntu-latest
+    # Just build when being a tag or explicitely asked for using #IPF 
+    if: startsWith(github.ref, 'refs/tags') || contains(github.event.head_commit.message, '#IPF')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
+        id: extract_branch
+
+      - uses: ./.github/actions/build-ipf-container
+        with:
+          BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          BUILD_CONTEXT: ./rs-container/docker_s3_ipf_sm2_hy
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      
+      - uses: ./.github/actions/generate-report
+        with: 
+          COMPONENT: ${{ env.IMAGE_NAME }}

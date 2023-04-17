@@ -28,7 +28,6 @@ import esa.s1pdgs.cpoc.common.utils.FileUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.Utils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.MetadataExtractorConfig;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.ExtractMetadata;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
@@ -44,12 +43,6 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestLevelSegmentMetadataExtractor {
 	private static final String PATTERN = "^(S1|AS)(A|B)_(S[1-6]|RF|GP|HK|IW|EW|WV|N[1-6]|EN|IM)_(SLC|GRD|OCN|RAW)(F|H|M|_)_(0)(A|C|N|S|_)(SH|__|SV|HH|HV|VV|VH|DH|DV)_([0-9a-z]{15})_([0-9a-z]{15})_([0-9]{6})_([0-9a-z_]{6})\\w{1,}\\.(SAFE)(/.*)?$";
-
-	/**
-	 * Elasticsearch services
-	 */
-	@Mock
-	protected EsServices esServices;
 
 	/**
 	 * Elasticsearch services
@@ -151,7 +144,7 @@ public class TestLevelSegmentMetadataExtractor {
 				extractorConfig.getTimelinessPriorityFromHighToLow(), extractorConfig.getXsltDirectory(), xmlConverter);
 		final MetadataBuilder mdBuilder = new MetadataBuilder(extract);
 
-		extractor = new LevelSegmentMetadataExtractor(esServices, mdBuilder, fileDescriptorBuilder, testDir.getPath(),
+		extractor = new LevelSegmentMetadataExtractor(mdBuilder, fileDescriptorBuilder, testDir.getPath(),
 				new ProcessConfiguration(), obsClient);
 	}
 

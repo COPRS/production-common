@@ -9,11 +9,13 @@ on:
       - '!main'
       - 'release/**'
       - 'develop**'
+      - 'stac-nativeapi**'
+      
   workflow_dispatch:
 
 env:
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT_DOCKER: werum-docker
+  ARTIFACTORY_PROJECT_DOCKER: rs-docker
 
 jobs:
   gg-scan:
@@ -24,7 +26,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: GitGuardian scan
-      uses: GitGuardian/gg-shield-action@master
+      uses: GitGuardian/ggshield-action@master
       env:
         GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
         GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}

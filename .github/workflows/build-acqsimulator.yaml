@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'rs-container/docker_acqsimulator/**'
+      - 'rs-container/docker_s3_ipf_acq/**'
       - '.github/workflows/build-acqsimulator.yaml'
     branches:
       - '!main'
@@ -24,7 +25,7 @@ on:
 
 env:
   REGISTRY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT: werum-docker
+  ARTIFACTORY_PROJECT: rs-docker-private
   USERNAME: ${{ secrets.WERUM_ARTIFACTORY_USER }}
   PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
   
@@ -50,7 +51,7 @@ jobs:
           fetch-depth: 0 # fetch all history so multiple commits can be scanned
 
       - name: GitGuardian scan
-        uses: GitGuardian/gg-shield-action@master
+        uses: GitGuardian/ggshield-action@master
         env:
           GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
           GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
@@ -70,7 +71,13 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images:  ${{ env.REGISTRY_BASE }}/${{ env.ARTIFACTORY_PROJECT }}/rs-core-acqsimulator
-              
+      
+      - name: Copy over scripts from docker_s3_ipf_acq
+        run: |
+          cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/S3ACQWrapperScript.sh" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/S3ACQWrapperScript.sh"
+          cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/convertL0OrderISP.py" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/convertL0OrderISP.py"
+          cp "${GITHUB_WORKSPACE}/rs-container/docker_s3_ipf_acq/files/convertL0OrderTF.py" "${GITHUB_WORKSPACE}/rs-container/docker_acqsimulator/files/convertL0OrderTF.py"
+
       - name: Build image
         uses: docker/build-push-action@v2
         with:
@@ -90,7 +97,7 @@ jobs:
           severity-cutoff: critical
 
       - name: Upload Anchore scan SARIF report
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
 

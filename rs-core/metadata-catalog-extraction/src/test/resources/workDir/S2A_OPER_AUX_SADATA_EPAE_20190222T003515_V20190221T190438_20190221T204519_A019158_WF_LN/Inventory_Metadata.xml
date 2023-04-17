@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Inventory_Metadata xmlns="http://pdgs.s2.esa.int/PSD/Inventory_Metadata.xsd">
+    <File_ID>S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN</File_ID>
+    <File_Name>S2A_OPER_AUX_SADATA_EPAE_20190222T003515_V20190221T190438_20190221T204519_A019158_WF_LN</File_Name>
+    <System>S2PDGS-DPC</System>
+    <Source>L0_Processor</Source>
+    <Source_Sw_Version>2.3.4</Source_Sw_Version>
+    <Generation_Time>UTC=2019-02-22T00:35:39.000716</Generation_Time>
+    <Validity_Start>UTC=2019-02-21T19:04:38.000000</Validity_Start>
+    <Validity_Stop>UTC=2019-02-21T20:45:19.000000</Validity_Stop>
+    <Start_Orbit_Number>019158</Start_Orbit_Number>
+    <Stop_Orbit_Number>019158</Stop_Orbit_Number>
+    <Quality_Info>100.0</Quality_Info>
+    <Data_Size>29974112</Data_Size>
+    <File_Type>AUX_SADATA</File_Type>
+    <Sensor_Code>MSI</Sensor_Code>
+    <Sensor_Mode>NOM</Sensor_Mode>
+    <Acquisition_Station>EDRS</Acquisition_Station>
+    <Processing_Station>EPAE</Processing_Station>
+    <Satellite_Code>S2A</Satellite_Code>
+</Inventory_Metadata>

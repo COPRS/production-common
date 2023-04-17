@@ -46,6 +46,7 @@ public class PoolExecutorCallableTest extends MockPropertiesTest {
         MockitoAnnotations.initMocks(this);
         mockDefaultAppProperties();
         mockWapAppProperties(3, 1);
+        mockOverwriteShell(false);
 
         job = new IpfExecutionJob(ProductFamily.L0_JOB, "id", "FAST", ".", "3", "FAST24", new UUID(23L, 42L));
         job.addPool(new LevelJobPoolDto());

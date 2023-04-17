@@ -1,13 +1,16 @@
 package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ContentDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.End;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.EvictionDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Name;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.ProductionType;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.PublicationDate;
-import static esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties.Start;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Id;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ProductionType;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.PublicationDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
 import static esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION;
+import static org.apache.olingo.commons.api.http.HttpStatusCode.BAD_REQUEST;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -27,7 +30,6 @@ import org.apache.olingo.commons.api.edm.EdmEnumType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriParameter;
@@ -52,8 +54,9 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
-import esa.s1pdgs.cpoc.prip.frontend.service.edm.EntityTypeProperties;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
+import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
@@ -72,6 +75,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	private static final Map<String, FIELD_NAMES> PRIP_DATETIME_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_TEXT_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_INTEGER_PROPERTY_FIELD_NAMES;
+	private static final Map<String, FIELD_NAMES> PRIP_BOOLEAN_PROPERTY_FIELD_NAMES;
 	private static final Map<String, FIELD_NAMES> PRIP_SUPPORTED_PROPERTY_FIELD_NAMES;
 	private static final List<String> PRIP_PRODUCTION_TYPES;
 	private static final List<MethodKind> SUPPORTED_METHODS;
@@ -84,16 +88,21 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(ContentDate.name() + "/" + End.name(), FIELD_NAMES.CONTENT_DATE_END);
 
 		PRIP_TEXT_PROPERTY_FIELD_NAMES = new HashMap<>();
+		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(Id.name(), FIELD_NAMES.ID);
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(Name.name(), FIELD_NAMES.NAME);
 		PRIP_TEXT_PROPERTY_FIELD_NAMES.put(ProductionType.name(), FIELD_NAMES.PRODUCTION_TYPE);
 
 		PRIP_INTEGER_PROPERTY_FIELD_NAMES = new HashMap<>();
-		PRIP_INTEGER_PROPERTY_FIELD_NAMES.put(EntityTypeProperties.ContentLength.name(), FIELD_NAMES.CONTENT_LENGTH);
+		PRIP_INTEGER_PROPERTY_FIELD_NAMES.put(ProductProperties.ContentLength.name(), FIELD_NAMES.CONTENT_LENGTH);
+
+		PRIP_BOOLEAN_PROPERTY_FIELD_NAMES = new HashMap<>();
+      PRIP_BOOLEAN_PROPERTY_FIELD_NAMES.put(ProductProperties.Online.name(), FIELD_NAMES.ONLINE);
 
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES = new HashMap<>();
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_DATETIME_PROPERTY_FIELD_NAMES);
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_TEXT_PROPERTY_FIELD_NAMES);
 		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_INTEGER_PROPERTY_FIELD_NAMES);
+		PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.putAll(PRIP_BOOLEAN_PROPERTY_FIELD_NAMES);
 
 		PRIP_PRODUCTION_TYPES = Arrays.asList(esa.s1pdgs.cpoc.prip.model.ProductionType.values()).stream()
 				.map(v -> v.getName()).collect(Collectors.toList());
@@ -119,21 +128,19 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		switch (operator) {
 		case OR:
 		case AND:
-			this.filterStack.applyOperator(operator);
+			filterStack.applyOperator(operator);
 			break;
 		case GT:
 		case GE:
 		case LT:
 		case LE:
-		case EQ: {
+		case NE:
+		case EQ:
 			final PripQueryFilterTerm filter = createFilter(operator, left, right, leftOperand, rightOperand);
-			if (null == filter) {
-				return null;
+			if (null != filter) {
+			   filterStack.push(filter);
 			}
-
-			this.filterStack.push(filter);
 			break;
-		}
 		default:
 			throw new UnsupportedOperationException("Operator " + operator + " not supported!");
 		}
@@ -161,7 +168,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				|| !(parameters.get(1) instanceof Literal)) {
 			throw new ODataApplicationException(
 					"Invalid or unsupported parameter(s): " + StringUtil.makeListString(",", parameters),
-					HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+					BAD_REQUEST.getStatusCode(), null);
 		}
 
 		final Member field = (Member) parameters.get(0);
@@ -169,14 +176,14 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 		if (!isTextField(odataFieldname)) {
 			throw new ODataApplicationException("Unsupported field name: " + odataFieldname,
-					HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+					BAD_REQUEST.getStatusCode(), null);
 		}
 
 		final String pripFieldName = mapToPripFieldName(odataFieldname).orElse(null); // we already checked if text
 																						// field
 		final Function filterFunction = PripTextFilter.Function.fromString(methodCall.name());
 		final String literal = ((Literal) parameters.get(1)).getText();
-		final String text = literal.substring(1, literal.length() - 1);
+		final String text = getStringData(literal);
 		final PripTextFilter textFilter = new PripTextFilter(pripFieldName, filterFunction, text);
 
 		this.filterStack.push(textFilter);
@@ -189,7 +196,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			throws ExpressionVisitException, ODataApplicationException {
 		throw new ODataApplicationException(
 				"Unsupported lambda expression: " + lambdaFunction + " / " + lambdaVariable + " / " + expression,
-				HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+				BAD_REQUEST.getStatusCode(), Locale.ROOT);
 	}
 
 	@Override
@@ -199,9 +206,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	@Override
 	public Object visitMember(Member member) throws ExpressionVisitException, ODataApplicationException {
-
 		Object result = member;
-		String type = "*";
+		String odataTypeName = null;
 		boolean ignored = true;
 		LOGGER.debug(String.format("iterating: %s", member.getResourcePath().getUriResourceParts()));
 
@@ -209,31 +215,36 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			LOGGER.debug(String.format("           %s (%s)", uriResource, uriResource.getKind()));
 			if (uriResource instanceof UriResourceNavigation) {
 				UriResourceNavigation uriResourceNavigation = (UriResourceNavigation) uriResource;
-				String typeRepresentation = uriResourceNavigation.getSegmentValue(true);
-				switch (typeRepresentation.substring(typeRepresentation.lastIndexOf(".") + 1)) {
-				case EdmProvider.ET_STRING_ATTRIBUTE_NAME:
-					type = "string";
-					break;
-				case EdmProvider.ET_INTEGER_ATTRIBUTE_NAME:
-					type = "long";
-					break;
-				case EdmProvider.ET_DOUBLE_ATTRIBUTE_NAME:
-					type = "double";
-					break;
-				case EdmProvider.ET_BOOLEAN_ATTRIBUTE_NAME:
-					type = "boolean";
-					break;
-				case EdmProvider.ET_DATE_ATTRIBUTE_NAME:
-					type = "date";
-					break;
-				default:
-				}
-				LOGGER.debug(String.format("               %s -> %s", typeRepresentation, type));
+				odataTypeName = uriResourceNavigation.getSegmentValue(true);
 			} else if (uriResource instanceof UriResourceLambdaAny) {
-				final AttributesFilterVisitor filterExpressionVisitor = new AttributesFilterVisitor(type);
+			   final String fieldNameSuffix; // database fieldname suffix (for e.g. att_foobar_string)
+            switch (odataTypeName.substring(odataTypeName.lastIndexOf(".") + 1)) {
+            case EdmProvider.ET_STRING_ATTRIBUTE_NAME:
+               fieldNameSuffix = "string";
+               break;
+            case EdmProvider.ET_INTEGER_ATTRIBUTE_NAME:
+               fieldNameSuffix = "long";
+               break;
+            case EdmProvider.ET_DOUBLE_ATTRIBUTE_NAME:
+               fieldNameSuffix = "double";
+               break;
+            case EdmProvider.ET_BOOLEAN_ATTRIBUTE_NAME:
+               fieldNameSuffix = "boolean";
+               break;
+            case EdmProvider.ET_DATE_ATTRIBUTE_NAME:
+               fieldNameSuffix = "date";
+               break;
+            default:
+               final String msg = String.format("Unsupported Type: %s" + odataTypeName);
+               LOGGER.error(msg);
+               throw new IllegalArgumentException(msg);
+            }
+            LOGGER.debug(String.format("               %s -> %s", odataTypeName, fieldNameSuffix));
+				final AttributesFilterVisitor filterExpressionVisitor =
+				      new AttributesFilterVisitor(fieldNameSuffix);
 				final UriResourceLambdaAny any = (UriResourceLambdaAny) uriResource;
 				final Expression expression = any.getExpression();
-				LOGGER.debug(String.format("               visit AttributesFilterVisitor(%s) for: %s", type, expression));
+				LOGGER.debug(String.format("               visit AttributesFilterVisitor(%s) for: %s", fieldNameSuffix, expression));
 				
 				expression.accept(filterExpressionVisitor);
 				final PripQueryFilter filter = filterExpressionVisitor.getFilter();
@@ -255,7 +266,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				}
 			} else if (uriResource instanceof UriResourceLambdaAll) {
 				throw new ODataApplicationException("Unsupported lambda expression on filter expression: all",
-						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+						BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
 		}
 		LOGGER.debug(String.format("           %s.", ignored ? "visitMember: ignored" : "visitMember: done"));
@@ -288,13 +299,13 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 				geometry = asGeometry(parameters.get(1));
 			} catch (ParseException e) {
 				throw new ODataApplicationException("Invalid geography parameter",
-						HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+						BAD_REQUEST.getStatusCode(), Locale.ROOT);
 			}
 		} else {
 			throw new ODataApplicationException(
 					"Invalid parameter for function "
 							+ functionName.getFullQualifiedNameAsString(),
-					HttpStatusCode.BAD_REQUEST.getStatusCode(), Locale.ROOT);
+					BAD_REQUEST.getStatusCode(), Locale.ROOT);
 		}
 
 		if (EdmProvider.FUNCTION_INTERSECTS_FQN.equals(functionName)) {
@@ -321,7 +332,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		final Matcher matcher = ODATA_EWKT_EXTRACTION_PATTERN.matcher(uriParameter.getText());
 
 		if (!matcher.matches()) {
-			throw new ParseException("Invalid structered parameter");
+			throw new ParseException("Invalid parameter format");
 		}
 
 		matcher.group(1); // geometry or geography for flat-earth or round-earth coordinate reference systems (CRS), must match with SRID
@@ -367,6 +378,8 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	}
 
 	public static String operandToString(Object operand) {
+	   // converts objects into text form, preserving surrounding quotes if present.
+	   // use getStringData() to extract absolute string values in a second step where applicable. 
 		String result = "";
 		if (operand instanceof Member) {
 			result = memberText((Member) operand);
@@ -403,7 +416,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			final String msg = String.format("Incomplete filter expression: more than one result on filter stack after traversing expression tree -> %s",
 					this.filterStack);
 			LOGGER.error(msg);
-			throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+			throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
 		}
 	}
 
@@ -454,6 +467,19 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	private static boolean isIntegerField(String odataFieldName) {
 		return PRIP_INTEGER_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
 	}
+	
+	private static boolean isBooleanComparison(final Object leftOperandExpression, final String leftOperandString, final Object rightOperandExpression,
+         final String rightOperandString) {
+      return isBooleanComparison(leftOperandExpression, leftOperandString) || isIntegerComparison(rightOperandExpression, rightOperandString);
+   }
+
+   private static boolean isBooleanComparison(final Object operandExpression, final String operandString) {
+      return operandExpression instanceof Member && isBooleanField(operandString);
+   }
+
+   private static boolean isBooleanField(String odataFieldName) {
+      return PRIP_BOOLEAN_PROPERTY_FIELD_NAMES.containsKey(odataFieldName);
+   }
 
 	private static Optional<String> mapToPripFieldName(String odataFieldName) {
 		if (PRIP_SUPPORTED_PROPERTY_FIELD_NAMES.containsKey(odataFieldName)) {
@@ -465,18 +491,20 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 
 	private static PripQueryFilterTerm createFilter(final BinaryOperatorKind operator, final Object left, final Object right, final String leftOperand,
 			final String rightOperand) throws ODataApplicationException, ExpressionVisitException {
-
 		if (isTextComparison(left, leftOperand, right, rightOperand)) {
 			return createTextFilter(Function.fromString(operator.name()), left, right, leftOperand, rightOperand);
 		} else if (isDateComparison(left, leftOperand, right, rightOperand)) {
 			return createDateTimeFilter(RelationalOperator.fromString(operator.name()), left, right, leftOperand, rightOperand);
 		} else if (isIntegerComparison(left, leftOperand, right, rightOperand)) {
 			return createIntegerFilter(RelationalOperator.fromString(operator.name()), left, right, leftOperand, rightOperand);
+      } else if (isBooleanComparison(left, leftOperand, right, rightOperand)) {
+         return createBooleanFilter(esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter.Function
+               .fromString(operator.name()), left, right, leftOperand, rightOperand);
 		} else {
 			final String msg = String.format("Unsupported operation: %s %s %s", leftOperand != null ? leftOperand : "''", operator,
 					rightOperand != null ? rightOperand : "''");
 			LOGGER.error(msg);
-			throw new ODataApplicationException(msg, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+			throw new ODataApplicationException(msg, BAD_REQUEST.getStatusCode(), null);
 		}
 	}
 
@@ -490,14 +518,14 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			}
 		} else if (left instanceof Literal && right instanceof Member) {
 			if (isDateField(rightOperand)) {
-				return new PripDateTimeFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getInverse(),
+				return new PripDateTimeFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getHorizontallyFlippedOperator(),
 						convertToLocalDateTime(leftOperand));
 			}
 		}
 
 		throw new ODataApplicationException(
 				"Invalid or unsupported operand(s): " + leftOperand + " " + operator.getOperator() + " " + rightOperand,
-				HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				BAD_REQUEST.getStatusCode(), null);
 	}
 
 	private static PripTextFilter createTextFilter(Function function, Object left, Object right, String leftOperand,
@@ -506,12 +534,12 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		if (left instanceof Member && right instanceof Literal) {
 			if (isTextField(leftOperand)) {
 				return new PripTextFilter(mapToPripFieldName(leftOperand).orElse(null), function,
-						rightOperand.substring(1, rightOperand.length() - 1));
+						getStringData(rightOperand));
 			}
 		} else if (left instanceof Literal && right instanceof Member) {
 			if (isTextField(rightOperand)) {
 				return new PripTextFilter(mapToPripFieldName(rightOperand).orElse(null), function,
-						leftOperand.substring(1, leftOperand.length() - 1));
+						getStringData(leftOperand));
 			}
 		} else if (left instanceof Member && right instanceof List || left instanceof List && right instanceof Member) {
 			final String memberText = left instanceof Member ? leftOperand : rightOperand;
@@ -521,7 +549,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			// systematic_production
 			if (ProductionType.name().equals("ProductionType")
 					&& !SYSTEMATIC_PRODUCTION.getName().equals(firstListElementText)) {
-				return new PripTextFilter(FIELD_NAMES.NAME.fieldName(), Function.EQUALS, "NOTEXISTINGPRODUCTNAME");
+				return new PripTextFilter(FIELD_NAMES.NAME.fieldName(), Function.EQ, "NOTEXISTINGPRODUCTNAME");
 			} else {
 				return null;
 			}
@@ -530,24 +558,80 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		}
 
 		throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand + " "
-				+ function.getFunctionName() + " " + rightOperand, HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				+ function.getFunctionName() + " " + rightOperand, BAD_REQUEST.getStatusCode(), null);
 	}
 
 	private static PripIntegerFilter createIntegerFilter(final RelationalOperator operator, final Object left, final Object right, final String leftOperand,
 			final String rightOperand) throws ODataApplicationException, ExpressionVisitException {
-
 		if (left instanceof Member && right instanceof Literal) {
 			if (isIntegerField(leftOperand)) {
 				return new PripIntegerFilter(mapToPripFieldName(leftOperand).orElse(null), operator, Long.valueOf(rightOperand));
 			}
 		} else if (left instanceof Literal && right instanceof Member) {
 			if (isIntegerField(rightOperand)) {
-				return new PripIntegerFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getInverse(), Long.valueOf(leftOperand));
+				return new PripIntegerFilter(mapToPripFieldName(rightOperand).orElse(null), operator.getHorizontallyFlippedOperator(), Long.valueOf(leftOperand));
 			}
 		}
 
 		throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand + " " + operator.getOperator() + " " + rightOperand,
-				HttpStatusCode.BAD_REQUEST.getStatusCode(), null);
+				BAD_REQUEST.getStatusCode(), null);
 	}
+	
+	private static PripBooleanFilter createBooleanFilter(
+	      final esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter.Function function,
+	      final Object left, final Object right, final String leftOperand, final String rightOperand)
+	            throws ODataApplicationException, ExpressionVisitException {
+      if (left instanceof Member && right instanceof Literal) {
+         if (isBooleanField(leftOperand)) {
+            return newPripBooleanFilter(mapToPripFieldName(leftOperand).orElse(null), function,
+                  Boolean.valueOf(rightOperand));
+         }
+      } else if (left instanceof Literal && right instanceof Member) {
+         if (isBooleanField(rightOperand)) {
+            return newPripBooleanFilter(mapToPripFieldName(rightOperand).orElse(null), function,
+                  Boolean.valueOf(leftOperand));
+         }
+      }
 
+      throw new ODataApplicationException("Invalid or unsupported operand(s): " + leftOperand +
+            " " + function + " " + rightOperand, BAD_REQUEST.getStatusCode(), null);
+   }
+	
+	private static PripBooleanFilter newPripBooleanFilter(final String fieldName,
+	      final PripBooleanFilter.Function function, final boolean value) {
+	   // RS-400: By default if not specified otherwise, products are online.
+	   // This means a query for online EQ true has to return {online=true, online=null} (instead of
+	   // {online=true}) and a query for online NE true has to return only {online=false} (instead of
+	   // {online=false, online=null}).
+	   // Note: Latter results having online=null will use the default (true) as set in
+	   // esa.s1pdgs.cpoc.prip.model.PripMetadata without an explicit mapping step. 
+	   if (value && PripBooleanFilter.Function.EQ == function
+	            && Online.name().equalsIgnoreCase(fieldName)) {
+	      // rewrite query to find {online=true, online=null} when searching for online EQ true
+	      LOGGER.debug("Rewriting '{} {} {}' to '{} {} {}'", fieldName, function, value, fieldName,
+	            PripBooleanFilter.Function.NE, false);
+         return new PripBooleanFilter(fieldName, PripBooleanFilter.Function.NE, false);  	     
+	   } else if (value && PripBooleanFilter.Function.NE == function
+	         && Online.name().equalsIgnoreCase(fieldName)) {
+	      // rewrite query to find {online=false} when searching for online NE true
+         LOGGER.debug("Rewriting '{} {} {}' to '{} {} {}'", fieldName, function, value, fieldName,
+               PripBooleanFilter.Function.EQ, false);
+	      return new PripBooleanFilter(fieldName, PripBooleanFilter.Function.EQ, false);  
+	   }
+	   return new PripBooleanFilter(fieldName, function, value);
+	}
+	
+	public static String getStringData(String odataStringParameter) {
+	   // converts an odata string parameter WITH its surrounding single quotes to plain text WITHOUT
+	   // surrounding single quotes. single quotes inside of the string, which are represented by
+	   // two following single quotes are unescaped to one single quote each. see also:
+	   // https://docs.oasis-open.org/odata/odata/v4.01/cs01/abnf/odata-abnf-construction-rules.txt
+	   
+	   if (odataStringParameter.length() >= 1 && odataStringParameter.charAt(0) != '\'') {
+	      // workaround to handle GUID as text
+	      return odataStringParameter;
+	   }
+	   
+	   return odataStringParameter.substring(1, odataStringParameter.length() - 1).replace("''", "'");
+	}
 }

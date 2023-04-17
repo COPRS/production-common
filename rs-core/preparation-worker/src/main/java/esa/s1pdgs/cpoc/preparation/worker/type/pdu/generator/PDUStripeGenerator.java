@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.preparation.worker.type.pdu.generator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,8 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 	}
 
 	@Override
-	public List<AppDataJob> generateAppDataJobs(IpfPreparationJob job) throws MetadataQueryException {
+	public List<AppDataJob> generateAppDataJobs(final IpfPreparationJob job, final int primaryCheckMaxTimelifeS)
+			throws MetadataQueryException {
 		if (settings.getReference() == PDUReferencePoint.ORBIT) {
 			final S3Metadata metadata = getMetadataForJobProduct(this.mdClient, job);
 
@@ -100,7 +102,7 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 					timeIntervals = generateTimeIntervals(startTime, metadata.getAnx1Time(), settings.getLengthInS());
 				}
 
-				return createJobsFromTimeIntervals(timeIntervals, job);
+				return createJobsFromTimeIntervals(timeIntervals, job, primaryCheckMaxTimelifeS);
 			}
 
 			LOGGER.debug("Product is not first in orbit - skip PDU generation");
@@ -110,7 +112,7 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 
 			List<TimeInterval> intervals = findTimeIntervalsForMetadata(metadata, settings.getLengthInS());
 
-			return createJobsFromTimeIntervals(intervals, job);
+			return createJobsFromTimeIntervals(intervals, job, primaryCheckMaxTimelifeS);
 		}
 
 		LOGGER.warn("Invalid reference point for pdu type STRIPE");
@@ -149,7 +151,7 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 	 * Create a list of AppDataJobs from the given list of time intervals
 	 */
 	private List<AppDataJob> createJobsFromTimeIntervals(final List<TimeInterval> intervals,
-			IpfPreparationJob preparationJob) {
+			final IpfPreparationJob preparationJob, final int primaryCheckMaxTimelifeS) {
 		List<AppDataJob> jobs = new ArrayList<>();
 
 		for (TimeInterval interval : intervals) {
@@ -162,6 +164,14 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 
 			if (processSettings.getProcessingGroup() != null) {
 				appDataJob.setProcessingGroup(processSettings.getProcessingGroup());
+			}
+			
+			// Calculate, when the Job will be timed out
+			if (primaryCheckMaxTimelifeS != 0) {
+				final Date creationDate = appDataJob.getGeneration().getCreationDate();
+				final Date timeoutDate = new Date(
+						creationDate.toInstant().toEpochMilli() + (primaryCheckMaxTimelifeS * 1000));
+				appDataJob.setTimeoutDate(timeoutDate);
 			}
 
 			jobs.add(appDataJob);

@@ -11,7 +11,6 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -21,7 +20,6 @@ import esa.s1pdgs.cpoc.report.ReportingFactory;
 public abstract class AbstractMetadataExtractor implements MetadataExtractor {	
 	protected final Logger logger = LogManager.getLogger(getClass());
 	
-	protected final EsServices esServices;
 	protected final MetadataBuilder mdBuilder;
 	protected final FileDescriptorBuilder fileDescriptorBuilder; 
     protected final String localDirectory;
@@ -29,14 +27,12 @@ public abstract class AbstractMetadataExtractor implements MetadataExtractor {
     protected final ObsClient obsClient;
 
 	public AbstractMetadataExtractor(
-			final EsServices esServices, 
 			final MetadataBuilder mdBuilder,
 			final FileDescriptorBuilder fileDescriptorBuilder, 
 			final String localDirectory,
 			final ProcessConfiguration processConfiguration, 
 			final ObsClient obsClient
 	) {
-		this.esServices = esServices;
 		this.mdBuilder = mdBuilder;
 		this.fileDescriptorBuilder = fileDescriptorBuilder;
 		this.localDirectory = localDirectory;

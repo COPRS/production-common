@@ -1,8 +1,8 @@
 ARG BRANCH
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-execution-worker:${BRANCH} as build
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-execution-worker:${BRANCH} as build
 WORKDIR /app 
 
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH} as base
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as base
 
 #FROM artifactory.coprs.esa-copernicus.eu/cfi/sentinel3/s3-ipf0:06.12
 FROM centos:7
@@ -11,25 +11,28 @@ ARG COMMIT_ID
 ARG BRANCH_TEXT
 ARG ARTIFACTORY_URL="https://artifactory.coprs.esa-copernicus.eu:443/artifactory/cfi"
 
-
+ 
 ### Reconstruction of the base image provided by the agency
 USER root
 
 RUN yum install -y java-1.8.0-openjdk java-11-openjdk boost-date-time boost-thread boost-devel tar
+
+# RS-747: This is a work around to use the xerces-c from the operating system
+RUN yum install xerces-c -y 
 
 # Creating symbolic link to match expectation from IPF
 RUN ln -s /usr/lib64/libboost_date_time.so.1.53.0 /usr/lib64/libboost_date_time.so.5
 
 # create user
 RUN useradd -u 1001 rsuser
-
+ 
 WORKDIR /tmp
-
+ 
 # DDC
 RUN mkdir -p /tmp/s3-cgs1-ddc
 WORKDIR /tmp/s3-cgs1-ddc
-RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/S3PD-DDC-1.0-1.0.0-0.x86_64.rpm"
-RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/S3PD-DDC-CFG-1.0-1.0.0-00.00.noarch.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/S3PD-DDC-3.4.37-3.4.el6.x86_64.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/S3PD-DDC-CFG-3.4.37-3.4.el6.x86_64.rpm"
 RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/s3-cgs1-ddc.sh"
 RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/s3-cgs1-ddc/s3-cgs1-ddc.rls"
 
@@ -37,8 +40,8 @@ RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_P
 RUN mkdir -p /tmp/s3-cgs1-l0preproc
 WORKDIR /tmp/s3-cgs1-l0preproc
 
-RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/S3PD-L0PreProc-1.0-1.0.0-0.x86_64.rpm"
-RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/S3PD-L0PreProc-CFG-1.0-1.0.0-00.00.noarch.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/S3PD-L0PreProc-3.4.37-3.4.el6.x86_64.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/S3PD-L0PreProc-CFG-3.4.37-3.4.el6.x86_64.rpm"
 RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/s3-cgs1-l0preproc.sh"
 RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Pre/s3-cgs1-l0preproc.rls"
 
@@ -46,8 +49,8 @@ RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_P
 RUN mkdir -p /tmp/s3-cgs1-l0postproc
 WORKDIR /tmp/s3-cgs1-l0postproc
 
-RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/S3PD-L0PostProc-1.0-1.0.0-0.x86_64.rpm"
-RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/S3PD-L0PostProc-CFG-1.0-1.0.0-00.00.noarch.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/S3PD-L0PostProc-3.4.37-3.4.el6.x86_64.rpm"
+RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/S3PD-L0PostProc-CFG-3.4.37-3.4.el6.x86_64.rpm"
 RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/s3-cgs1-l0postproc.sh"
 RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_PASS curl -sSf -u $(cat /run/secrets/ARTIFACTORY_USER):$(cat /run/secrets/ARTIFACTORY_PASS) -O "${ARTIFACTORY_URL}/S3-RPM/dockerfileS3L0Post/s3-cgs1-l0postproc.rls"
 
@@ -110,6 +113,6 @@ RUN chmod +x /tini
 RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
 RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
-USER rsuser:rsuser
+#USER rsuser:rsuser
 
 ENTRYPOINT ["/tini", "--", "/app/start.sh"]

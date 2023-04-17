@@ -11,10 +11,11 @@ env:
   RS_CORE_FOLDER: processing-common
   RS_EXAMPLES_FOLDER: rs-core-examples
   ARTIFACTORY_BASE: artifactory.coprs.esa-copernicus.eu
-  ARTIFACTORY_PROJECT_DOCKER: werum-docker
+  ARTIFACTORY_PROJECT_DOCKER: rs-docker
+  ARTIFACTORY_PROJECT_DOCKER_PRIVATE: rs-docker-private
   ARTIFACTORY_PROJECT_MAVEN: rs-maven
   ARTIFACTORY_PROJECT_HELM: rs-helm
-  ARTIFACTORY_PROJECT_COMMON: rs-docker
+  ARTIFACTORY_PROJECT_COMMON: rs-zip
   ARTIFACTORY_CORE_PROJECT: rs-core
   ARTIFACTORY_EXAMPLES_PROJECT: rs-core-examples
 
@@ -27,7 +28,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: GitGuardian scan
-      uses: GitGuardian/gg-shield-action@master
+      uses: GitGuardian/ggshield-action@master
       env:
         GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
         GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
@@ -89,7 +90,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [compression-worker, distribution-worker, dlq-manager, eviction-management-worker, execution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, data-lifecycle-worker, prip-frontend, ddip-frontend, preparation-worker, request-repository]
+        component: [compression-worker, distribution-worker, dlq-manager, eviction-management-worker, execution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, data-lifecycle-worker, prip-frontend, ddip-frontend, preparation-worker, request-parking-lot, cronbased-trigger]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -138,7 +139,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [ddip_frontend, metadata_search_controller, native_api, prip_frontend, request_repository, eviction_manager]
+        component: [ddip_frontend, metadata_search_controller, native_api, prip_frontend, request_parking_lot, eviction_manager]
     steps:
     - uses: actions/checkout@v2
     - uses: ./.github/actions/helm-charts
@@ -188,34 +189,30 @@ jobs:
         with: 
           COMPONENT: ${{ matrix.component }} 
 
-  build-s1-aiop:
+  build-ipf-containers:
     needs: [build-all-core]
-    uses: ./.github/workflows/build-ipf-s1-aio.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ipf: [{image: rs-ipf-s1-aio, dir: docker_s1_ipf_aio},{image: rs-ipf-s1-asp, dir: docker_s1_ipf_asp},{image: rs-ipf-s1-l1, dir: docker_s1_ipf_l1},{image: rs-ipf-s1-l2, dir: docker_s1_ipf_l2},{image: rs-ipf-s3-acq, dir: docker_s3_ipf_acq},{image: rs-ipf-s3-l0, dir: docker_s3_ipf_l0},{image: rs-ipf-s3-mw1, dir: docker_s3_ipf_mw1},{image: rs-ipf-s3-ol1-rac, dir: docker_s3_ipf_ol1_rac},{image: rs-ipf-s3-ol1-spc, dir: docker_s3_ipf_ol1_spc},{image: rs-ipf-s3-ol1, dir: docker_s3_ipf_ol1},{image: rs-ipf-s3-ol2, dir: docker_s3_ipf_ol2},{image: rs-ipf-s3-pug, dir: docker_s3_ipf_pug},{image: rs-ipf-s3-sl1, dir: docker_s3_ipf_sl1},{image: rs-ipf-s3-sl2-frp, dir: docker_s3_ipf_sl2_frp},{image: rs-ipf-s3-sl2, dir: docker_s3_ipf_sl2},{image: rs-ipf-s3-sm2-hy, dir: docker_s3_ipf_sm2_hy},{image: rs-ipf-s3-sm2-li, dir: docker_s3_ipf_sm2_li},{image: rs-ipf-s3-sm2-si, dir: docker_s3_ipf_sm2_si},{image: rs-ipf-s3-sr1, dir: docker_s3_ipf_sr1},{image: rs-ipf-s3-sy2-aod, dir: docker_s3_ipf_sy2_aod},{image: rs-ipf-s3-sy2-vgs, dir: docker_s3_ipf_sy2_vgs},{image: rs-ipf-s3-sy2, dir: docker_s3_ipf_sy2}]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
+        id: extract_branch
 
-  build-s1-asp:
-    needs: [build-all-core]
-    uses: ./.github/workflows/build-ipf-s1-asp.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
-
-  build-s3-acq:
-    needs: [build-all-core]
-    uses: ./.github/workflows/build-ipf-s3-acq.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
-
-  build-s3-l0:
-    needs: [build-all-core]
-    uses: ./.github/workflows/build-ipf-s3-l0.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      - uses: ./.github/actions/build-ipf-container
+        with:
+          BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
+          IMAGE_NAME: ${{ matrix.ipf.image }}
+          BUILD_CONTEXT: ./rs-container/${{ matrix.ipf.dir }}
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+      
+      - uses: ./.github/actions/generate-report
+        with: 
+          COMPONENT: ${{ matrix.ipf.image }}

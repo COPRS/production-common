@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.util.StreamUtils;
 
 import esa.s1pdgs.cpoc.common.ApplicationLevel;
+import esa.s1pdgs.cpoc.common.CommonConfigurationProperties;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
@@ -73,6 +74,8 @@ public class OutputProcessorTest {
     
     @Mock
     private ApplicationProperties properties;
+    
+    private CommonConfigurationProperties commonProperties;
 
     /**
      * List of outputs in job
@@ -168,13 +171,17 @@ public class OutputProcessorTest {
 
         doReturn(true).when(properties).isChangeIsipToSafe();
         
+        commonProperties = new CommonConfigurationProperties();
+		commonProperties.setRsChainName("test-chain");
+		commonProperties.setRsChainVersion("0.0.1");
+        
         processor =
                 new OutputProcessor(obsClient, inputMessage,
-                        PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties);
+                        PATH_DIRECTORY_TEST + "/outputs.list", 2, "MONITOR", ApplicationLevel.L0, properties, commonProperties);
 
         processorWithWildcardList =
                 new OutputProcessor(obsClient, inputMessage,
-                        "*.list", 2, "MONITOR", ApplicationLevel.S3_L0, properties);
+                        "*.list", 2, "MONITOR", ApplicationLevel.S3_L0, properties, commonProperties);
         
         // Mocks
         doNothing().when(obsClient).upload(Mockito.any(), Mockito.any());
@@ -419,7 +426,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForLOSegmentFast() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsClient, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L0_SEGMENT, properties, commonProperties);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -502,7 +509,7 @@ public class OutputProcessorTest {
         inputMessage.setProductProcessMode("NRT");
         processor =
                 new OutputProcessor(obsClient, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties, commonProperties);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();
@@ -570,7 +577,7 @@ public class OutputProcessorTest {
     public void testSortOutputsForL1RealOutputs() throws AbstractCodedException {
         processor =
                 new OutputProcessor(obsClient, inputMessage,
-                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties);
+                        PATH_DIRECTORY_TEST + "outputs.list", 2, "MONITOR", ApplicationLevel.L1, properties, commonProperties);
         
         final List<FileObsUploadObject> uploadBatch = new ArrayList<>();
         final List<ObsQueueMessage> outputToPublish = new ArrayList<>();

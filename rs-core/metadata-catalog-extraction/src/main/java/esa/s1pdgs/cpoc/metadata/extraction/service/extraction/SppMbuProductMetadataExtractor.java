@@ -9,7 +9,6 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
-import esa.s1pdgs.cpoc.metadata.extraction.service.elastic.EsServices;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
@@ -22,10 +21,10 @@ public class SppMbuProductMetadataExtractor extends AbstractMetadataExtractor {
 
 	private final static String SPP_MBU_PRODUCT_TYPE = "REP_MBU_";
 
-	public SppMbuProductMetadataExtractor(EsServices esServices, MetadataBuilder mdBuilder,
+	public SppMbuProductMetadataExtractor(MetadataBuilder mdBuilder,
 			FileDescriptorBuilder fileDescriptorBuilder, String localDirectory,
 			ProcessConfiguration processConfiguration, ObsClient obsClient) {
-		super(esServices, mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
+		super(mdBuilder, fileDescriptorBuilder, localDirectory, processConfiguration, obsClient);
 	}
 
 	@Override

@@ -30,6 +30,7 @@ import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
 import esa.s1pdgs.cpoc.obs_sdk.ObsObject;
 import esa.s1pdgs.cpoc.obs_sdk.ObsServiceException;
 import esa.s1pdgs.cpoc.prip.metadata.PripMetadataRepository;
+import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class EvictionManagementService {
 	
@@ -156,10 +157,18 @@ public class EvictionManagementService {
 			}
 			LOG.debug("eviction of product from compressed storage: " + dataLifecycleMetadata);
 			obsClient.delete(new ObsObject(productFamilyInCompressedStorage, pathInCompressedStorage));
-			boolean metadataDeleted = pripMetadataRepo.deleteByName(pathInCompressedStorage);
-			if (!metadataDeleted) {
-				LOG.warn("Prip metadata not deleted for: " + pathInCompressedStorage);
+			
+			// Setting the product as offline in the prip index (former behaviour was to remove it completely!)
+			try {
+				PripMetadata pripMetadata = pripMetadataRepo.findByName(pathInCompressedStorage);
+				pripMetadata.setOnline(false);
+				LOG.info("Setting product {} in prip index as offline", pripMetadata.getName());
+				pripMetadataRepo.save(pripMetadata);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				LOG.error("Unable to update the prip index for product {} due to error:{}", pathInCompressedStorage, e);
 			}
+
 			evictionUpdater.updateEvictedMetadata(pathInCompressedStorage, productFamilyInCompressedStorage);
 			numEvicted++;
 		} else {

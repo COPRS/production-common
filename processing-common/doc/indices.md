@@ -69,15 +69,32 @@ l2_slice
 l2_acn
 s2_l0_ds
 s2_l0_gr
+s2_l1a_ds
+s2_l1a_gr
+s2_l1b_ds
+s2_l1b_gr
+s2_l1c_ds
+s2_l1c_tl
+s2_l1c_tc
+s2_l2a_ds
+s2_l2a_tl
+s2_l2a_tc
 s2_hktm
+s2_sad
 s3_granules
 s3_l0
 s3_cal
 s3_pug
+s3_l1_nrt
+s3_l1_ntc
+s3_l1_stc
+s3_l2_nrt
+s3_l2_ntc
+s3_l2_stc
 ```
 
 ```
-{"mappings":{"properties":{"creationTime":{"type":"date"},"startTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape"},"oqcFlag":{"type":"text"}}}}
+{"mappings":{"properties":{"creationTime":{"type":"date"},"startTime":{"type":"date"},"sliceCoordinates":{"type":"geo_shape"},"oqcFlag":{"type":"text"},"insertionTime":{"type":"date"},"validityStartTime":{"type":"date"},"validityStopTime":{"type":"date"}}}}
 ```
 
 -------------------
@@ -87,7 +104,7 @@ prip
 ```
 
 ```
-{"mappings":{"properties":{"id": {"type":"keyword"},"obsKey":{"type":"keyword"},"name":{"type":"keyword"},"productFamily":{"type":"keyword"},"contentType":{"type":"keyword"},"contentLength":{"type":"long"},"contentDateStart":{"type":"date"},"contentDateEnd":{"type":"date"},"creationDate":{"type":"date"},"evictionDate":{"type":"date"},"checksum":{"type":"nested","properties":{"algorithm":{"type":"keyword"},"value":{"type":"keyword"},"checksum_date":{"type":"date"}}},"footprint":{"type":"geo_shape"}}}}
+{"mappings":{"properties":{"id":{"type":"keyword"},"obsKey":{"type":"keyword"},"name":{"type":"keyword"},"productFamily":{"type":"keyword"},"contentType":{"type":"keyword"},"contentLength":{"type":"long"},"contentDateStart":{"type":"date"},"contentDateEnd":{"type":"date"},"creationDate":{"type":"date"},"evictionDate":{"type":"date"},"checksum":{"type":"nested","properties":{"algorithm":{"type":"keyword"},"value":{"type":"keyword"},"checksum_date":{"type":"date"}}},"footprint":{"type":"geo_shape"},"browseKeys":{"type":"keyword"},"online":{"type":"boolean"}}},"settings":{"analysis":{"analyzer":{"default":{"type":"keyword"}}}}}
 ```
 
 -------------------

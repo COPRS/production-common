@@ -25,7 +25,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
@@ -68,6 +68,12 @@ public class ExtractMetadata {
 	private static final String XSLT_L1_MANIFEST = "XSLT_L1_MANIFEST.xslt";
 	private static final String XSLT_L2_MANIFEST = "XSLT_L2_MANIFEST.xslt";
 	private static final String XSLT_ETAD_MANIFEST = "XSLT_L1_MANIFEST.xslt";
+<<<<<<< HEAD
+	private static final String XSLT_S2_XML = "XSLT_S2_XMLS.xslt";
+	private static final String XSLT_S2_HKTM_XML = "XSLT_S2_MANIFEST.xslt";
+	private static final String XSLT_S2_SAD_XML = "XSLT_S2_SAD_INVENTORY.xslt";
+=======
+>>>>>>> main
 	private static final String XSLT_S3_AUX_XFDU_XML = "XSLT_S3_AUX_XFDU_XML.xslt";
 	private static final String XSLT_S3_XFDU_XML = "XSLT_S3_XFDU_XML.xslt";
 	private static final String XSLT_S3_IIF_XML = "XSLT_S3_IIF_XML.xslt";
@@ -400,6 +406,25 @@ public class ExtractMetadata {
 		}
 	}
 
+<<<<<<< HEAD
+	public ProductMetadata processS2Metadata(S2FileDescriptor descriptor, List<File> metadataFiles, ProductFamily family, String productName)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		File xsltFile = new File(this.xsltDirectory + XSLT_S2_XML);
+		
+		if (!xsltFile.exists()) {
+			throw new MetadataExtractionException("Unable to find S2 XSLT file '" + XSLT_S2_XML + "'");
+		}
+		
+		List<ProductMetadata> metadataList = new ArrayList<>();
+		for (File metadataFile : metadataFiles) {
+			metadataList.add(transformXMLWithXSLTToJSON(metadataFile, xsltFile));
+		}
+		
+		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
+		
+		ProductMetadata metadata = checkS2Metadata(metadataList, additionalMetadata);
+=======
 	public ProductMetadata processS2Metadata(S2FileDescriptor descriptor, File metadataFile, ProductFamily family, String productName)
 			throws MetadataExtractionException, MetadataMalformedException {
 
@@ -413,11 +438,55 @@ public class ExtractMetadata {
 		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
 		
 		metadata = checkS2Metadata(metadata, additionalMetadata);
+>>>>>>> main
 		metadata = processS2Coordinates(metadata, family);
 		metadata = putS2FileMetadataToJSON(metadata, descriptor);
 		
 		LOGGER.debug("composed Json: {} ", metadata);
 		return metadata;
+<<<<<<< HEAD
+	}
+	
+	public ProductMetadata processS2HKTMMetadata(S2FileDescriptor descriptor, File metadataFile, ProductFamily family, String productName)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		File xsltFile = new File(this.xsltDirectory + XSLT_S2_HKTM_XML);
+		
+		if (!xsltFile.exists()) {
+			throw new MetadataExtractionException("Unable to find S2 XSLT file '" + XSLT_S2_HKTM_XML + "'");
+		}
+		
+		ProductMetadata metadata = transformXMLWithXSLTToJSON(metadataFile, xsltFile);
+		
+		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
+		
+		metadata = checkS2Metadata(Arrays.asList(metadata), additionalMetadata);
+		metadata = putS2FileMetadataToJSON(metadata, descriptor);
+		
+		LOGGER.debug("composed Json: {} ", metadata);
+		return metadata;
+	}
+	
+	public ProductMetadata processS2SADMetadata(S2FileDescriptor descriptor, File metadataFile, ProductFamily family, String productName)
+			throws MetadataExtractionException, MetadataMalformedException {
+
+		File xsltFile = new File(this.xsltDirectory + XSLT_S2_SAD_XML);
+		
+		if (!xsltFile.exists()) {
+			throw new MetadataExtractionException("Unable to find S2 XSLT file '" + XSLT_S2_SAD_XML + "'");
+		}
+		
+		ProductMetadata metadata = transformXMLWithXSLTToJSON(metadataFile, xsltFile);
+		
+		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
+		
+		metadata = checkS2Metadata(Arrays.asList(metadata), additionalMetadata);
+		metadata = putS2FileMetadataToJSON(metadata, descriptor);
+		
+		LOGGER.debug("composed Json: {} ", metadata);
+		return metadata;
+=======
+>>>>>>> main
 	}
 
 	/**
@@ -560,9 +629,20 @@ public class ExtractMetadata {
 		}
 	}
 
+<<<<<<< HEAD
+	private ProductMetadata checkS2Metadata(final List<ProductMetadata> metadataList, final ProductMetadata additionalMetadata) 
+			throws MetadataExtractionException {
+		try {
+			ProductMetadata metadata = metadataList.get(0);
+			for (int i = 1; i < metadataList.size(); i++) {
+				metadata.asMap().putAll(metadataList.get(i).asMap());
+			}
+			
+=======
 	private ProductMetadata checkS2Metadata(final ProductMetadata metadata, final ProductMetadata additionalMetadata) 
 			throws MetadataExtractionException {
 		try {
+>>>>>>> main
 			// Add additional metadata
 			if (!metadata.has("productType") && additionalMetadata.has("productType")) {
 				metadata.put("productType", additionalMetadata.get("productType"));
@@ -573,6 +653,12 @@ public class ExtractMetadata {
 			if (!metadata.has("platformSerialIdentifier") && additionalMetadata.has("platformSerialIdentifier")) {
 				metadata.put("platformSerialIdentifier", additionalMetadata.get("platformSerialIdentifier"));
 			}
+<<<<<<< HEAD
+			if (!metadata.has("tileNumber") && additionalMetadata.has("tileNumber")) {
+				metadata.put("tileNumber", additionalMetadata.get("tileNumber"));
+			}
+=======
+>>>>>>> main
 			
 			// Fix format of timestamps
 			if (metadata.has("startTime")) {
@@ -592,9 +678,33 @@ public class ExtractMetadata {
 					throw new MetadataMalformedException("stopTime");
 				}
 			}
+<<<<<<< HEAD
+			
+			if (metadata.has("validityStartTime")) {
+				try {
+					metadata.put("validityStartTime",
+							DateUtils.convertToMetadataDateTimeFormat((String) metadata.get("validityStartTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStartTime");
+				}
+			}
+
+			if (metadata.has("validityStopTime")) {
+				try {
+					metadata.put("validityStopTime",
+							DateUtils.convertToMetadataDateTimeFormat((String) metadata.get("validityStopTime")));
+				} catch (final DateTimeParseException e) {
+					throw new MetadataMalformedException("validityStopTime");
+				}
+			}
 
 			if (metadata.has("creationTime")) {
 				try {
+=======
+
+			if (metadata.has("creationTime")) {
+				try {
+>>>>>>> main
 					metadata.put("creationTime",
 							DateUtils.convertToMetadataDateTimeFormat(metadata.getString("creationTime")));
 				} catch (final DateTimeParseException e) {

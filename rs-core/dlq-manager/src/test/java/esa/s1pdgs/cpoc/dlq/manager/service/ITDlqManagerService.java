@@ -173,7 +173,7 @@ public class ITDlqManagerService {
 	}
 	
 	@Test
-	public void testDeleteShallBeIgnored() throws JsonProcessingException {
+	public void testDropShallBeIgnored() throws JsonProcessingException {
 		dlqManagerService = dlqManagerServiceConfiguration.route();
 		
 		CatalogJob catalogJob = new CatalogJob("foo", "foo", ProductFamily.AUXILIARY_FILE);

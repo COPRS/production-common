@@ -1,6 +1,3 @@
-/**
- * 
- */
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files;
 
 import static org.junit.Assert.assertEquals;

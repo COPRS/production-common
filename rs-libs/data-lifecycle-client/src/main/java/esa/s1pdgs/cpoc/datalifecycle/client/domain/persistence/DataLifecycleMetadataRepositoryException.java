@@ -1,4 +1,3 @@
-
 package esa.s1pdgs.cpoc.datalifecycle.client.domain.persistence;
 
 import esa.s1pdgs.cpoc.datalifecycle.client.error.DataLifecycleTriggerInternalServerErrorException;

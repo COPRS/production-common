@@ -1,5 +1,5 @@
 ARG BRANCH
-FROM artifactory.coprs.esa-copernicus.eu/werum-docker/rs-core-base:${BRANCH}
+FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH}
 
 # Use user root to use apt-get
 USER root

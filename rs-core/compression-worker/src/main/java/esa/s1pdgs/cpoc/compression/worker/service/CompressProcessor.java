@@ -31,34 +31,35 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class CompressProcessor extends AbstractProcessor implements Function<CatalogEvent, Message<CompressionEvent>> {
 	private static final Logger LOGGER = LogManager.getLogger(CompressProcessor.class);
-	
+
 	private final CommonConfigurationProperties commonProperties;
 
 	@Autowired
-	public CompressProcessor(final CommonConfigurationProperties commonProperties, final AppStatus appStatus, final CompressionWorkerConfigurationProperties properties,
-			final ObsClient obsClient) {
+	public CompressProcessor(final CommonConfigurationProperties commonProperties, final AppStatus appStatus,
+			final CompressionWorkerConfigurationProperties properties, final ObsClient obsClient) {
 		super(appStatus, properties, obsClient);
 		this.commonProperties = commonProperties;
 	}
 
 	@Override
-	public final Message<CompressionEvent> apply(final CatalogEvent event) {
+	public final Message<CompressionEvent> apply(final CatalogEvent event) throws RuntimeException {
 		final String workDir = properties.getWorkingDirectory();
 
-		final Reporting report = ReportingUtils.newReportingBuilder(MissionId.fromFileName(event.getKeyObjectStorage()))
-				.rsChainName(commonProperties.getRsChainName())
-				.rsChainVersion(commonProperties.getRsChainVersion())
+		final MissionId mission = MissionId.fromFileName(event.getKeyObjectStorage());
+
+		final Reporting report = ReportingUtils.newReportingBuilder(mission)
+				.rsChainName(commonProperties.getRsChainName()).rsChainVersion(commonProperties.getRsChainVersion())
 				.predecessor(event.getUid()).newReporting("CompressionProcessing");
 
 		// Initialize the pool processor executor
-		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(event, properties);
+		final CompressExecutorCallable procExecutor = new CompressExecutorCallable(mission, event, properties);
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
 
 		// Initialize the input downloader
-		final FileDownloader fileDownloader = new FileDownloader(obsClient, workDir, event);
+		final FileDownloader fileDownloader = new FileDownloader(mission, obsClient, workDir, event);
 
-		final FileUploader fileUploader = new FileUploader(obsClient, workDir, event,
+		final FileUploader fileUploader = new FileUploader(mission, obsClient, workDir, event,
 				CompressionEventUtil.composeCompressedProductFamily(event.getProductFamily()));
 		report.begin(ReportingUtils.newFilenameReportingInputFor(event.getProductFamily(), event.getKeyObjectStorage()),
 				new ReportingMessage("Start compression processing"));
@@ -70,10 +71,13 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 			fileDownloader.processInputs(report);
 
 			checkThreadInterrupted();
-			LOGGER.info("Compressing inputs for {}", event);
-			final Future<?> fut = procCompletionSrv.submit(procExecutor);
-			waitForPoolProcessesEnding("Compressing inputs for " + event, fut, procCompletionSrv,
-					properties.getCompressionTimeout() * 1000L);
+
+			if (!event.getKeyObjectStorage().endsWith(".jp2")) {
+				LOGGER.info("Compressing inputs for {}", event);
+				final Future<?> fut = procCompletionSrv.submit(procExecutor);
+				waitForPoolProcessesEnding("Compressing inputs for " + event, fut, procCompletionSrv,
+						properties.getCompressionTimeout() * 1000L);
+			}
 
 			checkThreadInterrupted();
 			LOGGER.info("Uploading compressed outputs for {}", event);
@@ -95,11 +99,15 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 
 		CompressionEvent result = new CompressionEvent(
 				CompressionEventUtil.composeCompressedProductFamily(event.getProductFamily()),
-				CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage()));
+				CompressionEventUtil.composeCompressedKeyObjectStorage(event.getKeyObjectStorage(), mission));
 		result.setMissionId(event.getMissionId());
 		result.setSatelliteId(event.getSatelliteId());
 		result.setUid(report.getUid());
 		result.setStoragePath(obsClient.getAbsoluteStoragePath(event.getProductFamily(), event.getKeyObjectStorage()));
+		result.setTimeliness(event.getTimeliness());
+
+		// RS-536: Add RS Chain Version to message
+		result.setRsChainVersion(commonProperties.getRsChainVersion());
 
 		return MessageBuilder.withPayload(result).build();
 	}

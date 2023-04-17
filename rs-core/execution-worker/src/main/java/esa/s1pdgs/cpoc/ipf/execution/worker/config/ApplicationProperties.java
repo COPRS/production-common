@@ -121,6 +121,10 @@ public class ApplicationProperties {
 	
 	private Map<String, TypeEstimationMapping> productTypeEstimatedCount = new HashMap<>();
 	
+	/**
+	 * Workaround configuration for S1 L1 
+	 */
+	private boolean overwriteShell = false;
 
 	/**
      * Default constructor
@@ -391,5 +395,12 @@ public class ApplicationProperties {
 	public void setProductTypeEstimationOutputFamily(ProductFamily productTypeEstimationOutputFamily) {
 		this.productTypeEstimationOutputFamily = productTypeEstimationOutputFamily;
 	}
-	
+
+	public boolean getOverwriteShell() {
+		return overwriteShell;
+	}
+
+	public void setOverwriteShell(boolean overwriteShell) {
+		this.overwriteShell = overwriteShell;
+	}
 }

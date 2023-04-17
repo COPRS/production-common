@@ -23,13 +23,6 @@ public class L1AcnMetadataController extends AbstractMetadataController<L1AcnMet
     public L1AcnMetadataController(final EsServices esServices) {
 		super(L1AcnMetadata.class, esServices);
 	}
-
-	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{family}/{productName:.+}/overpassCoverage")
-    public ResponseEntity<Integer> getOverpassCoverage(
-            @PathVariable(name = "family") final ProductFamily family,
-            @PathVariable(name = "productName") final String productName) {		
-		return getResponse(productName, family, () -> esServices.getOverpassCoverage(family, productName));
-    }
 	
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE, path = "/{productType}/{dataTakeId}")
     public ResponseEntity<List<SearchMetadata>> getProductsForDatatakeId(

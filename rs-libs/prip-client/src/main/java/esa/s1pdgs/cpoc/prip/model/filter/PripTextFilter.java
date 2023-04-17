@@ -13,7 +13,8 @@ public class PripTextFilter extends PripQueryFilterTerm {
 		STARTS_WITH("startswith"), //
 		ENDS_WITH("endswith"), //
 		CONTAINS("contains"), //
-		EQUALS("eq");
+		EQ("eq"), //
+	   NE("ne");
 		
 		private String functionName;
 		
@@ -26,19 +27,12 @@ public class PripTextFilter extends PripQueryFilterTerm {
 		}
 		
 		public static Function fromString(String function) {
-			if (STARTS_WITH.functionName.equalsIgnoreCase(function) || STARTS_WITH.name().equalsIgnoreCase(function)) {
-				return STARTS_WITH;
-			}
-			if (ENDS_WITH.functionName.equalsIgnoreCase(function) || ENDS_WITH.name().equalsIgnoreCase(function)) {
-				return ENDS_WITH;
-			}
-			if (CONTAINS.functionName.equalsIgnoreCase(function) || CONTAINS.name().equalsIgnoreCase(function)) {
-				return CONTAINS;
-			}
-			if (EQUALS.functionName.equalsIgnoreCase(function) || EQUALS.name().equalsIgnoreCase(function)) {
-				return EQUALS;
-			}
-
+		   for (Function f : Function.values()) {
+            if (f.functionName.equalsIgnoreCase(function) ||
+                  f.name().equalsIgnoreCase(function)) {
+               return f;
+            }
+         }
 			throw new PripFilterOperatorException(String.format("text filter function not supported: %s", function));
 		}
 	}
@@ -58,15 +52,10 @@ public class PripTextFilter extends PripQueryFilterTerm {
 		this(fieldName.fieldName());
 	}
 
-	private PripTextFilter(String fieldName, Function function, String text, boolean nested, String path) {
-		super(fieldName, nested, path);
-
-		this.function = Objects.requireNonNull(function);
-		this.text = Objects.requireNonNull(text);
-	}
-
 	public PripTextFilter(String fieldName, Function function, String text) {
-		this(fieldName, function, text, false, null);
+		super(fieldName, false, null);
+		this.function = Objects.requireNonNull(function);
+      this.text = Objects.requireNonNull(text);
 	}
 
 	// --------------------------------------------------------------------------
@@ -98,15 +87,6 @@ public class PripTextFilter extends PripQueryFilterTerm {
 		return this.getFieldName() + " " + (null != this.function ? this.function.name() : "NO_FUNCTION") + " "
 				+ this.text;
 	}
-
-	// --------------------------------------------------------------------------
-
-	@Override
-	public PripTextFilter copy() {
-		return new PripTextFilter(this.getFieldName(), this.getFunction(), this.getText(), this.isNested(), this.getPath());
-	}
-
-	// --------------------------------------------------------------------------
 
 	public Function getFunction() {
 		return this.function;

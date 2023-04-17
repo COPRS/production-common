@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.mqi.model.control.AllowedAction;
-import esa.s1pdgs.cpoc.mqi.model.rest.GenericMessageDto;
 
 /**
  * Exchanged object for the product category LevelJobs.
@@ -30,11 +29,6 @@ public class IpfExecutionJob extends AbstractMessage {
 	 * Local path to the job order
 	 */
 	private String jobOrder;
-
-	/**
-	 * Timeliness
-	 */
-	private String timeliness;
 
 	private String etadMode = "";
 
@@ -65,7 +59,7 @@ public class IpfExecutionJob extends AbstractMessage {
 	 */
 	public IpfExecutionJob() {
 		super();
-		setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.REEVALUATE));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.RESUBMIT));
 	}
 
 	/**
@@ -80,7 +74,7 @@ public class IpfExecutionJob extends AbstractMessage {
 		this.jobOrder = jobOrder;
 		this.uid = reportingTaskUID;
 		this.timeliness = timeliness;
-		setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.REEVALUATE));
+		setAllowedActions(Arrays.asList(AllowedAction.RESTART, AllowedAction.RESUBMIT));
 	}
 
 	/**
@@ -109,20 +103,6 @@ public class IpfExecutionJob extends AbstractMessage {
 	 */
 	public void setJobOrder(final String jobOrder) {
 		this.jobOrder = jobOrder;
-	}
-
-	/**
-	 * @return the timeliness
-	 */
-	public String getTimeliness() {
-		return timeliness;
-	}
-
-	/**
-	 * @param timeliness the timeliness to set
-	 */
-	public void setTimeliness(final String timeliness) {
-		this.timeliness = timeliness;
 	}
 
 	/**
@@ -244,11 +224,11 @@ public class IpfExecutionJob extends AbstractMessage {
 	public String toString() {
 		return "IpfExecutionJob [productProcessMode=" + productProcessMode + ", workDirectory=" + workDirectory
 				+ ", jobOrder=" + jobOrder + ", timeliness=" + timeliness + ", etadMode=" + etadMode + ", inputs="
-				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", preparationJob="
-				+ preparationJob + ", timedOut=" + timedOut + "productFamily=" + productFamily
-				+ ", keyObjectStorage=" + keyObjectStorage + ", storagePath=" + storagePath + ", uid=" + uid
-				+ ", creationDate=" + creationDate + ", podName=" + podName + ", allowedActions=" + allowedActions
-				+ ", demandType=" + demandType + ", retryCounter=" + retryCounter + ", debug=" + debug + "]";
+				+ inputs + ", outputs=" + outputs + ", pools=" + pools + ", preparationJob=" + preparationJob
+				+ ", timedOut=" + timedOut + "productFamily=" + productFamily + ", keyObjectStorage=" + keyObjectStorage
+				+ ", storagePath=" + storagePath + ", uid=" + uid + ", creationDate=" + creationDate + ", podName="
+				+ podName + ", allowedActions=" + allowedActions + ", demandType=" + demandType + ", retryCounter="
+				+ retryCounter + ", debug=" + debug + ", rsChainVersion=" + rsChainVersion + "]";
 	}
 
 	@Override
@@ -270,11 +250,10 @@ public class IpfExecutionJob extends AbstractMessage {
 			return false;
 		final IpfExecutionJob other = (IpfExecutionJob) obj;
 		return Objects.equals(etadMode, other.etadMode) && Objects.equals(inputs, other.inputs)
-				&& Objects.equals(preparationJob, other.preparationJob)
-				&& Objects.equals(jobOrder, other.jobOrder) && Objects.equals(outputs, other.outputs)
-				&& Objects.equals(pools, other.pools) && Objects.equals(productProcessMode, other.productProcessMode)
-				&& timedOut == other.timedOut && Objects.equals(timeliness, other.timeliness)
-				&& Objects.equals(workDirectory, other.workDirectory);
+				&& Objects.equals(preparationJob, other.preparationJob) && Objects.equals(jobOrder, other.jobOrder)
+				&& Objects.equals(outputs, other.outputs) && Objects.equals(pools, other.pools)
+				&& Objects.equals(productProcessMode, other.productProcessMode) && timedOut == other.timedOut
+				&& Objects.equals(timeliness, other.timeliness) && Objects.equals(workDirectory, other.workDirectory);
 	}
 
 }

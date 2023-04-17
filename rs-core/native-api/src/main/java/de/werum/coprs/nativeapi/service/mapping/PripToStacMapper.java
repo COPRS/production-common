@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import org.geojson.Crs;
 import org.geojson.GeoJsonObject;
@@ -49,8 +50,8 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
  */
 public class PripToStacMapper {
 
-	static final List<String> ATTRIBUTES_COLLECTIONS = PripOdataEntityProperties.getAttributesCollectionProperties().stream()
-			.map(PripOdataEntityProperties::name).collect(Collectors.toList());
+	static final List<String> ATTRIBUTES_COLLECTIONS = PripOdataEntityProperties.getAttributesCollectionProperties()
+			.stream().map(PripOdataEntityProperties::name).collect(Collectors.toList());
 
 	public static StacItemCollection mapFromPripOdataJson(final JsonObject pripOdataJson, final URI externalPripUrl,
 			final boolean includeAdditionalAttributes) throws URISyntaxException {
@@ -59,7 +60,8 @@ public class PripToStacMapper {
 
 			final List<StacItem> items = new ArrayList<>();
 			for (int i = 0; i < pripOdataJsonProducts.size(); i++) {
-				items.add(mapFromPripOdataJsonProduct(pripOdataJsonProducts.getJsonObject(i), externalPripUrl, includeAdditionalAttributes));
+				items.add(mapFromPripOdataJsonProduct(pripOdataJsonProducts.getJsonObject(i), externalPripUrl,
+						includeAdditionalAttributes));
 			}
 
 			final StacItemCollection itemCollection = new StacItemCollection();
@@ -80,9 +82,11 @@ public class PripToStacMapper {
 		stacItem.setId(productId);
 
 		// geometry and bbox
-				
-		final JsonObject footprint = pripOdataJsonProduct.getJsonObject(Footprint.name());
-		stacItem.setGeometry(asGeoJson(footprint));
+		JsonObject footprint = null;
+		if (!pripOdataJsonProduct.isNull(Footprint.name())) {
+			footprint = pripOdataJsonProduct.getJsonObject(Footprint.name());
+			stacItem.setGeometry(asGeoJson(footprint));
+		}
 
 		// if this item has a geometry a bbox is required
 		if (null != stacItem.getGeometry()) {
@@ -90,8 +94,10 @@ public class PripToStacMapper {
 		}
 
 		// properties
-		// at least 'datetime' or, if a single point in time is not appropriate, 'start_datetime' and 'end_datetime' required
-		final JsonObject contentDateJson = pripOdataJsonProduct.getJsonObject(PripOdataEntityProperties.ContentDate.name());
+		// at least 'datetime' or, if a single point in time is not appropriate,
+		// 'start_datetime' and 'end_datetime' required
+		final JsonObject contentDateJson = pripOdataJsonProduct
+				.getJsonObject(PripOdataEntityProperties.ContentDate.name());
 		stacItem.setProperty("datetime", null);
 		final String contentDateStartStr = contentDateJson.getString(PripOdataEntityProperties.Start.name());
 		stacItem.setProperty("start_datetime", contentDateStartStr);
@@ -99,7 +105,8 @@ public class PripToStacMapper {
 		stacItem.setProperty("end_datetime", contentDateEndStr);
 
 		final List<String> dontInclude = new LinkedList<>();
-		dontInclude.addAll(Arrays.asList(Id.name(), Footprint.name())); // already included one level above as 'id' and 'geometry'
+		dontInclude.addAll(Arrays.asList(Id.name(), Footprint.name())); // already included one level above as 'id' and
+																		// 'geometry'
 		if (!includeAdditionalAttributes) {
 			dontInclude.addAll(ATTRIBUTES_COLLECTIONS);
 		}
@@ -117,6 +124,7 @@ public class PripToStacMapper {
 				switch (attribute) {
 				case Id:
 				case Name:
+				case Online:
 				case ContentType:
 				case ContentLength:
 				case PublicationDate:
@@ -134,7 +142,9 @@ public class PripToStacMapper {
 					addAdditionalAttributes(stacItem, attribute, pripOdataJsonProduct.getJsonArray(propertyKey));
 					continue;
 				case Footprint:
-					setFootprint(stacItem, footprint);
+					if (footprint != null) {
+						setFootprint(stacItem, footprint);
+					}
 					continue;
 				case ContentDate:
 					setContentDate(stacItem, contentDateStartStr, contentDateEndStr);
@@ -148,12 +158,28 @@ public class PripToStacMapper {
 			}
 		}
 
+		Map<String, StacAsset> assets = new HashMap<>();
+		
+		JsonArray quicklooks = pripOdataJsonProduct.getJsonArray("Quicklooks");		
+		if (quicklooks != null) {
+			if (quicklooks.size() > 0) {
+				// Currently just a single item is supported
+				JsonObject obj = quicklooks.getJsonObject(0);
+				String quicklookId = obj.getString("Image");
+			
+				assets.put("quicklook", createQuicklookAsset(externalPripUrl, productId, quicklookId));
+			}
+
+		}
+
 		final String filename = pripOdataJsonProduct.getString(PripOdataEntityProperties.Name.name(), null);
 		// links (product metadata link) and assets (product download link)
 		if (null != externalPripUrl) {
 			stacItem.setLinks(Collections.singletonList(createSelfLink(externalPripUrl, productId, filename)));
-			stacItem.setAssets(Collections.singletonMap("product", createDownloadAsset(externalPripUrl, productId, filename)));
+			assets.put("product", createDownloadAsset(externalPripUrl, productId, filename));
 		}
+
+		stacItem.setAssets(assets);
 
 		return stacItem;
 	}
@@ -166,7 +192,8 @@ public class PripToStacMapper {
 		}
 	}
 
-	private static void setContentDate(final StacItem item, final String contentDateStartStr, final String contentDateEndStr) {
+	private static void setContentDate(final StacItem item, final String contentDateStartStr,
+			final String contentDateEndStr) {
 		if (null != contentDateStartStr || null != contentDateEndStr) {
 			final ContentDate contentDate = new ContentDate();
 			contentDate.setStart(contentDateStartStr);
@@ -198,8 +225,7 @@ public class PripToStacMapper {
 
 	private static void addAdditionalAttributes(final StacItem item, final PripOdataEntityProperties attribute,
 			final JsonArray attributesOdataJsonArray) {
-		if (Attributes != attribute && null != attributesOdataJsonArray
-				&& attributesOdataJsonArray.size() > 0) {
+		if (Attributes != attribute && null != attributesOdataJsonArray && attributesOdataJsonArray.size() > 0) {
 
 			AdditionalAttributes additionalAttributes = item.getProperty(AdditionalAttributes.class.getSimpleName());
 			if (null == additionalAttributes) {
@@ -210,34 +236,44 @@ public class PripToStacMapper {
 			for (int i = 0; i < attributesOdataJsonArray.size(); i++) {
 				final JsonObject attributeJson = attributesOdataJsonArray.getJsonObject(i);
 
-				switch (attribute) {
-				case StringAttributes:
-					additionalAttributes.addStringAttribute(attributeJson.getString("Name"), attributeJson.getString("Value"));
-					continue;
-				case IntegerAttributes:
-					additionalAttributes.addIntegerAttribute(attributeJson.getString("Name"), attributeJson.getJsonNumber("Value").longValue());
-					continue;
-				case DoubleAttributes:
-					additionalAttributes.addDoubleAttribute(attributeJson.getString("Name"), attributeJson.getJsonNumber("Value").doubleValue());
-					continue;
-				case DateTimeOffsetAttributes:
-					additionalAttributes.addDateAttribute(attributeJson.getString("Name"), attributeJson.getString("Value"));
-					continue;
-				case BooleanAttributes:
-					additionalAttributes.addBooleanAttribute(attributeJson.getString("Name"), attributeJson.getBoolean("Value"));
-					continue;
-				default:
-					continue;
+				if (attributeJson.get("Value") != JsonValue.NULL) {
+					switch (attribute) {
+					case StringAttributes:
+						additionalAttributes.addStringAttribute(attributeJson.getString("Name"),
+								attributeJson.getString("Value"));
+						continue;
+					case IntegerAttributes:
+						additionalAttributes.addIntegerAttribute(attributeJson.getString("Name"),
+								attributeJson.getJsonNumber("Value").longValue());
+						continue;
+					case DoubleAttributes:
+						additionalAttributes.addDoubleAttribute(attributeJson.getString("Name"),
+								attributeJson.getJsonNumber("Value").doubleValue());
+						continue;
+					case DateTimeOffsetAttributes:
+						additionalAttributes.addDateAttribute(attributeJson.getString("Name"),
+								attributeJson.getString("Value"));
+						continue;
+					case BooleanAttributes:
+						additionalAttributes.addBooleanAttribute(attributeJson.getString("Name"),
+								attributeJson.getBoolean("Value"));
+						continue;
+					default:
+						continue;
+					}
 				}
 			}
 		}
 	}
 
-	private static StacLink createSelfLink(final URI externalPripUrl, final String productId, final String filename) throws URISyntaxException {
+	private static StacLink createSelfLink(final URI externalPripUrl, final String productId, final String filename)
+			throws URISyntaxException {
 		final StacLink link = new StacLink();
 
-		final URI pripProductMetadataUrl = Objects.requireNonNull(externalPripUrl, "cannot create metadata link without external PRIP URL")
-				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create metadata link") + ")?$format=JSON");
+		final URI pripProductMetadataUrl = Objects
+				.requireNonNull(externalPripUrl, "cannot create metadata link without external PRIP URL")
+				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create metadata link")
+						+ ")?$format=JSON");
 		link.setHref(pripProductMetadataUrl.toString());
 		link.setType(MediaType.APPLICATION_JSON_VALUE);
 		link.setRel("self");
@@ -251,19 +287,48 @@ public class PripToStacMapper {
 		return link;
 	}
 
-	private static StacAsset createDownloadAsset(final URI externalPripUrl, final String productId, final String filename) throws URISyntaxException {
+	private static StacAsset createDownloadAsset(final URI externalPripUrl, final String productId,
+			final String filename) throws URISyntaxException {
 		final StacAsset asset = new StacAsset();
 
-		final URI pripDownloadUrl = Objects.requireNonNull(externalPripUrl, "cannot create download asset without external PRIP URL")
-				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create download link") + ")/$value");
+		final URI pripDownloadUrl = Objects
+				.requireNonNull(externalPripUrl, "cannot create download asset without external PRIP URL")
+				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create download link")
+						+ ")/$value");
 		asset.setHref(pripDownloadUrl.toString());
 		asset.setTitle(filename);
 
 		if (null != filename && filename.toUpperCase().endsWith(".ZIP")) {
 			asset.setType("application/zip");
 		}
+		
+		if (null != filename && filename.toUpperCase().endsWith(".TAR")) {
+			asset.setType("application/x-tar");
+		}
 
 		asset.setDescription("download link for product data");
+		asset.setRoles(Collections.singletonList("data"));
+
+		return asset;
+	}
+
+	private static StacAsset createQuicklookAsset(final URI externalPripUrl, final String productId, final String quicklookId) throws URISyntaxException {
+		final StacAsset asset = new StacAsset();
+
+		final URI pripDownloadUrl = Objects
+				.requireNonNull(externalPripUrl, "cannot create quicklook asset without external PRIP URL")
+				.resolve("Products(" + Objects.requireNonNull(productId, "product ID needed to create download link")
+						+ ")/Quicklooks('"
+						+ Objects.requireNonNull(quicklookId, "quicklook Id needed to create download link")
+						+ "')/$value");
+		asset.setHref(pripDownloadUrl.toString());
+		asset.setTitle(quicklookId);
+
+		if (null != quicklookId && quicklookId.toUpperCase().endsWith(".PNG")) {
+			asset.setType("image/png");
+		}
+
+		asset.setDescription("download link for quicklook data");
 		asset.setRoles(Collections.singletonList("data"));
 
 		return asset;
@@ -288,7 +353,8 @@ public class PripToStacMapper {
 				}
 			} else if (GeoJsonType.LineString.name().equalsIgnoreCase(type)) {
 				final JsonArray coordinates = pripOdataJsonFootprint.getJsonArray("coordinates");
-				final LngLatAlt[] coordinatesArray = getCoordinatesFromArray(coordinates).stream().toArray(LngLatAlt[]::new);
+				final LngLatAlt[] coordinatesArray = getCoordinatesFromArray(coordinates).stream()
+						.toArray(LngLatAlt[]::new);
 
 				if (ArrayUtil.isNotEmpty(coordinatesArray)) {
 					final LineString lineString = new LineString(coordinatesArray);
@@ -330,7 +396,8 @@ public class PripToStacMapper {
 			final JsonObject CrsProperties = crsObject.getJsonObject("properties");
 			final Map<String, Object> crsPropertiesMap = new HashMap<>();
 
-			CollectionUtil.nullToEmpty(CrsProperties.keySet()).forEach(crsPropKey -> crsPropertiesMap.put(crsPropKey, CrsProperties.get(crsPropKey)));
+			CollectionUtil.nullToEmpty(CrsProperties.keySet())
+					.forEach(crsPropKey -> crsPropertiesMap.put(crsPropKey, CrsProperties.get(crsPropKey)));
 
 			if (!crsPropertiesMap.isEmpty()) {
 				crs.setProperties(crsPropertiesMap);
@@ -380,7 +447,8 @@ public class PripToStacMapper {
 		List<LngLatAlt> coordinates = null;
 
 		if (geometry instanceof Polygon) {
-			coordinates = CollectionUtil.nullToEmptyList(((Polygon) geometry).getCoordinates()).stream().flatMap(List::stream).collect(Collectors.toList());
+			coordinates = CollectionUtil.nullToEmptyList(((Polygon) geometry).getCoordinates()).stream()
+					.flatMap(List::stream).collect(Collectors.toList());
 
 		} else if (geometry instanceof LineString) {
 			coordinates = CollectionUtil.nullToEmptyList(((LineString) geometry).getCoordinates());
@@ -392,7 +460,8 @@ public class PripToStacMapper {
 			}
 		} else {
 			throw new IllegalArgumentException(
-					String.format("minimal bounding rectangle (bbox) algorithm not implemented for type: %s", geometry.getClass().getSimpleName()));
+					String.format("minimal bounding rectangle (bbox) algorithm not implemented for type: %s",
+							geometry.getClass().getSimpleName()));
 		}
 
 		return getBoundingBox(coordinates);
@@ -400,16 +469,20 @@ public class PripToStacMapper {
 
 	private static double[] getBoundingBox(final List<LngLatAlt> coordinates) {
 		if (CollectionUtil.isNotEmpty(coordinates)) {
-			final List<Double> allXcoords = coordinates.stream().map(lngLat -> lngLat.getLongitude()).collect(Collectors.toList());
-			final List<Double> allYcoords = coordinates.stream().map(lngLat -> lngLat.getLatitude()).collect(Collectors.toList());
+			final List<Double> allXcoords = coordinates.stream().map(lngLat -> lngLat.getLongitude())
+					.collect(Collectors.toList());
+			final List<Double> allYcoords = coordinates.stream().map(lngLat -> lngLat.getLatitude())
+					.collect(Collectors.toList());
 
 			final double minX = Collections.min(allXcoords);
 			final double minY = Collections.min(allYcoords);
 			final double maxX = Collections.max(allXcoords);
 			final double maxY = Collections.max(allYcoords);
 
-			// TODO: handle cases which cross the Antimeridian (https://datatracker.ietf.org/doc/html/rfc7946#section-5.2)
-			// TODO: handle cases which contains a pole (https://datatracker.ietf.org/doc/html/rfc7946#section-5.3)
+			// TODO: handle cases which cross the Antimeridian
+			// (https://datatracker.ietf.org/doc/html/rfc7946#section-5.2)
+			// TODO: handle cases which contains a pole
+			// (https://datatracker.ietf.org/doc/html/rfc7946#section-5.3)
 
 			return new double[] { minX, minY, maxX, maxY };
 		}

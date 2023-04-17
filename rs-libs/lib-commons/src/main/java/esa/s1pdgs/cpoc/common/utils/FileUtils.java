@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import esa.s1pdgs.cpoc.common.errors.InternalErrorException;
 
@@ -73,9 +74,11 @@ public class FileUtils {
     public static void writeFile(final File file, final String data)
             throws InternalErrorException {
         try {
-            final FileWriter fileWriter = new FileWriter(file);
-            final BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            FileWriter fileWriter = null; 
+            BufferedWriter bufferedWriter = null;
             try {
+            	fileWriter = new FileWriter(file);
+            	bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(data);
                 bufferedWriter.flush();
                 bufferedWriter.close();
@@ -149,10 +152,14 @@ public class FileUtils {
     public static void delete(final String path){
         try {
 			final Path pathObj = Paths.get(path);
-			Files.walk(pathObj, FileVisitOption.FOLLOW_LINKS)
-			        .sorted(Comparator.reverseOrder())
-			        .map(Path::toFile)
-			        .forEach(File::delete);
+			try (Stream<Path> walk = Files.walk(pathObj, FileVisitOption.FOLLOW_LINKS)) {
+				walk
+				.sorted(Comparator.reverseOrder())
+		        .map(Path::toFile)
+		        .forEach(File::delete);
+			}
+			
+			        
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}

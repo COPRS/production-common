@@ -14,7 +14,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -233,6 +232,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
 				properties.getLevel(), 
 				properties,
+				commonProperties,
 				job.isDebug());
 		
 		reporting.begin(
@@ -244,7 +244,6 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		List<MissingOutput> missingOutputs = new ArrayList<>();
 		OutputEstimation outputEstimation = new OutputEstimation(
 				properties, 
-				job,
 				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), 
 				outputListFile, 
 				missingOutputs);
@@ -255,7 +254,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			throw new RuntimeException(e);
 		}
 		
-		reporting.end(toReportingOutput(result, job.isDebug(), job.getT0_pdgs_date()), new ReportingMessage("End job processing"), missingOutputs);
+		reporting.end(toReportingOutput(result, job.isDebug(), (String) job.getAdditionalFields().get("t0PdgsDate")), new ReportingMessage("End job processing"), missingOutputs);
 		return result;
 	}
 
@@ -326,7 +325,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			
 			if (properties.isProductTypeEstimationEnabled()) {
 				LOGGER.debug("output product type estimation enabled");
-				outputEstimation.estimateWithoutError();
+				outputEstimation.estimateWithoutError(job);
 			} else {
 				LOGGER.debug("output product type estimation disabled");
 			}
@@ -335,7 +334,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		} catch (Exception e) {
 			if (properties.isProductTypeEstimationEnabled()) {
 				LOGGER.debug("output product type estimation enabled");
-				outputEstimation.estimateWithError();
+				outputEstimation.estimateWithError(job);
 			} else {
 				LOGGER.debug("output product type estimation disabled");
 			}
@@ -347,7 +346,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		}
 	}
 
-	private ReportingOutput toReportingOutput(final List<Message<CatalogJob>> out, final boolean debug, final Date lastInputAvailable) {
+	private ReportingOutput toReportingOutput(final List<Message<CatalogJob>> out, final boolean debug, final String lastInputAvailable) {
 		final List<ReportingFilenameEntry> reportingEntries = out.stream()
 				.map(m -> new ReportingFilenameEntry(m.getPayload().getProductFamily(),
 						new File(m.getPayload().getProductName()).getName()))
@@ -441,7 +440,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 					 */
 
 					Files.walkFileTree(workingDir,
-							new HashSet<FileVisitOption>(Arrays.asList(FileVisitOption.FOLLOW_LINKS)),
+							new HashSet<FileVisitOption>(Arrays.asList()),
 							Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
 								@Override
 								public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)

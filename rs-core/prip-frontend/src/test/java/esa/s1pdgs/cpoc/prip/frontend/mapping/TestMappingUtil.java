@@ -31,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import esa.s1pdgs.cpoc.prip.frontend.service.edm.EdmProvider;
+import esa.s1pdgs.cpoc.prip.frontend.service.edm.QuicklookProperties;
 import esa.s1pdgs.cpoc.prip.frontend.service.mapping.MappingUtil;
 import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.GeoShapePolygon;
@@ -119,6 +120,7 @@ public class TestMappingUtil {
 		Entity expectedEntity = new Entity()
 				.addProperty(new Property(null, "Id", ValueType.PRIMITIVE, UUID.fromString("00000000-0000-0000-0000-000000000001")))
 				.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, "Name"))
+				.addProperty(new Property(null, "Online", ValueType.PRIMITIVE, true))
 				.addProperty(new Property(null, "ContentType", ValueType.PRIMITIVE, "application/octet-stream"))
 				.addProperty(new Property(null, "ContentLength", ValueType.PRIMITIVE, 123L))
 				.addProperty(new Property(null, "ContentDate", ValueType.COMPLEX, contentDate))
@@ -155,7 +157,6 @@ public class TestMappingUtil {
 		dateLink.setInlineEntitySet(new EntityCollection());
 		expectedEntity.getNavigationLinks().add(dateLink);
 		
-		
 		PripMetadata inputPripMetadata = new PripMetadata();
 		inputPripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
 		inputPripMetadata.setName("Name");
@@ -166,6 +167,7 @@ public class TestMappingUtil {
 		inputPripMetadata.setCreationDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(100000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setEvictionDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setAttributes(new LinkedHashMap<String,Object>());
+		inputPripMetadata.setOnline(true);
 		
 		GeoShapePolygon inputPolygon = new GeoShapePolygon(Arrays.asList(
 				new PripGeoCoordinate(0.0, 1.0), new PripGeoCoordinate(2.0, 3.0),
@@ -181,8 +183,21 @@ public class TestMappingUtil {
 		checksum2.setValue("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 		checksum2.setDate(checksumDate);
 		inputPripMetadata.setChecksums(Arrays.asList(checksum1, checksum2));
-		Entity actualEntity = MappingUtil.pripMetadataToEntity(inputPripMetadata, "http://example.org");
 		
+      Link quicklookLink = new Link();
+      Entity quicklookEntity1 = new Entity();
+      Entity quicklookEntity2 = new Entity();
+      quicklookEntity1.addProperty(new Property(null, QuicklookProperties.Image.name(), ValueType.PRIMITIVE, "foo.png"));
+      quicklookEntity2.addProperty(new Property(null, QuicklookProperties.Image.name(), ValueType.PRIMITIVE, "bar.png"));
+      quicklookLink.setTitle(EdmProvider.QUICKLOOK_SET_NAME);
+      EntityCollection quicklookEntityCollection = new EntityCollection();
+      quicklookEntityCollection.getEntities().add(quicklookEntity1);
+      quicklookEntityCollection.getEntities().add(quicklookEntity2);
+      quicklookLink.setInlineEntitySet(quicklookEntityCollection);
+      expectedEntity.getNavigationLinks().add(quicklookLink);
+      inputPripMetadata.setBrowseKeys(List.of("foo.png", "bar.png"));
+
+      Entity actualEntity = MappingUtil.pripMetadataToEntity(inputPripMetadata, "http://example.org");
 		Assert.assertEquals(expectedEntity, actualEntity);
 	}
 	

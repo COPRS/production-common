@@ -107,7 +107,9 @@ public class MetadataExtractionReportingOutput implements ReportingOutput {
 	
 	public ReportingOutput build() {
 		if (null != this.productSensingStartDate || null != this.productSensingStopDate
-				|| null != this.productConsolidation || null != this.productSensingConsolidation) {
+				|| null != this.productConsolidation || null != this.productSensingConsolidation 
+				|| !this.productMetadataCustomObject.isEmpty()) {
+			
 			return this;
 		} else {
 			// following SD-05-2100-1 S1PRO-REPORT-API only trace what's there, no data -> no output

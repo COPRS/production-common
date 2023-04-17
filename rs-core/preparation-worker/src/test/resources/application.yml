@@ -145,7 +145,7 @@ process:
     tm-connect-ms: 200
   fixed-delay-ms: 200
   initial-delay-ms: 500
-  
+
 mqi:
   host-uri: http://localhost:8081
   max-retries: 3

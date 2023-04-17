@@ -8,8 +8,8 @@ import java.util.Objects;
 public class PripBooleanFilter extends PripQueryFilterTerm {
 
 	public enum Function {
-		EQUALS("is"), //
-		EQUALS_NOT("is not");
+		EQ("is"), //
+		NE("is not");
 		
 		private String functionName;
 		
@@ -22,15 +22,12 @@ public class PripBooleanFilter extends PripQueryFilterTerm {
 		}
 		
 		public static Function fromString(String function) {
-			if (EQUALS.functionName.equalsIgnoreCase(function) || EQUALS.name().equalsIgnoreCase(function)
-					|| "eq".equalsIgnoreCase(function) || "==".equals(function)) {
-				return EQUALS;
+		   for (Function f : Function.values()) {
+		      if (f.functionName.equalsIgnoreCase(function) ||
+		            f.name().equalsIgnoreCase(function)) {
+		         return f;
+		      }
 			}
-			if (EQUALS_NOT.functionName.equalsIgnoreCase(function) || EQUALS_NOT.name().equalsIgnoreCase(function)
-					|| "neq".equalsIgnoreCase(function) || "!=".equals(function)) {
-				return EQUALS_NOT;
-			}
-
 			throw new PripFilterOperatorException(String.format("boolean function not supported: %s", function));
 		}
 	}
@@ -46,15 +43,10 @@ public class PripBooleanFilter extends PripQueryFilterTerm {
 		super(fieldName);
 	}
 
-	private PripBooleanFilter(String fieldName, Function function, Boolean value, boolean nested, String path) {
-		super(fieldName, nested, path);
-
-		this.function = Objects.requireNonNull(function);
-		this.value = (Objects.requireNonNull(value));
-	}
-
 	public PripBooleanFilter(String fieldName, Function function, Boolean value) {
-		this(fieldName, function, value, false, null);
+		super(fieldName, false, null);
+		this.function = Objects.requireNonNull(function);
+      this.value = (Objects.requireNonNull(value));
 	}
 
 	// --------------------------------------------------------------------------
@@ -86,15 +78,6 @@ public class PripBooleanFilter extends PripQueryFilterTerm {
 		return this.getFieldName() + " " + (null != this.function ? this.function.functionName : "NO_FUNCTION") + " "
 				+ this.getValue();
 	}
-
-	// --------------------------------------------------------------------------
-
-	@Override
-	public PripBooleanFilter copy() {
-		return new PripBooleanFilter(this.getFieldName(), this.getFunction(), this.getValue(), this.isNested(), this.getPath());
-	}
-
-	// --------------------------------------------------------------------------
 
 	public Function getFunction() {
 		return this.function;
