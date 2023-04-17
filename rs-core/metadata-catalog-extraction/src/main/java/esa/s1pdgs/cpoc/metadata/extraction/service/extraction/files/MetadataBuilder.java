@@ -151,6 +151,7 @@ public class MetadataBuilder {
 	 * @throws MetadataExtractionException
 	 * @throws MetadataMalformedException
 	 */
+<<<<<<< HEAD
 	public ProductMetadata buildS2ProductFileMetadata(final S2FileDescriptor descriptor, final List<File> metadataFiles, final CatalogJob job)
 			throws MetadataExtractionException, MetadataMalformedException {
 		ProductMetadata metadataToIndex = extractor.processS2Metadata(descriptor, metadataFiles, job.getProductFamily(), job.getProductName());
@@ -190,6 +191,11 @@ public class MetadataBuilder {
 	public ProductMetadata buildS2SADFileMetadata(final S2FileDescriptor descriptor, final File metadataFile, final CatalogJob job)
 			throws MetadataExtractionException, MetadataMalformedException {
 		ProductMetadata metadataToIndex = extractor.processS2SADMetadata(descriptor, metadataFile, job.getProductFamily(), job.getProductName());
+=======
+	public ProductMetadata buildS2ProductFileMetadata(final S2FileDescriptor descriptor, final File metadataFile, final CatalogJob job)
+			throws MetadataExtractionException, MetadataMalformedException {
+		ProductMetadata metadataToIndex = extractor.processS2Metadata(descriptor, metadataFile, job.getProductFamily(), job.getProductName());
+>>>>>>> main
 		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
 		return metadataToIndex;
 	}

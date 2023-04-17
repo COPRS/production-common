@@ -43,6 +43,12 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 public class TestS2ProductMetadataExtractor {
 
 	private static final String PATTERN = "^(S2)(A|B|_)_([A-Z0-9]{4})_((MSI)_(L0_|L1A|L1B|L1C)_(GR|DS|TL|TC))_\\w{4}_(\\d{8}T\\d{6})(.*)$";
+<<<<<<< HEAD
+=======
+
+	@Mock
+	private EsServices esServices;
+>>>>>>> main
 
 	@Mock
 	private ObsClient obsClient;
@@ -102,12 +108,22 @@ public class TestS2ProductMetadataExtractor {
 				.newReporting("TestMetadataExtraction");
 
 		// Prepare OBS returnValues
+<<<<<<< HEAD
 		final String metadataPath = "S2A_OPER_MTD_L0__DS_SGS__20200420T205828_S20200322T173347.xml";
 		final List<String> metadataFilenames = Arrays.asList(metadataPath);
 		doReturn(metadataFilenames).when(obsClient).list(Mockito.any(), Mockito.any());
 
 		final List<File> metadataFiles = Arrays.asList(new File(testDir, keyObs + "/" + metadataPath));
 		doReturn(metadataFiles).when(obsClient).download(Mockito.any(), Mockito.any());
+=======
+		final String metadataPath = keyObs + File.separator
+				+ "S2A_OPER_MTD_L0__DS_SGS__20200420T205828_S20200322T173347.xml";
+		final List<File> metadataFiles = Arrays.asList(new File(testDir, metadataPath));
+		doReturn(metadataFiles).when(obsClient).download(
+				eq(Collections
+						.singletonList(new ObsDownloadObject(ProductFamily.S2_L0_DS, metadataPath, testDir.getPath()))),
+				Mockito.any());
+>>>>>>> main
 
 		// Prepare message
 		final CatalogJob message = Utils.newCatalogJob(keyObs, keyObs, ProductFamily.S2_L0_DS, "NRT");
@@ -126,12 +142,21 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setInstrumentShortName("MSI");
 
 		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
+<<<<<<< HEAD
 				metadataFiles, message);
 
 		final ProductMetadata result = extractor.extract(reporting, message);
 
 		Iterator<String> it = expected.keys().iterator();
 
+=======
+				metadataFiles.get(0), message);
+
+		final ProductMetadata result = extractor.extract(reporting, message);
+
+		Iterator<String> it = expected.keys().iterator();
+		
+>>>>>>> main
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"coordinates".equals(key)) {
@@ -149,12 +174,22 @@ public class TestS2ProductMetadataExtractor {
 				.newReporting("TestMetadataExtraction");
 
 		// Prepare OBS returnValues
+<<<<<<< HEAD
 		final String metadataPath = "S2A_OPER_MTD_L0__GR_SGS__20200420T205828_S20200322T173347_D01.xml";
 		final List<String> metadataFilenames = Arrays.asList(metadataPath);
 		doReturn(metadataFilenames).when(obsClient).list(Mockito.any(), Mockito.any());
 
 		final List<File> metadataFiles = Arrays.asList(new File(testDir, keyObs + "/" + metadataPath));
 		doReturn(metadataFiles).when(obsClient).download(Mockito.any(), Mockito.any());
+=======
+		final String metadataPath = keyObs + File.separator
+				+ "S2A_OPER_MTD_L0__GR_SGS__20200420T205828_S20200322T173347_D01.xml";
+		final List<File> metadataFiles = Arrays.asList(new File(testDir, metadataPath));
+		doReturn(metadataFiles).when(obsClient).download(
+				eq(Collections
+						.singletonList(new ObsDownloadObject(ProductFamily.S2_L0_GR, metadataPath, testDir.getPath()))),
+				Mockito.any());
+>>>>>>> main
 
 		// Prepare message
 		final CatalogJob message = Utils.newCatalogJob(keyObs, keyObs, ProductFamily.S2_L0_GR, "NRT");
@@ -173,12 +208,21 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setInstrumentShortName("MSI");
 
 		final ProductMetadata expected = extractor.mdBuilder.buildS2ProductFileMetadata(expectedDescriptor,
+<<<<<<< HEAD
 				metadataFiles, message);
 
 		final ProductMetadata result = extractor.extract(reporting, message);
 
 		Iterator<String> it = expected.keys().iterator();
 
+=======
+				metadataFiles.get(0), message);
+
+		final ProductMetadata result = extractor.extract(reporting, message);
+
+		Iterator<String> it = expected.keys().iterator();
+		
+>>>>>>> main
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"coordinates".equals(key)) {
