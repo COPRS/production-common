@@ -158,5 +158,14 @@ class TestStatementParser {
 		String query = parser.buildOdataQuery(params);
 		Assert.assertEquals("Id eq ae4ac3c0-f207-47a7-9585-d77a2bf164c2", query);
 	}
+	
+	@Test
+	public void testCloudcover() {
+		Map<String,String> params = Map.of("cloudcover","/10");
+//		parser.parseConfig(configs);
+		String query = parser.buildOdataQuery(params);
+		System.out.println(query);
+//		Assert.assertEquals("x",query);
+	}
 
 }
