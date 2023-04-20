@@ -28,7 +28,7 @@ RUN tar -xf OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz && rm OpenJDK11U
 WORKDIR /app
 #WA for #939
 #RUN mkdir -p /app && chown rsuser:rsuser /app
-RUN mkdir -p /app && chown ops3pdgs:ops3pdgs /app
+RUN mkdir -p /app && chown ops3pdgs:S3appladm /app
 
 #USER rsuser:rsuser
 #WA for #939
