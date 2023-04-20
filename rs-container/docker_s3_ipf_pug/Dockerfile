@@ -8,7 +8,7 @@ FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/sentinel3/s3-pug:3.45
 ARG VERSION
 ARG COMMIT_ID
 ARG BRANCH_TEXT
-
+ 
 ### Reconstruction of the base image provided by the agency
 USER root
 
