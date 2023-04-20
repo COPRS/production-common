@@ -23,9 +23,12 @@ WORKDIR /opt
 RUN wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.16.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz
 RUN tar -xf OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz && rm OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz
 
-### End of Base-Image  
+### End of Base-Image
+
 WORKDIR /app
-RUN mkdir -p /app && chown rsuser:rsuser /app
+#WA for #939
+#RUN mkdir -p /app && chown rsuser:rsuser /app
+RUN mkdir -p /app && chown ops3pdgs:ops3pdgs /app
 
 #USER rsuser:rsuser
 #WA for #939
