@@ -27,7 +27,9 @@ RUN tar -xf OpenJDK11U-jdk_x64_linux_hotspot_11.0.16.1_1.tar.gz && rm OpenJDK11U
 WORKDIR /app
 RUN mkdir -p /app && chown rsuser:rsuser /app
 
-USER rsuser:rsuser
+#USER rsuser:rsuser
+#WA for #939
+USER ops3pdgs
 
 # Adding Version information
 RUN echo "${VERSION}" >> VERSION
@@ -52,6 +54,8 @@ RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 # Install java 11 - workaround for AdoptJDK
 RUN sed -i '1 a\export PATH=$PATH:/opt/jdk-11.0.16.1+1/bin' /app/start.sh
 
-USER rsuser:rsuser
+#USER rsuser:rsuser
+#WA for #939
+USER ops3pdgs
 
 ENTRYPOINT ["/tini", "--", "/app/start.sh"]
