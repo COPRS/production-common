@@ -61,7 +61,7 @@ RUN mkdir -p /data/oqcWD && chown ops3pdgs:S3appladm /data/oqcWD
 RUN sed -i '1 a\export PATH=$PATH:/opt/jdk-11.0.16.1+1/bin' /app/start.sh
 
 #USER rsuser:rsuser
-#WA for #939
+#WA for #939 
 USER ops3pdgs
 
 ENTRYPOINT ["/tini", "--", "/app/start.sh"]
