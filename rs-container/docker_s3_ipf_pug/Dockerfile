@@ -51,8 +51,11 @@ ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini 
 
-RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
-RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
+#RUN mkdir -p /data/localWD && chown rsuser:rsuser /data/localWD
+#RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
+#WA for #939
+RUN mkdir -p /data/localWD && chown ops3pdgs:S3appladm /data/localWD
+RUN mkdir -p /data/oqcWD && chown ops3pdgs:S3appladm /data/oqcWD
 
 # Install java 11 - workaround for AdoptJDK
 RUN sed -i '1 a\export PATH=$PATH:/opt/jdk-11.0.16.1+1/bin' /app/start.sh
