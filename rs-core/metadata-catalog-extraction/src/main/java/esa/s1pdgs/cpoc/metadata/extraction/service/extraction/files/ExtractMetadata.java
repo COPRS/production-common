@@ -581,7 +581,7 @@ public class ExtractMetadata {
 				if (!metadata.has("sliceNumber")
 						|| "".equals(metadata.get("sliceNumber").toString())) {
 					metadata.put("sliceNumber", 1);
-				} else if (StringUtils.hasText(metadata.get("sliceNumber").toString())) {
+				} else if (!StringUtils.hasLength(metadata.get("sliceNumber").toString())) {
 					metadata.put("sliceNumber", 1);
 				}
 				if (!metadata.has("totalNumberOfSlice")
