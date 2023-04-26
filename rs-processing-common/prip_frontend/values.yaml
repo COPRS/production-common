@@ -99,7 +99,7 @@ obs:
   disable-chunked-encoding: 'false'
   endpoint-region: eu-west-0
   user-id: ${OBS_USERNAME}
-  endpoint: http://oss.eu-west-0.prod-cloud-ocb.orange-business.com
+  endpoint: oss.eu-west-0.prod-cloud-ocb.orange-business.com
 
 resources:
   cpu:
