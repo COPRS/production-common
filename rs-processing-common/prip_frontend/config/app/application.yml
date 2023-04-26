@@ -42,5 +42,5 @@ server:
   # Port used for publishing REST API
   port: {{ .Values.service.port }}
 
-# Generated from obs-stream-parameters.properties  
-{{ .Values.obs}}
+# Generated from obs-stream-parameters.properties
+obs: {{ toYaml  .Values.obs | nindent 2 }}

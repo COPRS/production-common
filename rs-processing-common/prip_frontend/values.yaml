@@ -18,7 +18,6 @@ image:
   
   name: rs-core-prip-frontend
   tag: {{CHART_VERSION}}
-  
   imagePullSecrets: spring-cloud-dataflow-registry-dockersecret
   
 update:
