@@ -78,9 +78,9 @@
 				<xsl:copy-of select="string(//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'familyName']/@abbreviation)"/>
 			</instrumentShortName>
 		</xsl:if>
-		<xsl:if test="//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'extension']/*[name() = 's1sar:instrumentMode']/*[name() = 's1sar:swath']/text() != ''">
+		<xsl:if test="//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'extension']/*[local-name() = 'instrumentMode']/*[local-name() = 'swath']/text() != ''">
 			<swathIdentifier>
-				<xsl:copy-of select="//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'extension']/*[name() = 's1sar:instrumentMode']/*[name() = 's1sar:swath']/text()"/>
+				<xsl:copy-of select="//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'extension']/*[local-name() = 'instrumentMode']/*[local-name() = 'swath']/text()"/>
 			</swathIdentifier>
 		</xsl:if>
 		<xsl:if test="//*[local-name() = 'orbitReference']/*[local-name() = 'cycleNumber']/text() != ''">
@@ -124,19 +124,19 @@
 				<xsl:copy-of select="//*[local-name() = 'standAloneProductInformation']/*[local-name() = 'productClass']/text()"/>
 			</productClass>
 		</xsl:if>
-		<xsl:if test="//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'extension']/*[name() = 's1sar:instrumentMode']/*[name() = 's1sar:mode']/text() != ''">
+		<xsl:if test="//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'extension']/*[local-name() = 'instrumentMode']/*[local-name() = 'mode']/text() != ''">
 			<operationalMode>
-				<xsl:copy-of select="//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'extension']/*[name() = 's1sar:instrumentMode']/*[name() = 's1sar:mode']/text()"/>
+				<xsl:copy-of select="//*[local-name() = 'platform']/*[local-name() = 'instrument']/*[local-name() = 'extension']/*[local-name() = 'instrumentMode']/*[local-name() = 'mode']/text()"/>
 			</operationalMode>
 		</xsl:if>
-		<xsl:if test="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfMissingElements']/text() != ''">
+		<xsl:if test="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[local-name() = 'qualityProperties']/*[local-name() = 'numOfMissingElements']/text() != ''">
 			<qualityNumOfMissingElements>
-				<xsl:copy-of select="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfMissingElements']/text()"/>
+				<xsl:copy-of select="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[local-name() = 'qualityProperties']/*[local-name() = 'numOfMissingElements']/text()"/>
 			</qualityNumOfMissingElements>
 		</xsl:if>
-		<xsl:if test="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfCorruptedElements']/text() != ''">
+		<xsl:if test="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[local-name() = 'qualityProperties']/*[local-name() = 'numOfCorruptedElements']/text() != ''">
 			<qualityNumOfCorruptedElements>
-				<xsl:copy-of select="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfCorruptedElements']/text()"/>
+				<xsl:copy-of select="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[local-name() = 'qualityProperties']/*[local-name() = 'numOfCorruptedElements']/text()"/>
 			</qualityNumOfCorruptedElements>
 		</xsl:if>
 	</xsl:template>
