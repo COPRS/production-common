@@ -307,7 +307,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				// RS-895: Remove all missing outputs if processing was a success
 				if (outputEstimation.getMissingOutputs().size() > 0) {
 					LOGGER.info(
-							"The production was successful, but there were some missing outputs detected by the output estimation:");
+							"The production was successful, but there were some missing outputs detected by the output estimation.");
 					
 					outputEstimation.setMissingOutputs(new ArrayList<>());
 				}
