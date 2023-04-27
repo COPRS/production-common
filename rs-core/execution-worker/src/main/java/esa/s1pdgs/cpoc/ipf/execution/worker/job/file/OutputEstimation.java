@@ -380,6 +380,14 @@ public class OutputEstimation {
 
 		return customObject;
 	}
+	
+	public List<MissingOutput> getMissingOutputs() {
+		return this.missingOutputs;
+	}
+	
+	public void setMissingOutputs(List<MissingOutput> missingOutputs) {
+		this.missingOutputs = missingOutputs;
+	}
 
 	static String productClassOf(final String productType) {
 		return productType.substring(productType.length() - 1);
