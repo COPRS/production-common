@@ -462,7 +462,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	}
 
 	private List<ReportingFilenameEntry> toReportFilenames(final IpfExecutionJob job) {
-		return job.getInputs().stream().map(this::newEntry).collect(Collectors.toList());
+		return new ArrayList<>(job.getInputs().stream().map(this::newEntry).collect(Collectors.toSet()));
 	}
 
 	private ReportingFilenameEntry newEntry(final LevelJobInputDto input) {
