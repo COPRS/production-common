@@ -102,7 +102,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		
 		try {
 			createAndSave(compressionEvent);
-		} catch (MetadataQueryException | InterruptedException | PripPublishingException | SdkClientException e) {
+		} catch (Exception e) {
 			final String errorMessage = String.format("Error on publishing file %s in PRIP: %s", name,
 					LogUtils.toString(e));
 			reporting.error(new ReportingMessage(errorMessage));
