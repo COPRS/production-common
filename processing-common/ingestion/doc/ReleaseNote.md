@@ -117,7 +117,7 @@ Please note that the following parameters are grouped by an inbox. The name of t
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.stationName``|The name of the station from where the products are retrieved from e.g. ``MTI_``|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.missionId``|The identifier of the mission from the inbox in upper case:<br>* S1<br>* S2<br>* S3|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.station-retention-time``|Defines after how many days entries shall be deleted from the persistence of the inbox|
-|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignore-files-before-date``|Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08:00:00.000Z``. This pattern can be used to avoid that all historical products from the inbox will be pulled into the system.|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignore-files-before-date``|Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08:00:00.000Z``. Please note that if a data in the future is set, the service will automatically use the current time of the system as filter. This pattern can be used to avoid that all historical products from the inbox will be pulled into the system.|
 
 
 ### MongoDB
