@@ -141,7 +141,9 @@ public class EsServices {
 					fixed = true;
 				}
 				
-				if (family == ProductFamily.S3_L0 && e.getDetailedMessage() != null && e.getDetailedMessage().contains("Self-intersection at or near point")) {
+				// S3 L0 products seem to have broken footprints. If a self intersecting error
+				// occurs, remove the sliceCoordinates and try again
+				if (e.getDetailedMessage() != null && e.getDetailedMessage().contains("Self-intersection at or near point")) {
 					warningMessage = "Invalid self-intersecting footprint detected, dropping it as a workaround for #RS-436";
 					LOGGER.warn(warningMessage);
 					product.remove("sliceCoordinates");

@@ -823,7 +823,7 @@ public class ExtractMetadata {
 		
 		final Map<String, Object> geoShape = new HashMap<>();
 		final List<List<Double>> geoShapeCoordinates = new ArrayList<>();
-		geoShape.put("type", "polygon");
+		geoShape.put("type", "Polygon");
 		
 		List<Double> longitudes = new ArrayList<>();
 		for (int i = 0; i < coords.length; i = i + 2) {
