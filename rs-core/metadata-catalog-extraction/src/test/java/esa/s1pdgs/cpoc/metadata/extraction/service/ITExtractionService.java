@@ -525,7 +525,7 @@ public class ITExtractionService {
 		Map<String,Object> coordinates = (Map<String,Object>)metadata.get("coordinates");
 		assertEquals(3, coordinates.size());
 		assertEquals("counterclockwise", coordinates.get("orientation"));
-		assertEquals("polygon", coordinates.get("type"));
+		assertEquals("Polygon", coordinates.get("type"));
 		@SuppressWarnings("unchecked")
 		List<List<List<Double>>> coordinates2 = (List<List<List<Double>>>)coordinates.get("coordinates");
 		assertEquals(1, coordinates2.size());
