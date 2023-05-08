@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: RS Native API
   description: The Native API of the Copernicus Reference System (COPRS) that can be used to query and download product data.
-  version: 1.12.0-rc1
+  version: 1.13.0-rc1
 servers:
   - url: http://localhost:8080
 paths:
@@ -223,9 +223,44 @@ paths:
     servers:
       - url: http://localhost:8080
   /stac/search:
+    post:
+      summary: Search STAC items with simple filtering via POST request
+      operationId: getItemSearchPost
+      description: |-
+        Retrieve Items matching filters via a POST requests. This can be especially useful if the query parameter are too long for the GET request. This query is performed as a list of query parameters within the request body.
+      tags:
+        - STAC Interface
+      requestBody:
+        content:
+          application/json:
+            example:
+              productname: S3B
+              bbox: 76.036377 -75.654331,76.57106 -75.654331,76.57196 -75.594357,76.036377 -75.594357,76.036377 -75.654331
+            schema:
+              anyOf:
+                - $ref: '#/components/parameters/ids'
+                - $ref: '#/components/parameters/bbox'
+                - $ref: '#/components/parameters/point'
+                - $ref: '#/components/parameters/line'
+                - $ref: '#/components/parameters/productname'
+                - $ref: '#/components/parameters/collections'
+                - $ref: '#/components/parameters/cloudcover'
+                - $ref: '#/components/parameters/datetime'
+                - $ref: '#/components/parameters/publicationdate'
+                - $ref: '#/components/parameters/polarisation'
+                - $ref: '#/components/parameters/page'
+                - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: A feature collection.
+          content:
+            application/geo+json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/itemCollection'
     get:
-      summary: Search STAC items with simple filtering.
-      operationId: getItemSearch
+      summary: Search STAC items with simple filtering via GET request
+      operationId: getItemSearchGet
       description: |-
         Retrieve Items matching filters. Intended as a shorthand API for simple
         queries.
