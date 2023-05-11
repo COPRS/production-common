@@ -999,10 +999,10 @@ public class ExtractMetadataTest {
 			assertEquals(-63.219410, coordinates.get(0).get(0).get(1));
 			assertEquals(97.84906, coordinates.get(0).get(1).get(0));
 			assertEquals(-63.146168, coordinates.get(0).get(1).get(1));
-			assertEquals(102.146751, coordinates.get(0).get(2).get(0));
-			assertEquals(-62.931400, coordinates.get(0).get(2).get(1));
-			assertEquals(100.111465, coordinates.get(0).get(3).get(0));
-			assertEquals(-61.471767, coordinates.get(0).get(3).get(1));
+			assertEquals(99.778091, coordinates.get(0).get(2).get(0));
+			assertEquals(-61.390305, coordinates.get(0).get(2).get(1));
+			assertEquals(102.5215, coordinates.get(0).get(3).get(0));
+			assertEquals(-63.010429, coordinates.get(0).get(3).get(1));
 			assertEquals(98.145752, coordinates.get(0).get(4).get(0));
 			assertEquals(-63.219410, coordinates.get(0).get(4).get(1));
 		} catch (final AbstractCodedException fe) {
