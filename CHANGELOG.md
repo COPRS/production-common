@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.1-rc1] - 2023-05-17
+
+### Added
+
+- RS-916: Adding post support for STAC search
+
+### Changed
+- RS-895: Removing missing outputs if production was success as estimation might not reflect reality
+- RS-900: metadata extraction regex for s2 l2 is missing
+- RS-911: Bad request for STAC publication date query
+- RS-913: Improved STAC API documentation regarding the use of Ids
+- RS-914: Same AIO session generated many times after an error, updating default configuration
+- RS-922: For standalone components allowing to set the bucket configuration via values.yaml
+- RS-933: Ensure that filenames in string are not duplicated of the input is used in multiple tasks
+- RS-939: PUG: All the product data unit generations exited in error
+- RS-943: METADATA/S1-L12 extracts wrong slice number
+- RS-946: [S1] "operationalMode" is not available for product S1 Level-1 and Level-2 on the PRIP
+- RS-949: Improving documentation to make clear the behaviour of ignoreFilesBefore dates in the future
+- RS-954: Increasing S1 L2 timeout to 6000s
+- RS-955: Automatic retries set to 1, related to RS-914
+- RS-956: Fixing behaviour how shape for S1 WV products are caluclated to avoid self-intersecting polygons
+- RS-957: Ensure that the PRIP worker is also adding a end trace message when a Runtime Exception is raised
+- RS-958: Using "Polygon" to use proper GeoJSON
+- RS-959: Fixing invalid L0 footprints also for PUG products
+
+### Removed
+
+- N/A
+
 ## [1.13.0-rc1] - 2023-03-30
 
 ### Added
