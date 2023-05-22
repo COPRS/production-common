@@ -61,10 +61,11 @@ public class S2ProductMetadataExtractor extends AbstractMetadataExtractor {
 		 * used, but instead providing a single jp2 product that does contain an embedded Product Inventory file. If we identify such a product
 		 * a special handling will be executed.
 		 */
-		if (ProductFamily.S2_L1C_TC.equals(catalogJob.getProductFamily())) {
+		if (ProductFamily.S2_L1C_TC.equals(catalogJob.getProductFamily()) || 
+				(ProductFamily.S2_L2A_TC.equals(catalogJob.getProductFamily()))) {
 			LOG.info("Incoming job is a S2 L1C TC product and metadata will be extracted from jp2");
 			
-			// The metadata is embedded in the actual product, so instead of the metafata
+			// The metadata is embedded in the actual product, so instead of the metadata
 			final File productFile = downloadMetadataFileToLocalFolder(reportingFactory, catalogJob.getProductFamily(),
 					catalogJob.getKeyObjectStorage());
 	

@@ -469,11 +469,17 @@ public class ExtractMetadata {
                   break;
                }               
             }
+            
+            // Unable to find the embedded metadata file in the first Mb of the file.
+            if (xml == null) {
+            	LOGGER.error("Unable to extract metadata from the first MB of the jp2 file. The structure of the file does not match the expectations");
+            	throw new RuntimeException("Unable to extract the metadata from the first MB of the jp2 file " + productFile);
+            }
+            
             LOGGER.info("Extracted Inventory Metadata from jp2 file");
             return xml;
          } catch(IOException e) {
-        	 System.out.println(e);
-            throw new RuntimeException("Could not read metadata from file", e );
+            throw new RuntimeException("Could not read metadata from file " + productFile, e );
          }
 	}
 	
