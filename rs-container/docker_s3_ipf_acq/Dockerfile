@@ -115,4 +115,14 @@ RUN mkdir -p /data/oqcWD && chown rsuser:rsuser /data/oqcWD
 
 #USER rsuser:rsuser
 
+# WA RS-968: For some reason the processors seems not always generate the NRTAP structure correctly. To ensure that these directories are existing,
+# they are generated in the docker image
+RUN mkdir -p /data/NRTAP/CADU/S3{A,B}
+RUN mkdir -p /data/NRTAP/CADU_Cache/S3{A,B}
+RUN mkdir -p /data/NRTAP/DICache
+RUN mkdir -p /data/NRTAP/HighPriorityOutBasket
+RUN mkdir -p /data/NRTAP/L0Orders
+RUN mkdir -p /data/NRTAP/LowPriorityOutBasket
+RUN mkdir -p /data/NRTAP/WorkingDir/S3{A,B}
+
 ENTRYPOINT ["/tini", "--", "/app/start.sh"]
