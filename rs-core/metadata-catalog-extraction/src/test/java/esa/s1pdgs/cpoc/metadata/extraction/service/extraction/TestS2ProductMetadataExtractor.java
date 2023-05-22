@@ -1,7 +1,6 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
@@ -35,7 +34,6 @@ import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.xml.XmlConverter;
 import esa.s1pdgs.cpoc.metadata.model.MissionId;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
-import esa.s1pdgs.cpoc.obs_sdk.ObsDownloadObject;
 import esa.s1pdgs.cpoc.obs_sdk.SdkClientException;
 import esa.s1pdgs.cpoc.report.Reporting;
 import esa.s1pdgs.cpoc.report.ReportingUtils;
@@ -177,6 +175,51 @@ public class TestS2ProductMetadataExtractor {
 
 		final ProductMetadata result = extractor.extract(reporting, message);
 
+		Iterator<String> it = expected.keys().iterator();
+
+		while (it.hasNext()) {
+			String key = it.next();
+			if (!"coordinates".equals(key)) {
+				assertEquals(expected.get(key), result.get(key));
+			}
+		}
+	}
+	
+	@Test
+	public void extract_S2_L1_TCI() throws AbstractCodedException, SdkClientException {
+		final String keyObs = "S2B_OPER_MSI_L1C_TC_EPAE_20191001T102654_A013417_T39UWP_N02.08.jp2";
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S2)
+				.newReporting("TestMetadataExtraction");
+		
+		// Prepare OBS returnValues
+		final List<String> metadataFilenames = Arrays.asList(keyObs);
+		doReturn(metadataFilenames).when(obsClient).list(Mockito.any(), Mockito.any());
+				
+		final List<File> metadataFiles = Arrays.asList(new File(testDir, keyObs));
+		doReturn(metadataFiles).when(obsClient).download(Mockito.any(), Mockito.any());
+		
+		// Prepare message
+		final CatalogJob message = Utils.newCatalogJob(keyObs, keyObs, ProductFamily.S2_L1C_TC, "NRT");
+		
+		final S2FileDescriptor expectedDescriptor = new S2FileDescriptor();
+		expectedDescriptor.setProductType("MSI_L1C_TC");
+		expectedDescriptor.setProductClass("OPER");
+		expectedDescriptor.setRelativePath(keyObs);
+		expectedDescriptor.setFilename(keyObs);
+		expectedDescriptor.setProductName(keyObs);
+		expectedDescriptor.setKeyObjectStorage(keyObs);
+		expectedDescriptor.setMissionId("S2");
+		expectedDescriptor.setSatelliteId("B");
+		expectedDescriptor.setProductFamily(ProductFamily.S2_L1C_TC);
+		expectedDescriptor.setMode("NRT");
+		expectedDescriptor.setInstrumentShortName("MSI");
+		
+		final ProductMetadata expected = extractor.mdBuilder.buildS2L1TCIMetadata(expectedDescriptor,
+				metadataFiles.get(0), message);
+		
+		final ProductMetadata result = extractor.extract(reporting, message);
+		
 		Iterator<String> it = expected.keys().iterator();
 
 		while (it.hasNext()) {

@@ -176,6 +176,13 @@ public class MetadataBuilder {
 		return metadataToIndex;
 	}
 	
+	public ProductMetadata buildS2L1TCIMetadata(final S2FileDescriptor descriptor, final File metadataFile, final CatalogJob job) 
+			throws MetadataExtractionException, MetadataMalformedException {
+		ProductMetadata metadataToIndex = extractor.processS2L1TCI(descriptor, metadataFile, job.getProductFamily(), job.getProductName());
+		LOGGER.debug("JSON OBJECT:{}", metadataToIndex.toString());
+		return metadataToIndex;
+	}
+	
 	/**
 	 * Build the metadata for an S2 SAD
 	 * 
