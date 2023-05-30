@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -27,6 +28,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.CatalogEvent;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfExecutionJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.IpfPreparationJob;
 import esa.s1pdgs.cpoc.mqi.model.queue.util.CatalogEventAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.report.TaskTableLookupReportingOutput;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
@@ -50,9 +52,12 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 
 	private final CommonConfigurationProperties commonProperties;
 
+	private PreparationWorkerProperties workerProperties;
+
 	public PreparationWorkerService(final TaskTableMapperService taskTableService, final ProductTypeAdapter typeAdapter,
 			final ProcessProperties properties, final AppCatJobService appCat,
-			final InputSearchService inputSearchService, final CommonConfigurationProperties commonProperties) {
+			final InputSearchService inputSearchService, final CommonConfigurationProperties commonProperties,
+			final PreparationWorkerProperties workerProperties) {
 		this.taskTableService = taskTableService;
 		this.typeAdapter = typeAdapter;
 		this.processProperties = properties;
@@ -87,13 +92,21 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		} catch (Exception e) {
 			LOGGER.error("Preparation worker failed: {}", LogUtils.toString(e));
 			reporting.error(new ReportingMessage("Error on handling CatalogEvent: %s", LogUtils.toString(e)));
-			
+
 			throw new RuntimeException(e);
 		}
-		
+
 		try {
 			// Find matching jobs
-			List<AppDataJob> appDataJobs = appCatJobService.findByTriggerProduct(catalogEvent.getMetadataProductType());
+			String triggerString = catalogEvent.getMetadataProductType();
+			for (Entry<String, String> entry : workerProperties.getMapTypeMeta().entrySet()) {
+				if (triggerString.matches(entry.getValue())) {
+					triggerString = entry.getKey();
+					break;
+				}
+			}
+
+			List<AppDataJob> appDataJobs = appCatJobService.findByTriggerProduct(triggerString);
 
 			// Check if jobs are ready
 			result = inputSearchService.checkIfJobsAreReady(appDataJobs);
@@ -115,9 +128,6 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 	}
 
 	public final List<AppDataJob> dispatch(final IpfPreparationJob preparationJob) throws Exception {
-
-		MissionId mission = MissionId
-				.valueOf((String) preparationJob.getCatalogEvent().getMetadata().get(MissionId.FIELD_NAME));
 
 		final List<AppDataJob> jobs = typeAdapter.createAppDataJobs(preparationJob);
 
@@ -142,8 +152,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 
 	// This needs to be synchronized to avoid duplicate jobs
 	private final synchronized List<AppDataJob> handleJobs(final IpfPreparationJob preparationJob,
-			final List<AppDataJob> jobsFromMessage, final String tasktableFilename)
-			throws AbstractCodedException {
+			final List<AppDataJob> jobsFromMessage, final String tasktableFilename) throws AbstractCodedException {
 		final AppDataJob firstJob = jobsFromMessage.get(0);
 
 		final CatalogEvent firstEvent = firstJob.getCatalogEvents().get(0);
