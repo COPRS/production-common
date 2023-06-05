@@ -64,6 +64,7 @@ public class PreparationWorkerService implements Function<CatalogEvent, List<Mes
 		this.appCatJobService = appCat;
 		this.inputSearchService = inputSearchService;
 		this.commonProperties = commonProperties;
+		this.workerProperties = workerProperties;
 	}
 
 	@Override
