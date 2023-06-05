@@ -40,7 +40,7 @@ import esa.s1pdgs.cpoc.report.ReportingUtils;
 
 public class TestS2ProductMetadataExtractor {
 
-	private static final String PATTERN = "^(S2)(A|B|_)_([A-Z0-9]{4})_((MSI)_(L0_|L1A|L1B|L1C)_(GR|DS|TL|TC))_\\w{4}_(\\d{8}T\\d{6})(.*)$";
+	private static final String PATTERN = "^(S2)(A|B|_)_([A-Z0-9]{4})_((MSI)_(L0_|L1A|L1B|L1C|L2A)_(GR|DS|TL|TC))_\\w{4}_(\\d{8}T\\d{6})(.*)$";
 
 	@Mock
 	private ObsClient obsClient;
@@ -212,6 +212,51 @@ public class TestS2ProductMetadataExtractor {
 		expectedDescriptor.setMissionId("S2");
 		expectedDescriptor.setSatelliteId("B");
 		expectedDescriptor.setProductFamily(ProductFamily.S2_L1C_TC);
+		expectedDescriptor.setMode("NRT");
+		expectedDescriptor.setInstrumentShortName("MSI");
+		
+		final ProductMetadata expected = extractor.mdBuilder.buildS2L1TCIMetadata(expectedDescriptor,
+				metadataFiles.get(0), message);
+		
+		final ProductMetadata result = extractor.extract(reporting, message);
+		
+		Iterator<String> it = expected.keys().iterator();
+
+		while (it.hasNext()) {
+			String key = it.next();
+			if (!"coordinates".equals(key)) {
+				assertEquals(expected.get(key), result.get(key));
+			}
+		}
+	}
+	
+	@Test
+	public void extract_S2_L2A_TCI() throws AbstractCodedException, SdkClientException {
+		final String keyObs = "S2B_OPER_MSI_L2A_TC_REFS_20230601T211358_A032516_T59GPL_N04.00.jp2";
+		
+		final Reporting reporting = ReportingUtils.newReportingBuilder(MissionId.S2)
+				.newReporting("TestMetadataExtraction");
+		
+		// Prepare OBS returnValues
+		final List<String> metadataFilenames = Arrays.asList(keyObs);
+		doReturn(metadataFilenames).when(obsClient).list(Mockito.any(), Mockito.any());
+				
+		final List<File> metadataFiles = Arrays.asList(new File(testDir, keyObs));
+		doReturn(metadataFiles).when(obsClient).download(Mockito.any(), Mockito.any());
+		
+		// Prepare message
+		final CatalogJob message = Utils.newCatalogJob(keyObs, keyObs, ProductFamily.S2_L2A_TC, "NRT");
+		
+		final S2FileDescriptor expectedDescriptor = new S2FileDescriptor();
+		expectedDescriptor.setProductType("MSI_L2A_TC");
+		expectedDescriptor.setProductClass("OPER");
+		expectedDescriptor.setRelativePath(keyObs);
+		expectedDescriptor.setFilename(keyObs);
+		expectedDescriptor.setProductName(keyObs);
+		expectedDescriptor.setKeyObjectStorage(keyObs);
+		expectedDescriptor.setMissionId("S2");
+		expectedDescriptor.setSatelliteId("B");
+		expectedDescriptor.setProductFamily(ProductFamily.S2_L2A_TC);
 		expectedDescriptor.setMode("NRT");
 		expectedDescriptor.setInstrumentShortName("MSI");
 		

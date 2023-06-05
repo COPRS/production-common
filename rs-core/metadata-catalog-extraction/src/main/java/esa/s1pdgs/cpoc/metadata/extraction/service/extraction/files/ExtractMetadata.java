@@ -496,6 +496,7 @@ public class ExtractMetadata {
 		
 		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
 		
+		metadata = processS2Coordinates(metadata, family);		
 		metadata = checkS2Metadata(Arrays.asList(metadata), additionalMetadata);
 		metadata = putS2FileMetadataToJSON(metadata, descriptor);
 		
