@@ -116,6 +116,9 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 				updateProcParam(jobOrder, entry.getKey(), entry.getValue());
 			}
 		}
+		
+		// RS-981: PUG update introduced new process parameter "pduType"
+		updateProcParam(jobOrder, "pduType", typeSettings.getType().toString().toLowerCase());
 
 		// Update timeliness
 		updateProcParam(jobOrder, "orderType", workerSettings.getProductMode().toString());
