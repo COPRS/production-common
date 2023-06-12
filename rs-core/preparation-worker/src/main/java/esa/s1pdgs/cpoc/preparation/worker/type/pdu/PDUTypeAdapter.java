@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -92,13 +93,6 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 	public void customJobOrder(AppDataJob job, JobOrder jobOrder) {
 		PDUTypeProperties typeSettings = settings.getConfig()
 				.get(job.getPrepJob().getCatalogEvent().getMetadataProductType());
-
-		// Add FrameNumber if it exists in metadata
-		String frameNumber = (String) job.getProduct().getMetadata().get(PDUProduct.FRAME_NUMBER);
-		if (frameNumber != null) {
-			updateProcParam(jobOrder, "MtdPDUFrameNumbers", frameNumber);
-		}
-
 		// Add PDUTimeIntervals for FRAME and STRIPE PDUs
 		if (typeSettings != null && typeSettings.getType() != PDUType.TILE) {
 			String timeIntervals = (String) job.getProduct().getMetadata().get(PDUProduct.PDU_TIME_INTERVALS);
@@ -107,15 +101,27 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 						+ DateUtils.convertToPDUDateTimeFormat(job.getStopTime()) + "]";
 			}
 
+			// Add FrameNumber if it exists in metadata
+			String frameNumber = (String) job.getProduct().getMetadata().get(PDUProduct.FRAME_NUMBER);
+			if (frameNumber != null) {
+				// Count number of time intervals
+				int intervalCount = StringUtils.countMatches(timeIntervals, "];[") + 1;
+
+				updateProcParam(jobOrder, "MtdPDUFrameNumbers", StringUtils.repeat(frameNumber, ";", intervalCount));
+			}
+
 			updateProcParam(jobOrder, "PDUTimeIntervals", timeIntervals);
 		}
-		
+
 		// Add other dynamic processing parameters
-		if  (typeSettings != null && !typeSettings.getDynProcParams().isEmpty()) {
+		if (typeSettings != null && !typeSettings.getDynProcParams().isEmpty()) {
 			for (Entry<String, String> entry : typeSettings.getDynProcParams().entrySet()) {
 				updateProcParam(jobOrder, entry.getKey(), entry.getValue());
 			}
 		}
+
+		// RS-981: PUG update introduced new process parameter "pduType"
+		updateProcParam(jobOrder, "pduType", typeSettings.getType().toString().toLowerCase());
 
 		// Update timeliness
 		updateProcParam(jobOrder, "orderType", workerSettings.getProductMode().toString());
