@@ -144,11 +144,20 @@ public class EsServices {
 				// S3 L0 products seem to have broken footprints. If a self intersecting error
 				// occurs, remove the sliceCoordinates and try again. Do this for PUG products 
 				// as well, as they can be based on S3_L0 products
-				if ((family == ProductFamily.S3_L0  || family == ProductFamily.S3_PUG) && e.getDetailedMessage() != null && e.getDetailedMessage().contains("Self-intersection at or near point")) {
-					warningMessage = "Invalid self-intersecting footprint detected, dropping it as a workaround for #RS-436";
-					LOGGER.warn(warningMessage);
-					product.remove("sliceCoordinates");
-					fixed = true;
+				if ((family == ProductFamily.S3_L0  || family == ProductFamily.S3_PUG) && e.getDetailedMessage() != null) {					
+					if (e.getDetailedMessage().contains("Self-intersection at or near point")) {
+						warningMessage = "Invalid self-intersecting footprint detected, dropping it as a workaround for #RS-436";
+						LOGGER.warn(warningMessage);
+						product.remove("sliceCoordinates");
+						fixed = true;
+					} else if (e.getDetailedMessage().contains("Cannot determine orientation: signed area equal to 0")) {
+						// DO_0_NAV products seems to have a footprint with multiple points in the same spot. Having
+						// a footprint without any area is not a valid 
+						warningMessage = "Invalid footprint without an area detected, dropping it as a workaround for #RS-986";
+						LOGGER.warn(warningMessage);
+						product.remove("sliceCoordinates");
+						fixed = true;
+					}
 				}
 
 				if (!fixed) {
