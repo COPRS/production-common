@@ -57,6 +57,7 @@
 					<version>3.8.0</version>
 					<configuration>
 						<release>11</release>
+						<parameters>true</parameters>
 					</configuration>
 				</plugin>
 				<plugin>
