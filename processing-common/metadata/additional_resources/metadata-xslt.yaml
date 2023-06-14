@@ -378,6 +378,36 @@ data:
             <xsl:copy-of select="//*[local-name() = 'qualityInformation'][1]/*[local-name() = 'extension']/*[name() = 's1:qualityProperties']/*[name() = 's1:numOfCorruptedElements']/text()"/>
           </qualityNumOfCorruptedElements>
         </xsl:if>
+        <xsl:if test="//*[local-name() = 'platform']/*[local-name() = 'familyName']/text() != ''">
+          <platformShortName>
+            <xsl:copy-of select="//*[local-name() = 'platform']/*[local-name() = 'familyName']/text()"/>
+          </platformShortName>
+        </xsl:if>
+        <xsl:if test="//*[local-name() = 'platform']/*[local-name() = 'number']/text() != ''">
+          <platformSerialIdentifier>
+            <xsl:copy-of select="//*[local-name() = 'platform']/*[local-name() = 'number']/text()"/>
+          </platformSerialIdentifier>
+        </xsl:if>
+        <xsl:if test="//*[local-name() = 'orbitReference']/*[local-name() = 'cycleNumber']/text() != ''">
+          <cycleNumber>
+            <xsl:copy-of select="//*[local-name() = 'orbitReference']/*[local-name() = 'cycleNumber']/text()"/>
+          </cycleNumber>
+        </xsl:if>
+        <xsl:if test="string(//*[local-name() = 'processing']/*[local-name() = 'facility']/@site) != ''">
+          <site>
+            <xsl:copy-of select="string(//*[local-name() = 'processing']/*[local-name() = 'facility']/@site)"/>
+          </site>
+        </xsl:if>
+        <xsl:if test="string(//*[local-name() = 'processing']/*[local-name() = 'software']/@name) != ''">
+          <processorName>
+            <xsl:copy-of select="string(//*[local-name() = 'processing']/*[local-name() = 'software']/@name)"/>
+          </processorName>
+        </xsl:if>
+        <xsl:if test="string(//*[local-name() = 'processing']/*[local-name() = 'software']/@version) != ''">
+          <processorVersion>
+            <xsl:copy-of select="string(//*[local-name() = 'processing']/*[local-name() = 'software']/@version)"/>
+          </processorVersion>
+        </xsl:if>
         <xsl:apply-templates select="node()"/>
       </xsl:template>
 
