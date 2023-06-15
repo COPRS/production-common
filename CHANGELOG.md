@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.2-rc1] - 2023-06-15
+
+### Added
+
+- RS-868: METADATA does not manage True Color Image (JP2)
+
+### Changed
+- RS-964: [S1] No production level-1 and level-2 for operation mode SM
+- RS-968: [OPS] S3 ACQ failed with following error [code 1] [msg Found an unexpected number of LIST-files (NRTAP structure generated as WA in container)
+- RS-986: Ensure that invalid footprints without an area are ignored and not fail when ingesting the metadata into the MDC
+- RS-997: [PRIP] Missing metadata for HKTM and GPS
+
+### Removed
+
+- N/A
+
+## [1.13.1-rc1] - 2023-05-22
+
+### Added
+
+- N/A
+
+### Changed
+
+- N/A
+
+### Removed
+
+- N/A
+
 ## [1.13.0-rc1] - 2023-03-30
 
 ### Added
