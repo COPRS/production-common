@@ -15,7 +15,8 @@ public class PripGeoShape {
 
 	public enum FIELD_NAMES {
 		TYPE("type"), //
-		COORDINATES("coordinates");
+		COORDINATES("coordinates"),
+		ORIENTATION("orientation");
 
 		private String fieldName;
 
@@ -32,16 +33,26 @@ public class PripGeoShape {
 
 	protected GeoShapeType type;
 	protected List<PripGeoCoordinate> coordinates;
+	protected String orientation;
 
 	// --------------------------------------------------------------------------
 
 	public PripGeoShape(String type, List<PripGeoCoordinate> coordinates) {
-		this(GeoShapeType.valueOf(type), coordinates);
+		this(GeoShapeType.valueOf(type), coordinates, null);
+	}
+	
+	public PripGeoShape(String type, List<PripGeoCoordinate> coordinates, String orientation) {
+		this(GeoShapeType.valueOf(type), coordinates, orientation);
 	}
 
 	protected PripGeoShape(GeoShapeType type, List<PripGeoCoordinate> coordinates) {
+		this(type, coordinates, null);
+	}
+	
+	protected PripGeoShape(GeoShapeType type, List<PripGeoCoordinate> coordinates, String orientation) {
 		this.type = Objects.requireNonNull(type);
 		this.coordinates = coordinates;
+		this.orientation = orientation;
 	}
 
 	// --------------------------------------------------------------------------
@@ -66,6 +77,10 @@ public class PripGeoShape {
 		} else if (GeoShapeType.POLYGON.equals(this.type)) {
 			map.put(FIELD_NAMES.COORDINATES.fieldName, coordExportOuterList);
 		}
+		
+		if (this.orientation != null) {
+			map.put(FIELD_NAMES.ORIENTATION.fieldName, this.orientation);
+		}
 		return map;
 	}
 
@@ -76,7 +91,8 @@ public class PripGeoShape {
 
 		result = prime * result + ((this.getType() == null) ? 0 : this.getType().hashCode());
 		result = prime * result + ((this.getCoordinates() == null) ? 0 : this.getCoordinates().hashCode());
-
+		result = prime * result + ((this.getOrientation() == null) ? 0 : this.getOrientation().hashCode());
+		
 		return result;
 	}
 
@@ -109,6 +125,14 @@ public class PripGeoShape {
 		} else if (!this.getCoordinates().equals(other.getCoordinates())) {
 			return false;
 		}
+		
+		if (null == this.getOrientation()) {
+			if (null != other.getOrientation()) {
+				return false;
+			}
+		} else if (!this.getOrientation().equals(other.getOrientation())) {
+			return false;
+		}
 
 		return true;
 	}
@@ -129,6 +153,14 @@ public class PripGeoShape {
 
 	public void setCoordinates(List<PripGeoCoordinate> coordinates) {
 		this.coordinates = coordinates;
+	}
+
+	public String getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
 	}
 
 	public int getSRID() {

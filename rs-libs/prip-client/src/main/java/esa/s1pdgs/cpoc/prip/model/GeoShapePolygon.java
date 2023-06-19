@@ -10,7 +10,11 @@ import org.elasticsearch.common.geo.GeoShapeType;
 public class GeoShapePolygon extends PripGeoShape {
 	
 	public GeoShapePolygon(List<PripGeoCoordinate> coordinates) {
-		super(GeoShapeType.POLYGON,coordinates);
+		super(GeoShapeType.POLYGON, coordinates);
+	}
+	
+	public GeoShapePolygon(List<PripGeoCoordinate> coordinates, String orientation) {
+		super(GeoShapeType.POLYGON, coordinates, orientation);
 	}
 
 }
