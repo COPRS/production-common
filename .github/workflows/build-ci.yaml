@@ -291,7 +291,7 @@ jobs:
 
   build-ipf-containers:
     needs: [lib-changes, core-changes, build-core, build-all-core]
-    if: ${{ always() && (needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), 'execution-worker')) }}
+    if: ${{ always() && contains(github.event.head_commit.message, '#IPF') && (needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), 'execution-worker')) }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
