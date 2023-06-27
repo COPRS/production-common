@@ -216,19 +216,18 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				new ReportingMessage("Start job processing"));
 
 		List<Message<CatalogJob>> result = new ArrayList<>();
-		List<MissingOutput> missingOutputs = new ArrayList<>();
 		OutputEstimation outputEstimation = new OutputEstimation(properties,
-				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), outputListFile, missingOutputs);
+				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), outputListFile, new ArrayList<>());
 		try {
 			result = processJob(job, inputDownloader, outputProcessor, outputEstimation, procExecutorSrv,
 					procCompletionSrv, procExecutor, reporting);
 		} catch (Exception e) {
-			reporting.error(errorReportMessage(e), missingOutputs);
+			reporting.error(errorReportMessage(e), outputEstimation.getMissingOutputs());
 			throw new RuntimeException(e);
 		}
 
 		reporting.end(toReportingOutput(result, job.isDebug(), (String) job.getAdditionalFields().get("t0PdgsDate")),
-				new ReportingMessage("End job processing"), missingOutputs);
+				new ReportingMessage("End job processing"), outputEstimation.getMissingOutputs());
 		return result;
 	}
 
