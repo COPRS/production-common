@@ -1,18 +1,18 @@
 name: Build RS-Core
 
-on: 
+on:
   push:
     paths:
-      - 'rs-core/**'
-      - 'rs-libs/**'
-      - '.github/workflows/build-ci.yaml'
-      - '.github/actions/**'
+      - "rs-core/**"
+      - "rs-libs/**"
+      - ".github/workflows/build-ci.yaml"
+      - ".github/actions/**"
     branches:
-      - '!main'
-      - 'release/**'
-      - 'develop**'
-      - 'stac-nativeapi**'
-      
+      - "!main"
+      - "release/**"
+      - "develop**"
+      - "stac-nativeapi**"
+
   workflow_dispatch:
 
 env:
@@ -23,164 +23,164 @@ env:
   ARTIFACTORY_PROJECT_DOCKER: rs-docker
   ARTIFACTORY_PROJECT_MAVEN: rs-maven
 
-jobs:   
+jobs:
   lib-changes:
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
     steps:
-    - name: Extract branch or tag name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
-      id: extract_branch
-    - uses: actions/checkout@v2
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        base: ${{ steps.extract_branch.outputs.branch }}
-        filters: |
-          lib-commons:
-            - 'rs-libs/lib-commons/**'
-            - 'rs-libs/pom.xml'
-          app-status: 
-            - 'rs-libs/app-status/**'
-            - 'rs-libs/pom.xml'
-          message-adapter: 
-            - 'rs-libs/message-adapter/**'
-            - 'rs-libs/pom.xml'
-          xml-tools: 
-            - 'rs-libs/xml-tools/**'
-            - 'rs-libs/pom.xml'
-          error-repo-client: 
-            - 'rs-libs/error-repo-client/**'
-            - 'rs-libs/pom.xml'
-          obs-sdk: 
-            - 'rs-libs/obs-sdk/**'
-            - 'rs-libs/pom.xml'
-          metadata-client: 
-            - 'rs-libs/metadata-client/**'
-            - 'rs-libs/pom.xml'
-          prip-client: 
-            - 'rs-libs/prip-client/**'
-            - 'rs-libs/pom.xml'
-          auxip-client: 
-            - 'rs-libs/auxip-client/**'
-            - 'rs-libs/pom.xml'
-          xbip-client: 
-            - 'rs-libs/xbip-client/**'
-            - 'rs-libs/pom.xml'
-          edip-client: 
-            - 'rs-libs/edip-client/**'
-            - 'rs-libs/pom.xml'
-          data-lifecycle-client: 
-            - 'rs-libs/data-lifecycle-client/**'
-            - 'rs-libs/pom.xml'
-          jacoco-report: 
-            - 'rs-libs/jacoco-report/**'
-            - 'rs-libs/pom.xml'
-          
+      - name: Extract branch or tag name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
+        id: extract_branch
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          base: ${{ steps.extract_branch.outputs.branch }}
+          filters: |
+            lib-commons:
+              - 'rs-libs/lib-commons/**'
+              - 'rs-libs/pom.xml'
+            app-status: 
+              - 'rs-libs/app-status/**'
+              - 'rs-libs/pom.xml'
+            message-adapter: 
+              - 'rs-libs/message-adapter/**'
+              - 'rs-libs/pom.xml'
+            xml-tools: 
+              - 'rs-libs/xml-tools/**'
+              - 'rs-libs/pom.xml'
+            error-repo-client: 
+              - 'rs-libs/error-repo-client/**'
+              - 'rs-libs/pom.xml'
+            obs-sdk: 
+              - 'rs-libs/obs-sdk/**'
+              - 'rs-libs/pom.xml'
+            metadata-client: 
+              - 'rs-libs/metadata-client/**'
+              - 'rs-libs/pom.xml'
+            prip-client: 
+              - 'rs-libs/prip-client/**'
+              - 'rs-libs/pom.xml'
+            auxip-client: 
+              - 'rs-libs/auxip-client/**'
+              - 'rs-libs/pom.xml'
+            xbip-client: 
+              - 'rs-libs/xbip-client/**'
+              - 'rs-libs/pom.xml'
+            edip-client: 
+              - 'rs-libs/edip-client/**'
+              - 'rs-libs/pom.xml'
+            data-lifecycle-client: 
+              - 'rs-libs/data-lifecycle-client/**'
+              - 'rs-libs/pom.xml'
+            jacoco-report: 
+              - 'rs-libs/jacoco-report/**'
+              - 'rs-libs/pom.xml'
+
   core-changes:
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.filter.outputs.changes }}
     steps:
-    - name: Extract branch or tag name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
-      id: extract_branch
-    - uses: actions/checkout@v2
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        base: ${{ steps.extract_branch.outputs.branch }}
-        filters: |
-          compression-worker: 
-            - 'rs-core/compression-worker/**'
-            - 'rs-core/pom.xml'
-          distribution-worker: 
-            - 'rs-core/distribution-worker/**'
-            - 'rs-core/pom.xml'
-          dlq-manager: 
-            - 'rs-core/dlq-manager/**'
-            - 'rs-core/pom.xml'
-          ingestion-filter: 
-            - 'rs-core/ingestion-filter/**'
-            - 'rs-core/pom.xml'
-          ingestion-trigger: 
-            - 'rs-core/ingestion-trigger/**'
-            - 'rs-core/pom.xml'
-          ingestion-worker: 
-            - 'rs-core/ingestion-worker/**'
-            - 'rs-core/pom.xml'
-          metadata-catalog-extraction: 
-            - 'rs-core/metadata-catalog-extraction/**'
-            - 'rs-core/pom.xml'
-          metadata-catalog-searchcontroller: 
-            - 'rs-core/metadata-catalog-searchcontroller/**'
-            - 'rs-core/pom.xml'
-          native-api: 
-            - 'rs-core/native-api/**'
-            - 'rs-core/pom.xml'
-          data-lifecycle-worker: 
-            - 'rs-core/data-lifecycle-worker/**'
-            - 'rs-core/pom.xml'
-          eviction-management-worker: 
-            - 'rs-core/eviction-management-worker/**'
-            - 'rs-core/pom.xml'
-          ddip-frontend: 
-            - 'rs-core/ddip-frontend/**'
-            - 'rs-core/pom.xml'
-          prip-frontend: 
-            - 'rs-core/prip-frontend/**'
-            - 'rs-core/pom.xml'
-          preparation-worker:
-            - 'rs-core/preparation-worker/**'
-            - 'rs-core/pom.xml'
-          execution-worker: 
-            - 'rs-core/execution-worker/**'
-            - 'rs-core/pom.xml'
-          request-parking-lot: 
-            - 'rs-core/request-parking-lot/**'
-            - 'rs-core/pom.xml'
-          cronbased-trigger: 
-            - 'rs-core/cronbased-trigger/**'
-            - 'rs-core/pom.xml'
+      - name: Extract branch or tag name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
+        id: extract_branch
+      - uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          base: ${{ steps.extract_branch.outputs.branch }}
+          filters: |
+            compression-worker: 
+              - 'rs-core/compression-worker/**'
+              - 'rs-core/pom.xml'
+            distribution-worker: 
+              - 'rs-core/distribution-worker/**'
+              - 'rs-core/pom.xml'
+            dlq-manager: 
+              - 'rs-core/dlq-manager/**'
+              - 'rs-core/pom.xml'
+            ingestion-filter: 
+              - 'rs-core/ingestion-filter/**'
+              - 'rs-core/pom.xml'
+            ingestion-trigger: 
+              - 'rs-core/ingestion-trigger/**'
+              - 'rs-core/pom.xml'
+            ingestion-worker: 
+              - 'rs-core/ingestion-worker/**'
+              - 'rs-core/pom.xml'
+            metadata-catalog-extraction: 
+              - 'rs-core/metadata-catalog-extraction/**'
+              - 'rs-core/pom.xml'
+            metadata-catalog-searchcontroller: 
+              - 'rs-core/metadata-catalog-searchcontroller/**'
+              - 'rs-core/pom.xml'
+            native-api: 
+              - 'rs-core/native-api/**'
+              - 'rs-core/pom.xml'
+            data-lifecycle-worker: 
+              - 'rs-core/data-lifecycle-worker/**'
+              - 'rs-core/pom.xml'
+            eviction-management-worker: 
+              - 'rs-core/eviction-management-worker/**'
+              - 'rs-core/pom.xml'
+            ddip-frontend: 
+              - 'rs-core/ddip-frontend/**'
+              - 'rs-core/pom.xml'
+            prip-frontend: 
+              - 'rs-core/prip-frontend/**'
+              - 'rs-core/pom.xml'
+            preparation-worker:
+              - 'rs-core/preparation-worker/**'
+              - 'rs-core/pom.xml'
+            execution-worker: 
+              - 'rs-core/execution-worker/**'
+              - 'rs-core/pom.xml'
+            request-parking-lot: 
+              - 'rs-core/request-parking-lot/**'
+              - 'rs-core/pom.xml'
+            cronbased-trigger: 
+              - 'rs-core/cronbased-trigger/**'
+              - 'rs-core/pom.xml'
 
-#          data-lifecycle-trigger: 
-#            - 'rs-core/data-lifecycle-trigger/**'
-#            - 'rs-core/pom.xml'
-#          data-request-worker: 
-#            - 'rs-core/data-request-worker/**'
-#            - 'rs-core/pom.xml'
-#          dissemination-trigger: 
-#            - 'rs-core/dissemination-trigger/**'
-#            - 'rs-core/pom.xml'
-#          dissemination-worker: 
-#            - 'rs-core/dissemination-worker/**'
-#            - 'rs-core/pom.xml'
-#          on-demand-interface-provider: 
-#            - 'rs-core/on-demand-interface-provider/**'
-#            - 'rs-core/pom.xml'
-#          production-trigger: 
-#            - 'rs-core/production-trigger/**'
-#            - 'rs-core/pom.xml'
-          
+  #          data-lifecycle-trigger:
+  #            - 'rs-core/data-lifecycle-trigger/**'
+  #            - 'rs-core/pom.xml'
+  #          data-request-worker:
+  #            - 'rs-core/data-request-worker/**'
+  #            - 'rs-core/pom.xml'
+  #          dissemination-trigger:
+  #            - 'rs-core/dissemination-trigger/**'
+  #            - 'rs-core/pom.xml'
+  #          dissemination-worker:
+  #            - 'rs-core/dissemination-worker/**'
+  #            - 'rs-core/pom.xml'
+  #          on-demand-interface-provider:
+  #            - 'rs-core/on-demand-interface-provider/**'
+  #            - 'rs-core/pom.xml'
+  #          production-trigger:
+  #            - 'rs-core/production-trigger/**'
+  #            - 'rs-core/pom.xml'
+
   gg-scan:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: GitGuardian scan
-      uses: GitGuardian/ggshield-action@master
-      env:
-        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
-        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
-          
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: GitGuardian scan
+        uses: GitGuardian/ggshield-action@master
+        env:
+          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+
   build-libs:
     needs: [lib-changes, gg-scan]
     if: ${{ needs.lib-changes.outputs.packages != '[]' }}
@@ -190,15 +190,15 @@ jobs:
       matrix:
         component: ${{ fromJSON(needs.lib-changes.outputs.packages) }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: ./.github/actions/build-libs
-      with:
-        COMPONENT: ${{ matrix.component }}
-        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
-    
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/build-libs
+        with:
+          COMPONENT: ${{ matrix.component }}
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+          SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+          SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+
   build-core:
     needs: [lib-changes, core-changes, gg-scan]
     if: ${{ needs.lib-changes.outputs.packages == '[]' && needs.core-changes.outputs.packages != '[]' }}
@@ -208,17 +208,17 @@ jobs:
         component: ${{ fromJSON(needs.core-changes.outputs.packages) }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: ./.github/actions/build-docker
-      with:
-        COMPONENT: ${{ matrix.component }}
-        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
-    - uses: ./.github/actions/generate-report
-      with:
-        COMPONENT: ${{ matrix.component }}
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/build-docker
+        with:
+          COMPONENT: ${{ matrix.component }}
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+          SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+          SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+      - uses: ./.github/actions/generate-report
+        with:
+          COMPONENT: ${{ matrix.component }}
 
   build-all-core:
     needs: [lib-changes, build-libs]
@@ -226,21 +226,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        component: [compression-worker, distribution-worker, dlq-manager, eviction-management-worker, execution-worker, ingestion-filter, ingestion-trigger, ingestion-worker, metadata-catalog-extraction, metadata-catalog-searchcontroller, native-api, data-lifecycle-worker, prip-frontend, ddip-frontend, preparation-worker, request-parking-lot, cronbased-trigger] 
-        #component: [disseminator, request-parking-lot, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]           
+        component:
+          [
+            compression-worker,
+            distribution-worker,
+            dlq-manager,
+            eviction-management-worker,
+            execution-worker,
+            ingestion-filter,
+            ingestion-trigger,
+            ingestion-worker,
+            metadata-catalog-extraction,
+            metadata-catalog-searchcontroller,
+            native-api,
+            data-lifecycle-worker,
+            prip-frontend,
+            ddip-frontend,
+            preparation-worker,
+            request-parking-lot,
+            cronbased-trigger,
+          ]
+        #component: [disseminator, request-parking-lot, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: ./.github/actions/build-docker
-      with:
-        COMPONENT: ${{ matrix.component }}
-        WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-        WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-        SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
-        SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
-    - uses: ./.github/actions/generate-report
-      with:
-        COMPONENT: ${{ matrix.component }}
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/build-docker
+        with:
+          COMPONENT: ${{ matrix.component }}
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
+          SONARQUBE_HOST: ${{ secrets.SONARQUBE_HOST }}
+          SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
+      - uses: ./.github/actions/generate-report
+        with:
+          COMPONENT: ${{ matrix.component }}
 
   build-s1-simulator:
     needs: [lib-changes, core-changes, build-core, build-all-core]
@@ -269,38 +288,55 @@ jobs:
       WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
       GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
-  build-s1-aiop:
+  build-ipf-containers:
     needs: [lib-changes, core-changes, build-core, build-all-core]
     if: ${{ always() && (needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), 'execution-worker')) }}
-    uses: ./.github/workflows/build-ipf-s1-aio.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ipf:
+          [
+            { image: rs-ipf-s1-aio, dir: docker_s1_ipf_aio },
+            { image: rs-ipf-s1-asp, dir: docker_s1_ipf_asp },
+            { image: rs-ipf-s1-l1, dir: docker_s1_ipf_l1 },
+            { image: rs-ipf-s1-l2, dir: docker_s1_ipf_l2 },
+            { image: rs-ipf-s3-acq, dir: docker_s3_ipf_acq },
+            { image: rs-ipf-s3-l0, dir: docker_s3_ipf_l0 },
+            { image: rs-ipf-s3-mw1, dir: docker_s3_ipf_mw1 },
+            { image: rs-ipf-s3-ol1-rac, dir: docker_s3_ipf_ol1_rac },
+            { image: rs-ipf-s3-ol1-spc, dir: docker_s3_ipf_ol1_spc },
+            { image: rs-ipf-s3-ol1, dir: docker_s3_ipf_ol1 },
+            { image: rs-ipf-s3-ol2, dir: docker_s3_ipf_ol2 },
+            { image: rs-ipf-s3-pug, dir: docker_s3_ipf_pug },
+            { image: rs-ipf-s3-sl1, dir: docker_s3_ipf_sl1 },
+            { image: rs-ipf-s3-sl2-frp, dir: docker_s3_ipf_sl2_frp },
+            { image: rs-ipf-s3-sl2, dir: docker_s3_ipf_sl2 },
+            { image: rs-ipf-s3-sm2-hy, dir: docker_s3_ipf_sm2_hy },
+            { image: rs-ipf-s3-sm2-li, dir: docker_s3_ipf_sm2_li },
+            { image: rs-ipf-s3-sm2-si, dir: docker_s3_ipf_sm2_si },
+            { image: rs-ipf-s3-sr1, dir: docker_s3_ipf_sr1 },
+            { image: rs-ipf-s3-sy2-aod, dir: docker_s3_ipf_sy2_aod },
+            { image: rs-ipf-s3-sy2-vgs, dir: docker_s3_ipf_sy2_vgs },
+            { image: rs-ipf-s3-sy2, dir: docker_s3_ipf_sy2 },
+          ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-  build-s1-asp:
-    needs: [lib-changes, core-changes, build-core, build-all-core]
-    if: ${{ always() && (needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), 'execution-worker')) }}
-    uses: ./.github/workflows/build-ipf-s1-asp.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
+        id: extract_branch
 
-  build-s3-acq:
-    needs: [lib-changes, core-changes, build-core, build-all-core]
-    if: ${{ always() && (needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), 'execution-worker')) }}
-    uses: ./.github/workflows/build-ipf-s3-acq.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      - uses: ./.github/actions/build-ipf-container
+        with:
+          BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
+          IMAGE_NAME: ${{ matrix.ipf.image }}
+          BUILD_CONTEXT: ./rs-container/${{ matrix.ipf.dir }}
+          WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
+          WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
 
-  build-s3-l0:
-    needs: [lib-changes, core-changes, build-core, build-all-core]
-    if: ${{ always() && (needs.lib-changes.outputs.packages != '[]' || contains(fromJSON(needs.core-changes.outputs.packages), 'execution-worker')) }}
-    uses: ./.github/workflows/build-ipf-s3-l0.yaml
-    secrets:
-      WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
-      WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+      - uses: ./.github/actions/generate-report
+        with:
+          COMPONENT: ${{ matrix.ipf.image }}
