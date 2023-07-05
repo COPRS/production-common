@@ -146,26 +146,6 @@ jobs:
             cronbased-trigger: 
               - 'rs-core/cronbased-trigger/**'
               - 'rs-core/pom.xml'
-
-  #          data-lifecycle-trigger:
-  #            - 'rs-core/data-lifecycle-trigger/**'
-  #            - 'rs-core/pom.xml'
-  #          data-request-worker:
-  #            - 'rs-core/data-request-worker/**'
-  #            - 'rs-core/pom.xml'
-  #          dissemination-trigger:
-  #            - 'rs-core/dissemination-trigger/**'
-  #            - 'rs-core/pom.xml'
-  #          dissemination-worker:
-  #            - 'rs-core/dissemination-worker/**'
-  #            - 'rs-core/pom.xml'
-  #          on-demand-interface-provider:
-  #            - 'rs-core/on-demand-interface-provider/**'
-  #            - 'rs-core/pom.xml'
-  #          production-trigger:
-  #            - 'rs-core/production-trigger/**'
-  #            - 'rs-core/pom.xml'
-
   gg-scan:
     runs-on: ubuntu-latest
     steps:
@@ -247,7 +227,6 @@ jobs:
             request-parking-lot,
             cronbased-trigger,
           ]
-        #component: [disseminator, request-parking-lot, ingestion-trigger, ingestion-filter, ingestion-worker, production-trigger, ipf-preparation-worker, ipf-execution-worker, on-demand-interface-provider, metadata-catalog-timer, metadata-catalog-extraction, metadata-catalog-searchcontroller, validation, compression-worker, distribution-worker, prip-frontend, data-lifecycle-trigger, data-request-worker, eviction-management-worker, dissemination-trigger, dissemination-worker, native-api, ddip-frontend]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -313,14 +292,16 @@ jobs:
             { image: rs-ipf-s3-sl1, dir: docker_s3_ipf_sl1 },
             { image: rs-ipf-s3-sl2-frp, dir: docker_s3_ipf_sl2_frp },
             { image: rs-ipf-s3-sl2, dir: docker_s3_ipf_sl2 },
-            { image: rs-ipf-s3-sm2-hy, dir: docker_s3_ipf_sm2_hy },
-            { image: rs-ipf-s3-sm2-li, dir: docker_s3_ipf_sm2_li },
-            { image: rs-ipf-s3-sm2-si, dir: docker_s3_ipf_sm2_si },
             { image: rs-ipf-s3-sr1, dir: docker_s3_ipf_sr1 },
             { image: rs-ipf-s3-sy2-aod, dir: docker_s3_ipf_sy2_aod },
             { image: rs-ipf-s3-sy2-vgs, dir: docker_s3_ipf_sy2_vgs },
             { image: rs-ipf-s3-sy2, dir: docker_s3_ipf_sy2 },
           ]
+          # The delivered IPFs for SM2 are currently too big for the GitHub pipeline, therefore skip these processors.
+          # If the size is fixed enable them by adding the following lines back to the array above:
+          # { image: rs-ipf-s3-sm2-hy, dir: docker_s3_ipf_sm2_hy },
+          # { image: rs-ipf-s3-sm2-li, dir: docker_s3_ipf_sm2_li },
+          # { image: rs-ipf-s3-sm2-si, dir: docker_s3_ipf_sm2_si },
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2

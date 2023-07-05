@@ -195,7 +195,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ipf: [{image: rs-ipf-s1-aio, dir: docker_s1_ipf_aio},{image: rs-ipf-s1-asp, dir: docker_s1_ipf_asp},{image: rs-ipf-s1-l1, dir: docker_s1_ipf_l1},{image: rs-ipf-s1-l2, dir: docker_s1_ipf_l2},{image: rs-ipf-s3-acq, dir: docker_s3_ipf_acq},{image: rs-ipf-s3-l0, dir: docker_s3_ipf_l0},{image: rs-ipf-s3-mw1, dir: docker_s3_ipf_mw1},{image: rs-ipf-s3-ol1-rac, dir: docker_s3_ipf_ol1_rac},{image: rs-ipf-s3-ol1-spc, dir: docker_s3_ipf_ol1_spc},{image: rs-ipf-s3-ol1, dir: docker_s3_ipf_ol1},{image: rs-ipf-s3-ol2, dir: docker_s3_ipf_ol2},{image: rs-ipf-s3-pug, dir: docker_s3_ipf_pug},{image: rs-ipf-s3-sl1, dir: docker_s3_ipf_sl1},{image: rs-ipf-s3-sl2-frp, dir: docker_s3_ipf_sl2_frp},{image: rs-ipf-s3-sl2, dir: docker_s3_ipf_sl2},{image: rs-ipf-s3-sm2-hy, dir: docker_s3_ipf_sm2_hy},{image: rs-ipf-s3-sm2-li, dir: docker_s3_ipf_sm2_li},{image: rs-ipf-s3-sm2-si, dir: docker_s3_ipf_sm2_si},{image: rs-ipf-s3-sr1, dir: docker_s3_ipf_sr1},{image: rs-ipf-s3-sy2-aod, dir: docker_s3_ipf_sy2_aod},{image: rs-ipf-s3-sy2-vgs, dir: docker_s3_ipf_sy2_vgs},{image: rs-ipf-s3-sy2, dir: docker_s3_ipf_sy2}]
+        ipf:
+          [
+            { image: rs-ipf-s1-aio, dir: docker_s1_ipf_aio },
+            { image: rs-ipf-s1-asp, dir: docker_s1_ipf_asp },
+            { image: rs-ipf-s1-l1, dir: docker_s1_ipf_l1 },
+            { image: rs-ipf-s1-l2, dir: docker_s1_ipf_l2 },
+            { image: rs-ipf-s3-acq, dir: docker_s3_ipf_acq },
+            { image: rs-ipf-s3-l0, dir: docker_s3_ipf_l0 },
+            { image: rs-ipf-s3-mw1, dir: docker_s3_ipf_mw1 },
+            { image: rs-ipf-s3-ol1-rac, dir: docker_s3_ipf_ol1_rac },
+            { image: rs-ipf-s3-ol1-spc, dir: docker_s3_ipf_ol1_spc },
+            { image: rs-ipf-s3-ol1, dir: docker_s3_ipf_ol1 },
+            { image: rs-ipf-s3-ol2, dir: docker_s3_ipf_ol2 },
+            { image: rs-ipf-s3-pug, dir: docker_s3_ipf_pug },
+            { image: rs-ipf-s3-sl1, dir: docker_s3_ipf_sl1 },
+            { image: rs-ipf-s3-sl2-frp, dir: docker_s3_ipf_sl2_frp },
+            { image: rs-ipf-s3-sl2, dir: docker_s3_ipf_sl2 },
+            { image: rs-ipf-s3-sr1, dir: docker_s3_ipf_sr1 },
+            { image: rs-ipf-s3-sy2-aod, dir: docker_s3_ipf_sy2_aod },
+            { image: rs-ipf-s3-sy2-vgs, dir: docker_s3_ipf_sy2_vgs },
+            { image: rs-ipf-s3-sy2, dir: docker_s3_ipf_sy2 },
+          ]
+          # The delivered IPFs for SM2 are currently too big for the GitHub pipeline, therefore skip these processors.
+          # If the size is fixed enable them by adding the following lines back to the array above:
+          # { image: rs-ipf-s3-sm2-hy, dir: docker_s3_ipf_sm2_hy },
+          # { image: rs-ipf-s3-sm2-li, dir: docker_s3_ipf_sm2_li },
+          # { image: rs-ipf-s3-sm2-si, dir: docker_s3_ipf_sm2_si },
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
