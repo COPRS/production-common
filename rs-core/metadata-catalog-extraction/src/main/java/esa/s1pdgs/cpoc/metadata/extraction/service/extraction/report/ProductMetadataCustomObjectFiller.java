@@ -143,43 +143,27 @@ public class ProductMetadataCustomObjectFiller {
 			// Sentinel-3 Custom Object
 			case S3_GRANULES:
 			case S3_L0:
-				fillwithKeyMapping("beginning_date_time_date", "startTime");
-				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
-				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
-				fillwithKeyMapping("instrument_short_name_string", "instrumentName");
-				fillwithKeyMapping("orbit_number_integer", "orbitNumber");
-				output.getProductMetadataCustomObject().put("processing_level_integer", 0);
-				fillwithKeyMapping("product_type_string", "productType");
-				fillwithKeyMapping("cycle_number_integer", "cycleNumber");
-				fillwithKeyMapping("processor_name_string", "procName");
-				fillwithKeyMapping("processor_version_string", "procVersion");
+				s3l0CustomObject();
 				break;
 			case S3_L1_NRT:
 			case S3_L1_NTC:
 			case S3_L1_STC:
-				fillwithKeyMapping("beginning_date_time_date", "startTime");
-				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
-				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
-				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
-				fillwithKeyMapping("orbit_number_integer", "orbitNumber");
-				output.getProductMetadataCustomObject().put("processing_level_integer", 1);
-				fillwithKeyMapping("product_type_string", "productType");
-				fillwithKeyMapping("cloud_cover_double", "cloudPercentage");
+				s3l1CustomObject();
 				break;
 			case S3_L2_NRT:
 			case S3_L2_NTC:
 			case S3_L2_STC:
-				fillwithKeyMapping("beginning_date_time_date", "startTime");
-				fillwithKeyMapping("ending_date_time_date", "stopTime");
-				output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
-				fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
-				fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
-				fillwithKeyMapping("orbit_number_integer", "orbitNumber");
-				output.getProductMetadataCustomObject().put("processing_level_integer", 2);
-				fillwithKeyMapping("product_type_string", "productType");
-				fillwithKeyMapping("cloud_cover_double", "cloudPercentage");
+				s3l2CustomObject();
+				break;
+			case S3_PUG:
+				String processingLevel = catalogEvent.getProductName().substring(7, 8);
+				if (processingLevel.equals("0")) {
+					s3l0CustomObject();
+				} else if (processingLevel.equals("1")) {
+					s3l1CustomObject();
+				} else if (processingLevel.equals("2")) {
+					s3l2CustomObject();
+				}
 				break;
 			case AUXILIARY_FILE:
 			case S2_AUX:
@@ -192,6 +176,44 @@ public class ProductMetadataCustomObjectFiller {
 				break;
 			default: //no metadata custom object
 		}
+	}
+	
+	private void s3l0CustomObject() {
+		fillwithKeyMapping("beginning_date_time_date", "startTime");
+		fillwithKeyMapping("ending_date_time_date", "stopTime");
+		output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+		fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
+		fillwithKeyMapping("instrument_short_name_string", "instrumentName");
+		fillwithKeyMapping("orbit_number_integer", "orbitNumber");
+		output.getProductMetadataCustomObject().put("processing_level_integer", 0);
+		fillwithKeyMapping("product_type_string", "productType");
+		fillwithKeyMapping("cycle_number_integer", "cycleNumber");
+		fillwithKeyMapping("processor_name_string", "procName");
+		fillwithKeyMapping("processor_version_string", "procVersion");
+	}
+	
+	private void s3l1CustomObject() {
+		fillwithKeyMapping("beginning_date_time_date", "startTime");
+		fillwithKeyMapping("ending_date_time_date", "stopTime");
+		output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+		fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
+		fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
+		fillwithKeyMapping("orbit_number_integer", "orbitNumber");
+		output.getProductMetadataCustomObject().put("processing_level_integer", 1);
+		fillwithKeyMapping("product_type_string", "productType");
+		fillwithKeyMapping("cloud_cover_double", "cloudPercentage");
+	}
+	
+	private void s3l2CustomObject() {
+		fillwithKeyMapping("beginning_date_time_date", "startTime");
+		fillwithKeyMapping("ending_date_time_date", "stopTime");
+		output.getProductMetadataCustomObject().put("platform_short_name_string", MissionId.toPlatformShortName(missionId));
+		fillwithKeyMapping("platform_serial_identifier_string", "satelliteId");
+		fillwithKeyMapping("instrument_short_name_string", "instrumentShortName");
+		fillwithKeyMapping("orbit_number_integer", "orbitNumber");
+		output.getProductMetadataCustomObject().put("processing_level_integer", 2);
+		fillwithKeyMapping("product_type_string", "productType");
+		fillwithKeyMapping("cloud_cover_double", "cloudPercentage");
 	}
 	
 	private void fillwithKeyMapping(final String toKey, final String fromKey) {
