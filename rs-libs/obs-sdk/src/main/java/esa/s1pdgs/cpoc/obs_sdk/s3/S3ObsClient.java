@@ -74,10 +74,7 @@ public class S3ObsClient extends AbstractObsClient {
 		public final ObsClient newObsClient(final ObsConfigurationProperties config, final ReportingProductFactory factory) {
 			final BasicAWSCredentials awsCreds = new BasicAWSCredentials(config.getUserId(), config.getUserSecret());
 			final ClientConfiguration clientConfig = new ClientConfiguration();
-			
-			if (config.isEnforceHttp()) {
-				clientConfig.setProtocol(Protocol.HTTP);
-			}
+			clientConfig.setProtocol(Protocol.HTTP);
 
 			// set proxy if defined in environmental
 			final String proxyConfig = System.getenv("https_proxy");

@@ -98,7 +98,6 @@ obs:
   user-secret: ${OBS_PASSWORD}
   disable-chunked-encoding: 'false'
   endpoint-region: eu-west-0
-  enforce-http: false
   user-id: ${OBS_USERNAME}
   endpoint: oss.eu-west-0.prod-cloud-ocb.orange-business.com
 
