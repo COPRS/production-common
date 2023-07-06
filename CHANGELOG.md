@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.14.0-rc1] - 2023-07-05
+## [1.14.0-rc1] - 2023-07-06
 
 ### Added
 
@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-885: Update S1-L12 to 3.6.1
 - RS-995: [BUG] S2 metadata coordinates does not match ES configuration. Documentation was updated
 - RS-1000: [BUG] S1 fields in S3 ACQ configuration. Documentation was updated
+- RS-1010: [TRACE][S3] SR1-STC & SR1-NTC include several time the same filename on input
 
 ### Removed
 

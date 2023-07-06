@@ -183,11 +183,17 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-
+	
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-shapefile</artifactId>
 			<version>${geotools.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.media</groupId>
+					<artifactId>jai_core</artifactId>					
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Expose metrics for Prometheus -->
@@ -273,9 +279,11 @@
 							<goal>report</goal>
 						</goals>
 						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
+							<!-- Sets the path to the file which contains the
+							execution data. -->
 							<dataFile>target/jacoco.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
+							<!-- Sets the output directory for the code coverage
+							report. -->
 							<outputDirectory>target/html-reports/jacoco-ut</outputDirectory>
 						</configuration>
 					</execution>
