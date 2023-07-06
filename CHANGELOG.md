@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- N/A
+- RS-1023: Update S3_L0 CFI L0p to 06.15 (new docker image)
 
 ### Changed
 
