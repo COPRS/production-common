@@ -1,4 +1,7 @@
-
+### Copernicus Reference System
+# Common - How to create an RS Add-on
+### Reference System version V2.0
+---
 # Overview
 
 These sections are giving an overview about how to create custom RS Add-ons for the COPRS environment. Basically there are two activities that need to be performed. A docker image needs to be created that is based on an image containing the CFI. This image is expected to contain a self-contained environment that allows the execution of the worker. So it needs to include all the binaries, libraries and configuration that are required in order to execute the processor. On this image another layer needs to be deployed that contains the COPRS Execution Worker that invokes the processor from the workflows and monitor its outcome.
