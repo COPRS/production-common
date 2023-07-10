@@ -1,6 +1,8 @@
-:arrow_heading_up: Go back to the [Production Common Documentation Overview](../README.md) :arrow_heading_up:
-
+### Copernicus Reference System
 # COPRS-PRO-IM RS Production Common Installation Manual
+### Reference System version V2.0
+---
+:arrow_heading_up: Go back to the [Production Common Documentation Overview](../README.md) :arrow_heading_up:
 
 # Deployment
 
