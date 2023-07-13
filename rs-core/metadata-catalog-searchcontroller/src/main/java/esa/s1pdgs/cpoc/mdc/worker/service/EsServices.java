@@ -778,21 +778,23 @@ public class EsServices {
 		public String getStopTime() {
 			return stopTime;
 		}
-		
-		public final int hashCode()
-		  {			
-			return Objects.hash(startTime, stopTime);
-		  }
 
-		public final boolean equals(final Object _obj)
-		  {
-		    if (getClass() == _obj.getClass())
-		    {
-			  return Objects.equals(this, _obj);
-		    }
-		    return false;
-		  }
-				
+		@Override
+		public int hashCode() {
+			return Objects.hash(startTime, stopTime);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DateRange other = (DateRange) obj;
+			return Objects.equals(startTime, other.startTime) && Objects.equals(stopTime, other.stopTime);
+		}
 	}
 	
 	public List<SearchMetadata> valIntersectWithoutDuplicates(final String beginDate, final String endDate, final String productType,
