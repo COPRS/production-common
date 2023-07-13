@@ -1,6 +1,6 @@
 # RS-Core - Scaling of applications
 
-One important feature of Spring Cloud Dataflow (SCDF) is the ability to independently scale applications inside a stream. 
+One important feature of Spring Cloud Dataflow (SCDF) is the ability to independently scale applications inside a stream.
 There are two different methods to scale applications with SCDF: Setup properties before first deploying a stream, and dynamically scale applications up and down, while they are running.
 
 ## Preconditions
@@ -22,6 +22,16 @@ app.<applicaition-name>.spring.cloud.stream.kafka.binder.minPartitionCount
 ```
 
 `autoAddPartitions` should be set to `true`, while `minPartitionCount` should be set to the maximum number of consumers in one consumer group listening to the output topic of this application.
+
+When SCDF is responsible for creating the topics it might be necessary to tweak the maximum sizes of messages on the topic. This can be done by adding the properties:
+
+```
+app.<producer-application-name>.spring.cloud.stream.kafka.bindings.output.producer.topic.properties.max.message.bytes
+
+app.<consumer-application-name>.spring.cloud.stream.kafka.bindings.input.consumer.configuration.max.partition.fetch.bytes
+```
+
+For example the topic between the ingestion-trigger (producer) and the ingestion-filter (consumer) contains big messages if the ingestion point listened to lists a lot of input files at once.
 
 ## Start a stream with more than one instance
 
@@ -47,5 +57,6 @@ SCDF also provides a REST-interface to execute this scaling mechanism. This is i
 For more information on how to use the REST-interface please refer to the SCDF documentation mentioned under **Additional resources**
 
 ## Additional resources
+
 - [Manual scaling](https://dataflow.spring.io/docs/recipes/scaling/manual-scaling/)
 - [Autoscaling](https://dataflow.spring.io/docs/recipes/scaling/autoscaling/)
