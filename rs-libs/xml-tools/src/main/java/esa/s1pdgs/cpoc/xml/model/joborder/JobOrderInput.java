@@ -175,6 +175,11 @@ public class JobOrderInput {
 		return filenames;
 	}
 
+	public void setFilenames(List<JobOrderInputFile> filenames) {
+		this.filenames = filenames;
+		this.nbFilenames = filenames.size();
+	}
+
 	/**
 	 * @param filename
 	 *            the filenames to set
@@ -189,6 +194,11 @@ public class JobOrderInput {
 	 */
 	public List<JobOrderTimeInterval> getTimeIntervals() {
 		return timeIntervals;
+	}
+
+	public void setTimeIntervals(List<JobOrderTimeInterval> timeIntervals) {
+		this.timeIntervals = timeIntervals;
+		this.nbTimeIntervals = timeIntervals.size();
 	}
 
 	/**

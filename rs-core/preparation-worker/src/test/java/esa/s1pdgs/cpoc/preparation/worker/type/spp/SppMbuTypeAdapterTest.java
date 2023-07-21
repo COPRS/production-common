@@ -35,6 +35,7 @@ import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
 import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.preparation.worker.model.joborder.JobOrderAdapter;
@@ -67,6 +68,9 @@ public class SppMbuTypeAdapterTest {
     private ProcessProperties processSettings;
 	
 	@Autowired
+	private PreparationWorkerProperties settings;
+	
+	@Autowired
     private XmlConverter xmlConverter;
 
 	private SppMbuTypeAdapter uut;
@@ -94,7 +98,8 @@ public class SppMbuTypeAdapterTest {
                 (t) -> jobOrder,
                 productTypeAdapter,
                 elementMapper,
-                xmlConverter
+                xmlConverter,
+                settings
         );
 	}
 	

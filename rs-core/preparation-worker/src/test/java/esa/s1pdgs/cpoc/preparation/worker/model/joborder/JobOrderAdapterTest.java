@@ -29,6 +29,7 @@ import esa.s1pdgs.cpoc.appcatalog.AppDataJobFile;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobInput;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobProduct;
 import esa.s1pdgs.cpoc.appcatalog.AppDataJobTaskInputs;
+import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.config.ProcessProperties;
 import esa.s1pdgs.cpoc.preparation.worker.model.ProductMode;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
@@ -60,6 +61,8 @@ public class JobOrderAdapterTest {
 
     @Mock
     private ProductTypeAdapter productTypeAdapter;
+    
+    private PreparationWorkerProperties settings = new PreparationWorkerProperties();
 
     @Test
     public final void bogusTest() {
@@ -82,7 +85,8 @@ public class JobOrderAdapterTest {
                 (t) -> jobOrder,
                 productTypeAdapter,
                 elementMapper,
-                xmlConverter
+                xmlConverter,
+                settings
         );
 
         final AppDataJob job = new AppDataJob(133L);
