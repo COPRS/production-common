@@ -72,7 +72,7 @@ RUN sed -i 's;rpm -i $rpms_to_install $AT >>$RILOG 2>\&1;rpm --force -i $rpms_to
 
 # FIXING naming pattern
 RUN cd /tmp/s3-cgs1-l0postproc/ ; mv s3-cgs1-l0postproc.rls s3-cgs1-l0postproc.rls.bck ; cat s3-cgs1-l0postproc.rls.bck | tr '[:upper:]' '[:lower:]' > s3-cgs1-l0postproc.rls
-RUN cd /tmp/s3-cgs1-l0preproc/ ; mv s3-cgs1-l0preproc.rls s3-cgs1-l0postproc.rls.bck  ; cat s3-cgs1-l0preproc.rls.bck | tr '[:upper:]' '[:lower:]' > s3-cgs1-l0preproc.rls
+RUN cd /tmp/s3-cgs1-l0preproc/ ; mv s3-cgs1-l0preproc.rls s3-cgs1-l0preproc.rls.bck  ; cat s3-cgs1-l0preproc.rls.bck | tr '[:upper:]' '[:lower:]' > s3-cgs1-l0preproc.rls
 RUN cd /tmp/s3-cgs1-ddc ; mv s3-cgs1-ddc.rls s3-cgs1-ddc.rls.bck ; cat s3-cgs1-ddc.rls.bck | tr '[:upper:]' '[:lower:]' > s3-cgs1-ddc.rls
 
 # Deploy
