@@ -70,6 +70,10 @@ RUN --mount=type=secret,id=ARTIFACTORY_USER --mount=type=secret,id=ARTIFACTORY_P
 RUN sed -i 's;rpm -i $AT $rpms_to_install >>$RILOG 2>\&1;rpm --force -i $AT $rpms_to_install >>$RILOG 2>\&1;g' functions
 RUN sed -i 's;rpm -i $rpms_to_install $AT >>$RILOG 2>\&1;rpm --force -i $rpms_to_install $AT >>$RILOG 2>\&1;g' functions
 
+# FIXING naming pattern
+RUN cd /tmp/s3-cgs1-l0postproc/ ; mv s3-cgs1-l0postproc.rls.bck ; cat s3-cgs1-l0postproc.rls.bck | tr '[:lower:]' '[:upper:]' > s3-cgs1-l0postproc.rls
+RUN cd /tmp/s3-cgs1-l0preproc/ ; mv s3-cgs1-l0preproc.rls.bck ; cat s3-cgs1-l0preproc.rls.bck | tr '[:lower:]' '[:upper:]' > s3-cgs1-l0preproc.rls
+RUN cd /tmp/s3-cgs1-ddc ; mv s3-cgs1-ddc.rls s3-cgs1-ddc.rls.bck ; cat s3-cgs1-ddc.rls | tr '[:lower:]' '[:upper:]' > s3-cgs1-ddc.rls
 
 # Deploy
 RUN cd /tmp/common; chmod a+x ./common.sh && ./common.sh -i
