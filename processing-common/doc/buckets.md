@@ -74,7 +74,7 @@ deployer.<POD-NAME>.kubernetes.secretKeyRefs=[{ envVarName: 'OBS_USERNAME', secr
 |`app.*.obs.multipart-upload-threshold`| Threshold for when to start using multipart upload, in MB (default: 3072) |
 |`app.*.obs.min-upload-part-size`| Minimum size for each part, when using multipart upload, in MB (default: 100) |
 |`app.*.obs.max-obs-retries`| How many times any operation on the OBS shall be performed before considered failed (default: 10) |
-|`app.*.obs.backoff-throttled-base-delay`| Delay between each retry, in ms (default: 500) |
+|`app.*.obs.backoff-throttled-base-delay`| Delay between each retry, in ms (default: 6000) |
 |`app.*.obs.timeout-shutdown`| Time after an Exception was raised to stop waiting for graceful termination, in s (default: 10) |
 |`app.*.obs.timeout-down-exec`| On batch download: Timeout for each object, in s (default: 15) |
 |`app.*.obs.timeout-up-exec`| On batch upload: Timeout for each object, in s (default: 20) |
