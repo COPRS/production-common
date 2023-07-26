@@ -196,7 +196,7 @@ public class EsServices {
 				 * RS-1002: There are some situations where the footprint raises a topology exception in ES and breaking the workflow.
 				 * It was decided to catch this kind of exceptions as well and remove the footprint as a WA
 				 */
-				if (result.contains("found non-noded intersection between LINESTRING")) {
+				if (e.getDetailedMessage().contains("found non-noded intersection between LINESTRING")) {
 					warningMessage = "Parsing error occurred and identified as non-noded intersection between LINESTRING, dropping them as workaround for #RS-1002";
 					LOGGER.warn(warningMessage);
 					product.remove("sliceCoordinates");
