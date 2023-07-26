@@ -46,7 +46,7 @@ public class ObsConfigurationProperties {
 	
 	private int backoffBaseDelay = 1000;
 	
-	private int backoffThrottledBaseDelay = 500;
+	private int backoffThrottledBaseDelay = 6000;
 	
 	private int backoffMaxDelay = 20000;
 	
