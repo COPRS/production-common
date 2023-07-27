@@ -1,6 +1,7 @@
 package esa.s1pdgs.cpoc.preparation.worker.type.pdu.generator;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,19 +53,25 @@ public abstract class AbstractPDUGenerator {
 	 * @param fill   flag to add remaining time to last interval
 	 * @return list of created intervals (may be empty if start = stop)
 	 */
-	protected List<TimeInterval> generateTimeIntervals(final String start, final String stop, final double length) {
+	List<TimeInterval> generateTimeIntervals(final String start, final String stop, final double length, final double minLength) {
 		List<TimeInterval> intervals = new ArrayList<>();
 
 		LocalDateTime currentStop = DateUtils.parse(start);
 		final LocalDateTime finalStop = DateUtils.parse(stop);
+		
+		long lengthInNanos = (long) (length * 1000000000L);
+		long minLengthInNanos = (long) (minLength * 1000000000L);
 
 		while (currentStop.isBefore(finalStop)) {
-			long lengthInNanos = (long) (length * 1000000000L);
-
-			LocalDateTime newStop = currentStop.plusNanos(lengthInNanos);
+			LocalDateTime newStop = currentStop.plusNanos(lengthInNanos);			
 			if (newStop.isAfter(finalStop)) {
 				intervals.add(new TimeInterval(currentStop, finalStop));
 			} else {
+				// Check if last interval would be too small. If yes, merge it with predecessor
+				long restInterval = newStop.until(finalStop, ChronoUnit.NANOS);
+				if (restInterval < minLengthInNanos) {
+					newStop = finalStop;
+				}
 				intervals.add(new TimeInterval(currentStop, newStop));
 			}
 			currentStop = newStop;

@@ -380,6 +380,18 @@ public class PDUTypeAdapter extends AbstractProductTypeAdapter {
 
 				ThresholdGapHandler gapHandler = new ThresholdGapHandler(typeSettings.getGapThreshholdInS());
 				intervals = gapHandler.mergeTimeIntervals(jobInterval, intervals);
+				
+				// Check if the timeout created malformed time intervals and drop them if necessary
+				if (typeSettings.getMinPDULengthThreshold() > 0.0) {
+					List<TimeInterval> correctedIntervals = new ArrayList<>();
+					for (int i = 0; i < intervals.size(); i++) {
+						// Too small intervals get dropped
+						if (intervals.get(i).lengthInNanos() >= (long) (typeSettings.getMinPDULengthThreshold() * 1000000000L)) {
+							correctedIntervals.add(intervals.get(i));
+						}
+					}
+					intervals = correctedIntervals;
+				}
 
 				String pduTimeIntervals = intervals.stream()
 						.map(i -> "[" + DateUtils.formatToPDUDateTimeFormat(i.getStart()) + ","

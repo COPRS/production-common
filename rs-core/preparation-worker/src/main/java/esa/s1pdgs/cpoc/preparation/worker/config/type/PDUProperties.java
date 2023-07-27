@@ -32,6 +32,11 @@ public class PDUProperties {
 		 * Offset for stripes of reference ORBIT
 		 */
 		private double offsetInS = 0.0;
+		
+		/**
+		 * Minimum length threshold for PDUs
+		 */
+		private double minPDULengthThreshold = 0.0;
 
 		/**
 		 * Reference point for stripes (dump start [DUMP] or anx time [ORBIT])
@@ -44,7 +49,7 @@ public class PDUProperties {
 		private PDUType type = PDUType.FRAME;
 
 		/**
-		 * Threshhold for the gap handler to determine if two intervals should be
+		 * Threshold for the gap handler to determine if two intervals should be
 		 * handled as continuous
 		 */
 		private double gapThreshholdInS = 0.0;
@@ -104,6 +109,14 @@ public class PDUProperties {
 
 		public void setDynProcParams(Map<String, String> dynProcParams) {
 			this.dynProcParams = dynProcParams;
+		}
+
+		public double getMinPDULengthThreshold() {
+			return minPDULengthThreshold;
+		}
+
+		public void setMinPDULengthThreshold(double minPDULengthThreshold) {
+			this.minPDULengthThreshold = minPDULengthThreshold;
 		}
 	}
 

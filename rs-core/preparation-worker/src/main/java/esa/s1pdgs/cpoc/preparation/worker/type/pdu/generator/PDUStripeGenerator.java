@@ -82,8 +82,10 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 					orbit2ANX1 = addOffset(orbit2ANX1, (long) settings.getOffsetInS() * 1000000000L);
 
 					// Generate all timeIntervals that are in between those two intervals
-					timeIntervals = generateTimeIntervals(orbit2ANX1, orbit1ANX1, settings.getLengthInS());
-					timeIntervals.addAll(generateTimeIntervals(orbit1ANX1, orbitANX1, settings.getLengthInS()));
+					timeIntervals = generateTimeIntervals(orbit2ANX1, orbit1ANX1, settings.getLengthInS(),
+							settings.getMinPDULengthThreshold());
+					timeIntervals.addAll(generateTimeIntervals(orbit1ANX1, orbitANX1, settings.getLengthInS(),
+							settings.getMinPDULengthThreshold()));
 
 					// only use timeIntervals with stopTime in between Anx1 from orbit -1 and anx1
 					// from orbit
@@ -99,7 +101,8 @@ public class PDUStripeGenerator extends AbstractPDUGenerator implements PDUGener
 						startTime = firstOfLastOrbit.getAnx1Time();
 					}
 
-					timeIntervals = generateTimeIntervals(startTime, metadata.getAnx1Time(), settings.getLengthInS());
+					timeIntervals = generateTimeIntervals(startTime, metadata.getAnx1Time(), settings.getLengthInS(),
+							settings.getMinPDULengthThreshold());
 				}
 
 				return createJobsFromTimeIntervals(timeIntervals, job, primaryCheckMaxTimelifeS);
