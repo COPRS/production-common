@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-1031: [BUG] [OPS] S3 OL1 NRT 2 same Joborder generated twice
 - RS-1035: [BUG] [S3 SY2 VGS STC v1.14.0-rc1] Only S3A data are produced
 - RS-1043: [BUG] SY2_AOD_NTC Initializing PreProcessing SY1-P0 failed because of duplicated inputs in JobOrder
+- RS-1050: [BUG] [OPS] S3 PUG NTC Execution failed on too short product
 
 ### Removed
 
@@ -56,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RS-868: METADATA does not manage True Color Image (JP2)
 
 ### Changed
+
 - RS-964: [S1] No production level-1 and level-2 for operation mode SM
 - RS-968: [OPS] S3 ACQ failed with following error [code 1] [msg Found an unexpected number of LIST-files (NRTAP structure generated as WA in container)
 - RS-986: Ensure that invalid footprints without an area are ignored and not fail when ingesting the metadata into the MDC
