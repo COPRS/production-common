@@ -144,7 +144,7 @@ public class ServiceConfiguration {
 			final ProductTypeAdapter typeAdapter, final ElementMapper elementMapper, final XmlConverter xmlConverter) {
 		final JobOrderAdapter.Factory jobOrderFactory = new JobOrderAdapter.Factory(
 				(tasktableAdapter) -> tasktableAdapter.newJobOrder(processSettings, settings.getProductMode()),
-				typeAdapter, elementMapper, xmlConverter);
+				typeAdapter, elementMapper, xmlConverter, settings);
 
 		return new JobCreationService(commonProperties, settings, processSettings, jobOrderFactory, typeAdapter);
 	}

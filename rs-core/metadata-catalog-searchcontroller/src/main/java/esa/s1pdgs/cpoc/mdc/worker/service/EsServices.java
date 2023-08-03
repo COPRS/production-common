@@ -191,6 +191,17 @@ public class EsServices {
 					product.remove("sliceCoordinates");
 					fixed = true;
 				}
+				
+				/*
+				 * RS-1002: There are some situations where the footprint raises a topology exception in ES and breaking the workflow.
+				 * It was decided to catch this kind of exceptions as well and remove the footprint as a WA
+				 */
+				if (e.getDetailedMessage().contains("found non-noded intersection between LINESTRING")) {
+					warningMessage = "Parsing error occurred and identified as non-noded intersection between LINESTRING, dropping them as workaround for #RS-1002";
+					LOGGER.warn(warningMessage);
+					product.remove("sliceCoordinates");
+					fixed = true;
+				}
 
 				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
 					warningMessage = "Parsing error occurred for segmentCoordinates, dropping them as workaround for #S1PRO-783";
@@ -767,21 +778,23 @@ public class EsServices {
 		public String getStopTime() {
 			return stopTime;
 		}
-		
-		public final int hashCode()
-		  {			
-			return Objects.hash(startTime, stopTime);
-		  }
 
-		public final boolean equals(final Object _obj)
-		  {
-		    if (getClass() == _obj.getClass())
-		    {
-			  return Objects.equals(this, _obj);
-		    }
-		    return false;
-		  }
-				
+		@Override
+		public int hashCode() {
+			return Objects.hash(startTime, stopTime);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DateRange other = (DateRange) obj;
+			return Objects.equals(startTime, other.startTime) && Objects.equals(stopTime, other.stopTime);
+		}
 	}
 	
 	public List<SearchMetadata> valIntersectWithoutDuplicates(final String beginDate, final String endDate, final String productType,

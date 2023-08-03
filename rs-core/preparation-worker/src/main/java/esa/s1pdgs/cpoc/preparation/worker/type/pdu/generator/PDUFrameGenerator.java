@@ -54,7 +54,7 @@ public class PDUFrameGenerator extends AbstractPDUGenerator implements PDUGenera
 			}
 
 			List<TimeInterval> timeIntervals = generateTimeIntervals(startTime, metadata.getAnx1Time(),
-					settings.getLengthInS());
+					settings.getLengthInS(), settings.getMinPDULengthThreshold());
 
 			List<AppDataJob> jobs = new ArrayList<>();
 			Integer frameNumber = 1;

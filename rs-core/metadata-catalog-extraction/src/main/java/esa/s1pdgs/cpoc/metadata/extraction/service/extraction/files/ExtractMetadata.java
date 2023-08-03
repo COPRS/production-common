@@ -1,9 +1,15 @@
 package esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -467,6 +473,59 @@ public class ExtractMetadata {
 		return metadata;
 	}
 	
+	private String extractProductInventoryFromJP2(Path productFile) {
+		try {
+            String xml = null;
+
+            try(FileChannel fc = FileChannel.open(productFile, StandardOpenOption.READ);) {
+
+               // assume XML is in first MB of file
+               long bufferSize = (fc.size() < 1024 * 1024) ? fc.size() : 1024*1024;
+               ByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, bufferSize);
+               CharBuffer cb = Charset.forName("8859_1").newDecoder().decode(bb);
+
+               Pattern p = Pattern.compile("(<Inventory_Metadata.*</Inventory_Metadata>?)", Pattern.DOTALL);
+               Matcher m = p.matcher(cb);
+               while(m.find()) {
+                  xml = m.group();
+                  break;
+               }               
+            }
+            
+            // Unable to find the embedded metadata file in the first Mb of the file.
+            if (xml == null) {
+            	LOGGER.error("Unable to extract metadata from the first MB of the jp2 file. The structure of the file does not match the expectations");
+            	throw new RuntimeException("Unable to extract the metadata from the first MB of the jp2 file " + productFile);
+            }
+            
+            LOGGER.info("Extracted Inventory Metadata from jp2 file");
+            return xml;
+         } catch(IOException e) {
+            throw new RuntimeException("Could not read metadata from file " + productFile, e );
+         }
+	}
+	
+	public ProductMetadata processS2L1TCI(S2FileDescriptor descriptor, File productFile, ProductFamily family, String productName)
+			throws MetadataExtractionException, MetadataMalformedException {
+		String metadataJP2 = extractProductInventoryFromJP2(productFile.toPath());
+		File xsltFile = new File(this.xsltDirectory + XSLT_S2_XML);
+		
+		if (!xsltFile.exists()) {
+			throw new MetadataExtractionException("Unable to find S2 XSLT file '" + XSLT_S2_HKTM_XML + "'");
+		}
+		
+		ProductMetadata metadata = transformXMLStringWithXSLTToJSON(metadataJP2, xsltFile);
+		
+		ProductMetadata additionalMetadata = S2ProductNameUtil.extractMetadata(productName);
+		
+		metadata = processS2Coordinates(metadata, family);		
+		metadata = checkS2Metadata(Arrays.asList(metadata), additionalMetadata);
+		metadata = putS2FileMetadataToJSON(metadata, descriptor);
+		
+		LOGGER.debug("composed Json: {} ", metadata);
+		return metadata;
+	}
+	
 	public ProductMetadata processS2SADMetadata(S2FileDescriptor descriptor, File metadataFile, ProductFamily family, String productName)
 			throws MetadataExtractionException, MetadataMalformedException {
 
@@ -605,7 +664,7 @@ public class ExtractMetadata {
 				if (!metadata.has("sliceNumber")
 						|| "".equals(metadata.get("sliceNumber").toString())) {
 					metadata.put("sliceNumber", 1);
-				} else if (StringUtils.hasText(metadata.get("sliceNumber").toString())) {
+				} else if (!StringUtils.hasLength(metadata.get("sliceNumber").toString())) {
 					metadata.put("sliceNumber", 1);
 				}
 				if (!metadata.has("totalNumberOfSlice")
@@ -862,7 +921,7 @@ public class ExtractMetadata {
 		
 		final Map<String, Object> geoShape = new HashMap<>();
 		final List<List<Double>> geoShapeCoordinates = new ArrayList<>();
-		geoShape.put("type", "polygon");
+		geoShape.put("type", "Polygon");
 		
 		List<Double> longitudes = new ArrayList<>();
 		for (int i = 0; i < coords.length; i = i + 2) {
@@ -1164,12 +1223,22 @@ public class ExtractMetadata {
 
 	private ProductMetadata transformXMLWithXSLTToJSON(final File inputXMLFile, final File xsltFile)
 			throws MetadataExtractionException, MetadataMalformedException {
-
+		StreamSource stream = new StreamSource(inputXMLFile);
+		return transformXMLStreamWithXSLTToJSON(stream, xsltFile);
+	}
+	
+	private ProductMetadata transformXMLStringWithXSLTToJSON(final String metadataString, final File xsltFile)
+			throws MetadataExtractionException, MetadataMalformedException {
+		StreamSource stream = new StreamSource(new ByteArrayInputStream(metadataString.getBytes()));
+		return transformXMLStreamWithXSLTToJSON(stream, xsltFile);
+	}
+	
+	private ProductMetadata transformXMLStreamWithXSLTToJSON(final StreamSource source, final File xsltFile) throws MetadataExtractionException, MetadataMalformedException {
 		try {
 			final Transformer transformer = transFactory.newTransformer(new StreamSource(xsltFile));
 			final ByteArrayOutputStream transformationStream = new ByteArrayOutputStream();
 
-			transformer.transform(new StreamSource(inputXMLFile), new StreamResult(transformationStream));
+			transformer.transform(source, new StreamResult(transformationStream));
 			ProductMetadata metadata = ProductMetadata.ofXml(transformationStream.toString(Charset.defaultCharset().name()));
 			return enforceFieldTypes(metadata);
 

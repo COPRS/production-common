@@ -220,6 +220,12 @@ public class PreparationWorkerProperties {
     private String pathTaskTableXslt = "";
     
 	/**
+	 * Use only the most recent product, if for one input are multiple products are
+	 * listed with the same validation time window
+	 */
+	private boolean useLatestOnly = false;
+
+	/**
 	 * Initialization function:
 	 * <li>Build maps by splitting the corresponding string (note: we cannot map
 	 * configuration parameter directly in a map due to the use of K8S configuration
@@ -487,6 +493,14 @@ public class PreparationWorkerProperties {
 	public void setPathTaskTableXslt(String pathTaskTableXslt) {
 		this.pathTaskTableXslt = pathTaskTableXslt;
 	}
+	
+	public boolean isUseLatestOnly() {
+		return useLatestOnly;
+	}
+
+	public void setUseLatestOnly(boolean useLatestOnly) {
+		this.useLatestOnly = useLatestOnly;
+	}
 
 	/**
 	 * Display object in JSON format
@@ -500,6 +514,6 @@ public class PreparationWorkerProperties {
 				+ "\", typeSliceLength: \"" + typeSliceLength + "\", mapTypeMeta: \"" + mapTypeMeta + "\", oqcCheck: \""
 				+ oqcCheck + "\", productMode: \"" + productMode + "\", inputWaiting: \"" + inputWaiting
 				+ "\", joborderTimelinessCategoryMapping:" + joborderTimelinessCategoryMapping + "\", maxAgeJobMs:"
-				+ maxAgeJobMs + "\", pathTaskTableXslt:" + pathTaskTableXslt + "\"}";
+				+ maxAgeJobMs + "\", pathTaskTableXslt:" + pathTaskTableXslt + "\", useLatestOnly:" + useLatestOnly + "\"}";
 	}
 }

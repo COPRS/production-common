@@ -3,22 +3,22 @@ name: Build IPF S3 PUG
 on:
   push:
     paths:
-      - 'rs-container/docker_s3_ipf_pug/**'
-      - '.github/workflows/build-ipf-s3-pug.yaml'
+      - "rs-container/docker_s3_ipf_pug/**"
+      - ".github/workflows/build-ipf-s3-pug.yaml"
     branches:
-      - '!main'
-      - 'release/**'
-      - 'develop**'
+      - "!main"
+      - "release/**"
+      - "develop**"
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:
-        description: 'Username to log into Artifactory'
+        description: "Username to log into Artifactory"
         required: true
       WERUM_ARTIFACTORY_PASSWORD:
-        description: 'Password to log into Artifactory'
+        description: "Password to log into Artifactory"
         required: true
       GITGUARDIAN_API_KEY:
-        description: 'API Key for GitGuardian'
+        description: "API Key for GitGuardian"
         required: true
   workflow_dispatch:
 
@@ -35,28 +35,28 @@ jobs:
   gg-scan:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: GitGuardian scan
-      uses: GitGuardian/ggshield-action@master
-      env:
-        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
-        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }} 
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: GitGuardian scan
+        uses: GitGuardian/ggshield-action@master
+        env:
+          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
   build-ipf-s3-pug:
     needs: [gg-scan]
     runs-on: ubuntu-latest
-    # Just build when being a tag or explicitely asked for using #IPF 
+    # Just build when being a tag or explicitely asked for using #IPF
     if: startsWith(github.ref, 'refs/tags') || contains(github.event.head_commit.message, '#IPF')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        
+
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF} | cut -d / -f3-)"
@@ -69,7 +69,7 @@ jobs:
           BUILD_CONTEXT: ./rs-container/docker_s3_ipf_pug
           WERUM_ARTIFACTORY_USER: ${{ secrets.WERUM_ARTIFACTORY_USER }}
           WERUM_ARTIFACTORY_PASSWORD: ${{ secrets.WERUM_ARTIFACTORY_PASSWORD }}
-      
+
       - uses: ./.github/actions/generate-report
-        with: 
+        with:
           COMPONENT: ${{ env.IMAGE_NAME }}

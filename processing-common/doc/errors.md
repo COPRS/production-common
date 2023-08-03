@@ -1,25 +1,25 @@
-# RS Core / RS add-on  - Automated error Management 
+# RS Core / RS add-on - Automated error Management
 
 One important common topic in the Reference System is the handling of errors within the system. Indeed, a processing chain is composed of multiple microservices bounded by Kafka bus. There are cases that are not always working as expected and generate countless errors.
 
-The production-common repository provides to Reference Systems workflows two features to manage automatically errors. 
+The production-common repository provides to Reference Systems workflows two features to manage automatically errors.
 
-These features are common within all RS core chains and RS add-on chains. 
+These features are common within all RS core chains and RS add-on chains.
 
 ## Message retry with Spring Cloud Dataflow (SCDF)
 
 When an error occurs within one application, SCDF handles this error by retrying the message on the same application for a configurable number of times. This behaviour should prevent that small issues regarding the unavailability of required other applications or any network issues will immediately result in a failed message. The following parameters are commonly used to configure the retry mechanism by SCDF:
 
 ```
-app.*.spring.cloud.stream.bindings.input.consumer.maxAttempts=3
+app.*.spring.cloud.stream.bindings.input.consumer.maxAttempts=1
 app.*.spring.cloud.stream.kafka.bindings.input.consumer.enableDlq=true
 app.*.spring.cloud.stream.kafka.bindings.input.consumer.dlqName=error-warning
 ```
 
-From top to bottom the properties have the following effects: ``maxAttempts`` defines how many times a message shall be processed before flagged as a "failed" message. The retry is handled within the SCDF layer and will not reingest the message onto the incoming Kafka topic, meaning no message duplication will occur. 
-``enableDlq`` will enable the Dead-Letter-Queue mechanism from SCDF, meaning, that after the retries are exhausted, the failed message will be sent to one "Dead-Letter-Queue" (DLQ). By default the topic would be determined by the name of the input topic and therefore each topic would have its own DLQ. To harmonize this and make the further processing easier the parameter ``dlqName`` can be used to configure the name of the DLQ-topic. In this case all failed messages within the system will be sent to the topic ``error-warning``. 
+From top to bottom the properties have the following effects: `maxAttempts` defines how many times a message shall be processed before flagged as a "failed" message. The retry is handled within the SCDF layer and will not reingest the message onto the incoming Kafka topic, meaning no message duplication will occur.
+`enableDlq` will enable the Dead-Letter-Queue mechanism from SCDF, meaning, that after the retries are exhausted, the failed message will be sent to one "Dead-Letter-Queue" (DLQ). By default the topic would be determined by the name of the input topic and therefore each topic would have its own DLQ. To harmonize this and make the further processing easier the parameter `dlqName` can be used to configure the name of the DLQ-topic. In this case all failed messages within the system will be sent to the topic `error-warning`.
 
-When forwarding a message to the DLQ the Kafka message headers are enriched with additional information regarding the original topic and the number of retries. This information is then available for all future applications by accessing the headers. 
+When forwarding a message to the DLQ the Kafka message headers are enriched with additional information regarding the original topic and the number of retries. This information is then available for all future applications by accessing the headers.
 
 ## Dead-Letter-Queue mechanism (DLQ)
 

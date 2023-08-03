@@ -27,6 +27,9 @@ public class ObsConfigurationProperties {
 	
 	private String endpointRegion;
 	
+	// In old versions http was enforced, so we keep it as default
+	private boolean enforceHttp = true;
+	
 	private String tenantId = UNDEFINED;
 	
 	private String tenantName = UNDEFINED;
@@ -43,7 +46,7 @@ public class ObsConfigurationProperties {
 	
 	private int backoffBaseDelay = 1000;
 	
-	private int backoffThrottledBaseDelay = 500;
+	private int backoffThrottledBaseDelay = 6000;
 	
 	private int backoffMaxDelay = 20000;
 	
@@ -95,6 +98,14 @@ public class ObsConfigurationProperties {
 
 	public void setEndpointRegion(String endpointRegion) {
 		this.endpointRegion = endpointRegion;
+	}
+	
+	public boolean isEnforceHttp() {
+		return enforceHttp;
+	}
+
+	public void setEnforceHttp(boolean enforceHttp) {
+		this.enforceHttp = enforceHttp;
 	}
 
 	public long getMultipartUploadThreshold() {

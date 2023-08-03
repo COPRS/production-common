@@ -92,7 +92,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	private static final Logger LOGGER = LogManager.getLogger(ExecutionWorkerService.class);
 
 	private final CommonConfigurationProperties commonProperties;
-	
+
 	/**
 	 * AppStatus
 	 */
@@ -112,12 +112,12 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	 * Output processsor
 	 */
 	private final ObsClient obsClient;
-	
+
 	/**
 	 */
 	@Autowired
-	public ExecutionWorkerService(final CommonConfigurationProperties commonProperties, final AppStatus appStatus, final ApplicationProperties properties,
-			final DevProperties devProperties, final ObsClient obsClient) {
+	public ExecutionWorkerService(final CommonConfigurationProperties commonProperties, final AppStatus appStatus,
+			final ApplicationProperties properties, final DevProperties devProperties, final ObsClient obsClient) {
 		this.commonProperties = commonProperties;
 		this.appStatus = appStatus;
 		this.devProperties = devProperties;
@@ -132,15 +132,13 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		// ----------------------------------------------------------
 		// Initialize processing
 		// ------------------------------------------------------
-		MissionId mission = MissionId.valueOf((String) job.getPreparationJob().getCatalogEvent()
-				.getMetadata().get(MissionId.FIELD_NAME));
+		MissionId mission = MissionId
+				.valueOf((String) job.getPreparationJob().getCatalogEvent().getMetadata().get(MissionId.FIELD_NAME));
 
 		final Reporting reporting = ReportingUtils.newReportingBuilder(mission)
-				.rsChainName(commonProperties.getRsChainName())
-				.rsChainVersion(commonProperties.getRsChainVersion())
-				.predecessor(job.getUid())
-				.newReporting("JobProcessing");		
-		
+				.rsChainName(commonProperties.getRsChainName()).rsChainVersion(commonProperties.getRsChainVersion())
+				.predecessor(job.getUid()).newReporting("JobProcessing");
+
 		/*
 		 * If the working directory provided by the job order is outside the expected
 		 * and configured working directory of the wrapper, something is going on
@@ -152,16 +150,16 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			final String errorMessage = String.format(
 					"Attempt to access directory '%s' being outside of working directory '%s'.", job.getWorkDirectory(),
 					properties.getWorkingDir());
-			
+
 			throw new RuntimeException(errorMessage);
 		}
 
 		// Everything is fine with the request, we can start processing it.
 		LOGGER.debug("Everything is fine with the request, start processing job {}", job);
-		
+
 		final File workdir = new File(job.getWorkDirectory());
 		final String jobOrderName = new File(job.getJobOrder()).getName();
-		
+
 		final ProductCategory category;
 
 		// Build output list filename
@@ -178,97 +176,70 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 				.contains(properties.getLevel())) {
 			outputListFile = "*.LIST";
 			category = ProductCategory.S3_PRODUCTS;
-		} else if(properties.getLevel() == ApplicationLevel.SPP_MBU) {
+		} else if (properties.getLevel() == ApplicationLevel.SPP_MBU) {
 			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
 			category = ProductCategory.SPP_MBU_PRODUCTS;
-		} else if(properties.getLevel() == ApplicationLevel.SPP_OBS) {
+		} else if (properties.getLevel() == ApplicationLevel.SPP_OBS) {
 			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
 			category = ProductCategory.SPP_PRODUCTS;
-		}
-		else {
+		} else {
 			outputListFile = job.getWorkDirectory() + workdir.getName() + ".LIST";
 			category = ProductCategory.LEVEL_PRODUCTS;
 		}
-		
+
 		// Clean up the working directory with all of its content
 		eraseWorkingDirectory(properties.getWorkingDir());
 
 		LOGGER.debug("Output list build {}", outputListFile);
 
-		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(
-				properties, 
-				job,
-				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), 
-				properties.getLevel(), 
-				reporting,
-				properties.getPlaintextTaskPatterns()
-		);
-		
-		
+		final PoolExecutorCallable procExecutor = new PoolExecutorCallable(properties, job,
+				getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job), properties.getLevel(), reporting,
+				properties.getPlaintextTaskPatterns());
+
 		final ExecutorService procExecutorSrv = Executors.newSingleThreadExecutor();
 		final ExecutorCompletionService<Void> procCompletionSrv = new ExecutorCompletionService<>(procExecutorSrv);
-		final InputDownloader inputDownloader = new InputDownloader(
-				obsClient, 
-				job.getWorkDirectory(), 
-				job.getInputs(),
-				properties.getSizeBatchDownload(), 
-				getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job),
-				procExecutor, 
-				properties.getLevel(),
-				properties.getPathJobOrderXslt()
-		);
+		final InputDownloader inputDownloader = new InputDownloader(obsClient, job.getWorkDirectory(), job.getInputs(),
+				properties.getSizeBatchDownload(), getPrefixMonitorLog(MonitorLogUtils.LOG_INPUT, job), procExecutor,
+				properties.getLevel(), properties.getPathJobOrderXslt());
 
 //		this.authorizedOutputs = inputMessage.getBody().getOutputs();
 //		this.workDirectory = inputMessage.getBody().getWorkDirectory();
 //		this.debugMode = inputMessage.getDto().isDebug();
-		
-		final OutputProcessor outputProcessor = new OutputProcessor(
-				obsClient,
-				job.getWorkDirectory(),
-				outputListFile,
-				job, 
-				job.getOutputs(),
-				properties.getSizeBatchUpload(), 
-				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job),
-				properties.getLevel(), 
-				properties,
-				commonProperties,
-				job.isDebug());
-		
+
+		final OutputProcessor outputProcessor = new OutputProcessor(obsClient, job.getWorkDirectory(), outputListFile,
+				job, job.getOutputs(), properties.getSizeBatchUpload(),
+				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), properties.getLevel(), properties,
+				commonProperties, job.isDebug());
+
 		reporting.begin(
-				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName, extractIpfVersionFromJobOrder(job)),	
-				new ReportingMessage("Start job processing")
-		);
-		
+				JobReportingInput.newInstance(toReportFilenames(job), jobOrderName, extractIpfVersionFromJobOrder(job)),
+				new ReportingMessage("Start job processing"));
+
 		List<Message<CatalogJob>> result = new ArrayList<>();
-		List<MissingOutput> missingOutputs = new ArrayList<>();
-		OutputEstimation outputEstimation = new OutputEstimation(
-				properties, 
-				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), 
-				outputListFile, 
-				missingOutputs);
+		OutputEstimation outputEstimation = new OutputEstimation(properties,
+				getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job), outputListFile, new ArrayList<>());
 		try {
-			result = processJob(job, inputDownloader, outputProcessor, outputEstimation, procExecutorSrv, procCompletionSrv, procExecutor, reporting);
+			result = processJob(job, inputDownloader, outputProcessor, outputEstimation, procExecutorSrv,
+					procCompletionSrv, procExecutor, reporting);
 		} catch (Exception e) {
-			reporting.error(errorReportMessage(e), missingOutputs);
+			reporting.error(errorReportMessage(e), outputEstimation.getMissingOutputs());
 			throw new RuntimeException(e);
 		}
-		
-		reporting.end(toReportingOutput(result, job.isDebug(), (String) job.getAdditionalFields().get("t0PdgsDate")), new ReportingMessage("End job processing"), missingOutputs);
+
+		reporting.end(toReportingOutput(result, job.isDebug(), (String) job.getAdditionalFields().get("t0PdgsDate")),
+				new ReportingMessage("End job processing"), outputEstimation.getMissingOutputs());
 		return result;
 	}
 
-	protected List<Message<CatalogJob>> processJob(final IpfExecutionJob job,
-			final InputDownloader inputDownloader,
-			final OutputProcessor outputProcessor,
-			final OutputEstimation outputEstimation,
-			final ExecutorService procExecutorSrv, final ExecutorCompletionService<Void> procCompletionSrv,
-			final PoolExecutorCallable procExecutor,
+	protected List<Message<CatalogJob>> processJob(
+			final IpfExecutionJob job, final InputDownloader inputDownloader, final OutputProcessor outputProcessor,
+			final OutputEstimation outputEstimation, final ExecutorService procExecutorSrv,
+			final ExecutorCompletionService<Void> procCompletionSrv, final PoolExecutorCallable procExecutor,
 			final Reporting reporting) /* TODO: Refactor to not expect an already begun reporting... */
 			throws Exception {
 		boolean poolProcessing = false;
 		final List<Message<CatalogJob>> catalogJobs = new ArrayList<>();
-		
+
 		try {
 			LOGGER.info("{} Starting process executor", getPrefixMonitorLog(MonitorLogUtils.LOG_PROCESS, job));
 			final Future<?> submittedFuture = procCompletionSrv.submit(procExecutor);
@@ -286,7 +257,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			waitForPoolProcessesEnding(getPrefixMonitorLog(MonitorLogUtils.LOG_ERROR, job), submittedFuture,
 					procCompletionSrv, properties.getTmProcAllTasksS() * 1000L);
 			poolProcessing = false;
-			
+
 			if (devProperties.getStepsActivation().get("upload")) {
 				checkThreadInterrupted();
 				LOGGER.info("{} Processing l0 outputs", getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
@@ -294,42 +265,55 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 			} else {
 				LOGGER.info("{} Processing l0 outputs bypasssed", getPrefixMonitorLog(MonitorLogUtils.LOG_OUTPUT, job));
 			}
-			
-			/* 
+
+			/*
 			 * This code is not used any more in the SCDF context:
 			 */
-			
-			//          // If there was a missing chunk, we submit a warning in order to deal with the
-			//          // missing chunk and operator needs to decide, whether to restart it or delete
-			//           s// it.
 
-			
-			//			final List<String> missingChunks = downloadToBatch.stream()
-			//					.filter(o -> o.getFamily() == ProductFamily.INVALID).map(ObsObject::getKey)
-			//					.collect(Collectors.toList());
+			// // If there was a missing chunk, we submit a warning in order to deal with
+			// the
+			// // missing chunk and operator needs to decide, whether to restart it or
+			// delete
+			// s// it.
+
+			// final List<String> missingChunks = downloadToBatch.stream()
+			// .filter(o -> o.getFamily() == ProductFamily.INVALID).map(ObsObject::getKey)
+			// .collect(Collectors.toList());
 			//
-			//			final String warningMessage;
-			//			if (!missingChunks.isEmpty()) {
-			//				warningMessage = String.format(
-			//						"Missing RAWs detected for successful production %s: %s. "
-			//								+ "Restart if chunks become available or delete this request if they are lost",
-			//						job.getUid().toString(), missingChunks);
-			//			} else if (job.isTimedOut()) {
-			//				warningMessage = String.format(
-			//						"JobGeneration timed out before successful production %s. "
-			//								+ "Restart if missing inputs become available or delete this request if they are lost",
-			//								job.getUid().toString());
-			//			} else {
-			//				warningMessage = "";
-			//			}
+			// final String warningMessage;
+			// if (!missingChunks.isEmpty()) {
+			// warningMessage = String.format(
+			// "Missing RAWs detected for successful production %s: %s. "
+			// + "Restart if chunks become available or delete this request if they are
+			// lost",
+			// job.getUid().toString(), missingChunks);
+			// } else if (job.isTimedOut()) {
+			// warningMessage = String.format(
+			// "JobGeneration timed out before successful production %s. "
+			// + "Restart if missing inputs become available or delete this request if they
+			// are lost",
+			// job.getUid().toString());
+			// } else {
+			// warningMessage = "";
+			// }
+
 			
 			if (properties.isProductTypeEstimationEnabled()) {
 				LOGGER.debug("output product type estimation enabled");
+
 				outputEstimation.estimateWithoutError(job);
+				
+				// RS-895: Remove all missing outputs if processing was a success
+				if (outputEstimation.getMissingOutputs().size() > 0) {
+					LOGGER.info(
+							"The production was successful, but there were some missing outputs detected by the output estimation.");
+					
+					outputEstimation.setMissingOutputs(new ArrayList<>());
+				}
 			} else {
 				LOGGER.debug("output product type estimation disabled");
 			}
-			
+
 			return catalogJobs;
 		} catch (Exception e) {
 			if (properties.isProductTypeEstimationEnabled()) {
@@ -346,12 +330,14 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 		}
 	}
 
-	private ReportingOutput toReportingOutput(final List<Message<CatalogJob>> out, final boolean debug, final String lastInputAvailable) {
+	private ReportingOutput toReportingOutput(final List<Message<CatalogJob>> out, final boolean debug,
+			final String lastInputAvailable) {
 		final List<ReportingFilenameEntry> reportingEntries = out.stream()
 				.map(m -> new ReportingFilenameEntry(m.getPayload().getProductFamily(),
 						new File(m.getPayload().getProductName()).getName()))
 				.collect(Collectors.toList());
-		return new IpfFilenameReportingOutput(new ReportingFilenameEntries(reportingEntries), debug, lastInputAvailable);
+		return new IpfFilenameReportingOutput(new ReportingFilenameEntries(reportingEntries), debug,
+				lastInputAvailable);
 	}
 
 	/**
@@ -439,9 +425,8 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 					 * deleted what is possible and will ignore items it is not able to access
 					 */
 
-					Files.walkFileTree(workingDir,
-							new HashSet<FileVisitOption>(Arrays.asList()),
-							Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
+					Files.walkFileTree(workingDir, new HashSet<FileVisitOption>(Arrays.asList()), Integer.MAX_VALUE,
+							new SimpleFileVisitor<Path>() {
 								@Override
 								public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
 										throws IOException {
@@ -476,7 +461,7 @@ public class ExecutionWorkerService implements Function<IpfExecutionJob, List<Me
 	}
 
 	private List<ReportingFilenameEntry> toReportFilenames(final IpfExecutionJob job) {
-		return job.getInputs().stream().map(this::newEntry).collect(Collectors.toList());
+		return new ArrayList<>(job.getInputs().stream().map(this::newEntry).collect(Collectors.toSet()));
 	}
 
 	private ReportingFilenameEntry newEntry(final LevelJobInputDto input) {

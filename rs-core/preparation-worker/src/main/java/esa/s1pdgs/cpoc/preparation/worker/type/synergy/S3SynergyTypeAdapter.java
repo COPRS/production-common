@@ -98,12 +98,15 @@ public class S3SynergyTypeAdapter extends AbstractProductTypeAdapter implements 
 		// Extract if there already is a Job in the database for the given start and
 		// stop time for this productType
 		final String productType = job.getProductName().substring(4, 15);
+		final String satelliteId = job.getProductName().substring(2, 3);
 
 		final List<AppDataJob> jobsInDatabase = appCat.findByProductType(productType);
 
 		for (AppDataJob databaseJob : jobsInDatabase) {
+			final String databaseSatelliteId = databaseJob.getProductName().substring(2, 3);
+
 			if (job.getStartTime().equals(databaseJob.getStartTime())
-					&& job.getStopTime().equals(databaseJob.getStopTime())) {
+					&& job.getStopTime().equals(databaseJob.getStopTime()) && satelliteId.equals(databaseSatelliteId)) {
 				LOGGER.info("Found a matching job in database: AppDataJob {}", databaseJob.getId());
 
 				return Optional.of(databaseJob);

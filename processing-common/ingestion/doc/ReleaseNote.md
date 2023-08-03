@@ -39,7 +39,7 @@ Following components of the COPRS shall be installed and running
 OBS Buckets, Kubernetes Secrets and ES indices shall be created.
 - See [COPRS OBS Bucket](/processing-common/doc/buckets.md)
 - See [COPRS ES Indice](/processing-common/doc/indices.md) 
-- See [COPRS Kubernetes Secret](/processing-common/doc/secrets.md)
+- See [COPRS Kubernetes Secret](/processing-common/doc/secret.md)
 
 Additionally the Ingestion system needs a persistence in order to store which products had been identified in the past already and avoid firing another event for them again. Thus it is required to have a MongoDB instance available and setup. For further general information regarding the creation of a secret for the  MongoDB instance, please see [this](/processing-common/doc/secret.md) description.
 
@@ -65,7 +65,7 @@ For each of these types a different type of inbox configuration needs to be setu
 ## AUXIP
 When using an AUXIP endpoint it will be required to provide some additional credentials in order to allow login to it. For security issues this cannot be done in the normal properties and needs to be setup as Kubernetes secret. 
 
-Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secrets.md) documentation for giving detailed information on how to create secrets and passing the credentials.
+Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secret.md) documentation for giving detailed information on how to create secrets and passing the credentials.
 
 For more details, see [AUXIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#auxip)
 
@@ -74,7 +74,7 @@ For an example configuration of an AUXIP endpoint, please have a look at the [ex
 ## XBIP
 The XBIP interface in the frame of COPRS is used to download raw data (chunks) for Sentinel-1,  Sentinel-2 and  Sentinel-3 missions.
 
-Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secrets.md) documentation for giving detailed information on how to create secrets and passing the credentials.
+Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secret.md) documentation for giving detailed information on how to create secrets and passing the credentials.
 
 For more details, see [XBIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#xbip)
 
@@ -83,7 +83,7 @@ The RS Core ingestion does contain an example for an XBIP endpoint already. For 
 ## EDIP
 The EDIP interface, similar to XBIP, is used by COPRS to download chunks via FTP protocol
 
-Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secrets.md) documentation for giving detailed information on how to create secrets and passing the credentials.
+Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secret.md) documentation for giving detailed information on how to create secrets and passing the credentials.
 
 For more details, see [EDIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#edip)
 
@@ -117,7 +117,7 @@ Please note that the following parameters are grouped by an inbox. The name of t
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.stationName``|The name of the station from where the products are retrieved from e.g. ``MTI_``|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.missionId``|The identifier of the mission from the inbox in upper case:<br>* S1<br>* S2<br>* S3|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.station-retention-time``|Defines after how many days entries shall be deleted from the persistence of the inbox|
-|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignore-files-before-date``|Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08:00:00.000Z``. This pattern can be used to avoid that all historical products from the inbox will be pulled into the system.|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignore-files-before-date``|Defines a date. All files before this date will be ignored. e.g. ``2020-11-24T08:00:00.000Z``. Please note that if a data in the future is set, the service will automatically use the current time of the system as filter. This pattern can be used to avoid that all historical products from the inbox will be pulled into the system.|
 
 
 ### MongoDB

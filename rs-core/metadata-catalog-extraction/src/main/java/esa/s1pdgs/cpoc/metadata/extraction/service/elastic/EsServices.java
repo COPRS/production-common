@@ -156,7 +156,7 @@ public class EsServices {
 					product.remove("sliceCoordinates");
 					fixed = true;
 				}
-
+	
 				if (result.contains("failed to parse field [segmentCoordinates] of type [geo_shape]")) {
 					warningMessage = "Parsing error occurred for segmentCoordinates, dropping them as workaround for #S1PRO-783";
 					LOGGER.warn(warningMessage);
@@ -164,11 +164,34 @@ public class EsServices {
 					fixed = true;
 				}
 				
-				if (family == ProductFamily.S3_L0 && e.getDetailedMessage() != null && e.getDetailedMessage().contains("Self-intersection at or near point")) {
-					warningMessage = "Invalid self-intersecting footprint detected, dropping it as a workaround for #RS-436";
+				/*
+				 * RS-1002: There are some situations where the footprint raises a topology exception in ES and breaking the workflow.
+				 * It was decided to catch this kind of exceptions as well and remove the footprint as a WA
+				 */
+				if (e.getDetailedMessage().contains("found non-noded intersection between LINESTRING")) {
+					warningMessage = "Parsing error occurred and identified as non-noded intersection between LINESTRING, dropping them as workaround for #RS-1002";
 					LOGGER.warn(warningMessage);
 					product.remove("sliceCoordinates");
 					fixed = true;
+				}
+				
+				// S3 L0 products seem to have broken footprints. If a self intersecting error
+				// occurs, remove the sliceCoordinates and try again. Do this for PUG products 
+				// as well, as they can be based on S3_L0 products
+				if ((family == ProductFamily.S3_L0  || family == ProductFamily.S3_PUG) && e.getDetailedMessage() != null) {					
+					if (e.getDetailedMessage().contains("Self-intersection at or near point")) {
+						warningMessage = "Invalid self-intersecting footprint detected, dropping it as a workaround for #RS-436";
+						LOGGER.warn(warningMessage);
+						product.remove("sliceCoordinates");
+						fixed = true;
+					} else if (e.getDetailedMessage().contains("Cannot determine orientation: signed area equal to 0")) {
+						// DO_0_NAV products seems to have a footprint with multiple points in the same spot. Having
+						// a footprint without any area is not a valid 
+						warningMessage = "Invalid footprint without an area detected, dropping it as a workaround for #RS-986";
+						LOGGER.warn(warningMessage);
+						product.remove("sliceCoordinates");
+						fixed = true;
+					}
 				}
 
 				if (!fixed) {

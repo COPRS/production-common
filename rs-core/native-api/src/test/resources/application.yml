@@ -48,6 +48,9 @@ native-api:
       - "contains(Name,'{value}')"
     "[collections={producttype}]":
       - "Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq ‘{producttype}"
+    "[cloudcover={min}/{max}]":
+        - "Attributes/OData.CSC.DoubleAttribute/any(att:att/Name eq 'cloudCover' and att/OData.CSC.DoubleAttribute/Value gt {min})"
+        - "Attributes/OData.CSC.DoubleAttribute/any(att:att/Name eq 'cloudCover' and att/OData.CSC.DoubleAttribute/Value lt {max})"
     "[datetime={start}/{stop}]": 
       - "ContentDate/Start gt {start}"
       - "ContentDate/End lt {stop}"

@@ -1,6 +1,8 @@
-:arrow_heading_up: Go back to the [Production Common Documentation Overview](../README.md) :arrow_heading_up:
-
+### Copernicus Reference System
 # COPRS-PRO-ADD RS Processing Architecture and Design Document
+### Reference System version V2.0
+---
+:arrow_heading_up: Go back to the [Production Common Documentation Overview](../README.md) :arrow_heading_up:
 
 ## Summary
 

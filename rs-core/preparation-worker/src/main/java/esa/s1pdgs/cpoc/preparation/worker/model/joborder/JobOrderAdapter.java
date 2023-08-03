@@ -30,9 +30,11 @@ import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.StringUtil;
 import esa.s1pdgs.cpoc.mqi.model.queue.LevelJobOutputDto;
+import esa.s1pdgs.cpoc.preparation.worker.config.PreparationWorkerProperties;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.ElementMapper;
 import esa.s1pdgs.cpoc.preparation.worker.tasktable.adapter.TaskTableAdapter;
 import esa.s1pdgs.cpoc.preparation.worker.type.ProductTypeAdapter;
+import esa.s1pdgs.cpoc.preparation.worker.type.s3.DuplicateProductFilter;
 import esa.s1pdgs.cpoc.xml.XmlConverter;
 import esa.s1pdgs.cpoc.xml.model.joborder.AbstractJobOrderProc;
 import esa.s1pdgs.cpoc.xml.model.joborder.JobOrder;
@@ -52,17 +54,20 @@ public final class JobOrderAdapter
 		private final ProductTypeAdapter typeAdapter;
 		private final ElementMapper elementMapper;
 		private final XmlConverter xmlConverter;
+		private final PreparationWorkerProperties prepperSettings;
 
 		public Factory(
 				final Function<TaskTableAdapter, JobOrder> jobOrderSupplier, 
 				final ProductTypeAdapter typeAdapter,
 				final ElementMapper elementMapper,
-				final XmlConverter xmlConverter
+				final XmlConverter xmlConverter,
+				final PreparationWorkerProperties prepperSettings
 		) {
 			this.jobOrderSupplier = jobOrderSupplier;
 			this.typeAdapter = typeAdapter;
 			this.elementMapper = elementMapper;
 			this.xmlConverter = xmlConverter;
+			this.prepperSettings = prepperSettings;
 		}
 
 		public final JobOrderAdapter newJobOrderFor(final AppDataJob job, final TaskTableAdapter taskTableAdapter) {
@@ -98,7 +103,15 @@ public final class JobOrderAdapter
 					DateUtils.convertToAnotherFormat(job.getStopTime(),
 							AppDataJobProduct.TIME_FORMATTER, JobOrderSensingTime.DATETIME_FORMATTER)));
 			
-			typeAdapter.customJobOrder(job, jobOrder);	
+			typeAdapter.customJobOrder(job, jobOrder);
+			
+			if (prepperSettings.isUseLatestOnly()) {
+				inputsOf(jobOrder).forEach(input -> {
+					JobOrderInput newInput = DuplicateProductFilter.filterJobOrderInput(input);
+					input.setFilenames(newInput.getFilenames());
+					input.setTimeIntervals(newInput.getTimeIntervals());
+				});
+			}
 			
 			return new JobOrderAdapter(xmlConverter, jobOrderFile, jobOrder);
 		}

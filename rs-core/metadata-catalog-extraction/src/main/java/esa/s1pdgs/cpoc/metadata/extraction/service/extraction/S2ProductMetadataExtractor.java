@@ -61,6 +61,30 @@ public class S2ProductMetadataExtractor extends AbstractMetadataExtractor {
 					FileUtils.delete(metadataFile.getPath());
 			}
 		}
+		
+		/*
+		 * For the L1C TCI products we are having a special case. These won't be provided as normal products containing a metadata file that can be
+		 * used, but instead providing a single jp2 product that does contain an embedded Product Inventory file. If we identify such a product
+		 * a special handling will be executed.
+		 */
+		if (ProductFamily.S2_L1C_TC.equals(catalogJob.getProductFamily()) || 
+				(ProductFamily.S2_L2A_TC.equals(catalogJob.getProductFamily()))) {
+			LOG.info("Incoming job is a S2 L1C TC product and metadata will be extracted from jp2");
+			
+			// The metadata is embedded in the actual product, so instead of the metadata
+			final File productFile = downloadMetadataFileToLocalFolder(reportingFactory, catalogJob.getProductFamily(),
+					catalogJob.getKeyObjectStorage());
+	
+			try {
+				final S2FileDescriptor descriptor = fileDescriptorBuilder.buildS2FileDescriptor(catalogJob);
+
+				// Build metadata from file and extracted
+				final ProductMetadata metadata = mdBuilder.buildS2L1TCIMetadata(descriptor, productFile, catalogJob);
+				return metadata;
+			} finally {
+				FileUtils.delete(productFile.getPath());
+			}
+		}
 
 		// In all other cases download all .xml files and use xslt to extract necessary information
 		final List<File> metadataFiles = downloadS2MetadataFilesToLocalFolder(reportingFactory,

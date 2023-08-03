@@ -50,7 +50,7 @@ public class PreparationWorkerServiceConfiguration {
 	@Bean
 	public Function<CatalogEvent, List<Message<IpfExecutionJob>>> prepareExecutionJobs() {
 		return new PreparationWorkerService(taskTableMapperService, typeAdapter, processProperties, appCatJobService,
-				inputSearchService, commonProperties);
+				inputSearchService, commonProperties, preparationWorkerProperties);
 	}
 
 	@Bean

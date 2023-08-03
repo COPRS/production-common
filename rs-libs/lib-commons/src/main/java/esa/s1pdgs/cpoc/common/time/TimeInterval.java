@@ -1,6 +1,8 @@
 package esa.s1pdgs.cpoc.common.time;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Objects;
 
 public final class TimeInterval implements Comparable<TimeInterval> {
@@ -54,5 +56,9 @@ public final class TimeInterval implements Comparable<TimeInterval> {
 	
 	public final boolean intersects(final TimeInterval interval) {
 		return TimeIntervals.intersects(this, interval);
+	}
+	
+	public final long lengthInNanos() {
+		return this.start.until(this.stop, ChronoUnit.NANOS);
 	}
 }

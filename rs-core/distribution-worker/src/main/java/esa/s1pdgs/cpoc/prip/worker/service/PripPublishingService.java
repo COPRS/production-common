@@ -26,6 +26,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.obs.ObsException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataQueryException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
+import esa.s1pdgs.cpoc.common.utils.FootprintUtil;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
 import esa.s1pdgs.cpoc.metadata.client.MetadataClient;
@@ -102,7 +103,7 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		
 		try {
 			createAndSave(compressionEvent);
-		} catch (MetadataQueryException | InterruptedException | PripPublishingException | SdkClientException e) {
+		} catch (Exception e) {
 			final String errorMessage = String.format("Error on publishing file %s in PRIP: %s", name,
 					LogUtils.toString(e));
 			reporting.error(new ReportingMessage(errorMessage));
@@ -176,7 +177,18 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 					LOGGER.debug("Assuming that footprint with {} points is of type 'linestring'", coordinates.size());
 					pripMetadata.setFootprint(new GeoShapeLineString(coordinates));
 				} else if (coordinates.size() >= 4) {
-					pripMetadata.setFootprint(new GeoShapePolygon(coordinates));
+					
+					// RS-958: Add date-line support to distribution-worker
+					List<Double> longitudes = new ArrayList<>();
+					for (PripGeoCoordinate coord : coordinates) {
+						longitudes.add(coord.getLongitude());
+					}
+					final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
+					if ("clockwise".equals(orientation)) {
+						LOGGER.info("Adding dateline crossing marker");
+					}
+					
+					pripMetadata.setFootprint(new GeoShapePolygon(coordinates, orientation));
 				} else {
 					LOGGER.warn("No valid footprint of type 'polygon' (must be >= 4 points) -> Footprint ignored!");
 				}

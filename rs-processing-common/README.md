@@ -80,6 +80,20 @@ The latest version can be deployed by using the following command line:
 | `prip-frontend.debug-support` | Adding additional debug information on the Odata interface. Don't use this in an operational setup | `false` |
 | `update.maxSurge` | maximum number of Pods that can be created over the desired number of Pods | `100%` |
 | `update.maxUnavailable` | optional field that specifies the maximum number of Pods that can be unavailable during the update process | `50%` |
+| `obs.endpoint-region` | Specifies the region of the endpoint for the cloud provider | `eu-west-0` |
+| `obs.endpoint` | Specifies the region of the endpoint for the cloud provider | `oss.eu-west-0.prod-cloud-ocb.orange-business.com` |
+| `obs.user-secret` | Sets the user password used to access the OBS. It is highly recommend to leave this to the environmental, so it can be read from a secret | `${OBS_PASSWORD}` |
+| `obs.user-id` | Sets the user name used to access the OBS. It is highly recommend to leave this to the environmental, so it can be read from a secret | `${OBS_USERNAME}` |
+| `obs.disable-chunked-encoding` | Allows to disable chunked encoding for file transfers | `false` |
+
+Please note that it is additionally possible to set bucket definitions below the value `obs.bucket`. The following pattern can be used:
+```
+obs:
+  bucket:
+    auxiliary-file: rs-s1-aux
+    edrs-session: rs-session-files
+```
+This sets for the product family "auxiliary-file" the bucket `rs-s1-aux` and for the family `edrs-session` the bucket `rs-session-files`. The list of buckets is a collection that can be extended. The configuration used for the buckets shall be consistent with the RS Core component configurations that are provided there as stream definition properties.
 
 ## Native API
 
@@ -91,7 +105,7 @@ The latest version can be deployed by using the following command line:
 | Name                              | Description                                              | Default |
 | ----------------------------------|----------------------------------------------------------|---------|
 | `nativeapi.prip.protocol` | The protocol that shall be used to contact the PRIP backend | `http`|
-| `nativeapi.prip.host` | The host that shall be used to contact the PRIP backend| `s1pro-prip-frontend-svc.processing.svc.cluster.local` |
+| `nativeapi.prip.host` | The host that shall be used to contact the PRIP backend| `rs-prip-frontend-svc.processing.svc.cluster.local` |
 | `nativeapi.prip.port` | The port that shall be used to contact the PRIP backend | `8080` |
 | `nativeapi.external.protocol` | The protocol used to externally connect to the PRIP/DDIP frontend | `http` |
 | `nativeapi.external.host` | The externally reachable hostname or IP used to connect to the PRIP/DDIP frontend | `coprs.werum.de/prip/odata/v1/` |
@@ -144,8 +158,8 @@ The `datetime` is an example for a ranged type. The value of the parameter conta
 When having a ranged query it is not sufficient enough to provide a single statement as the value cannot be mapped as empty string or null to provide a valid OData query. Thus if one of these ranges are open ended the associated OData statement needs to be ignored. To allow this in a generic manner, the statements needs to be listed independently. E.g.
 ```
     "[publicationdate={start}/{stop}]":
-      - "CreationDate gt {start}"
-      - "CreationDate lt {stop}"  
+      - "PublicationDate gt {start}"
+      - "PublicationDate lt {stop}"  
 ```
 If start and stop are provided, both statements will be concated using an and operator like:
 `PublicationDate gt 2010-10-18T14:33:00.000Z and PublicationDate lt 2023-02-06T14:33:00.000Z`
@@ -193,6 +207,20 @@ The following command can be used in order to deploy the Eviction Manager:
 | `elasticsearch.socket-timeout-ms` | Timeout in milliseconds of the socket to the cluster | `10000` |
 | `elasticsearch.search-result-limit` | Limitation of search result when searching for evictable files in the DLM index. Only this amount of files will be handled in one iteration | `1000` |
 | `eviction-management-worker.eviction-interval-ms` | Specifies the interval in milliseconds between invocations of the Eviction routine for searching and deleting evictable files from OBS/MDC/Prip | `600000` |
+| `obs.endpoint-region` | Specifies the region of the endpoint for the cloud provider | `eu-west-0` |
+| `obs.endpoint` | Specifies the region of the endpoint for the cloud provider | `oss.eu-west-0.prod-cloud-ocb.orange-business.com` |
+| `obs.user-secret` | Sets the user password used to access the OBS. It is highly recommend to leave this to the environmental, so it can be read from a secret | `${OBS_PASSWORD}` |
+| `obs.user-id` | Sets the user name used to access the OBS. It is highly recommend to leave this to the environmental, so it can be read from a secret | `${OBS_USERNAME}` |
+| `obs.disable-chunked-encoding` | Allows to disable chunked encoding for file transfers | `false` |
+
+Please note that it is additionally possible to set bucket definitions below the value `obs.bucket`. The following pattern can be used:
+```
+obs:
+  bucket:
+    auxiliary-file: rs-s1-aux
+    edrs-session: rs-session-files
+```
+This sets for the product family "auxiliary-file" the bucket `rs-s1-aux` and for the family `edrs-session` the bucket `rs-session-files`. The list of buckets is a collection that can be extended. The configuration used for the buckets shall be consistent with the RS Core component configurations that are provided there as stream definition properties.
 
 ## Request Parking Lot
 

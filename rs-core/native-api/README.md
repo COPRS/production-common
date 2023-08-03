@@ -5,7 +5,7 @@ The Native API is based on the [STAC item search](https://github.com/radianteart
 At this state the API supports the `GET` HTTP method for search requests and the query parameter `datetime`.
 
 <figure>
-  <img src="media/native-api-stac.png" alt="Native-API diagram" style="width:100%"><figcaption align="center"><b>The Native API and its environment as part of the RS-API</b></figcaption>
+  <img src="media/native-api-stac.png" alt="Native-API diagram" style="width:100%"><figcaption align="center"><br/><b>The Native API and its environment as part of the RS-API</b></figcaption>
 </figure>
 
 ## Interface Context
