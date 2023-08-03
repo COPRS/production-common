@@ -129,7 +129,7 @@ public class TestS2ProductMetadataExtractor {
 		final ProductMetadata result = extractor.extract(reporting, message);
 
 		Iterator<String> it = expected.keys().iterator();
-
+    
 		while (it.hasNext()) {
 			String key = it.next();
 			if (!"coordinates".equals(key)) {

@@ -60,6 +60,13 @@ COPY --from=base /log/log4j2.yml /log/log4j2.yml
 
 USER root:root 
 
+<<<<<<< HEAD
+=======
+# Install java 11
+RUN yum install -y java-11-openjdk
+RUN alternatives --set java java-11-openjdk.x86_64
+
+>>>>>>> main
 # Add Tini as entry point
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini

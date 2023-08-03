@@ -459,6 +459,20 @@ This version is the first delivery for V1.1 and contains migrated components for
 
 - N/A
 
+## [0.3.0-rc14] - 2022-03-16
+
+### Added
+
+- N/A
+
+### Changed
+
+- N/A
+
+### Removed
+
+- N/A
+
 ## [0.3.0-rc11] - 2022-03-01
 
 ### Added
@@ -482,6 +496,7 @@ This version is the first delivery for V1.1 and contains migrated components for
 ### Changed
 
 - RS-283: Fixing typo in AUXIP configuration causing restarts
+- RS-286: Fixing issue causing S3 L0 IPF to parse wrong .LIST file
 
 ### Removed
 

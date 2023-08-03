@@ -35,9 +35,10 @@ This directory contains the definitions of the default RS Core Components of the
 The RS Core components are build automatically when something is commited and generating a zip file that will be uploaded to the COPRS Artifactory instance. If you just want to deploy these instances, you can download the RS Core component archive directly. You can find an overview of the available components are versions [here](https://artifactory.coprs.esa-copernicus.eu/artifactory/rs-zip/).
 
 Please note that this directory does not contain the RS Add-ons of the COPRS. They are located in different repositories, but using a similiar structure. You can find them here for:
-* [Sentinel-1](https://github.com/COPRS/processing-sentinel-1)
-* [Sentinel-2](https://github.com/COPRS/processing-sentinel-2)
-* [Sentinel-3](https://github.com/COPRS/processing-sentinel-3)
+
+- [Sentinel-1](https://github.com/COPRS/processing-sentinel-1)
+- [Sentinel-2](https://github.com/COPRS/processing-sentinel-2)
+- [Sentinel-3](https://github.com/COPRS/processing-sentinel-3)
 
 ### rs-container
 
@@ -63,12 +64,11 @@ This directory contains the source code of the common libraries that are used ac
 
 Each subfolder contains a library that is used within the system. Check this folder out if you intend to improve or study the common libraries used by the COPRS.
 
-
 ### rs-processing-common
 
 A part of the RS Core Components that are deployed as stream definitions with an SCDF instance, there are a set of standalone components that are not working on an event driven approach, but instead providing some services to the system. These are usually front end applications that are exposing some kind of interface to the outside worls that can be used by end-users or other components.
 
-Each subfolder contains a standalone component that will automatically build a helm chart that is pushed into the Artifactory instance of 
+Each subfolder contains a standalone component that will automatically build a helm chart that is pushed into the Artifactory instance of
 
 A set of helm charts that are deployed as standalone components and not operated within the SCDF streams
 
@@ -80,15 +80,18 @@ This folder contains a set of extra components that are not supposed to be used 
 
 For example, you can mock the ingestion systems like the XBIP or EDIP with a local instance in order to place your own products locally into the inbox.
 
-Some additional helm charts that can be used to mock systems. 
+Some additional helm charts that can be used to mock systems.
 
 ## Documentation
 
 ### Architecture Design Document
+
 In order to get an overview about the architecture of the overall design of COPRS and the software components, please consult the Architecture design document that can be found [here](./docs/architecture)
 
 ### Installation Manual
+
 For further information on deploying the RS Core Components or RS Standalone Components, please consult the Installation Manual, that can be found [here](./docs/install_manuals)
 
 ### Reports
-The build pipe of this project is automatically generating Sonarqube reports for each module when it is build. This allows an easy overview about the status of the project. You can check the reports of the project [here](https://sonarqube.coprs.esa-copernicus.eu/projects) 
+
+The build pipe of this project is automatically generating Sonarqube reports for each module when it is build. This allows an easy overview about the status of the project. You can check the reports of the project [here](https://sonarqube.coprs.esa-copernicus.eu/projects)

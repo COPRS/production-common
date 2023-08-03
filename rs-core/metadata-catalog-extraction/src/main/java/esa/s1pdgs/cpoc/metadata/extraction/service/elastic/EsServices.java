@@ -12,6 +12,14 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.rest.RestStatus;
+<<<<<<< HEAD
+=======
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
+>>>>>>> main
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +27,22 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataCreationException;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
 import esa.s1pdgs.cpoc.common.utils.Retries;
+<<<<<<< HEAD
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
+=======
+import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties;
+import esa.s1pdgs.cpoc.metadata.extraction.config.MdcWorkerConfigurationProperties.CategoryConfig;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.AuxFilenameMetadataExtractor;
+import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
+import esa.s1pdgs.cpoc.metadata.model.AuxMetadata;
+import esa.s1pdgs.cpoc.metadata.model.EdrsSessionMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0AcnMetadata;
+import esa.s1pdgs.cpoc.metadata.model.L0SliceMetadata;
+import esa.s1pdgs.cpoc.metadata.model.LevelSegmentMetadata;
+import esa.s1pdgs.cpoc.metadata.model.MissionId;
+import esa.s1pdgs.cpoc.metadata.model.S3Metadata;
+import esa.s1pdgs.cpoc.metadata.model.SearchMetadata;
+>>>>>>> main
 
 /**
  * Service for accessing to elasticsearch data
@@ -195,5 +218,71 @@ public class EsServices {
 		}
 		return warningMessage;
 	}
+<<<<<<< HEAD
+=======
+
+	public void createMaskFootprintData(final MaskType maskType, final Map<String, Object> feature, final String id) throws Exception {
+		final String footprintIndexName;
+		switch (maskType) {
+			case EW_SLC: footprintIndexName = EW_SLC_MASK_FOOTPRINT_INDEX_NAME; break;
+			case LAND: footprintIndexName = LAND_MASK_FOOTPRINT_INDEX_NAME; break;
+			case OCEAN:	footprintIndexName = OCEAN_MASK_FOOTPRINT_INDEX_NAME; break;
+			case OVERPASS: footprintIndexName = OVERPASS_MASK_FOOTPRINT_INDEX_NAME; break;
+			default: throw new IllegalArgumentException(String.format("Unsupported mask type '%s'", maskType));
+		}
+
+		// RS-280: Use Elasticsearch Dateline Support
+		@SuppressWarnings("unchecked")
+		final Map<String, Object> geometry = (Map<String, Object>)feature.get("geometry");
+		if ("Polygon".equals(geometry.get("type"))) {
+			final List<Double> longitudes = new ArrayList<>();
+			@SuppressWarnings("unchecked")
+			List<List<List<Double>>> coordinates = (List<List<List<Double>>>)geometry.get("coordinates");
+			final List<List<Double>> exteriorRing = (List<List<Double>>)coordinates.get(0);
+			for (int idx = 0; idx < exteriorRing.size(); idx++) {
+				longitudes.add(exteriorRing.get(idx).get(0));
+			}
+			final String orientation = FootprintUtil.elasticsearchPolygonOrientation(longitudes.toArray(new Double[0]));
+			geometry.put("orientation", orientation);
+			if ("clockwise".equals(orientation)) {
+				LOGGER.info("Adding dateline crossing marker for {}", id);
+			}
+		}
+		
+		try {
+			final IndexRequest request = new IndexRequest(footprintIndexName).id(id).source(feature.toString(),
+					XContentType.JSON).setRefreshPolicy(RefreshPolicy.WAIT_UNTIL);
+
+			final IndexResponse response = elasticsearchDAO.index(request);
+
+			if (response.status() != RestStatus.CREATED) {
+				throw new MetadataCreationException(id, response.status().toString(),
+						response.getResult().toString());
+			}
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+		
+	/**
+	 * Refresh the index to ensure new documents can be found. The index is
+	 * extracted from the family and type.
+	 * 
+	 * @param productFamily productFamily of the product that will be searched in
+	 *                      the future
+	 * @param productType   product type of the product that will be searched in the
+	 *                      future
+	 */
+	public void refreshIndex(final ProductFamily productFamily, final String productType) throws Exception {
+		final String index = getIndexForProductFamily(productFamily, productType);
+		final RefreshRequest request = new RefreshRequest(index);
+
+		try {
+			elasticsearchDAO.refresh(request);
+		} catch (final IOException e) {
+			throw new Exception(e.getMessage());
+		}
+	}
+>>>>>>> main
 	
 }
