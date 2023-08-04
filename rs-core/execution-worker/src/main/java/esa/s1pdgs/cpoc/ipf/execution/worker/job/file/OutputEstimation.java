@@ -36,13 +36,8 @@ public class OutputEstimation {
 
 	List<MissingOutput> missingOutputs;
 
-<<<<<<< HEAD
 	public OutputEstimation(final ApplicationProperties properties, final String prefixMonitorLogs,
 			final String listFile, final List<MissingOutput> missingOutputs) {
-=======
-	public OutputEstimation(final ApplicationProperties properties, final IpfExecutionJob job,
-			final String prefixMonitorLogs, final String listFile, final List<MissingOutput> missingOutputs) {
->>>>>>> main
 		this.properties = properties;
 		this.prefixMonitorLogs = prefixMonitorLogs;
 		this.listFile = listFile;
@@ -81,12 +76,7 @@ public class OutputEstimation {
 						typeEstimationMapping.getCount());
 			}
 		} else if (inputProductFamily == ProductFamily.S3_GRANULES) {
-<<<<<<< HEAD
 			findMissingType(job, s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, productsInWorkDir, 1);
-=======
-			findMissingType(s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, productsInWorkDir, 1);
->>>>>>> main
-
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
 			findMissingTypesForASP(job, inputProductType, productsInWorkDir);
 		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
@@ -114,12 +104,7 @@ public class OutputEstimation {
 			}
 
 		} else if (inputProductFamily == ProductFamily.S3_GRANULES) {
-<<<<<<< HEAD
 			addMissingOutput(job, s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, 1);
-=======
-			addMissingOutput(s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, 1);
->>>>>>> main
-
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
 			addMissingOutputForASP(job, inputProductType);
 		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
@@ -203,8 +188,6 @@ public class OutputEstimation {
 					1);
 		}
 	}
-	
-	private String s3L0TypeFromGranulesType(final String inputProductType) {
 
 	void findMissingTypesFromJob(final IpfExecutionJob job, final List<String> productsInWorkDir) {
 		for (LevelJobOutputDto o : job.getOutputs()) {

@@ -160,11 +160,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		return event;
 	}
 
-<<<<<<< HEAD
 	private final CatalogEvent toCatalogEvent(final MissionId missionId, final CatalogJob catJob, final ProductMetadata metadata)
-=======
-	private final CatalogEvent toCatalogEvent(final CatalogJob catJob, final ProductMetadata metadata)
->>>>>>> main
 				throws MetadataMalformedException {
 		final CatalogEvent catEvent = new CatalogEvent();
 		String satelliteId;
@@ -175,11 +171,7 @@ public class ExtractionService implements Function<CatalogJob, CatalogEvent> {
 		}
 
 		catEvent.setMetadata(metadata.asMap());
-<<<<<<< HEAD
 		catEvent.setMissionId(missionId.name());
-=======
-		catEvent.setMissionId(catJob.getMissionId());
->>>>>>> main
 		catEvent.setSatelliteId(satelliteId);
 		catEvent.setMetadataProductName(catJob.getProductName());
 		catEvent.setKeyObjectStorage(catJob.getKeyObjectStorage());
