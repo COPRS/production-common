@@ -15,10 +15,7 @@ import esa.s1pdgs.cpoc.metadata.extraction.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.FileDescriptorBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.files.MetadataBuilder;
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.ProductMetadata;
-<<<<<<< HEAD
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.model.S2FileDescriptor;
-=======
->>>>>>> main
 import esa.s1pdgs.cpoc.metadata.extraction.service.extraction.util.S2ProductNameUtil;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
 import esa.s1pdgs.cpoc.obs_sdk.ObsClient;
@@ -39,7 +36,6 @@ public class S2AuxMetadataExtractor extends AbstractMetadataExtractor {
 	}
 
 	@Override
-<<<<<<< HEAD
 	public ProductMetadata extract(ReportingFactory reportingFactory, CatalogJob catalogJob)
 			throws AbstractCodedException {
 		if (catalogJob.getProductFamily() == ProductFamily.S2_SAD) {
@@ -59,10 +55,6 @@ public class S2AuxMetadataExtractor extends AbstractMetadataExtractor {
 			}
 		} else {
 			// For all other AUX, extract metadata from filename
-=======
-	public ProductMetadata extract(ReportingFactory reportingFactory, CatalogJob catalogJob) throws AbstractCodedException {
-		if (enableExtractionFromProductName) {
->>>>>>> main
 			LOG.trace("Extracting metadata from product name: {}", catalogJob.getProductName());
 			ProductMetadata metadata = S2ProductNameUtil.extractMetadata(catalogJob.getProductName());
 			metadata.put("productFamily", catalogJob.getProductFamily().name());

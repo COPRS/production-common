@@ -695,20 +695,6 @@ The message filter is a basic SCDF component that allows to filter out products 
 
 The SCDF application Extraction takes the product from the received event and will identify the type of extraction that is required for them. It will then fetch the metadata from the OBS (e.g. the manifest file for a SAFE product) and start with the extraction of the metadata. The result will be stored within the Elastic Search index related to the product and it will become visible for other application within the system. Products that are not extracted yet, will not be visible e.g. via the Metadata Search Controller.
 
-<<<<<<< HEAD
-=======
-
-### Browse Image
-
-TBD: The browse image extractor is not required before V2 and thus is not available at the moment.
-
-A processor that is extracting the browse image depending on the input file. Might be a simple selection from product or invoking a conversion (e.g. S2 JPEG2k -> JPG).
-
-The extracted image will be uploaded into the OBS and the image written into the browse image catalog.
-![fc2864113e1f34778f09531d59358623.png](media/fc2864113e1f34778f09531d59358623.png)
-
-
->>>>>>> main
 ### Compression
 
 ![e830e7833cab916176c295924f8437bb.png](media/e830e7833cab916176c295924f8437bb.png)
@@ -730,11 +716,7 @@ The Compression worker itself will download the product into a local working dir
 
 At the end of the chain a "Compression Event" will be generated that will be usually consumed by the Distribution chain handling the publication of the product and make it available for the End users.
 
-<<<<<<< HEAD
 For further information on the compression chain, please have a look [here](https://github.com/COPRS/production-common/tree/develop/processing-common/compression)
-=======
-For futher information on the compression chain, please have a look [here](https://github.com/COPRS/production-common/tree/develop/processing-common/compression)
->>>>>>> main
 
 #### Message Filter
 The message filter is a basic SCDF component that allows to filter out products that are not supposed to be compressed.
@@ -746,19 +728,10 @@ Similiar to the message filter, the priority filter is also a basic SCDF compone
 
 The compression worker is performing the actual compression of the product. It will take the product referenced in the catalog event, download it into a local working directory and execute the configured compression script to perform the compression.
 
-<<<<<<< HEAD
 The kind of compression that is used is depending on the mission. The compression worker will read the missionId from the Catalog Event. Depending on the mission it is possible to define a compression script that shall be used. By default S1 will use compressed ZIP, S2 will use tar and S3 will use uncompressed ZIP. For further information on the configuration, please consult the parameter configuration for the Compression worker that can be found [here](/processing-common/compression/doc/ReleaseNote.md)
 
 After the compression had been performed successfully the result will be uploaded into the OBS. Please note that it will not be uploaded into the same bucket as the original product. Instead the bucket and product family will add a suffix "-zip" to indicate it actually references a compressed product and to distinguish between these.
 
-=======
-Usually this will be a compression tool from the operating system as zip or 7z. It will be executed in a similiar manner like an IPF.
-
-After the compression had been performed successfully the result will be uploaded into the OBS. Please note that it will not be uploaded into the same bucket as the original product. Instead the bucket and product family will add a suffix "-zip" to indicate it actually references a compressed product and to distinguish between these.
-
-
-
->>>>>>> main
 ### Distribution
 
 ![905146a466c8f8dd944cec89e955c99f.png](media/905146a466c8f8dd944cec89e955c99f.png)
