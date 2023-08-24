@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.OriginDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
@@ -84,6 +85,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 		PRIP_DATETIME_PROPERTY_FIELD_NAMES = new HashMap<>();
 		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(PublicationDate.name(), FIELD_NAMES.CREATION_DATE);
 		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(EvictionDate.name(), FIELD_NAMES.EVICTION_DATE);
+		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(OriginDate.name(), FIELD_NAMES.ORIGIN_DATE);
 		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(ContentDate.name() + "/" + Start.name(), FIELD_NAMES.CONTENT_DATE_START);
 		PRIP_DATETIME_PROPERTY_FIELD_NAMES.put(ContentDate.name() + "/" + End.name(), FIELD_NAMES.CONTENT_DATE_END);
 

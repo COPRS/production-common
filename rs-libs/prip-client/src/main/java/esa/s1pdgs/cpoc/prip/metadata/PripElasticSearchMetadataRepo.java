@@ -618,6 +618,10 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			pm.setContentDateEnd(
 					DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
 		}
+		if (Strings.isNotEmpty((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ORIGIN_DATE.fieldName()))) {
+			pm.setOriginDate(
+					DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ORIGIN_DATE.fieldName())));
+		}
 		
 		// If no value is found, we assume it to be true for backward compatibility reasons
 		if (sourceAsMap.get(PripMetadata.FIELD_NAMES.ONLINE.fieldName()) != null) {

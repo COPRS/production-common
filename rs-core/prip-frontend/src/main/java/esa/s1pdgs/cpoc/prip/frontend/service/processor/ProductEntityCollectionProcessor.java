@@ -82,6 +82,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 		SORTABLE_FIELDS = new HashMap<>();
 		SORTABLE_FIELDS.put(ProductProperties.PublicationDate.name(), PripMetadata.FIELD_NAMES.CREATION_DATE);
 		SORTABLE_FIELDS.put(ProductProperties.EvictionDate.name(), PripMetadata.FIELD_NAMES.EVICTION_DATE);
+		SORTABLE_FIELDS.put(ProductProperties.OriginDate.name(), PripMetadata.FIELD_NAMES.ORIGIN_DATE);
 		SORTABLE_FIELDS.put(ProductProperties.ContentDate.name() + "/" + ProductProperties.Start.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_START);
 		SORTABLE_FIELDS.put(ProductProperties.ContentDate.name() + "/" + ProductProperties.End.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_END);
 		SORTABLE_FIELDS.put(ProductProperties.ContentLength.name(), PripMetadata.FIELD_NAMES.CONTENT_LENGTH);
