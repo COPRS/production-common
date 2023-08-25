@@ -8,6 +8,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Conten
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.OriginDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Footprint;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
@@ -79,6 +80,8 @@ public class MappingUtil {
 						convertLocalDateTimeToTimestamp(pripMetadata.getCreationDate())))
 				.addProperty(new Property(null, EvictionDate.name(), ValueType.PRIMITIVE,
 						convertLocalDateTimeToTimestamp(pripMetadata.getEvictionDate())))
+				.addProperty(new Property(null, OriginDate.name(), ValueType.PRIMITIVE,
+						convertLocalDateTimeToTimestamp(pripMetadata.getOriginDate())))
 				.addProperty(new Property(null, ProductionType.name(), ValueType.ENUM,
 						mapToProductionType(esa.s1pdgs.cpoc.prip.model.ProductionType.SYSTEMATIC_PRODUCTION)))
 				.addProperty(new Property(null, Checksum.name(), ValueType.COLLECTION_COMPLEX,
