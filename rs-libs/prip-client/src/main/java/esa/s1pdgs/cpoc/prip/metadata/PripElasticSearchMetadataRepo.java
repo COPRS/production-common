@@ -261,6 +261,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 					queryBuilder.must(subQuery);
 				} else if (LogicalOperator.OR == operator) {
 					queryBuilder.should(subQuery);
+				} else if (LogicalOperator.NOT == operator) {
+					queryBuilder.mustNot(subQuery);
 				} else {
 					throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
 				}
@@ -388,6 +390,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			queryBuilder.must(query);
 		} else if (LogicalOperator.OR == operator) {
 			queryBuilder.should(query);
+		} else if (LogicalOperator.NOT == operator) {
+			queryBuilder.mustNot(query);
 		} else {
 			throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
 		}

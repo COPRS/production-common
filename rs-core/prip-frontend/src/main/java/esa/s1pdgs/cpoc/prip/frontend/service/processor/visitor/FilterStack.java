@@ -118,6 +118,10 @@ public class FilterStack {
 			}
 		}
 	}
+	
+	public void applyNot() {
+		this.push(PripQueryFilterList.not(this.filterStack.pop()));
+	}
 
 	public boolean isEmpty() {
 		return this.filterStack.isEmpty();

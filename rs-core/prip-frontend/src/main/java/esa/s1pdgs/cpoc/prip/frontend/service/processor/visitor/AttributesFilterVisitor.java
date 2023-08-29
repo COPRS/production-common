@@ -141,7 +141,16 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
    @Override
    public Object visitUnaryOperator(UnaryOperatorKind operator, Object operand)
          throws ExpressionVisitException, ODataApplicationException {
-      throw new UnsupportedOperationException();
+	   
+		if (operator == UnaryOperatorKind.NOT) {
+			filterStack.applyNot();
+
+		} else {
+			throw new UnsupportedOperationException(
+					String.format("Unsupported unary operator %s on filter expression", operator.name()));
+		}
+
+		return null;
    }
 
    @Override

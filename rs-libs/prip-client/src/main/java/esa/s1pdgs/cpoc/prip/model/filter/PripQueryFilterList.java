@@ -16,7 +16,7 @@ public class PripQueryFilterList implements PripQueryFilter {
 	private List<PripQueryFilter> filterList; // can contain filter terms and/or lists
 
 	public static enum LogicalOperator {
-		AND, OR;
+		AND, OR, NOT;
 
 		public static LogicalOperator fromString(final String operator) {
 			if (AND.name().equalsIgnoreCase(operator)) {
@@ -24,6 +24,9 @@ public class PripQueryFilterList implements PripQueryFilter {
 			}
 			if (OR.name().equalsIgnoreCase(operator)) {
 				return OR;
+			}
+			if (NOT.name().equalsIgnoreCase(operator)) {
+				return NOT;
 			}
 			return null;
 		}
@@ -47,6 +50,15 @@ public class PripQueryFilterList implements PripQueryFilter {
 
 	public static final PripQueryFilterList matchAny(final List<PripQueryFilter> filters) {
 		return new PripQueryFilterList(LogicalOperator.OR, filters);
+	}
+	
+	@SafeVarargs
+	public static final PripQueryFilterList not(final PripQueryFilter... filters) {
+		return new PripQueryFilterList(LogicalOperator.NOT, CollectionUtil.toList(filters));
+	}
+
+	public static final PripQueryFilterList not(final List<PripQueryFilter> filters) {
+		return new PripQueryFilterList(LogicalOperator.NOT, filters);
 	}
 
 	// --------------------------------------------------------------------------
