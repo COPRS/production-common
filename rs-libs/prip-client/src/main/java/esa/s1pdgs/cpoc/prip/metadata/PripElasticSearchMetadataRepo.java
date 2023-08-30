@@ -73,6 +73,7 @@ import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList.LogicalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripInFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 @Service
@@ -281,6 +282,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			buildQueryWithBooleanFilter((PripBooleanFilter) filterTerm, queryBuilder, operator);
 		} else if (filterTerm instanceof PripGeometryFilter) {
 			buildQueryWithGeometryFilter((PripGeometryFilter) filterTerm, queryBuilder, operator);
+		} else if (filterTerm instanceof PripInFilter) {
+			buildQueryWithTermsFilter((PripInFilter) filterTerm, queryBuilder, operator);
 		} else {
 			throw new IllegalArgumentException(String.format("filter type not supported: %s", filterTerm.getClass().getSimpleName()));
 		}
@@ -377,6 +380,16 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 	}
 
+	private static void buildQueryWithTermsFilter(final PripInFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
+		switch (filter.getFunction()) {
+		case IN:
+			appendQuery(queryBuilder, operator, QueryBuilders.termsQuery(filter.getFieldName(), filter.getTerms()), filter);
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+	
 	private static void appendQuery(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
 			final PripQueryFilter filter) {
 		final QueryBuilder query;
