@@ -349,6 +349,7 @@
 		<module>xbip-client</module>
 		<module>auxip-client</module>
 		<module>edip-client</module>
+		<module>cadip-client</module>
 		<module>error-repo-client</module>
 		<module>app-status</module>
 		<module>lib-commons</module>
