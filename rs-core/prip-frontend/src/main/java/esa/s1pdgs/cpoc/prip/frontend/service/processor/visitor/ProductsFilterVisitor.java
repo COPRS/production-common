@@ -32,6 +32,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmType;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.apache.olingo.server.api.uri.UriResource;
@@ -47,6 +48,8 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.apache.olingo.server.api.uri.queryoption.expression.MethodKind;
 import org.apache.olingo.server.api.uri.queryoption.expression.UnaryOperatorKind;
 import org.apache.olingo.server.core.uri.UriResourceFunctionImpl;
+import org.apache.olingo.server.core.uri.queryoption.expression.LiteralImpl;
+import org.apache.olingo.server.core.uri.queryoption.expression.MemberImpl;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -60,6 +63,7 @@ import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripGeometryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripInFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
@@ -375,7 +379,48 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 	@Override
 	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, List<Object> right)
 			throws ExpressionVisitException, ODataApplicationException {
-		throw new UnsupportedOperationException();
+		if (operator != BinaryOperatorKind.IN) {
+			throw new UnsupportedOperationException("Operator " + operator + " not supported!");
+		}
+		if (!(left instanceof MemberImpl)) {
+			throw new UnsupportedOperationException("Operand type of" + left + " not supported!");
+		}
+		
+		String odataFieldName = memberText((MemberImpl) left);
+		
+		if (!isTextField(odataFieldName)) {
+			throw new ODataApplicationException("Unsupported field name: " + odataFieldName,
+					BAD_REQUEST.getStatusCode(), null);
+		}
+
+		final String pripFieldName = mapToPripFieldName(odataFieldName).orElse(null);
+		
+		List<Object> listObjects = new ArrayList<>();
+		
+		for (Object o:right) {
+			if (!(o instanceof LiteralImpl)) {
+				throw new UnsupportedOperationException("Type of " + o + " not supported!");
+			}
+		    LiteralImpl literal = (LiteralImpl) o;
+		    if (literal.getType() instanceof EdmString) {
+		    	listObjects.add(literal.getText().replace("'", ""));
+		    } else {
+		    	throw new UnsupportedOperationException("Type " + literal.getType() + " not supported!");
+			    //TODO?
+		    	//Edm.DateTimeOffset
+			    //Edm.SByte
+			    //Edm.Int32
+			    //Edm.Int64
+		    	//Edm.Decimal
+		    	//Edm.Boolean
+		    	//Edm.Guid
+			    //??
+		    }
+		}
+
+		final PripQueryFilterTerm filter = new PripInFilter(pripFieldName, PripInFilter.Function.IN, listObjects);
+		filterStack.push(filter);
+		return null;
 	}
 
 	@Override
