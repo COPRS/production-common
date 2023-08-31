@@ -126,6 +126,7 @@ public class TestMappingUtil {
 				.addProperty(new Property(null, "ContentDate", ValueType.COMPLEX, contentDate))
 				.addProperty(new Property(null, "PublicationDate", ValueType.PRIMITIVE, new Timestamp(100000000000L)))
 				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, new Timestamp(200000000000L)))
+				.addProperty(new Property(null, "OriginDate", ValueType.PRIMITIVE, new Timestamp(200000000000L)))
 				.addProperty(new Property(null, "ProductionType", ValueType.ENUM, 0))
 				.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, Arrays.asList(cv1, cv2)))
 				.addProperty(new Property(null, "Footprint", ValueType.GEOSPATIAL, footprint));
@@ -166,6 +167,7 @@ public class TestMappingUtil {
 		inputPripMetadata.setContentDateEnd(LocalDateTime.ofInstant(Instant.ofEpochMilli(222222222222L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setCreationDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(100000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setEvictionDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
+		inputPripMetadata.setOriginDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setAttributes(new LinkedHashMap<String,Object>());
 		inputPripMetadata.setOnline(true);
 		
