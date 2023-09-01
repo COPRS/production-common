@@ -386,14 +386,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			throw new UnsupportedOperationException("Operand type of" + left + " not supported!");
 		}
 		
-		String odataFieldName = memberText((MemberImpl) left);
-		
-		if (!isTextField(odataFieldName)) {
-			throw new ODataApplicationException("Unsupported field name: " + odataFieldName,
-					BAD_REQUEST.getStatusCode(), null);
-		}
-
-		final String pripFieldName = mapToPripFieldName(odataFieldName).orElse(null);
+		final String pripFieldName = mapToPripFieldName(memberText((MemberImpl) left)).orElse(null);
 		
 		List<Object> listObjects = new ArrayList<>();
 		
@@ -401,21 +394,7 @@ public class ProductsFilterVisitor implements ExpressionVisitor<Object> {
 			if (!(o instanceof LiteralImpl)) {
 				throw new UnsupportedOperationException("Type of " + o + " not supported!");
 			}
-		    LiteralImpl literal = (LiteralImpl) o;
-		    if (literal.getType() instanceof EdmString) {
-		    	listObjects.add(literal.getText().replace("'", ""));
-		    } else {
-		    	throw new UnsupportedOperationException("Type " + literal.getType() + " not supported!");
-			    //TODO?
-		    	//Edm.DateTimeOffset
-			    //Edm.SByte
-			    //Edm.Int32
-			    //Edm.Int64
-		    	//Edm.Decimal
-		    	//Edm.Boolean
-		    	//Edm.Guid
-			    //??
-		    }
+		    listObjects.add(((LiteralImpl) o).getText().replace("'", ""));
 		}
 
 		final PripQueryFilterTerm filter = new PripInFilter(pripFieldName, PripInFilter.Function.IN, listObjects);

@@ -235,19 +235,7 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
 			if (!(o instanceof LiteralImpl)) {
 				throw new UnsupportedOperationException("Type of " + o + " not supported!");
 			}
-		    LiteralImpl literal = (LiteralImpl)o;
-		    if (literal.getType() instanceof EdmString) {
-		    	listObjects.add(literal.getText().replace("'", ""));
-		    } else {
-		    	throw new UnsupportedOperationException("Type " + literal.getType() + " not supported!");
-			    //TODO?
-		    	//Edm.DateTimeOffset
-			    //Edm.SByte
-			    //Edm.Int32
-			    //Edm.Int64
-		    	//Edm.Decimal
-			    //??
-		    }
+		    listObjects.add(((LiteralImpl)o).getText().replace("'", ""));
 		}
 
 		final PripQueryFilterTerm filter = new PripInFilter(fieldName, PripInFilter.Function.IN, listObjects);
