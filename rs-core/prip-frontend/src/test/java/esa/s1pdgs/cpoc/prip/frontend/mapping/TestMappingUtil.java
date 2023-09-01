@@ -129,7 +129,7 @@ public class TestMappingUtil {
 				.addProperty(new Property(null, "OriginDate", ValueType.PRIMITIVE, new Timestamp(200000000000L)))
 				.addProperty(new Property(null, "ProductionType", ValueType.ENUM, 0))
 				.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, Arrays.asList(cv1, cv2)))
-				.addProperty(new Property(null, "Footprint", ValueType.GEOSPATIAL, footprint));
+				.addProperty(new Property(null, "GeoFootprint", ValueType.GEOSPATIAL, footprint));
 		expectedEntity.setMediaContentType("application/octet-stream");
 		expectedEntity.setId(uri);
 		

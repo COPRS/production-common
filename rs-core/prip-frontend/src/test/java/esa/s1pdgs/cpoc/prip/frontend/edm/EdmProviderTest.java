@@ -31,7 +31,7 @@ public class EdmProviderTest {
 		CsdlEntityType entityType = uut.getEntityType(new FullQualifiedName("OData.CSC", "Product"));
 		List<CsdlProperty> properties = entityType.getProperties();
 		
-		assertEquals(Arrays.asList("Id", "Name", "Online", "ContentType", "ContentLength", "PublicationDate", "EvictionDate", "OriginDate", "Checksum", "ProductionType", "ContentDate", "Footprint"),
+		assertEquals(Arrays.asList("Id", "Name", "Online", "ContentType", "ContentLength", "PublicationDate", "EvictionDate", "OriginDate", "Checksum", "ProductionType", "ContentDate", "GeoFootprint"),
 				properties.stream().map(p -> p.getName()).collect(Collectors.toList()));
 		
 		assertEquals(Arrays.asList( //
