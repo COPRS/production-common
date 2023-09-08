@@ -13,6 +13,8 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractorImpl;
 import esa.s1pdgs.cpoc.ingestion.trigger.auxip.AuxipInboxAdapterFactory;
+import esa.s1pdgs.cpoc.ingestion.trigger.cadip.CadipInboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.trigger.cadip.CadipInboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.InboxConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.edip.EdipInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.edip.EdipInboxAdapterFactory;
@@ -36,6 +38,7 @@ public class InboxFactory {
 	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
 	private final AuxipInboxAdapterFactory auxipInboxAdapterFactory;
 	private final EdipInboxAdapterFactory edipInboxAdapterFactory;
+	private final CadipInboxAdapterFactory cadipInboxAdapterFactory;
 	private final CommonConfigurationProperties commonProperties;
 
 	@Autowired
@@ -45,6 +48,7 @@ public class InboxFactory {
 			final XbipInboxAdapterFactory xbipInboxAdapterFactory,
 			final AuxipInboxAdapterFactory auxipInboxAdapterFactory,
 			final EdipInboxAdapterFactory edipInboxAdapterFactory,
+			final CadipInboxAdapterFactory cadipInboxAdapterFactory,
 			final CommonConfigurationProperties commonProperties
 	) {
 		this.ingestionTriggerServiceTransactional = inboxPollingServiceTransactional;
@@ -52,6 +56,7 @@ public class InboxFactory {
 		this.xbipInboxAdapterFactory = xbipInboxAdapterFactory;
 		this.auxipInboxAdapterFactory = auxipInboxAdapterFactory;
 		this.edipInboxAdapterFactory = edipInboxAdapterFactory;
+		this.cadipInboxAdapterFactory = cadipInboxAdapterFactory;
 		this.commonProperties = commonProperties;
 	}
 	
@@ -116,6 +121,10 @@ public class InboxFactory {
 		
 		if (EdipInboxAdapter.INBOX_TYPE.equals(type)) {
 			return edipInboxAdapterFactory;
+		}
+		
+		if (CadipInboxAdapter.INBOX_TYPE.equals(type)) {
+			return cadipInboxAdapterFactory;
 		}
 
 		if (url.startsWith("https://")) {

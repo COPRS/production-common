@@ -3,7 +3,6 @@ package esa.s1pdgs.cpoc.ingestion.trigger.cadip;
 import java.util.Date;
 import java.util.Objects;
 
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class CadipSessionState {
 
 	@Id
-	private ObjectId id; // necessary for repository.delete(entry)
+	private Long id; // necessary for repository.delete(entry)
 
 	private String pod;
 	private String cadipUrl;
@@ -52,11 +51,11 @@ public class CadipSessionState {
 				&& Objects.equals(sessionId, other.sessionId);
 	}
 
-	public ObjectId getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(ObjectId id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

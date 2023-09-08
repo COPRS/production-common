@@ -30,6 +30,8 @@ public class InboxConfiguration {
 	
 	private String pathPattern = null;
 	private Map<String,Integer> pathMetadataElements = new HashMap<>();
+	
+	private String satelliteId = "";
 
 	public String getType() {
 		return type;
@@ -159,14 +161,22 @@ public class InboxConfiguration {
 		this.pathMetadataElements = pathMetadataElements;
 	}
 
-	@Override
-	public String toString() {
-		return "InboxConfiguration [type=" + type + ", directory=" + directory + ", matchRegex=" + matchRegex + ", ignoreRegex="
-				+ ignoreRegex + ", missionId=" + missionId + ", stationName=" + stationName + ", mode=" + mode + ", timeliness="
-				+ timeliness + ", sessionNamePattern=" + sessionNamePattern + ", sessionNameGroupIndex="
-				+ sessionNameGroupIndex + ", ignoreFilesBeforeDate=" + ignoreFilesBeforeDate + ", family=" + family
-				+ ", stationRetentionTime=" + stationRetentionTime + ", pathPattern=" + pathPattern+ ", pathMetadataElements=" 
-				+ pathMetadataElements + "]";
+	public String getSatelliteId() {
+		return satelliteId;
 	}
 
+	public void setSatelliteId(String satelliteId) {
+		this.satelliteId = satelliteId;
+	}
+	
+	@Override
+	public String toString() {
+		return "InboxConfiguration [type=" + type + ", directory=" + directory + ", matchRegex=" + matchRegex
+				+ ", ignoreRegex=" + ignoreRegex + ", missionId=" + missionId + ", stationName=" + stationName
+				+ ", mode=" + mode + ", timeliness=" + timeliness + ", sessionNamePattern=" + sessionNamePattern
+				+ ", sessionNameGroupIndex=" + sessionNameGroupIndex + ", ignoreFilesBeforeDate="
+				+ ignoreFilesBeforeDate + ", family=" + family + ", stationRetentionTime=" + stationRetentionTime
+				+ ", ftpDirectoryListing=" + ftpDirectoryListing + ", pathPattern=" + pathPattern
+				+ ", pathMetadataElements=" + pathMetadataElements + ", satelliteId=" + satelliteId + "]";
+	}
 }
