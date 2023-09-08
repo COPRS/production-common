@@ -73,6 +73,9 @@ jobs:
             edip-client: 
               - 'rs-libs/edip-client/**'
               - 'rs-libs/pom.xml'
+            cadip-client: 
+              - 'rs-libs/cadip-client/**'
+              - 'rs-libs/pom.xml'
             data-lifecycle-client: 
               - 'rs-libs/data-lifecycle-client/**'
               - 'rs-libs/pom.xml'
