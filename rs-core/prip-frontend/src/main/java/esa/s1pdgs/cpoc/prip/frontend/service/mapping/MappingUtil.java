@@ -25,9 +25,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -37,7 +35,6 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Link;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.data.ValueType;
-import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.commons.api.edm.geo.Geospatial.Dimension;
 import org.apache.olingo.commons.api.edm.geo.LineString;
@@ -62,6 +59,12 @@ public class MappingUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MappingUtil.class);
 	
 	private static final int MILLIS_PER_SECOND = 1000;
+	
+	public static final String ATTRIBUTE_VALUE_TYPE_STRING = "String";
+	public static final String ATTRIBUTE_VALUE_TYPE_INTEGER = "Integer";
+	public static final String ATTRIBUTE_VALUE_TYPE_DATETIMEOFFSET = "DateTimeOffset";
+	public static final String ATTRIBUTE_VALUE_TYPE_BOOLEAN = "Boolean";
+	public static final String ATTRIBUTE_VALUE_TYPE_DOUBLE = "Double";
 
 	public static Entity pripMetadataToEntity(PripMetadata pripMetadata, String rawBaseUri) {
 		LOGGER.trace("pripMetadataToEntity {}", pripMetadata.getName());
@@ -92,78 +95,61 @@ public class MappingUtil {
 		entity.setMediaContentType(pripMetadata.getContentType());
 		entity.setId(uri);
 
-		Map<FullQualifiedName, EntityCollection> entityCollections = new HashMap<>();
-		entityCollections.put(EdmProvider.STRING_TYPE_FQN, new EntityCollection());
-		entityCollections.put(EdmProvider.INT_64_TYPE_FQN, new EntityCollection());
-		entityCollections.put(EdmProvider.DOUBLE_TYPE_FQN, new EntityCollection());
-		entityCollections.put(EdmProvider.BOOLEAN_TYPE_FQN, new EntityCollection());
-		entityCollections.put(EdmProvider.DATE_TIME_OFFSET_TYPE_FQN, new EntityCollection());
+		final EntityCollection targetEntityCollection = new EntityCollection();
 
 		// TODO sort attributes
 		if (null != pripMetadata.getAttributes()) {
 			for (Entry<String, Object> entrySet : pripMetadata.getAttributes().entrySet()) {
 				LOGGER.trace("Handle {}", entrySet.getKey());
-				final FullQualifiedName valueType;
+				final String valueType;
+				final String entityType;
 				final int firstSeparatorPosition = entrySet.getKey().indexOf('_');
 				final int lastSeparatorPosition = entrySet.getKey().lastIndexOf('_');
 				switch (entrySet.getKey().substring(lastSeparatorPosition + 1)) {
 				case "string":
-					valueType = EdmProvider.STRING_TYPE_FQN;
+					valueType = ATTRIBUTE_VALUE_TYPE_STRING;
+					entityType = EdmProvider.STRING_ATTRIBUTE_TYPE_FQN.toString();
 					break;
 				case "long":
-					valueType = EdmProvider.INT_64_TYPE_FQN;
+					valueType = ATTRIBUTE_VALUE_TYPE_INTEGER;
+					entityType = EdmProvider.INTEGER_ATTRIBUTE_TYPE_FQN.toString();
 					break;
 				case "double":
-					valueType = EdmProvider.DOUBLE_TYPE_FQN;
+					valueType = ATTRIBUTE_VALUE_TYPE_DOUBLE;
+					entityType = EdmProvider.DOUBLE_ATTRIBUTE_TYPE_FQN.toString();
 					break;
 				case "boolean":
-					valueType = EdmProvider.BOOLEAN_TYPE_FQN;
+					valueType = ATTRIBUTE_VALUE_TYPE_BOOLEAN;
+					entityType = EdmProvider.BOOLEAN_ATTRIBUTE_TYPE_FQN.toString();
 					break;
 				case "date":
-					valueType = EdmProvider.DATE_TIME_OFFSET_TYPE_FQN;
+					valueType = ATTRIBUTE_VALUE_TYPE_DATETIMEOFFSET;
+					entityType = EdmProvider.DATE_ATTRIBUTE_TYPE_FQN.toString();
 					break;
 				default:
 					throw new RuntimeException(String.format(
 							"Unsupported type extension specified for PRIP metadata mapping in %s", entrySet.getKey()));
 				}
-				final Object value = valueType == EdmProvider.DATE_TIME_OFFSET_TYPE_FQN
+				final Object value = valueType == ATTRIBUTE_VALUE_TYPE_DATETIMEOFFSET
 						? convertLocalDateTimeToTimestamp((LocalDateTime) entrySet.getValue())
 						: entrySet.getValue();
 				final String odataPropertyName = entrySet.getKey().substring(firstSeparatorPosition + 1,
 						lastSeparatorPosition);
 				final Entity attributeEntity = new Entity();
+				attributeEntity.setType(entityType);
 				attributeEntity.addProperty(new Property(null, "Name", ValueType.PRIMITIVE, odataPropertyName));
 				attributeEntity.addProperty(new Property(null, "ValueType", ValueType.PRIMITIVE, valueType));
 				attributeEntity.addProperty(new Property(null, "Value", ValueType.PRIMITIVE, value));
-				final EntityCollection targetEntityCollection = entityCollections.get(valueType);
 				targetEntityCollection.getEntities().add(attributeEntity);
 			}
 		}
 
-		Link stringLink = new Link();
-		stringLink.setTitle(EdmProvider.STRING_ATTRIBUTES_SET_NAME);
-		stringLink.setInlineEntitySet(entityCollections.get(EdmProvider.STRING_TYPE_FQN));
-		entity.getNavigationLinks().add(stringLink);
+		Link attributesLink = new Link();
+		attributesLink.setTitle(EdmProvider.ATTRIBUTES_SET_NAME);
+		attributesLink.setInlineEntitySet(targetEntityCollection);
+		entity.getNavigationLinks().add(attributesLink);
 
-		Link longLink = new Link();
-		longLink.setTitle(EdmProvider.INTEGER_ATTRIBUTES_SET_NAME);
-		longLink.setInlineEntitySet(entityCollections.get(EdmProvider.INT_64_TYPE_FQN));
-		entity.getNavigationLinks().add(longLink);
-
-		Link doubleLink = new Link();
-		doubleLink.setTitle(EdmProvider.DOUBLE_ATTRIBUTES_SET_NAME);
-		doubleLink.setInlineEntitySet(entityCollections.get(EdmProvider.DOUBLE_TYPE_FQN));
-		entity.getNavigationLinks().add(doubleLink);
-
-		Link booleanLink = new Link();
-		booleanLink.setTitle(EdmProvider.BOOLEAN_ATTRIBUTES_SET_NAME);
-		booleanLink.setInlineEntitySet(entityCollections.get(EdmProvider.BOOLEAN_TYPE_FQN));
-		entity.getNavigationLinks().add(booleanLink);
-
-		Link dateLink = new Link();
-		dateLink.setTitle(EdmProvider.DATE_ATTRIBUTES_SET_NAME);
-		dateLink.setInlineEntitySet(entityCollections.get(EdmProvider.DATE_TIME_OFFSET_TYPE_FQN));
-		entity.getNavigationLinks().add(dateLink);
+		
       
       EntityCollection quicklookEntityCollection = quicklookEntityCollectionOf(pripMetadata);
       Link quicklookLink = new Link();
