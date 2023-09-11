@@ -133,31 +133,11 @@ public class TestMappingUtil {
 		expectedEntity.setMediaContentType("application/octet-stream");
 		expectedEntity.setId(uri);
 		
-		Link stringLink = new Link();
-		stringLink.setTitle(EdmProvider.STRING_ATTRIBUTES_SET_NAME);
-		stringLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(stringLink);
+		Link attributesLink = new Link();
+		attributesLink.setTitle(EdmProvider.ATTRIBUTES_SET_NAME);
+		attributesLink.setInlineEntitySet(new EntityCollection());
+		expectedEntity.getNavigationLinks().add(attributesLink);
 
-		Link longLink = new Link();
-		longLink.setTitle(EdmProvider.INTEGER_ATTRIBUTES_SET_NAME);
-		longLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(longLink);
-
-		Link doubleLink = new Link();
-		doubleLink.setTitle(EdmProvider.DOUBLE_ATTRIBUTES_SET_NAME);
-		doubleLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(doubleLink);
-
-		Link booleanLink = new Link();
-		booleanLink.setTitle(EdmProvider.BOOLEAN_ATTRIBUTES_SET_NAME);
-		booleanLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(booleanLink);
-
-		Link dateLink = new Link();
-		dateLink.setTitle(EdmProvider.DATE_ATTRIBUTES_SET_NAME);
-		dateLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(dateLink);
-		
 		PripMetadata inputPripMetadata = new PripMetadata();
 		inputPripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
 		inputPripMetadata.setName("Name");
