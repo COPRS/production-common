@@ -12,6 +12,7 @@ on:
       - "release/**"
       - "develop**"
       - "stac-nativeapi**"
+      - "cadip**"
 
   workflow_dispatch:
 
