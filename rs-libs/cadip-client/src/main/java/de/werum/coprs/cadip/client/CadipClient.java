@@ -6,8 +6,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.lang.NonNull;
-
 import de.werum.coprs.cadip.client.model.CadipFile;
 import de.werum.coprs.cadip.client.model.CadipQualityInfo;
 import de.werum.coprs.cadip.client.model.CadipSession;
