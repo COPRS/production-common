@@ -3,6 +3,7 @@ package esa.s1pdgs.cpoc.ingestion.trigger.cadip;
 import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import de.werum.coprs.cadip.client.CadipClientFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.CadipConfiguration;
@@ -12,6 +13,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxAdapterFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 
+@Component
 public class CadipInboxAdapterFactory implements InboxAdapterFactory {
 
 	private final CadipConfiguration configuration;
