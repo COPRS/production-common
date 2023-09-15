@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,8 @@ import esa.s1pdgs.cpoc.ingestion.trigger.xbip.XbipInboxAdapterFactory;
 
 @Component
 public class InboxFactory {
+	private static final Logger logger = LoggerFactory.getLogger(InboxFactory.class);
+	
 	private final IngestionTriggerServiceTransactional ingestionTriggerServiceTransactional;
 	private final FilesystemInboxAdapterFactory fileSystemInboxAdapterFactory;
 	private final XbipInboxAdapterFactory xbipInboxAdapterFactory;
@@ -116,14 +120,17 @@ public class InboxFactory {
 	
 	private final InboxAdapterFactory newInboxAdapterFactory(final String type, final String url) {
 		if("prip".equals(type)) {
+			logger.info("InboxAdapterFactory returning a auxip inbox");
 			return auxipInboxAdapterFactory;
 		}
 		
 		if (EdipInboxAdapter.INBOX_TYPE.equals(type)) {
+			logger.info("InboxAdapterFactory returning a edip inbox");
 			return edipInboxAdapterFactory;
 		}
 		
 		if (CadipInboxAdapter.INBOX_TYPE.equals(type)) {
+			logger.info("InboxAdapterFactory returning a cadip inbox");
 			return cadipInboxAdapterFactory;
 		}
 
