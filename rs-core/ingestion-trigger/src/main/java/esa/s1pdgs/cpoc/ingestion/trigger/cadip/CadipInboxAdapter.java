@@ -1,7 +1,5 @@
 package esa.s1pdgs.cpoc.ingestion.trigger.cadip;
 
-import static java.time.Duration.ofSeconds;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
@@ -16,12 +14,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.werum.coprs.cadip.client.CadipClient;
 import de.werum.coprs.cadip.client.model.CadipFile;
 import de.werum.coprs.cadip.client.model.CadipSession;
+import de.werum.coprs.cadip.client.odata.CadipOdataClientFactory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
-import esa.s1pdgs.cpoc.ingestion.trigger.auxip.AuxipState;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.CadipConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.ProcessConfiguration;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
@@ -30,7 +32,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.InboxEntryFactory;
 import esa.s1pdgs.cpoc.ingestion.trigger.inbox.SupportsProductFamily;
 
 public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsProductFamily {
-
+	private static final Logger LOG = LogManager.getLogger(CadipInboxAdapter.class);
 	public final static String INBOX_TYPE = "cadip";
 	
 	private CadipConfiguration configuration;
@@ -100,9 +102,10 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 				this.processConfiguration.getHostname(), inboxURL(), this.satelliteId);
 
 		if (state.isPresent()) {
+			LOG.debug("Retrieving existing CadipState {} from database", state.get());			
 			return state.get();
 		}
-
+		
 		// If none state exists yet, create a new one
 		final CadipState newState = new CadipState();
 		newState.setNextWindowStart(new Date(Instant.from(
@@ -112,6 +115,8 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 		newState.setPod(this.processConfiguration.getHostname());
 		newState.setSatelliteId(this.satelliteId);
 		this.stateRepository.save(newState);
+		
+		LOG.debug("New CadipState {} stored in database",newState);
 
 		return newState;
 	}
