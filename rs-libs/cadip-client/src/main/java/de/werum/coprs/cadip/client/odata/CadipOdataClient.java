@@ -293,9 +293,6 @@ public class CadipOdataClient implements CadipClient {
 		final ODataRetrieveResponse<ClientEntitySetIterator<ClientEntitySet, ClientEntity>> response = request
 				.execute();
 		LOG.debug("metadata search response status: " + response.getStatusCode() + " - " + response.getStatusMessage());
-
-		// TODO: Remove LOG
-		LOG.debug("metadata search body: {}", response.getBody().toString());
 		
 		return response.getBody();
 	}

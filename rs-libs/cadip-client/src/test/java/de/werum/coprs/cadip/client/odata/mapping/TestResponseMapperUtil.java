@@ -63,13 +63,11 @@ public class TestResponseMapperUtil {
 	@Test
 	public void test_mapResponseToListOfFiles() {
 		// @formatter:off
-		InputStream jsonStream = new ByteArrayInputStream("{\"@odata.context\":\"$metadata#Files\",\"value\":[{\"Id\":\"00000000-0000-0000-0000-000000000001\",\"Name\":\"blub\",\"SessionId\":\"1\",\"Channel\":1,\"BlockNumber\":1,\"FinalBlock\":false,\"PublicationDate\":\"2014-01-03T01:00:00.123Z\",\"EvictionDate\":\"2015-01-03T00:00:00.123Z\",\"Size\":100,\"Retransfer\":false},{\"Id\":\"00000000-0000-0000-0000-000000000002\",\"Name\":\"blab\",\"SessionId\":\"2\",\"Channel\":2,\"BlockNumber\":2,\"FinalBlock\":false,\"PublicationDate\":\"2014-01-03T02:00:00.123Z\",\"EvictionDate\":\"2016-01-03T00:00:00.123Z\",\"Size\":200,\"Retransfer\":false},{\"Id\":\"00000000-0000-0000-0000-000000000003\",\"Name\":\"blab\",\"SessionId\":\"3\",\"Channel\":3,\"BlockNumber\":3,\"FinalBlock\":false,\"PublicationDate\":\"2014-01-03T03:00:00.123Z\",\"EvictionDate\":\"2017-01-03T00:00:00.123Z\",\"Size\":300,\"Retransfer\":false}]}".getBytes());
+		InputStream jsonStream = new ByteArrayInputStream("{\"@odata.context\":\"$metadata#Files\",\"value\":[{\"Id\":\"00000000-0000-0000-0000-000000000001\",\"Name\":\"blub\",\"SessionId\":\"1\",\"Channel\":1,\"BlockNumber\":1,\"FinalBlock\":false,\"PublicationDate\":\"2014-01-03T01:00:00.123Z\",\"EvictionDate\":null,\"Size\":100,\"Retransfer\":false},{\"Id\":\"00000000-0000-0000-0000-000000000002\",\"Name\":\"blab\",\"SessionId\":\"2\",\"Channel\":2,\"BlockNumber\":2,\"FinalBlock\":false,\"PublicationDate\":\"2014-01-03T02:00:00.123Z\",\"EvictionDate\":\"2016-01-03T00:00:00.123Z\",\"Size\":200,\"Retransfer\":false},{\"Id\":\"00000000-0000-0000-0000-000000000003\",\"Name\":\"blab\",\"SessionId\":\"3\",\"Channel\":3,\"BlockNumber\":3,\"FinalBlock\":false,\"PublicationDate\":\"2014-01-03T03:00:00.123Z\",\"EvictionDate\":\"2017-01-03T00:00:00.123Z\",\"Size\":300,\"Retransfer\":false}]}".getBytes());
 		// @formatter:on
 		
 		ClientEntitySetIterator<ClientEntitySet, ClientEntity> clientEntitySetIterator = new ClientEntitySetIterator<>(
 				odataClient, jsonStream, ContentType.APPLICATION_JSON);
-		
-		//System.out.println(clientEntitySetIterator);
 		
 		List<CadipFile> result = ResponseMapperUtil.mapResponseToListOfFiles(clientEntitySetIterator);
 

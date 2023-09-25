@@ -148,7 +148,7 @@ public class ResponseMapperUtil {
 		final ClientProperty entityProperty = entity.getProperty(property);
 		if (null != entityProperty) {
 			ClientPrimitiveValue value = entityProperty.getPrimitiveValue();
-			if (null != value) {
+			if (null != value && null != value.toValue()) {
 				return converterFunction.apply(value.toString());
 			}
 		}
