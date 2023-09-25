@@ -34,7 +34,7 @@ import esa.s1pdgs.cpoc.ingestion.trigger.inbox.SupportsProductFamily;
 public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsProductFamily {
 	private static final Logger LOG = LogManager.getLogger(CadipInboxAdapter.class);
 	public final static String INBOX_TYPE = "cadip";
-	
+
 	private CadipConfiguration configuration;
 	private ProcessConfiguration processConfiguration;
 	private CadipStateRepository stateRepository;
@@ -42,7 +42,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 	private CadipClient cadipClient;
 	private String satelliteId;
 	private LocalDateTime nextWindowStart;
-	
+
 	public CadipInboxAdapter(InboxEntryFactory inboxEntryFactory, CadipConfiguration configuration,
 			ProcessConfiguration processConfiguration, CadipStateRepository stateRepository,
 			CadipSessionStateRepository sessionRepository, CadipClient client, URI inboxURL, String stationName,
@@ -64,22 +64,24 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 
 		// Persist next window start for method advanceAfterPublish
 		this.nextWindowStart = LocalDateTime.now();
-		
+
 		List<CadipSession> sessions = this.cadipClient.getSessions(state.getSatelliteId(), null,
 				LocalDateTime.ofInstant(state.getNextWindowStart().toInstant(), ZoneOffset.UTC));
 
-		// Check if one of the sessions contains a newer date than "this.nextWindowStart"
+		// Check if one of the sessions contains a newer date than
+		// "this.nextWindowStart"
 		for (CadipSession session : sessions) {
 			if (session.getPublicationDate().isAfter(this.nextWindowStart)) {
 				this.nextWindowStart = session.getPublicationDate();
 			}
 		}
-		
+
 		// save new sessions to SessionRepository
 		saveNewSessionsToRepository(sessions);
 
 		// Retrieve new files for each known session
-		List<CadipSessionState> allSessions = this.sessionRepository.findByPodAndCadipUrl(satelliteId, satelliteId);
+		List<CadipSessionState> allSessions = this.sessionRepository
+				.findByPodAndCadipUrl(this.processConfiguration.getHostname(), inboxURL());
 
 		// When retrieved files have flag FinalBlock, increase number of finished
 		// channels. Delete finished sessions from repo, to keep storage small.
@@ -91,7 +93,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 	@Override
 	public void advanceAfterPublish() {
 		CadipState cadipState = retrieveState();
-		
+
 		cadipState.setNextWindowStart(new Date(this.nextWindowStart.toInstant(ZoneOffset.UTC).toEpochMilli()));
 
 		this.stateRepository.save(cadipState);
@@ -102,10 +104,10 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 				this.processConfiguration.getHostname(), inboxURL(), this.satelliteId);
 
 		if (state.isPresent()) {
-			LOG.debug("Retrieving existing CadipState {} from database", state.get());			
+			LOG.debug("Retrieving existing CadipState {} from database", state.get());
 			return state.get();
 		}
-		
+
 		// If none state exists yet, create a new one
 		final CadipState newState = new CadipState();
 		newState.setNextWindowStart(new Date(Instant.from(
@@ -115,8 +117,8 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 		newState.setPod(this.processConfiguration.getHostname());
 		newState.setSatelliteId(this.satelliteId);
 		this.stateRepository.save(newState);
-		
-		LOG.debug("New CadipState {} stored in database",newState);
+
+		LOG.debug("New CadipState {} stored in database", newState);
 
 		return newState;
 	}
@@ -143,7 +145,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 			newSessionState.setCompletedChannels(0);
 
 			this.sessionRepository.save(newSessionState);
-			
+
 			LOG.debug("New CadipSessionState {} stored in database", newSessionState);
 		}
 	}
@@ -185,27 +187,16 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 
 		return newFiles;
 	}
-	
-	private EntrySupplier toEntrySupplier(final CadipFile cadipFile) {
-        return new EntrySupplier(
-                Paths.get(cadipFile.getName()),
-                () -> toInboxEntry(cadipFile)
-        );
-    }
-	
-	private InboxEntry toInboxEntry(final CadipFile cadipFile) {
-        LOG.debug("handling cadip file: {}", cadipFile.toString());
 
-        return new InboxEntry(
-        		cadipFile.getName(),
-        		cadipFile.getName(),
-                inboxURL(),
-                new Date(cadipFile.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()),
-                cadipFile.getSize(),
-                processConfiguration.getHostname(),
-                "cadip",
-                productFamily.name(),
-                stationName,
-                missionId);
-    }
+	private EntrySupplier toEntrySupplier(final CadipFile cadipFile) {
+		return new EntrySupplier(Paths.get(cadipFile.getName()), () -> toInboxEntry(cadipFile));
+	}
+
+	private InboxEntry toInboxEntry(final CadipFile cadipFile) {
+		LOG.debug("handling cadip file: {}", cadipFile.toString());
+
+		return new InboxEntry(cadipFile.getName(), cadipFile.getName(), inboxURL(),
+				new Date(cadipFile.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()), cadipFile.getSize(),
+				processConfiguration.getHostname(), "cadip", productFamily.name(), stationName, missionId);
+	}
 }
