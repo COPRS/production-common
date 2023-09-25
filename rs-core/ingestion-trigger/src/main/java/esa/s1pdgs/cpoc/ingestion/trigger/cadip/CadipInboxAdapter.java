@@ -129,6 +129,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 
 			if (result.isPresent()) {
 				// Session is already being processed. No need to save it again
+				LOG.warn("CadipSessionState {} already present in database", result.get());
 				continue;
 			}
 
@@ -142,6 +143,8 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 			newSessionState.setCompletedChannels(0);
 
 			this.sessionRepository.save(newSessionState);
+			
+			LOG.debug("New CadipSessionState {} stored in database", newSessionState);
 		}
 	}
 
