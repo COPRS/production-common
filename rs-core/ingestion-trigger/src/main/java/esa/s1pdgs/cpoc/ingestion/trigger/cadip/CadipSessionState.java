@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * session was retrieved completely, it can be deleted from this repository in
  * order to keep the amount of entries and file space low.
  */
-@Document(collection = "cadipState")
+@Document(collection = "cadipSessionState")
 public class CadipSessionState {
 
 	@Id

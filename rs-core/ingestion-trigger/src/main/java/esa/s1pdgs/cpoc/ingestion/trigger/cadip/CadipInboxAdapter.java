@@ -134,8 +134,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 
 			final CadipSessionState newSessionState = new CadipSessionState();
 			newSessionState.setNextWindowStart(
-					new Date(Instant.from(ZonedDateTime.ofLocal(DateUtils.parse(this.configuration.getStart()),
-							ZoneId.of("UTC"), ZoneOffset.UTC)).toEpochMilli()));
+					new Date(session.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()));
 			newSessionState.setCadipUrl(inboxURL());
 			newSessionState.setPod(this.processConfiguration.getHostname());
 			newSessionState.setSessionId(session.getSessionId());
