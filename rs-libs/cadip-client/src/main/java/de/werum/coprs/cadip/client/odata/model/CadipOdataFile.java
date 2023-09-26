@@ -120,4 +120,22 @@ public class CadipOdataFile implements CadipFile {
 	public void setRetransfer(Boolean retransfer) {
 		this.retransfer = retransfer;
 	}
+	
+	@Override
+	public final String toString() {
+		StringBuilder sb = new StringBuilder("CadipOdataFile [");
+		sb.append("id=").append(id).append(", ");
+		sb.append("name=").append(name).append(", ");
+		sb.append("sessionId=").append(sessionId).append(", ");
+		sb.append("channel=").append(channel).append(", ");
+		sb.append("blockNumber=").append(blockNumber).append(", ");
+		sb.append("finalBlock=").append(finalBlock).append(", ");
+		sb.append("publicationDate=").append(publicationDate).append(", ");
+		sb.append("evictionDate=").append(evictionDate).append(", ");
+		sb.append("size=").append(size).append(", ");
+		sb.append("retransfer=").append(retransfer);
+		sb.append("]");
+		
+		return sb.toString();
+	}
 }
