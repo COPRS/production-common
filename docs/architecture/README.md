@@ -46,7 +46,7 @@ Applicable and Referenced documents are the documents which have reference or re
 ***
 The following sections are giving an overview about the architecture and strategies that will be used for the COPRS 1.1, on trying to justify the decisions that had been made.
 
-Currently the COPRS system is used operationallym in the version 1.0 that is based on the S1PRO software that had been orginally developed in order to run the Ground Segment for Sentinel-1.
+Currently the COPRS system is used operationally in the version 1.0 that is based on the S1PRO software that had been orginally developed in order to run the Ground Segment for Sentinel-1.
 
 That system is being operated on a set of micro services that are connected with Kafka with each other. However the workflows in that system are rather static and needs configuration files to be adjusted in order to modify the existing workflows or changing the behaviour of the microservices.
 

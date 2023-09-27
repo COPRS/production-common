@@ -1,6 +1,6 @@
 # RS Core - Ingestion
 
-The RS Core Ingestion component is able to pull data from a source into the COPRS. Supported interfaces that can be used are AUXIP, EDIP and XBIP interfaces
+The RS Core Ingestion component is able to pull data from a source into the COPRS. Supported interfaces that can be used are CADIP, AUXIP and EDIP interfaces
 
 # Overview
 
@@ -14,7 +14,7 @@ The Ingestion Worker application is doing the actual I/O activity and performing
 
 The Uncompression is used, to provide the input files uncompressed to the system. Compressed inputs will be downloaded from the OBS and uploaded in their uncompressed form to a different bucket. A new CatalogJob is then generated to notify the COPRS of the new product.
 
-For details, please see [Ingestion Chain Design](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#ingestion-chain)
+For details, please see [Ingestion Chain Design](/docs/architecture/README.md#ingestion)
 
 # Resource Requirements
 
@@ -31,7 +31,7 @@ This software does have the following minimal requirements:
 | Disk storage capacity       |    n/a      |   n/a      |  n/a       |
 | Affinity between Pod / Node |   no       |   no       |  no       |
 
- *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [COPRS Worker Scaling] (https://github.com/COPRS/production-common/scaling.md) for more details.
+ *These resource requirements are applicable for one worker. There may be many instances of an extraction worker, see [COPRS Worker Scaling](/production-common/scaling.md) for more details.
 
 # Deployment Prerequisite
 Following components of the COPRS shall be installed and running
@@ -57,8 +57,9 @@ db.inboxEntry.createIndex({"processingPod":1, "pickupURL":1, "stationName":1})
 
 This RS Core component does contain a generic component for ingesting products from different endpoints into the RS environment. The following types are supported:
 - AUXIP
+- CADIP
 - EDIP
-- XBIP
+- XBIP (deprecated)
 
 For each of these types a different type of inbox configuration needs to be setup. The following sections are giving an overview about how to use and configure the different endpoints.
 
@@ -67,16 +68,29 @@ When using an AUXIP endpoint it will be required to provide some additional cred
 
 Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secret.md) documentation for giving detailed information on how to create secrets and passing the credentials.
 
-For more details, see [AUXIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#auxip)
+For more details, see [AUXIP](/docs/architecture/README.md#auxip)
 
 For an example configuration of an AUXIP endpoint, please have a look at the [example](https://github.com/COPRS/production-common/tree/develop/rs-core-examples/ingestion-auxip)
 
+## CADIP
+The CADIP ingestion is the sucessor of the XBIP based interfaces that had been used in older versions of the COPRS. The XBIP was used to harvest new sessions from a WebDav based endpoint and pull the chunks and DSIB files into the processing environment. The CADIP is now (similiar as the AUXIP as well) a OData4 based endpoint that allows to perform queries for sessions and files as well as retrieve the actual chunks from the system.
+
+The trigger is observing the endpoint for the new sessions and once it finds one, it will query the sessions for new files and download it into the processing environment as long as a file was found within the channel that was flagged as final block. The worker understands the CADIP protocol and how to retrieve the actual payload.
+
+Please check [this](/processing-common/doc/secret.md) documentation for giving detailed information on how to create secrets and passing the credentials.
+
+For more details, see [CADIP](/docs/architecture/README.md#cadip)
+
+
 ## XBIP
+
+*Deprecated* Be aware that the CADIP is the successor of the XBIP and will replace it functionality. More information on the CADIP can be found in the previous section. The XBIP documentation will just be kept for documentation purposes and shall not be used anymore.
+
 The XBIP interface in the frame of COPRS is used to download raw data (chunks) for Sentinel-1,  Sentinel-2 and  Sentinel-3 missions.
 
 Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secret.md) documentation for giving detailed information on how to create secrets and passing the credentials.
 
-For more details, see [XBIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#xbip)
+For more details, see [XBIP](/docs/architecture/README.md#xbip)
 
 The RS Core ingestion does contain an example for an XBIP endpoint already. For an example with multiple inboxes, please have a look at the [example](https://github.com/COPRS/production-common/tree/develop/rs-core-examples/ingestion-xbip)
 
@@ -85,7 +99,7 @@ The EDIP interface, similar to XBIP, is used by COPRS to download chunks via FTP
 
 Please check [this](https://github.com/COPRS/production-common/tree/develop/processing-common/doc/secret.md) documentation for giving detailed information on how to create secrets and passing the credentials.
 
-For more details, see [EDIP](https://github.com/COPRS/reference-system-documentation/blob/pro_V1.1/components/production%20common/Architecture%20Design%20Document/004%20-%20Software%20Component%20Design.md#edip)
+For more details, see [EDIP](/docs/architecture/README.md#edip)
 
 For an example configuration for an EDIP endpoint, please have a look at the [example](https://github.com/COPRS/production-common/tree/develop/rs-core-examples/ingestion-edip)
 
@@ -110,7 +124,7 @@ Please note that the following parameters are grouped by an inbox. The name of t
 
 | Property                   				                               | Details       |
 |---------------------------------------------------------------|---------------|
-|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.directory``|The location of the inbox on the remote system specified by an URI. Please note that depending on the type of inbox additional configuration paramters might be required for XBIP (WebDAV), AUXIP (ODATA) or EDIP (FTP). A location for an XBIP might look like `https://s1pro-mock-webdav-cgs01-svc/NOMINAL/`. This specifies that the trigger shall poll on the given location for new products.|
+|``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.directory``|The location of the inbox on the remote system specified by an URI. Please note that depending on the type of inbox additional configuration paramters might be required for CADIP, AUXIP (ODATA) or EDIP (FTP). A location for an CADIP might look like `https://s1pro-mock-cadip/odata/v1/`. This specifies that the trigger shall poll on the given location for new products.|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.matchRegex``|Regular expression that will be used to identify new products on the inbox while doing a poll attempt e.g.`^([A-Za-z_]{4}/)?([0-9A-Za-z_]{1})1([0-9A-Za-z_]{1})/([0-9A-Za-z_]+)/(ch[0\|_]?[1-2]/)?(DCS_[0-9]{2}_([a-zA-Z0-9_]*)_ch([12])_(DSDB\|DSIB).*\\.(raw|aisp|xml|RAW|AISP|XML))$`|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.ignoreRegex`` | A regular expression that allows to specifiy a pattern of files that shall be ignored and not considered to be valid files. This is usually used to exclude temporary files or system files. e.g. ``(^\\..*|.*\\.tmp$|db.*|^lost\+found$)``|
 |``app.ingestion-trigger.ingestion-trigger.polling.\$inbox.family``|The product family of the products detected on the inbox. In case of ingestion system this will be usually: <br>* EDRS_SESSION (all missions) <br>* AUXILIARY_FILE (Sentinel-1) <br>* S2_AUX (Sentinel-2) <br>* S3_AUX (Sentinel-3) <br>This information is important for the system to know into which OBS bucket the identified product shall be uploaded to.|
@@ -130,6 +144,43 @@ Please note that the following parameters are grouped by an inbox. The name of t
 |``app.ingestion-trigger.mongodb.username``|The username to login to the MongoDB instance|
 |``app.ingestion-trigger.mongodb.password``|The password to login to the MongoDB instance|
 
+### CADIP
+
+#### CADIP Client
+The CADIP client module is used by both trigger and worker services for both polling and downloading functionalities.
+
+In oder to connect to multiple servers, following configuration shall be repeated  and ajdusted by adding incrementing  `host*` propeorties. The configuration parameters `host1` are described below.
+
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.serviceRootUri``|URI for the CADIP endpoint.Default:``https://rs-cadip-mock-s1-svc/odata/v1``|
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.user``|Username for the CADIP Server. This is a referenced variable here, that shall be configured using `secret` . <br>If more than one CADIP servers are used for the missions of RS, then the name of  referenced variable for the field here `user` shall also be adjusted as configured in the secret. For Example: If another secret configured contain values `CADIP_USERNAME_2` ,the the variable referenced here shall be adjusted as `${CADIP_USERNAME_2}`. Similar goes for the all the variables here such as `${CADIP_PASSWORD}`, `${CADIP_CLIENT_ID}` and `${CADIP_CLIENT_SECRET}` Default:``${CADIP_USERNAME}``|
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.pass``|Password the configured user of for the CADIP Server. This is a referenced variable here, that shall be configured using `secret` Default:``${CADIP_PASSWORD}``|
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.sslValidation``|SSL validation for the server.Default:``false``|
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.authType``|Authentication type for the CADIP server.Possible values: basic, oauth2, disable.Default:``oauth2``|
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.bearerTokenType``|A Bearer Token is an opaque string, not intended to have any meaning to clients. This can be set to ``AUTHORIZATION`` that will use a bearer token like ``BasicHeader("Authorization", "Bearer "+accessToken)`` or using ``OAUTH2_ACCESS_TOKEN`` using a bearer token like ``new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken)``. Please note that version 1.6.0-rc1 and earlier had a typo and offered OUTH2_ACCESS_TOKEN. Please don't use this option anymore! |
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.oauthAuthUrl``|Authentication type for the CADIP server. Default:``https://aux1.s1pdgs.eu/auth/realms/s1pdgs/protocol/openid-connect/token``|
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.oauthClientId``|Oauth2 Client it. This is a referenced variable here, that shall be configured using  Kubernetes secret .Default:``${CADIP_CLIENT_ID}``|
+|``app.ingestion-cadip-trigger.cadip.host-configs.host1.oauthClientSecret``|Oauth2 Client secret. This is a referenced variable here, that shall be configured using Kubernetes secret .Default:``${CADIP_CLIENT_SECRET}``|
+
+#### CADIP Trigger
+
+| Property                   				                               | Details       |
+|---------------------------------------------------------------|---------------|
+``app.ingestion-cadip-trigger.spring.integration.poller.fixed-delay`` |Polling interval between two tries to the server in seconds. Default:``20s``|
+|``app.ingestion-cadip-trigger.ingestion-trigger.polling.inbox1.directory``|The polling directory/url of the server. DefaultDefault:``https://rs-cadip-mock-s1/odata/v1``|
+|``app.ingestion-cadip-trigger.ingestion-trigger.polling.inbox1.matchRegex``|Pattern that the trigger service shall be matching against the filenames on the server in order to create a job. The pattern shall be adjusted in the associated trigger configruation in order to  match the filenames of Sentinel-2 and Sentinel-3 auxiliaries. Default:``^S1.*(AUX_\|AMH_\|AMV_\|MPL_).*$``|
+|``app.ingestion-cadip-trigger.ingestion-trigger.polling.inbox1.ignoreRegex``|Pattern for the filenames that are configured to ignored on the server.Default:``(^\\..*\|.*\\.tmp$\|db.*\|^lost\+found$)``|
+|``app.ingestion-cadip-trigger.ingestion-trigger.polling.inbox1.type``|Type of Inbox. For all interfaces, the value shall be `cadip` |
+|``app.ingestion-cadip-trigger.ingestion-trigger.polling.inbox1.family``|Product Family associated with the for the files found on the Server. For the CADIP this should be normally ``EDRS_SESSION``.
+<br>Default:``EDRS_SESSION``|
+|``app.ingestion-cadip-trigger.ingestion-trigger.polling.inbox1.stationName``|CADIP Server/station name. Default:``CADIP``|
+|``app.ingestion-cadip-trigger.ingestion-trigger.polling.inbox1.missionId=S1``|Mission ID for the products to the related mission in COPRS.- `S1` for Sentinel-1 related files- `S2` for Sentinel-2 related files - `S3` for Sentinel-3 related files<br>Default:``S1``|
+|``app.ingestion-cadip-trigger.cadip.start`` |Starting date for the CADIP trigger for polling files on the server based on the their publicationDate. Files prior to the configured date shall be ingored.Default:``2022-04-10T12:00:00.000000``|
+|``app.ingestion-cadip-trigger.cadip.time-window-sec``|The trigger polls starting with a configured timestamp( `start`) and then systematically queries the server by using a configurable timewindow up until the current time.From then on it will stay up-to-date following all new sessions on the CADIP as long as it is running.Default:``2400``|
+|``app.ingestion-cadip-trigger.cadip.time-window-overlap-sec``|The overlapping of time windows in seconds, for safety, keep smallDefault:``2400``|
+|``app.ingestion-cadip-trigger.cadip.offset-from-now-sec``|The offset from now in seconds, so that the provider has some time to publish new sessions, otherwise they might not be seen. The time window will not reach now but now minus `offset-from-now-sec`.Default:``2400``|
+|``app.ingestion-cadip-trigger.cadip.max-page-size``|Maximum number of new files that are that are divided as per configured page-size, if the the resultset is big.Default:``500``|
 
 ### XBIP
 
