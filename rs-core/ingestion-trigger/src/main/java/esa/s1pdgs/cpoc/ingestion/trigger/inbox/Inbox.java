@@ -21,6 +21,7 @@ import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.metadata.PathMetadataExtractor;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.common.utils.LogUtils;
+import esa.s1pdgs.cpoc.ingestion.trigger.cadip.CadipInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.trigger.entity.InboxEntry;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.InboxFilter;
 import esa.s1pdgs.cpoc.ingestion.trigger.filter.PositiveFileSizeFilter;
@@ -190,31 +191,42 @@ public final class Inbox {
 		}
 		
 		try {
-			final String publishedName = nameEvaluator.evaluateFrom(entry);
+			IngestionJob job = null;
+			if (entry.getInboxType().equals(CadipInboxAdapter.INBOX_TYPE)) {
+				/*
+				 * Products being queried from CADIP does not have a path in the common sense as the files
+				 * are stored flat within the system.
+				 */
+				final String publishedName = entry.getName();
+				log.debug("Publishing new cadip entry {} to kafka queue: {}", publishedName, entry);
+				
+				String t0PdgsDate = DateUtils.formatToMetadataDateTimeFormat(
+						entry.getLastModified().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
 
-			// S1OPS-971: Use the entire path element for the rule evaluation
-			final String absolutePath = absolutePathOf(entry);
-			
-			log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
-			
-			String t0PdgsDate =  DateUtils.formatToMetadataDateTimeFormat(entry.getLastModified().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-			
-			IngestionJob job = new IngestionJob(
-					family, 
-					publishedName,
-					entry.getPickupURL(), 
-					entry.getRelativePath(), 
-					entry.getSize(),
-					entry.getLastModified(),
-					reporting.getUid(),
-					mission.name(),
-					stationName,
-					mode,
-					timeliness,
-					entry.getInboxType(),
-					pathMetadataExtractor.metadataFrom(absolutePath),
-					t0PdgsDate
-				);
+				job = new IngestionJob(family, publishedName, entry.getPickupURL(),
+						entry.getRelativePath(), entry.getSize(), entry.getLastModified(), reporting.getUid(),
+						mission.name(), stationName, mode, timeliness, entry.getInboxType(),
+						null, t0PdgsDate);
+			} else {
+				/*
+				 * This is the classic case where the path name is extracted and added into the 
+				 * message.
+				 */
+				final String publishedName = nameEvaluator.evaluateFrom(entry);
+
+				// S1OPS-971: Use the entire path element for the rule evaluation
+				final String absolutePath = absolutePathOf(entry);
+
+				log.debug("Publishing new entry {} to kafka queue: {}", publishedName, entry);
+
+				String t0PdgsDate = DateUtils.formatToMetadataDateTimeFormat(
+						entry.getLastModified().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+
+				job = new IngestionJob(family, publishedName, entry.getPickupURL(),
+						entry.getRelativePath(), entry.getSize(), entry.getLastModified(), reporting.getUid(),
+						mission.name(), stationName, mode, timeliness, entry.getInboxType(),
+						pathMetadataExtractor.metadataFrom(absolutePath), t0PdgsDate);
+			}
 			// RS-536: Add RS Chain version to message
 			job.setRsChainVersion(commonProperties.getRsChainVersion());
 			
