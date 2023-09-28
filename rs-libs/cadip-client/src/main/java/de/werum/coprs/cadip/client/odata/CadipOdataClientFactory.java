@@ -75,7 +75,7 @@ public class CadipOdataClientFactory implements CadipClientFactory {
 	private CadipHostConfiguration hostConfigFor(final String serviceRootUri) {
 		// lookup host configuration for the given URL
 		for (final CadipHostConfiguration hostConfig : this.config.getHostConfigs().values()) {
-			if (this.urisEqual(serviceRootUri, hostConfig.getServiceRootUri())) {
+			if (this.uriStartsWith(serviceRootUri, hostConfig.getServiceRootUri())) {
 				LOG.trace("Found config {}", hostConfig);
 				return hostConfig;
 			}
@@ -84,8 +84,8 @@ public class CadipOdataClientFactory implements CadipClientFactory {
 				String.format("Could not find configuration for server '%s'", serviceRootUri));
 	}
 
-	private boolean urisEqual(final String serviceRootUri1, final String serviceRootUri2) {
-		return StringUtil.removeTrailing(serviceRootUri1, "/").equals(StringUtil.removeTrailing(serviceRootUri2, "/"));
+	private boolean uriStartsWith(final String serviceRootUri1, final String serviceRootUri2) {
+		return StringUtil.removeTrailing(serviceRootUri1, "/").startsWith(StringUtil.removeTrailing(serviceRootUri2, "/"));
 	}
 
 	private CloseableHttpClient newDownloadClient(final CadipHostConfiguration hostConfig,
