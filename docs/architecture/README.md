@@ -59,9 +59,9 @@ However normally between all microservices there will be kafka topics that are s
 
 ### Software Static Architecture
 
-The RS provides the processing chain in a Cloud environment by containerizing the micro-services enabling the systematic processing of the Sentinel satellites data. For Sentinel-1, Sentinel-2 and Sentinel-3 satellits the raw data received by XBIP and EDIP is systematically processed and made available to end consumers via PRIP.
+The RS provides the processing chain in a Cloud environment by containerizing the micro-services enabling the systematic processing of the Sentinel satellites data. For Sentinel-1, Sentinel-2 and Sentinel-3 satellits the raw data received by CADIP and EDIP is systematically processed and made available to end consumers via PRIP.
 
-The RS implements XBIP (X-band Ground Station Data Delivery Point) interface to ingest the downlinked raw data from the CGS centres. The XBIP interface allows the downloading of DSIBs & DSDBs using the WebDAV (HTTPS based) protocol over the internet. The RS Service detects and downloads the raw data using its Trigger and Worker components.The RS also impelemnts EDIP ("EDRS-ICD-ADSO-1000830938) interfaces  are used by PRO to poll for new CADU/DSIB files and download and ingest raw files.
+The RS implements CADIP (CADU Interface Delivery Point) interface to ingest the downlinked raw data. The interface allows to query sessions and associated files (chunks) using OData4 interface over the internet. The RS Service detects and downloads the raw data using its Trigger and Worker components. The RS also impelemnts EDIP ("EDRS-ICD-ADSO-1000830938) interfaces  are used by PRO to poll for new CADU/DSIB files and download and ingest raw files. The XBIP interface is the predecessor of the CADIP and realized on the WebDav protocol, but should not be used in new implementations anymore.
 
 
 
@@ -537,7 +537,7 @@ Before the producton can be prepared it will be required to have these products 
 
 Additionally especially main input products like EDRS sessions are used to invoke systematic workflows handling the actual processing of high level products.
 
-The COPRS the Ingestion chain is used to detect and retrieve products from other systems like XBIP, EDIP and AUXIP. The metadata extraction of these products and adding them to the catalog will be tackled in the Metadata chain.
+The COPRS the Ingestion chain is used to detect and retrieve products from other systems like CADIP, EDIP and AUXIP. The metadata extraction of these products and adding them to the catalog will be tackled in the Metadata chain.
 
 A generic ingestion chain will be looking like this:
 ![edc9a8e1896c38b1d832517f81ddbde1.png](media/edc9a8e1896c38b1d832517f81ddbde1.png)
@@ -551,11 +551,12 @@ For further information in the Ingestion Chain and an example configuration, ple
 ![Screenshot_20220303_134317.png](media/Screenshot_20220303_134317.png)
 
 Please note that the source is not part of the COPRS environment, but rther being an remote external source like:
-- XBIP (WebDAV)
-- EDIP (FTP)
 - AUXIP (ODATA)
+- CADIP (ODATA)
+- EDIP (FTP)
+- XBIP (WebDAV, deprecated)
 
-The ingestion chain is a generic component and capable of handling the different kinds of protocols that are used for the sources. It is possible to setup Inbox for the Ingeston chain that will observe the specified location depending on the type of the Inbox. E.g. in case of an XBIP WebDav will be used in order to observe the source or retrieve the actual products while an EDIP Inbox will be using FTP as protocol.
+The ingestion chain is a generic component and capable of handling the different kinds of protocols that are used for the sources. It is possible to setup Inbox for the Ingeston chain that will observe the specified location depending on the type of the Inbox. E.g. in case of an CADIP, Odata will be used in order to query for new session and files and retrieve it over the interface.
 
 Because the actual retrieval of products from the source is an IO expensive activity, it was decided to split the detection of new products from the actual retrieval process. Thus the ingestion trigger will be simply in charge to poll on the source in order to detect the availability of new products that might be interesting for the COPRS environment.
 
@@ -567,7 +568,7 @@ Additionally it will make a note and store the products that had been fired alre
 
 ![Screenshot_20220303_134433.png](media/Screenshot_20220303_134433.png)
 
-Especially for the XBIP sources that are retrieving the actual raw input files (EDRS Session), the COPRS shall not retrieve all available files from the source. Instead just about 3% of the products shall be processed within the COPRS.
+Especially for the CADIP sources that are retrieving the actual raw input files (EDRS Session), the COPRS shall not retrieve all available files from the source. Instead just about 3% of the products shall be processed within the COPRS.
 
 In order to control that not all products will be processed, the ingestion filter will be a filter gate for the system to ensure that just products being detected within a time interval will be actually processed.
 
@@ -599,8 +600,24 @@ Note that the products retrieved from the AUXIP are compressed and needs to be u
 
 Credentials to log into PRIP services (OData) are configured by Kubernetes secrets and are provided to the AUXIP client as needed. Different credentials for each PRIP service are supported
 
+#### CADIP
+
+The CADIP interface is the sucessor of the XBIP interface and is supposed to be used in order to retrieve the CADU files for the local processing system. Similiar to the AUXIP interface CADIP is based on OData4 and thus not just allow to download products, but also to perform Queries for sessions and files.
+
+The CADIP trigger is polling the specified endpoint for new sessions to appear. If a new session is identified it will be persisted. When quering for new sessions the publication date will be considered and just the trigger will just look for new sessions after the last finding to avoid retrieving old sessions all the time.
+
+Once a session is identified, the trigger will also start to query for the files that are contained within the session. Each file that is found will be fired as new event that will invoke the handling of the download into the local processing system. This will be continued per channel as long as no chunk is detected having the final block flag set.
+
+Each file identified by the trigger is send to the filter that can decide to drop the file or to provide it to the worker. This can be used in order to ensure that files just within a specific time interval are accepted.
+
+Once receiving a download request, the worker will contact the CADIP endpoint and query the file to get its UUID. Then a download is invoked from the OData interface and the provided file will be automatically uploaded into the Object Storage of the local processing system. A Catalog Event is written to invoke the metadata extraction from the file and addin it to the catalog to make it available to the processing chains.
+
+Note that to keep the RS-Addons behave the same way as before the worker will create a DSIB per channel once the files with the final block flag had been received. This DSIB file is just used to trigger the workflows.
+
 
 #### XBIP
+*Please be aware that this interface is deprecated and will be replaced by the CADIP in order to retrieve CADU sessions. It should not be used in new configurations anymore*
+
 Ingestion-Trigger component polls XBIP interface (webdav) of ground station and detects new files (CADU & DSIB). Once a new file is detected, an ingestion job is created and send to ingestion-workers. 
 
 To be able to detect files as "new", ingestion-trigger stores in a persistence a last-known list of files available in XBIP and can compare current content with last-known content. This is valid for nominal and retransfer folders as both will be polled systematically. IngestionJobs are put on the nominal (high-priority) or retransfer (low-priority) queue depending on their origin.
@@ -612,7 +629,7 @@ One ingestion-trigger pod per XBIP station to avoid dependencies between the sta
 Credentials to log into XBIP stations (webdav) are configured by Kubernetes secrets and are provided to ingestion trigger and worker as needed. It is supported to different credentials for each station.
 
 #### EDIP
-The EDIP interface, similar to XBIP, is used by COPRS services to poll for new CADU chunks and DSIB files and download and ingest such files via FTP protocol. The interface is specified in the ICD "EDRS-ICD-ADSO-1000830938"
+The EDIP interface is used by COPRS services to poll for new CADU chunks and DSIB files and download and ingest such files via FTP protocol. The interface is specified in the ICD "EDRS-ICD-ADSO-1000830938"
 
 Features:
 - The directory structure of the  files is identical to the XBIP Interface.
