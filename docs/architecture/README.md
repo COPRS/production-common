@@ -100,7 +100,7 @@ All RSPRO components are based on widely used and well supported COTS and standa
 ***
 ### Overall Architecture
 The diagram below depicts architectural overview of RS Processing sub-system
-![c0735b37de1563c86e3c8970eca2ff93.png](media/c0735b37de1563c86e3c8970eca2ff93.png)
+![c0735b37de1563c86e3c8970eca2ff93.png](media/add_overall_architecture.png)
 
 The RS PRO system is composed structurally by software modules which are split in three different type of components (or microservices):
 
