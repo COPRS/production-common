@@ -85,4 +85,7 @@ public class DSIBXmlGenerator {
 		return null;
 	}
 
+	public static String generateName(final String sessionId, final long channelId) {
+		return "DCS_00_" + sessionId + "_ch" + channelId + "_DSIB.xml";
+	}
 }
