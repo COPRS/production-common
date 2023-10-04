@@ -16,6 +16,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Produc
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.PublicationDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Value;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Footprint;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.GeoFootprint;
 
 import java.util.ArrayList;
@@ -259,6 +260,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(Checksum.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
 			properties.add(new CsdlProperty().setName(ProductionType.name()).setType(PRODUCTION_TYPE_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentDate.name()).setType(TIMERANGE_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(Footprint.name()).setType(GEOSHAPE_GEOGRAPHY_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(GeoFootprint.name()).setType(GEOSHAPE_GEOGRAPHY_TYPE_FQN));
 
 			entityType.setName(ET_PRODUCT_NAME);
