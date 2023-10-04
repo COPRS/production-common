@@ -2,39 +2,89 @@
 
 ## Document Summary
 
-This document describes the modifications that had been required to tailor the PRIP/DDIP interface for the Reference System. It especially is describing fields that are not described in the PRIP ICD as e.g. quick look productions.
+This document describes the modifications that had been required to tailor the PRIP/DDIP interface for the Reference System. It especially is describing fields or functions that are not described in the PRIP ICD as e.g. quick look productions or if there are known limitations. It is based on the PRIP ICD v1.9.
 
 ## Document Change log
 
 | Issue/Revision | Date | Change Requests | Observations |
 | --- | --- | --- | --- |
 | 01 | 2022/11/07 | N/A | First issue of document |
+| 02 | 2023/09/12 | RS-1059 | Implementation of PRIP ICD v1.9 |
+
+## Applicable Documents
+
+| Document Name | Document Identifier | Issue | Ref |
+| --- | --- | --- | --- |
+| Production Interface Delivery Point Specification | ESA-EOPG-EOPGC-IF-3 | 1.9 | [AD-1] |
 
 ## Known Limitations
 
 Especially for the DDIP not all features that are described within the DDIP ICD (Data Distribution Interface Control Document, v1.2, ESA-EOPG-EOPGC-IF-4) are available within the COPRS system. The used functions are either solved in a different way or was removed from the scope of the project. The following sections are giving an overview about the known limitations.
 
-### Delete Product
+### DDIP
+
+#### Delete Product
 
 The ICD asks for a delete function that allows to remove products from the catalog. As this function is not supposed to be exposed to the end-user and used internally and also marked as deprecated already, it was decided not to implement it. The COPRS does have a with the Data Lifecycle Manager a component that is automatically expiring outdated products from the system and there are operational procedures that are performed by the system operators if a product needs to be removed.
 
-### On Demand Processing
+#### On Demand Processing
 
 The ICD is describing on-demand functionality. However this features was removed from the scope of the project at the beginning and thus the interface is not provided.
 
-### Quota Management
+#### Quota Management
 
 There is currently no quota management existing for the DDIP system. Quota handling might be added in a future version of the system and and Denial of Service Violations will be handled by the system layer. There is no individual Quota handling for users at the moment.
 
-### Catalog Export
+#### Catalog Export
 
 There is no catalog export existing at the moment for the system. End users can use the OData interface or the STAC native API to paginate throught the whole catalog to get the data. For system operators there are operational procedures in order to create backups of the system databases that are not requiring an individual export of the full catalog.
 
-## Quicklook Images
+#### Footprints
+
+The "Footprint" field in OData reponses from the PRIP does not contain a Spatial Reference Identifier as described in the ICD, but contains a GeoJSON String. This field is the same content as "GeoFootprint" and just kept for having a backwards compatibility. The "Footprint" is marked as deprecated and it is high recommended using the "GeoFootprint" attribute instead.
+
+### Quicklook Images
 
 The Product entity has been extended with a navigation property binding to a new entity type Quicklook, allowing to provide multiple preview images with a product. The Quicklook entity has one attribute Image of type String, containing the filename of the preview image as well as acting as the identifier of the entity. A media stream is present under the /$value resource path of a Quicklook to download an image.
 
 ### Query Examples
+
+#### Operators Examples
+
+##### AND
+
+A request that looks for products starting with a S1B at the beginning and a specific end in the product name:
+
+<pre>
+GET
+http://<service-root-uri>/odata/v1/Products$filter=startswith(Name,'S1B') and endswith(Name,'025A63_28CD.SAFE.zip')"
+</pre>
+
+##### OR
+
+A request that is looking for products with a product name either containign a "EW_GRDM_1A" or "WV_WAV__0C":
+
+<pre>
+GET
+http://<service-root-uri>/odata/v1/Products$filter=contains(Name,'EW_GRDM_1A') or contains(Name,'WV_RAW__0C')"
+</pre>
+
+##### NOT
+
+Filters for a S1A product that does not contain "WV_RAW__0C":
+
+<pre>
+GET
+http://<service-root-uri>/odata/v1/Products$filter=startswith(Name,'S1A') and not contains(Name,'WV_RAW__0C')"
+</pre>
+
+##### IN
+
+Search for a product that contains a value that is contained in a list:
+<pre>
+GET
+http://<service-root-uri>/odata/v1/Products$filter=Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value in ('IW_RAW__0A','IW_RAW__0C','IW_RAW__0N'))"
+</pre>
 
 #### Product List Query
 
@@ -258,3 +308,27 @@ The following query shows a download request for a Quicklook media stream (binar
 GET
 http://<service-root-uri>/odata/v1/Products(81fd477f-6503-4887-8b5b-30e07dca179c)/Quicklooks('S1A_IW_GRDH_1SDV_20200120T124926_20200120T124958_030884_038B5E_F0D1.SAFE_bwi.png')/$value
 </pre>
+
+### Remarks of ICD 1.9
+
+With the new version 1.9 of the PRIP ICD ([AD-1]) some changes had been performed that might affect previous versions. These are described in the following sections.
+
+#### Entity Model
+
+In older implementations of the COPRS PRIP version all extended attributes was assigned to type specific attribute lists. E.g. all String attributes was listed in a list containing all string attribute and all Integer was in a specific list for Integers.
+
+This had been modified to be in line with the new ICD version, so that all attributes are contained in the field "attributes" and there is no distinction between their types anymore. Each attribute does contain a type in the attribute "ValueType" allowing to identify the data it represents.
+
+Also note that previous version used the Olingo types starting with the prefix "edm" and now using the types specified in the ICD.
+
+#### Footprint
+
+The attribute "footprint" contains the footprint as geojson and is marked as deprecation and will be removed in further versions. Please use the new field "geofootprint" instead. The data returned is kept and compatible.
+
+#### Origindate
+
+The attribute "origindate" was introduced and will be returned for products. It contains the "t0pdgs" time of the product.
+
+#### Operators
+
+The operators "and", "or", "not" and "in" are supported by the new version. Please check the examples given above to learn how to use them.
