@@ -103,11 +103,23 @@ public class ProductServiceImpl implements ProductService {
 	private List<InboxAdapterEntry> upload(ObsAdapter obsAdapter, IngestionJob ingestion, ProductFamily family, InboxAdapter inboxAdapter, URI uri, String obsKey) throws Exception {
 		try (final InboxAdapterResponse response = inboxAdapter.read(
 				uri, ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getProductSizeByte())) {
-			obsAdapter.upload(
-					family,
-					response.getResult(),
-					obsKey
-			);
+			
+			// If CADIP, files have to be uploaded seperately...
+			if (inboxAdapter instanceof CadipInboxAdapter) {
+				for (InboxAdapterEntry entry : response.getResult()) {
+					obsAdapter.upload(
+							family,
+							Collections.singletonList(entry),
+							obsKey
+					);
+				}
+			} else {
+				obsAdapter.upload(
+						family,
+						response.getResult(),
+						obsKey
+				);
+			}
 			
 			return response.getResult();
 		}
