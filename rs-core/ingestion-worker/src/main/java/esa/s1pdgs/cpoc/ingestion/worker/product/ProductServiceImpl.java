@@ -2,6 +2,7 @@ package esa.s1pdgs.cpoc.ingestion.worker.product;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,7 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import esa.s1pdgs.cpoc.appstatus.AppStatus;
 import esa.s1pdgs.cpoc.common.ProductFamily;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.CadipInboxAdapter;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapter;
+import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterEntry;
 import esa.s1pdgs.cpoc.ingestion.worker.inbox.InboxAdapterResponse;
 import esa.s1pdgs.cpoc.ingestion.worker.obs.ObsAdapter;
 import esa.s1pdgs.cpoc.mqi.model.queue.CatalogJob;
@@ -66,12 +69,29 @@ public class ProductServiceImpl implements ProductService {
 		}
 		
 		checkExistingInObs(obsAdapter, ingestion);
-		upload(obsAdapter, ingestion, family, inboxAdapter, uri, obsKey);
+		List<InboxAdapterEntry> entries = upload(obsAdapter, ingestion, family, inboxAdapter, uri, obsKey);
 
+		// Special case CADIP: We sometimes create a DSIB as well and have to create two messages
+		if (inboxAdapter instanceof CadipInboxAdapter && entries.size() > 1) {
+			final CatalogJob dtoDSIB = new CatalogJob(
+					family, 
+					entries.get(1).key(),
+					storagePathFor(obsAdapter, family, entries.get(1).key()),
+					entries.get(1).key(),
+					entries.get(1).size(),
+					ingestion.getMissionId(),
+					ingestion.getStationName(),
+					ingestion.getMode(),
+					ingestion.getTimeliness()
+			);
+			
+			return Arrays.asList(new Product<>(family, uri, dto), new Product<>(family, uri, dtoDSIB));
+		}
+		
 		return Collections.singletonList(new Product<>(family, uri, dto));
 	}
 
-	private void upload(ObsAdapter obsAdapter, IngestionJob ingestion, ProductFamily family, InboxAdapter inboxAdapter, URI uri, String obsKey) throws Exception {
+	private List<InboxAdapterEntry> upload(ObsAdapter obsAdapter, IngestionJob ingestion, ProductFamily family, InboxAdapter inboxAdapter, URI uri, String obsKey) throws Exception {
 		try (final InboxAdapterResponse response = inboxAdapter.read(
 				uri, ingestion.getProductName(), ingestion.getRelativePath(), ingestion.getProductSizeByte())) {
 			obsAdapter.upload(
@@ -79,6 +99,8 @@ public class ProductServiceImpl implements ProductService {
 					response.getResult(),
 					obsKey
 			);
+			
+			return response.getResult();
 		}
 	}
 
