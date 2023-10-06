@@ -17,7 +17,7 @@ import org.w3c.dom.Element;
 
 public class DSIBXmlGenerator {
 
-	public static String generate(String sessionId, List<String> filenames) {
+	public static String generate(String sessionId, List<String> filenames, String startTime, String stopTime, long size) {
 		try {
 			/*
 			 * Create a new builder for a DSIB element
@@ -41,10 +41,15 @@ public class DSIBXmlGenerator {
 			 * Following elements are not used by COPRS and thus can be left empty
 			 */
 			Element e_timestart = doc.createElement("time_start");
+			e_timestart.setTextContent(startTime);
 			Element e_timestop = doc.createElement("time_stop");
-			Element e_timecreate = doc.createElement("time_stop");
+			e_timestop.setTextContent(stopTime);
+			Element e_timecreate = doc.createElement("time_created");
+			e_timecreate.setTextContent(startTime);
 			Element e_timefinished = doc.createElement("time_finished");
+			e_timefinished.setTextContent(stopTime);
 			Element e_datasize = doc.createElement("data_size");
+			e_datasize.setTextContent(Long.toString(size));
 
 			rootElement.appendChild(e_sessionId);
 			rootElement.appendChild(e_timestart);

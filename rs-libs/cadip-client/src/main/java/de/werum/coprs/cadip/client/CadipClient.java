@@ -24,7 +24,15 @@ public interface CadipClient extends Closeable {
 	 * @return List of session objects retrieved by CADIP interface
 	 */
 	List<CadipSession> getSessions(String satellite, List<String> orbits, LocalDateTime publishingDate);
-
+	
+	/**
+	 * Retrieve sessions from CADIP interface. The session objects sre filtered
+	 * by sessionId. Can return more than one session in case of retransfer scenarios.
+	 * 
+	 * @param sessionId Session if to filter sessions for
+	 * @return List of session objects retrieved by CADIP interface
+	 */
+	List<CadipSession> getSessionsBySessionId(String sessionId);
 	/**
 	 * Retrieve files from CADIP interface. The file objects can be filtered by
 	 * session id, file name (with "contains" operation) and publishing date and any

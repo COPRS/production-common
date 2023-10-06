@@ -33,6 +33,7 @@ public class DateUtils {
 		FORMATS.put(s -> s.length() == 30 && s.startsWith("UTC="), DateTimeFormatter.ofPattern("'UTC='yyyy-MM-dd'T'HH:mm:ss.SSSSSS"));
 		FORMATS.put(s -> s.length() == 19, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
 		FORMATS.put(s -> s.length() == 15, FILENAME_DATE_FORMATTER);
+		FORMATS.put(s -> s.length() == 14, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 	}
 
 	public static String convertToAnotherFormat(

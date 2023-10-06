@@ -21,6 +21,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
+import org.apache.olingo.client.api.communication.request.cud.ODataReferenceAddingRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetIteratorRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
@@ -105,6 +106,23 @@ public class CadipOdataClient implements CadipClient {
 			final LocalDateTime publishingDate) {
 		// Prepare filter and URI
 		final URIFilter uriFilter = buildSessionFilters(satellite, orbits, publishingDate);
+		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataSession.ENTITY_SET_NAME,
+				CadipOdataSession.PUBLICATION_DATE_ATTRIBUTE, "asc");
+		
+		// Retrieve entities
+		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
+		final List<CadipSession> result = ResponseMapperUtil.mapResponseToListOfSessions(response);
+		LOG.debug("getSessions returned " + result.size() + " elements");
+		
+		return result;
+	}
+	
+	@Override
+	public List<CadipSession> getSessionsBySessionId(String sessionId) {		
+		// Prepare filter and URI
+		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
+		final URIFilter uriFilter = filterFactory.eq(CadipOdataSession.SATELLITE_ATTRIBUTE, sessionId);;
+		
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataSession.ENTITY_SET_NAME,
 				CadipOdataSession.PUBLICATION_DATE_ATTRIBUTE, "asc");
 		
