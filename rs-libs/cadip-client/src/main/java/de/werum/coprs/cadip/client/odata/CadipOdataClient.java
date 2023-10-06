@@ -121,7 +121,7 @@ public class CadipOdataClient implements CadipClient {
 	public List<CadipSession> getSessionsBySessionId(String sessionId) {		
 		// Prepare filter and URI
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
-		final URIFilter uriFilter = filterFactory.eq(CadipOdataSession.SATELLITE_ATTRIBUTE, sessionId);;
+		final URIFilter uriFilter = filterFactory.eq(CadipOdataSession.SESSION_ID_ATTRIBUTE, sessionId);;
 		
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataSession.ENTITY_SET_NAME,
 				CadipOdataSession.PUBLICATION_DATE_ATTRIBUTE, "asc");

@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.werum.coprs.cadip.client.CadipClient;
 import de.werum.coprs.cadip.client.CadipClientFactory;
 import de.werum.coprs.cadip.client.model.CadipFile;
@@ -17,6 +20,7 @@ import de.werum.coprs.cadip.client.xml.DSIBXmlGenerator;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 
 public class CadipInboxAdapter implements InboxAdapter {
+	private static final Logger LOG = LoggerFactory.getLogger(CadipInboxAdapter.class);
 	private final CadipClientFactory cadipClientFactory;
 
 	public CadipInboxAdapter(CadipClientFactory cadipClientFactory) {
@@ -36,6 +40,7 @@ public class CadipInboxAdapter implements InboxAdapter {
 
 			// If file is finalBlock write DSIB file
 			if (file.getFinalBlock()) {
+				LOG.info("Create DSIB for channel {} as this is the final file", file.getChannel());
 				List<CadipFile> filesInSession = cadipClient.getFiles(file.getSessionId(), null, null);
 
 				List<CadipSession> sessionsWithSessionId = cadipClient.getSessionsBySessionId(file.getSessionId());
