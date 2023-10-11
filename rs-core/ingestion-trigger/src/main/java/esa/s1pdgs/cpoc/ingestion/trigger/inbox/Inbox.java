@@ -203,7 +203,7 @@ public final class Inbox {
 				String t0PdgsDate = DateUtils.formatToMetadataDateTimeFormat(
 						entry.getLastModified().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
 
-				job = new IngestionJob(family, publishedName, entry.getPickupURL(),
+				job = new IngestionJob(ProductFamily.valueOf(entry.getProductFamily()), publishedName, entry.getPickupURL(),
 						entry.getRelativePath(), entry.getSize(), entry.getLastModified(), reporting.getUid(),
 						mission.name(), stationName, mode, timeliness, entry.getInboxType(),
 						null, t0PdgsDate);
