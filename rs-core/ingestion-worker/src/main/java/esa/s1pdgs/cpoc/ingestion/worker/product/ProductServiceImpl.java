@@ -147,7 +147,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	private String obsKeyFor(final IngestionJob ingestion) {
-		if("auxip".equals(ingestion.getInboxType())) {
+		if("auxip".equals(ingestion.getInboxType()) || "cadip".equals(ingestion.getInboxType())) {
 			return ingestion.getRelativePath();
 		}
 

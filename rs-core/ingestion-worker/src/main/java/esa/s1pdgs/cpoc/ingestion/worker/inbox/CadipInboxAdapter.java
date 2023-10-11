@@ -48,9 +48,9 @@ public class CadipInboxAdapter implements InboxAdapter {
 				// session object
 				CadipSession session = sessionsWithSessionId.get(0);
 
-				String xmlContent = generateDSIB(file, filesInSession, session, relativePath);
+				String xmlContent = generateDSIB(file, filesInSession, session);
 
-				entries.add(new InboxAdapterEntry(DSIBXmlGenerator.generateName(file.getSessionId(), file.getChannel()),
+				entries.add(new InboxAdapterEntry(file.getSessionId() + "/" + DSIBXmlGenerator.generateName(file.getSessionId(), file.getChannel()),
 						new ByteArrayInputStream(xmlContent.getBytes()), xmlContent.length()));
 			}
 
@@ -70,8 +70,7 @@ public class CadipInboxAdapter implements InboxAdapter {
 		return "CadipInboxAdapter";
 	}
 
-	private String generateDSIB(final CadipFile file, final List<CadipFile> filesInSession, final CadipSession session,
-			String relativePath) {
+	private String generateDSIB(final CadipFile file, final List<CadipFile> filesInSession, final CadipSession session) {
 		LocalDateTime startTime = session.getDownlinkStart();
 		LocalDateTime stopTime = session.getDownlinkStop();
 		String start = DateUtils.convertToMetadataDateTimeFormat(file.getSessionId().substring(4, 18));
@@ -85,7 +84,7 @@ public class CadipInboxAdapter implements InboxAdapter {
 			stop = DateUtils.formatToMetadataDateTimeFormat(stopTime);
 		}
 
-		return DSIBXmlGenerator.generate(relativePath,
+		return DSIBXmlGenerator.generate(session.getSessionId(),
 				filesInSession.stream().filter(f -> f.getChannel() == file.getChannel()).map(f -> f.getName())
 						.collect(Collectors.toList()),
 				start, stop,

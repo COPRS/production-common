@@ -195,8 +195,10 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 	private InboxEntry toInboxEntry(final CadipFile cadipFile) {
 		LOG.debug("handling cadip file: {}", cadipFile.toString());
 
-		return new InboxEntry(cadipFile.getName(), cadipFile.getName(), inboxURL(),
+		return new InboxEntry(cadipFile.getName(), cadipFile.getSessionId() + "/" + cadipFile.getName(), inboxURL(),
 				new Date(cadipFile.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()), cadipFile.getSize(),
-				processConfiguration.getHostname(), "cadip", productFamily.name(), stationName, missionId);
+				processConfiguration.getHostname(), "cadip",
+				cadipFile.getRetransfer() ? configuration.getRetransferFamily().name() : productFamily.name(),
+				stationName, missionId);
 	}
 }
