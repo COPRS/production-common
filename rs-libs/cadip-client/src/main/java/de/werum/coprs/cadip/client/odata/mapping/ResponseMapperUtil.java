@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.apache.olingo.client.api.domain.ClientCollectionValue;
+import org.apache.olingo.client.api.domain.ClientComplexValue;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientEntitySetIterator;
 import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
 import org.apache.olingo.client.api.domain.ClientProperty;
+import org.apache.olingo.client.api.domain.ClientValue;
 
 import de.werum.coprs.cadip.client.model.CadipFile;
 import de.werum.coprs.cadip.client.model.CadipQualityInfo;
@@ -104,6 +107,41 @@ public class ResponseMapperUtil {
 	}
 	
 	/**
+	 * Map an Odata response of an endpoint providing a session expanded with its list of files to the
+	 * library own model objects
+	 * 
+	 * @param cliententity object from CADIP Server
+	 * @return list of file objects related to the given session
+	 */
+	public static List<CadipFile> mapSessionResponseToListOfFiles(final ClientEntity response) {
+		final List<CadipFile> result = new ArrayList<>();
+
+		if (null != response) {
+			ClientCollectionValue<ClientValue> filesProperty = response.getProperty("Files").getCollectionValue();
+			filesProperty.forEach((fileProperty) -> {
+				final CadipOdataFile file = new CadipOdataFile();
+				final ClientComplexValue complexValue = fileProperty.asComplex();
+				
+				// @formatter:off
+				file.setId(getPropertyFromComplexValue(complexValue, CadipOdataFile.ID_ATTRIBUTE, UUID::fromString));
+				file.setName(getPropertyFromComplexValue(complexValue, CadipOdataFile.NAME_ATTRIBUTE, String::toString));
+				file.setSessionId(getPropertyFromComplexValue(complexValue, CadipOdataFile.SESSION_ID_ATTRIBUTE, String::toString));
+				file.setChannel(getPropertyFromComplexValue(complexValue, CadipOdataFile.CHANNEL_ATTRIBUTE, Long::parseLong));
+				file.setBlockNumber(getPropertyFromComplexValue(complexValue, CadipOdataFile.BLOCK_NUMBER_ATTRIBUTE, Long::parseLong));
+				file.setFinalBlock(getPropertyFromComplexValue(complexValue, CadipOdataFile.FINAL_BLOCK_ATTRIBUTE, Boolean::parseBoolean));
+				file.setPublicationDate(getPropertyFromComplexValue(complexValue, CadipOdataFile.PUBLICATION_DATE_ATTRIBUTE, DateUtils::parse));
+				file.setEvictionDate(getPropertyFromComplexValue(complexValue, CadipOdataFile.EVICTION_DATE_ATTRIBUTE, DateUtils::parse));
+				file.setSize(getPropertyFromComplexValue(complexValue, CadipOdataFile.SIZE_ATTRIBUTE, Long::parseLong));
+				file.setRetransfer(getPropertyFromComplexValue(complexValue, CadipOdataFile.RETRANSFER_ATTRIBUTE, Boolean::parseBoolean));
+				// @formatter:on
+
+				result.add(file);
+			});
+		}
+		return result;
+	}
+	
+	/**
 	 * Map an Odata response of an endpoint providing a list of quality infos to the
 	 * library own model objects
 	 * 
@@ -146,6 +184,19 @@ public class ResponseMapperUtil {
 	private static <E> E getPropertyFromEntity(final ClientEntity entity, final String property,
 			final Function<String, E> converterFunction) {
 		final ClientProperty entityProperty = entity.getProperty(property);
+		if (null != entityProperty) {
+			ClientPrimitiveValue value = entityProperty.getPrimitiveValue();
+			if (null != value && null != value.toValue()) {
+				return converterFunction.apply(value.toString());
+			}
+		}
+
+		return null;
+	}
+	
+	private static <E> E getPropertyFromComplexValue(final ClientComplexValue complexValue, final String property,
+			final Function<String, E> converterFunction) {
+		final ClientProperty entityProperty = complexValue.get(property);
 		if (null != entityProperty) {
 			ClientPrimitiveValue value = entityProperty.getPrimitiveValue();
 			if (null != value && null != value.toValue()) {

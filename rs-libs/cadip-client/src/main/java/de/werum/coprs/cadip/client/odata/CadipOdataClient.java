@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.cud.ODataReferenceAddingRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetIteratorRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
@@ -29,6 +30,7 @@ import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientEntitySetIterator;
 import org.apache.olingo.client.api.uri.FilterArgFactory;
 import org.apache.olingo.client.api.uri.FilterFactory;
+import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.client.api.uri.URIFilter;
 
@@ -108,62 +110,123 @@ public class CadipOdataClient implements CadipClient {
 		final URIFilter uriFilter = buildSessionFilters(satellite, orbits, publishingDate);
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataSession.ENTITY_SET_NAME,
 				CadipOdataSession.PUBLICATION_DATE_ATTRIBUTE, "asc");
-		
+
 		// Retrieve entities
 		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
 		final List<CadipSession> result = ResponseMapperUtil.mapResponseToListOfSessions(response);
 		LOG.debug("getSessions returned " + result.size() + " elements");
-		
+
 		return result;
 	}
-	
+
 	@Override
-	public List<CadipSession> getSessionsBySessionId(String sessionId) {		
+	public List<CadipSession> getSessionsBySessionId(String sessionId) {
 		// Prepare filter and URI
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
-		final URIFilter uriFilter = filterFactory.eq(CadipOdataSession.SESSION_ID_ATTRIBUTE, sessionId);;
-		
+		final URIFilter uriFilter = filterFactory.eq(CadipOdataSession.SESSION_ID_ATTRIBUTE, sessionId);
+
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataSession.ENTITY_SET_NAME,
 				CadipOdataSession.PUBLICATION_DATE_ATTRIBUTE, "asc");
-		
+
 		// Retrieve entities
 		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
 		final List<CadipSession> result = ResponseMapperUtil.mapResponseToListOfSessions(response);
-		LOG.debug("getSessions returned " + result.size() + " elements");
-		
+		LOG.debug("getSessionsBySessionId returned " + result.size() + " elements");
+
 		return result;
 	}
-	
+
+	@Override
+	public CadipSession getSessionById(String uuid) {
+		// Prepare filter and URI
+		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
+		final URIFilter uriFilter = filterFactory.eq(CadipOdataSession.ID_ATTRIBUTE, uuid);
+
+		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataSession.ENTITY_SET_NAME,
+				CadipOdataSession.PUBLICATION_DATE_ATTRIBUTE, "asc");
+
+		// Retrieve entities
+		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
+		final List<CadipSession> result = ResponseMapperUtil.mapResponseToListOfSessions(response);
+
+		if (result.size() == 1) {
+			LOG.debug("getSessionById returned an element");
+			return result.get(0);
+		}
+
+		LOG.debug("getSessionById returned no element");
+		return null;
+	}
+
 	@Override
 	public List<CadipFile> getFiles(String sessionId, String name, LocalDateTime publishingDate) {
 		// Prepare filter and URI
 		final URIFilter uriFilter = buildFileFilters(sessionId, name, publishingDate);
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataFile.ENTITY_SET_NAME,
 				CadipOdataFile.PUBLICATION_DATE_ATTRIBUTE, "asc");
-		
+
 		// Retrieve entities
 		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
 		final List<CadipFile> result = ResponseMapperUtil.mapResponseToListOfFiles(response);
 		LOG.debug("getFiles " + result.size() + " elements");
-		
+
 		return result;
+	}
+
+	@Override
+	public List<CadipFile> getFilesBySessionUUID(String sessionUUID) {
+		// Prepare URI
+		final URIBuilder uriBuilder = this.odataClient.newURIBuilder(this.rootServiceUrl.toString())
+				.appendEntitySetSegment(CadipOdataSession.ENTITY_SET_NAME).appendKeySegment(sessionUUID)
+				.expand("Files");
+
+		URI queryUri = uriBuilder.build();
+
+		// Retrieve entities
+		final ClientEntity response = this.readEntity(queryUri);
+		final List<CadipFile> result = ResponseMapperUtil.mapSessionResponseToListOfFiles(response);
+		LOG.debug("getFilesBySessionUUID " + result.size() + " elements");
+
+		return result;
+	}
+
+	@Override
+	public CadipFile getFileById(String uuid) {
+		// Prepare filter and URI
+		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
+		final URIFilter uriFilter = filterFactory.eq(CadipOdataFile.ID_ATTRIBUTE, uuid);
+
+		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataFile.ENTITY_SET_NAME,
+				CadipOdataFile.PUBLICATION_DATE_ATTRIBUTE, "asc");
+
+		// Retrieve entities
+		final ClientEntitySetIterator<ClientEntitySet, ClientEntity> response = this.readEntities(queryUri);
+		final List<CadipFile> result = ResponseMapperUtil.mapResponseToListOfFiles(response);
+
+		if (result.size() == 1) {
+			LOG.debug("getFileById returned an element");
+			return result.get(0);
+		}
+
+		LOG.debug("getFileById returned no element");
+		return null;
 	}
 
 	@Override
 	public List<CadipQualityInfo> getQualityInfo(UUID sessionId) {
 		// TODO: Implement if needed.
 		throw new NotImplementedException("getQualityInfo was not implemented for the CADIP client yet");
-	}	
-	
+	}
+
 	@Override
 	public InputStream downloadFile(UUID fileId) {
 		final URI productDownloadUrl = this.rootServiceUrl
-		.resolve(CadipOdataFile.ENTITY_SET_NAME + "(" + fileId.toString() + ")/$value");
+				.resolve(CadipOdataFile.ENTITY_SET_NAME + "(" + fileId.toString() + ")/$value");
 
 		LOG.debug("sending download request: " + productDownloadUrl);
 		if (this.hostConfig.isUseHttpClientDownload()) {
 			final HttpGet httpget = new HttpGet(productDownloadUrl.toString());
-		
+
 			// authentication
 			final String authType = this.hostConfig.getAuthType();
 			if ("oauth2".equalsIgnoreCase(authType)) {
@@ -176,11 +239,11 @@ public class CadipOdataClient implements CadipClient {
 								: "'" + this.hostConfig.getAuthType() + "'")
 						+ " for " + this.rootServiceUrl);
 			}
-		
+
 			try {
 				final CloseableHttpResponse response = this.downloadClient.execute(httpget, this.context);
 				final HttpEntity entity = response.getEntity();
-		
+
 				// check if something has been returned and no error occurred
 				if ((entity == null) || (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
 					throw new RuntimeException(
@@ -203,16 +266,16 @@ public class CadipOdataClient implements CadipClient {
 		} else {
 			final ODataRetrieveResponse<InputStream> response = this.odataClient.getRetrieveRequestFactory()
 					.getMediaRequest(productDownloadUrl).execute();
-		
+
 			LOG.debug("download request (" + productDownloadUrl + ") response status: " + response.getStatusCode()
 					+ " - " + response.getStatusMessage());
-		
+
 			return response.getBody();
 		}
 	}
 
 	// --------------------------------------------------------------------------
-	
+
 	private URIFilter buildSessionFilters(final String satellite, final List<String> orbits,
 			final LocalDateTime publishingDate) {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
@@ -249,9 +312,8 @@ public class CadipOdataClient implements CadipClient {
 		finalFilter = combineFilters(filterFactory, finalFilter, dateFilter);
 		return finalFilter;
 	}
-	
-	private URIFilter buildFileFilters(final String sessionId, final String name,
-			final LocalDateTime publishingDate) {
+
+	private URIFilter buildFileFilters(final String sessionId, final String name, final LocalDateTime publishingDate) {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
 		final FilterArgFactory filterArgFactory = filterFactory.getArgFactory();
 		URIFilter sessionFilter = null;
@@ -263,7 +325,8 @@ public class CadipOdataClient implements CadipClient {
 		}
 
 		if (name != null && !name.isEmpty()) {
-			nameFilter = filterFactory.match(filterArgFactory.contains(filterArgFactory.property(CadipOdataFile.NAME_ATTRIBUTE), filterArgFactory.literal(name)));
+			nameFilter = filterFactory.match(filterArgFactory.contains(
+					filterArgFactory.property(CadipOdataFile.NAME_ATTRIBUTE), filterArgFactory.literal(name)));
 		}
 
 		if (publishingDate != null) {
@@ -284,10 +347,10 @@ public class CadipOdataClient implements CadipClient {
 		if (filter2 == null) {
 			return filter1;
 		}
-		
+
 		return filter1 == null ? filter2 : factory.and(filter1, filter2);
 	}
-	
+
 	private URI buildQueryUri(final List<URIFilter> filters, final String entitySetName, final String sortAttribute,
 			final String sortDirection) {
 		final URIBuilder uriBuilder = this.odataClient.newURIBuilder(this.rootServiceUrl.toString())
@@ -310,8 +373,20 @@ public class CadipOdataClient implements CadipClient {
 
 		final ODataRetrieveResponse<ClientEntitySetIterator<ClientEntitySet, ClientEntity>> response = request
 				.execute();
-		LOG.debug("metadata search response status: " + response.getStatusCode() + " - " + response.getStatusMessage());
-		
+		LOG.debug("CADIP response status: " + response.getStatusCode() + " - " + response.getStatusMessage());
+
 		return response.getBody();
 	}
+
+	private ClientEntity readEntity(final URI absoluteUri) {
+		final ODataEntityRequest<ClientEntity> request = this.odataClient.getRetrieveRequestFactory()
+				.getEntityRequest(absoluteUri);
+		request.setAccept("application/json");
+		LOG.debug("sending request to CADIP-Server: " + absoluteUri);
+
+		final ODataRetrieveResponse<ClientEntity> response = request.execute();
+		LOG.debug("CADIP response status: " + response.getStatusCode() + " - " + response.getStatusMessage());
+		return response.getBody();
+	}
+
 }
