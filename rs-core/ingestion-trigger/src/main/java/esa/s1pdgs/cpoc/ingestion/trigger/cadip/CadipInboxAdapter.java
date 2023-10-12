@@ -16,12 +16,10 @@ import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.werum.coprs.cadip.client.CadipClient;
 import de.werum.coprs.cadip.client.model.CadipFile;
 import de.werum.coprs.cadip.client.model.CadipSession;
-import de.werum.coprs.cadip.client.odata.CadipOdataClientFactory;
 import esa.s1pdgs.cpoc.common.ProductFamily;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
 import esa.s1pdgs.cpoc.ingestion.trigger.config.CadipConfiguration;
