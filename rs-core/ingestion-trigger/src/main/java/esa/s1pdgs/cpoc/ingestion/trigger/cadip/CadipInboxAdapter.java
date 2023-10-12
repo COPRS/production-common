@@ -126,7 +126,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 	private void saveNewSessionsToRepository(final List<CadipSession> newSessions) {
 		// Only insert new Sessions into repository
 		for (CadipSession session : newSessions) {
-			Optional<CadipSessionState> result = this.sessionRepository.findByPodAndCadipUrlAndsessionUUID(
+			Optional<CadipSessionState> result = this.sessionRepository.findByPodAndCadipUrlAndSessionUUID(
 					this.processConfiguration.getHostname(), inboxURL(), session.getId().toString());
 
 			if (result.isPresent()) {
