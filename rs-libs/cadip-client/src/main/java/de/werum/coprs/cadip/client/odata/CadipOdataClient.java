@@ -194,7 +194,7 @@ public class CadipOdataClient implements CadipClient {
 	public CadipFile getFileById(String uuid) {
 		// Prepare filter and URI
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
-		final URIFilter uriFilter = filterFactory.eq(CadipOdataFile.ID_ATTRIBUTE, uuid);
+		final URIFilter uriFilter = filterFactory.eq(CadipOdataFile.ID_ATTRIBUTE, UUID.fromString(uuid));
 
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataFile.ENTITY_SET_NAME,
 				CadipOdataFile.PUBLICATION_DATE_ATTRIBUTE, "asc");
