@@ -30,33 +30,29 @@ public class CadipInboxAdapter implements InboxAdapter {
 	@Override
 	public InboxAdapterResponse read(URI uri, String name, String relativePath, long size) throws Exception {
 		final CadipClient cadipClient = cadipClientFactory.newCadipClient(uri);
-		List<CadipFile> cadipFiles = cadipClient.getFiles(null, name, null);
-		if (cadipFiles.size() == 1) {
-			CadipFile file = cadipFiles.get(0);
-			InputStream in = cadipClient.downloadFile(file.getId());
+		CadipFile file = cadipClient.getFileById(name);
+		InputStream in = cadipClient.downloadFile(file.getId());
 
-			List<InboxAdapterEntry> entries = new ArrayList<>(
-					Collections.singletonList(new InboxAdapterEntry(relativePath, in, size)));
+		List<InboxAdapterEntry> entries = new ArrayList<>(
+				Collections.singletonList(new InboxAdapterEntry(relativePath, in, size)));
 
-			// If file is finalBlock write DSIB file
-			if (file.getFinalBlock()) {
-				LOG.info("Create DSIB for channel {} as this is the final file", file.getChannel());
-				List<CadipFile> filesInSession = cadipClient.getFiles(file.getSessionId(), null, null);
+		// If file is finalBlock write DSIB file
+		if (file.getFinalBlock()) {
+			LOG.info("Create DSIB for channel {} as this is the final file", file.getChannel());
+			List<CadipFile> filesInSession = cadipClient.getFiles(file.getSessionId(), null, null);
 
-				List<CadipSession> sessionsWithSessionId = cadipClient.getSessionsBySessionId(file.getSessionId());
-				// We assume to receive a session here, as the file is related to at least one
-				// session object
-				CadipSession session = sessionsWithSessionId.get(0);
+			List<CadipSession> sessionsWithSessionId = cadipClient.getSessionsBySessionId(file.getSessionId());
+			// We assume to receive a session here, as the file is related to at least one
+			// session object
+			CadipSession session = sessionsWithSessionId.get(0);
 
-				String xmlContent = generateDSIB(file, filesInSession, session);
+			String xmlContent = generateDSIB(file, filesInSession, session);
 
-				entries.add(new InboxAdapterEntry(file.getSessionId() + "/" + DSIBXmlGenerator.generateName(file.getSessionId(), file.getChannel()),
-						new ByteArrayInputStream(xmlContent.getBytes()), xmlContent.length()));
-			}
-
-			return new InboxAdapterResponse(entries, cadipClient);
+			entries.add(new InboxAdapterEntry(file.getSessionId() + "/" + DSIBXmlGenerator.generateName(file.getSessionId(), file.getChannel()),
+					new ByteArrayInputStream(xmlContent.getBytes()), xmlContent.length()));
 		}
-		return null;
+
+		return new InboxAdapterResponse(entries, cadipClient);
 	}
 
 	@Override
@@ -84,7 +80,7 @@ public class CadipInboxAdapter implements InboxAdapter {
 			stop = DateUtils.formatToMetadataDateTimeFormat(stopTime);
 		}
 
-		return DSIBXmlGenerator.generate(session.getSessionId(),
+		return DSIBXmlGenerator.generate(file.getSessionId(),
 				filesInSession.stream().filter(f -> f.getChannel() == file.getChannel()).map(f -> f.getName())
 						.collect(Collectors.toList()),
 				start, stop,

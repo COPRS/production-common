@@ -20,21 +20,21 @@ public class CadipSessionState {
 
 	private String pod;
 	private String cadipUrl;
-	private String sessionId;
+	private String sessionUUID;
 	private Date nextWindowStart;
 	private Integer numChannels;
 	private Integer completedChannels;
 
 	@Override
 	public String toString() {
-		return "CadipSessionState [id=" + id + ", pod=" + pod + ", cadipUrl=" + cadipUrl + ", sessionId=" + sessionId
+		return "CadipSessionState [id=" + id + ", pod=" + pod + ", cadipUrl=" + cadipUrl + ", sessionUUID=" + sessionUUID
 				+ ", nextWindowStart=" + nextWindowStart + ", numChannels=" + numChannels + ", completedChannels="
 				+ completedChannels + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cadipUrl, completedChannels, id, nextWindowStart, numChannels, pod, sessionId);
+		return Objects.hash(cadipUrl, completedChannels, id, nextWindowStart, numChannels, pod, sessionUUID);
 	}
 
 	@Override
@@ -49,15 +49,15 @@ public class CadipSessionState {
 		return Objects.equals(cadipUrl, other.cadipUrl) && Objects.equals(completedChannels, other.completedChannels)
 				&& Objects.equals(id, other.id) && Objects.equals(nextWindowStart, other.nextWindowStart)
 				&& Objects.equals(numChannels, other.numChannels) && Objects.equals(pod, other.pod)
-				&& Objects.equals(sessionId, other.sessionId);
+				&& Objects.equals(sessionUUID, other.sessionUUID);
 	}
 
-	public String getSessionId() {
-		return sessionId;
+	public String getSessionUUID() {
+		return sessionUUID;
 	}
 
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
+	public void setSessionUUID(String sessionUUID) {
+		this.sessionUUID = sessionUUID;
 	}
 
 	public Date getNextWindowStart() {

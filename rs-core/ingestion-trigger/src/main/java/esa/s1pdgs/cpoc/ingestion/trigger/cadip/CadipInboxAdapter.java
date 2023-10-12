@@ -126,8 +126,8 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 	private void saveNewSessionsToRepository(final List<CadipSession> newSessions) {
 		// Only insert new Sessions into repository
 		for (CadipSession session : newSessions) {
-			Optional<CadipSessionState> result = this.sessionRepository.findByPodAndCadipUrlAndSessionId(
-					this.processConfiguration.getHostname(), inboxURL(), session.getSessionId());
+			Optional<CadipSessionState> result = this.sessionRepository.findByPodAndCadipUrlAndsessionUUID(
+					this.processConfiguration.getHostname(), inboxURL(), session.getId().toString());
 
 			if (result.isPresent()) {
 				// Session is already being processed. No need to save it again
@@ -140,7 +140,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 					new Date(session.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()));
 			newSessionState.setCadipUrl(inboxURL());
 			newSessionState.setPod(this.processConfiguration.getHostname());
-			newSessionState.setSessionId(session.getSessionId());
+			newSessionState.setSessionUUID(session.getId().toString());
 			newSessionState.setNumChannels(session.getNumChannels().intValue());
 			newSessionState.setCompletedChannels(0);
 
@@ -154,14 +154,19 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 		List<CadipFile> newFiles = new ArrayList<>();
 
 		for (CadipSessionState sessionState : sessionStates) {
+			LocalDateTime lastIngestionDate = LocalDateTime.ofInstant(sessionState.getNextWindowStart().toInstant(), ZoneOffset.UTC);
 			LocalDateTime now = LocalDateTime.now();
-			List<CadipFile> response = this.cadipClient.getFiles(sessionState.getSessionId(), null,
-					LocalDateTime.ofInstant(sessionState.getNextWindowStart().toInstant(), ZoneOffset.UTC));
+			List<CadipFile> response = this.cadipClient.getFilesBySessionUUID(sessionState.getSessionUUID());
 
 			// make sure, that the nextTimestamp is correct
 			// use "now" but if in the response a publicationDate is greater than now use
-			// that one (prevent duplicated processings)
+			// that one (prevent duplicated processing)
 			for (CadipFile file : response) {
+				// Check if file was already processed
+				if (!file.getPublicationDate().isAfter(lastIngestionDate)) {
+					continue;
+				}
+				
 				if (file.getPublicationDate().isAfter(now)) {
 					now = file.getPublicationDate();
 				}
@@ -195,7 +200,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 	private InboxEntry toInboxEntry(final CadipFile cadipFile) {
 		LOG.debug("handling cadip file: {}", cadipFile.toString());
 
-		return new InboxEntry(cadipFile.getName(), cadipFile.getSessionId() + "/" + cadipFile.getName(), inboxURL(),
+		return new InboxEntry(cadipFile.getId().toString(), cadipFile.getSessionId() + "/" + cadipFile.getName(), inboxURL(),
 				new Date(cadipFile.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()), cadipFile.getSize(),
 				processConfiguration.getHostname(), "cadip",
 				cadipFile.getRetransfer() ? configuration.getRetransferFamily().name() : productFamily.name(),

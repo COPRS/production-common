@@ -166,7 +166,7 @@ public final class Inbox {
 				.newReporting("IngestionTrigger");
 
 		final String productName;
-		if ("auxip".equalsIgnoreCase(entry.getInboxType())) {
+		if ("auxip".equalsIgnoreCase(entry.getInboxType()) || "cadip".equalsIgnoreCase(entry.getInboxType())) {
 			productName = entry.getRelativePath();
 		} else {
 			productName = entry.getName();
@@ -197,13 +197,12 @@ public final class Inbox {
 				 * Products being queried from CADIP does not have a path in the common sense as the files
 				 * are stored flat within the system.
 				 */
-				final String publishedName = entry.getName();
-				log.debug("Publishing new cadip entry {} to kafka queue: {}", publishedName, entry);
+				log.debug("Publishing new cadip entry {} to kafka queue: {}", productName, entry);
 				
 				String t0PdgsDate = DateUtils.formatToMetadataDateTimeFormat(
 						entry.getLastModified().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
 
-				job = new IngestionJob(ProductFamily.valueOf(entry.getProductFamily()), publishedName, entry.getPickupURL(),
+				job = new IngestionJob(ProductFamily.valueOf(entry.getProductFamily()),  entry.getName(), entry.getPickupURL(),
 						entry.getRelativePath(), entry.getSize(), entry.getLastModified(), reporting.getUid(),
 						mission.name(), stationName, mode, timeliness, entry.getInboxType(),
 						null, t0PdgsDate);
