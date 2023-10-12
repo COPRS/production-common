@@ -177,7 +177,7 @@ public class CadipOdataClient implements CadipClient {
 	public List<CadipFile> getFilesBySessionUUID(String sessionUUID) {
 		// Prepare URI
 		final URIBuilder uriBuilder = this.odataClient.newURIBuilder(this.rootServiceUrl.toString())
-				.appendEntitySetSegment(CadipOdataSession.ENTITY_SET_NAME).appendKeySegment(sessionUUID)
+				.appendEntitySetSegment(CadipOdataSession.ENTITY_SET_NAME).appendKeySegment(UUID.fromString(sessionUUID))
 				.expand("Files");
 
 		URI queryUri = uriBuilder.build();
