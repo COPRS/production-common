@@ -140,6 +140,11 @@ public final class Inbox {
 	}
 
 	private boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
+		// Skip this check for CADIP
+		if (entry.getInboxType().equals("cadip")) {
+			return false;
+		}
+		
 		final Path thisPath = Paths.get(entry.getRelativePath());
 
 		for (final InboxEntry handledEntry : handledElements) {
