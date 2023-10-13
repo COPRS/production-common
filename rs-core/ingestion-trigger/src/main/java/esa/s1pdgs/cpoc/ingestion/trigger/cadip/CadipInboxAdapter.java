@@ -181,6 +181,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 			// Update sessionState entry with new timeWindow and potentially new number of
 			// completed channels
 			if (sessionState.getCompletedChannels().equals(sessionState.getNumChannels())) {
+				LOG.info("Session {} finished detecting - delete sessionState entry", sessionState.getSessionUUID());
 				this.sessionRepository.deleteById(sessionState.getId());
 			} else {
 				sessionState.setNextWindowStart(new Date(now.toInstant(ZoneOffset.UTC).toEpochMilli()));
