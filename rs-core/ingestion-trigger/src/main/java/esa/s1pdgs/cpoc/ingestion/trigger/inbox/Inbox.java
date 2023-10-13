@@ -142,6 +142,7 @@ public final class Inbox {
 	private boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
 		// Skip this check for CADIP
 		if (entry.getInboxType().equals("cadip")) {
+			log.debug("Skip isChildOf-check for CADIP");
 			return false;
 		}
 		
