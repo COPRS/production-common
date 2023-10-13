@@ -141,7 +141,7 @@ public final class Inbox {
 
 	private boolean isChildOf(final InboxEntry entry, final Set<InboxEntry> handledElements) {
 		// Skip this check for CADIP
-		if (entry.getInboxType().equals("cadip")) {
+		if ("cadip".equalsIgnoreCase(entry.getInboxType())) {
 			log.debug("Skip isChildOf-check for CADIP");
 			return false;
 		}
@@ -198,7 +198,7 @@ public final class Inbox {
 		
 		try {
 			IngestionJob job = null;
-			if (entry.getInboxType().equals(CadipInboxAdapter.INBOX_TYPE)) {
+			if ("cadip".equalsIgnoreCase(entry.getInboxType())) {
 				/*
 				 * Products being queried from CADIP does not have a path in the common sense as the files
 				 * are stored flat within the system.
