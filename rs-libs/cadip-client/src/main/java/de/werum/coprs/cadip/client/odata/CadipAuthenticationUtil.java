@@ -60,11 +60,11 @@ public final class CadipAuthenticationUtil {
 
 	public static final String retrieveOauthAccessToken(final CadipHostConfiguration hostConfig) {
 		return retrieveOauthAccessToken(URI.create(hostConfig.getOauthAuthUrl()), hostConfig.getOauthClientId(),
-				hostConfig.getOauthClientSecret(), hostConfig.getUser(), hostConfig.getPass());
+				hostConfig.getOauthClientSecret(), hostConfig.getUser(), hostConfig.getPass(), hostConfig.getScope());
 	}
 
 	public static final String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
-			final String oauthClientSecret, final String oauthAuthServerUser, final String oauthAuthServerPass) {
+			final String oauthClientSecret, final String oauthAuthServerUser, final String oauthAuthServerPass, final String scope) {
 		final CloseableHttpClient httpClient = newOauthAuthorizationClient();
 
 		final List<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
@@ -73,14 +73,17 @@ public final class CadipAuthenticationUtil {
 		data.add(new BasicNameValuePair("client_secret", oauthClientSecret));
 		data.add(new BasicNameValuePair("username", oauthAuthServerUser));
 		data.add(new BasicNameValuePair("password", oauthAuthServerPass));
-
+		if (scope != null) {
+			data.add(new BasicNameValuePair("scope", scope));
+		}
+	
 		ObjectNode token = null;
 		CloseableHttpResponse response = null;
 		InputStream responseContent = null;
 		try {
 			final HttpPost post = new HttpPost(oauthAuthUrl);
 			post.setEntity(new UrlEncodedFormEntity(data, "UTF-8"));
-
+			
 			response = httpClient.execute(post);
 
 			if (null == response) {

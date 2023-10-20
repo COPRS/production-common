@@ -28,6 +28,7 @@ public class CadipClientConfigurationProperties {
 		private String oauthClientId;
 		private String oauthClientSecret;
 		private boolean useHttpClientDownload = true;
+		private String scope = null;
 
 		// - - - - - - - - - - - - - - - - - -
 
@@ -37,7 +38,7 @@ public class CadipClientConfigurationProperties {
 					+ ", pass=****" + ", sslValidation=" + this.sslValidation + ", authType=" + this.authType
 					+ ", oauthAuthUrl=" + this.oauthAuthUrl + ", oauthClientId=" + this.oauthClientId
 					+ ", bearerTokenType=" + this.bearerTokenType + ", oauthClientSecret=" + this.oauthClientSecret
-					+ ", useHttpClientDownload=" + useHttpClientDownload + "]";
+					+ ", useHttpClientDownload=" + useHttpClientDownload + ", scope=" + scope + "]";
 		}
 
 		// - - - - - - - - - - - - - - - - - -
@@ -122,6 +123,13 @@ public class CadipClientConfigurationProperties {
 			this.bearerTokenType = bearerTokenType;
 		}
 
+		public String getScope() {
+			return scope;
+		}
+
+		public void setScope(String scope) {
+			this.scope = scope;
+		}
 	}
 
 	// --------------------------------------------------------------------------
