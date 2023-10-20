@@ -11,10 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "cadip")
 public class CadipClientConfigurationProperties {
-	
+
 	public enum BearerTokenType {
-		AUTHORIZATION,
-		OAUTH2_ACCESS_TOKEN
+		AUTHORIZATION, OAUTH2_ACCESS_TOKEN
 	}
 
 	public static class CadipHostConfiguration {
@@ -29,6 +28,7 @@ public class CadipClientConfigurationProperties {
 		private String oauthClientSecret;
 		private boolean useHttpClientDownload = true;
 		private String scope = null;
+		private Map<String, String> additionalHeadersAuth = new HashMap<>();
 
 		// - - - - - - - - - - - - - - - - - -
 
@@ -38,7 +38,8 @@ public class CadipClientConfigurationProperties {
 					+ ", pass=****" + ", sslValidation=" + this.sslValidation + ", authType=" + this.authType
 					+ ", oauthAuthUrl=" + this.oauthAuthUrl + ", oauthClientId=" + this.oauthClientId
 					+ ", bearerTokenType=" + this.bearerTokenType + ", oauthClientSecret=" + this.oauthClientSecret
-					+ ", useHttpClientDownload=" + useHttpClientDownload + ", scope=" + scope + "]";
+					+ ", useHttpClientDownload=" + useHttpClientDownload + ", scope=" + scope
+					+ ", additionalHeadersAuth=" + additionalHeadersAuth + "]";
 		}
 
 		// - - - - - - - - - - - - - - - - - -
@@ -129,6 +130,14 @@ public class CadipClientConfigurationProperties {
 
 		public void setScope(String scope) {
 			this.scope = scope;
+		}
+
+		public Map<String, String> getAdditionalHeadersAuth() {
+			return additionalHeadersAuth;
+		}
+
+		public void setAdditionalHeadersAuth(Map<String, String> additionalHeadersAuth) {
+			this.additionalHeadersAuth = additionalHeadersAuth;
 		}
 	}
 

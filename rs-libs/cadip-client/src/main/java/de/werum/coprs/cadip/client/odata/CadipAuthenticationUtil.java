@@ -5,6 +5,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -45,26 +47,27 @@ public final class CadipAuthenticationUtil {
 
 	public static final Header oauthHeaderFor(final CadipHostConfiguration hostConfig) {
 		final String accessToken = retrieveOauthAccessToken(hostConfig);
-		
-		switch (hostConfig.getBearerTokenType())
-		{
-			case AUTHORIZATION:
-				return new BasicHeader("Authorization", "Bearer "+accessToken);
-			case OAUTH2_ACCESS_TOKEN:
-				return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
+
+		switch (hostConfig.getBearerTokenType()) {
+		case AUTHORIZATION:
+			return new BasicHeader("Authorization", "Bearer " + accessToken);
+		case OAUTH2_ACCESS_TOKEN:
+			return new BasicHeader("OAUTH2-ACCESS-TOKEN", accessToken);
 		}
-		
-		throw new IllegalArgumentException("Unknown bearer token type: "+hostConfig.getBearerTokenType());
+
+		throw new IllegalArgumentException("Unknown bearer token type: " + hostConfig.getBearerTokenType());
 
 	}
 
 	public static final String retrieveOauthAccessToken(final CadipHostConfiguration hostConfig) {
 		return retrieveOauthAccessToken(URI.create(hostConfig.getOauthAuthUrl()), hostConfig.getOauthClientId(),
-				hostConfig.getOauthClientSecret(), hostConfig.getUser(), hostConfig.getPass(), hostConfig.getScope());
+				hostConfig.getOauthClientSecret(), hostConfig.getUser(), hostConfig.getPass(), hostConfig.getScope(),
+				hostConfig.getAdditionalHeadersAuth());
 	}
 
 	public static final String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
-			final String oauthClientSecret, final String oauthAuthServerUser, final String oauthAuthServerPass, final String scope) {
+			final String oauthClientSecret, final String oauthAuthServerUser, final String oauthAuthServerPass,
+			final String scope, final Map<String, String> additionalHeadersAuth) {
 		final CloseableHttpClient httpClient = newOauthAuthorizationClient();
 
 		final List<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
@@ -76,13 +79,18 @@ public final class CadipAuthenticationUtil {
 		if (scope != null) {
 			data.add(new BasicNameValuePair("scope", scope));
 		}
-	
+
 		ObjectNode token = null;
 		CloseableHttpResponse response = null;
 		InputStream responseContent = null;
 		try {
 			final HttpPost post = new HttpPost(oauthAuthUrl);
 			post.setEntity(new UrlEncodedFormEntity(data, "UTF-8"));
+			
+			// Additional Headers for authentication request
+			for (Entry<String, String> entry : additionalHeadersAuth.entrySet()) {
+				post.addHeader(entry.getKey(), entry.getValue());
+			}
 			
 			response = httpClient.execute(post);
 
