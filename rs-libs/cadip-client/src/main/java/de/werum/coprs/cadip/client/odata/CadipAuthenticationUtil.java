@@ -90,11 +90,10 @@ public final class CadipAuthenticationUtil {
 			
 			// Additional Headers for authentication request
 			for (Entry<String, String> entry : additionalHeadersAuth.entrySet()) {
-				LOG.info("Add header to authorization request: key: \"{}\", value: \"{}\"");
+				LOG.debug("Add header to authorization request: key: \"{}\", value: \"{}\"", entry.getKey(), entry.getValue());
 				post.addHeader(entry.getKey(), entry.getValue());
 			}
 			
-			LOG.info("Execute post request: {}", post.toString());
 			response = httpClient.execute(post);
 
 			if (null == response) {
