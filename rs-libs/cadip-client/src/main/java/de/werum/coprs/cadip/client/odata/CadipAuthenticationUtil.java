@@ -24,6 +24,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.olingo.commons.api.http.HttpHeader;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,8 +37,7 @@ import esa.s1pdgs.cpoc.common.utils.StringUtil;
 
 public final class CadipAuthenticationUtil {
 
-	// private static final Logger LOG =
-	// LogManager.getLogger(CadipAuthenticationUtil.class);
+	private static final Logger LOG = LogManager.getLogger(CadipAuthenticationUtil.class);
 
 	public static final Header basicAuthHeaderFor(final CadipHostConfiguration hostConfig) {
 		final String auth = hostConfig.getUser() + ":" + hostConfig.getPass();
@@ -89,9 +90,11 @@ public final class CadipAuthenticationUtil {
 			
 			// Additional Headers for authentication request
 			for (Entry<String, String> entry : additionalHeadersAuth.entrySet()) {
+				LOG.info("Add header to authorization request: key: \"{}\", value: \"{}\"");
 				post.addHeader(entry.getKey(), entry.getValue());
 			}
 			
+			LOG.info("Execute post request: {}", post.toString());
 			response = httpClient.execute(post);
 
 			if (null == response) {
