@@ -140,6 +140,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 			newSessionState.setCadipUrl(inboxURL());
 			newSessionState.setPod(this.processConfiguration.getHostname());
 			newSessionState.setSessionId(session.getSessionId());
+			newSessionState.setRetransfer(session.getRetransfer());
 			newSessionState.setNumChannels(session.getNumChannels().intValue());
 			newSessionState.setCompletedChannels(0);
 
