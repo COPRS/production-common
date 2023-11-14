@@ -20,21 +20,22 @@ public class CadipSessionState {
 
 	private String pod;
 	private String cadipUrl;
-	private String sessionUUID;
+	private String sessionId;
+	private boolean retransfer;
 	private Date nextWindowStart;
 	private Integer numChannels;
 	private Integer completedChannels;
 
 	@Override
 	public String toString() {
-		return "CadipSessionState [id=" + id + ", pod=" + pod + ", cadipUrl=" + cadipUrl + ", sessionUUID=" + sessionUUID
-				+ ", nextWindowStart=" + nextWindowStart + ", numChannels=" + numChannels + ", completedChannels="
-				+ completedChannels + "]";
+		return "CadipSessionState [id=" + id + ", pod=" + pod + ", cadipUrl=" + cadipUrl + ", sessionId=" + sessionId
+				+ ", retransfer=" + retransfer + ", nextWindowStart=" + nextWindowStart + ", numChannels=" + numChannels
+				+ ", completedChannels=" + completedChannels + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cadipUrl, completedChannels, id, nextWindowStart, numChannels, pod, sessionUUID);
+		return Objects.hash(cadipUrl, completedChannels, id, nextWindowStart, numChannels, pod, retransfer, sessionId);
 	}
 
 	@Override
@@ -49,15 +50,15 @@ public class CadipSessionState {
 		return Objects.equals(cadipUrl, other.cadipUrl) && Objects.equals(completedChannels, other.completedChannels)
 				&& Objects.equals(id, other.id) && Objects.equals(nextWindowStart, other.nextWindowStart)
 				&& Objects.equals(numChannels, other.numChannels) && Objects.equals(pod, other.pod)
-				&& Objects.equals(sessionUUID, other.sessionUUID);
+				&& retransfer == other.retransfer && Objects.equals(sessionId, other.sessionId);
 	}
 
-	public String getSessionUUID() {
-		return sessionUUID;
+	public String getSessionId() {
+		return sessionId;
 	}
 
-	public void setSessionUUID(String sessionUUID) {
-		this.sessionUUID = sessionUUID;
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 	public Date getNextWindowStart() {
@@ -106,6 +107,14 @@ public class CadipSessionState {
 
 	public void setId(ObjectId id) {
 		this.id = id;
+	}
+
+	public boolean isRetransfer() {
+		return retransfer;
+	}
+
+	public void setRetransfer(boolean retransfer) {
+		this.retransfer = retransfer;
 	}
 		
 }

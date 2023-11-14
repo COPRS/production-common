@@ -124,8 +124,9 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 	private void saveNewSessionsToRepository(final List<CadipSession> newSessions) {
 		// Only insert new Sessions into repository
 		for (CadipSession session : newSessions) {
-			Optional<CadipSessionState> result = this.sessionRepository.findByPodAndCadipUrlAndSessionUUID(
-					this.processConfiguration.getHostname(), inboxURL(), session.getId().toString());
+			Optional<CadipSessionState> result = this.sessionRepository.findByPodAndCadipUrlAndSessionIdAndRetransfer(
+					this.processConfiguration.getHostname(), inboxURL(), session.getSessionId(),
+					session.getRetransfer());
 
 			if (result.isPresent()) {
 				// Session is already being processed. No need to save it again
@@ -138,7 +139,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 					new Date(session.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()));
 			newSessionState.setCadipUrl(inboxURL());
 			newSessionState.setPod(this.processConfiguration.getHostname());
-			newSessionState.setSessionUUID(session.getId().toString());
+			newSessionState.setSessionId(session.getSessionId());
 			newSessionState.setNumChannels(session.getNumChannels().intValue());
 			newSessionState.setCompletedChannels(0);
 
@@ -152,9 +153,11 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 		List<CadipFile> newFiles = new ArrayList<>();
 
 		for (CadipSessionState sessionState : sessionStates) {
-			LocalDateTime lastIngestionDate = LocalDateTime.ofInstant(sessionState.getNextWindowStart().toInstant(), ZoneOffset.UTC);
+			LocalDateTime lastIngestionDate = LocalDateTime.ofInstant(sessionState.getNextWindowStart().toInstant(),
+					ZoneOffset.UTC);
 			LocalDateTime now = LocalDateTime.now();
-			List<CadipFile> response = this.cadipClient.getFilesBySessionUUID(sessionState.getSessionUUID());
+			List<CadipFile> response = this.cadipClient.getFiles(sessionState.getSessionId(), null,
+					sessionState.isRetransfer(), now);
 
 			// make sure, that the nextTimestamp is correct
 			// use "now" but if in the response a publicationDate is greater than now use
@@ -164,7 +167,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 				if (!file.getPublicationDate().isAfter(lastIngestionDate)) {
 					continue;
 				}
-				
+
 				if (file.getPublicationDate().isAfter(now)) {
 					now = file.getPublicationDate();
 				}
@@ -181,7 +184,8 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 			// Update sessionState entry with new timeWindow and potentially new number of
 			// completed channels
 			if (sessionState.getCompletedChannels().equals(sessionState.getNumChannels())) {
-				LOG.info("Session {} finished detecting - delete sessionState entry", sessionState.getSessionUUID());
+				LOG.info("Session ({}, {}) finished detecting - delete sessionState entry", sessionState.getSessionId(),
+						sessionState.isRetransfer());
 				this.sessionRepository.deleteById(sessionState.getId());
 			} else {
 				sessionState.setNextWindowStart(new Date(now.toInstant(ZoneOffset.UTC).toEpochMilli()));
@@ -199,9 +203,9 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 	private InboxEntry toInboxEntry(final CadipFile cadipFile) {
 		LOG.debug("handling cadip file: {}", cadipFile.toString());
 
-		return new InboxEntry(cadipFile.getId().toString(), cadipFile.getSessionId() + "/" + cadipFile.getName(), inboxURL(),
-				new Date(cadipFile.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()), cadipFile.getSize(),
-				processConfiguration.getHostname(), "cadip",
+		return new InboxEntry(cadipFile.getId().toString(), cadipFile.getSessionId() + "/" + cadipFile.getName(),
+				inboxURL(), new Date(cadipFile.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()),
+				cadipFile.getSize(), processConfiguration.getHostname(), "cadip",
 				cadipFile.getRetransfer() ? configuration.getRetransferFamily().name() : productFamily.name(),
 				stationName, missionId);
 	}

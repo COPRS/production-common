@@ -21,7 +21,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.olingo.client.api.ODataClient;
-import org.apache.olingo.client.api.communication.request.cud.ODataReferenceAddingRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRequest;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetIteratorRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
@@ -30,7 +29,6 @@ import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientEntitySetIterator;
 import org.apache.olingo.client.api.uri.FilterArgFactory;
 import org.apache.olingo.client.api.uri.FilterFactory;
-import org.apache.olingo.client.api.uri.QueryOption;
 import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.client.api.uri.URIFilter;
 
@@ -120,10 +118,13 @@ public class CadipOdataClient implements CadipClient {
 	}
 
 	@Override
-	public List<CadipSession> getSessionsBySessionId(String sessionId) {
+	public List<CadipSession> getSessionsBySessionIdAndRetransfer(String sessionId, boolean retransfer) {
 		// Prepare filter and URI
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
-		final URIFilter uriFilter = filterFactory.eq(CadipOdataSession.SESSION_ID_ATTRIBUTE, sessionId);
+		final URIFilter sessionIdFilter = filterFactory.eq(CadipOdataSession.SESSION_ID_ATTRIBUTE, sessionId);
+		final URIFilter retransferFilter = filterFactory.eq(CadipOdataSession.RETRANSFER_ATTRIBUTE, retransfer);
+		
+		final URIFilter uriFilter = combineFilters(filterFactory, sessionIdFilter, retransferFilter);
 
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataSession.ENTITY_SET_NAME,
 				CadipOdataSession.PUBLICATION_DATE_ATTRIBUTE, "asc");
@@ -159,9 +160,9 @@ public class CadipOdataClient implements CadipClient {
 	}
 
 	@Override
-	public List<CadipFile> getFiles(String sessionId, String name, LocalDateTime publishingDate) {
+	public List<CadipFile> getFiles(String sessionId, String name, boolean retransfer, LocalDateTime publishingDate) {
 		// Prepare filter and URI
-		final URIFilter uriFilter = buildFileFilters(sessionId, name, publishingDate);
+		final URIFilter uriFilter = buildFileFilters(sessionId, name, retransfer, publishingDate);
 		final URI queryUri = this.buildQueryUri(Collections.singletonList(uriFilter), CadipOdataFile.ENTITY_SET_NAME,
 				CadipOdataFile.PUBLICATION_DATE_ATTRIBUTE, "asc");
 
@@ -177,8 +178,8 @@ public class CadipOdataClient implements CadipClient {
 	public List<CadipFile> getFilesBySessionUUID(String sessionUUID) {
 		// Prepare URI
 		final URIBuilder uriBuilder = this.odataClient.newURIBuilder(this.rootServiceUrl.toString())
-				.appendEntitySetSegment(CadipOdataSession.ENTITY_SET_NAME).appendKeySegment(UUID.fromString(sessionUUID))
-				.expand("Files");
+				.appendEntitySetSegment(CadipOdataSession.ENTITY_SET_NAME)
+				.appendKeySegment(UUID.fromString(sessionUUID)).expand("Files");
 
 		URI queryUri = uriBuilder.build();
 
@@ -313,7 +314,8 @@ public class CadipOdataClient implements CadipClient {
 		return finalFilter;
 	}
 
-	private URIFilter buildFileFilters(final String sessionId, final String name, final LocalDateTime publishingDate) {
+	private URIFilter buildFileFilters(final String sessionId, final String name, final boolean retransfer,
+			final LocalDateTime publishingDate) {
 		final FilterFactory filterFactory = this.odataClient.getFilterFactory();
 		final FilterArgFactory filterArgFactory = filterFactory.getArgFactory();
 		URIFilter sessionFilter = null;
@@ -328,6 +330,8 @@ public class CadipOdataClient implements CadipClient {
 			nameFilter = filterFactory.match(filterArgFactory.contains(
 					filterArgFactory.property(CadipOdataFile.NAME_ATTRIBUTE), filterArgFactory.literal(name)));
 		}
+		
+		URIFilter retransferFilter = filterFactory.eq(CadipOdataFile.RETRANSFER_ATTRIBUTE, retransfer);
 
 		if (publishingDate != null) {
 			dateFilter = filterFactory.ge(CadipOdataFile.PUBLICATION_DATE_ATTRIBUTE,
@@ -338,6 +342,7 @@ public class CadipOdataClient implements CadipClient {
 		URIFilter finalFilter = null;
 		finalFilter = combineFilters(filterFactory, finalFilter, sessionFilter);
 		finalFilter = combineFilters(filterFactory, finalFilter, nameFilter);
+		finalFilter = combineFilters(filterFactory, finalFilter, retransferFilter);
 		finalFilter = combineFilters(filterFactory, finalFilter, dateFilter);
 
 		return finalFilter;

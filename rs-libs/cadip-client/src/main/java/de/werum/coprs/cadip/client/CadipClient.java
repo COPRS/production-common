@@ -29,10 +29,11 @@ public interface CadipClient extends Closeable {
 	 * Retrieve sessions from CADIP interface. The session objects are filtered by
 	 * sessionId. Can return more than one session in case of retransfer scenarios.
 	 * 
-	 * @param sessionId Session id to filter sessions for
+	 * @param sessionId  Session id to filter sessions for
+	 * @param retransfer retransfer flag to filter sessions for
 	 * @return List of session objects retrieved by CADIP interface
 	 */
-	List<CadipSession> getSessionsBySessionId(String sessionId);
+	List<CadipSession> getSessionsBySessionIdAndRetransfer(String sessionId, boolean retransfer);
 
 	/**
 	 * Retrieve session from CADIP interface based on a given UUID.
@@ -50,16 +51,18 @@ public interface CadipClient extends Closeable {
 	 * 
 	 * @param sessionId      Session id to filter files for
 	 * @param name           String that has to be part of the name of the file
+	 * @param retransfer     Boolean if the session to be polled is retransfered or
+	 *                       not
 	 * @param publishingDate Earliest publishing date to retrieve sessions for
 	 * @return List of file objects retrieved by CADIP interface
 	 */
-	List<CadipFile> getFiles(String sessionId, String name, LocalDateTime publishingDate);
+	List<CadipFile> getFiles(String sessionId, String name, boolean retransfer, LocalDateTime publishingDate);
 
 	/**
 	 * Retrieve files from CADIP interface. The file objects are filtered by the
 	 * unique id of the related session.
 	 * 
-	 * @param sessionUUID      Session UUID to filter files for
+	 * @param sessionUUID Session UUID to filter files for
 	 * @return List of file objects retrieved by CADIP interface
 	 */
 	List<CadipFile> getFilesBySessionUUID(String sessionUUID);

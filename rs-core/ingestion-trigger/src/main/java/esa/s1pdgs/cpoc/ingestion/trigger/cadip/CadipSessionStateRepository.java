@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface CadipSessionStateRepository extends MongoRepository<CadipSessionState, ObjectId> {
 
-	Optional<CadipSessionState> findByPodAndCadipUrlAndSessionUUID(final String pod, final String cadipUrl,
-			final String sessionUUID);
-	
+	Optional<CadipSessionState> findByPodAndCadipUrlAndSessionIdAndRetransfer(final String pod, final String cadipUrl,
+			final String sessionId, final boolean retransfer);
+
 	List<CadipSessionState> findByPodAndCadipUrl(final String pod, final String cadipUrl);
 }
