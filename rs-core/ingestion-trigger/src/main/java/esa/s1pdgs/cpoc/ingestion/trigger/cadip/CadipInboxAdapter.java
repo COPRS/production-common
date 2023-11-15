@@ -158,7 +158,7 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 					ZoneOffset.UTC);
 			LocalDateTime now = LocalDateTime.now();
 			List<CadipFile> response = this.cadipClient.getFiles(sessionState.getSessionId(), null,
-					sessionState.isRetransfer(), now);
+					sessionState.isRetransfer(), lastIngestionDate);
 
 			// make sure, that the nextTimestamp is correct
 			// use "now" but if in the response a publicationDate is greater than now use
