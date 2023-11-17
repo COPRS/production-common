@@ -135,8 +135,10 @@ public class CadipInboxAdapter extends AbstractInboxAdapter implements SupportsP
 			}
 
 			final CadipSessionState newSessionState = new CadipSessionState();
+			// For the first time window take the publication date of the session minus 1
+			// second. We want to be sure, to get alle files for the session
 			newSessionState.setNextWindowStart(
-					new Date(session.getPublicationDate().toInstant(ZoneOffset.UTC).toEpochMilli()));
+					new Date(session.getPublicationDate().minusSeconds(1).toInstant(ZoneOffset.UTC).toEpochMilli()));
 			newSessionState.setCadipUrl(inboxURL());
 			newSessionState.setPod(this.processConfiguration.getHostname());
 			newSessionState.setSessionId(session.getSessionId());
