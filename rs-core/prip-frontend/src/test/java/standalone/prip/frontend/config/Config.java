@@ -18,7 +18,7 @@ public class Config {
     @Primary
     PripMetadataRepository getPripMetadataRepository() {
     	int maxSearchHits = 100;
-    	return new PripElasticSearchMetadataRepo(restHighLevelClient, maxSearchHits);
+    	return new PripElasticSearchMetadataRepo(restHighLevelClient, maxSearchHits, true);
     }
     
     @Bean

@@ -85,6 +85,7 @@ The latest version can be deployed by using the following command line:
 | `obs.user-secret` | Sets the user password used to access the OBS. It is highly recommend to leave this to the environmental, so it can be read from a secret | `${OBS_PASSWORD}` |
 | `obs.user-id` | Sets the user name used to access the OBS. It is highly recommend to leave this to the environmental, so it can be read from a secret | `${OBS_USERNAME}` |
 | `obs.disable-chunked-encoding` | Allows to disable chunked encoding for file transfers | `false` |
+| `prip-client.repository.search-string-term-in-lower-case` | searches string terms in lower case (only relevant for IN operator) | `true` |
 
 Please note that it is additionally possible to set bucket definitions below the value `obs.bucket`. The following pattern can be used:
 ```

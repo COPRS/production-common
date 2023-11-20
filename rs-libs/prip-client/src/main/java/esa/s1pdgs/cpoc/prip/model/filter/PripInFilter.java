@@ -1,11 +1,14 @@
 package esa.s1pdgs.cpoc.prip.model.filter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 
 public class PripInFilter extends PripQueryFilterTerm {
+	
+	public static final String FIELD_TYPE_STRING = "string"; 
 
 	public enum Function {
 		IN("in");
@@ -86,6 +89,20 @@ public class PripInFilter extends PripQueryFilterTerm {
 	
 	public List<Object> getTerms() {
 		return this.terms;
+	}
+	
+	public List<Object> getTermsInLowerCase() {
+		if (getFieldName().endsWith("_" + FIELD_TYPE_STRING)) {
+
+			List<Object> listObjects = new ArrayList<>();
+			for (Object o : terms) {
+				listObjects.add(((String) o).toLowerCase());
+			}
+			return listObjects;
+
+		} else {
+			return this.terms;
+		}
 	}
 	
 	public void setTerms(List<Object> terms) {

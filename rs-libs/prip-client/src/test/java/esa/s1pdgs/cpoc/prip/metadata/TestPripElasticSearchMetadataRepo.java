@@ -64,7 +64,7 @@ public class TestPripElasticSearchMetadataRepo {
 	public void init() {
 
 		MockitoAnnotations.initMocks(this);
-		repo = new PripElasticSearchMetadataRepo(restHighLevelClient, 1000);
+		repo = new PripElasticSearchMetadataRepo(restHighLevelClient, 1000, true);
 	}
 
 	@Test
