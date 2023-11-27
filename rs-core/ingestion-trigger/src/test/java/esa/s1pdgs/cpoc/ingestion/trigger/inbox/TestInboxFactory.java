@@ -19,7 +19,7 @@ public class TestInboxFactory {
 		final InboxConfiguration defConfig = new InboxConfiguration();
 		defConfig.setFamily(productFamily);
 
-		final InboxFactory uut = new InboxFactory(null, null, null, null, null, null);
+		final InboxFactory uut = new InboxFactory(null, null, null, null, null, null, null);
 
 		final ProductNameEvaluator eval = uut.newProductNameEvaluatorFor(defConfig);
 		final InboxEntry entry = new InboxEntry();

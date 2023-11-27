@@ -61,6 +61,18 @@ public class DateUtilsTest {
     }
     
     @Test
+    public final void testParse_OdataReturnValues() {
+    	LocalDateTime time = DateUtils.parse("2017-12-24T14:22:15.12345Z");    	
+    	assertEquals("2017-12-24T14:22:15.123450Z", DateUtils.formatToMetadataDateTimeFormat(time));  
+    	time = DateUtils.parse("2017-12-24T14:22:15.1234Z");    	
+    	assertEquals("2017-12-24T14:22:15.123400Z", DateUtils.formatToMetadataDateTimeFormat(time));  
+    	time = DateUtils.parse("2017-12-24T14:22:15.12Z");    	
+    	assertEquals("2017-12-24T14:22:15.120000Z", DateUtils.formatToMetadataDateTimeFormat(time));  
+    	time = DateUtils.parse("2017-12-24T14:22:15.1Z");    	
+    	assertEquals("2017-12-24T14:22:15.100000Z", DateUtils.formatToMetadataDateTimeFormat(time));  
+    }
+    
+    @Test
     public final void testConvertToMetadataDateTimeFormat()
     {
     	assertEquals("2000-01-01T00:00:00.123456Z", DateUtils.convertToMetadataDateTimeFormat("2000-01-01T00:00:00.123456Z"));

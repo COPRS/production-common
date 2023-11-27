@@ -7,7 +7,7 @@ Configuration:
     Console:
       - name: STDOUT
         PatternLayout:
-          Pattern: "{\"header\":{\"type\":\"LOG\",\"timestamp\":\"%d{yyyy-MM-dd'T'HH:mm:ss.nnnnnn}Z\",\"level\":\"%level\",\"line\":%L,\"file\":\"%.255F\",\"thread\":\"%.255t\"},\"message\":{\"content\":\"%enc{%m%xEx}{JSON}\"},\"custom\":{\"logger_string\":\"%logger\"}}%n"    
+          Pattern: '{"header":{"type":"LOG","timestamp":"%d{yyyy-MM-dd''T''HH:mm:ss.nnnnnn}Z","level":"%level","line":%L,"file":"%.255F","thread":"%.255t"},"message":{"content":"%enc{%m%xEx}{JSON}"},"custom":{"logger_string":"%logger"}}%n'
       - name: PLAIN
         PatternLayout:
           Pattern: "%msg%n"
@@ -50,13 +50,19 @@ Configuration:
         AppenderRef:
           - ref: STDOUT
           - ref: FILE
-# S1PRO-1799: log found mqi messages on debug         
+      - name: de.werum.coprs
+        level: INFO
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          - ref: FILE
+      # S1PRO-1799: log found mqi messages on debug
       - name: esa.s1pdgs.cpoc.appcatalog.server.rest
         level: DEBUG
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          - ref: FILE         
+          - ref: FILE
       - name: org.springframework
         level: ERROR
         additivity: false

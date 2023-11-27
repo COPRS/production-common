@@ -192,11 +192,11 @@ public class TestInbox {
         
         // old entry shall be ignored
         final Optional<InboxReturnValue> ignored = uut.handleEntry(
-        		new InboxEntry("foo1", "foo1", "/tmp", new Date(0), 1, "ingestor-01", null, productFamily.name(), "WILE", "S1")
+        		new InboxEntry("foo1", "foo1", "/tmp", new Date(0), 1, "ingestor-01", "edip", productFamily.name(), "WILE", "S1")
         );
         // new entry shall be accepted
         final Optional<InboxReturnValue> accepted = uut.handleEntry(
-        		new InboxEntry("foo2", "foo2", "/tmp", new Date(), 1, "ingestor-01", null, productFamily.name(), "WILE", "S1")
+        		new InboxEntry("foo2", "foo2", "/tmp", new Date(), 1, "ingestor-01", "xbip", productFamily.name(), "WILE", "S1")
         );
         assertFalse(ignored.isPresent());
         assertTrue(accepted.isPresent());

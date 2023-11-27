@@ -33,7 +33,7 @@ import esa.s1pdgs.cpoc.mqi.model.queue.IngestionJob;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @DirtiesContext
-@ComponentScan("esa.s1pdgs.cpoc")
+@ComponentScan({"esa.s1pdgs.cpoc","de.werum.coprs"})
 @Import(TestConfig.class)
 @PropertySource("classpath:stream-parameters--fs.properties")
 public class TestApplication {
