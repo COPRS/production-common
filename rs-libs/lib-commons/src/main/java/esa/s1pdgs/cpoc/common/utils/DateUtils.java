@@ -22,12 +22,18 @@ public class DateUtils {
 	private static final Map<Predicate<String>,DateTimeFormatter> FORMATS = new LinkedHashMap<>();	
 	static {
 		FORMATS.put(s -> s.length() == 27 && s.endsWith("Z"), METADATA_DATE_FORMATTER);
+		FORMATS.put(s -> s.length() == 26 && s.endsWith("Z"), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSS'Z'"));
 		FORMATS.put(s -> s.length() == 26, PDU_DATE_FORMATTER);
+		FORMATS.put(s -> s.length() == 25 && s.endsWith("Z"), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSS'Z'"));
 		FORMATS.put(s -> s.length() == 24 && s.endsWith("Z"), ODATA_DATE_FORMATTER);
+		FORMATS.put(s -> s.length() == 23 && s.endsWith("Z"), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'"));
 		FORMATS.put(s -> s.length() == 23 && s.startsWith("UTC="), DateTimeFormatter.ofPattern("'UTC='yyyy-MM-dd'T'HH:mm:ss"));
+		FORMATS.put(s -> s.length() == 22 && s.endsWith("Z"), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.S'Z'"));
+		FORMATS.put(s -> s.length() == 20 && s.endsWith("Z"),DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
 		FORMATS.put(s -> s.length() == 30 && s.startsWith("UTC="), DateTimeFormatter.ofPattern("'UTC='yyyy-MM-dd'T'HH:mm:ss.SSSSSS"));
 		FORMATS.put(s -> s.length() == 19, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
 		FORMATS.put(s -> s.length() == 15, FILENAME_DATE_FORMATTER);
+		FORMATS.put(s -> s.length() == 14, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 	}
 
 	public static String convertToAnotherFormat(

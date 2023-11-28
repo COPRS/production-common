@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList.matchAll;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import static org.mockito.Mockito.doReturn;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
+import org.apache.olingo.server.core.uri.queryoption.expression.LiteralImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +35,11 @@ import esa.s1pdgs.cpoc.prip.model.Checksum;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata;
 import esa.s1pdgs.cpoc.prip.model.PripMetadata.FIELD_NAMES;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
-import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
+import esa.s1pdgs.cpoc.prip.model.filter.PripInFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList.LogicalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter.RelationalOperator;
 
 @RunWith(SpringRunner.class)
@@ -226,10 +232,88 @@ public class TestOdataController {
 		expectIdAndName(ra, p1);
 		expectIdAndName(ra, p2);
 	}
+	
+	@Test
+	public void testAttributeFiltering_eq() throws Exception {
+		
+		List<PripMetadata> l = new ArrayList<>();
+		PripMetadata p1 = createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00), "name1");
+		l.add(p1);
+		
+		PripTextFilter n1 = new PripTextFilter("attr_productType_string");
+		n1.setFunction(PripTextFilter.Function.EQ);
+		n1.setText("HK_RAW__0_");
+		
+		doReturn(l).when(pripMetadataRepository).findWithFilter(n1, Optional.empty(), Optional.empty(), Collections.emptyList());
+		
+		ResultActions ra = this.mockMvc.perform(get(
+				"/odata/v1/Products?$filter=Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value eq 'HK_RAW__0_')")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+		expectIdAndName(ra, p1);	
+	}
+	
+	@Test
+	public void testNameFiltering_not_contains() throws Exception {
+		List<PripMetadata> l1 = new ArrayList<>();
+		PripMetadata p1 = createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00), "name1abc");
+		l1.add(p1);
+		
+		List<PripMetadata> l2 = new ArrayList<>();
+		PripMetadata p2 = createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00), "name");
+		l2.add(p2);
+		
+		PripTextFilter textFilter = new PripTextFilter(FIELD_NAMES.NAME);
+		textFilter.setFunction(PripTextFilter.Function.CONTAINS);
+		textFilter.setText("e1a");
+		
+		List<PripQueryFilter> filters = new ArrayList<>();
+		filters.add(textFilter);
+		PripQueryFilter notFilter = new PripQueryFilterList(LogicalOperator.NOT, filters); 
+		
+		doReturn(l1).when(pripMetadataRepository).findWithFilter(textFilter,Optional.empty(), Optional.empty(), Collections.emptyList());
+		doReturn(l2).when(pripMetadataRepository).findWithFilter(notFilter,Optional.empty(), Optional.empty(), Collections.emptyList());
+
+		ResultActions ra = this.mockMvc.perform(get(
+				"/odata/v1/Products?$filter=not contains(Name,'e1a')")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+		
+		notExpectIdAndName(ra, p1);
+		expectIdAndName(ra, p2);
+	}
+	
+	@Test
+	public void testAttributeFiltering_in() throws Exception {
+		
+		List<PripMetadata> result = new ArrayList<>();
+		PripMetadata p1 = createPripMetadata(LocalDateTime.of(2020, 1, 1, 00, 00, 00), "name1");
+		result.add(p1);
+		
+		List<Object> literals = new ArrayList<>();
+		literals.add("HK_RAW__0_");
+		
+		PripInFilter n1 = new PripInFilter("attr_productType_string");
+		n1.setFunction(PripInFilter.Function.IN);
+		n1.setTerms(literals);
+		
+		doReturn(result).when(pripMetadataRepository).findWithFilter(n1, Optional.empty(), Optional.empty(), Collections.emptyList());
+		
+		ResultActions ra = this.mockMvc.perform(get(
+				"/odata/v1/Products?$filter=Attributes/OData.CSC.StringAttribute/any(att:att/Name eq 'productType' and att/OData.CSC.StringAttribute/Value in ('HK_RAW__0_'))")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+		expectIdAndName(ra, p1);	
+	}
 
 	private ResultActions expectIdAndName(ResultActions a, PripMetadata p) throws Exception {
 		return a.andExpect(content().string(containsString(String.format("\"Id\":\"%s\"", p.getId().toString()))))
 				.andExpect(content().string(containsString(String.format("\"Name\":\"%s\"", p.getName()))));
+	}
+	
+	private ResultActions notExpectIdAndName(ResultActions a, PripMetadata p) throws Exception {
+		return a.andExpect(content().string(not(containsString(String.format("\"Id\":\"%s\"", p.getId().toString())))))
+				.andExpect(content().string(not(containsString(String.format("\"Name\":\"%s\"", p.getName())))));
 	}
 
 	private PripMetadata createPripMetadata(LocalDateTime creationDate, String name) {
@@ -259,6 +343,7 @@ public class TestOdataController {
 		pripMetadata.setCreationDate(creationDate);
 		pripMetadata.setEvictionDate(creationDate.plusDays(PripMetadata.DEFAULT_EVICTION_DAYS));
 		pripMetadata.setChecksums(checksums);
+		
 		return pripMetadata;
 	}
 

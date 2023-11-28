@@ -73,6 +73,7 @@ import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterList.LogicalOperator;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
 import esa.s1pdgs.cpoc.prip.model.filter.PripRangeValueFilter;
+import esa.s1pdgs.cpoc.prip.model.filter.PripInFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripTextFilter;
 
 @Service
@@ -81,14 +82,17 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 	private static final Logger LOGGER = LogManager.getLogger(PripElasticSearchMetadataRepo.class);
 	private static final String ES_INDEX = "prip";
 	private final int maxSearchHits;
+	private final boolean searchStringTermInLowerCase;
 
 	private final RestHighLevelClient restHighLevelClient;
 
 	@Autowired
 	public PripElasticSearchMetadataRepo(@Qualifier("pripEsClient") RestHighLevelClient restHighLevelClient,
-			@Value("${prip-client.repository.max-search-hits:1000}") final int maxSearchHits) {
+			@Value("${prip-client.repository.max-search-hits:1000}") final int maxSearchHits,
+			@Value("${prip-client.repository.search-string-term-in-lower-case:true}") final boolean searchStringTermInLowerCase) {
 		this.restHighLevelClient = restHighLevelClient;
 		this.maxSearchHits = maxSearchHits;
+		this.searchStringTermInLowerCase = searchStringTermInLowerCase;
 	}
 
 	@Override
@@ -226,7 +230,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 	}
 
-	private static BoolQueryBuilder buildQueryWithFilter(final PripQueryFilter rootFilter) {
+	private BoolQueryBuilder buildQueryWithFilter(final PripQueryFilter rootFilter) {
 		final BoolQueryBuilder rootQuery = QueryBuilders.boolQuery();
 
 		if (rootFilter instanceof PripQueryFilterTerm) {
@@ -244,7 +248,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		return rootQuery;
 	}
 
-	private static void appendFilterList(final BoolQueryBuilder queryBuilder, final PripQueryFilterList filterList) {
+	private void appendFilterList(final BoolQueryBuilder queryBuilder, final PripQueryFilterList filterList) {
 		final LogicalOperator operator = filterList.getOperator();
 		final List<PripQueryFilter> filters = CollectionUtil.nullToEmptyList((filterList).getFilterList());
 
@@ -261,6 +265,8 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 					queryBuilder.must(subQuery);
 				} else if (LogicalOperator.OR == operator) {
 					queryBuilder.should(subQuery);
+				} else if (LogicalOperator.NOT == operator) {
+					queryBuilder.mustNot(subQuery);
 				} else {
 					throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
 				}
@@ -270,7 +276,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		});
 	}
 
-	private static void appendFilterTerm(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final PripQueryFilterTerm filterTerm) {
+	private void appendFilterTerm(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final PripQueryFilterTerm filterTerm) {
 		if (filterTerm instanceof PripRangeValueFilter) {
 			buildQueryWithRangeValueFilter((PripRangeValueFilter<?>) filterTerm, queryBuilder, operator);
 		} else if (filterTerm instanceof PripTextFilter) {
@@ -279,12 +285,14 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			buildQueryWithBooleanFilter((PripBooleanFilter) filterTerm, queryBuilder, operator);
 		} else if (filterTerm instanceof PripGeometryFilter) {
 			buildQueryWithGeometryFilter((PripGeometryFilter) filterTerm, queryBuilder, operator);
+		} else if (filterTerm instanceof PripInFilter) {
+			buildQueryWithTermsFilter((PripInFilter) filterTerm, queryBuilder, operator);
 		} else {
 			throw new IllegalArgumentException(String.format("filter type not supported: %s", filterTerm.getClass().getSimpleName()));
 		}
 	}
 
-	private static void buildQueryWithRangeValueFilter(final PripRangeValueFilter<?> filter, final BoolQueryBuilder queryBuilder,
+	private void buildQueryWithRangeValueFilter(final PripRangeValueFilter<?> filter, final BoolQueryBuilder queryBuilder,
 			final LogicalOperator operator) {
 		switch (filter.getRelationalOperator()) {
 		case LT:
@@ -310,7 +318,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 	}
 
-	private static void buildQueryWithTextFilter(final PripTextFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
+	private void buildQueryWithTextFilter(final PripTextFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
 		case STARTS_WITH:
 			appendQuery(queryBuilder, operator, QueryBuilders.wildcardQuery(filter.getFieldName(), String.format("%s*", filter.getText())), filter);
@@ -334,7 +342,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 	}
 
-	private static void buildQueryWithBooleanFilter(final PripBooleanFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
+	private void buildQueryWithBooleanFilter(final PripBooleanFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
 		case EQ:
 			appendQuery(queryBuilder, operator, QueryBuilders.termQuery(filter.getFieldName(), filter.getValue().booleanValue()), filter);
@@ -347,7 +355,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 	}
 	
-	private static void buildQueryWithGeometryFilter(final PripGeometryFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
+	private void buildQueryWithGeometryFilter(final PripGeometryFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
 		switch (filter.getFunction()) {
 		case INTERSECTS:
 			try {
@@ -375,7 +383,21 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 	}
 
-	private static void appendQuery(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
+	private void buildQueryWithTermsFilter(final PripInFilter filter, final BoolQueryBuilder queryBuilder, final LogicalOperator operator) {
+		switch (filter.getFunction()) {
+		case IN:
+			if (searchStringTermInLowerCase && filter.getFieldName().endsWith(PripInFilter.FIELD_TYPE_STRING)) {
+				appendQuery(queryBuilder, operator, QueryBuilders.termsQuery(filter.getFieldName(), filter.getTermsInLowerCase()), filter);
+			} else {
+				appendQuery(queryBuilder, operator, QueryBuilders.termsQuery(filter.getFieldName(), filter.getTerms()), filter);
+			}
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("not supported filter function: %s", filter.getFunction().name()));
+		}
+	}
+	
+	private void appendQuery(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
 			final PripQueryFilter filter) {
 		final QueryBuilder query;
 		if (filter instanceof NestableQueryFilter && ((NestableQueryFilter) filter).isNested()) {
@@ -388,12 +410,14 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 			queryBuilder.must(query);
 		} else if (LogicalOperator.OR == operator) {
 			queryBuilder.should(query);
+		} else if (LogicalOperator.NOT == operator) {
+			queryBuilder.mustNot(query);
 		} else {
 			throw new IllegalArgumentException(String.format("logocal filter operator not supported: %s", operator.name()));
 		}
 	}
 
-	private static void appendQueryNegated(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
+	private void appendQueryNegated(final BoolQueryBuilder queryBuilder, final LogicalOperator operator, final QueryBuilder queryToAppend,
 			final PripQueryFilter filter) {
 		final QueryBuilder query;
 		if (filter instanceof NestableQueryFilter && ((NestableQueryFilter) filter).isNested()) {
@@ -550,7 +574,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		return result;
 	}
 
-	private static Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
+	private Geometry convertGeometry(org.locationtech.jts.geom.Geometry input) {
 		if (input instanceof Polygon) {
 			final Polygon polygon = (Polygon) input;
 			final List<Double> longitudes = new ArrayList<>();
@@ -580,7 +604,7 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		}
 	}
 
-	private static SortOrder sortOrderFor(String sortOrder) {
+	private SortOrder sortOrderFor(String sortOrder) {
 		if (SortOrder.ASC.name().equalsIgnoreCase(sortOrder) || SortOrder.ASC.toString().equalsIgnoreCase(sortOrder)) {
 			return SortOrder.ASC;
 		}
@@ -617,6 +641,10 @@ public class PripElasticSearchMetadataRepo implements PripMetadataRepository {
 		if (Strings.isNotEmpty((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName()))) {
 			pm.setContentDateEnd(
 					DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.CONTENT_DATE_END.fieldName())));
+		}
+		if (Strings.isNotEmpty((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ORIGIN_DATE.fieldName()))) {
+			pm.setOriginDate(
+					DateUtils.parse((String) sourceAsMap.get(PripMetadata.FIELD_NAMES.ORIGIN_DATE.fieldName())));
 		}
 		
 		// If no value is found, we assume it to be true for backward compatibility reasons

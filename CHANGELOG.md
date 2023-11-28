@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2023-11-28
+
+### Added
+
+- RS-1060: [CADIP] Add CADIP interface for ingestion
+- RS-1061: [CADIP] Add example for CADIP configuration
+- RS-1068: [PRIP] Add new OriginDate attribute to prip index
+- RS-1070: [PRIP] Add GeoFootprint properties to prip index entries
+
+### Changed
+
+- RS-1069: [PRIP] Support "and", "or", "not", "in" operators
+- RS-1078: [PRIP] Update entity data model 
+
+### Removed
+
+- N/A
+
 ## [1.14.0-rc2] - 2023-07-31
 
 ### Added

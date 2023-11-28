@@ -206,6 +206,7 @@
 				<artifactId>commons-configuration</artifactId>
 				<version>${commons.configuration.version}</version>
 			</dependency>
+			
 			<dependency>
 				<groupId>commons-net</groupId>
 				<artifactId>commons-net</artifactId>
@@ -349,6 +350,7 @@
 		<module>xbip-client</module>
 		<module>auxip-client</module>
 		<module>edip-client</module>
+		<module>cadip-client</module>
 		<module>error-repo-client</module>
 		<module>app-status</module>
 		<module>lib-commons</module>

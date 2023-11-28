@@ -8,6 +8,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Conten
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.ContentType;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.End;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.EvictionDate;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.OriginDate;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Id;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Name;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Online;
@@ -16,6 +17,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Public
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Start;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Value;
 import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.Footprint;
+import static esa.s1pdgs.cpoc.prip.frontend.service.edm.ProductProperties.GeoFootprint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,16 +106,7 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 	// Entity Set Names
 	public static final String ES_PRODUCTS_NAME = "Products";
 	public static final String ATTRIBUTES_SET_NAME = "Attributes";
-	public static final String STRING_ATTRIBUTES_SET_NAME = "StringAttributes";
-	public static final String INTEGER_ATTRIBUTES_SET_NAME = "IntegerAttributes";
-	public static final String DOUBLE_ATTRIBUTES_SET_NAME = "DoubleAttributes";
-	public static final String DATE_ATTRIBUTES_SET_NAME = "DateTimeOffsetAttributes";
-	public static final String BOOLEAN_ATTRIBUTES_SET_NAME = "BooleanAttributes";
 	public static final String QUICKLOOK_SET_NAME = "Quicklooks";
-
-	public static final String[] ATTRIBUTES_TYPE_NAMES = new String[] { STRING_ATTRIBUTES_SET_NAME,
-			INTEGER_ATTRIBUTES_SET_NAME, DOUBLE_ATTRIBUTES_SET_NAME, BOOLEAN_ATTRIBUTES_SET_NAME,
-			DATE_ATTRIBUTES_SET_NAME };
 	
 	public static final String ACTION_FILTERLIST = "FilterList";
 	public static final FullQualifiedName FILTERLIST_ACTION_FQN = new FullQualifiedName(SERVICE_NAMESPACE, ACTION_FILTERLIST);
@@ -263,10 +256,12 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			properties.add(new CsdlProperty().setName(ContentLength.name()).setType(INT_64_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(PublicationDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(EvictionDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(OriginDate.name()).setType(DATE_TIME_OFFSET_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(Checksum.name()).setType(CHECKSUM_TYPE_FQN).setCollection(true));
 			properties.add(new CsdlProperty().setName(ProductionType.name()).setType(PRODUCTION_TYPE_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(ContentDate.name()).setType(TIMERANGE_TYPE_FQN));
 			properties.add(new CsdlProperty().setName(Footprint.name()).setType(GEOSHAPE_GEOGRAPHY_TYPE_FQN));
+			properties.add(new CsdlProperty().setName(GeoFootprint.name()).setType(GEOSHAPE_GEOGRAPHY_TYPE_FQN));
 
 			entityType.setName(ET_PRODUCT_NAME);
 			entityType.setKey(Collections.singletonList(propertyRef));
@@ -275,16 +270,6 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 
 			entityType.setNavigationProperties(Arrays.asList(
 					new CsdlNavigationProperty().setName(ATTRIBUTES_SET_NAME).setType(ATTRIBUTE_TYPE_FQN)
-							.setCollection(true),
-					new CsdlNavigationProperty().setName(STRING_ATTRIBUTES_SET_NAME).setType(STRING_ATTRIBUTE_TYPE_FQN)
-							.setCollection(true),
-					new CsdlNavigationProperty().setName(INTEGER_ATTRIBUTES_SET_NAME)
-							.setType(INTEGER_ATTRIBUTE_TYPE_FQN).setCollection(true),
-					new CsdlNavigationProperty().setName(DOUBLE_ATTRIBUTES_SET_NAME).setType(DOUBLE_ATTRIBUTE_TYPE_FQN)
-							.setCollection(true),
-					new CsdlNavigationProperty().setName(BOOLEAN_ATTRIBUTES_SET_NAME)
-							.setType(BOOLEAN_ATTRIBUTE_TYPE_FQN).setCollection(true),
-					new CsdlNavigationProperty().setName(DATE_ATTRIBUTES_SET_NAME).setType(DATE_ATTRIBUTE_TYPE_FQN)
 							.setCollection(true),
 			      new CsdlNavigationProperty().setName(QUICKLOOK_SET_NAME).setType(QUICKLOOK_TYPE_FQN)
                      .setCollection(true)));
@@ -460,60 +445,15 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 			attributesBinding.setTarget(ATTRIBUTES_SET_NAME);
 			bindings.add(attributesBinding);
 
-			final CsdlNavigationPropertyBinding stringAttributesBinding = new CsdlNavigationPropertyBinding();
-			stringAttributesBinding.setPath(STRING_ATTRIBUTES_SET_NAME);
-			stringAttributesBinding.setTarget(STRING_ATTRIBUTES_SET_NAME);
-			bindings.add(stringAttributesBinding);
-
-			final CsdlNavigationPropertyBinding doubleAttributesBinding = new CsdlNavigationPropertyBinding();
-			doubleAttributesBinding.setPath(DOUBLE_ATTRIBUTES_SET_NAME);
-			doubleAttributesBinding.setTarget(DOUBLE_ATTRIBUTES_SET_NAME);
-			bindings.add(doubleAttributesBinding);
-
-			final CsdlNavigationPropertyBinding booleanAttributesBinding = new CsdlNavigationPropertyBinding();
-			booleanAttributesBinding.setPath(BOOLEAN_ATTRIBUTES_SET_NAME);
-			booleanAttributesBinding.setTarget(BOOLEAN_ATTRIBUTES_SET_NAME);
-			bindings.add(booleanAttributesBinding);
-
-			final CsdlNavigationPropertyBinding integerAttributesBinding = new CsdlNavigationPropertyBinding();
-			integerAttributesBinding.setPath(INTEGER_ATTRIBUTES_SET_NAME);
-			integerAttributesBinding.setTarget(INTEGER_ATTRIBUTES_SET_NAME);
-			bindings.add(integerAttributesBinding);
-
-			final CsdlNavigationPropertyBinding dateAttributesBinding = new CsdlNavigationPropertyBinding();
-			dateAttributesBinding.setPath(DATE_ATTRIBUTES_SET_NAME);
-			dateAttributesBinding.setTarget(DATE_ATTRIBUTES_SET_NAME);
-			bindings.add(dateAttributesBinding);
-			
 			final CsdlNavigationPropertyBinding quicklookBinding = new CsdlNavigationPropertyBinding();
 			quicklookBinding.setPath(QUICKLOOK_SET_NAME);
 			quicklookBinding.setTarget(QUICKLOOK_SET_NAME);
-         bindings.add(quicklookBinding);
+            bindings.add(quicklookBinding);
 
 			entitySet.setNavigationPropertyBindings(bindings);
 		} else if (entitySetName.equals(ATTRIBUTES_SET_NAME)) {
 			entitySet.setName(ATTRIBUTES_SET_NAME);
 			entitySet.setType(ATTRIBUTE_TYPE_FQN);
-			entitySet.setIncludeInServiceDocument(false);
-		} else if (entitySetName.equals(STRING_ATTRIBUTES_SET_NAME)) {
-			entitySet.setName(STRING_ATTRIBUTES_SET_NAME);
-			entitySet.setType(STRING_ATTRIBUTE_TYPE_FQN);
-			entitySet.setIncludeInServiceDocument(false);
-		} else if (entitySetName.equals(INTEGER_ATTRIBUTES_SET_NAME)) {
-			entitySet.setName(INTEGER_ATTRIBUTES_SET_NAME);
-			entitySet.setType(INTEGER_ATTRIBUTE_TYPE_FQN);
-			entitySet.setIncludeInServiceDocument(false);
-		} else if (entitySetName.equals(DOUBLE_ATTRIBUTES_SET_NAME)) {
-			entitySet.setName(DOUBLE_ATTRIBUTES_SET_NAME);
-			entitySet.setType(DOUBLE_ATTRIBUTE_TYPE_FQN);
-			entitySet.setIncludeInServiceDocument(false);
-		} else if (entitySetName.equals(BOOLEAN_ATTRIBUTES_SET_NAME)) {
-			entitySet.setName(BOOLEAN_ATTRIBUTES_SET_NAME);
-			entitySet.setType(BOOLEAN_ATTRIBUTE_TYPE_FQN);
-			entitySet.setIncludeInServiceDocument(false);
-		} else if (entitySetName.equals(DATE_ATTRIBUTES_SET_NAME)) {
-			entitySet.setName(DATE_ATTRIBUTES_SET_NAME);
-			entitySet.setType(DATE_ATTRIBUTE_TYPE_FQN);
 			entitySet.setIncludeInServiceDocument(false);
       } else if (entitySetName.equals(QUICKLOOK_SET_NAME)) {
          entitySet.setName(QUICKLOOK_SET_NAME);
@@ -583,11 +523,6 @@ public class EdmProvider extends org.apache.olingo.commons.api.edm.provider.Csdl
 
 		this.addEntitySet(entitySets, this.getEntitySet(CONTAINER, ES_PRODUCTS_NAME));
 		this.addEntitySet(entitySets, this.getEntitySet(CONTAINER, ATTRIBUTES_SET_NAME));
-		this.addEntitySet(entitySets, this.getEntitySet(CONTAINER, DATE_ATTRIBUTES_SET_NAME));
-		this.addEntitySet(entitySets, this.getEntitySet(CONTAINER, STRING_ATTRIBUTES_SET_NAME));
-		this.addEntitySet(entitySets, this.getEntitySet(CONTAINER, INTEGER_ATTRIBUTES_SET_NAME));
-		this.addEntitySet(entitySets, this.getEntitySet(CONTAINER, DOUBLE_ATTRIBUTES_SET_NAME));
-		this.addEntitySet(entitySets, this.getEntitySet(CONTAINER, BOOLEAN_ATTRIBUTES_SET_NAME));
 		this.addEntitySet(entitySets, this.getEntitySet(CONTAINER, QUICKLOOK_SET_NAME));
 
 		final CsdlEntityContainer entityContainer = new CsdlEntityContainer();

@@ -36,6 +36,8 @@ public class PripMetadata {
 				m -> (m.getCreationDate() != null) ? DateUtils.formatToOdataDateTimeFormat(m.getCreationDate()) : null),
 		EVICTION_DATE("evictionDate",
 				m -> (m.getEvictionDate() == null) ? null : DateUtils.formatToOdataDateTimeFormat(m.getEvictionDate())),
+		ORIGIN_DATE("originDate",
+				m -> (m.getOriginDate() != null) ? DateUtils.formatToOdataDateTimeFormat(m.getOriginDate()) : null),
 		CHECKSUM("checksum", PripMetadata::getChecksums),
 		PRODUCTION_TYPE("productionType", PripMetadata::getProductionType),
 		FOOTPRINT("footprint", PripMetadata::getFootprint),
@@ -78,6 +80,8 @@ public class PripMetadata {
 	private LocalDateTime creationDate;
 
 	private LocalDateTime evictionDate;
+	
+	private LocalDateTime originDate;
 
 	private List<Checksum> checksums;
 	
@@ -90,7 +94,7 @@ public class PripMetadata {
 	private boolean online = true; // RS-400: by default if not specified otherwise, products are online. see also: esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFilterVisitor.newPripBooleanFilter(String, Function, boolean)
 	
 	private Map<String, Object> attributes;
-
+	
 	public PripMetadata() {
 	}
 
@@ -169,6 +173,14 @@ public class PripMetadata {
 	public void setEvictionDate(LocalDateTime evictionDate) {
 		this.evictionDate = evictionDate;
 	}
+	
+	public LocalDateTime getOriginDate() {
+		return originDate;
+	}
+
+	public void setOriginDate(LocalDateTime originDate) {
+		this.originDate = originDate;
+	}
 
 	public List<Checksum> getChecksums() {
 		return checksums;
@@ -217,7 +229,7 @@ public class PripMetadata {
 	public void setAttributes(Map<String, Object> attributes) {
 		this.attributes = attributes;
 	}
-
+	
 	public String toJson() {
 		final Map<String, Object> map = new HashMap<>();
 
@@ -260,7 +272,7 @@ public class PripMetadata {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(checksums, contentDateEnd, contentDateStart, contentLength, contentType, creationDate,
+		return Objects.hash(checksums, contentDateEnd, contentDateStart, contentLength, contentType, creationDate, originDate,
 				evictionDate, id, name, obsKey, productFamily, productionType, footprint, browseKeys, online, attributes);
 	}
 
@@ -277,6 +289,7 @@ public class PripMetadata {
 				&& Objects.equals(contentDateStart, other.contentDateStart) && contentLength == other.contentLength
 				&& Objects.equals(contentType, other.contentType) && Objects.equals(creationDate, other.creationDate)
 				&& Objects.equals(evictionDate, other.evictionDate) && Objects.equals(id, other.id)
+				&& Objects.equals(originDate, other.originDate)
 				&& Objects.equals(name, other.name) && Objects.equals(obsKey, other.obsKey)
 				&& productFamily == other.productFamily && productionType == other.productionType
 				&& Objects.equals(footprint, other.footprint)

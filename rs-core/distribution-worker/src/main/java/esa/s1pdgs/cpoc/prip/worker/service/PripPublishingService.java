@@ -138,6 +138,12 @@ public class PripPublishingService implements Consumer<CompressionEvent> {
 		pripMetadata
 				.setChecksums(getChecksums(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage()));
 		
+		if (compressionEvent.getAdditionalFields().get("t0PdgsDate") != null) {
+		
+			String originDate = (String) compressionEvent.getAdditionalFields().get("t0PdgsDate");
+			pripMetadata.setOriginDate(DateUtils.parse(originDate).truncatedTo(ChronoUnit.MILLIS));
+		}
+		
 		processBrowseImages(compressionEvent.getProductFamily(), compressionEvent.getKeyObjectStorage(), pripMetadata);
 		
 		if(mdcQuery(compressionEvent.getKeyObjectStorage())) {

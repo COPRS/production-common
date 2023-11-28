@@ -46,7 +46,7 @@ Applicable and Referenced documents are the documents which have reference or re
 ***
 The following sections are giving an overview about the architecture and strategies that will be used for the COPRS 1.1, on trying to justify the decisions that had been made.
 
-Currently the COPRS system is used operationallym in the version 1.0 that is based on the S1PRO software that had been orginally developed in order to run the Ground Segment for Sentinel-1.
+Currently the COPRS system is used operationally in the version 1.0 that is based on the S1PRO software that had been orginally developed in order to run the Ground Segment for Sentinel-1.
 
 That system is being operated on a set of micro services that are connected with Kafka with each other. However the workflows in that system are rather static and needs configuration files to be adjusted in order to modify the existing workflows or changing the behaviour of the microservices.
 
@@ -59,9 +59,9 @@ However normally between all microservices there will be kafka topics that are s
 
 ### Software Static Architecture
 
-The RS provides the processing chain in a Cloud environment by containerizing the micro-services enabling the systematic processing of the Sentinel satellites data. For Sentinel-1, Sentinel-2 and Sentinel-3 satellits the raw data received by XBIP and EDIP is systematically processed and made available to end consumers via PRIP.
+The RS provides the processing chain in a Cloud environment by containerizing the micro-services enabling the systematic processing of the Sentinel satellites data. For Sentinel-1, Sentinel-2 and Sentinel-3 satellits the raw data received by CADIP and EDIP is systematically processed and made available to end consumers via PRIP.
 
-The RS implements XBIP (X-band Ground Station Data Delivery Point) interface to ingest the downlinked raw data from the CGS centres. The XBIP interface allows the downloading of DSIBs & DSDBs using the WebDAV (HTTPS based) protocol over the internet. The RS Service detects and downloads the raw data using its Trigger and Worker components.The RS also impelemnts EDIP ("EDRS-ICD-ADSO-1000830938) interfaces  are used by PRO to poll for new CADU/DSIB files and download and ingest raw files.
+The RS implements CADIP (CADU Interface Delivery Point) interface to ingest the downlinked raw data. The interface allows to query sessions and associated files (chunks) using OData4 interface over the internet. The RS Service detects and downloads the raw data using its Trigger and Worker components. The RS also impelemnts EDIP ("EDRS-ICD-ADSO-1000830938) interfaces  are used by PRO to poll for new CADU/DSIB files and download and ingest raw files. The XBIP interface is the predecessor of the CADIP and realized on the WebDav protocol, but should not be used in new implementations anymore.
 
 
 
@@ -100,7 +100,7 @@ All RSPRO components are based on widely used and well supported COTS and standa
 ***
 ### Overall Architecture
 The diagram below depicts architectural overview of RS Processing sub-system
-![c0735b37de1563c86e3c8970eca2ff93.png](media/c0735b37de1563c86e3c8970eca2ff93.png)
+![c0735b37de1563c86e3c8970eca2ff93.png](media/add_overall_architecture.png)
 
 The RS PRO system is composed structurally by software modules which are split in three different type of components (or microservices):
 
@@ -537,7 +537,7 @@ Before the producton can be prepared it will be required to have these products 
 
 Additionally especially main input products like EDRS sessions are used to invoke systematic workflows handling the actual processing of high level products.
 
-The COPRS the Ingestion chain is used to detect and retrieve products from other systems like XBIP, EDIP and AUXIP. The metadata extraction of these products and adding them to the catalog will be tackled in the Metadata chain.
+The COPRS the Ingestion chain is used to detect and retrieve products from other systems like CADIP, EDIP and AUXIP. The metadata extraction of these products and adding them to the catalog will be tackled in the Metadata chain.
 
 A generic ingestion chain will be looking like this:
 ![edc9a8e1896c38b1d832517f81ddbde1.png](media/edc9a8e1896c38b1d832517f81ddbde1.png)
@@ -551,11 +551,12 @@ For further information in the Ingestion Chain and an example configuration, ple
 ![Screenshot_20220303_134317.png](media/Screenshot_20220303_134317.png)
 
 Please note that the source is not part of the COPRS environment, but rther being an remote external source like:
-- XBIP (WebDAV)
-- EDIP (FTP)
 - AUXIP (ODATA)
+- CADIP (ODATA)
+- EDIP (FTP)
+- XBIP (WebDAV, deprecated)
 
-The ingestion chain is a generic component and capable of handling the different kinds of protocols that are used for the sources. It is possible to setup Inbox for the Ingeston chain that will observe the specified location depending on the type of the Inbox. E.g. in case of an XBIP WebDav will be used in order to observe the source or retrieve the actual products while an EDIP Inbox will be using FTP as protocol.
+The ingestion chain is a generic component and capable of handling the different kinds of protocols that are used for the sources. It is possible to setup Inbox for the Ingeston chain that will observe the specified location depending on the type of the Inbox. E.g. in case of an CADIP, Odata will be used in order to query for new session and files and retrieve it over the interface.
 
 Because the actual retrieval of products from the source is an IO expensive activity, it was decided to split the detection of new products from the actual retrieval process. Thus the ingestion trigger will be simply in charge to poll on the source in order to detect the availability of new products that might be interesting for the COPRS environment.
 
@@ -567,7 +568,7 @@ Additionally it will make a note and store the products that had been fired alre
 
 ![Screenshot_20220303_134433.png](media/Screenshot_20220303_134433.png)
 
-Especially for the XBIP sources that are retrieving the actual raw input files (EDRS Session), the COPRS shall not retrieve all available files from the source. Instead just about 3% of the products shall be processed within the COPRS.
+Especially for the CADIP sources that are retrieving the actual raw input files (EDRS Session), the COPRS shall not retrieve all available files from the source. Instead just about 3% of the products shall be processed within the COPRS.
 
 In order to control that not all products will be processed, the ingestion filter will be a filter gate for the system to ensure that just products being detected within a time interval will be actually processed.
 
@@ -599,8 +600,24 @@ Note that the products retrieved from the AUXIP are compressed and needs to be u
 
 Credentials to log into PRIP services (OData) are configured by Kubernetes secrets and are provided to the AUXIP client as needed. Different credentials for each PRIP service are supported
 
+#### CADIP
+
+The CADIP interface is the sucessor of the XBIP interface and is supposed to be used in order to retrieve the CADU files for the local processing system. Similiar to the AUXIP interface CADIP is based on OData4 and thus not just allow to download products, but also to perform Queries for sessions and files.
+
+The CADIP trigger is polling the specified endpoint for new sessions to appear. If a new session is identified it will be persisted. When quering for new sessions the publication date will be considered and just the trigger will just look for new sessions after the last finding to avoid retrieving old sessions all the time.
+
+Once a session is identified, the trigger will also start to query for the files that are contained within the session. Each file that is found will be fired as new event that will invoke the handling of the download into the local processing system. This will be continued per channel as long as no chunk is detected having the final block flag set.
+
+Each file identified by the trigger is send to the filter that can decide to drop the file or to provide it to the worker. This can be used in order to ensure that files just within a specific time interval are accepted.
+
+Once receiving a download request, the worker will contact the CADIP endpoint and query the file to get its UUID. Then a download is invoked from the OData interface and the provided file will be automatically uploaded into the Object Storage of the local processing system. A Catalog Event is written to invoke the metadata extraction from the file and addin it to the catalog to make it available to the processing chains.
+
+Note that to keep the RS-Addons behave the same way as before the worker will create a DSIB per channel once the files with the final block flag had been received. This DSIB file is just used to trigger the workflows.
+
 
 #### XBIP
+*Please be aware that this interface is deprecated and will be replaced by the CADIP in order to retrieve CADU sessions. It should not be used in new configurations anymore*
+
 Ingestion-Trigger component polls XBIP interface (webdav) of ground station and detects new files (CADU & DSIB). Once a new file is detected, an ingestion job is created and send to ingestion-workers. 
 
 To be able to detect files as "new", ingestion-trigger stores in a persistence a last-known list of files available in XBIP and can compare current content with last-known content. This is valid for nominal and retransfer folders as both will be polled systematically. IngestionJobs are put on the nominal (high-priority) or retransfer (low-priority) queue depending on their origin.
@@ -612,7 +629,7 @@ One ingestion-trigger pod per XBIP station to avoid dependencies between the sta
 Credentials to log into XBIP stations (webdav) are configured by Kubernetes secrets and are provided to ingestion trigger and worker as needed. It is supported to different credentials for each station.
 
 #### EDIP
-The EDIP interface, similar to XBIP, is used by COPRS services to poll for new CADU chunks and DSIB files and download and ingest such files via FTP protocol. The interface is specified in the ICD "EDRS-ICD-ADSO-1000830938"
+The EDIP interface is used by COPRS services to poll for new CADU chunks and DSIB files and download and ingest such files via FTP protocol. The interface is specified in the ICD "EDRS-ICD-ADSO-1000830938"
 
 Features:
 - The directory structure of the  files is identical to the XBIP Interface.
@@ -695,20 +712,6 @@ The message filter is a basic SCDF component that allows to filter out products 
 
 The SCDF application Extraction takes the product from the received event and will identify the type of extraction that is required for them. It will then fetch the metadata from the OBS (e.g. the manifest file for a SAFE product) and start with the extraction of the metadata. The result will be stored within the Elastic Search index related to the product and it will become visible for other application within the system. Products that are not extracted yet, will not be visible e.g. via the Metadata Search Controller.
 
-<<<<<<< HEAD
-=======
-
-### Browse Image
-
-TBD: The browse image extractor is not required before V2 and thus is not available at the moment.
-
-A processor that is extracting the browse image depending on the input file. Might be a simple selection from product or invoking a conversion (e.g. S2 JPEG2k -> JPG).
-
-The extracted image will be uploaded into the OBS and the image written into the browse image catalog.
-![fc2864113e1f34778f09531d59358623.png](media/fc2864113e1f34778f09531d59358623.png)
-
-
->>>>>>> main
 ### Compression
 
 ![e830e7833cab916176c295924f8437bb.png](media/e830e7833cab916176c295924f8437bb.png)
@@ -730,11 +733,7 @@ The Compression worker itself will download the product into a local working dir
 
 At the end of the chain a "Compression Event" will be generated that will be usually consumed by the Distribution chain handling the publication of the product and make it available for the End users.
 
-<<<<<<< HEAD
 For further information on the compression chain, please have a look [here](https://github.com/COPRS/production-common/tree/develop/processing-common/compression)
-=======
-For futher information on the compression chain, please have a look [here](https://github.com/COPRS/production-common/tree/develop/processing-common/compression)
->>>>>>> main
 
 #### Message Filter
 The message filter is a basic SCDF component that allows to filter out products that are not supposed to be compressed.
@@ -746,19 +745,10 @@ Similiar to the message filter, the priority filter is also a basic SCDF compone
 
 The compression worker is performing the actual compression of the product. It will take the product referenced in the catalog event, download it into a local working directory and execute the configured compression script to perform the compression.
 
-<<<<<<< HEAD
 The kind of compression that is used is depending on the mission. The compression worker will read the missionId from the Catalog Event. Depending on the mission it is possible to define a compression script that shall be used. By default S1 will use compressed ZIP, S2 will use tar and S3 will use uncompressed ZIP. For further information on the configuration, please consult the parameter configuration for the Compression worker that can be found [here](/processing-common/compression/doc/ReleaseNote.md)
 
 After the compression had been performed successfully the result will be uploaded into the OBS. Please note that it will not be uploaded into the same bucket as the original product. Instead the bucket and product family will add a suffix "-zip" to indicate it actually references a compressed product and to distinguish between these.
 
-=======
-Usually this will be a compression tool from the operating system as zip or 7z. It will be executed in a similiar manner like an IPF.
-
-After the compression had been performed successfully the result will be uploaded into the OBS. Please note that it will not be uploaded into the same bucket as the original product. Instead the bucket and product family will add a suffix "-zip" to indicate it actually references a compressed product and to distinguish between these.
-
-
-
->>>>>>> main
 ### Distribution
 
 ![905146a466c8f8dd944cec89e955c99f.png](media/905146a466c8f8dd944cec89e955c99f.png)

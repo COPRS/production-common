@@ -82,6 +82,7 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 		SORTABLE_FIELDS = new HashMap<>();
 		SORTABLE_FIELDS.put(ProductProperties.PublicationDate.name(), PripMetadata.FIELD_NAMES.CREATION_DATE);
 		SORTABLE_FIELDS.put(ProductProperties.EvictionDate.name(), PripMetadata.FIELD_NAMES.EVICTION_DATE);
+		SORTABLE_FIELDS.put(ProductProperties.OriginDate.name(), PripMetadata.FIELD_NAMES.ORIGIN_DATE);
 		SORTABLE_FIELDS.put(ProductProperties.ContentDate.name() + "/" + ProductProperties.Start.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_START);
 		SORTABLE_FIELDS.put(ProductProperties.ContentDate.name() + "/" + ProductProperties.End.name(), PripMetadata.FIELD_NAMES.CONTENT_DATE_END);
 		SORTABLE_FIELDS.put(ProductProperties.ContentLength.name(), PripMetadata.FIELD_NAMES.CONTENT_LENGTH);
@@ -124,14 +125,6 @@ public class ProductEntityCollectionProcessor implements EntityCollectionProcess
 	private void serveProducts(final ODataRequest request, final ODataResponse response, final UriInfo uriInfo,
 	      final ContentType responseFormat, final EdmEntitySet edmEntitySet) throws ODataApplicationException, ODataLibraryException {
       final ExpandOptionImpl expandOption = (ExpandOptionImpl) uriInfo.getExpandOption();
-		if (null != expandOption && null != expandOption.getText() &&
-		      List.of(expandOption.getText().split(",")).contains(EdmProvider.ATTRIBUTES_SET_NAME)) {
-			for (final String setname : EdmProvider.ATTRIBUTES_TYPE_NAMES) {
-				final ExpandItem item = new ExpandItemImpl().setResourcePath(new UriInfoImpl().addResourcePart(
-						new UriResourceNavigationPropertyImpl(edmEntitySet.getEntityType().getNavigationProperty(setname))));
-				expandOption.addExpandItem(item);
-			}
-		}
 
 		final ContextURL contextUrl = OlingoUtil.getContextUrl(edmEntitySet, edmEntitySet.getEntityType(), false);
 		final EntityCollection entityCollection = new EntityCollection();

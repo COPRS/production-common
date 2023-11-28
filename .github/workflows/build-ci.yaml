@@ -12,6 +12,7 @@ on:
       - "release/**"
       - "develop**"
       - "stac-nativeapi**"
+      - "cadip**"
 
   workflow_dispatch:
 
@@ -72,6 +73,9 @@ jobs:
               - 'rs-libs/pom.xml'
             edip-client: 
               - 'rs-libs/edip-client/**'
+              - 'rs-libs/pom.xml'
+            cadip-client: 
+              - 'rs-libs/cadip-client/**'
               - 'rs-libs/pom.xml'
             data-lifecycle-client: 
               - 'rs-libs/data-lifecycle-client/**'

@@ -37,8 +37,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.util.StringUtils;
 
 import esa.s1pdgs.cpoc.common.ProductFamily;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException;
-import esa.s1pdgs.cpoc.common.errors.AbstractCodedException.ErrorCode;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataExtractionException;
 import esa.s1pdgs.cpoc.common.errors.processing.MetadataMalformedException;
 import esa.s1pdgs.cpoc.common.utils.DateUtils;
@@ -282,11 +280,9 @@ public class ExtractMetadata {
 			final EdrsSessionFile edrsSessionFile = (EdrsSessionFile) xmlConverter
 					.convertFromXMLToObject(file.getPath());
 
-			metadata.put("startTime", DateUtils.convertToAnotherFormat(edrsSessionFile.getStartTime(),
-					EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
+			metadata.put("startTime", DateUtils.convertToMetadataDateTimeFormat(edrsSessionFile.getStartTime()));
 
-			metadata.put("stopTime", DateUtils.convertToAnotherFormat(edrsSessionFile.getStopTime(),
-					EdrsSessionFile.TIME_FORMATTER, DateUtils.METADATA_DATE_FORMATTER));
+			metadata.put("stopTime", DateUtils.convertToMetadataDateTimeFormat(edrsSessionFile.getStopTime()));
 
 			metadata.put("rawNames",
 					edrsSessionFile.getRawNames().stream().map(r -> r.getFileName()).collect(Collectors.toList()));

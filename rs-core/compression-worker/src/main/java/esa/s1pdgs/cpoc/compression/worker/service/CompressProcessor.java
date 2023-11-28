@@ -108,6 +108,7 @@ public class CompressProcessor extends AbstractProcessor implements Function<Cat
 
 		// RS-536: Add RS Chain Version to message
 		result.setRsChainVersion(commonProperties.getRsChainVersion());
+		result.setAdditionalFields(event.getAdditionalFields());
 
 		return MessageBuilder.withPayload(result).build();
 	}

@@ -126,37 +126,19 @@ public class TestMappingUtil {
 				.addProperty(new Property(null, "ContentDate", ValueType.COMPLEX, contentDate))
 				.addProperty(new Property(null, "PublicationDate", ValueType.PRIMITIVE, new Timestamp(100000000000L)))
 				.addProperty(new Property(null, "EvictionDate", ValueType.PRIMITIVE, new Timestamp(200000000000L)))
+				.addProperty(new Property(null, "OriginDate", ValueType.PRIMITIVE, new Timestamp(200000000000L)))
 				.addProperty(new Property(null, "ProductionType", ValueType.ENUM, 0))
 				.addProperty(new Property(null, "Checksum", ValueType.COLLECTION_COMPLEX, Arrays.asList(cv1, cv2)))
-				.addProperty(new Property(null, "Footprint", ValueType.GEOSPATIAL, footprint));
+				.addProperty(new Property(null, "Footprint", ValueType.GEOSPATIAL, footprint))
+				.addProperty(new Property(null, "GeoFootprint", ValueType.GEOSPATIAL, footprint));
 		expectedEntity.setMediaContentType("application/octet-stream");
 		expectedEntity.setId(uri);
 		
-		Link stringLink = new Link();
-		stringLink.setTitle(EdmProvider.STRING_ATTRIBUTES_SET_NAME);
-		stringLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(stringLink);
+		Link attributesLink = new Link();
+		attributesLink.setTitle(EdmProvider.ATTRIBUTES_SET_NAME);
+		attributesLink.setInlineEntitySet(new EntityCollection());
+		expectedEntity.getNavigationLinks().add(attributesLink);
 
-		Link longLink = new Link();
-		longLink.setTitle(EdmProvider.INTEGER_ATTRIBUTES_SET_NAME);
-		longLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(longLink);
-
-		Link doubleLink = new Link();
-		doubleLink.setTitle(EdmProvider.DOUBLE_ATTRIBUTES_SET_NAME);
-		doubleLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(doubleLink);
-
-		Link booleanLink = new Link();
-		booleanLink.setTitle(EdmProvider.BOOLEAN_ATTRIBUTES_SET_NAME);
-		booleanLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(booleanLink);
-
-		Link dateLink = new Link();
-		dateLink.setTitle(EdmProvider.DATE_ATTRIBUTES_SET_NAME);
-		dateLink.setInlineEntitySet(new EntityCollection());
-		expectedEntity.getNavigationLinks().add(dateLink);
-		
 		PripMetadata inputPripMetadata = new PripMetadata();
 		inputPripMetadata.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
 		inputPripMetadata.setName("Name");
@@ -166,6 +148,7 @@ public class TestMappingUtil {
 		inputPripMetadata.setContentDateEnd(LocalDateTime.ofInstant(Instant.ofEpochMilli(222222222222L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setCreationDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(100000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setEvictionDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
+		inputPripMetadata.setOriginDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(200000000000L), TimeZone.getTimeZone("UTC").toZoneId()));
 		inputPripMetadata.setAttributes(new LinkedHashMap<String,Object>());
 		inputPripMetadata.setOnline(true);
 		

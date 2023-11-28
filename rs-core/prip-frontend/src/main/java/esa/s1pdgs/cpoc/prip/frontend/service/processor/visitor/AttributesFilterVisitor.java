@@ -7,6 +7,7 @@ import static esa.s1pdgs.cpoc.prip.frontend.service.processor.visitor.ProductsFi
 import static org.apache.olingo.commons.api.http.HttpStatusCode.BAD_REQUEST;
 import static org.apache.olingo.server.api.uri.queryoption.expression.BinaryOperatorKind.OR;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import esa.s1pdgs.cpoc.prip.model.filter.PripBooleanFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDateTimeFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripDoubleFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripFilterOperatorException;
+import esa.s1pdgs.cpoc.prip.model.filter.PripInFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripIntegerFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilter;
 import esa.s1pdgs.cpoc.prip.model.filter.PripQueryFilterTerm;
@@ -141,7 +143,16 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
    @Override
    public Object visitUnaryOperator(UnaryOperatorKind operator, Object operand)
          throws ExpressionVisitException, ODataApplicationException {
-      throw new UnsupportedOperationException();
+	   
+		if (operator == UnaryOperatorKind.NOT) {
+			filterStack.applyNot();
+
+		} else {
+			throw new UnsupportedOperationException(
+					String.format("Unsupported unary operator %s on filter expression", operator.name()));
+		}
+
+		return null;
    }
 
    @Override
@@ -210,11 +221,27 @@ public class AttributesFilterVisitor implements ExpressionVisitor<Object> {
       throw new UnsupportedOperationException();
    }
 
-   @Override
-   public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, List<Object> right)
-         throws ExpressionVisitException, ODataApplicationException {
-      throw new UnsupportedOperationException();
-   }
+	@Override
+	public Object visitBinaryOperator(BinaryOperatorKind operator, Object left, List<Object> right)
+			throws ExpressionVisitException, ODataApplicationException {
+
+		if (operator != BinaryOperatorKind.IN) {
+			throw new UnsupportedOperationException("Operator " + operator + " not supported!");
+		}
+		
+		List<Object> listObjects = new ArrayList<>();
+		
+		for (Object o:right) {
+			if (!(o instanceof LiteralImpl)) {
+				throw new UnsupportedOperationException("Type of " + o + " not supported!");
+			}
+		    listObjects.add(((LiteralImpl)o).getText().replace("'", ""));
+		}
+
+		final PripQueryFilterTerm filter = new PripInFilter(fieldName, PripInFilter.Function.IN, listObjects);
+		filterStack.push(filter);
+		return null;
+	}
    
    @Override
    public Object visitEnum(EdmEnumType type, List<String> enumValues)
