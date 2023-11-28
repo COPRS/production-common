@@ -77,7 +77,6 @@ public class OutputEstimation {
 			}
 		} else if (inputProductFamily == ProductFamily.S3_GRANULES) {
 			findMissingType(job, s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, productsInWorkDir, 1);
-
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
 			findMissingTypesForASP(job, inputProductType, productsInWorkDir);
 		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
@@ -106,7 +105,6 @@ public class OutputEstimation {
 
 		} else if (inputProductFamily == ProductFamily.S3_GRANULES) {
 			addMissingOutput(job, s3L0TypeFromGranulesType(inputProductType), ProductFamily.S3_L0, 1);
-
 		} else if (inputProductFamily == ProductFamily.L0_SEGMENT) {
 			addMissingOutputForASP(job, inputProductType);
 		} else if (inputProductFamily == ProductFamily.L0_SLICE || inputProductFamily == ProductFamily.L0_ACN
