@@ -89,7 +89,7 @@ jobs:
           sarif_file: ${{ steps.scan.outputs.sarif }}
 
       - name: Upload Anchore scan json report
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v2
         with:
           name: vulnerabilities-s1-ipfsimulator
           path: ${{ steps.scan.outputs.vulnerabilities }}
@@ -123,7 +123,7 @@ jobs:
           args: vulnerabilities.html vulnerabilities.pdf
 
       - name: Upload Anchore scan reports
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v2
         with:
           name: vulnerabilities-s1-ipfsimulator
           path: |
