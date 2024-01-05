@@ -49,7 +49,7 @@ public class IngestionWorkerService implements Function<IngestionJob, List<Messa
 	@Override
 	public List<Message<CatalogJob>> apply(IngestionJob ingestion) {
 		final String productName;
-		if ("auxip".equalsIgnoreCase(ingestion.getInboxType())) {
+		if ("auxip".equalsIgnoreCase(ingestion.getInboxType()) || "cadip".equalsIgnoreCase(ingestion.getInboxType())) {
 			productName = ingestion.getRelativePath();
 		} else {
 			productName = ingestion.getProductName();
