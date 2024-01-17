@@ -49,6 +49,9 @@ public class IngestionJobs {
 		final String nameWithoutTrailingSlash;
 		if ("auxip".equalsIgnoreCase(ingestion.getInboxType())) {
 			nameWithoutTrailingSlash = ingestion.getRelativePath();
+		} else if ("cadip".equalsIgnoreCase(ingestion.getInboxType())) {
+			String relativePath = ingestion.getRelativePath();
+			nameWithoutTrailingSlash = relativePath.substring(relativePath.indexOf("/") + 1);
 		} else {
 			nameWithoutTrailingSlash = ingestion.getKeyObjectStorage().endsWith("/") ?
 					ingestion.getKeyObjectStorage().substring(0,ingestion.getKeyObjectStorage().length()-1) :

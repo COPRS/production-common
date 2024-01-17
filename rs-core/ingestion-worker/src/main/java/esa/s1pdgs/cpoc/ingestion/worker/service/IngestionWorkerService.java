@@ -51,6 +51,9 @@ public class IngestionWorkerService implements Function<IngestionJob, List<Messa
 		final String productName;
 		if ("auxip".equalsIgnoreCase(ingestion.getInboxType())) {
 			productName = ingestion.getRelativePath();
+		} else if ("cadip".equalsIgnoreCase(ingestion.getInboxType())) {
+			String relativePath = ingestion.getRelativePath();
+			productName = relativePath.substring(relativePath.indexOf("/") + 1);
 		} else {
 			productName = ingestion.getProductName();
 		}
