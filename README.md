@@ -99,3 +99,4 @@ The build pipe of this project is automatically generating Sonarqube reports for
 <p align="center">
  <img src="/docs/media/banner.jpg" width="800" height="50" />
 </p>
+<p align="center">This project is funded by the EU and ESA.</p>
