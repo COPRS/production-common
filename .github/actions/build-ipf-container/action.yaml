@@ -50,7 +50,7 @@ runs:
         COMMIT_ID=${{ env.COMMIT_ID }}
 
   - name: Scan image
-    uses: anchore/scan-action@v2
+    uses: anchore/scan-action@v3
     id: scan
     with:
       image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
