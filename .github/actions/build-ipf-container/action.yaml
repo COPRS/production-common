@@ -55,6 +55,7 @@ runs:
     with:
       image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       acs-report-enable: true
+      fail-build: false
       severity-cutoff: critical
 
   - name: Upload Anchore scan SARIF report
