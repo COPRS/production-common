@@ -56,16 +56,19 @@ runs:
       image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       fail-build: false
 
-        #  - name: Upload Anchore scan SARIF report
-        #    uses: github/codeql-action/upload-sarif@v3
-        #    with:
-        #      sarif_file: ${{ steps.scan.outputs.sarif }}
+  - name: Upload Anchore scan SARIF report
+    uses: github/codeql-action/upload-sarif@v3
+    with:
+      sarif_file: ${{ steps.scan.outputs.sarif }}
 
-        #  - name: Upload Anchore scan json report
-        #    uses: actions/upload-artifact@v3
-        #    with:
-        #      name: vulnerabilities-${{ inputs.IMAGE_NAME }} 
-        #      path: ${{ steps.scan.outputs.vulnerabilities }}
+  - name: Inspect action SARIF report
+    run: cat ${{ steps.scan.outputs.sarif }}
+
+  - name: Upload Anchore scan json report
+    uses: actions/upload-artifact@v2
+    with:
+      name: vulnerabilities-${{ inputs.IMAGE_NAME }} 
+      path: ${{ steps.scan.outputs.vulnerabilities }}
 
   - name: Push image
     shell: bash
