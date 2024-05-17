@@ -66,7 +66,7 @@ runs:
       sarif_file: ${{ steps.scan.outputs.sarif }}
 
   - name: Upload Anchore scan json report
-    uses: actions/upload-artifact@v2
+    uses: actions/upload-artifact@v3
     with:
       name: vulnerabilities-${{ inputs.IMAGE_NAME }} 
       path: ${{ steps.scan.outputs.vulnerabilities }}
