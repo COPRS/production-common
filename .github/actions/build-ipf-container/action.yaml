@@ -69,7 +69,7 @@ runs:
     uses: actions/upload-artifact@v3
     with:
       name: vulnerabilities-${{ inputs.IMAGE_NAME }} 
-      path: ${{ steps.scan.outputs.vulnerabilities }}
+      path: ${{ steps.scan.outputs.json }}
 
   - name: Push image
     shell: bash
