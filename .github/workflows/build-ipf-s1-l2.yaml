@@ -9,6 +9,7 @@ on:
       - '!main'
       - 'release/**'
       - 'develop**'
+      - 'BuildS1L1L2investigation'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:
