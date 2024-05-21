@@ -57,10 +57,10 @@ runs:
       fail-build: false
       output-format: json
 
-        # DEBUG 
-        #  - name: Inspect action SARIF report
-        #    shell: bash
-        #    run: cat ${{ steps.scan.outputs.sarif }}
+        # DEBUG REPORT NAME
+  - name: Inspect action SARIF report
+    shell: bash
+    run: cat ${{ steps.scan.outputs.json }}
 
 # Deactivate SARIF Report Upload   
 #  - name: Upload Anchore scan SARIF report
