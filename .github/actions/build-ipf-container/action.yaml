@@ -58,9 +58,9 @@ runs:
       output-format: json
 
         # DEBUG REPORT NAME
-  - name: Inspect action SARIF report
-    shell: bash
-    run: cat ${{ steps.scan.outputs.json }}
+        #  - name: Inspect action SARIF report
+        #    shell: bash
+        #    run: cat ${{ steps.scan.outputs.json }}
 
 # Deactivate SARIF Report Upload   
 #  - name: Upload Anchore scan SARIF report
