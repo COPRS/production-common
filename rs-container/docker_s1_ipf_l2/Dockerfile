@@ -6,6 +6,7 @@ FROM artifactory.coprs.esa-copernicus.eu/rs-docker/rs-core-base:${BRANCH} as bas
 
 
 
+
 FROM artifactory.coprs.esa-copernicus.eu/cfi/processors/s1_l12:3.8.0-light
  
 ARG VERSION
