@@ -44,7 +44,7 @@ runs:
         "ARTIFACTORY_USER=${{ inputs.WERUM_ARTIFACTORY_USER }}"
         "ARTIFACTORY_PASS=${{ inputs.WERUM_ARTIFACTORY_PASSWORD }}"
       build-args: |
-        BRANCH=${{ inputs.BRANCH_NAME }}
+        BRANCH=develop
         BRANCH_TEXT=${{ inputs.BRANCH_NAME }}
         VERSION=${{ env.VERSION }}
         COMMIT_ID=${{ env.COMMIT_ID }}
