@@ -9,7 +9,6 @@ on:
       - '!main'
       - 'release/**'
       - 'develop**'
-      - 'sub-S1L12'
   workflow_call:
     secrets:
       WERUM_ARTIFACTORY_USER:

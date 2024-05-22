@@ -17,7 +17,6 @@ runs:
       shell: bash
       run: |
         echo "SEVERITY;ID;PACKAGE;VERSION;LINK" > vulnerabilities.csv
-        ls -l
         cat results.json | jq -r '.matches[] | "\(.vulnerability.severity);\(.vulnerability.id);\(.artifact.name);\(.artifact.version);\(.vulnerability.links[0])"' >> vulnerabilities.csv
         echo -e '<table>\n<thead>\n<tr class="header">\n<th><p>SEVERITY</p></th>\n<th><p>ID</p></th>\n<th><p>PACKAGE</p></th>\n<th><p>VERSION</p></th>\n</tr>\n</thead>\n<tbody>' > vulnerabilities.html
         cat results.json | jq -r '.matches[] | "<tr>;<td><p>\(.vulnerability.severity)</p></td>;<td><p><a href=\"\(.vulnerability.links[0])\">\(.vulnerability.id)</a></p></td>;<td><p>\(.artifact.name)</p></td>;<td><p>\(.artifact.version)</p></td>;</tr>"' | tr -s ';' '\n' | sed 's!><p>Negligible! style="background-color:#FFFFFF;"><p>Negligible!g' | sed 's!><p>Low! style="background-color:#FFFC9E;"><p>Low!g' | sed 's!><p>Medium! style="background-color:#FE996B;"><p>Medium!g' | sed 's!><p>High! style="background-color:#FD6864;"><p>High!g' | sed 's!><p>Critical! style="background-color:#FE0000;"><p>Critical!g' >> vulnerabilities.html
