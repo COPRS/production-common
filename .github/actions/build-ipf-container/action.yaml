@@ -55,6 +55,7 @@ runs:
     with:
       image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
       fail-build: false
+      grype-version: v0.77.4
       output-format: json
 
         # DEBUG REPORT NAME
