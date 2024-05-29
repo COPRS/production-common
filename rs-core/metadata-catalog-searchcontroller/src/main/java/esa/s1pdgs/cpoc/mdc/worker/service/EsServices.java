@@ -1064,7 +1064,7 @@ public class EsServices {
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
 		LOGGER.debug("latestValidityClosest: query composed is {}", queryBuilder);
-		sourceBuilder.size(SIZE_LIMIT);
+		sourceBuilder.size(SIZE_LIMIT); 
 
 		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
 		searchRequest.source(sourceBuilder);
