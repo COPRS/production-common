@@ -1049,9 +1049,17 @@ public class EsServices {
 
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
+		final String fieldNameStart = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStartTime" : "startTime";
+		final String fieldNameStop = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStopTime" : "stopTime";
+		final BoolQueryBuilder queryBuilder = ProductFamily.AUXILIARY_FILE.equals(productFamily) ?
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+			:
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
 		sourceBuilder.query(queryBuilder);
