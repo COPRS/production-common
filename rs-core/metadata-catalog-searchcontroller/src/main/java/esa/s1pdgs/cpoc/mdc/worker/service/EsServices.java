@@ -1085,7 +1085,7 @@ public class EsServices {
 					final Map<String, Object> source = candidate.getSourceAsMap();
 
 					final BigInteger requested_starttime = BigInteger
-							.valueOf(DateUtils.parse(source.get("startTime").toString()).getNano());
+							.valueOf(DateUtils.parse(source.get(fieldNameStart).toString()).getNano());
 
 					final BigInteger magic = requested_starttime.subtract(valStart.add(valStop));
 
@@ -1110,18 +1110,18 @@ public class EsServices {
 		local.setProductType(r.get("productType").toString());
 		local.setKeyObjectStorage(r.get("url").toString());
 
-		if (r.containsKey("startTime")) {
+		if (r.containsKey(fieldNameStart)) {
 			try {
-				local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(r.get("startTime").toString()));
+				local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(r.get(fieldNameStart).toString()));
 			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("startTime");
+				throw new MetadataMalformedException(fieldNameStart);
 			}
 		}
-		if (r.containsKey("stopTime")) {
+		if (r.containsKey(fieldNameStop)) {
 			try {
-				local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(r.get("stopTime").toString()));
+				local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(r.get(fieldNameStop).toString()));
 			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("stopTime");
+				throw new MetadataMalformedException(fieldNameStop);
 			}
 		}
 
