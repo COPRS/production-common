@@ -1134,9 +1134,12 @@ public class EsServices {
 				throw new MetadataMalformedException(fieldNameStop);
 			}
 		}
-
-		r.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
-
+		
+		for (final Map.Entry<String,Object> entry : r.entrySet()) {
+			if (entry.getValue() != null) {
+				local.addAdditionalProperty(entry.getKey(), String.valueOf(entry.getValue()));
+			}
+		}
 		return local;
 	}
 
