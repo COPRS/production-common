@@ -1062,9 +1062,19 @@ public class EsServices {
 				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
-		sourceBuilder.query(queryBuilder);
+		sourceBuilder.query(queryBuilder);		
+		sourceBuilder.size(SIZE_LIMIT);
+		/*
+		 * The following behaviour is actually not specified for the Selection Policy. LatestValidityClosest query is executing on a very wide range
+		 * of products. Due to the behaviour of ElasticSearch it might not be able to return all the suitable products. This might lead to situation
+		 * where just products are returned that are far away from being a good choice. To ensure that the IPF S1 L2 3.8.0 is able to select the
+		 * right AUX, ES is instructed to sort it by validityStartTime to ensure that old products are within the candidates. InsertionTime might work
+		 * in most cases as well, but could cause some issues in some scenarios as well.
+		 */
+		if (ProductFamily.AUXILIARY_FILE.equals(productFamily)) {
+			sourceBuilder.sort(new FieldSortBuilder(fieldNameStart).order(SortOrder.DESC));
+		}
 		LOGGER.debug("latestValidityClosest: query composed is {}", queryBuilder);
-		sourceBuilder.size(SIZE_LIMIT); 
 
 		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
 		searchRequest.source(sourceBuilder);
