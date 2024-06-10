@@ -21,7 +21,7 @@ COPY --from=build /app/rs-execution-worker.jar rs-execution-worker.jar
 COPY --from=build /app/start.sh /app/start.sh
 COPY --from=base /log/log4j2.yml /log/log4j2.yml
 COPY simplified_sea_cls.geojson /app/simplified_sea_cls.geojson
-
+ 
 USER root:root
  
 # Install java 11
