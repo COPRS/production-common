@@ -17,14 +17,14 @@
 
 <Ipf_Task_Table xmlns:a="http://www.acsys.it/schemas/IPF" xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance" >
 	<Processor_Name>PUG_SR_1_SRA</Processor_Name>
-	<Version>03.45</Version>
+	<Version>03.48</Version>
 	<Test>No</Test>
 	<Min_Disk_Space units="MB">1024</Min_Disk_Space>
 	<Max_Time units="sec">0</Max_Time>
 	<List_of_Cfg_Files count="4">
 		<Cfg_File>
 			<Version>1.0</Version>
-			<File_Name>/usr/local/conf/PUG-3.45/S3_PUG_PCONF.01.xml</File_Name>
+			<File_Name>/usr/local/conf/PUG-3.48/S3_PUG_PCONF.01.xml</File_Name>
 		</Cfg_File>
 		<Cfg_File>
 			<File_Name>/usr/local/COTS/exelis/configuration/olqc_app_configuration.xml</File_Name>
@@ -46,7 +46,7 @@
 			<Param_Default></Param_Default>
 		</Dyn_ProcParam>
 		<Dyn_ProcParam>
-			<Param_Name>orderType</Param_Name> <!-- Timeliness of the product -->
+			<Param_Name>orderType</Param_Name>			<!-- Timeliness of the product -->
 			<Param_Type>String</Param_Type>
 			<Param_Default>NRT</Param_Default>
 		</Dyn_ProcParam>
@@ -104,10 +104,10 @@
 			<List_of_Tasks count="1">
 				<Task>
 					<Name>PUGCoreProcessor</Name>
-					<Version>03.45</Version>
+					<Version>03.48</Version>
 					<Critical>true</Critical>
 					<Criticality_Level>1</Criticality_Level>
-					<File_Name>/usr/local/components/PUG-3.45/bin/PUGCoreProcessor</File_Name>
+					<File_Name>/usr/local/components/PUG-3.48/bin/PUGCoreProcessor</File_Name>
 					<List_of_Inputs count="2">
 						<Input>
 							<Mode>ALWAYS</Mode>
@@ -192,10 +192,10 @@
 			<List_of_Tasks count="1">
 				<Task>
 					<Name>PUGPostProcessor</Name>
-					<Version>03.45</Version>
+					<Version>03.48</Version>
 					<Critical>true</Critical>
 					<Criticality_Level>1</Criticality_Level>
-					<File_Name>/usr/local/components/PUG-3.45/bin/PUGPostProcessor</File_Name>
+					<File_Name>/usr/local/components/PUG-3.48/bin/PUGPostProcessor</File_Name>
 					<List_of_Inputs count="3">
 						<Input>
 							<Mode>ALWAYS</Mode>
@@ -292,7 +292,7 @@
 					<Version>01.00</Version>
 					<Critical>true</Critical>
 					<Criticality_Level>1</Criticality_Level>
-					<File_Name>/usr/local/components/PUG-3.45/bin/PUGReportGenerator</File_Name>
+					<File_Name>/usr/local/components/PUG-3.48/bin/PUGReportGenerator</File_Name>
 					<List_of_Inputs count="1">
 						<Input>
 							<Mode>ALWAYS</Mode>
@@ -321,7 +321,7 @@
 					<List_of_Breakpoints count="0"/>
 				</Task>
 			</List_of_Tasks>
-		</Pool>		
+		</Pool>
 	</List_of_Pools>
 </Ipf_Task_Table>
 

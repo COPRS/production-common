@@ -16,14 +16,14 @@
 -->
 
 <Ipf_Task_Table xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <Processor_Name>S3A_OL_EFR_L0</Processor_Name>
-  <Version>06.14</Version>
+  <Processor_Name>S3B_TM_NAT_L0</Processor_Name>
+  <Version>06.15</Version>
   <Test>No</Test>
   <Min_Disk_Space units="MB">2048</Min_Disk_Space>
   <Max_Time units="sec">1800</Max_Time>
   <List_of_Cfg_Files count="1">
     <Cfg_File>
-      <File_Name>/usr/local/conf/S3IPF_L0_06.14/S3A/S3IPF_L0_Configuration.xml</File_Name>
+      <File_Name>/usr/local/conf/S3IPF_L0_06.15/S3B/S3IPF_L0_Configuration.xml</File_Name>
     </Cfg_File>
   </List_of_Cfg_Files>
   <List_of_Dyn_ProcParams count="10">
@@ -80,11 +80,6 @@
 		<Param_Type>String</Param_Type>
 		<Param_Default>002</Param_Default>
 	</Dyn_ProcParam>
-    <Dyn_ProcParam>
-      <Param_Name>ABORT_IF_EMPTY_OUTPUT</Param_Name>         <!-- Provided by PDGS-->
-      <Param_Type>String</Param_Type>
-      <Param_Default>false</Param_Default>
-    </Dyn_ProcParam>
   </List_of_Dyn_ProcParams>
   <Sensing_Time_flag>true</Sensing_Time_flag>
   <List_of_Pools count="1">
@@ -93,17 +88,17 @@
       <Killing_Signal>2</Killing_Signal>
       <List_of_Tasks count="1">
         <!-- =========================== -->
-        <!-- L0 Processing of the OLCI  -->
+        <!-- L0 Processing of the NAVATT -->
         <!-- =========================== -->
         <Task>
-          <Name>OL_0_EFR</Name>
-          <Version>06.14</Version>
+          <Name>TM_0_NAT</Name>
+          <Version>06.15</Version>
           <Critical>true</Critical>
           <Criticality_Level>1</Criticality_Level>
-          <File_Name>/usr/local/components/S3IPF_L0_06.14/bin/OL_0_EFR.bin</File_Name>
-          <List_of_Inputs count="5">
-            <!-- OLCI Granule -->
-            <Input id="[OL_0_EFR__G]">
+          <File_Name>/usr/local/components/S3IPF_L0_06.15/bin/TM_0_NAT.bin</File_Name>
+          <List_of_Inputs count="4">
+            <!-- NAVATT Granule -->
+            <Input id="[TM_0_NAT__G]">
               <Mode>ALWAYS</Mode>
               <Mandatory>Yes</Mandatory>
               <List_of_Alternatives count="1">
@@ -113,22 +108,7 @@
                   <Retrieval_Mode>LatestValCover</Retrieval_Mode>
                   <T0>0</T0>
                   <T1>0</T1>
-                  <File_Type>OL_0_EFR__G</File_Type>
-                  <File_Name_Type>Physical</File_Name_Type>
-                </Alternative>
-              </List_of_Alternatives>
-            </Input>
-            <Input id="[TM_0_NAT___]">
-              <Mode>ALWAYS</Mode>
-              <Mandatory>No</Mandatory>
-              <List_of_Alternatives count="1">
-                <Alternative>
-                  <Order>1</Order>
-                  <Origin>DB</Origin>
-                  <Retrieval_Mode>LatestValCover</Retrieval_Mode>
-                  <T0>0</T0>
-                  <T1>0</T1>
-                  <File_Type>TM_0_NAT___</File_Type>
+                  <File_Type>TM_0_NAT__G</File_Type>
                   <File_Name_Type>Physical</File_Name_Type>
                 </Alternative>
               </List_of_Alternatives>
@@ -168,8 +148,8 @@
                   <Order>2</Order>
                   <Origin>DB</Origin>
                   <Retrieval_Mode>LatestValCover</Retrieval_Mode>
-                  <T0>4.0</T0>
-                  <T1>4.0</T1>
+                  <T0>7000.0</T0>
+                  <T1>7000.0</T1>
                   <File_Type>AX___FRO_AX</File_Type>
                   <File_Name_Type>Physical</File_Name_Type>
                 </Alternative>
@@ -203,8 +183,8 @@
                   <Order>1</Order>
                   <Origin>DB</Origin>
                   <Retrieval_Mode>LatestValCover</Retrieval_Mode>
-                  <T0>4.0</T0>
-                  <T1>4.0</T1>
+                  <T0>7000.0</T0>
+                  <T1>7000.0</T1>
                   <File_Type>AX___FRO_AX</File_Type>
                   <File_Name_Type>Physical</File_Name_Type>
                 </Alternative>
@@ -239,11 +219,11 @@
             </Input>
           </List_of_Inputs>
           <List_of_Outputs count="1">
-            <!-- The OLCI L0 Product -->
+            <!-- The NAVATT L0 Product -->
             <Output>
               <Destination>DBPROC</Destination>
-              <Mandatory>No</Mandatory>
-              <Type>OL_0_EFR___</Type>
+              <Mandatory>Yes</Mandatory>
+              <Type>TM_0_NAT___</Type>
               <File_Name_Type>Physical</File_Name_Type>
             </Output>
           </List_of_Outputs>

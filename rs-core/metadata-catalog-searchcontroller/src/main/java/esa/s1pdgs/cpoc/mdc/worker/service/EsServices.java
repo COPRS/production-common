@@ -1065,14 +1065,32 @@ public class EsServices {
 
 		final SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 		// Generic fields
-		final BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery()
-				.must(QueryBuilders.rangeQuery("startTime").lt(endDate))
-				.must(QueryBuilders.rangeQuery("stopTime").gt(beginDate)).must(satelliteId(satelliteId))
+		final String fieldNameStart = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStartTime" : "startTime";
+		final String fieldNameStop = ProductFamily.AUXILIARY_FILE.equals(productFamily) ? "validityStopTime" : "stopTime";
+		final BoolQueryBuilder queryBuilder = ProductFamily.AUXILIARY_FILE.equals(productFamily) ?
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
+				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
+			:
+				QueryBuilders.boolQuery()
+				.must(QueryBuilders.rangeQuery(fieldNameStart).lt(endDate))
+				.must(QueryBuilders.rangeQuery(fieldNameStop).gt(beginDate)).must(satelliteId(satelliteId))
 				.must(QueryBuilders.regexpQuery("productType.keyword", productType))
 				.must(QueryBuilders.termQuery("processMode.keyword", processMode));
-		sourceBuilder.query(queryBuilder);
-		LOGGER.debug("latestValidityClosest: query composed is {}", queryBuilder);
+		sourceBuilder.query(queryBuilder);		
 		sourceBuilder.size(SIZE_LIMIT);
+		/*
+		 * The following behaviour is actually not specified for the Selection Policy. LatestValidityClosest query is executing on a very wide range
+		 * of products. Due to the behaviour of ElasticSearch it might not be able to return all the suitable products. This might lead to situation
+		 * where just products are returned that are far away from being a good choice. To ensure that the IPF S1 L2 3.8.0 is able to select the
+		 * right AUX, ES is instructed to sort it by validityStartTime to ensure that old products are within the candidates. InsertionTime might work
+		 * in most cases as well, but could cause some issues in some scenarios as well.
+		 */
+		if (ProductFamily.AUXILIARY_FILE.equals(productFamily)) {
+			sourceBuilder.sort(new FieldSortBuilder(fieldNameStart).order(SortOrder.DESC));
+		}
+		LOGGER.debug("latestValidityClosest: query composed is {}", queryBuilder);
 
 		final SearchRequest searchRequest = new SearchRequest(getIndexForProductFamily(productFamily, productType));
 		searchRequest.source(sourceBuilder);
@@ -1093,7 +1111,7 @@ public class EsServices {
 					final Map<String, Object> source = candidate.getSourceAsMap();
 
 					final BigInteger requested_starttime = BigInteger
-							.valueOf(DateUtils.parse(source.get("startTime").toString()).getNano());
+							.valueOf(DateUtils.parse(source.get(fieldNameStart).toString()).getNano());
 
 					final BigInteger magic = requested_starttime.subtract(valStart.add(valStop));
 
@@ -1118,23 +1136,26 @@ public class EsServices {
 		local.setProductType(r.get("productType").toString());
 		local.setKeyObjectStorage(r.get("url").toString());
 
-		if (r.containsKey("startTime")) {
+		if (r.containsKey(fieldNameStart)) {
 			try {
-				local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(r.get("startTime").toString()));
+				local.setValidityStart(DateUtils.convertToMetadataDateTimeFormat(r.get(fieldNameStart).toString()));
 			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("startTime");
+				throw new MetadataMalformedException(fieldNameStart);
 			}
 		}
-		if (r.containsKey("stopTime")) {
+		if (r.containsKey(fieldNameStop)) {
 			try {
-				local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(r.get("stopTime").toString()));
+				local.setValidityStop(DateUtils.convertToMetadataDateTimeFormat(r.get(fieldNameStop).toString()));
 			} catch (final DateTimeParseException e) {
-				throw new MetadataMalformedException("stopTime");
+				throw new MetadataMalformedException(fieldNameStop);
 			}
 		}
-
-		r.forEach((key, value) -> local.addAdditionalProperty(key, value.toString()));
-
+		
+		for (final Map.Entry<String,Object> entry : r.entrySet()) {
+			if (entry.getValue() != null) {
+				local.addAdditionalProperty(entry.getKey(), String.valueOf(entry.getValue()));
+			}
+		}
 		return local;
 	}
 
