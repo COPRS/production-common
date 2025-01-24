@@ -44,7 +44,7 @@ runs:
     - name: Upload Anchore scan reports
       uses: actions/upload-artifact@v4
       with:
-        name: vulnerabilities-${{ inputs.COMPONENT }}
+        name: vulnerabilities-${{ inputs.COMPONENT }}-converted
         path: |
           vulnerabilities.csv
           vulnerabilities.pdf
