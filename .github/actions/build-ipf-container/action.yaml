@@ -85,7 +85,7 @@ runs:
 
         # No more json report file
   - name: Upload Anchore scan json report
-    uses: actions/upload-artifact@v3
+    uses: actions/upload-artifact@v4
     with:
       name: vulnerabilities-${{ inputs.IMAGE_NAME }} 
       path: ${{ steps.scan.outputs.json }}
