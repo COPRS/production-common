@@ -100,7 +100,7 @@ runs:
       severity-cutoff: critical
 
   - name: Upload Anchore scan json report
-    uses: actions/upload-artifact@v2
+    uses: actions/upload-artifact@v4
     with:
       name: vulnerabilities-${{ inputs.COMPONENT }}
       path: ${{ steps.scan.outputs.vulnerabilities }}
