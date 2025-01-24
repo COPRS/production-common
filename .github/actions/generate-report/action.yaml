@@ -23,7 +23,7 @@ runs:
   using: "composite"
   steps:
     - name: Download json report from build jobs
-      uses: actions/download-artifact@v2.1.1
+      uses: actions/download-artifact@v4
       with:
         name: vulnerabilities-${{ inputs.COMPONENT }}
 
@@ -42,7 +42,7 @@ runs:
         args: vulnerabilities.html vulnerabilities.pdf
 
     - name: Upload Anchore scan reports
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: vulnerabilities-${{ inputs.COMPONENT }}
         path: |

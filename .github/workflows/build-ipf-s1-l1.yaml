@@ -89,3 +89,4 @@ jobs:
       - uses: ./.github/actions/generate-report
         with: 
           COMPONENT: ${{ env.IMAGE_NAME }}
+          
