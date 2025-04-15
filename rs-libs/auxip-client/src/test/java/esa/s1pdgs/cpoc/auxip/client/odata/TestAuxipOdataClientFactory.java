@@ -65,6 +65,7 @@ public class TestAuxipOdataClientFactory {
 		hostConfig.setAuthType("oauth2");
 		hostConfig.setUser("user");
 		hostConfig.setPass("pass");
+		hostConfig.setScope("openId");
 		hostConfig.setOauthAuthUrl("http://localhost/odata/v1/");
 		hostConfig.setOauthClientId("clientId");
 		hostConfig.setOauthClientSecret("secret");

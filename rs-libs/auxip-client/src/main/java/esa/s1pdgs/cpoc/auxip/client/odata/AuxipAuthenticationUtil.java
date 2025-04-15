@@ -80,11 +80,11 @@ public final class AuxipAuthenticationUtil {
 
 	public static final String retrieveOauthAccessToken(final AuxipHostConfiguration hostConfig) {
 		return retrieveOauthAccessToken(URI.create(hostConfig.getOauthAuthUrl()), hostConfig.getOauthClientId(),
-				hostConfig.getOauthClientSecret(), hostConfig.getUser(), hostConfig.getPass());
+				hostConfig.getOauthClientSecret(), hostConfig.getUser(), hostConfig.getPass(), hostConfig.getScope());
 	}
 
 	public static final String retrieveOauthAccessToken(final URI oauthAuthUrl, final String oauthClientId,
-			final String oauthClientSecret, final String oauthAuthServerUser, final String oauthAuthServerPass) {
+			final String oauthClientSecret, final String oauthAuthServerUser, final String oauthAuthServerPass, final String scope) {
 		final CloseableHttpClient httpClient = newOauthAuthorizationClient();
 
 		final List<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
@@ -93,6 +93,9 @@ public final class AuxipAuthenticationUtil {
 		data.add(new BasicNameValuePair("client_secret", oauthClientSecret));
 		data.add(new BasicNameValuePair("username", oauthAuthServerUser));
 		data.add(new BasicNameValuePair("password", oauthAuthServerPass));
+		if (scope != null) {
+			data.add(new BasicNameValuePair("scope", scope));
+		}
 
 		ObjectNode token = null;
 		CloseableHttpResponse response = null;

@@ -40,6 +40,7 @@ public class AuxipClientConfigurationProperties {
 		private boolean sslValidation = true;
 		private String authType; // basic|oauth2|disable
 		private BearerTokenType bearerTokenType = BearerTokenType.AUTHORIZATION;
+		private String scope;
 		private String oauthAuthUrl;
 		private String oauthClientId;
 		private String oauthClientSecret;
@@ -57,6 +58,7 @@ public class AuxipClientConfigurationProperties {
 		public String toString() {
 			return "AuxipHostConfiguration [serviceRootUri=" + this.serviceRootUri + ", user=" + this.user
 					+ ", pass=****" + ", sslValidation=" + this.sslValidation + ", authType=" + this.authType
+					+ ", scope=" + this.scope
 					+ ", oauthAuthUrl=" + this.oauthAuthUrl + ", oauthClientId=" + this.oauthClientId
 					+ ", bearerTokenType=" + this.bearerTokenType + ", oauthClientSecret=" + this.oauthClientSecret
 					+ ", creationDateAttributeName=" + this.creationDateAttributeName + ", productNameAttrName="
@@ -136,6 +138,14 @@ public class AuxipClientConfigurationProperties {
 
 		public void setUseHttpClientDownload(final boolean useHttpClientDownload) {
 			this.useHttpClientDownload = useHttpClientDownload;
+		}
+
+		public String getScope() {
+			return this.scope;
+		}
+
+		public void setScope(String scope) {
+			this.scope = scope;
 		}
 
 		public String getOauthAuthUrl() {
