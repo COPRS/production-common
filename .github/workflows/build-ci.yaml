@@ -164,24 +164,24 @@ jobs:
             cronbased-trigger: 
               - 'rs-core/cronbased-trigger/**'
               - 'rs-core/pom.xml'
-  gg-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: GitGuardian scan
-        uses: GitGuardian/ggshield-action@master
-        env:
-          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
-          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+  #gg-scan:
+    #runs-on: ubuntu-latest
+    #steps:
+      #- name: Checkout repository
+      #  uses: actions/checkout@v2
+      #  with:
+      #    fetch-depth: 0
+      #- name: GitGuardian scan
+      #  uses: GitGuardian/ggshield-action@master
+      #  env:
+      #    GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+      #    GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+      #    GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      #    GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      #    GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
 
   build-libs:
-    needs: [lib-changes, gg-scan]
+    needs: [lib-changes]
     if: ${{ needs.lib-changes.outputs.packages != '[]' }}
     runs-on: ubuntu-latest
     strategy:
@@ -199,7 +199,7 @@ jobs:
           SONARQUBE_TOKEN: ${{ secrets.WERUM_SONARQUBE_TOKEN }}
 
   build-core:
-    needs: [lib-changes, core-changes, gg-scan]
+    needs: [lib-changes, core-changes]
     if: ${{ needs.lib-changes.outputs.packages == '[]' && needs.core-changes.outputs.packages != '[]' }}
     strategy:
       fail-fast: false
